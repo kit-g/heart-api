@@ -17,13 +17,14 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v4
         with:
-          go-version: 1.23
+          go-version: "1.24"
           cache: 'true'
+          cache-dependency-path: "api/go.sum"
       - name: "Install dependencies"
         working-directory: api
         run: go mod download
       - name: "Run model tests"
-        working-directory: api/internal/models
+        working-directory: "api/internal/models"
         run: go test . -v
 
   api-deploy:
@@ -41,9 +42,9 @@ jobs:
       - name: "Setup Go"
         uses: actions/setup-go@v4
         with:
-          go-version: '1.23'
+          go-version: "1.24"
           cache: 'true'
-          cache-dependency-path: api/go.sum
+          cache-dependency-path: "api/go.sum"
 
       - name: "Configure AWS Credentials"
         uses: aws-actions/configure-aws-credentials@v2
