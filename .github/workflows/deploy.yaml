@@ -34,7 +34,7 @@ jobs:
         run: zip function.zip bootstrap
 
       - name: "Upload Lambda artifact"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lambda-zip
           path: api/function.zip
