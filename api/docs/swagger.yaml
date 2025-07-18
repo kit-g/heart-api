@@ -88,7 +88,7 @@ definitions:
         example: 10
         type: number
       id:
-        example: "1234567890"
+        example: "2025-07-18T05:40:48.329406Z"
         type: string
       reps:
         example: 10
@@ -100,26 +100,6 @@ definitions:
     - completed
     - id
     type: object
-  SetIn:
-    properties:
-      completed:
-        example: true
-        type: boolean
-      distance:
-        example: 10
-        type: number
-      duration:
-        example: 10
-        type: number
-      reps:
-        example: 10
-        type: integer
-      weight:
-        example: 100
-        type: number
-    required:
-    - completed
-    type: object
   Template:
     properties:
       exercises:
@@ -127,7 +107,7 @@ definitions:
           $ref: '#/definitions/TemplateExercise'
         type: array
       id:
-        example: 2ztgx4cIWnxtt95klKnYGGtIfb1
+        example: "2"
         type: string
       name:
         example: Legs & Shoulders
@@ -140,11 +120,14 @@ definitions:
     properties:
       exercise:
         type: string
+      id:
+        example: "2025-07-18T05:40:48.329406Z"
+        type: string
       order:
         type: integer
       sets:
         items:
-          $ref: '#/definitions/SetIn'
+          $ref: '#/definitions/Set'
         type: array
     type: object
   TemplateIn:
@@ -153,6 +136,8 @@ definitions:
         items:
           $ref: '#/definitions/TemplateExercise'
         type: array
+      id:
+        type: string
       name:
         type: string
       order:
@@ -161,12 +146,10 @@ definitions:
   User:
     properties:
       accountDeletionSchedule:
+        example: arn:aws:scheduler:ca-central-1:123:schedule/account-deletions/account-deletion-123
         type: string
       avatar:
         example: https://example.com/avatar.png
-        type: string
-      createdAt:
-        example: "2025-07-12T12:11:54.450476-04:00"
         type: string
       displayName:
         example: jane_doe
@@ -178,9 +161,7 @@ definitions:
         example: HW4beTVvbTUPRxun9MXZxwKPjmC2
         type: string
       scheduledForDeletionAt:
-        type: string
-      updatedAt:
-        example: "2025-07-15T12:11:54.450476-04:00"
+        example: "2022-01-01T00:00:00.000Z"
         type: string
     required:
     - displayName
@@ -197,7 +178,7 @@ definitions:
           $ref: '#/definitions/WorkoutExercise'
         type: array
       id:
-        example: 2zsp6iMWgOx9n6qQxZm0GmeXog1
+        example: "2025-07-18T05:40:48.329406Z"
         type: string
       name:
         example: Legs
@@ -211,6 +192,9 @@ definitions:
       exercise:
         example: Push Up
         type: string
+      id:
+        example: "2025-07-18T05:40:48.329406Z"
+        type: string
       sets:
         items:
           $ref: '#/definitions/Set'
@@ -221,15 +205,19 @@ definitions:
       exercise:
         example: Push Up
         type: string
+      id:
+        example: "2025-07-18T05:40:48.329406Z"
+        type: string
       order:
         example: 1
         type: integer
       sets:
         items:
-          $ref: '#/definitions/SetIn'
+          $ref: '#/definitions/Set'
         type: array
     required:
     - exercise
+    - id
     type: object
   WorkoutIn:
     properties:
@@ -241,7 +229,7 @@ definitions:
           $ref: '#/definitions/WorkoutExerciseIn'
         type: array
       id:
-        example: 2zsp6iMWgOx9n6qQxZm0GmeXog1
+        example: "2025-07-18T05:40:48.329406Z"
         type: string
       name:
         example: Legs

@@ -3,7 +3,6 @@ package handlers
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"heart/internal/dbx"
 	"heart/internal/models"
 	"strconv"
@@ -25,37 +24,24 @@ import (
 //	@Router			/workouts [get]
 //	@Security		BearerAuth
 func GetWorkouts(c *gin.Context, userId string) (any, error) {
-	pageSize := 10 // default page size
+	pageSize := 10
 	if size := c.Query("pageSize"); size != "" {
 		if parsed, err := strconv.Atoi(size); err == nil && parsed > 0 {
 			pageSize = parsed
 		}
 	}
 
-	var workouts []models.Workout
-	query := dbx.DB.
-		Preload("Exercises.Sets").
-		Preload("Exercises.Exercise").
-		Where("user_id = ?", userId).
-		Order("id desc").
-		Limit(pageSize)
+	cursor := c.Query("cursor")
 
-	if cursor := c.Query("cursor"); cursor != "" {
-		query = query.Where("id < ?", cursor)
-	}
+	workouts, last, err := dbx.GetWorkouts(c.Request.Context(), userId, pageSize, cursor)
 
-	if err := query.Find(&workouts).Error; err != nil {
+	if err != nil {
 		return nil, models.NewServerError(err)
-	}
-
-	var nextCursor string
-	if len(workouts) == pageSize {
-		nextCursor = workouts[len(workouts)-1].ID.String()
 	}
 
 	return models.WorkoutResponse{
 		Workouts: models.NewWorkoutsArray(workouts),
-		Cursor:   nextCursor,
+		Cursor:   last,
 	}, nil
 }
 
@@ -77,19 +63,13 @@ func GetWorkouts(c *gin.Context, userId string) (any, error) {
 func GetWorkout(c *gin.Context, userId string) (any, error) {
 	workoutId := c.Param("workoutId")
 
-	var workout models.Workout
-	if err := dbx.DB.
-		Preload("Exercises.Sets").
-		Preload("Exercises.Exercise").
-		Where("id = ? AND user_id = ?", workoutId, userId).
-		First(&workout).Error; err != nil {
-		if models.Is(err, gorm.ErrRecordNotFound) {
-			return nil, models.NewNotFoundError("Workout not found", err)
-		}
+	workout, err := dbx.GetWorkout(c.Request.Context(), userId, workoutId)
+
+	if err != nil {
 		return nil, models.NewServerError(err)
 	}
 
-	return models.NewWorkoutOut(&workout), nil
+	return models.NewWorkoutOut(workout), nil
 }
 
 // MakeWorkout godoc
@@ -114,11 +94,12 @@ func MakeWorkout(c *gin.Context, userID string) (any, error) {
 
 	workout := models.NewWorkout(&workoutIn, userID)
 
-	if err := dbx.DB.Create(&workout).Error; err != nil {
-		return nil, models.NewServerError(err)
+	saved, err := dbx.SaveWorkout(c.Request.Context(), workout)
+	if err != nil {
+		return nil, err
 	}
 
-	return models.NewWorkoutOut(&workout), nil
+	return models.NewWorkoutOut(saved), nil
 }
 
 // DeleteWorkout godoc
@@ -139,16 +120,15 @@ func MakeWorkout(c *gin.Context, userID string) (any, error) {
 func DeleteWorkout(c *gin.Context, userId string) (any, error) {
 	workoutId := c.Param("workoutId")
 
-	result := dbx.DB.
-		Where("id = ? AND user_id = ?", workoutId, userId).
-		Delete(&models.Workout{})
+	err := dbx.DeleteWorkout(c.Request.Context(), userId, workoutId)
 
-	if result.Error != nil {
-		return nil, models.NewServerError(result.Error)
+	var notFound *models.NotFoundError
+	if ok := errors.As(err, &notFound); ok {
+		return nil, err
 	}
 
-	if result.RowsAffected == 0 {
-		return nil, models.NewNotFoundError("Workout not found", errors.New("workout not found"))
+	if err != nil {
+		return nil, models.NewServerError(err)
 	}
 
 	return models.NoContent, nil

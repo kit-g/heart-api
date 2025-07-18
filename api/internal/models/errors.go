@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"errors"
+	"log"
 )
 
 type HTTPError interface {
@@ -68,6 +69,7 @@ type NotFoundError struct {
 }
 
 func NewServerError(err error) *ServerError {
+	log.Printf("[ERROR] %v", err)
 	return &ServerError{
 		&baseError{
 			Err:     err,

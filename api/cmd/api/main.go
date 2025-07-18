@@ -20,9 +20,7 @@ import (
 	_ "heart/docs"
 	"heart/internal/awsx"
 	"heart/internal/config"
-	"heart/internal/dbx"
 	"heart/internal/firebasex"
-	"heart/internal/models"
 	"heart/internal/routerx"
 
 	"log"
@@ -44,24 +42,10 @@ func Init() {
 		}
 	}
 
-	if err := dbx.Connect(&config.App.DBConfig); err != nil {
-		log.Fatal("Failed to connect to DB:", err)
-		return
-	}
-
 	if err := awsx.Init(context.Background(), config.App.AwsConfig); err != nil {
 		log.Fatal("Failed to initialize AWS clients:", err)
 		return
 	}
-
-	_ = dbx.DB.AutoMigrate(
-		&models.User{},
-		&models.Exercise{},
-		&models.Workout{},
-		&models.WorkoutExercise{},
-		&models.Set{},
-		&models.Template{},
-	)
 }
 
 func main() {

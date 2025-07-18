@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"heart/internal/awsx"
 	"heart/internal/config"
 	"heart/internal/dbx"
@@ -26,14 +25,15 @@ import (
 //	@Failure		500			{object}	ErrorResponse	"Server error"
 //	@Router			/accounts/{accountId} [get]
 //	@Security		BearerAuth
-func GetAccount(_ *gin.Context, userId string) (any, error) {
-	var user models.User
+func GetAccount(c *gin.Context, userId string) (any, error) {
+	user, err := dbx.GetAccount(c.Request.Context(), userId)
 
-	if err := dbx.DB.
-		Where("firebase_uid = ?", userId).
-		First(&user).
-		Error; err != nil {
+	if err != nil {
 		return nil, models.NewServerError(err)
+	}
+
+	if user == nil {
+		return nil, models.NewNotFoundError("Account not found", errors.New("account not found"))
 	}
 
 	return user, nil
@@ -63,11 +63,12 @@ func RegisterAccount(c *gin.Context, userId string) (any, error) {
 		return nil, models.NewValidationError(fmt.Errorf("user id mismatch"))
 	}
 
-	if err := dbx.DB.Create(&user).Error; err != nil {
-		return nil, models.NewServerError(err)
+	account, err := dbx.SaveAccount(c.Request.Context(), userId, user)
+	if err != nil {
+		return nil, err
 	}
 
-	return user, nil
+	return account, nil
 }
 
 // EditAccount godoc
@@ -96,17 +97,14 @@ func EditAccount(c *gin.Context, userId string) (any, error) {
 
 	switch request.Action {
 	case "undoAccountDeletion":
-		var user models.User
+		user, err := dbx.GetAccount(c.Request.Context(), userId)
 
-		if err := dbx.DB.
-			Model(&models.User{}).
-			Where("firebase_uid = ?", userId).
-			First(&user, nil).
-			Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return models.NoContent, nil
-			}
+		if err != nil {
 			return nil, models.NewServerError(err)
+		}
+
+		if user == nil {
+			return nil, models.NewNotFoundError("Account not found", errors.New("account not found"))
 		}
 
 		if user.AccountDeletionSchedule != nil {
@@ -117,12 +115,9 @@ func EditAccount(c *gin.Context, userId string) (any, error) {
 			}
 		}
 
-		if err := dbx.DB.
-			Model(&models.User{}).
-			Where("firebase_uid = ?", userId).
-			Update("account_deletion_schedule", nil).
-			Update("scheduled_for_deletion_at", nil).
-			Error; err != nil {
+		err = dbx.UndoAccountDeletion(c.Request.Context(), userId)
+
+		if err != nil {
 			return nil, models.NewServerError(err)
 		}
 
@@ -139,13 +134,12 @@ func EditAccount(c *gin.Context, userId string) (any, error) {
 			return nil, models.NewServerError(err)
 		}
 
-		if err := dbx.DB.
-			Model(&models.User{}).
-			Where("firebase_uid = ?", userId).
-			Update("avatar_url", nil).
-			Error; err != nil {
+		err = dbx.RemoveAvatar(c.Request.Context(), userId)
+
+		if err != nil {
 			return nil, models.NewServerError(err)
 		}
+
 		return models.NoContent, nil
 
 	case "uploadAvatar":
@@ -202,17 +196,9 @@ func DeleteAccount(c *gin.Context, userId string) (any, error) {
 	}
 
 	if when != nil && schedule != nil {
-		columns := map[string]interface{}{
-			"account_deletion_schedule": schedule,
-			"scheduled_for_deletion_at": when,
-		}
-
-		if err := dbx.DB.
-			Model(&models.User{}).
-			Where("firebase_uid = ?", userId).
-			Updates(columns).
-			Error; err != nil {
-			return nil, models.NewServerError(err)
+		err := dbx.ScheduleAccountForDeletion(c.Request.Context(), userId, *schedule, when.Unix())
+		if err != nil {
+			return nil, err
 		}
 	}
 

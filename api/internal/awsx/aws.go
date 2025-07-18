@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/scheduler"
 	"github.com/aws/aws-sdk-go-v2/service/scheduler/types"
@@ -17,6 +18,7 @@ import (
 )
 
 var (
+	Db       *dynamodb.Client
 	Env      env.AwsConfig
 	events   *scheduler.Client
 	S3       *s3.Client
@@ -39,7 +41,7 @@ func Init(ctx context.Context, c env.AwsConfig) error {
 	S3 = s3.NewFromConfig(cfg)
 	s3Signer = s3.NewPresignClient(S3)
 	SNS = sns.NewFromConfig(cfg)
-
+	Db = dynamodb.NewFromConfig(cfg)
 	return nil
 }
 

@@ -3,7 +3,6 @@ package handlers
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"heart/internal/dbx"
 	"heart/internal/models"
 )
@@ -21,13 +20,10 @@ import (
 //	@Failure		500	{object}	ErrorResponse	"Server error"
 //	@Router			/templates [get]
 //	@Security		BearerAuth
-func GetTemplates(_ *gin.Context, userId string) (any, error) {
-	var templates []models.Template
-	query := dbx.DB.
-		Where("user_id = ?", userId).
-		Order("id desc")
+func GetTemplates(c *gin.Context, userId string) (any, error) {
+	templates, err := dbx.GetTemplates(c.Request.Context(), userId)
 
-	if err := query.Find(&templates).Error; err != nil {
+	if err != nil {
 		return nil, models.NewServerError(err)
 	}
 
@@ -54,17 +50,17 @@ func GetTemplates(_ *gin.Context, userId string) (any, error) {
 func GetTemplate(c *gin.Context, userId string) (any, error) {
 	templateId := c.Param("templateId")
 
-	var template models.Template
-	if err := dbx.DB.
-		Where("id = ? AND user_id = ?", templateId, userId).
-		First(&template).Error; err != nil {
-		if models.Is(err, gorm.ErrRecordNotFound) {
-			return nil, models.NewNotFoundError("Template not found", err)
-		}
+	template, err := dbx.GetTemplate(c.Request.Context(), userId, templateId)
+
+	if err != nil {
 		return nil, models.NewServerError(err)
 	}
 
-	return models.NewTemplateOut(&template), nil
+	if template == nil {
+		return nil, models.NewNotFoundError("Template not found", errors.New("template not found"))
+	}
+
+	return models.NewTemplateOut(template), nil
 }
 
 // MakeTemplate godoc
@@ -89,11 +85,12 @@ func MakeTemplate(c *gin.Context, userId string) (any, error) {
 
 	created := models.NewTemplate(&template, userId)
 
-	if err := dbx.DB.Create(&created).Error; err != nil {
-		return nil, models.NewServerError(err)
+	saved, err := dbx.SaveTemplate(c.Request.Context(), created)
+	if err != nil {
+		return nil, err
 	}
 
-	return models.NewTemplateOut(&created), nil
+	return models.NewTemplateOut(saved), nil
 }
 
 // DeleteTemplate godoc
@@ -114,16 +111,10 @@ func MakeTemplate(c *gin.Context, userId string) (any, error) {
 func DeleteTemplate(c *gin.Context, userId string) (any, error) {
 	templateId := c.Param("templateId")
 
-	result := dbx.DB.
-		Where("id = ? AND user_id = ?", templateId, userId).
-		Delete(&models.Template{})
+	err := dbx.DeleteTemplate(c.Request.Context(), userId, templateId)
 
-	if result.Error != nil {
-		return nil, models.NewServerError(result.Error)
-	}
-
-	if result.RowsAffected == 0 {
-		return nil, models.NewNotFoundError("Template not found", errors.New("template not found"))
+	if err != nil {
+		return nil, models.NewServerError(err)
 	}
 
 	return models.NoContent, nil

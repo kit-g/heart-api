@@ -1,19 +1,25 @@
 package models
 
 import (
-	"github.com/segmentio/ksuid"
-	"log"
+	"strings"
 	"time"
 )
 
+const (
+	UserKey     = "USER#"
+	WorkoutKey  = "WORKOUT#"
+	TemplateKey = "TEMPLATE#"
+)
+
 type Workout struct {
-	SoftDeleteModel
-	Start     time.Time `gorm:"not null"`
-	End       time.Time
-	UserID    string            `gorm:"type:text;index"`
-	User      User              `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
-	Name      string            `gorm:"type:text"`
-	Exercises []WorkoutExercise `gorm:"foreignKey:WorkoutID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	ID        string            `dynamodbav:"-"`
+	UserID    string            `dynamodbav:"-"`
+	PK        string            `dynamodbav:"PK"` // USER#<userID>
+	SK        string            `dynamodbav:"SK"` // WORKOUT#<workoutID>
+	Start     time.Time         `dynamodbav:"start"`
+	End       *time.Time        `dynamodbav:"end,omitempty"`
+	Name      string            `dynamodbav:"name,omitempty"`
+	Exercises []WorkoutExercise `dynamodbav:"exercises"`
 }
 
 func (w *Workout) String() string {
@@ -21,54 +27,38 @@ func (w *Workout) String() string {
 }
 
 type WorkoutExercise struct {
-	Model
-	WorkoutID     string   `gorm:"not null;index"`
-	Workout       Workout  `gorm:"foreignKey:WorkoutID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	ExerciseID    string   `gorm:"not null;index"`
-	Exercise      Exercise `gorm:"foreignKey:ExerciseID;references:Name;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	ExerciseOrder int      `gorm:"type:integer"`
-	Sets          []Set
-}
-
-func (we *WorkoutExercise) String() string {
-	return we.Exercise.Name + " in " + we.Workout.Name
+	ID            string `dynamodbav:"id"`
+	ExerciseID    string `dynamodbav:"exercise_id"` // same as Exercise.Name
+	ExerciseOrder int    `dynamodbav:"exercise_order"`
+	Sets          []Set  `dynamodbav:"sets"`
 }
 
 type Set struct {
-	ModifiableModel
-	WorkoutExerciseID string          `gorm:"not null;index"`
-	WorkoutExercise   WorkoutExercise `gorm:"foreignKey:WorkoutExerciseID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Completed         bool            `gorm:"not null;default:false"`
-	Weight            float64         `gorm:"type:real"` // kgs
-	Reps              int             `gorm:"type:integer"`
-	Duration          float64         `gorm:"type:real"` // seconds
-	Distance          float64         `gorm:"type:real"` // kilometers
-}
-
-type SetIn struct {
-	Completed bool    `json:"completed" binding:"required" example:"true"`
-	Weight    float64 `json:"weight,omitempty" example:"100"`
-	Reps      int     `json:"reps,omitempty" example:"10"`
-	Duration  float64 `json:"duration,omitempty" example:"10"`
-	Distance  float64 `json:"distance,omitempty" example:"10"`
+	ID        string  `dynamodbav:"id" json:"id" binding:"required" example:"2025-07-18T05:40:48.329406Z"`
+	Completed bool    `dynamodbav:"completed" json:"completed" binding:"required" example:"true"`
+	Weight    float64 `dynamodbav:"weight,omitempty" json:"weight,omitempty" example:"100"` // kg
+	Reps      int     `dynamodbav:"reps,omitempty" json:"reps,omitempty" example:"10"`
+	Duration  float64 `dynamodbav:"duration,omitempty" json:"duration,omitempty" example:"10"` // seconds
+	Distance  float64 `dynamodbav:"distance,omitempty" json:"distance,omitempty" example:"10"` // kilometers
 } // @name SetIn
 
 type WorkoutExerciseIn struct {
-	Exercise string  `json:"exercise" binding:"required" example:"Push Up"`
-	Sets     []SetIn `json:"sets"`
-	Order    int     `json:"order" example:"1"`
+	ID       string `json:"id" binding:"required" example:"2025-07-18T05:40:48.329406Z"`
+	Exercise string `json:"exercise" binding:"required" example:"Push Up"`
+	Sets     []Set  `json:"sets"`
+	Order    int    `json:"order" example:"1"`
 } // @name WorkoutExerciseIn
 
 type WorkoutIn struct {
-	ID        string              `json:"id" binding:"required" example:"2zsp6iMWgOx9n6qQxZm0GmeXog1"`
+	ID        string              `json:"id" binding:"required" example:"2025-07-18T05:40:48.329406Z"`
 	Name      string              `json:"name" example:"Legs"`
 	Start     time.Time           `json:"start" binding:"required" example:"2023-01-01T12:00:00Z"`
-	End       time.Time           `json:"end" example:"2023-01-01T12:00:00Z"`
+	End       *time.Time          `json:"end,omitempty" example:"2023-01-01T12:00:00Z"`
 	Exercises []WorkoutExerciseIn `json:"exercises" binding:"required"`
 } // @name WorkoutIn
 
 type SetOut struct {
-	ID        string  `json:"id" binding:"required" example:"1234567890"`
+	ID        string  `json:"id" binding:"required" example:"2025-07-18T05:40:48.329406Z"`
 	Completed bool    `json:"completed" binding:"required" example:"true"`
 	Weight    float64 `json:"weight" example:"100"`
 	Reps      int     `json:"reps" example:"10"`
@@ -77,21 +67,22 @@ type SetOut struct {
 } // @name Set
 
 type WorkoutExerciseOut struct {
+	ID       string   `json:"id" example:"2025-07-18T05:40:48.329406Z"`
 	Exercise *string  `json:"exercise" example:"Push Up"`
 	Sets     []SetOut `json:"sets"`
 } // @name WorkoutExercise
 
 type WorkoutOut struct {
-	ID        string               `json:"id" example:"2zsp6iMWgOx9n6qQxZm0GmeXog1"`
+	ID        string               `json:"id" example:"2025-07-18T05:40:48.329406Z"`
 	Name      string               `json:"name" example:"Legs"`
 	Start     time.Time            `json:"start" example:"2023-01-01T12:00:00Z"`
-	End       time.Time            `json:"end" example:"2023-01-01T12:00:00Z"`
+	End       *time.Time           `json:"end" example:"2023-01-01T12:00:00Z"`
 	Exercises []WorkoutExerciseOut `json:"exercises"`
 } // @name Workout
 
 func NewSetOut(s *Set) SetOut {
 	return SetOut{
-		ID:        s.ID.String(),
+		ID:        s.ID,
 		Completed: s.Completed,
 		Weight:    s.Weight,
 		Reps:      s.Reps,
@@ -108,24 +99,18 @@ func NewWorkoutExerciseOut(e *WorkoutExercise) WorkoutExerciseOut {
 	}
 
 	return WorkoutExerciseOut{
+		ID:       e.ID,
 		Exercise: &e.ExerciseID,
 		Sets:     sets,
 	}
 }
 
 func NewWorkout(w *WorkoutIn, userId string) Workout {
-	id, err := ksuid.Parse(w.ID)
-
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	workout := Workout{
-		SoftDeleteModel: SoftDeleteModel{
-			ModifiableModel: ModifiableModel{
-				Model: Model{ID: id},
-			},
-		},
+		ID:        w.ID,
+		PK:        UserKey + userId,
+		SK:        WorkoutKey + w.ID,
 		Name:      w.Name,
 		Start:     w.Start,
 		End:       w.End,
@@ -135,6 +120,7 @@ func NewWorkout(w *WorkoutIn, userId string) Workout {
 
 	for i, exercise := range w.Exercises {
 		workout.Exercises[i] = WorkoutExercise{
+			ID:            exercise.ID,
 			ExerciseID:    exercise.Exercise,
 			ExerciseOrder: exercise.Order,
 			Sets:          make([]Set, len(exercise.Sets)),
@@ -142,6 +128,7 @@ func NewWorkout(w *WorkoutIn, userId string) Workout {
 
 		for j, set := range exercise.Sets {
 			workout.Exercises[i].Sets[j] = Set{
+				ID:        set.ID,
 				Completed: set.Completed,
 				Weight:    set.Weight,
 				Reps:      set.Reps,
@@ -162,7 +149,7 @@ func NewWorkoutOut(w *Workout) WorkoutOut {
 	}
 
 	return WorkoutOut{
-		ID:        w.ID.String(),
+		ID:        strings.TrimPrefix(w.SK, WorkoutKey),
 		Name:      w.Name,
 		Start:     w.Start,
 		End:       w.End,

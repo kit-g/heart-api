@@ -1,17 +1,14 @@
 package models
 
 type Exercise struct {
-	Name            string `gorm:"primaryKey;not null"`
-	Category        string `gorm:"not null"`
-	Target          string `gorm:"not null"`
-	Asset           string `gorm:"type:text"`
-	AssetWidth      int    `gorm:"type:integer"`
-	AssetHeight     int    `gorm:"type:integer"`
-	Thumbnail       string `gorm:"type:text"`
-	ThumbnailWidth  int    `gorm:"type:integer"`
-	ThumbnailHeight int    `gorm:"type:integer"`
-	Instructions    string `gorm:"type:text"`
-	UserID          string `gorm:"type:text"`
+	PK           string            `dynamodbav:"pk"` // always "EXERCISE"
+	Name         string            `dynamodbav:"sk"`
+	Category     string            `dynamodbav:"category"`
+	Target       string            `dynamodbav:"target"`
+	Asset        *ImageDescription `dynamodbav:"asset,omitempty"`
+	Thumbnail    *ImageDescription `dynamodbav:"thumbnail,omitempty"`
+	Instructions *string           `dynamodbav:"instructions,omitempty"`
+	UserID       string            `dynamodbav:"userId,omitempty"`
 }
 
 func (e *Exercise) String() string {
@@ -28,31 +25,13 @@ type ExerciseOut struct {
 } // @name Exercise
 
 func NewExerciseOut(e *Exercise) ExerciseOut {
-	var asset *ImageDescription
-	if e.Asset != "" {
-		asset = &ImageDescription{
-			Link:   &e.Asset,
-			Width:  &e.AssetWidth,
-			Height: &e.AssetHeight,
-		}
-	}
-
-	var thumbnail *ImageDescription
-	if e.Thumbnail != "" {
-		thumbnail = &ImageDescription{
-			Link:   &e.Thumbnail,
-			Width:  &e.ThumbnailWidth,
-			Height: &e.ThumbnailHeight,
-		}
-	}
-
 	return ExerciseOut{
 		Name:         e.Name,
 		Category:     e.Category,
 		Target:       e.Target,
-		Asset:        asset,
-		Thumbnail:    thumbnail,
-		Instructions: &e.Instructions,
+		Asset:        e.Asset,
+		Thumbnail:    e.Thumbnail,
+		Instructions: e.Instructions,
 	}
 }
 

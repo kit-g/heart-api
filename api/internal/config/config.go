@@ -47,9 +47,10 @@ type SnsConfig struct {
 }
 
 type AwsConfig struct {
-	SchedulerConfig
-	S3Config
+	DynamoDBConfig
 	LambdaConfig
+	S3Config
+	SchedulerConfig
 	SnsConfig
 	AwsRegion             string `env:"REGION" required:"true"`
 	AccountDeletionOffset int    `env:"ACCOUNT_DELETION_OFFSET" default:"30" required:"true"`
@@ -61,6 +62,10 @@ type SentryConfig struct {
 
 type FirebaseConfig struct {
 	Credentials string `env:"FIREBASE_CREDENTIALS"`
+}
+
+type DynamoDBConfig struct {
+	WorkoutsTable string `env:"WORKOUTS_TABLE" required:"true"`
 }
 
 type AppConfig struct {

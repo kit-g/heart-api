@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/aws/smithy-go/ptr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -46,16 +47,21 @@ func TestExercise_String(t *testing.T) {
 func TestNewExerciseOut(t *testing.T) {
 	t.Run("Exercise with all fields", func(t *testing.T) {
 		exercise := &Exercise{
-			Name:            "Push Up",
-			Category:        "Body weight",
-			Target:          "Chest",
-			Asset:           "https://example.com/pushup.jpg",
-			AssetWidth:      800,
-			AssetHeight:     600,
-			Thumbnail:       "https://example.com/pushup-thumb.jpg",
-			ThumbnailWidth:  200,
-			ThumbnailHeight: 150,
-			Instructions:    "Keep your body straight and lower yourself until your chest almost touches the ground.",
+			Name:     "Push Up",
+			Category: "Body weight",
+			Target:   "Chest",
+			Asset: &ImageDescription{
+				Link:   strP("https://example.com/pushup.jpg"),
+				Width:  intP(800),
+				Height: intP(600),
+			},
+			//Asset:           ,
+			Thumbnail: &ImageDescription{
+				Link:   strP("https://example.com/pushup-thumb.jpg"),
+				Width:  intP(200),
+				Height: intP(150),
+			},
+			Instructions: strP("Keep your body straight and lower yourself until your chest almost touches the ground."),
 		}
 
 		result := NewExerciseOut(exercise)
@@ -92,18 +98,19 @@ func TestNewExerciseOut(t *testing.T) {
 		assert.Equal(t, "Legs", result.Target)
 		assert.Nil(t, result.Asset)
 		assert.Nil(t, result.Thumbnail)
-		require.NotNil(t, result.Instructions)
-		assert.Equal(t, "", *result.Instructions)
+		require.Nil(t, result.Instructions)
 	})
 
 	t.Run("Exercise with only asset", func(t *testing.T) {
 		exercise := &Exercise{
-			Name:        "Plank",
-			Category:    "Core",
-			Target:      "Abs",
-			Asset:       "https://example.com/plank.jpg",
-			AssetWidth:  400,
-			AssetHeight: 300,
+			Name:     "Plank",
+			Category: "Core",
+			Target:   "Abs",
+			Asset: &ImageDescription{
+				Link:   strP("https://example.com/plank.jpg"),
+				Width:  intP(400),
+				Height: intP(300),
+			},
 		}
 
 		result := NewExerciseOut(exercise)
@@ -118,12 +125,14 @@ func TestNewExerciseOut(t *testing.T) {
 
 	t.Run("Exercise with only thumbnail", func(t *testing.T) {
 		exercise := &Exercise{
-			Name:            "Burpee",
-			Category:        "Cardio",
-			Target:          "Full body",
-			Thumbnail:       "https://example.com/burpee-thumb.jpg",
-			ThumbnailWidth:  100,
-			ThumbnailHeight: 75,
+			Name:     "Burpee",
+			Category: "Cardio",
+			Target:   "Full body",
+			Thumbnail: &ImageDescription{
+				Link:   strP("https://example.com/burpee-thumb.jpg"),
+				Width:  intP(100),
+				Height: intP(75),
+			},
 		}
 
 		result := NewExerciseOut(exercise)
@@ -140,29 +149,41 @@ func TestNewExerciseOut(t *testing.T) {
 func TestExerciseStructFields(t *testing.T) {
 	t.Run("Exercise with all fields", func(t *testing.T) {
 		exercise := Exercise{
-			Name:            "Push Up",
-			Category:        "Body weight",
-			Target:          "Chest",
-			Asset:           "https://example.com/asset.jpg",
-			AssetWidth:      800,
-			AssetHeight:     600,
-			Thumbnail:       "https://example.com/thumb.jpg",
-			ThumbnailWidth:  200,
-			ThumbnailHeight: 150,
-			Instructions:    "Push up instructions",
-			UserID:          "user123",
+			Name:     "Push Up",
+			Category: "Body weight",
+			Target:   "Chest",
+			Asset: &ImageDescription{
+				Link:   strP("https://example.com/asset.jpg"),
+				Width:  intP(800),
+				Height: intP(600),
+			},
+			Thumbnail: &ImageDescription{
+				Link:   strP("https://example.com/thumb.jpg"),
+				Width:  intP(200),
+				Height: intP(150),
+			},
+			Instructions: strP("Push up instructions"),
+			UserID:       "user123",
 		}
 
 		assert.Equal(t, "Push Up", exercise.Name)
 		assert.Equal(t, "Body weight", exercise.Category)
 		assert.Equal(t, "Chest", exercise.Target)
-		assert.Equal(t, "https://example.com/asset.jpg", exercise.Asset)
-		assert.Equal(t, 800, exercise.AssetWidth)
-		assert.Equal(t, 600, exercise.AssetHeight)
-		assert.Equal(t, "https://example.com/thumb.jpg", exercise.Thumbnail)
-		assert.Equal(t, 200, exercise.ThumbnailWidth)
-		assert.Equal(t, 150, exercise.ThumbnailHeight)
-		assert.Equal(t, "Push up instructions", exercise.Instructions)
+		assert.Equal(t, "https://example.com/asset.jpg", *exercise.Asset.Link)
+		assert.Equal(t, 800, *exercise.Asset.Width)
+		assert.Equal(t, 600, *exercise.Asset.Height)
+		assert.Equal(t, "https://example.com/thumb.jpg", *exercise.Thumbnail.Link)
+		assert.Equal(t, 200, *exercise.Thumbnail.Width)
+		assert.Equal(t, 150, *exercise.Thumbnail.Height)
+		assert.Equal(t, "Push up instructions", *exercise.Instructions)
 		assert.Equal(t, "user123", exercise.UserID)
 	})
+}
+
+func strP(v string) *string {
+	return ptr.String(v)
+}
+
+func intP(v int) *int {
+	return ptr.Int(v)
 }

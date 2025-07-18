@@ -898,35 +898,7 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string",
-                    "example": "1234567890"
-                },
-                "reps": {
-                    "type": "integer",
-                    "example": 10
-                },
-                "weight": {
-                    "type": "number",
-                    "example": 100
-                }
-            }
-        },
-        "SetIn": {
-            "type": "object",
-            "required": [
-                "completed"
-            ],
-            "properties": {
-                "completed": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "distance": {
-                    "type": "number",
-                    "example": 10
-                },
-                "duration": {
-                    "type": "number",
-                    "example": 10
+                    "example": "2025-07-18T05:40:48.329406Z"
                 },
                 "reps": {
                     "type": "integer",
@@ -949,7 +921,7 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string",
-                    "example": "2ztgx4cIWnxtt95klKnYGGtIfb1"
+                    "example": "2"
                 },
                 "name": {
                     "type": "string",
@@ -967,13 +939,17 @@ const docTemplate = `{
                 "exercise": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string",
+                    "example": "2025-07-18T05:40:48.329406Z"
+                },
                 "order": {
                     "type": "integer"
                 },
                 "sets": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SetIn"
+                        "$ref": "#/definitions/Set"
                     }
                 }
             }
@@ -986,6 +962,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/TemplateExercise"
                     }
+                },
+                "id": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -1004,15 +983,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "accountDeletionSchedule": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "arn:aws:scheduler:ca-central-1:123:schedule/account-deletions/account-deletion-123"
                 },
                 "avatar": {
                     "type": "string",
                     "example": "https://example.com/avatar.png"
-                },
-                "createdAt": {
-                    "type": "string",
-                    "example": "2025-07-12T12:11:54.450476-04:00"
                 },
                 "displayName": {
                     "type": "string",
@@ -1027,11 +1003,8 @@ const docTemplate = `{
                     "example": "HW4beTVvbTUPRxun9MXZxwKPjmC2"
                 },
                 "scheduledForDeletionAt": {
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string",
-                    "example": "2025-07-15T12:11:54.450476-04:00"
+                    "example": "2022-01-01T00:00:00.000Z"
                 }
             }
         },
@@ -1050,7 +1023,7 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string",
-                    "example": "2zsp6iMWgOx9n6qQxZm0GmeXog1"
+                    "example": "2025-07-18T05:40:48.329406Z"
                 },
                 "name": {
                     "type": "string",
@@ -1069,6 +1042,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Push Up"
                 },
+                "id": {
+                    "type": "string",
+                    "example": "2025-07-18T05:40:48.329406Z"
+                },
                 "sets": {
                     "type": "array",
                     "items": {
@@ -1080,12 +1057,17 @@ const docTemplate = `{
         "WorkoutExerciseIn": {
             "type": "object",
             "required": [
-                "exercise"
+                "exercise",
+                "id"
             ],
             "properties": {
                 "exercise": {
                     "type": "string",
                     "example": "Push Up"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "2025-07-18T05:40:48.329406Z"
                 },
                 "order": {
                     "type": "integer",
@@ -1094,7 +1076,7 @@ const docTemplate = `{
                 "sets": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SetIn"
+                        "$ref": "#/definitions/Set"
                     }
                 }
             }
@@ -1119,7 +1101,7 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string",
-                    "example": "2zsp6iMWgOx9n6qQxZm0GmeXog1"
+                    "example": "2025-07-18T05:40:48.329406Z"
                 },
                 "name": {
                     "type": "string",

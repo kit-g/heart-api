@@ -70,6 +70,9 @@ Resources:
         - AttributeName: SK
           KeyType: RANGE
       TableName: !Ref WorkoutsDatabaseName
+      TimeToLiveSpecification:
+        AttributeName: "scheduled_for_deletion_at"
+        Enabled: true
 
   Api:
     Type: AWS::ApiGateway::RestApi
