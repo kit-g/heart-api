@@ -2,7 +2,7 @@ name: "Deploy"
 
 on:
   push:
-    branches: [ main, ci ] # todo
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -90,7 +90,6 @@ jobs:
             --function-name ${{ env.FUNCTION_NAME }} \
             --zip-file fileb://api/function.zip \
             --region ${{ env.AWS_REGION }} > /dev/null
-
 
   smoke-test:
     name: "Smoke Test Deployed API"
