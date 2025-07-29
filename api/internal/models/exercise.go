@@ -16,9 +16,9 @@ func (e *Exercise) String() string {
 }
 
 type ExerciseOut struct {
-	Name         string            `json:"name" example:"Push Up"`
-	Category     string            `json:"category" example:"Body weight"`
-	Target       string            `json:"target" example:"Chest"`
+	Name         string            `json:"name" example:"Push Up" binding:"required"`
+	Category     string            `json:"category" example:"Body weight" binding:"required"`
+	Target       string            `json:"target" example:"Chest" binding:"required"`
 	Asset        *ImageDescription `json:"asset,omitempty"`
 	Thumbnail    *ImageDescription `json:"thumbnail,omitempty"`
 	Instructions *string           `json:"instructions,omitempty" example:"Keep your body straight and lower yourself until your chest almost touches the ground."`

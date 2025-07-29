@@ -39,6 +39,10 @@ definitions:
         type: string
       thumbnail:
         $ref: '#/definitions/ImageDescription'
+    required:
+    - category
+    - name
+    - target
     type: object
   ExercisesResponse:
     properties:
@@ -66,6 +70,8 @@ definitions:
       width:
         example: 100
         type: integer
+    required:
+    - link
     type: object
   PresignedUrlResponse:
     properties:

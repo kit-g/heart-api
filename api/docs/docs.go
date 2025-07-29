@@ -798,6 +798,11 @@ const docTemplate = `{
         },
         "Exercise": {
             "type": "object",
+            "required": [
+                "category",
+                "name",
+                "target"
+            ],
             "properties": {
                 "asset": {
                     "$ref": "#/definitions/ImageDescription"
@@ -848,6 +853,9 @@ const docTemplate = `{
         },
         "ImageDescription": {
             "type": "object",
+            "required": [
+                "link"
+            ],
             "properties": {
                 "height": {
                     "type": "integer",
