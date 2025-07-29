@@ -26,7 +26,9 @@ import (
 //	@Router			/accounts/{accountId} [get]
 //	@Security		BearerAuth
 func GetAccount(c *gin.Context, userId string) (any, error) {
-	user, err := dbx.GetAccount(c.Request.Context(), userId)
+	accountId := c.Param("accountId")
+
+	user, err := dbx.GetAccount(c.Request.Context(), accountId)
 
 	if err != nil {
 		return nil, models.NewServerError(err)
@@ -36,7 +38,11 @@ func GetAccount(c *gin.Context, userId string) (any, error) {
 		return nil, models.NewNotFoundError("Account not found", errors.New("account not found"))
 	}
 
-	return user, nil
+	if userId == accountId {
+		return user, nil
+	}
+
+	return models.NewUserOut(user), nil
 }
 
 // RegisterAccount godoc

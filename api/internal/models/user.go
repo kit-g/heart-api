@@ -6,7 +6,7 @@ import (
 
 type User struct {
 	Username                string     `json:"displayName" example:"jane_doe" binding:"required"`
-	Email                   string     `json:"email" example:"jane_doe@mail.com" binding:"required"`
+	Email                   string     `json:"email" example:"jane_doe@mail.com"`
 	FirebaseUID             string     `json:"id" example:"HW4beTVvbTUPRxun9MXZxwKPjmC2" binding:"required"`
 	AvatarUrl               *string    `json:"avatar" example:"https://example.com/avatar.png"`
 	AccountDeletionSchedule *string    `json:"accountDeletionSchedule,omitempty" example:"arn:aws:scheduler:ca-central-1:123:schedule/account-deletions/account-deletion-123"`
@@ -22,6 +22,12 @@ type UserInternal struct {
 	AvatarUrl               *string    `dynamodbav:"avatar"`
 	AccountDeletionSchedule *string    `dynamodbav:"account_deletion_schedule"`
 	ScheduledForDeletionAt  *time.Time `dynamodbav:"scheduled_for_deletion_at"`
+}
+
+type UserPublic struct {
+	Username    string  `json:"displayName" example:"jane_doe" binding:"required"`
+	FirebaseUID string  `json:"id" example:"HW4beTVvbTUPRxun9MXZxwKPjmC2" binding:"required"`
+	AvatarUrl   *string `json:"avatar" example:"https://example.com/avatar.png"`
 }
 
 func NewUserInternal(u *User) UserInternal {
@@ -45,6 +51,14 @@ func NewUser(u *UserInternal) User {
 		AvatarUrl:               u.AvatarUrl,
 		AccountDeletionSchedule: u.AccountDeletionSchedule,
 		ScheduledForDeletionAt:  u.ScheduledForDeletionAt,
+	}
+}
+
+func NewUserOut(u *User) UserPublic {
+	return UserPublic{
+		Username:    u.Username,
+		FirebaseUID: u.FirebaseUID,
+		AvatarUrl:   u.AvatarUrl,
 	}
 }
 
