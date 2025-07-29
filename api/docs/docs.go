@@ -978,7 +978,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "displayName",
-                "email",
                 "id"
             ],
             "properties": {

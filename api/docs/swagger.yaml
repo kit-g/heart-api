@@ -165,7 +165,6 @@ definitions:
         type: string
     required:
     - displayName
-    - email
     - id
     type: object
   Workout:
