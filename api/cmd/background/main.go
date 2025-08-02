@@ -8,6 +8,7 @@ import (
 	"heart/internal/config"
 	"heart/internal/firebasex"
 	"heart/internal/models"
+	"heart/internal/routerx"
 	"log"
 )
 
@@ -63,6 +64,7 @@ func initFirebase() error {
 }
 
 func main() {
+	log.Printf("Starting Heart API Background - version: %s", routerx.String())
 	err := initFirebase()
 	if err != nil {
 		return
