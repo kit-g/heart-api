@@ -11,18 +11,6 @@ Globals:
     Timeout: 5
 
 Parameters:
-  DbHost:
-    Type: String
-    Description: "Postgres database endpoint"
-    NoEcho: true
-  DbPassword:
-    Type: String
-    Description: "Postgres database password"
-    NoEcho: true
-  DbUser:
-    Type: String
-    Description: "Postgres database user"
-    NoEcho: true
   Env:
     Type: String
     AllowedValues:
@@ -205,11 +193,6 @@ Resources:
           BACKGROUND_FUNCTION: !GetAtt BackgroundFunction.Arn
           BACKGROUND_ROLE: !GetAtt LambdaExecutionRole.Arn
           CORS_ORIGINS: !FindInMap [ Env, !Ref Env, CorsOrigins ]
-          DB_HOST: !Ref DbHost
-          DB_PASSWORD: !Ref DbPassword
-          DB_PORT: 5432
-          DB_USER: !Ref DbUser
-          DB_NAME: heart
           FIREBASE_CREDENTIALS: !Ref FirebaseCredentials
           GIN_MODE: release
           MEDIA_BUCKET: !FindInMap [ Env, !Ref Env, MediaBucket ]

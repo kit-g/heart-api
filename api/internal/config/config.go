@@ -7,16 +7,6 @@ import (
 	"strconv"
 )
 
-type DBConfig struct {
-	DBHost     string `env:"DB_HOST" default:"localhost" required:"true"`
-	DBPort     string `env:"DB_PORT" default:"5432" required:"true"`
-	DBUser     string `env:"DB_USER" default:""`
-	DBPassword string `env:"DB_PASSWORD" default:""`
-	DBName     string `env:"DB_NAME" required:"true"`
-	DBSSLMode  string `env:"DB_SSLMODE" default:"disable"   required:"true"`
-	AppName    string `env:"APP_NAME" default:"heart-api"`
-}
-
 type SchedulerConfig struct {
 	ScheduleGroup string `env:"SCHEDULE_GROUP" required:"true"`
 }
@@ -69,7 +59,6 @@ type DynamoDBConfig struct {
 }
 
 type AppConfig struct {
-	DBConfig
 	AwsConfig
 	SentryConfig
 	FirebaseConfig
