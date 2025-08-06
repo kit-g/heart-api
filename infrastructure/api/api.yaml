@@ -248,4 +248,9 @@ Resources:
       StageName: "api"
       RestApiId: !Ref Api
       DeploymentId: !Ref Deployment
+      MethodSettings:
+        - HttpMethod: "*"
+          ResourcePath: '/*'
+          ThrottlingBurstLimit: 100
+          ThrottlingRateLimit: 200
 
