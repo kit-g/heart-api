@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
 	"heart/internal/dbx"
 	"heart/internal/models"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GetWorkouts godoc

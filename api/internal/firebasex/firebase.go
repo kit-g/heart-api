@@ -2,11 +2,12 @@ package firebasex
 
 import (
 	"context"
+	"fmt"
+	"log"
+
 	"firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
-	"fmt"
 	"google.golang.org/api/option"
-	"log"
 )
 
 var firebaseApp *firebase.App

@@ -1,13 +1,14 @@
 package routerx
 
 import (
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"heart/internal/handlers"
 	"heart/internal/middleware"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func Router(origins string) *gin.Engine {

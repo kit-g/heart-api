@@ -1,10 +1,11 @@
 package models
 
 import (
+	"testing"
+
 	"github.com/aws/smithy-go/ptr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestExercise_String(t *testing.T) {

@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
 	"heart/internal/firebasex"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func AuthenticationMiddleware() gin.HandlerFunc {

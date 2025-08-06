@@ -15,13 +15,14 @@ package main
 
 import (
 	"context"
-	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/awslabs/aws-lambda-go-api-proxy/gin"
 	_ "heart/docs"
 	"heart/internal/awsx"
 	"heart/internal/config"
 	"heart/internal/firebasex"
 	"heart/internal/routerx"
+
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/awslabs/aws-lambda-go-api-proxy/gin"
 
 	"log"
 	"os"

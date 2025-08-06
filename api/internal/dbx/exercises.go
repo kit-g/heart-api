@@ -2,13 +2,14 @@ package dbx
 
 import (
 	"context"
+	"heart/internal/awsx"
+	"heart/internal/config"
+	"heart/internal/models"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"heart/internal/awsx"
-	"heart/internal/config"
-	"heart/internal/models"
 )
 
 func GetExercises(ctx context.Context) ([]models.Exercise, error) {

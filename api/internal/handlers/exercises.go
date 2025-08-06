@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
 	"heart/internal/dbx"
 	"heart/internal/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GetExercises godoc

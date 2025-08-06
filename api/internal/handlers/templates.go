@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
 	"heart/internal/dbx"
 	"heart/internal/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GetTemplates godoc
