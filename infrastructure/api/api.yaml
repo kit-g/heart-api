@@ -254,3 +254,10 @@ Resources:
           ThrottlingBurstLimit: 100
           ThrottlingRateLimit: 200
 
+Outputs:
+  ApiUrl:
+    Description: "API Gateway full URL"
+    Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"
+    Export:
+      Name: !Sub "${AWS::StackName}-api-url"
+
