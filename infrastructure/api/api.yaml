@@ -20,6 +20,9 @@ Parameters:
     Type: String
     Description: "Firebase json key"
     NoEcho: true
+  StageName:
+    Type: String
+    Default: "v1"
   WorkoutsDatabaseName:
     Type: String
     Default: "workouts"
@@ -28,16 +31,18 @@ Mappings:
   Env:
     dev:
       AccountDeletionOffset: 2 # days
-      CorsOrigins: "https://dev.media.heart-of.me,https://dev.app.heart-of.me,http://localhost:7357"
+      CorsOrigins: "https://dev.media.heart-of.me,https://dev.app.heart-of.me,http://localhost:8080"
       LogRetention: 3 # days
       UploadBucket: "583168578067-upload"
       MediaBucket: "583168578067-user-media"
       NeedDatabaseDeletionProtection: false
+      SwaggerDocsEnabled: true
     prod:
       AccountDeletionOffset: 30 # days
       CorsOrigin: "https://media.heart-of.me,https://app.heart-of.me"
       LogRetention: 90 # days
       NeedDatabaseDeletionProtection: true
+      SwaggerDocsEnabled: false
 
 
 Resources:
@@ -200,6 +205,9 @@ Resources:
           MONITORING_TOPIC: !Ref MonitoringTopic
           REGION: !Ref AWS::Region
           SCHEDULE_GROUP: !Ref ScheduleGroup
+          SWAGGER_HOST: !Sub "${Api}.execute-api.${AWS::Region}.amazonaws.com" # temporary
+          SWAGGER_DOCS_ENABLED: !FindInMap [ Env, !Ref Env, SwaggerDocsEnabled ]
+          SWAGGER_BASE_PATH: !Sub "/${StageName}"
           UPLOAD_BUCKET: !FindInMap [ Env, !Ref Env, UploadBucket ]
           WORKOUTS_TABLE: !Ref WorkoutsDatabase
       FunctionName: "heart-api"
@@ -245,7 +253,7 @@ Resources:
   Stage:
     Type: AWS::ApiGateway::Stage
     Properties:
-      StageName: "v1"
+      StageName: !Ref StageName
       RestApiId: !Ref Api
       DeploymentId: !Ref Deployment
       MethodSettings:
