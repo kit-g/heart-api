@@ -757,4 +757,9 @@ paths:
       summary: Returns a workout
       tags:
       - workouts
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
