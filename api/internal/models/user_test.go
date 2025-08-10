@@ -9,12 +9,16 @@ import (
 
 func TestUser_StructFields(t *testing.T) {
 	user := User{
-		Username:    "jane_doe",
-		Email:       "jane_doe@mail.com",
-		FirebaseUID: "HW4beTVvbTUPRxun9MXZxwKPjmC2",
+		user: user{
+			Username:    strP("jane_doe"),
+			Email:       "jane_doe@mail.com",
+			FirebaseUID: "HW4beTVvbTUPRxun9MXZxwKPjmC2",
+		},
+		AccountDeletionSchedule: nil,
+		ScheduledForDeletionAt:  nil,
 	}
 
-	assert.Equal(t, "jane_doe", user.Username)
+	assert.Equal(t, "jane_doe", *user.Username)
 	assert.Equal(t, "jane_doe@mail.com", user.Email)
 	assert.Equal(t, "HW4beTVvbTUPRxun9MXZxwKPjmC2", user.FirebaseUID)
 	assert.Nil(t, user.AvatarUrl)
@@ -28,15 +32,17 @@ func TestUser_WithOptionalFields(t *testing.T) {
 	scheduledTime := time.Now()
 
 	user := User{
-		Username:                "jane_doe",
-		Email:                   "jane_doe@mail.com",
-		FirebaseUID:             "HW4beTVvbTUPRxun9MXZxwKPjmC2",
-		AvatarUrl:               &avatarUrl,
+		user: user{
+			Username:    strP("jane_doe"),
+			Email:       "jane_doe@mail.com",
+			FirebaseUID: "HW4beTVvbTUPRxun9MXZxwKPjmC2",
+			AvatarUrl:   &avatarUrl,
+		},
 		AccountDeletionSchedule: &deletionSchedule,
 		ScheduledForDeletionAt:  &scheduledTime,
 	}
 
-	assert.Equal(t, "jane_doe", user.Username)
+	assert.Equal(t, "jane_doe", *user.Username)
 	assert.Equal(t, "jane_doe@mail.com", user.Email)
 	assert.Equal(t, "HW4beTVvbTUPRxun9MXZxwKPjmC2", user.FirebaseUID)
 	assert.NotNil(t, user.AvatarUrl)

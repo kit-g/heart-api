@@ -49,7 +49,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/User"
+                            "$ref": "#/definitions/UserIn"
                         }
                     }
                 ],
@@ -976,7 +976,6 @@ const docTemplate = `{
         "User": {
             "type": "object",
             "required": [
-                "displayName",
                 "id"
             ],
             "properties": {
@@ -1003,6 +1002,30 @@ const docTemplate = `{
                 "scheduledForDeletionAt": {
                     "type": "string",
                     "example": "2022-01-01T00:00:00.000Z"
+                }
+            }
+        },
+        "UserIn": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "https://example.com/avatar.png"
+                },
+                "displayName": {
+                    "type": "string",
+                    "example": "jane_doe"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "jane_doe@mail.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "HW4beTVvbTUPRxun9MXZxwKPjmC2"
                 }
             }
         },

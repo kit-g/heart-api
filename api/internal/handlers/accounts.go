@@ -54,7 +54,7 @@ func GetAccount(c *gin.Context, userId string) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@ID				registerAccount
-//	@Param			input	body		User	true	"User request"
+//	@Param			input	body		UserIn	true	"User request"
 //	@Success		201		{object}	User
 //	@Failure		401		{object}	ErrorResponse	"Unauthorized"
 //	@Failure		500		{object}	ErrorResponse	"Server error"

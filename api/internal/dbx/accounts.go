@@ -32,7 +32,7 @@ func SaveAccount(ctx context.Context, userId string, in models.User) (*models.Us
 			"#firebase_uid": "firebase_uid",
 		},
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":username":     &types.AttributeValueMemberS{Value: internal.Username},
+			":username":     &types.AttributeValueMemberS{Value: *internal.Username},
 			":email":        &types.AttributeValueMemberS{Value: internal.Email},
 			":firebase_uid": &types.AttributeValueMemberS{Value: internal.FirebaseUID},
 		},

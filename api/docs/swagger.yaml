@@ -170,7 +170,23 @@ definitions:
         example: "2022-01-01T00:00:00.000Z"
         type: string
     required:
-    - displayName
+    - id
+    type: object
+  UserIn:
+    properties:
+      avatar:
+        example: https://example.com/avatar.png
+        type: string
+      displayName:
+        example: jane_doe
+        type: string
+      email:
+        example: jane_doe@mail.com
+        type: string
+      id:
+        example: HW4beTVvbTUPRxun9MXZxwKPjmC2
+        type: string
+    required:
     - id
     type: object
   Workout:
@@ -308,7 +324,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/User'
+          $ref: '#/definitions/UserIn'
       produces:
       - application/json
       responses:

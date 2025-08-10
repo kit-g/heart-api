@@ -4,19 +4,27 @@ import (
 	"time"
 )
 
+type user struct {
+	FirebaseUID string  `json:"id" example:"HW4beTVvbTUPRxun9MXZxwKPjmC2" binding:"required"`
+	Username    *string `json:"displayName" example:"jane_doe"`
+	Email       string  `json:"email" example:"jane_doe@mail.com"`
+	AvatarUrl   *string `json:"avatar" example:"https://example.com/avatar.png"`
+}
+
 type User struct {
-	Username                string     `json:"displayName" example:"jane_doe" binding:"required"`
-	Email                   string     `json:"email" example:"jane_doe@mail.com"`
-	FirebaseUID             string     `json:"id" example:"HW4beTVvbTUPRxun9MXZxwKPjmC2" binding:"required"`
-	AvatarUrl               *string    `json:"avatar" example:"https://example.com/avatar.png"`
+	user
 	AccountDeletionSchedule *string    `json:"accountDeletionSchedule,omitempty" example:"arn:aws:scheduler:ca-central-1:123:schedule/account-deletions/account-deletion-123"`
 	ScheduledForDeletionAt  *time.Time `json:"scheduledForDeletionAt,omitempty" example:"2022-01-01T00:00:00.000Z"`
 } // @name User
 
+type UserIn struct {
+	user
+} // @name UserIn
+
 type UserInternal struct {
 	PK                      string     `dynamodbav:"PK"`
 	SK                      string     `dynamodbav:"SK"`
-	Username                string     `dynamodbav:"username"`
+	Username                *string    `dynamodbav:"username"`
 	Email                   string     `dynamodbav:"email"`
 	FirebaseUID             string     `dynamodbav:"firebase_uid"`
 	AvatarUrl               *string    `dynamodbav:"avatar"`
@@ -45,10 +53,12 @@ func NewUserInternal(u *User) UserInternal {
 
 func NewUser(u *UserInternal) User {
 	return User{
-		Username:                u.Username,
-		Email:                   u.Email,
-		FirebaseUID:             u.FirebaseUID,
-		AvatarUrl:               u.AvatarUrl,
+		user: user{
+			Username:    u.Username,
+			Email:       u.Email,
+			FirebaseUID: u.FirebaseUID,
+			AvatarUrl:   u.AvatarUrl,
+		},
 		AccountDeletionSchedule: u.AccountDeletionSchedule,
 		ScheduledForDeletionAt:  u.ScheduledForDeletionAt,
 	}
@@ -56,7 +66,7 @@ func NewUser(u *UserInternal) User {
 
 func NewUserOut(u *User) UserPublic {
 	return UserPublic{
-		Username:    u.Username,
+		Username:    *u.Username,
 		FirebaseUID: u.FirebaseUID,
 		AvatarUrl:   u.AvatarUrl,
 	}
