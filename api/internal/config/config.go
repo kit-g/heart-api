@@ -62,7 +62,14 @@ type AppConfig struct {
 	AwsConfig
 	SentryConfig
 	FirebaseConfig
+	SwaggerConfig
 	CORSOrigins string `env:"CORS_ORIGINS" default:"*"` // Comma-separated list of allowed origins
+}
+
+type SwaggerConfig struct {
+	Host        string `env:"SWAGGER_HOST" default:"localhost:8080"`
+	DocsEnabled bool   `env:"SWAGGER_DOCS_ENABLED" default:"true"`
+	BasePath    string `env:"SWAGGER_BASE_PATH" default:""`
 }
 
 func NewAppConfig() (*AppConfig, error) {
