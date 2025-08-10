@@ -1,6 +1,7 @@
 package routerx
 
 import (
+	"heart/internal/config"
 	"heart/internal/handlers"
 	"heart/internal/middleware"
 	"net/http"
@@ -30,7 +31,9 @@ func Router(origins string) *gin.Engine {
 		},
 	)
 
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	if config.App.SwaggerConfig.DocsEnabled {
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 
 	exercisesGroup := r.Group("/exercises")
 	exercisesGroup.Use(middleware.AuthenticationMiddleware())
