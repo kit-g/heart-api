@@ -117,6 +117,12 @@ func fromEnv(v reflect.Value, t reflect.Type) error {
 				return fmt.Errorf("invalid int for %s: %v", envKey, err)
 			}
 			fieldVal.SetInt(int64(intVal))
+		case reflect.Bool:
+			boolVal, err := strconv.ParseBool(finalVal)
+			if err != nil {
+				return fmt.Errorf("invalid bool for %s: %v", envKey, err)
+			}
+			fieldVal.SetBool(boolVal)
 		default:
 			return fmt.Errorf("unsupported config type: %s", field.Type.Kind())
 		}
