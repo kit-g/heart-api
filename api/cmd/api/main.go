@@ -9,17 +9,21 @@
 //	@license.name	MIT
 //	@license.url	https://opensource.org/licenses/MIT
 
-// @host		localhost:8080
-// @BasePath	/
+// @host						localhost:8080
+// @BasePath					/
+// @securityDefinitions.apikey	BearerAuth
+// @in							header
+// @name						Authorization
 package main
 
 import (
 	"context"
-	_ "heart/docs"
+	"heart/docs"
 	"heart/internal/awsx"
 	"heart/internal/config"
 	"heart/internal/firebasex"
 	"heart/internal/routerx"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gin"
@@ -35,6 +39,14 @@ func Init() {
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 		return
+	}
+
+	if config.App.DocsEnabled {
+		docs.SwaggerInfo.Host = config.App.Host
+		docs.SwaggerInfo.BasePath = config.App.BasePath
+		if !strings.HasPrefix(config.App.Host, "localhost") {
+			docs.SwaggerInfo.Schemes = []string{"https"}
+		}
 	}
 
 	if config.App.Credentials != "" {
