@@ -1,0 +1,368 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "App's media resources"
+Transform: "AWS::Serverless-2016-10-31"
+
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Handler: app.handler
+    Timeout: 7
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues:
+      - dev
+      - prod
+  UploadBucketName:
+    Type: String
+    Default: "upload"  # used in the bucket definition and to refer to it, to avoid cyclic dependencies
+
+Mappings:
+  Env:
+    dev:
+      AppAlias: "dev.app.heart-of.me"
+      AppDistributionCertificate: "arn:aws:acm:us-east-1:583168578067:certificate/2ea82eb1-136d-466b-99f6-ae7001de7aa7"
+      LogRetention: 3 # days
+      DistributionAlias: "dev.media.heart-of.me"
+      MediaDistributionCertificate: "arn:aws:acm:us-east-1:583168578067:certificate/297c34bc-7a74-4cb1-82c4-71bfe0114eb7"
+    prod:
+      LogRetention: 90 # days
+      DistributionAlias: "media.heart-of.me"
+      MediaDistributionCertificate: ""
+
+Resources:
+  ExerciseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::AccountId}-exercise-assets"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  UserMediaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::AccountId}-user-media"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  BucketOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Description: "OAC for various assets"
+        Name: "bucket-oac"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  MediaCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Comment: "Copy of CachingOptimized policy, except it allows the 'v' query param"
+        DefaultTTL: 86400
+        MaxTTL: 31536000
+        MinTTL: 1
+        Name: "MediaCacheWithQuery"
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingGzip: true
+          EnableAcceptEncodingBrotli: true
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: whitelist
+            QueryStrings: [ "v" ]
+          CookiesConfig:
+            CookieBehavior: none
+
+  MediaDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: "Heart of yours, media assets"
+        CacheBehaviors:
+          - PathPattern: "/exercises/*"
+            TargetOriginId: ExerciseBucketOrigin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+            ForwardedValues:
+              QueryString: false
+          - PathPattern: "/avatars/*"
+            TargetOriginId: UserMediaBucketOrigin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: !Ref MediaCachePolicy
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+            ForwardedValues:
+              QueryString: false
+          - PathPattern: "/favicon.ico"
+            TargetOriginId: UserMediaBucketOrigin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+          - PathPattern: "/config"
+            TargetOriginId: UserMediaBucketOrigin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+          - PathPattern: "/templates"
+            TargetOriginId: UserMediaBucketOrigin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+        DefaultCacheBehavior:
+          TargetOriginId: ExerciseBucketOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          ForwardedValues:
+            QueryString: false
+        Origins:
+          - DomainName: !GetAtt ExerciseBucket.RegionalDomainName
+            Id: ExerciseBucketOrigin
+            OriginPath: ""
+            S3OriginConfig:
+              # empty, as per
+              # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-distribution-s3originconfig.html#cfn-cloudfront-distribution-s3originconfig-originaccessidentity
+              OriginAccessIdentity: ""
+            OriginAccessControlId: !Ref BucketOriginAccessControl
+          - DomainName: !GetAtt UserMediaBucket.RegionalDomainName
+            Id: UserMediaBucketOrigin
+            OriginPath: ""
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+            OriginAccessControlId: !Ref BucketOriginAccessControl
+        Aliases:
+          - !FindInMap [ Env, !Ref Env, DistributionAlias ]
+        ViewerCertificate:
+          AcmCertificateArn: !FindInMap [ Env, !Ref Env, MediaDistributionCertificate ]
+          SslSupportMethod: 'sni-only'
+
+  AppDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: "Heart of yours, app"
+        CacheBehaviors:
+          - PathPattern: "/.well-known/assetlinks.json"
+            TargetOriginId: UserMediaBucketOrigin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+          - PathPattern: "/.well-known/apple-app-site-association"
+            TargetOriginId: UserMediaBucketOrigin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+        DefaultCacheBehavior:
+          TargetOriginId: UserMediaBucketOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          ForwardedValues:
+            QueryString: false
+        Origins:
+          - DomainName: !GetAtt UserMediaBucket.RegionalDomainName
+            Id: UserMediaBucketOrigin
+            OriginPath: ""
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+            OriginAccessControlId: !Ref BucketOriginAccessControl
+        Aliases:
+          - !FindInMap [ Env, !Ref Env, AppAlias ]
+          - !Sub
+            - "www.${App}"
+            - App: !FindInMap [ Env, !Ref Env, AppAlias ]
+        ViewerCertificate:
+          AcmCertificateArn: !FindInMap [ Env, !Ref Env, AppDistributionCertificate ]
+          SslSupportMethod: 'sni-only'
+
+  ExerciseBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ExerciseBucket
+      PolicyDocument:
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipal
+            Effect: Allow
+            Action: "s3:GetObject"
+            Resource: !Sub "${ExerciseBucket.Arn}/*"
+            Principal:
+              Service: "cloudfront.amazonaws.com"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${MediaDistribution}"
+
+  MediaBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref UserMediaBucket
+      PolicyDocument:
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipal
+            Effect: Allow
+            Action: "s3:GetObject"
+            Resource: !Sub "${UserMediaBucket.Arn}/*"
+            Principal:
+              Service: "cloudfront.amazonaws.com"
+            Condition:
+              StringEquals:
+                AWS:SourceArn:
+                  - !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${MediaDistribution}"
+                  - !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${AppDistribution}"
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: "ApiPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:PutObjectTagging
+                  - s3:GetObjectTagging
+                Resource:
+                  - !Sub "arn:aws:s3:::${AWS::AccountId}-${UploadBucketName}/*"
+                  - !Sub "arn:aws:s3:::${UserMediaBucket}/*"
+
+  ImageConverterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./process
+      Description: "Part of Heart API: processes uploaded images"
+      FunctionName: "heart-images"
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:770693421928:layer:Klayers-p312-Pillow:5"
+      MemorySize: 256
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  ImageConverterFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub  "/aws/lambda/${ImageConverterFunction}"
+      RetentionInDays: !FindInMap [ Env, !Ref Env, LogRetention ]
+
+  S3Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ImageConverterFunction
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceArn: !Sub "arn:aws:s3:::${AWS::AccountId}-${UploadBucketName}"
+
+  UploadBucket:
+    DependsOn: S3Permission
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::AccountId}-${UploadBucketName}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: delete-all-after-one-day
+            Status: Enabled
+            ExpirationInDays: 1
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: "s3:ObjectCreated:Post"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: "avatars/"
+            Function: !GetAtt ImageConverterFunction.Arn
+
+Outputs:
+  ExerciseBucketName:
+    Description: "Media assets for exercises"
+    Value: !Ref ExerciseBucket
+    Export:
+      Name: "exercise-bucket"
+
+  UserMediaBucket:
+    Description: "Bucket for various user media"
+    Value: !Ref UserMediaBucket
+    Export:
+      Name: "user-media-bucket"
+
+  MediaDistributionDomainName:
+    Description: "CloudFront distribution domain name"
+    Value: !GetAtt MediaDistribution.DomainName
+    Export:
+      Name: "media-distribution-domain"
+
+  AppDistributionDomainName:
+    Description: "App CloudFront distribution domain name"
+    Value: !GetAtt AppDistribution.DomainName
+    Export:
+      Name: "app-distribution-domain"
