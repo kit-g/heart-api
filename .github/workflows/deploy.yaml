@@ -50,6 +50,18 @@ jobs:
         working-directory: api
         run: go mod download
 
+      - name: "Install swag2op"
+        run: go install github.com/swaggo/swag2op/cmd/swag2op@v1.0.0
+
+      - name: "Generate OpenAPI"
+        run: |
+          export PATH="$PATH:$(go env GOPATH)/bin"
+          swag2op init \
+            --generalInfo api/cmd/api/main.go \
+            --output api/docs \
+            --openapiOutputDir api/docs \
+            --outputTypes go,yaml
+
       - name: "Build Lambda binary"
         working-directory: api
         run: ARTIFACTS_DIR=. make build-ApiFunction
