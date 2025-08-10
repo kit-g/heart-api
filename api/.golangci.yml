@@ -11,14 +11,9 @@ linters:
     - ineffassign       # assignments never used
     - staticcheck       # smart static analysis
     - unused            # dead code
-
     - gofmt
-    - goimports
 
 issues:
-  # keep PR noise down: only show new issues vs main
-  new: true
-
   # don’t fail the build on TODOs or generated files, etc.
   exclude-use-default: false
   exclude-rules:
