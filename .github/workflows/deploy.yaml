@@ -38,10 +38,6 @@ jobs:
   build-artifact:
     name: "Build Lambda Artifact"
     runs-on: ubuntu-latest
-    env:
-      SWAGGER_HOST: "bsm50dxdal.execute-api.ca-central-1.amazonaws.com"  # temporary
-      SWAGGER_BASE_PATH: "/v1"
-      SWAGGER_DOCS_ENABLED: "true"
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v4
