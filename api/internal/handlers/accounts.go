@@ -188,11 +188,10 @@ func EditAccount(c *gin.Context, userId string) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@ID				deleteAccount
-//	@Param			accountId	path	string	true	"Account ID"
-//	@Success		204			"No Content"
-//	@Failure		401			{object}	ErrorResponse	"Unauthorized"
-//	@Failure		404			{object}	ErrorResponse	"Not Found"
-//	@Failure		500			{object}	ErrorResponse	"Server error"
+//	@Success		204	"No Content"
+//	@Failure		401	{object}	ErrorResponse	"Unauthorized"
+//	@Failure		404	{object}	ErrorResponse	"Not Found"
+//	@Failure		500	{object}	ErrorResponse	"Server error"
 //	@Router			/accounts [delete]
 //	@Security		BearerAuth
 func DeleteAccount(c *gin.Context, userId string) (any, error) {

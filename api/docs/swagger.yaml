@@ -275,12 +275,6 @@ paths:
       - application/json
       description: Schedules account deletion for the authenticated user
       operationId: deleteAccount
-      parameters:
-      - description: Account ID
-        in: path
-        name: accountId
-        required: true
-        type: string
       produces:
       - application/json
       responses:

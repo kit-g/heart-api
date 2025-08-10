@@ -92,15 +92,6 @@ const docTemplate = `{
                 ],
                 "summary": "Delete user account",
                 "operationId": "deleteAccount",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Account ID",
-                        "name": "accountId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "204": {
                         "description": "No Content"

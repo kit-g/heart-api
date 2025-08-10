@@ -56,6 +56,7 @@ jobs:
       - name: "Generate OpenAPI"
         run: |
           export PATH="$PATH:$(go env GOPATH)/bin"
+          mkdir -p api/docs
           swag2op init \
             --generalInfo api/cmd/api/main.go \
             --output api/docs \
