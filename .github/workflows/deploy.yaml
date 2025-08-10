@@ -51,7 +51,7 @@ jobs:
         run: go mod download
 
       - name: "Install swag2op"
-        run: go install github.com/zxmfke/swagger2openapi3/cmd/swag2op@v1.0.0
+        run: go install github.com/zxmfke/swagger2openapi3/cmd/swag2op@latest
 
       - name: "Generate OpenAPI"
         run: |
@@ -59,8 +59,7 @@ jobs:
           swag2op init \
             --generalInfo api/cmd/api/main.go \
             --output api/docs \
-            --openapiOutputDir api/docs \
-            --outputTypes go,yaml
+            --openapiOutputDir api/docs 
 
       - name: "Build Lambda binary"
         working-directory: api
