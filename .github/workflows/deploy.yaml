@@ -51,7 +51,7 @@ jobs:
         run: go mod download
 
       - name: "Install swag2op"
-        run: go install github.com/zxmfke/swagger2openapi3/cmd/swag2op@latest
+        run: go install github.com/zxmfke/swagger2openapi3/cmd/swag2op@v1.0.0
 
       - name: "Generate OpenAPI"
         run: |
