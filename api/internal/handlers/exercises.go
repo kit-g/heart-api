@@ -15,9 +15,10 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@ID				getExercises
-//	@Success		200	{object}	ExercisesResponse
-//	@Failure		401	{object}	ErrorResponse	"Unauthorized"
-//	@Failure		500	{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header		string	false	"Client app version (e.g., 2.8.0)"
+//	@Success		200				{object}	ExercisesResponse
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/exercises [get]
 //	@Security		BearerAuth
 func GetExercises(c *gin.Context, _ string) (any, error) {

@@ -12,18 +12,19 @@ import (
 
 // LeaveFeedback godoc
 //
-// @Summary		Submit user feedback
-// @Description	Allows users to submit feedback with a message and optionally attach a screenshot
-// @Tags			feedback
-// @Accept			json
-// @Produce		json
-// @Param			request	body		FeedbackRequest	true	"Feedback details"
-// @Success		200		{object}	PresignedUrlResponse
-// @Failure		400		{object}	ErrorResponse
-// @Failure		401		{object}	ErrorResponse
-// @Failure		500		{object}	ErrorResponse
-// @Security		BearerAuth
-// @Router			/feedback [post]
+//	@Summary		Submit user feedback
+//	@Description	Allows users to submit feedback with a message and optionally attach a screenshot
+//	@Tags			feedback
+//	@Accept			json
+//	@Produce		json
+//	@Param			X-App-Version	header		string			false	"Client app version"
+//	@Param			request			body		FeedbackRequest	true	"Feedback details"
+//	@Success		200				{object}	PresignedUrlResponse
+//	@Failure		400				{object}	ErrorResponse
+//	@Failure		401				{object}	ErrorResponse
+//	@Failure		500				{object}	ErrorResponse
+//	@Security		BearerAuth
+//	@Router			/feedback [post]
 func LeaveFeedback(c *gin.Context, userId string) (any, error) {
 	var request models.FeedbackRequest
 

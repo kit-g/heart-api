@@ -17,11 +17,12 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@ID				getWorkouts
-//	@Param			pageSize	query		integer	false	"Page size for pagination"
-//	@Param			cursor		query		string	false	"Cursor for pagination"
-//	@Success		200			{object}	WorkoutResponse
-//	@Failure		401			{object}	ErrorResponse	"Unauthorized"
-//	@Failure		500			{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header		string	false	"Client app version"
+//	@Param			pageSize		query		integer	false	"Page size for pagination"
+//	@Param			cursor			query		string	false	"Cursor for pagination"
+//	@Success		200				{object}	WorkoutResponse
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/workouts [get]
 //	@Security		BearerAuth
 func GetWorkouts(c *gin.Context, userId string) (any, error) {
@@ -54,11 +55,12 @@ func GetWorkouts(c *gin.Context, userId string) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@ID				getWorkout
-//	@Param			workoutId	path		string	true	"Workout ID"
-//	@Success		200			{object}	Workout
-//	@Failure		401			{object}	ErrorResponse	"Unauthorized"
-//	@Failure		404			{object}	ErrorResponse	"Not Found"
-//	@Failure		500			{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header		string	false	"Client app version"
+//	@Param			workoutId		path		string	true	"Workout ID"
+//	@Success		200				{object}	Workout
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		404				{object}	ErrorResponse	"Not Found"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/workouts/{workoutId} [get]
 //	@Security		BearerAuth
 func GetWorkout(c *gin.Context, userId string) (any, error) {
@@ -81,10 +83,11 @@ func GetWorkout(c *gin.Context, userId string) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@ID				makeWorkout
-//	@Param			input	body		WorkoutIn	true	"Workout request"
-//	@Success		200		{object}	Workout
-//	@Failure		401		{object}	ErrorResponse	"Unauthorized"
-//	@Failure		500		{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header		string		false	"Client app version"
+//	@Param			input			body		WorkoutIn	true	"Workout request"
+//	@Success		200				{object}	Workout
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/workouts [post]
 //	@Security		BearerAuth
 func MakeWorkout(c *gin.Context, userID string) (any, error) {
@@ -111,11 +114,12 @@ func MakeWorkout(c *gin.Context, userID string) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@ID				deleteWorkout
-//	@Param			workoutId	path		string	true	"Workout ID"
-//	@Success		204		"No Content"
-//	@Failure		401			{object}	ErrorResponse	"Unauthorized"
-//	@Failure		404			{object}	ErrorResponse	"Not Found"
-//	@Failure		500			{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header	string	false	"Client app version"
+//	@Param			workoutId		path	string	true	"Workout ID"
+//	@Success		204				"No Content"
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		404				{object}	ErrorResponse	"Not Found"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/workouts/{workoutId} [delete]
 //	@Security		BearerAuth
 func DeleteWorkout(c *gin.Context, userId string) (any, error) {

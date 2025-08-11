@@ -16,9 +16,10 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@ID				getTemplates
-//	@Success		200	{array}		Template
-//	@Failure		401	{object}	ErrorResponse	"Unauthorized"
-//	@Failure		500	{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header		string	false	"Client app version"
+//	@Success		200				{array}		Template
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/templates [get]
 //	@Security		BearerAuth
 func GetTemplates(c *gin.Context, userId string) (any, error) {
@@ -41,11 +42,12 @@ func GetTemplates(c *gin.Context, userId string) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@ID				getTemplate
-//	@Param			id	path		string	true	"Template ID"
-//	@Success		200	{object}	Template
-//	@Failure		401	{object}	ErrorResponse	"Unauthorized"
-//	@Failure		404	{object}	ErrorResponse	"Not Found"
-//	@Failure		500	{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header		string	false	"Client app version"
+//	@Param			id				path		string	true	"Template ID"
+//	@Success		200				{object}	Template
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		404				{object}	ErrorResponse	"Not Found"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/templates/{id} [get]
 //	@Security		BearerAuth
 func GetTemplate(c *gin.Context, userId string) (any, error) {
@@ -72,10 +74,11 @@ func GetTemplate(c *gin.Context, userId string) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@ID				makeTemplate
-//	@Param			input	body		TemplateIn	true	"Template request"
-//	@Success		200		{object}	Template
-//	@Failure		401		{object}	ErrorResponse	"Unauthorized"
-//	@Failure		500		{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header		string		false	"Client app version"
+//	@Param			input			body		TemplateIn	true	"Template request"
+//	@Success		200				{object}	Template
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/templates [post]
 //	@Security		BearerAuth
 func MakeTemplate(c *gin.Context, userId string) (any, error) {
@@ -102,11 +105,12 @@ func MakeTemplate(c *gin.Context, userId string) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@ID				deleteTemplate
-//	@Param			id	path	string	true	"Template ID"
-//	@Success		204	"No Content"
-//	@Failure		401	{object}	ErrorResponse	"Unauthorized"
-//	@Failure		404	{object}	ErrorResponse	"Not Found"
-//	@Failure		500	{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header	string	false	"Client app version"
+//	@Param			id				path	string	true	"Template ID"
+//	@Success		204				"No Content"
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		404				{object}	ErrorResponse	"Not Found"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/templates/{id} [delete]
 //	@Security		BearerAuth
 func DeleteTemplate(c *gin.Context, userId string) (any, error) {

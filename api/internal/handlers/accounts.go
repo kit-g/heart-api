@@ -19,11 +19,12 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@ID				getAccount
-//	@Param			accountId	path		string	true	"Account ID"
-//	@Success		200			{object}	User
-//	@Failure		401			{object}	ErrorResponse	"Unauthorized"
-//	@Failure		404			{object}	ErrorResponse	"Not Found"
-//	@Failure		500			{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header		string	false	"Client app version"
+//	@Param			accountId		path		string	true	"Account ID"
+//	@Success		200				{object}	User
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		404				{object}	ErrorResponse	"Not Found"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/accounts/{accountId} [get]
 //	@Security		BearerAuth
 func GetAccount(c *gin.Context, userId string) (any, error) {
@@ -54,10 +55,11 @@ func GetAccount(c *gin.Context, userId string) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@ID				registerAccount
-//	@Param			input	body		UserIn	true	"User request"
-//	@Success		201		{object}	User
-//	@Failure		401		{object}	ErrorResponse	"Unauthorized"
-//	@Failure		500		{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header		string	false	"Client app version"
+//	@Param			input			body		UserIn	true	"User request"
+//	@Success		201				{object}	User
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/accounts [post]
 //	@Security		BearerAuth
 func RegisterAccount(c *gin.Context, userId string) (any, error) {
@@ -86,14 +88,15 @@ func RegisterAccount(c *gin.Context, userId string) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@ID				editAccount
-//	@Param			accountId	path		string				true	"Account ID"
-//	@Param			input		body		EditAccountRequest	true	"Edit account request"
-//	@Success		200			{object}	PresignedUrlResponse
-//	@Success		204			"No Content"
-//	@Failure		400			{object}	ErrorResponse	"Validation error"
-//	@Failure		401			{object}	ErrorResponse	"Unauthorized"
-//	@Failure		403			{object}	ErrorResponse	"Forbidden"
-//	@Failure		500			{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header		string				false	"Client app version"
+//	@Param			accountId		path		string				true	"Account ID"
+//	@Param			input			body		EditAccountRequest	true	"Edit account request"
+//	@Success		200				{object}	PresignedUrlResponse
+//	@Success		204				"No Content"
+//	@Failure		400				{object}	ErrorResponse	"Validation error"
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		403				{object}	ErrorResponse	"Forbidden"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/accounts/{accountId} [put]
 //	@Security		BearerAuth
 func EditAccount(c *gin.Context, userId string) (any, error) {
@@ -188,10 +191,11 @@ func EditAccount(c *gin.Context, userId string) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@ID				deleteAccount
-//	@Success		204	"No Content"
-//	@Failure		401	{object}	ErrorResponse	"Unauthorized"
-//	@Failure		404	{object}	ErrorResponse	"Not Found"
-//	@Failure		500	{object}	ErrorResponse	"Server error"
+//	@Param			X-App-Version	header	string	false	"Client app version"
+//	@Success		204				"No Content"
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		404				{object}	ErrorResponse	"Not Found"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/accounts [delete]
 //	@Security		BearerAuth
 func DeleteAccount(c *gin.Context, userId string) (any, error) {
