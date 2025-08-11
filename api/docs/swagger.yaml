@@ -291,6 +291,11 @@ paths:
       - application/json
       description: Schedules account deletion for the authenticated user
       operationId: deleteAccount
+      parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       produces:
       - application/json
       responses:
@@ -319,6 +324,10 @@ paths:
       description: Accounts are managed by Firebase so we just need to store them
       operationId: registerAccount
       parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       - description: User request
         in: body
         name: input
@@ -352,6 +361,10 @@ paths:
       description: Returns user account information for the authenticated user
       operationId: getAccount
       parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       - description: Account ID
         in: path
         name: accountId
@@ -388,6 +401,10 @@ paths:
         removeAvatar, uploadAvatar'
       operationId: editAccount
       parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       - description: Account ID
         in: path
         name: accountId
@@ -435,6 +452,11 @@ paths:
       - application/json
       description: Returns all exercises in a single page
       operationId: getExercises
+      parameters:
+      - description: Client app version (e.g., 2.8.0)
+        in: header
+        name: X-App-Version
+        type: string
       produces:
       - application/json
       responses:
@@ -462,6 +484,10 @@ paths:
       description: Allows users to submit feedback with a message and optionally attach
         a screenshot
       parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       - description: Feedback details
         in: body
         name: request
@@ -498,6 +524,11 @@ paths:
       - application/json
       description: Returns all workout templates for the authenticated user
       operationId: getTemplates
+      parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       produces:
       - application/json
       responses:
@@ -526,6 +557,10 @@ paths:
       description: Validates, saves and returns a workout template
       operationId: makeTemplate
       parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       - description: Template request
         in: body
         name: input
@@ -559,6 +594,10 @@ paths:
       description: Deletes a specific workout template by ID
       operationId: deleteTemplate
       parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       - description: Template ID
         in: path
         name: id
@@ -592,6 +631,10 @@ paths:
       description: Returns a specific workout template by ID
       operationId: getTemplate
       parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       - description: Template ID
         in: path
         name: id
@@ -628,6 +671,10 @@ paths:
       description: Returns paginated list of user workouts with exercises and sets
       operationId: getWorkouts
       parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       - description: Page size for pagination
         in: query
         name: pageSize
@@ -662,6 +709,10 @@ paths:
       description: Validates, saves and returns a workout
       operationId: makeWorkout
       parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       - description: Workout request
         in: body
         name: input
@@ -695,6 +746,10 @@ paths:
       description: Deletes a workout by ID
       operationId: deleteWorkout
       parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       - description: Workout ID
         in: path
         name: workoutId
@@ -728,6 +783,10 @@ paths:
       description: Returns a single workout by ID with exercises and sets
       operationId: getWorkout
       parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
       - description: Workout ID
         in: path
         name: workoutId

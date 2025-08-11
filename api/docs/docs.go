@@ -44,6 +44,12 @@ const docTemplate = `{
                 "operationId": "registerAccount",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
+                    {
                         "description": "User request",
                         "name": "input",
                         "in": "body",
@@ -92,6 +98,14 @@ const docTemplate = `{
                 ],
                 "summary": "Delete user account",
                 "operationId": "deleteAccount",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "No Content"
@@ -137,6 +151,12 @@ const docTemplate = `{
                 "summary": "Get user account",
                 "operationId": "getAccount",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
                     {
                         "type": "string",
                         "description": "Account ID",
@@ -191,6 +211,12 @@ const docTemplate = `{
                 "summary": "Edit user account",
                 "operationId": "editAccount",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
                     {
                         "type": "string",
                         "description": "Account ID",
@@ -264,6 +290,14 @@ const docTemplate = `{
                 ],
                 "summary": "List all exercises",
                 "operationId": "getExercises",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version (e.g., 2.8.0)",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -305,6 +339,12 @@ const docTemplate = `{
                 ],
                 "summary": "Submit user feedback",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
                     {
                         "description": "Feedback details",
                         "name": "request",
@@ -362,6 +402,14 @@ const docTemplate = `{
                 ],
                 "summary": "Lists workout templates",
                 "operationId": "getTemplates",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -405,6 +453,12 @@ const docTemplate = `{
                 "summary": "Creates a workout template",
                 "operationId": "makeTemplate",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
                     {
                         "description": "Template request",
                         "name": "input",
@@ -457,6 +511,12 @@ const docTemplate = `{
                 "summary": "Get workout template",
                 "operationId": "getTemplate",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
                     {
                         "type": "string",
                         "description": "Template ID",
@@ -513,6 +573,12 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
                         "description": "Template ID",
                         "name": "id",
                         "in": "path",
@@ -564,6 +630,12 @@ const docTemplate = `{
                 "summary": "Returns user workouts",
                 "operationId": "getWorkouts",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
                     {
                         "type": "integer",
                         "description": "Page size for pagination",
@@ -618,6 +690,12 @@ const docTemplate = `{
                 "operationId": "makeWorkout",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
+                    {
                         "description": "Workout request",
                         "name": "input",
                         "in": "body",
@@ -669,6 +747,12 @@ const docTemplate = `{
                 "summary": "Returns a workout",
                 "operationId": "getWorkout",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
                     {
                         "type": "string",
                         "description": "Workout ID",
@@ -723,6 +807,12 @@ const docTemplate = `{
                 "summary": "Deletes a workout",
                 "operationId": "deleteWorkout",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
                     {
                         "type": "string",
                         "description": "Workout ID",
