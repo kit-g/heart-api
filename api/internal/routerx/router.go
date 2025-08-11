@@ -36,32 +36,32 @@ func Router(origins string) *gin.Engine {
 	}
 
 	exercisesGroup := r.Group("/exercises")
-	exercisesGroup.Use(middleware.AuthenticationMiddleware())
+	exercisesGroup.Use(middleware.Version(), middleware.Authentication())
 	exercisesGroup.GET("", Authenticated(handlers.GetExercises))
 
 	workoutsGroup := r.Group("/workouts")
-	workoutsGroup.Use(middleware.AuthenticationMiddleware())
+	workoutsGroup.Use(middleware.Version(), middleware.Authentication())
 	workoutsGroup.GET("", Authenticated(handlers.GetWorkouts))
 	workoutsGroup.POST("", Authenticated(handlers.MakeWorkout))
 	workoutsGroup.GET(":workoutId", Authenticated(handlers.GetWorkout))
 	workoutsGroup.DELETE(":workoutId", Authenticated(handlers.DeleteWorkout))
 
 	templatesGroup := r.Group("/templates")
-	templatesGroup.Use(middleware.AuthenticationMiddleware())
+	templatesGroup.Use(middleware.Version(), middleware.Authentication())
 	templatesGroup.GET("", Authenticated(handlers.GetTemplates))
 	templatesGroup.POST("", Authenticated(handlers.MakeTemplate))
 	templatesGroup.GET(":templateId", Authenticated(handlers.GetTemplate))
 	templatesGroup.DELETE(":templateId", Authenticated(handlers.DeleteTemplate))
 
 	accountGroup := r.Group("/accounts")
-	accountGroup.Use(middleware.AuthenticationMiddleware())
+	accountGroup.Use(middleware.Version(), middleware.Authentication())
 	accountGroup.POST("", Authenticated(handlers.RegisterAccount))
 	accountGroup.DELETE("", Authenticated(handlers.DeleteAccount))
 	accountGroup.PUT(":accountId", Authenticated(handlers.EditAccount))
 	accountGroup.GET(":accountId", Authenticated(handlers.GetAccount))
 
 	feedbackGroup := r.Group("/feedback")
-	feedbackGroup.Use(middleware.AuthenticationMiddleware())
+	feedbackGroup.Use(middleware.Version(), middleware.Authentication())
 	feedbackGroup.POST("", Authenticated(handlers.LeaveFeedback))
 
 	return r

@@ -4,6 +4,7 @@ go 1.24.5
 
 require (
 	firebase.google.com/go/v4 v4.18.0
+	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/aws/aws-lambda-go v1.49.0
 	github.com/aws/aws-sdk-go-v2 v1.37.2
 	github.com/aws/aws-sdk-go-v2/config v1.30.3
