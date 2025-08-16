@@ -19,7 +19,6 @@ func TestGetWorkouts_PaginationAndUnmarshal(t *testing.T) {
 
 	// Prepare one workout item
 	now := time.Now().UTC()
-	item := map[string]types.AttributeValue{}
 	w := struct {
 		PK    string    `dynamodbav:"PK"`
 		SK    string    `dynamodbav:"SK"`
@@ -32,7 +31,7 @@ func TestGetWorkouts_PaginationAndUnmarshal(t *testing.T) {
 		Start: now,
 	}
 	var err error
-	item, err = attributevalue.MarshalMap(w)
+	item, err := attributevalue.MarshalMap(w)
 	if err != nil {
 		t.Fatalf("marshal err: %v", err)
 	}
