@@ -180,7 +180,7 @@ Resources:
     Properties:
       FunctionName: !Ref BackgroundFunction
       Qualifier: "$LATEST"
-      MaximumRetryAttempts: 0
+      MaximumRetryAttempts: 2
       DestinationConfig:
         OnFailure:
           Destination: !Ref MonitoringTopic
