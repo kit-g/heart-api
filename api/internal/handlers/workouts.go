@@ -9,6 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// test seams for dbx dependencies
+var (
+	dbGetWorkouts   = dbx.GetWorkouts
+	dbGetWorkout    = dbx.GetWorkout
+	dbDeleteWorkout = dbx.DeleteWorkout
+)
+
 // GetWorkouts godoc
 //
 //	@Summary		Returns user workouts
@@ -35,7 +42,7 @@ func GetWorkouts(c *gin.Context, userId string) (any, error) {
 
 	cursor := c.Query("cursor")
 
-	workouts, last, err := dbx.GetWorkouts(c.Request.Context(), userId, pageSize, cursor)
+	workouts, last, err := dbGetWorkouts(c.Request.Context(), userId, pageSize, cursor)
 
 	if err != nil {
 		return nil, models.NewServerError(err)
@@ -66,7 +73,7 @@ func GetWorkouts(c *gin.Context, userId string) (any, error) {
 func GetWorkout(c *gin.Context, userId string) (any, error) {
 	workoutId := c.Param("workoutId")
 
-	workout, err := dbx.GetWorkout(c.Request.Context(), userId, workoutId)
+	workout, err := dbGetWorkout(c.Request.Context(), userId, workoutId)
 
 	if err != nil {
 		return nil, models.NewServerError(err)
@@ -125,7 +132,7 @@ func MakeWorkout(c *gin.Context, userID string) (any, error) {
 func DeleteWorkout(c *gin.Context, userId string) (any, error) {
 	workoutId := c.Param("workoutId")
 
-	err := dbx.DeleteWorkout(c.Request.Context(), userId, workoutId)
+	err := dbDeleteWorkout(c.Request.Context(), userId, workoutId)
 
 	var notFound *models.NotFoundError
 	if ok := errors.As(err, &notFound); ok {
