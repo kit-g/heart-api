@@ -39,7 +39,7 @@ Mappings:
       SwaggerDocsEnabled: true
     prod:
       AccountDeletionOffset: 30 # days
-      CorsOrigin: "https://media.heart-of.me,https://app.heart-of.me"
+      CorsOrigins: "https://media.heart-of.me,https://app.heart-of.me"
       LogRetention: 90 # days
       NeedDatabaseDeletionProtection: true
       SwaggerDocsEnabled: false
@@ -218,6 +218,12 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub  "/aws/lambda/${ApiFunction}"
+      RetentionInDays: !FindInMap [ Env, !Ref Env, LogRetention ]
+
+  BackgroundFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub  "/aws/lambda/${BackgroundFunction}"
       RetentionInDays: !FindInMap [ Env, !Ref Env, LogRetention ]
 
   ApiPermission:
