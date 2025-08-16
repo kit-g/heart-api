@@ -8,6 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// test seam: allow stubbing in tests
+var verifyIDToken = firebasex.VerifyIDToken
+
 func Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		auth := c.GetHeader("Authorization")
@@ -17,7 +20,7 @@ func Authentication() gin.HandlerFunc {
 		}
 
 		bearer := strings.TrimPrefix(auth, "Bearer ")
-		token, err := firebasex.VerifyIDToken(c.Request.Context(), bearer)
+		token, err := verifyIDToken(c.Request.Context(), bearer)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return
