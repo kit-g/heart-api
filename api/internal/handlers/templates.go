@@ -8,6 +8,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// test seams for dbx dependencies
+var (
+	dbGetTemplates   = dbx.GetTemplates
+	dbGetTemplate    = dbx.GetTemplate
+	dbSaveTemplate   = dbx.SaveTemplate
+	dbDeleteTemplate = dbx.DeleteTemplate
+)
+
 // GetTemplates godoc
 //
 //	@Summary		Lists workout templates
@@ -23,7 +31,7 @@ import (
 //	@Router			/templates [get]
 //	@Security		BearerAuth
 func GetTemplates(c *gin.Context, userId string) (any, error) {
-	templates, err := dbx.GetTemplates(c.Request.Context(), userId)
+	templates, err := dbGetTemplates(c.Request.Context(), userId)
 
 	if err != nil {
 		return nil, models.NewServerError(err)
@@ -53,7 +61,7 @@ func GetTemplates(c *gin.Context, userId string) (any, error) {
 func GetTemplate(c *gin.Context, userId string) (any, error) {
 	templateId := c.Param("templateId")
 
-	template, err := dbx.GetTemplate(c.Request.Context(), userId, templateId)
+	template, err := dbGetTemplate(c.Request.Context(), userId, templateId)
 
 	if err != nil {
 		return nil, models.NewServerError(err)
@@ -89,7 +97,7 @@ func MakeTemplate(c *gin.Context, userId string) (any, error) {
 
 	created := models.NewTemplate(&template, userId)
 
-	saved, err := dbx.SaveTemplate(c.Request.Context(), created)
+	saved, err := dbSaveTemplate(c.Request.Context(), created)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +124,7 @@ func MakeTemplate(c *gin.Context, userId string) (any, error) {
 func DeleteTemplate(c *gin.Context, userId string) (any, error) {
 	templateId := c.Param("templateId")
 
-	err := dbx.DeleteTemplate(c.Request.Context(), userId, templateId)
+	err := dbDeleteTemplate(c.Request.Context(), userId, templateId)
 
 	if err != nil {
 		return nil, models.NewServerError(err)
