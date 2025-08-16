@@ -7,6 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// test seams for dbx dependencies
+var (
+	dbGetExercises = dbx.GetExercises
+)
+
 // GetExercises godoc
 //
 //	@Summary		List all exercises
@@ -22,7 +27,7 @@ import (
 //	@Router			/exercises [get]
 //	@Security		BearerAuth
 func GetExercises(c *gin.Context, _ string) (any, error) {
-	exercises, err := dbx.GetExercises(c.Request.Context())
+	exercises, err := dbGetExercises(c.Request.Context())
 
 	if err != nil {
 		return nil, models.NewServerError(err)
