@@ -96,9 +96,9 @@ jobs:
           cache: true
           cache-dependency-path: api/go.sum
 
-      - name: "Run model tests"
-        working-directory: "api/internal/models"
-        run: go test . -v
+      - name: "Run internal tests"
+        working-directory: api
+        run: go test ./internal/... -v -race -coverprofile=coverage.out
 
   api-deploy:
     name: "Deploy Heart API"
