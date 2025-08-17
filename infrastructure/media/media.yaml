@@ -22,8 +22,6 @@ Parameters:
 Mappings:
   Env:
     dev:
-      AppAlias: "dev.app.heart-of.me"
-      AppDistributionCertificate: "arn:aws:acm:us-east-1:583168578067:certificate/2ea82eb1-136d-466b-99f6-ae7001de7aa7"
       LogRetention: 3 # days
       DistributionAlias: "dev.media.heart-of.me"
       MediaDistributionCertificate: "arn:aws:acm:us-east-1:583168578067:certificate/297c34bc-7a74-4cb1-82c4-71bfe0114eb7"
@@ -176,60 +174,6 @@ Resources:
           AcmCertificateArn: !FindInMap [ Env, !Ref Env, MediaDistributionCertificate ]
           SslSupportMethod: 'sni-only'
 
-  AppDistribution:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        Enabled: true
-        Comment: "Heart of yours, app"
-        CacheBehaviors:
-          - PathPattern: "/.well-known/assetlinks.json"
-            TargetOriginId: UserMediaBucketOrigin
-            ViewerProtocolPolicy: https-only
-            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
-            AllowedMethods:
-              - GET
-              - HEAD
-            CachedMethods:
-              - GET
-              - HEAD
-          - PathPattern: "/.well-known/apple-app-site-association"
-            TargetOriginId: UserMediaBucketOrigin
-            ViewerProtocolPolicy: https-only
-            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
-            AllowedMethods:
-              - GET
-              - HEAD
-            CachedMethods:
-              - GET
-              - HEAD
-        DefaultCacheBehavior:
-          TargetOriginId: UserMediaBucketOrigin
-          ViewerProtocolPolicy: redirect-to-https
-          AllowedMethods:
-            - GET
-            - HEAD
-          CachedMethods:
-            - GET
-            - HEAD
-          ForwardedValues:
-            QueryString: false
-        Origins:
-          - DomainName: !GetAtt UserMediaBucket.RegionalDomainName
-            Id: UserMediaBucketOrigin
-            OriginPath: ""
-            S3OriginConfig:
-              OriginAccessIdentity: ""
-            OriginAccessControlId: !Ref BucketOriginAccessControl
-        Aliases:
-          - !FindInMap [ Env, !Ref Env, AppAlias ]
-          - !Sub
-            - "www.${App}"
-            - App: !FindInMap [ Env, !Ref Env, AppAlias ]
-        ViewerCertificate:
-          AcmCertificateArn: !FindInMap [ Env, !Ref Env, AppDistributionCertificate ]
-          SslSupportMethod: 'sni-only'
-
   ExerciseBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -260,9 +204,7 @@ Resources:
               Service: "cloudfront.amazonaws.com"
             Condition:
               StringEquals:
-                AWS:SourceArn:
-                  - !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${MediaDistribution}"
-                  - !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${AppDistribution}"
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${MediaDistribution}"
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -360,9 +302,3 @@ Outputs:
     Value: !GetAtt MediaDistribution.DomainName
     Export:
       Name: "media-distribution-domain"
-
-  AppDistributionDomainName:
-    Description: "App CloudFront distribution domain name"
-    Value: !GetAtt AppDistribution.DomainName
-    Export:
-      Name: "app-distribution-domain"
