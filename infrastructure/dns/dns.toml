@@ -1,0 +1,14 @@
+version = 0.1
+[dev]
+[dev.deploy]
+[dev.deploy.parameters]
+stack_name = "DNS"
+s3_bucket = "583168578067-sam"
+s3_prefix = "DNS"
+region = "ca-central-1"
+profile = "personal"
+confirm_changeset = true
+tags = """
+    application=\"dns\"
+    AppManagerCFNStackKey=\"dns\"
+"""

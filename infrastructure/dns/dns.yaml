@@ -1,0 +1,167 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "DNS configuration"
+
+Parameters:
+  ApiGatewayHostedZoneId:
+    Description: DNS zone ID of the deployed API Gateway for the mobile API
+    Type: String
+    Default: Z19DQILCV0OWEC
+  CloudfrontHostedZone:
+    Default: Z2FDTNDATAQYW2
+    Type: String
+  ZoneName:
+    Default: heart-of.me
+    Description: "FQDN heart-of.me"
+    Type: String
+  DevMediaDistribution:
+    Type: String
+    Default: "d15gue09xfvm24.cloudfront.net"
+  DevAppDistribution:
+    Type: String
+    Default: "dsw54y29hvvfi.cloudfront.net"
+
+
+Resources:
+  Zone:
+    Type: AWS::Route53::HostedZone
+    DeletionPolicy: Retain
+    Properties:
+      HostedZoneConfig:
+        Comment: 'heart-of.me hosted zone'
+      Name: !Ref ZoneName
+
+  DevEmailValidationRecord1:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: Firebase email validation record
+      HostedZoneId: !GetAtt Zone.Id
+      Name: "firebase1._domainkey.dev.heart-of.me"
+      ResourceRecords:
+        - "mail-dev-heart--of-me.dkim1._domainkey.firebasemail.com."
+      TTL: 14400
+      Type: CNAME
+
+  DevEmailValidationRecord2:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: Firebase email validation record
+      HostedZoneId: !GetAtt Zone.Id
+      Name: "firebase2._domainkey.dev.heart-of.me"
+      ResourceRecords:
+        - "mail-dev-heart--of-me.dkim2._domainkey.firebasemail.com."
+      TTL: 14400
+      Type: CNAME
+
+  DevEmailValidationRecord3:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: Firebase email validation record
+      HostedZoneId: !GetAtt Zone.Id
+      Name: "dev.heart-of.me"
+      ResourceRecords:
+        - "\"v=spf1 include:_spf.firebasemail.com ~all\""
+        - "\"firebase=heart-of-yours-dev\""
+      TTL: 14400
+      Type: TXT
+
+  DevMediaDistributionCertificateValidationRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: 'Dev media CF distribution'
+      HostedZoneId: !GetAtt Zone.Id
+      Name: _a66f9b14b2fe79100de8da2794bbda3e.dev.media.heart-of.me.
+      ResourceRecords:
+        - _1d9796af82610f64321c6d4ffc014691.xlfgrmvvlj.acm-validations.aws.
+      TTL: 14400
+      Type: CNAME
+
+  DevMediaDistributionCertificateValidationRecord1:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: 'Dev media CF distribution'
+      HostedZoneId: !GetAtt Zone.Id
+      Name: _b7feebaf597a5b3dfa112fb63ad76a40.dev.heart-of.me.
+      ResourceRecords:
+        - _f3c60a3d8cc31b91fd49ea5e969c15f8.xlfgrmvvlj.acm-validations.aws.
+      TTL: 14400
+      Type: CNAME
+
+  DevMediaDistributionCertificateValidationRecord2:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: 'Dev media CF distribution'
+      HostedZoneId: !GetAtt Zone.Id
+      Name: _323f7b7de154eed3a1faa0f26192a320.www.dev.heart-of.me.
+      ResourceRecords:
+        - _2b937ce14a76052f45b0f5e3e792251d.xlfgrmvvlj.acm-validations.aws.
+      TTL: 14400
+      Type: CNAME
+
+  DevAppDistributionCertificateValidationRecord1:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: 'Dev app CF distribution'
+      HostedZoneId: !GetAtt Zone.Id
+      Name: _f05280c09b017b103351d8730a493786.dev.app.heart-of.me.
+      ResourceRecords:
+        - _255e9c88f095efa39931dcec9556a59e.xlfgrmvvlj.acm-validations.aws.
+      TTL: 14400
+      Type: CNAME
+
+  DevAppDistributionCertificateValidationRecord2:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: 'Dev app CF distribution'
+      HostedZoneId: !GetAtt Zone.Id
+      Name: _e9453692ccbd0645bd3d939805ec62bd.www.dev.app.heart-of.me.
+      ResourceRecords:
+        - _cf535b2aa56b54ec8420a83a003bd176.xlfgrmvvlj.acm-validations.aws.
+      TTL: 14400
+      Type: CNAME
+
+  DevMediaDistributionRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: 'Dev media CF distribution'
+      HostedZoneId: !GetAtt Zone.Id
+      Name: "dev.media.heart-of.me"
+      ResourceRecords:
+        - !Ref DevMediaDistribution
+      TTL: 14400
+      Type: CNAME
+
+  DevAppDistributionRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: 'Dev app CF distribution'
+      HostedZoneId: !GetAtt Zone.Id
+      Name: "dev.app.heart-of.me"
+      ResourceRecords:
+        - !Ref DevAppDistribution
+      TTL: 14400
+      Type: CNAME
+
+  MxRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: 'Mail confirmation record'
+      HostedZoneId: !GetAtt Zone.Id
+      Name: "heart-of.me"
+      ResourceRecords:
+        - "10 mx1.improvmx.com"
+        - "20 mx2.improvmx.com"
+      TTL: 14400
+      Type: MX
+
+  TxtRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: "TXT record"
+      HostedZoneId: !GetAtt Zone.Id
+      Name: "heart-of.me"
+      ResourceRecords:
+        - "\"v=spf1 include:spf.improvmx.com ~all\""
+      TTL: 14400
+      Type: TXT
+
+
