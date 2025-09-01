@@ -2,6 +2,8 @@ package dbx
 
 import (
 	"context"
+	"errors"
+	"heart/internal/models"
 	"testing"
 
 	"heart/internal/awsx"
@@ -36,5 +38,58 @@ func TestGetExercises(t *testing.T) {
 	}
 	if len(list) != 2 {
 		t.Fatalf("expected 2 exercises, got %d", len(list))
+	}
+}
+
+func TestMakeExercise_Success(t *testing.T) {
+	teardown := setupTest(t)
+	defer teardown()
+
+	awsx.Db = &mockDynamo{
+		PutItemFn: func(ctx context.Context, p *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error) {
+			// simulate successful put
+			return &dynamodb.PutItemOutput{}, nil
+		},
+	}
+
+	in := models.UserExerciseIn{Name: "Push Up", Category: "Body", Target: "Chest"}
+	res, err := MakeExercise(context.Background(), in, "user-1")
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if res == nil || res.Name != in.Name {
+		t.Fatalf("unexpected result: %#v", res)
+	}
+}
+
+func TestMakeExercise_AlreadyExists(t *testing.T) {
+	teardown := setupTest(t)
+	defer teardown()
+
+	awsx.Db = &mockDynamo{
+		PutItemFn: func(ctx context.Context, p *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error) {
+			return nil, &types.ConditionalCheckFailedException{}
+		},
+	}
+
+	_, err := MakeExercise(context.Background(), models.UserExerciseIn{Name: "Push Up", Category: "Body", Target: "Chest"}, "user-1")
+	if err == nil {
+		t.Fatalf("expected error, got nil")
+	}
+}
+
+func TestMakeExercise_ServerError(t *testing.T) {
+	teardown := setupTest(t)
+	defer teardown()
+
+	awsx.Db = &mockDynamo{
+		PutItemFn: func(ctx context.Context, p *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error) {
+			return nil, errors.New("boom")
+		},
+	}
+
+	_, err := MakeExercise(context.Background(), models.UserExerciseIn{Name: "Push Up", Category: "Body", Target: "Chest"}, "user-1")
+	if err == nil {
+		t.Fatalf("expected error, got nil")
 	}
 }

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/aws/smithy-go/ptr"
@@ -179,6 +180,16 @@ func TestExerciseStructFields(t *testing.T) {
 		assert.Equal(t, "Push up instructions", *exercise.Instructions)
 		assert.Equal(t, "user123", exercise.UserID)
 	})
+}
+
+func TestNewUserExercise_BuildsKeys(t *testing.T) {
+	in := &UserExerciseIn{Name: "Push Up", Category: "Body", Target: "Chest"}
+	out := NewUserExercise(in, "user-1")
+	assert.Equal(t, UserKey+"user-1", out.PK)
+	assert.Equal(t, ExerciseKey+url.PathEscape("Push Up"), out.SK)
+	assert.Equal(t, in.Name, out.Name)
+	assert.Equal(t, in.Category, out.Category)
+	assert.Equal(t, in.Target, out.Target)
 }
 
 func strP(v string) *string {
