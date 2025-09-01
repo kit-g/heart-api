@@ -9,6 +9,7 @@ const (
 	UserKey     = "USER#"
 	WorkoutKey  = "WORKOUT#"
 	TemplateKey = "TEMPLATE#"
+	ExerciseKey = "EXERCISE#"
 )
 
 type Workout struct {

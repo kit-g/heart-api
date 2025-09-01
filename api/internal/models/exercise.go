@@ -1,5 +1,10 @@
 package models
 
+import (
+	"fmt"
+	"net/url"
+)
+
 type Exercise struct {
 	PK           string            `dynamodbav:"pk"` // always "EXERCISE"
 	Name         string            `dynamodbav:"sk"`
@@ -38,3 +43,26 @@ func NewExerciseOut(e *Exercise) ExerciseOut {
 type ExercisesResponse struct {
 	Exercises []ExerciseOut `json:"exercises"`
 } // @name ExercisesResponse
+
+type UserExerciseIn struct {
+	Name         string  `dynamodbav:"name" json:"name" example:"Push Up" binding:"required"`
+	Category     string  `dynamodbav:"category" json:"category" example:"Body weight" binding:"required"`
+	Target       string  `dynamodbav:"target" json:"target" example:"Chest" binding:"required"`
+	Instructions *string `dynamodbav:"instructions,omitempty" json:"instructions,omitempty" example:"Keep your body straight and lower yourself until your chest almost touches the ground."`
+}
+
+// @name UserExerciseIn
+
+type UserExercise struct {
+	UserExerciseIn
+	PK string `json:"-" dynamodbav:"PK"`
+	SK string `json:"-" dynamodbav:"SK"`
+} // @name UserExercise
+
+func NewUserExercise(e *UserExerciseIn, userId string) UserExercise {
+	return UserExercise{
+		PK:             fmt.Sprintf("%s%s", UserKey, userId),
+		SK:             fmt.Sprintf("%s%s", ExerciseKey, url.PathEscape(e.Name)),
+		UserExerciseIn: *e,
+	}
+}
