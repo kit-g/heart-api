@@ -296,6 +296,12 @@ const docTemplate = `{
                         "description": "Client app version (e.g., 2.8.0)",
                         "name": "X-App-Version",
                         "in": "header"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter exercises created by the authenticated user",
+                        "name": "owned",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -350,7 +356,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/UserExerciseIn"
+                            "$ref": "#/definitions/UserExercise"
                         }
                     }
                 ],
@@ -1157,7 +1163,7 @@ const docTemplate = `{
                 }
             }
         },
-        "UserExerciseIn": {
+        "UserExercise": {
             "type": "object",
             "required": [
                 "category",

@@ -7,6 +7,8 @@ import (
 	"heart/internal/awsx"
 	"heart/internal/config"
 	"heart/internal/models"
+	"net/url"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -64,4 +66,41 @@ func MakeExercise(ctx context.Context, in models.UserExerciseIn, userId string) 
 	}
 
 	return &in, nil
+}
+
+func GetOwnExercises(ctx context.Context, userId string) ([]models.Exercise, error) {
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String(config.App.WorkoutsTable),
+		KeyConditionExpression: aws.String("#PK = :PK AND begins_with(#SK, :SK)"),
+		ExpressionAttributeNames: map[string]string{
+			"#PK": "PK",
+			"#SK": "SK",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":PK": &types.AttributeValueMemberS{Value: fmt.Sprintf("%s%s", models.UserKey, userId)},
+			":SK": &types.AttributeValueMemberS{Value: models.ExerciseKey},
+		},
+	}
+
+	result, err := awsx.Db.Query(ctx, input)
+	if err != nil {
+		return nil, models.NewServerError(err)
+	}
+
+	var exercises []models.Exercise
+	err = attributevalue.UnmarshalListOfMaps(result.Items, &exercises)
+	if err != nil {
+		return nil, models.NewServerError(err)
+	}
+
+	for i := range exercises {
+		exercises[i].Name = strings.TrimPrefix(exercises[i].Name, "EXERCISE#")
+		decodedName, err := url.QueryUnescape(exercises[i].Name)
+		if err != nil {
+			return nil, models.NewServerError(err)
+		}
+		exercises[i].Name = decodedName
+	}
+
+	return exercises, nil
 }

@@ -9,8 +9,9 @@ import (
 
 // test seams for dbx dependencies
 var (
-	dbGetExercises = dbx.GetExercises
-	dbMakeExercise = dbx.MakeExercise
+	dbGetExercises    = dbx.GetExercises
+	dbGetOwnExercises = dbx.GetOwnExercises
+	dbMakeExercise    = dbx.MakeExercise
 )
 
 // GetExercises godoc
@@ -22,13 +23,21 @@ var (
 //	@Produce		json
 //	@ID				getExercises
 //	@Param			X-App-Version	header		string	false	"Client app version (e.g., 2.8.0)"
+//	@Param			owned			query		boolean	false	"Filter exercises created by the authenticated user"
 //	@Success		200				{object}	ExercisesResponse
 //	@Failure		401				{object}	ErrorResponse	"Unauthorized"
 //	@Failure		500				{object}	ErrorResponse	"Server error"
 //	@Router			/exercises [get]
 //	@Security		BearerAuth
-func GetExercises(c *gin.Context, _ string) (any, error) {
-	exercises, err := dbGetExercises(c.Request.Context())
+func GetExercises(c *gin.Context, userId string) (any, error) {
+	owned := c.Query("owned") == "true"
+	var exercises []models.Exercise
+	var err error
+	if owned {
+		exercises, err = dbGetOwnExercises(c.Request.Context(), userId)
+	} else {
+		exercises, err = dbGetExercises(c.Request.Context())
+	}
 
 	if err != nil {
 		return nil, models.NewServerError(err)
@@ -53,7 +62,7 @@ func GetExercises(c *gin.Context, _ string) (any, error) {
 //	@Produce		json
 //	@ID				makeExercise
 //	@Param			X-App-Version	header		string			false	"Client app version (e.g., 2.8.0)"
-//	@Param			exercise		body		UserExerciseIn	true	"Exercise details"
+//	@Param			exercise		body		UserExercise	true	"Exercise details"
 //	@Success		200				{object}	Exercise
 //	@Failure		400				{object}	ErrorResponse	"Validation error"
 //	@Failure		401				{object}	ErrorResponse	"Unauthorized"

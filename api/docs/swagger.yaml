@@ -172,7 +172,7 @@ definitions:
     required:
     - id
     type: object
-  UserExerciseIn:
+  UserExercise:
     properties:
       category:
         example: Body weight
@@ -477,6 +477,10 @@ paths:
         in: header
         name: X-App-Version
         type: string
+      - description: Filter exercises created by the authenticated user
+        in: query
+        name: owned
+        type: boolean
       produces:
       - application/json
       responses:
@@ -512,7 +516,7 @@ paths:
         name: exercise
         required: true
         schema:
-          $ref: '#/definitions/UserExerciseIn'
+          $ref: '#/definitions/UserExercise'
       produces:
       - application/json
       responses:
