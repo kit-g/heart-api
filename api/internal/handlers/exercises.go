@@ -12,6 +12,7 @@ var (
 	dbGetExercises    = dbx.GetExercises
 	dbGetOwnExercises = dbx.GetOwnExercises
 	dbMakeExercise    = dbx.MakeExercise
+	dbDeleteExercise  = dbx.DeleteExercise
 )
 
 // GetExercises godoc
@@ -86,4 +87,28 @@ func MakeExercise(c *gin.Context, userId string) (any, error) {
 		Target:       made.Target,
 		Instructions: made.Instructions,
 	}, nil
+}
+
+// DeleteExercise godoc
+//
+//	@Summary		Delete an exercise
+//	@Description	Deletes an exercise created by the authenticated user
+//	@Tags			workouts
+//	@Accept			json
+//	@Produce		json
+//	@ID				deleteExercise
+//	@Param			X-App-Version	header		string	false	"Client app version (e.g., 2.8.0)"
+//	@Param			exerciseName	path		string	true	"Name of the exercise to delete"
+//	@Success		200				{object}	nil
+//	@Failure		400				{object}	ErrorResponse	"Validation error"
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
+//	@Router			/exercises/{exerciseName} [delete]
+//	@Security		BearerAuth
+func DeleteExercise(c *gin.Context, userId string) (any, error) {
+	exerciseName := c.Param("exerciseName")
+	if err := dbDeleteExercise(c.Request.Context(), userId, exerciseName); err != nil {
+		return nil, err
+	}
+	return models.NoContent, nil
 }

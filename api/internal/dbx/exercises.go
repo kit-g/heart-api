@@ -104,3 +104,30 @@ func GetOwnExercises(ctx context.Context, userId string) ([]models.Exercise, err
 
 	return exercises, nil
 }
+
+func DeleteExercise(ctx context.Context, userId string, exerciseName string) error {
+	encodedName := url.PathEscape(exerciseName)
+	input := &dynamodb.DeleteItemInput{
+		TableName:           aws.String(config.App.WorkoutsTable),
+		ConditionExpression: aws.String("attribute_exists(#PK) AND attribute_exists(#SK)"),
+		ExpressionAttributeNames: map[string]string{
+			"#PK": "PK",
+			"#SK": "SK",
+		},
+		Key: map[string]types.AttributeValue{
+			"PK": &types.AttributeValueMemberS{Value: fmt.Sprintf("%s%s", models.UserKey, userId)},
+			"SK": &types.AttributeValueMemberS{Value: fmt.Sprintf("%s%s", models.ExerciseKey, encodedName)},
+		},
+	}
+
+	_, err := awsx.Db.DeleteItem(ctx, input)
+	if err != nil {
+		var checkFailed *types.ConditionalCheckFailedException
+		if errors.As(err, &checkFailed) {
+			return models.NewValidationError(fmt.Errorf("exercise with name '%s' does not exist", exerciseName))
+		}
+		return models.NewServerError(err)
+	}
+
+	return nil
+}
