@@ -541,6 +541,44 @@ paths:
       summary: Create new exercise
       tags:
       - workouts
+  /exercises/{exerciseName}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an exercise created by the authenticated user
+      operationId: deleteExercise
+      parameters:
+      - description: Client app version (e.g., 2.8.0)
+        in: header
+        name: X-App-Version
+        type: string
+      - description: Name of the exercise to delete
+        in: path
+        name: exerciseName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete an exercise
+      tags:
+      - workouts
   /feedback:
     post:
       consumes:

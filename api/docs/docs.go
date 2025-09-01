@@ -388,6 +388,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/exercises/{exerciseName}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes an exercise created by the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workouts"
+                ],
+                "summary": "Delete an exercise",
+                "operationId": "deleteExercise",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version (e.g., 2.8.0)",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name of the exercise to delete",
+                        "name": "exerciseName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/feedback": {
             "post": {
                 "security": [
