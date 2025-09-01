@@ -318,6 +318,68 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new user exercise with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workouts"
+                ],
+                "summary": "Create new exercise",
+                "operationId": "makeExercise",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version (e.g., 2.8.0)",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
+                    {
+                        "description": "Exercise details",
+                        "name": "exercise",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UserExerciseIn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Exercise"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
             }
         },
         "/feedback": {
@@ -1092,6 +1154,32 @@ const docTemplate = `{
                 "scheduledForDeletionAt": {
                     "type": "string",
                     "example": "2022-01-01T00:00:00.000Z"
+                }
+            }
+        },
+        "UserExerciseIn": {
+            "type": "object",
+            "required": [
+                "category",
+                "name",
+                "target"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "example": "Body weight"
+                },
+                "instructions": {
+                    "type": "string",
+                    "example": "Keep your body straight and lower yourself until your chest almost touches the ground."
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Push Up"
+                },
+                "target": {
+                    "type": "string",
+                    "example": "Chest"
                 }
             }
         },

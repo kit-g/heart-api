@@ -172,6 +172,26 @@ definitions:
     required:
     - id
     type: object
+  UserExerciseIn:
+    properties:
+      category:
+        example: Body weight
+        type: string
+      instructions:
+        example: Keep your body straight and lower yourself until your chest almost
+          touches the ground.
+        type: string
+      name:
+        example: Push Up
+        type: string
+      target:
+        example: Chest
+        type: string
+    required:
+    - category
+    - name
+    - target
+    type: object
   UserIn:
     properties:
       avatar:
@@ -475,6 +495,46 @@ paths:
       security:
       - BearerAuth: []
       summary: List all exercises
+      tags:
+      - workouts
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user exercise with the provided details
+      operationId: makeExercise
+      parameters:
+      - description: Client app version (e.g., 2.8.0)
+        in: header
+        name: X-App-Version
+        type: string
+      - description: Exercise details
+        in: body
+        name: exercise
+        required: true
+        schema:
+          $ref: '#/definitions/UserExerciseIn'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Exercise'
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create new exercise
       tags:
       - workouts
   /feedback:
