@@ -2,6 +2,8 @@ package dbx
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"heart/internal/awsx"
 	"heart/internal/config"
 	"heart/internal/models"
@@ -33,4 +35,33 @@ func GetExercises(ctx context.Context) ([]models.Exercise, error) {
 	}
 
 	return exercises, nil
+}
+
+func MakeExercise(ctx context.Context, in models.UserExerciseIn, userId string) (*models.UserExerciseIn, error) {
+	exercise := models.NewUserExercise(&in, userId)
+	item, err := attributevalue.MarshalMap(exercise)
+	if err != nil {
+		return nil, models.NewServerError(err)
+	}
+
+	input := &dynamodb.PutItemInput{
+		TableName:           aws.String(config.App.WorkoutsTable),
+		ConditionExpression: aws.String("attribute_not_exists(#PK) AND attribute_not_exists(#SK)"),
+		ExpressionAttributeNames: map[string]string{
+			"#PK": "PK",
+			"#SK": "SK",
+		},
+		Item: item,
+	}
+
+	_, err = awsx.Db.PutItem(ctx, input)
+	if err != nil {
+		var checkFailed *types.ConditionalCheckFailedException
+		if errors.As(err, &checkFailed) {
+			return nil, models.NewValidationError(fmt.Errorf("exercise with name '%s' already exists", in.Name))
+		}
+		return nil, models.NewServerError(err)
+	}
+
+	return &in, nil
 }
