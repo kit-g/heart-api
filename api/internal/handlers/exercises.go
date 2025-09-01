@@ -10,6 +10,7 @@ import (
 // test seams for dbx dependencies
 var (
 	dbGetExercises = dbx.GetExercises
+	dbMakeExercise = dbx.MakeExercise
 )
 
 // GetExercises godoc
@@ -41,4 +42,39 @@ func GetExercises(c *gin.Context, _ string) (any, error) {
 	}
 
 	return out, nil
+}
+
+// MakeExercise godoc
+//
+//	@Summary		Create new exercise
+//	@Description	Creates a new user exercise with the provided details
+//	@Tags			workouts
+//	@Accept			json
+//	@Produce		json
+//	@ID				makeExercise
+//	@Param			X-App-Version	header		string			false	"Client app version (e.g., 2.8.0)"
+//	@Param			exercise		body		UserExerciseIn	true	"Exercise details"
+//	@Success		200				{object}	Exercise
+//	@Failure		400				{object}	ErrorResponse	"Validation error"
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
+//	@Router			/exercises [post]
+//	@Security		BearerAuth
+func MakeExercise(c *gin.Context, userId string) (any, error) {
+	var exercise models.UserExerciseIn
+	if err := c.BindJSON(&exercise); err != nil {
+		return nil, models.NewValidationError(err)
+	}
+
+	made, err := dbMakeExercise(c, exercise, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return models.ExerciseOut{
+		Name:         made.Name,
+		Category:     made.Category,
+		Target:       made.Target,
+		Instructions: made.Instructions,
+	}, nil
 }
