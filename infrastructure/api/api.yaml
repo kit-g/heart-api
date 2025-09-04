@@ -20,6 +20,8 @@ Parameters:
     Type: String
     Description: "Firebase json key"
     NoEcho: true
+  MonitoringEmail:
+    Type: String
   StageName:
     Type: String
     Default: "v1"
@@ -82,6 +84,13 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: "monitoring-notifications"
+
+  EmailMonitoringSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref MonitoringEmail
+      Protocol: email
+      TopicArn: !Ref MonitoringTopic
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
