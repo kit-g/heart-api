@@ -32,7 +32,6 @@ func SaveAccount(ctx context.Context, userId string, in models.User) (*models.Us
 			"#firebase_uid": "firebase_uid",
 		},
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":username":     &types.AttributeValueMemberS{Value: *internal.Username},
 			":email":        &types.AttributeValueMemberS{Value: internal.Email},
 			":firebase_uid": &types.AttributeValueMemberS{Value: internal.FirebaseUID},
 		},
@@ -48,6 +47,14 @@ func SaveAccount(ctx context.Context, userId string, in models.User) (*models.Us
 	}
 
 	input.ExpressionAttributeValues[":avatar"] = avatar
+
+	var username types.AttributeValue
+	if internal.Username == nil {
+		username = &types.AttributeValueMemberNULL{Value: true}
+	} else {
+		username = &types.AttributeValueMemberS{Value: *internal.Username}
+	}
+	input.ExpressionAttributeValues[":username"] = username
 
 	response, err := awsx.Db.UpdateItem(ctx, input)
 

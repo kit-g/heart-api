@@ -108,3 +108,50 @@ func TestSaveAccount_SetsAvatarStringWhenProvided(t *testing.T) {
 		t.Fatalf("expected :avatar to be String, got %#v", captured.ExpressionAttributeValues[":avatar"])
 	}
 }
+
+func TestSaveAccount_SetsUsernameNullWhenNil(t *testing.T) {
+	teardown := setupTest(t)
+	defer teardown()
+
+	var captured *dynamodb.UpdateItemInput
+
+	respUser := models.UserInternal{
+		PK:          models.UserKey + "u1",
+		SK:          models.UserKey + "u1",
+		Username:    nil,
+		Email:       "jane@example.com",
+		FirebaseUID: "u1",
+		AvatarUrl:   nil,
+	}
+	attrs, err := attributevalue.MarshalMap(respUser)
+	if err != nil {
+		t.Fatalf("marshal err: %v", err)
+	}
+
+	awsx.Db = &mockDynamo{
+		UpdateItemFn: func(ctx context.Context, p *dynamodb.UpdateItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.UpdateItemOutput, error) {
+			captured = p
+			return &dynamodb.UpdateItemOutput{Attributes: attrs}, nil
+		},
+	}
+
+	var in models.User
+	in.Email = "jane@example.com"
+	in.Username = nil   // key part of this test
+	in.AvatarUrl = nil  // keep null for simplicity
+	in.FirebaseUID = "" // will be set by SaveAccount
+
+	_, err = SaveAccount(context.Background(), "u1", in)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+
+	if captured == nil {
+		t.Fatalf("expected UpdateItem to be called")
+	}
+
+	u, ok := captured.ExpressionAttributeValues[":username"].(*types.AttributeValueMemberNULL)
+	if !ok || !u.Value {
+		t.Fatalf("expected :username to be NULL, got %#v", captured.ExpressionAttributeValues[":username"])
+	}
+}
