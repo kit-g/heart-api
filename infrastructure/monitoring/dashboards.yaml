@@ -1,0 +1,203 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Heart app monitoring dashboards"
+
+Parameters:
+  BaseRegion:
+    Type: String
+    Default: "ca-central-1"
+    Description: "Base region for the dashboards"
+  MediaDistributionId:
+    Type: String
+    Description: "CloudFront Distribution ID for the media stack"
+
+
+Resources:
+  HeartAppDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/Lambda",
+                    "Invocations",
+                    "FunctionName",
+                    "heart-api"],
+                  [
+                    "...",
+                    "heart-images"],
+                  [
+                    "...",
+                    "heart-background"]
+                ],
+                "region": "${BaseRegion}",
+                "stat": "Sum",
+                "title": "Lambda Invocations"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/Lambda",
+                    "Errors",
+                    "FunctionName",
+                    "heart-api"
+                  ],
+                  [
+                    "...",
+                    "heart-images"
+                  ],
+                  [
+                    "...",
+                    "heart-background"
+                  ]
+                ],
+                "region": "${BaseRegion}",
+                "stat": "Sum",
+                "title": "Lambda Errors"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 12,
+              "y": 0,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/Lambda",
+                    "Duration",
+                    "FunctionName",
+                    "heart-api"
+                  ],
+                  [
+                    "...",
+                    "heart-images"],
+                  [
+                    "...",
+                    "heart-background"]
+                ],
+                "region": "${BaseRegion}",
+                "stat": "Sum",
+                "title": "Lambda Duration"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/CloudFront",
+                    "Requests",
+                    "DistributionId",
+                    "${MediaDistributionId}",
+                    "Region",
+                    "Global"]
+                ],
+                "region": "us-east-1",
+                "stat": "Sum",
+                "title": "CloudFront Requests (Media)"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 6,
+              "y": 6,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/CloudFront",
+                    "4xxErrorRate",
+                    "DistributionId",
+                    "${MediaDistributionId}",
+                    "Region",
+                    "Global"],
+                  [
+                    ".",
+                    "5xxErrorRate",
+                    ".",
+                    ".",
+                    ".",
+                    "."]
+                ],
+                "region": "us-east-1",
+                "stat": "Average",
+                "title": "CloudFront Error Rates (Media)",
+                "yAxis": {
+                  "left": {
+                    "min": 0,
+                    "max": 100
+                  }
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "x": 12,
+              "y": 6,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/CloudFront",
+                    "BytesDownloaded",
+                    "DistributionId",
+                    "${MediaDistributionId}",
+                    "Region",
+                    "Global"],
+                  [
+                    ".",
+                    "BytesUploaded",
+                    ".",
+                    ".",
+                    ".",
+                    "."]
+                ],
+                "region": "us-east-1",
+                "stat": "Sum",
+                "title": "CloudFront Data Transfer (Media)"
+              }
+            }
+          ]
+        }
+      DashboardName: "heart-app"

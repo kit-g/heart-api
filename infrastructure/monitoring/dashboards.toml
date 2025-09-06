@@ -1,0 +1,20 @@
+version = 0.1
+
+[dev]
+[dev.deploy]
+[dev.deploy.parameters]
+stack_name = "heart-monitoring"
+s3_bucket = "583168578067-sam"
+s3_prefix = "heart-monitoring"
+region = "ca-central-1"
+profile = "personal"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = """
+    Env=\"dev\"
+    MediaDistributionId=\"E9YBVFFEOZLFQ\"
+"""
+tags = """
+    application=\"media\"
+    AppManagerCFNStackKey=\"media\"
+"""
