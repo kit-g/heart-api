@@ -12,6 +12,10 @@ Parameters:
   ApiName:
     Type: String
     Description: "Heart API Gateway"
+  TableName:
+    Type: String
+    Description: "Heart DynamoDB Table Name"
+    Default: "workouts"
 
 
 Resources:
@@ -310,6 +314,104 @@ Resources:
                 "region": "${BaseRegion}",
                 "stat": "Average",
                 "title": "API Gateway Latency"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 18,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/DynamoDB",
+                    "SuccessfulRequestLatency",
+                    "TableName",
+                    "${TableName}",
+                    "Operation",
+                    "BatchWriteItem"
+                  ],
+                  [
+                    "...",
+                    "PutItem"
+                  ],
+                  [
+                    "...",
+                    "GetItem"
+                  ],
+                  [
+                    "...",
+                    "BatchGetItem"
+                  ],
+                  [
+                    "...",
+                    "Query"
+                  ],
+                  [
+                    "...",
+                    "Scan"
+                  ],
+                  [
+                    "...",
+                    "DeleteItem"
+                  ]
+                ],
+                "region": "${BaseRegion}",
+                "stat": "Average",
+                "title": "Dynamo Latency"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 6,
+              "y": 18,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/DynamoDB",
+                    "SuccessfulRequestLatency",
+                    "TableName",
+                    "${TableName}",
+                    "Operation",
+                    "BatchWriteItem"
+                  ],
+                  [
+                    "...",
+                    "PutItem"
+                  ],
+                  [
+                    "...",
+                    "GetItem"
+                  ],
+                  [
+                    "...",
+                    "BatchGetItem"
+                  ],
+                  [
+                    "...",
+                    "Query"
+                  ],
+                  [
+                    "...",
+                    "Scan"
+                  ],
+                  [
+                    "...",
+                    "DeleteItem"
+                  ]
+                ],
+                "region": "${BaseRegion}",
+                "stat": "SampleCount",
+                "title": "Dynamo Requests"
               }
             }
           ]
