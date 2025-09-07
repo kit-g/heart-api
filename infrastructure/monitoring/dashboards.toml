@@ -11,6 +11,7 @@ profile = "personal"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 parameter_overrides = """
+    ApiName=\"heart-api\"
     Env=\"dev\"
     MediaDistributionId=\"E9YBVFFEOZLFQ\"
 """

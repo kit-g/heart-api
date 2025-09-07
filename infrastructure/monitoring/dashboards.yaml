@@ -9,6 +9,9 @@ Parameters:
   MediaDistributionId:
     Type: String
     Description: "CloudFront Distribution ID for the media stack"
+  ApiName:
+    Type: String
+    Description: "Heart API Gateway"
 
 
 Resources:
@@ -102,8 +105,38 @@ Resources:
                     "heart-background"]
                 ],
                 "region": "${BaseRegion}",
-                "stat": "Sum",
+                "stat": "Average",
                 "title": "Lambda Duration"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 18,
+              "y": 0,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/Lambda",
+                    "ConcurrentExecutions",
+                    "FunctionName",
+                    "heart-api"
+                  ],
+                  [
+                    "...",
+                    "heart-images"],
+                  [
+                    "...",
+                    "heart-background"
+                  ]
+                ],
+                "region": "${BaseRegion}",
+                "stat": "Sum",
+                "title": "Lambda Concurrent Executions"
               }
             },
             {
@@ -196,6 +229,87 @@ Resources:
                 "region": "us-east-1",
                 "stat": "Sum",
                 "title": "CloudFront Data Transfer (Media)"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 12,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/ApiGateway",
+                    "Count",
+                    "ApiName",
+                    "${ApiName}"
+                  ]
+                ],
+                "region": "${BaseRegion}",
+                "stat": "Sum",
+                "title": "API Gateway Requests"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 6,
+              "y": 12,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/ApiGateway",
+                    "4XXError",
+                    "ApiName",
+                    "${ApiName}"
+                  ],
+                  [
+                    ".",
+                    "5XXError",
+                    ".",
+                    "."
+                  ]
+                ],
+                "region": "${BaseRegion}",
+                "stat": "Sum",
+                "title": "API Gateway Errors"
+              }
+            },
+            {
+              "type": "metric",
+              "x": 12,
+              "y": 12,
+              "width": 6,
+              "height": 6,
+              "start": "-P3D",
+              "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [
+                    "AWS/ApiGateway",
+                    "IntegrationLatency",
+                    "ApiName",
+                    "${ApiName}"
+                  ],
+                  [
+                    ".",
+                    "Latency",
+                    ".",
+                    "."
+                  ]
+                ],
+                "region": "${BaseRegion}",
+                "stat": "Average",
+                "title": "API Gateway Latency"
               }
             }
           ]
