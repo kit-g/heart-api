@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"net/url"
+	"strings"
 )
 
 type Exercise struct {
@@ -14,6 +15,7 @@ type Exercise struct {
 	Thumbnail    *ImageDescription `dynamodbav:"thumbnail,omitempty"`
 	Instructions *string           `dynamodbav:"instructions,omitempty"`
 	UserID       string            `dynamodbav:"userId,omitempty"`
+	Archived     *bool             `dynamodbav:"archived,omitempty"`
 }
 
 func (e *Exercise) String() string {
@@ -27,6 +29,8 @@ type ExerciseOut struct {
 	Asset        *ImageDescription `json:"asset,omitempty"`
 	Thumbnail    *ImageDescription `json:"thumbnail,omitempty"`
 	Instructions *string           `json:"instructions,omitempty" example:"Keep your body straight and lower yourself until your chest almost touches the ground."`
+	Own          *bool             `json:"own,omitempty"`
+	Archived     *bool             `json:"archived,omitempty"`
 } // @name Exercise
 
 func NewExerciseOut(e *Exercise) ExerciseOut {
@@ -37,6 +41,7 @@ func NewExerciseOut(e *Exercise) ExerciseOut {
 		Asset:        e.Asset,
 		Thumbnail:    e.Thumbnail,
 		Instructions: e.Instructions,
+		Archived:     e.Archived,
 	}
 }
 
@@ -44,14 +49,19 @@ type ExercisesResponse struct {
 	Exercises []ExerciseOut `json:"exercises"`
 } // @name ExercisesResponse
 
+type EditExerciseIn struct {
+	Category     *string `json:"category,omitempty" example:"Body weight"`
+	Target       *string `json:"target,omitempty" example:"Chest"`
+	Instructions *string `json:"instructions,omitempty" example:"Keep your body straight and lower yourself until your chest almost touches the ground."`
+	Archived     *bool   `json:"archived,omitempty"`
+} // @name EditExerciseIn
+
 type UserExerciseIn struct {
 	Name         string  `dynamodbav:"name" json:"name" example:"Push Up" binding:"required"`
 	Category     string  `dynamodbav:"category" json:"category" example:"Body weight" binding:"required"`
 	Target       string  `dynamodbav:"target" json:"target" example:"Chest" binding:"required"`
 	Instructions *string `dynamodbav:"instructions,omitempty" json:"instructions,omitempty" example:"Keep your body straight and lower yourself until your chest almost touches the ground."`
-}
-
-// @name UserExerciseIn
+} // @name UserExerciseIn
 
 type UserExercise struct {
 	UserExerciseIn
@@ -60,9 +70,10 @@ type UserExercise struct {
 } // @name UserExercise
 
 func NewUserExercise(e *UserExerciseIn, userId string) UserExercise {
+	var name = strings.Trim(strings.ToLower(e.Name), " ")
 	return UserExercise{
 		PK:             fmt.Sprintf("%s%s", UserKey, userId),
-		SK:             fmt.Sprintf("%s%s", ExerciseKey, url.PathEscape(e.Name)),
+		SK:             fmt.Sprintf("%s%s", ExerciseKey, url.PathEscape(name)),
 		UserExerciseIn: *e,
 	}
 }
