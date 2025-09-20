@@ -12,7 +12,7 @@ var (
 	dbGetExercises    = dbx.GetExercises
 	dbGetOwnExercises = dbx.GetOwnExercises
 	dbMakeExercise    = dbx.MakeExercise
-	dbDeleteExercise  = dbx.DeleteExercise
+	dbEditExercise    = dbx.EditExercise
 )
 
 // GetExercises godoc
@@ -48,7 +48,13 @@ func GetExercises(c *gin.Context, userId string) (any, error) {
 		Exercises: make([]models.ExerciseOut, len(exercises)),
 	}
 	for i, e := range exercises {
-		out.Exercises[i] = models.NewExerciseOut(&e)
+		ex := models.NewExerciseOut(&e)
+		if owned {
+			ex.Own = boolPtr(true)
+		} else {
+			ex.Own = boolPtr(false)
+		}
+		out.Exercises[i] = ex
 	}
 
 	return out, nil
@@ -89,26 +95,37 @@ func MakeExercise(c *gin.Context, userId string) (any, error) {
 	}, nil
 }
 
-// DeleteExercise godoc
+// EditExercise godoc
 //
-//	@Summary		Delete an exercise
-//	@Description	Deletes an exercise created by the authenticated user
+//	@Summary		Edit an exercise
+//	@Description	Edits target, category and instructions for the exercise created by the authenticated user
 //	@Tags			workouts
 //	@Accept			json
 //	@Produce		json
-//	@ID				deleteExercise
-//	@Param			X-App-Version	header		string	false	"Client app version (e.g., 2.8.0)"
-//	@Param			exerciseName	path		string	true	"Name of the exercise to delete"
-//	@Success		200				{object}	nil
+//	@ID				editExercise
+//	@Param			X-App-Version	header		string			false	"Client app version (e.g., 2.8.0)"
+//	@Param			exerciseName	path		string			true	"Name of the exercise to edit"
+//	@Param			input			body		EditExerciseIn	true	"Exercise fields to edit"
+//	@Success		200				{object}	Exercise
 //	@Failure		400				{object}	ErrorResponse	"Validation error"
 //	@Failure		401				{object}	ErrorResponse	"Unauthorized"
 //	@Failure		500				{object}	ErrorResponse	"Server error"
-//	@Router			/exercises/{exerciseName} [delete]
+//	@Router			/exercises/{exerciseName} [put]
 //	@Security		BearerAuth
-func DeleteExercise(c *gin.Context, userId string) (any, error) {
+func EditExercise(c *gin.Context, userId string) (any, error) {
 	exerciseName := c.Param("exerciseName")
-	if err := dbDeleteExercise(c.Request.Context(), userId, exerciseName); err != nil {
+	var in models.EditExerciseIn
+	if err := c.BindJSON(&in); err != nil {
+		return nil, models.NewValidationError(err)
+	}
+
+	updated, err := dbEditExercise(c.Request.Context(), userId, exerciseName, in)
+	if err != nil {
 		return nil, err
 	}
-	return models.NoContent, nil
+	out := models.NewExerciseOut(updated)
+	out.Own = boolPtr(true)
+	return out, nil
 }
+
+func boolPtr(b bool) *bool { return &b }

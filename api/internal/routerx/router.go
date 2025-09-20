@@ -39,7 +39,7 @@ func Router(origins string) *gin.Engine {
 	exercisesGroup.Use(middleware.Version(), middleware.Authentication())
 	exercisesGroup.GET("", Authenticated(handlers.GetExercises))
 	exercisesGroup.POST("", Authenticated(handlers.MakeExercise))
-	exercisesGroup.DELETE(":exerciseName", Authenticated(handlers.DeleteExercise))
+	exercisesGroup.PUT(":exerciseName", Authenticated(handlers.EditExercise))
 
 	workoutsGroup := r.Group("/workouts")
 	workoutsGroup.Use(middleware.Version(), middleware.Authentication())
