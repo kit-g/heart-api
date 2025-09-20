@@ -389,13 +389,13 @@ const docTemplate = `{
             }
         },
         "/exercises/{exerciseName}": {
-            "delete": {
+            "put": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Deletes an exercise created by the authenticated user",
+                "description": "Edits target, category and instructions for the exercise created by the authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -405,8 +405,8 @@ const docTemplate = `{
                 "tags": [
                     "workouts"
                 ],
-                "summary": "Delete an exercise",
-                "operationId": "deleteExercise",
+                "summary": "Edit an exercise",
+                "operationId": "editExercise",
                 "parameters": [
                     {
                         "type": "string",
@@ -416,15 +416,27 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Name of the exercise to delete",
+                        "description": "Name of the exercise to edit",
                         "name": "exerciseName",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Exercise fields to edit",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/EditExerciseIn"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Exercise"
+                        }
                     },
                     "400": {
                         "description": "Validation error",
@@ -991,6 +1003,26 @@ const docTemplate = `{
                 }
             }
         },
+        "EditExerciseIn": {
+            "type": "object",
+            "properties": {
+                "archived": {
+                    "type": "boolean"
+                },
+                "category": {
+                    "type": "string",
+                    "example": "Body weight"
+                },
+                "instructions": {
+                    "type": "string",
+                    "example": "Keep your body straight and lower yourself until your chest almost touches the ground."
+                },
+                "target": {
+                    "type": "string",
+                    "example": "Chest"
+                }
+            }
+        },
         "ErrorResponse": {
             "type": "object",
             "properties": {
@@ -1012,6 +1044,9 @@ const docTemplate = `{
                 "target"
             ],
             "properties": {
+                "archived": {
+                    "type": "boolean"
+                },
                 "asset": {
                     "$ref": "#/definitions/ImageDescription"
                 },
@@ -1026,6 +1061,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Push Up"
+                },
+                "own": {
+                    "type": "boolean"
                 },
                 "target": {
                     "type": "string",

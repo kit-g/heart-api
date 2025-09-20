@@ -11,6 +11,21 @@ definitions:
     required:
     - action
     type: object
+  EditExerciseIn:
+    properties:
+      archived:
+        type: boolean
+      category:
+        example: Body weight
+        type: string
+      instructions:
+        example: Keep your body straight and lower yourself until your chest almost
+          touches the ground.
+        type: string
+      target:
+        example: Chest
+        type: string
+    type: object
   ErrorResponse:
     properties:
       code:
@@ -22,6 +37,8 @@ definitions:
     type: object
   Exercise:
     properties:
+      archived:
+        type: boolean
       asset:
         $ref: '#/definitions/ImageDescription'
       category:
@@ -34,6 +51,8 @@ definitions:
       name:
         example: Push Up
         type: string
+      own:
+        type: boolean
       target:
         example: Chest
         type: string
@@ -542,26 +561,35 @@ paths:
       tags:
       - workouts
   /exercises/{exerciseName}:
-    delete:
+    put:
       consumes:
       - application/json
-      description: Deletes an exercise created by the authenticated user
-      operationId: deleteExercise
+      description: Edits target, category and instructions for the exercise created
+        by the authenticated user
+      operationId: editExercise
       parameters:
       - description: Client app version (e.g., 2.8.0)
         in: header
         name: X-App-Version
         type: string
-      - description: Name of the exercise to delete
+      - description: Name of the exercise to edit
         in: path
         name: exerciseName
         required: true
         type: string
+      - description: Exercise fields to edit
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/EditExerciseIn'
       produces:
       - application/json
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/Exercise'
         "400":
           description: Validation error
           schema:
@@ -576,7 +604,7 @@ paths:
             $ref: '#/definitions/ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Delete an exercise
+      summary: Edit an exercise
       tags:
       - workouts
   /feedback:
