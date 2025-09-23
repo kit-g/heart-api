@@ -70,7 +70,7 @@ type UserExercise struct {
 } // @name UserExercise
 
 func NewUserExercise(e *UserExerciseIn, userId string) UserExercise {
-	var name = strings.Trim(strings.ToLower(e.Name), " ")
+	var name = strings.Trim(e.Name, " ")
 	return UserExercise{
 		PK:             fmt.Sprintf("%s%s", UserKey, userId),
 		SK:             fmt.Sprintf("%s%s", ExerciseKey, url.PathEscape(name)),
