@@ -38,7 +38,7 @@ func LeaveFeedback(c *gin.Context, userId string) (any, error) {
 		c.Request.Context(),
 		config.App.MediaBucket,
 		key,
-		defaultMimeType,
+		models.DefaultMimeType,
 		nil,
 	)
 

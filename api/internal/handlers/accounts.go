@@ -155,7 +155,7 @@ func EditAccount(c *gin.Context, userId string) (any, error) {
 	case "uploadAvatar":
 		var mimeType string
 		if request.MimeType == nil || *request.MimeType == "" {
-			mimeType = defaultMimeType
+			mimeType = models.DefaultMimeType
 		} else {
 			mimeType = *request.MimeType
 		}
@@ -214,5 +214,3 @@ func DeleteAccount(c *gin.Context, userId string) (any, error) {
 
 	return models.NoContent, nil
 }
-
-const defaultMimeType = "image/png"
