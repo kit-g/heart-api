@@ -927,6 +927,69 @@ const docTemplate = `{
                     }
                 }
             },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Generates presigned URL and form fields for uploading workout files to S3",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workouts"
+                ],
+                "summary": "Generates presigned URL for workout file upload",
+                "operationId": "makeWorkoutPresignedUrl",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Workout ID",
+                        "name": "workoutId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Upload request",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/HasMimeType"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/PresignedUrlResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -1094,6 +1157,15 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "Good job!"
+                }
+            }
+        },
+        "HasMimeType": {
+            "type": "object",
+            "properties": {
+                "mimeType": {
+                    "type": "string",
+                    "example": "image/png"
                 }
             }
         },

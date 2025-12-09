@@ -78,6 +78,12 @@ definitions:
     required:
     - message
     type: object
+  HasMimeType:
+    properties:
+      mimeType:
+        example: image/png
+        type: string
+    type: object
   ImageDescription:
     properties:
       height:
@@ -944,6 +950,48 @@ paths:
       security:
       - BearerAuth: []
       summary: Returns a workout
+      tags:
+      - workouts
+    put:
+      consumes:
+      - application/json
+      description: Generates presigned URL and form fields for uploading workout files
+        to S3
+      operationId: makeWorkoutPresignedUrl
+      parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
+      - description: Workout ID
+        in: path
+        name: workoutId
+        required: true
+        type: string
+      - description: Upload request
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/HasMimeType'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/PresignedUrlResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Generates presigned URL for workout file upload
       tags:
       - workouts
 securityDefinitions:
