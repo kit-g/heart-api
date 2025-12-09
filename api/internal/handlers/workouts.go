@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
+	"heart/internal/awsx"
+	"heart/internal/config"
 	"heart/internal/dbx"
 	"heart/internal/models"
 	"strconv"
@@ -144,4 +147,61 @@ func DeleteWorkout(c *gin.Context, userId string) (any, error) {
 	}
 
 	return models.NoContent, nil
+}
+
+// MakeWorkoutPresignedUrl godoc
+//
+//	@Summary		Generates presigned URL for workout file upload
+//	@Description	Generates presigned URL and form fields for uploading workout files to S3
+//	@Tags			workouts
+//	@Accept			json
+//	@Produce		json
+//	@ID				makeWorkoutPresignedUrl
+//	@Param			X-App-Version	header		string		false	"Client app version"
+//	@Param			workoutId		path		string		true	"Workout ID"
+//	@Param			input			body		HasMimeType true	"Upload request"
+//	@Success		200				{object}	PresignedUrlResponse
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
+//	@Router			/workouts/{workoutId} [put]
+//	@Security		BearerAuth
+func MakeWorkoutPresignedUrl(c *gin.Context, userId string) (any, error) {
+	workoutId := c.Param("workoutId")
+
+	var request models.HasMimeType
+	if err := c.BindJSON(&request); err != nil {
+		return nil, models.NewValidationError(err)
+	}
+
+	tag := config.App.UploadDestinationTag()
+
+	var mimeType string
+	if request.MimeType == nil || *request.MimeType == "" {
+		mimeType = models.DefaultMimeType
+	} else {
+		mimeType = *request.MimeType
+	}
+
+	var extension, err = models.Extension(mimeType)
+
+	if err != nil {
+		return nil, models.NewServerError(err)
+	}
+
+	response, err := awsx.GeneratePresignedPostURL(
+		c.Request.Context(),
+		config.App.UploadBucket,
+		fmt.Sprintf("workouts/user-%s/workout-%s%s", userId, workoutId, extension),
+		mimeType,
+		&tag,
+	)
+
+	if err != nil {
+		return nil, models.NewServerError(err)
+	}
+
+	return models.PresignedUrlResponse{
+		URL:    response.URL,
+		Fields: response.Values,
+	}, nil
 }
