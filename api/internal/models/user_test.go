@@ -67,15 +67,19 @@ func TestEditAccountRequest_StructFields(t *testing.T) {
 		{
 			name: "Request with action and mime type",
 			request: EditAccountRequest{
-				Action:   "uploadAvatar",
-				MimeType: stringPtr("image/png"),
+				Action: "uploadAvatar",
+				HasMimeType: HasMimeType{
+					MimeType: stringPtr("image/png"),
+				},
 			},
 		},
 		{
 			name: "Request with different action",
 			request: EditAccountRequest{
-				Action:   "updateProfile",
-				MimeType: stringPtr("application/json"),
+				Action: "updateProfile",
+				HasMimeType: HasMimeType{
+					MimeType: stringPtr("application/json"),
+				},
 			},
 		},
 	}
@@ -102,8 +106,8 @@ func TestEditAccountRequest_RequiredFields(t *testing.T) {
 func TestEditAccountRequest_WithMimeType(t *testing.T) {
 	mimeType := "image/jpeg"
 	request := EditAccountRequest{
-		Action:   "uploadAvatar",
-		MimeType: &mimeType,
+		Action:      "uploadAvatar",
+		HasMimeType: HasMimeType{MimeType: &mimeType},
 	}
 
 	assert.Equal(t, "uploadAvatar", request.Action)

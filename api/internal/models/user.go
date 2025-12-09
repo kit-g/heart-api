@@ -73,8 +73,8 @@ func NewUserOut(u *User) UserPublic {
 }
 
 type EditAccountRequest struct {
-	Action   string  `json:"action" example:"removeAvatar" binding:"required"`
-	MimeType *string `json:"mimeType,omitempty" example:"image/png"`
+	HasMimeType
+	Action string `json:"action" example:"removeAvatar" binding:"required"`
 } // @name EditAccountRequest
 
 type PresignedUrlResponse struct {
