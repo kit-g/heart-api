@@ -116,6 +116,16 @@ Resources:
               - HEAD
             ForwardedValues:
               QueryString: false
+          - PathPattern: "/workouts/*"
+            TargetOriginId: UserMediaBucketOrigin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
           - PathPattern: "/avatars/*"
             TargetOriginId: UserMediaBucketOrigin
             ViewerProtocolPolicy: https-only
