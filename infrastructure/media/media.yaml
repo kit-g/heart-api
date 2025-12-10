@@ -18,6 +18,9 @@ Parameters:
   UploadBucketName:
     Type: String
     Default: "upload"  # used in the bucket definition and to refer to it, to avoid cyclic dependencies
+  AttachFunctionName:
+    Type: String
+    Default: "heart-attach"  # used in the bucket definition and to refer to it, to avoid cyclic dependencies
 
 Mappings:
   Env:
@@ -255,13 +258,34 @@ Resources:
       MemorySize: 256
       Role: !GetAtt LambdaExecutionRole.Arn
 
+  AttachFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./attach
+      Description: "Part of Heart API: connects uploaded files to their entities"
+      Environment:
+        Variables:
+          WORKOUTS_TABLE: !FindInMap [ Env, !Ref Env, WorkoutsTableName ]
+          MEDIA_DISTRIBUTION: !Sub
+            - "https://${distribution}"
+            - distribution: !FindInMap [ Env, !Ref Env, DistributionAlias ]
+      FunctionName: !Ref AttachFunctionName
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.14
+
   ImageConverterFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub  "/aws/lambda/${ImageConverterFunction}"
       RetentionInDays: !FindInMap [ Env, !Ref Env, LogRetention ]
 
-  S3Permission:
+  AttachFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub  "/aws/lambda/${AttachFunction}"
+      RetentionInDays: !FindInMap [ Env, !Ref Env, LogRetention ]
+
+  ImageConverterFunctionS3Permission:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !Ref ImageConverterFunction
@@ -269,8 +293,16 @@ Resources:
       Principal: s3.amazonaws.com
       SourceArn: !Sub "arn:aws:s3:::${AWS::AccountId}-${UploadBucketName}"
 
+  AttachFunctionS3Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AttachFunction
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceArn: !GetAtt UserMediaBucket.Arn
+
   UploadBucket:
-    DependsOn: S3Permission
+    DependsOn: ImageConverterFunctionS3Permission
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "${AWS::AccountId}-${UploadBucketName}"
