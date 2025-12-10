@@ -27,6 +27,7 @@ def handler(event: dict, _) -> dict:
             tags = {tag['Key']: tag['Value'] for tag in tagging['TagSet']}
             destination = tags.get('destination')
 
+            dst_tags = '&'.join([f'{k}={v}' for k, v in tags.items()])
             if not destination:
                 print(f'No destination tag found for {key}, skipping.')
                 return {}
@@ -43,6 +44,7 @@ def handler(event: dict, _) -> dict:
                             Key=key,
                             Body=raw,
                             ContentType=obj['ContentType'],
+                            Tagging=dst_tags,
                         )
                         print('Uploaded without resizing')
                         return {}
@@ -60,6 +62,7 @@ def handler(event: dict, _) -> dict:
                     Key=key,
                     Body=output,
                     ContentType='image/jpeg',
+                    Tagging=dst_tags,
                 )
                 print('Uploaded resized image')
             return {}
