@@ -57,6 +57,15 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: "s3:ObjectCreated:*"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: "workouts/"
+            Function: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AttachFunctionName}"
 
   BucketOriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
@@ -325,6 +334,14 @@ Resources:
                   - Name: prefix
                     Value: "avatars/"
             Function: !GetAtt ImageConverterFunction.Arn
+          - Event: "s3:ObjectCreated:Post"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: "workouts/"
+            Function: !GetAtt ImageConverterFunction.Arn
+
 
 Outputs:
   ExerciseBucketName:
