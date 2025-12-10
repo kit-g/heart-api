@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"heart/internal/awsx"
 	"heart/internal/config"
 	"heart/internal/dbx"
 	"heart/internal/models"
+	"maps"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -175,6 +178,8 @@ func MakeWorkoutPresignedUrl(c *gin.Context, userId string) (any, error) {
 
 	tag := config.App.UploadDestinationTag()
 
+	maps.Copy(tag, map[string]string{"userId": userId, "workoutId": workoutId})
+
 	var mimeType string
 	if request.MimeType == nil || *request.MimeType == "" {
 		mimeType = models.DefaultMimeType
@@ -191,7 +196,7 @@ func MakeWorkoutPresignedUrl(c *gin.Context, userId string) (any, error) {
 	response, err := awsx.GeneratePresignedPostURL(
 		c.Request.Context(),
 		config.App.UploadBucket,
-		fmt.Sprintf("workouts/user-%s/workout-%s%s", userId, workoutId, extension),
+		workoutImageKey(userId, workoutId, extension),
 		mimeType,
 		&tag,
 	)
@@ -204,4 +209,11 @@ func MakeWorkoutPresignedUrl(c *gin.Context, userId string) (any, error) {
 		URL:    response.URL,
 		Fields: response.Values,
 	}, nil
+}
+
+// workoutImageKey generates a deterministic, privacy-safe S3 key for workout images
+func workoutImageKey(userId, workoutId, extension string) string {
+	h := sha256.Sum256([]byte(userId + ":" + workoutId))
+	hash := hex.EncodeToString(h[:])[:16] // 16 hex chars = 64 bits, plenty unique
+	return fmt.Sprintf("workouts/%s%s", hash, extension)
 }
