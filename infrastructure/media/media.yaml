@@ -25,10 +25,14 @@ Mappings:
       LogRetention: 3 # days
       DistributionAlias: "dev.media.heart-of.me"
       MediaDistributionCertificate: "arn:aws:acm:us-east-1:583168578067:certificate/297c34bc-7a74-4cb1-82c4-71bfe0114eb7"
+      WorkoutsTableName: "workouts"
+      WorkoutsTableArn: "arn:aws:dynamodb:ca-central-1:583168578067:table/workouts"
     prod:
       LogRetention: 90 # days
       DistributionAlias: "media.heart-of.me"
       MediaDistributionCertificate: ""
+      WorkoutsTableName: "workouts"
+      WorkoutsTableArn: ""
 
 Resources:
   ExerciseBucket:
@@ -230,9 +234,15 @@ Resources:
                   - s3:GetObject
                   - s3:PutObjectTagging
                   - s3:GetObjectTagging
+                  - s3:DeleteObject
                 Resource:
                   - !Sub "arn:aws:s3:::${AWS::AccountId}-${UploadBucketName}/*"
                   - !Sub "arn:aws:s3:::${UserMediaBucket}/*"
+              - Effect: Allow
+                Action:
+                  - dynamodb:UpdateItem
+                Resource:
+                  - !FindInMap [ Env, !Ref Env, WorkoutsTableArn ]
 
   ImageConverterFunction:
     Type: AWS::Serverless::Function
