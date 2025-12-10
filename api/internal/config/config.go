@@ -16,11 +16,8 @@ type S3Config struct {
 	MediaBucket  string `env:"MEDIA_BUCKET" required:"true"`
 }
 
-func (c *S3Config) UploadDestinationTag() string {
-	return fmt.Sprintf(
-		`<Tagging><TagSet><Tag><Key>destination</Key><Value>%s</Value></Tag></TagSet></Tagging>`,
-		c.MediaBucket,
-	)
+func (c *S3Config) UploadDestinationTag() map[string]string {
+	return map[string]string{"destination": c.MediaBucket}
 }
 
 func (c *S3Config) AvatarKey(userId string) string {

@@ -98,11 +98,9 @@ func TestS3Helpers(t *testing.T) {
 	c := S3Config{MediaBucket: "media-bkt"}
 	// AvatarKey
 	assert.Equal(t, "avatars/user-1", c.AvatarKey("user-1"))
-	// UploadDestinationTag must embed the bucket
+	// UploadDestinationTag must return a map with destination key pointing to MediaBucket
 	tag := c.UploadDestinationTag()
-	assert.Contains(t, tag, "destination")
-	assert.Contains(t, tag, "media-bkt")
-	assert.Contains(t, tag, "<Tagging>")
+	assert.Equal(t, map[string]string{"destination": "media-bkt"}, tag)
 }
 
 func TestNewFirebaseConfig(t *testing.T) {
