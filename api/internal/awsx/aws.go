@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	env "heart/internal/config"
+	"html"
 	"strings"
 	"time"
 
@@ -59,7 +60,7 @@ func GeneratePresignedPostURL(
 	bucket string,
 	key string,
 	contentType string,
-	tagging *string,
+	tagging *map[string]string,
 ) (*s3.PresignedPostRequest, error) {
 	input := s3.PutObjectInput{
 		Bucket:      aws.String(bucket),
@@ -67,6 +68,7 @@ func GeneratePresignedPostURL(
 		ContentType: aws.String(contentType),
 	}
 
+	var tagset string
 	request, err := s3Signer.PresignPostObject(
 		ctx,
 		&input,
@@ -80,7 +82,8 @@ func GeneratePresignedPostURL(
 			)
 
 			if tagging != nil {
-				conditions = append(conditions, map[string]string{"tagging": *tagging})
+				tagset = buildTags(*tagging)
+				conditions = append(conditions, map[string]string{"tagging": tagset})
 			}
 
 			options.Conditions = conditions
@@ -96,12 +99,26 @@ func GeneratePresignedPostURL(
 	}
 
 	if tagging != nil {
-		request.Values["tagging"] = *tagging
+		request.Values["tagging"] = tagset
 	}
 
 	request.Values["Content-Type"] = contentType
 
 	return request, nil
+}
+
+func buildTags(tags map[string]string) string {
+	var b strings.Builder
+	b.WriteString("<Tagging><TagSet>")
+	for k, v := range tags {
+		b.WriteString("<Tag><Key>")
+		b.WriteString(html.EscapeString(k))
+		b.WriteString("</Key><Value>")
+		b.WriteString(html.EscapeString(v))
+		b.WriteString("</Value></Tag>")
+	}
+	b.WriteString("</TagSet></Tagging>")
+	return b.String()
 }
 
 func DeleteObject(ctx context.Context, bucket string, key string) (*s3.DeleteObjectOutput, error) {
