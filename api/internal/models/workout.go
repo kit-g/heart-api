@@ -12,6 +12,10 @@ const (
 	ExerciseKey = "EXERCISE#"
 )
 
+type HasImage struct {
+	Image *string `dynamodbav:"image,omitempty" json:"image,omitempty"`
+}
+
 type Workout struct {
 	ID        string            `dynamodbav:"-"`
 	UserID    string            `dynamodbav:"-"`
@@ -21,6 +25,7 @@ type Workout struct {
 	End       *time.Time        `dynamodbav:"end,omitempty"`
 	Name      string            `dynamodbav:"name,omitempty"`
 	Exercises []WorkoutExercise `dynamodbav:"exercises"`
+	HasImage
 }
 
 func (w *Workout) String() string {
@@ -79,6 +84,7 @@ type WorkoutOut struct {
 	Start     time.Time            `json:"start" example:"2023-01-01T12:00:00Z"`
 	End       *time.Time           `json:"end" example:"2023-01-01T12:00:00Z"`
 	Exercises []WorkoutExerciseOut `json:"exercises"`
+	HasImage
 } // @name Workout
 
 func NewSetOut(s *Set) SetOut {
@@ -155,6 +161,7 @@ func NewWorkoutOut(w *Workout) WorkoutOut {
 		Start:     w.Start,
 		End:       w.End,
 		Exercises: exercises,
+		HasImage:  HasImage{Image: w.Image},
 	}
 }
 
