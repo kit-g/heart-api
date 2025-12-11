@@ -16,6 +16,10 @@ type S3Config struct {
 	MediaBucket  string `env:"MEDIA_BUCKET" required:"true"`
 }
 
+type CloudFrontConfig struct {
+	MediaDistributionAlias string `env:"MEDIA_DISTRIBUTION_ALIAS" required:"true"`
+}
+
 func (c *S3Config) UploadDestinationTag() map[string]string {
 	return map[string]string{"destination": c.MediaBucket}
 }
@@ -39,6 +43,7 @@ type AwsConfig struct {
 	S3Config
 	SchedulerConfig
 	SnsConfig
+	CloudFrontConfig
 	AwsRegion             string `env:"REGION" required:"true"`
 	AccountDeletionOffset int    `env:"ACCOUNT_DELETION_OFFSET" default:"30" required:"true"`
 }

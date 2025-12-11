@@ -37,12 +37,14 @@ Mappings:
       LogRetention: 3 # days
       UploadBucket: "583168578067-upload"
       MediaBucket: "583168578067-user-media"
+      MediaDistribution: "https://dev.media.heart-of.me"
       NeedDatabaseDeletionProtection: false
       SwaggerDocsEnabled: true
     prod:
       AccountDeletionOffset: 30 # days
       CorsOrigins: "https://media.heart-of.me,https://app.heart-of.me"
       LogRetention: 90 # days
+      MediaDistribution: ""
       NeedDatabaseDeletionProtection: true
       SwaggerDocsEnabled: false
 
@@ -210,6 +212,7 @@ Resources:
           FIREBASE_CREDENTIALS: !Ref FirebaseCredentials
           GIN_MODE: release
           MEDIA_BUCKET: !FindInMap [ Env, !Ref Env, MediaBucket ]
+          MEDIA_DISTRIBUTION_ALIAS: !FindInMap [ Env, !Ref Env, MediaDistribution ]
           MIN_APP_VERSION: "1.0.0"
           MODE: "lambda"
           MONITORING_TOPIC: !Ref MonitoringTopic

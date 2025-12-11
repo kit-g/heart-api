@@ -27,6 +27,8 @@ func setMinimalAppEnv(t *testing.T) {
 	t.Setenv("MONITORING_TOPIC", "arn:aws:sns:us-east-1:123:topic")
 	// leave ACCOUNT_DELETION_OFFSET unset to use default 30
 	// leave Swagger and CORS unset to use defaults
+	// CF
+	t.Setenv("MEDIA_DISTRIBUTION_ALIAS", "https://media.heart-of.me")
 }
 
 func TestNewAppConfig_SuccessWithDefaults(t *testing.T) {

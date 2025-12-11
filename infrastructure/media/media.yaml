@@ -119,7 +119,7 @@ Resources:
           - PathPattern: "/workouts/*"
             TargetOriginId: UserMediaBucketOrigin
             ViewerProtocolPolicy: https-only
-            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            CachePolicyId: !Ref MediaCachePolicy
             AllowedMethods:
               - GET
               - HEAD
