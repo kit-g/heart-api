@@ -13,7 +13,8 @@ const (
 )
 
 type HasImage struct {
-	Image *string `dynamodbav:"image,omitempty" json:"image,omitempty"`
+	Image    *string `dynamodbav:"image,omitempty" json:"image,omitempty"`
+	ImageKey *string `dynamodbav:"image_key,omitempty" json:"-"`
 }
 
 type Workout struct {
