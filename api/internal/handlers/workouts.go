@@ -18,9 +18,10 @@ import (
 
 // test seams for dbx dependencies
 var (
-	dbGetWorkouts   = dbx.GetWorkouts
-	dbGetWorkout    = dbx.GetWorkout
-	dbDeleteWorkout = dbx.DeleteWorkout
+	dbGetWorkouts      = dbx.GetWorkouts
+	dbGetWorkout       = dbx.GetWorkout
+	dbDeleteWorkout    = dbx.DeleteWorkout
+	removeWorkoutImage = dbx.RemoveWorkoutImage
 )
 
 // GetWorkouts godoc
@@ -167,7 +168,7 @@ func DeleteWorkout(c *gin.Context, userId string) (any, error) {
 //	@Success		200				{object}	PresignedUrlResponse
 //	@Failure		401				{object}	ErrorResponse	"Unauthorized"
 //	@Failure		500				{object}	ErrorResponse	"Server error"
-//	@Router			/workouts/{workoutId} [put]
+//	@Router			/workouts/{workoutId}/image [put]
 //	@Security		BearerAuth
 func MakeWorkoutPresignedUrl(c *gin.Context, userId string) (any, error) {
 	workoutId := c.Param("workoutId")
@@ -222,4 +223,49 @@ func workoutImageKey(userId, workoutId, extension string) string {
 	h := sha256.Sum256([]byte(userId + ":" + workoutId))
 	hash := hex.EncodeToString(h[:])[:16] // 16 hex chars = 64 bits, plenty unique
 	return fmt.Sprintf("workouts/%s%s", hash, extension)
+}
+
+// DeleteWorkoutImage godoc
+//
+//	@Summary		Deletes a workout image
+//	@Description	Deletes the image associated with a workout from S3 and removes the image reference from DynamoDB
+//	@Tags			workouts
+//	@Accept			json
+//	@Produce		json
+//	@ID				deleteWorkoutImage
+//	@Param			X-App-Version	header	string	false	"Client app version"
+//	@Param			workoutId		path	string	true	"Workout ID"
+//	@Success		204				"No Content"
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		404				{object}	ErrorResponse	"Not Found"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
+//	@Router			/workouts/{workoutId}/image [delete]
+//	@Security		BearerAuth
+func DeleteWorkoutImage(c *gin.Context, userId string) (any, error) {
+	workoutId := c.Param("workoutId")
+
+	// get workout to retrieve ImageKey
+	workout, err := dbGetWorkout(c.Request.Context(), userId, workoutId)
+	if err != nil {
+		return nil, err
+	}
+
+	// check if workout has an image
+	if workout.ImageKey == nil || *workout.ImageKey == "" {
+		return models.NoContent, nil
+	}
+
+	// delete image from S3
+	_, err = awsx.DeleteObject(c.Request.Context(), config.App.MediaBucket, *workout.ImageKey)
+	if err != nil {
+		return nil, models.NewServerError(err)
+	}
+
+	// remove image attribute from DynamoDB
+	err = removeWorkoutImage(c.Request.Context(), userId, workoutId)
+	if err != nil {
+		return nil, err
+	}
+
+	return models.NoContent, nil
 }

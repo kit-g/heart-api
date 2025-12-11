@@ -46,7 +46,8 @@ func Router(origins string) *gin.Engine {
 	workoutsGroup.GET("", Authenticated(handlers.GetWorkouts))
 	workoutsGroup.POST("", Authenticated(handlers.MakeWorkout))
 	workoutsGroup.GET(":workoutId", Authenticated(handlers.GetWorkout))
-	workoutsGroup.PUT(":workoutId", Authenticated(handlers.MakeWorkoutPresignedUrl))
+	workoutsGroup.PUT(":workoutId/image", Authenticated(handlers.MakeWorkoutPresignedUrl))
+	workoutsGroup.DELETE(":workoutId/image", Authenticated(handlers.DeleteWorkoutImage))
 	workoutsGroup.DELETE(":workoutId", Authenticated(handlers.DeleteWorkout))
 
 	templatesGroup := r.Group("/templates")
