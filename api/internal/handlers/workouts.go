@@ -11,6 +11,7 @@ import (
 	"heart/internal/models"
 	"maps"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -193,10 +194,12 @@ func MakeWorkoutPresignedUrl(c *gin.Context, userId string) (any, error) {
 		return nil, models.NewServerError(err)
 	}
 
+	key := workoutImageKey(userId, workoutId, extension)
+
 	response, err := awsx.GeneratePresignedPostURL(
 		c.Request.Context(),
 		config.App.UploadBucket,
-		workoutImageKey(userId, workoutId, extension),
+		key,
 		mimeType,
 		&tag,
 	)
@@ -205,9 +208,12 @@ func MakeWorkoutPresignedUrl(c *gin.Context, userId string) (any, error) {
 		return nil, models.NewServerError(err)
 	}
 
+	now := time.Now().Format(time.RFC3339)
+	destinationUrl := fmt.Sprintf("%s/%s?v=%s", config.App.MediaDistributionAlias, key, now)
 	return models.PresignedUrlResponse{
-		URL:    response.URL,
-		Fields: response.Values,
+		URL:            response.URL,
+		Fields:         response.Values,
+		DestinationUrl: &destinationUrl,
 	}, nil
 }
 

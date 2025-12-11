@@ -78,6 +78,7 @@ type EditAccountRequest struct {
 } // @name EditAccountRequest
 
 type PresignedUrlResponse struct {
-	URL    string            `json:"url"`
-	Fields map[string]string `json:"fields"`
+	URL            string            `json:"url"`
+	Fields         map[string]string `json:"fields"`
+	DestinationUrl *string           `json:"destinationUrl,omitempty"`
 } // @name PresignedUrlResponse
