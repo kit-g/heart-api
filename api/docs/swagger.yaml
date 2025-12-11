@@ -100,6 +100,8 @@ definitions:
     type: object
   PresignedUrlResponse:
     properties:
+      destinationUrl:
+        type: string
       fields:
         additionalProperties:
           type: string
@@ -245,6 +247,8 @@ definitions:
         type: array
       id:
         example: "2025-07-18T05:40:48.329406Z"
+        type: string
+      image:
         type: string
       name:
         example: Legs
@@ -950,6 +954,45 @@ paths:
       security:
       - BearerAuth: []
       summary: Returns a workout
+      tags:
+      - workouts
+  /workouts/{workoutId}/image:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the image associated with a workout from S3 and removes
+        the image reference from DynamoDB
+      operationId: deleteWorkoutImage
+      parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
+      - description: Workout ID
+        in: path
+        name: workoutId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Deletes a workout image
       tags:
       - workouts
     put:

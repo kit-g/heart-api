@@ -927,6 +927,65 @@ const docTemplate = `{
                     }
                 }
             },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes a workout by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workouts"
+                ],
+                "summary": "Deletes a workout",
+                "operationId": "deleteWorkout",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Workout ID",
+                        "name": "workoutId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workouts/{workoutId}/image": {
             "put": {
                 "security": [
                     {
@@ -996,7 +1055,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Deletes a workout by ID",
+                "description": "Deletes the image associated with a workout from S3 and removes the image reference from DynamoDB",
                 "consumes": [
                     "application/json"
                 ],
@@ -1006,8 +1065,8 @@ const docTemplate = `{
                 "tags": [
                     "workouts"
                 ],
-                "summary": "Deletes a workout",
-                "operationId": "deleteWorkout",
+                "summary": "Deletes a workout image",
+                "operationId": "deleteWorkoutImage",
                 "parameters": [
                     {
                         "type": "string",
@@ -1192,6 +1251,9 @@ const docTemplate = `{
         "PresignedUrlResponse": {
             "type": "object",
             "properties": {
+                "destinationUrl": {
+                    "type": "string"
+                },
                 "fields": {
                     "type": "object",
                     "additionalProperties": {
@@ -1398,6 +1460,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string",
                     "example": "2025-07-18T05:40:48.329406Z"
+                },
+                "image": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string",
