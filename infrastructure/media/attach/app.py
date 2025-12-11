@@ -1,5 +1,5 @@
 import os
-
+from datetime import datetime, timezone
 import boto3
 
 _dynamo = None
@@ -22,16 +22,19 @@ def s3():
     return _s3
 
 
-def write(*, user_id: str, workout_id: str, url: str) -> dict:
+def write(*, user_id: str, workout_id: str, url: str, image_key: str) -> dict:
     return dynamo().update_item(
         TableName=workouts_table,
         Key={
             'PK': {'S': f'USER#{user_id}'},
             'SK': {'S': f'WORKOUT#{workout_id}'},
         },
-        UpdateExpression='SET #url = :url',
-        ExpressionAttributeNames={'#url': 'image'},
-        ExpressionAttributeValues={':url': {'S': url}},
+        UpdateExpression='SET #url = :url, #key = :key',
+        ExpressionAttributeNames={'#url': 'image', '#key': 'image_key'},
+        ExpressionAttributeValues={
+            ':url': {'S': url},
+            ':key': {'S': image_key},
+        },
     )
 
 
@@ -41,8 +44,8 @@ def update_workout_on_image(bucket: str, key: str) -> None:
 
     match tags:
         case {'userId': user_id, 'workoutId': workout_id}:
-            url = f'{media_distribution}/{key}'
-            write(user_id=user_id, workout_id=workout_id, url=url)
+            url = f'{media_distribution}/{key}?v={datetime.now(tz=timezone.utc).isoformat()}'
+            write(user_id=user_id, workout_id=workout_id, url=url, image_key=key)
         case _:
             raise ValueError(f'Invalid tags: {tags}')
 
