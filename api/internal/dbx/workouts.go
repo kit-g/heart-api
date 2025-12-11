@@ -136,3 +136,28 @@ func GetWorkouts(ctx context.Context, userId string, limit int, cursor string) (
 
 	return workouts, nextCursor, nil
 }
+
+func RemoveWorkoutImage(ctx context.Context, userId string, workoutId string) error {
+	pk := models.UserKey + userId
+	sk := models.WorkoutKey + workoutId
+
+	input := &dynamodb.UpdateItemInput{
+		TableName: aws.String(config.App.WorkoutsTable),
+		Key: map[string]types.AttributeValue{
+			"PK": &types.AttributeValueMemberS{Value: pk},
+			"SK": &types.AttributeValueMemberS{Value: sk},
+		},
+		UpdateExpression: aws.String("REMOVE #image, #key"),
+		ExpressionAttributeNames: map[string]string{
+			"#image": "image",
+			"#key":   "image_key",
+		},
+	}
+
+	_, err := awsx.Db.UpdateItem(ctx, input)
+	if err != nil {
+		return models.NewServerError(err)
+	}
+
+	return nil
+}
