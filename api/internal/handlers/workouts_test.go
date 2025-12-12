@@ -66,7 +66,8 @@ func TestGetWorkout_ErrorMapping(t *testing.T) {
 	c.Params = gin.Params{{Key: "workoutId", Value: "w1"}}
 	res, err := GetWorkout(c, "u1")
 	assert.Nil(t, res)
-	_, isHTTP := err.(models.HTTPError)
+	var HTTPError models.HTTPError
+	isHTTP := errors.As(err, &HTTPError)
 	assert.True(t, isHTTP)
 }
 
@@ -74,7 +75,8 @@ func TestMakeWorkout_ValidationError(t *testing.T) {
 	c := newGinContextWithBody("POST", "/workouts", "not json")
 	res, err := MakeWorkout(c, "u1")
 	assert.Nil(t, res)
-	_, isHTTP := err.(models.HTTPError)
+	var HTTPError models.HTTPError
+	isHTTP := errors.As(err, &HTTPError)
 	assert.True(t, isHTTP)
 }
 
@@ -91,4 +93,76 @@ func TestDeleteWorkout_NotFoundPassthrough(t *testing.T) {
 	assert.Nil(t, res)
 	var nf *models.NotFoundError
 	assert.ErrorAs(t, err, &nf)
+}
+
+func TestGetWorkoutGallery_DefaultsAndHappyPath(t *testing.T) {
+	orig := dbGetWorkoutGallery
+	var gotUser string
+	var gotPage int
+	var gotCursor string
+
+	dbGetWorkoutGallery = func(ctx context.Context, userId string, pageSize int, cursor string) ([]models.ProgressImage, *string, error) {
+		gotUser, gotPage, gotCursor = userId, pageSize, cursor
+		next := "2025-07-01T00:00:00Z#2025-12-01T00:00:00Z~aaaa"
+		items := []models.ProgressImage{
+			{
+				WorkoutID: "2025-07-25T18:20:01.253622Z",
+				PhotoID:   "2025-12-11T20:41:16.797Z~deadbeef",
+			},
+		}
+		return items, &next, nil
+	}
+	t.Cleanup(func() { dbGetWorkoutGallery = orig })
+
+	c := newCtx() // no pageSize, no cursor
+	res, err := GetWorkoutGallery(c, "u1")
+	assert.NoError(t, err)
+
+	assert.Equal(t, "u1", gotUser)
+	assert.Equal(t, 20, gotPage)
+	assert.Equal(t, "", gotCursor)
+
+	out, ok := res.(models.ProgressGalleryResponse)
+	assert.True(t, ok)
+	assert.Len(t, out.Images, 1)
+	assert.NotNil(t, out.Cursor)
+	assert.Equal(t, "2025-07-01T00:00:00Z#2025-12-01T00:00:00Z~aaaa", *out.Cursor)
+}
+
+func TestGetWorkoutGallery_CustomPageAndCursor(t *testing.T) {
+	orig := dbGetWorkoutGallery
+	var gotPage int
+	var gotCursor string
+
+	dbGetWorkoutGallery = func(ctx context.Context, userId string, pageSize int, cursor string) ([]models.ProgressImage, *string, error) {
+		gotPage, gotCursor = pageSize, cursor
+		return nil, nil, nil
+	}
+	t.Cleanup(func() { dbGetWorkoutGallery = orig })
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest("GET", "/workouts/images?pageSize=25&cursor=abc", nil)
+
+	res, err := GetWorkoutGallery(c, "u1")
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+	assert.Equal(t, 25, gotPage)
+	assert.Equal(t, "abc", gotCursor)
+}
+
+func TestGetWorkoutGallery_DBErrorMapping(t *testing.T) {
+	orig := dbGetWorkoutGallery
+	dbGetWorkoutGallery = func(ctx context.Context, userId string, pageSize int, cursor string) ([]models.ProgressImage, *string, error) {
+		return nil, nil, errors.New("boom")
+	}
+	t.Cleanup(func() { dbGetWorkoutGallery = orig })
+
+	c := newCtx()
+	res, err := GetWorkoutGallery(c, "u1")
+
+	assert.Nil(t, res)
+	var HTTPError models.HTTPError
+	isHTTP := errors.As(err, &HTTPError)
+	assert.True(t, isHTTP)
 }
