@@ -109,6 +109,15 @@ definitions:
       url:
         type: string
     type: object
+  ProgressGalleryResponse:
+    properties:
+      cursor:
+        type: string
+      images:
+        items:
+          $ref: '#/definitions/models.ProgressImage'
+        type: array
+    type: object
   Set:
     properties:
       completed:
@@ -320,6 +329,18 @@ definitions:
         items:
           $ref: '#/definitions/Workout'
         type: array
+    type: object
+  models.ProgressImage:
+    properties:
+      image:
+        example: https://<cdn-domain>/workouts/<hash>.jpg?v=<cache-bust>
+        type: string
+      photoId:
+        example: 2025-12-11T20:41:16.797Z~deadbeef
+        type: string
+      workoutId:
+        example: "2025-07-25T18:20:01.253622Z"
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -1035,6 +1056,45 @@ paths:
       security:
       - BearerAuth: []
       summary: Generates presigned URL for workout file upload
+      tags:
+      - workouts
+  /workouts/images:
+    get:
+      consumes:
+      - application/json
+      description: Returns paginated list of workout progress images
+      operationId: getWorkoutGallery
+      parameters:
+      - description: Client app version
+        in: header
+        name: X-App-Version
+        type: string
+      - description: Page size for pagination
+        in: query
+        name: pageSize
+        type: integer
+      - description: Cursor for pagination
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ProgressGalleryResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Returns workout progress gallery
       tags:
       - workouts
 securityDefinitions:

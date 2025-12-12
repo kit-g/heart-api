@@ -271,6 +271,22 @@ func DeleteWorkoutImage(c *gin.Context, userId string) (any, error) {
 	return models.NoContent, nil
 }
 
+// GetWorkoutGallery godoc
+//
+//	@Summary		Returns workout progress gallery
+//	@Description	Returns paginated list of workout progress images
+//	@Tags			workouts
+//	@Accept			json
+//	@Produce		json
+//	@ID				getWorkoutGallery
+//	@Param			X-App-Version	header		string	false	"Client app version"
+//	@Param			pageSize		query		integer	false	"Page size for pagination"
+//	@Param			cursor			query		string	false	"Cursor for pagination"
+//	@Success		200				{object}	ProgressGalleryResponse
+//	@Failure		401				{object}	ErrorResponse	"Unauthorized"
+//	@Failure		500				{object}	ErrorResponse	"Server error"
+//	@Router			/workouts/images [get]
+//	@Security		BearerAuth
 func GetWorkoutGallery(c *gin.Context, userId string) (any, error) {
 	pageSize := 20
 	if size := c.Query("pageSize"); size != "" {

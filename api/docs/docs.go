@@ -866,6 +866,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/workouts/images": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns paginated list of workout progress images",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workouts"
+                ],
+                "summary": "Returns workout progress gallery",
+                "operationId": "getWorkoutGallery",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client app version",
+                        "name": "X-App-Version",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size for pagination",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProgressGalleryResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/workouts/{workoutId}": {
             "get": {
                 "security": [
@@ -1265,6 +1326,20 @@ const docTemplate = `{
                 }
             }
         },
+        "ProgressGalleryResponse": {
+            "type": "object",
+            "properties": {
+                "cursor": {
+                    "type": "string"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ProgressImage"
+                    }
+                }
+            }
+        },
         "Set": {
             "type": "object",
             "required": [
@@ -1563,6 +1638,23 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/Workout"
                     }
+                }
+            }
+        },
+        "models.ProgressImage": {
+            "type": "object",
+            "properties": {
+                "image": {
+                    "type": "string",
+                    "example": "https://\u003ccdn-domain\u003e/workouts/\u003chash\u003e.jpg?v=\u003ccache-bust\u003e"
+                },
+                "photoId": {
+                    "type": "string",
+                    "example": "2025-12-11T20:41:16.797Z~deadbeef"
+                },
+                "workoutId": {
+                    "type": "string",
+                    "example": "2025-07-25T18:20:01.253622Z"
                 }
             }
         }
