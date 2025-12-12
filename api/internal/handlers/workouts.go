@@ -18,10 +18,11 @@ import (
 
 // test seams for dbx dependencies
 var (
-	dbGetWorkouts      = dbx.GetWorkouts
-	dbGetWorkout       = dbx.GetWorkout
-	dbDeleteWorkout    = dbx.DeleteWorkout
-	removeWorkoutImage = dbx.RemoveWorkoutImage
+	dbGetWorkouts       = dbx.GetWorkouts
+	dbGetWorkout        = dbx.GetWorkout
+	dbDeleteWorkout     = dbx.DeleteWorkout
+	removeWorkoutImage  = dbx.RemoveWorkoutImage
+	dbGetWorkoutGallery = dbx.GetWorkoutGallery
 )
 
 // GetWorkouts godoc
@@ -268,4 +269,25 @@ func DeleteWorkoutImage(c *gin.Context, userId string) (any, error) {
 	}
 
 	return models.NoContent, nil
+}
+
+func GetWorkoutGallery(c *gin.Context, userId string) (any, error) {
+	pageSize := 20
+	if size := c.Query("pageSize"); size != "" {
+		if parsed, err := strconv.Atoi(size); err == nil && parsed > 0 {
+			pageSize = parsed
+		}
+	}
+
+	cursor := c.Query("cursor")
+
+	items, next, err := dbGetWorkoutGallery(c.Request.Context(), userId, pageSize, cursor)
+	if err != nil {
+		return nil, models.NewServerError(err)
+	}
+
+	return models.ProgressGalleryResponse{
+		Images: items,
+		Cursor: next,
+	}, nil
 }
