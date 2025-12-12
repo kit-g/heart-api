@@ -173,8 +173,8 @@ func GetWorkoutGallery(ctx context.Context, userId string, limit int, cursor str
 		},
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":PK":     &types.AttributeValueMemberS{Value: pk},
-			":SK_MIN": &types.AttributeValueMemberS{Value: "PROGRESS#"},
-			":SK_MAX": &types.AttributeValueMemberS{Value: "PROGRESS$"}, // '$' sorts after '#'
+			":SK_MIN": &types.AttributeValueMemberS{Value: models.ProgressKey + "#"},
+			":SK_MAX": &types.AttributeValueMemberS{Value: models.ProgressKey + "$"}, // '$' sorts after '#'
 		},
 		KeyConditionExpression: aws.String("#PK = :PK AND #SK BETWEEN :SK_MIN AND :SK_MAX"),
 		ScanIndexForward:       aws.Bool(false), // most recent workoutId first

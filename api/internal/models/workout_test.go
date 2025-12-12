@@ -1036,5 +1036,114 @@ func TestWorkoutConstants(t *testing.T) {
 		assert.Equal(t, "USER#", UserKey)
 		assert.Equal(t, "WORKOUT#", WorkoutKey)
 		assert.Equal(t, "TEMPLATE#", TemplateKey)
+		assert.Equal(t, "PROGRESS#", ProgressKey)
+	})
+}
+
+func TestProgressImage_StructFields(t *testing.T) {
+	t.Run("ProgressImage with all fields", func(t *testing.T) {
+		imageURL := "https://example.com/workouts/img.jpg?v=2025-12-11T20:41:16.797Z"
+		imageKey := "workouts/abcd1234.jpg"
+
+		p := ProgressImage{
+			PK:        UserKey + "user123",
+			SK:        ProgressKey + "2025-07-25T18:20:01.253622Z#2025-12-11T20:41:16.797Z~deadbeef",
+			WorkoutID: "2025-07-25T18:20:01.253622Z",
+			PhotoID:   "2025-12-11T20:41:16.797Z~deadbeef",
+			Image:     &imageURL,
+			ImageKey:  &imageKey,
+		}
+
+		assert.Equal(t, UserKey+"user123", p.PK)
+		assert.Equal(t, ProgressKey+"2025-07-25T18:20:01.253622Z#2025-12-11T20:41:16.797Z~deadbeef", p.SK)
+		assert.Equal(t, "2025-07-25T18:20:01.253622Z", p.WorkoutID)
+		assert.Equal(t, "2025-12-11T20:41:16.797Z~deadbeef", p.PhotoID)
+		assert.NotNil(t, p.Image)
+		assert.Equal(t, imageURL, *p.Image)
+		assert.NotNil(t, p.ImageKey)
+		assert.Equal(t, imageKey, *p.ImageKey)
+	})
+
+	t.Run("ProgressImage with optional fields nil", func(t *testing.T) {
+		p := ProgressImage{
+			PK:        UserKey + "user456",
+			SK:        ProgressKey + "2025-07-25T18:20:01.253622Z#2025-12-11T20:41:16.797Z~beadfeed",
+			WorkoutID: "2025-07-25T18:20:01.253622Z",
+			PhotoID:   "2025-12-11T20:41:16.797Z~beadfeed",
+			Image:     nil,
+			ImageKey:  nil,
+		}
+
+		assert.Equal(t, UserKey+"user456", p.PK)
+		assert.Equal(t, "2025-07-25T18:20:01.253622Z", p.WorkoutID)
+		assert.Equal(t, "2025-12-11T20:41:16.797Z~beadfeed", p.PhotoID)
+		assert.Nil(t, p.Image)
+		assert.Nil(t, p.ImageKey)
+	})
+}
+
+func TestProgressGalleryResponse_CursorNullable(t *testing.T) {
+	t.Run("Cursor nil", func(t *testing.T) {
+		resp := ProgressGalleryResponse{
+			Images: []ProgressImage{},
+			Cursor: nil,
+		}
+
+		assert.NotNil(t, resp.Images)
+		assert.Len(t, resp.Images, 0)
+		assert.Nil(t, resp.Cursor)
+	})
+
+	t.Run("Cursor present", func(t *testing.T) {
+		cursor := "2025-07-25T18:20:01.253622Z#2025-12-11T20:41:16.797Z~deadbeef"
+		resp := ProgressGalleryResponse{
+			Images: []ProgressImage{
+				{
+					PK:        UserKey + "user123",
+					SK:        ProgressKey + cursor,
+					WorkoutID: "2025-07-25T18:20:01.253622Z",
+					PhotoID:   "2025-12-11T20:41:16.797Z~deadbeef",
+				},
+			},
+			Cursor: &cursor,
+		}
+
+		assert.Len(t, resp.Images, 1)
+		assert.NotNil(t, resp.Cursor)
+		assert.Equal(t, cursor, *resp.Cursor)
+	})
+}
+
+func TestProgressCursorFromSK(t *testing.T) {
+	t.Run("Trims PROGRESS# prefix", func(t *testing.T) {
+		sk := ProgressKey + "2025-07-25T18:20:01.253622Z#2025-12-11T20:41:16.797Z~deadbeef"
+		out := ProgressCursorFromSK(sk)
+
+		assert.Equal(t, "2025-07-25T18:20:01.253622Z#2025-12-11T20:41:16.797Z~deadbeef", out)
+	})
+
+	t.Run("No prefix present returns original string", func(t *testing.T) {
+		sk := "NOTPROGRESS#whatever"
+		out := ProgressCursorFromSK(sk)
+
+		assert.Equal(t, sk, out)
+	})
+}
+
+func TestProgressModels_ZeroValues(t *testing.T) {
+	t.Run("Zero values", func(t *testing.T) {
+		var p ProgressImage
+		var r ProgressGalleryResponse
+
+		assert.Equal(t, "", p.PK)
+		assert.Equal(t, "", p.SK)
+		assert.Equal(t, "", p.WorkoutID)
+		assert.Equal(t, "", p.PhotoID)
+		assert.Nil(t, p.Image)
+		assert.Nil(t, p.ImageKey)
+
+		// slice zero-value is nil; cursor should also be nil
+		assert.Nil(t, r.Images)
+		assert.Nil(t, r.Cursor)
 	})
 }
