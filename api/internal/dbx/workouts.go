@@ -161,3 +161,53 @@ func RemoveWorkoutImage(ctx context.Context, userId string, workoutId string) er
 
 	return nil
 }
+
+func GetWorkoutGallery(ctx context.Context, userId string, limit int, cursor string) ([]models.ProgressImage, *string, error) {
+	pk := models.UserKey + userId
+
+	input := &dynamodb.QueryInput{
+		TableName: aws.String(config.App.WorkoutsTable),
+		ExpressionAttributeNames: map[string]string{
+			"#PK": "PK",
+			"#SK": "SK",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":PK":     &types.AttributeValueMemberS{Value: pk},
+			":SK_MIN": &types.AttributeValueMemberS{Value: "PROGRESS#"},
+			":SK_MAX": &types.AttributeValueMemberS{Value: "PROGRESS$"}, // '$' sorts after '#'
+		},
+		KeyConditionExpression: aws.String("#PK = :PK AND #SK BETWEEN :SK_MIN AND :SK_MAX"),
+		ScanIndexForward:       aws.Bool(false), // most recent workoutId first
+		Limit:                  aws.Int32(int32(limit)),
+	}
+
+	// pagination
+	if cursor != "" {
+		input.ExclusiveStartKey = map[string]types.AttributeValue{
+			"PK": &types.AttributeValueMemberS{Value: pk},
+			"SK": &types.AttributeValueMemberS{Value: "PROGRESS#" + cursor},
+		}
+	}
+
+	result, err := awsx.Db.Query(ctx, input)
+	if err != nil {
+		return nil, nil, models.NewServerError(err)
+	}
+
+	var items []models.ProgressImage
+	if err := attributevalue.UnmarshalListOfMaps(result.Items, &items); err != nil {
+		return nil, nil, models.NewServerError(err)
+	}
+
+	var nextCursor *string
+	if result.LastEvaluatedKey != nil {
+		if skAttr, ok := result.LastEvaluatedKey["SK"]; ok {
+			if skValue, ok := skAttr.(*types.AttributeValueMemberS); ok {
+				cur := models.ProgressCursorFromSK(skValue.Value)
+				nextCursor = &cur
+			}
+		}
+	}
+
+	return items, nextCursor, nil
+}
