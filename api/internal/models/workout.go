@@ -10,6 +10,7 @@ const (
 	WorkoutKey  = "WORKOUT#"
 	TemplateKey = "TEMPLATE#"
 	ExerciseKey = "EXERCISE#"
+	ProgressKey = "PROGRESS#"
 )
 
 type HasImage struct {
@@ -177,4 +178,26 @@ func NewWorkoutsArray(workouts []Workout) []WorkoutOut {
 		workoutsOut[i] = NewWorkoutOut(&w)
 	}
 	return workoutsOut
+}
+
+// ProgressImage is a DynamoDB item representing one progress photo entry.
+// PK: USER#<userId>
+// SK: PROGRESS#<workoutId>#<photoId>
+type ProgressImage struct {
+	PK        string  `dynamodbav:"PK" json:"-"`
+	SK        string  `dynamodbav:"SK" json:"-"`
+	WorkoutID string  `dynamodbav:"workout_id" json:"workoutId" example:"2025-07-25T18:20:01.253622Z"`
+	PhotoID   string  `dynamodbav:"photo_id" json:"photoId" example:"2025-12-11T20:41:16.797Z~deadbeef"`
+	Image     *string `dynamodbav:"image,omitempty" json:"image,omitempty" example:"https://<cdn-domain>/workouts/<hash>.jpg?v=<cache-bust>"`
+	ImageKey  *string `dynamodbav:"image_key,omitempty" json:"-"`
+}
+
+type ProgressGalleryResponse struct {
+	Images []ProgressImage `json:"images"`
+	Cursor *string         `json:"cursor"`
+} // @name ProgressGalleryResponse
+
+func ProgressCursorFromSK(sk string) string {
+	// expects SK like: "PROGRESS#<workoutId>#<photoId>"
+	return strings.TrimPrefix(sk, "PROGRESS#")
 }
