@@ -263,6 +263,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - dynamodb:UpdateItem
+                  - dynamodb:PutItem
                 Resource:
                   - !FindInMap [ Env, !Ref Env, WorkoutsTableArn ]
 
