@@ -125,13 +125,12 @@ func TestGetWorkoutGallery_PaginationAndUnmarshal(t *testing.T) {
 			assert.True(t, ok)
 			assert.Equal(t, "USER#u1", pkAttr.Value)
 
-			skMinAttr, ok := p.ExpressionAttributeValues[":SK_MIN"].(*types.AttributeValueMemberS)
+			prefixAttr, ok := p.ExpressionAttributeValues[":PREFIX"].(*types.AttributeValueMemberS)
 			assert.True(t, ok)
-			assert.Equal(t, models.ProgressKey+"#", skMinAttr.Value)
+			assert.Equal(t, models.ProgressKey, prefixAttr.Value)
 
-			skMaxAttr, ok := p.ExpressionAttributeValues[":SK_MAX"].(*types.AttributeValueMemberS)
-			assert.True(t, ok)
-			assert.Equal(t, models.ProgressKey+"$", skMaxAttr.Value)
+			assert.NotNil(t, p.KeyConditionExpression)
+			assert.Equal(t, "#PK = :PK AND begins_with(#SK, :PREFIX)", *p.KeyConditionExpression)
 
 			assert.NotNil(t, p.ExclusiveStartKey)
 
