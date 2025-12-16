@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+	"path"
 	"strings"
 	"time"
 )
@@ -13,21 +15,39 @@ const (
 	ProgressKey = "PROGRESS#"
 )
 
-type HasImage struct {
-	Image    *string `dynamodbav:"image,omitempty" json:"image,omitempty"`
-	ImageKey *string `dynamodbav:"image_key,omitempty" json:"-"`
+type Image struct {
+	Key string `example:"workouts/abc/019b23cc-4de2-7a19-89a6-0960f4929e4c.png"`
 }
 
+func (i Image) Url(domain string) string {
+	return fmt.Sprintf("%s/%s", domain, i.Key)
+}
+
+// ID parses the UUID from the key filename (without extension).
+// Example: "workouts/abc/019b23cc-4de2-7a19-89a6-0960f4929e4c.png" -> UUID(...)
+func (i Image) ID() string {
+	base := path.Base(i.Key)             // "....png"
+	ext := path.Ext(base)                // ".png"
+	return strings.TrimSuffix(base, ext) // "<uuid>"
+}
+
+type ImageOut struct {
+	Key       string `json:"key" example:"workouts/<workout>/<uuidv7>.png"`
+	URL       string `json:"url" example:"https://<cdn-domain>/workouts/<workout>/<uuidv7>.png"`
+	ID        string `json:"id" example:"019b23cc-4de2-7a19-89a6-0960f4929e4c"`
+	WorkoutId string `json:"workoutId" example:"2025-07-25T18:20:01.253622Z"`
+} // @name Image
+
 type Workout struct {
-	ID        string            `dynamodbav:"-"`
-	UserID    string            `dynamodbav:"-"`
+	ID        string            `dynamodbav:"-"`  // todo delete
+	UserID    string            `dynamodbav:"-"`  // todo delete
 	PK        string            `dynamodbav:"PK"` // USER#<userID>
 	SK        string            `dynamodbav:"SK"` // WORKOUT#<workoutID>
 	Start     time.Time         `dynamodbav:"start"`
 	End       *time.Time        `dynamodbav:"end,omitempty"`
 	Name      string            `dynamodbav:"name,omitempty"`
 	Exercises []WorkoutExercise `dynamodbav:"exercises"`
-	HasImage
+	ImageKeys *[]string         `dynamodbav:"images,omitempty" json:"-"`
 }
 
 func (w *Workout) String() string {
@@ -86,7 +106,7 @@ type WorkoutOut struct {
 	Start     time.Time            `json:"start" example:"2023-01-01T12:00:00Z"`
 	End       *time.Time           `json:"end" example:"2023-01-01T12:00:00Z"`
 	Exercises []WorkoutExerciseOut `json:"exercises"`
-	HasImage
+	Images    *[]ImageOut          `json:"images"`
 } // @name Workout
 
 func NewSetOut(s *Set) SetOut {
@@ -115,7 +135,6 @@ func NewWorkoutExerciseOut(e *WorkoutExercise) WorkoutExerciseOut {
 }
 
 func NewWorkout(w *WorkoutIn, userId string) Workout {
-
 	workout := Workout{
 		ID:        w.ID,
 		PK:        UserKey + userId,
@@ -150,11 +169,29 @@ func NewWorkout(w *WorkoutIn, userId string) Workout {
 	return workout
 }
 
-func NewWorkoutOut(w *Workout) WorkoutOut {
+func NewWorkoutOut(w *Workout, mediaDomain string) WorkoutOut {
 	exercises := make([]WorkoutExerciseOut, len(w.Exercises))
 
 	for i, e := range w.Exercises {
 		exercises[i] = NewWorkoutExerciseOut(&e)
+	}
+
+	var images []ImageOut
+
+	if w.ImageKeys != nil {
+		images = make([]ImageOut, 0, len(*w.ImageKeys))
+		for _, k := range *w.ImageKeys {
+			image := Image{Key: k}
+			images = append(
+				images,
+				ImageOut{
+					Key:       image.Key,
+					URL:       image.Url(mediaDomain),
+					ID:        image.ID(),
+					WorkoutId: w.ID,
+				},
+			)
+		}
 	}
 
 	return WorkoutOut{
@@ -163,7 +200,7 @@ func NewWorkoutOut(w *Workout) WorkoutOut {
 		Start:     w.Start,
 		End:       w.End,
 		Exercises: exercises,
-		HasImage:  HasImage{Image: w.Image},
+		Images:    &images,
 	}
 }
 
@@ -172,10 +209,10 @@ type WorkoutResponse struct {
 	Cursor   string       `json:"cursor"`
 } // @name WorkoutResponse
 
-func NewWorkoutsArray(workouts []Workout) []WorkoutOut {
+func NewWorkoutsArray(workouts []Workout, mediaDomain string) []WorkoutOut {
 	workoutsOut := make([]WorkoutOut, len(workouts))
 	for i, w := range workouts {
-		workoutsOut[i] = NewWorkoutOut(&w)
+		workoutsOut[i] = NewWorkoutOut(&w, mediaDomain)
 	}
 	return workoutsOut
 }
@@ -187,9 +224,9 @@ type ProgressImage struct {
 	PK        string  `dynamodbav:"PK" json:"-"`
 	SK        string  `dynamodbav:"SK" json:"-"`
 	WorkoutID string  `dynamodbav:"workout_id" json:"workoutId" example:"2025-07-25T18:20:01.253622Z"`
-	PhotoID   string  `dynamodbav:"photo_id" json:"photoId" example:"2025-12-11T20:41:16.797Z~deadbeef"`
-	Image     *string `dynamodbav:"image,omitempty" json:"image,omitempty" example:"https://<cdn-domain>/workouts/<hash>.jpg?v=<cache-bust>"`
-	ImageKey  *string `dynamodbav:"image_key,omitempty" json:"-"`
+	PhotoID   string  `dynamodbav:"photo_id" json:"id" example:"2025-12-11T20:41:16.797Z~deadbeef"`
+	Image     *string `dynamodbav:"image,omitempty" json:"url,omitempty" example:"https://<cdn-domain>/workouts/<hash>.jpg?v=<cache-bust>"`
+	ImageKey  *string `dynamodbav:"image_key,omitempty" json:"key,omitempty" example:"workouts/<hash>.jpg"`
 }
 
 type ProgressGalleryResponse struct {

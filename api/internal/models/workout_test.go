@@ -740,7 +740,7 @@ func TestNewWorkoutOut(t *testing.T) {
 			Exercises: exercises,
 		}
 
-		result := NewWorkoutOut(workout)
+		result := NewWorkoutOut(workout, "https://images.com")
 
 		assert.Equal(t, id, result.ID)
 		assert.Equal(t, "Leg Day", result.Name)
@@ -766,7 +766,7 @@ func TestNewWorkoutOut(t *testing.T) {
 			Exercises: []WorkoutExercise{},
 		}
 
-		result := NewWorkoutOut(workout)
+		result := NewWorkoutOut(workout, "https://images.com")
 
 		assert.Equal(t, id, result.ID)
 		assert.Equal(t, "Empty Workout", result.Name)
@@ -788,7 +788,7 @@ func TestNewWorkoutOut(t *testing.T) {
 			Exercises: []WorkoutExercise{},
 		}
 
-		result := NewWorkoutOut(workout)
+		result := NewWorkoutOut(workout, "https://images.com")
 
 		// The ID should be extracted from SK by removing the WorkoutKey prefix
 		assert.Equal(t, id, result.ID)
@@ -869,7 +869,7 @@ func TestNewWorkoutsArray(t *testing.T) {
 			},
 		}
 
-		result := NewWorkoutsArray(workouts)
+		result := NewWorkoutsArray(workouts, "https://images.com")
 
 		assert.Len(t, result, 2)
 		assert.Equal(t, id1, result[0].ID)
@@ -882,7 +882,7 @@ func TestNewWorkoutsArray(t *testing.T) {
 
 	t.Run("Create array from empty workouts", func(t *testing.T) {
 		workouts := []Workout{}
-		result := NewWorkoutsArray(workouts)
+		result := NewWorkoutsArray(workouts, "https://images.com")
 
 		assert.Len(t, result, 0)
 	})
@@ -902,7 +902,7 @@ func TestNewWorkoutsArray(t *testing.T) {
 			},
 		}
 
-		result := NewWorkoutsArray(workouts)
+		result := NewWorkoutsArray(workouts, "https://images.com")
 
 		assert.Len(t, result, 1)
 		assert.Equal(t, id, result[0].ID)
