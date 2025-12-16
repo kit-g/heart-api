@@ -1109,7 +1109,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/workouts/{workoutId}/images": {
             "delete": {
                 "security": [
                     {
@@ -1140,6 +1142,13 @@ const docTemplate = `{
                         "description": "Workout ID",
                         "name": "workoutId",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Image ID",
+                        "name": "imageId",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -1286,6 +1295,27 @@ const docTemplate = `{
                 "mimeType": {
                     "type": "string",
                     "example": "image/png"
+                }
+            }
+        },
+        "Image": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "019b23cc-4de2-7a19-89a6-0960f4929e4c"
+                },
+                "key": {
+                    "type": "string",
+                    "example": "workouts/\u003cworkout\u003e/\u003cuuidv7\u003e.png"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "https://\u003ccdn-domain\u003e/workouts/\u003cworkout\u003e/\u003cuuidv7\u003e.png"
+                },
+                "workoutId": {
+                    "type": "string",
+                    "example": "2025-07-25T18:20:01.253622Z"
                 }
             }
         },
@@ -1536,8 +1566,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2025-07-18T05:40:48.329406Z"
                 },
-                "image": {
-                    "type": "string"
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Image"
+                    }
                 },
                 "name": {
                     "type": "string",
@@ -1644,13 +1677,17 @@ const docTemplate = `{
         "models.ProgressImage": {
             "type": "object",
             "properties": {
-                "image": {
-                    "type": "string",
-                    "example": "https://\u003ccdn-domain\u003e/workouts/\u003chash\u003e.jpg?v=\u003ccache-bust\u003e"
-                },
-                "photoId": {
+                "id": {
                     "type": "string",
                     "example": "2025-12-11T20:41:16.797Z~deadbeef"
+                },
+                "key": {
+                    "type": "string",
+                    "example": "workouts/\u003chash\u003e.jpg"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "https://\u003ccdn-domain\u003e/workouts/\u003chash\u003e.jpg?v=\u003ccache-bust\u003e"
                 },
                 "workoutId": {
                     "type": "string",
