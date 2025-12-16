@@ -98,7 +98,7 @@ jobs:
 
       - name: "Run internal tests"
         working-directory: api
-        run: go test ./internal/... -json -race -coverprofile=coverage.out
+        run: go test ./internal/... -race -coverprofile=coverage.out
 
   api-deploy:
     name: "Deploy Heart API"
