@@ -3,13 +3,28 @@ package handlers
 import (
 	"context"
 	"errors"
+	"heart/internal/config"
 	"heart/internal/models"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	// Minimal config needed by handlers that build media URLs.
+	config.App = &config.AppConfig{
+		AwsConfig: config.AwsConfig{
+			CloudFrontConfig: config.CloudFrontConfig{
+				MediaDistributionAlias: "https://media.example.test",
+			},
+		},
+	}
+
+	os.Exit(m.Run())
+}
 
 func TestGetWorkouts_DefaultsAndHappyPath(t *testing.T) {
 	orig := dbGetWorkouts
