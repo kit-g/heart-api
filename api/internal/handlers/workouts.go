@@ -268,6 +268,10 @@ func DeleteWorkoutImage(c *gin.Context, userId string) (any, error) {
 		return nil, err
 	}
 
+	if workout == nil {
+		return nil, models.NewForbiddenError("Forbidden", errors.New("workout not found"))
+	}
+
 	found := false
 	if workout.ImageKeys != nil {
 		for _, k := range *workout.ImageKeys {
