@@ -1,6 +1,7 @@
 package models
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -49,7 +50,7 @@ func TestExtension(t *testing.T) {
 		{
 			name:     "image/jpeg returns extension",
 			mimeType: "image/jpeg",
-			wantExt:  ".jpe", // first extension returned by mime package
+			wantExt:  "", // order is OS-dependent; assert membership instead
 			wantErr:  false,
 		},
 		{
@@ -91,6 +92,13 @@ func TestExtension(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
+
+			if tt.mimeType == "image/jpeg" {
+				acceptable := []string{".jpg", ".jpeg", ".jpe"}
+				assert.True(t, slices.Contains(acceptable, got), "got %q, expected one of %v", got, acceptable)
+				return
+			}
+
 			assert.Equal(t, tt.wantExt, got)
 		})
 	}
