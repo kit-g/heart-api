@@ -45,24 +45,75 @@ func GetWorkout(ctx context.Context, userId string, workoutId string) (*models.W
 }
 
 func SaveWorkout(ctx context.Context, in models.Workout) (*models.Workout, error) {
-	item, err := attributevalue.MarshalMap(in)
+	startAV, err := attributevalue.Marshal(in.Start)
+	if err != nil {
+		return nil, models.NewServerError(err)
+	}
+	exercisesAV, err := attributevalue.Marshal(in.Exercises)
 	if err != nil {
 		return nil, models.NewServerError(err)
 	}
 
-	input := &dynamodb.PutItemInput{
+	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String(config.App.WorkoutsTable),
-		Item:      item,
+		Key: map[string]types.AttributeValue{
+			"PK": &types.AttributeValueMemberS{Value: in.PK},
+			"SK": &types.AttributeValueMemberS{Value: in.SK},
+		},
+		ExpressionAttributeNames: map[string]string{
+			"#start":     "start",
+			"#end":       "end",
+			"#name":      "name",
+			"#exercises": "exercises",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":start":     startAV,
+			":exercises": exercisesAV,
+		},
+		ConditionExpression: aws.String("attribute_exists(PK) AND attribute_exists(SK)"),
 	}
 
-	_, err = awsx.Db.PutItem(ctx, input)
+	setParts := []string{
+		"#start = :start",
+		"#exercises = :exercises",
+	}
+	removeParts := []string{}
+
+	if in.End != nil {
+		endAV, err := attributevalue.Marshal(*in.End)
+		if err != nil {
+			return nil, models.NewServerError(err)
+		}
+		input.ExpressionAttributeValues[":end"] = endAV
+		setParts = append(setParts, "#end = :end")
+	} else {
+		removeParts = append(removeParts, "#end")
+	}
+
+	if in.Name != "" {
+		nameAV, err := attributevalue.Marshal(in.Name)
+		if err != nil {
+			return nil, models.NewServerError(err)
+		}
+		input.ExpressionAttributeValues[":name"] = nameAV
+		setParts = append(setParts, "#name = :name")
+	} else {
+		removeParts = append(removeParts, "#name")
+	}
+
+	updateExpr := "SET " + strings.Join(setParts, ", ")
+	if len(removeParts) > 0 {
+		updateExpr += " REMOVE " + strings.Join(removeParts, ", ")
+	}
+	input.UpdateExpression = aws.String(updateExpr)
+
+	_, err = awsx.Db.UpdateItem(ctx, input)
 	if err != nil {
 		return nil, models.NewServerError(err)
 	}
 
 	return &in, nil
 }
-
 func DeleteWorkout(ctx context.Context, userId string, workoutId string) error {
 	pk := models.UserKey + userId
 	sk := models.WorkoutKey + workoutId
