@@ -188,25 +188,55 @@ func GetWorkouts(ctx context.Context, userId string, limit int, cursor string) (
 	return workouts, nextCursor, nil
 }
 
-func RemoveWorkoutImage(ctx context.Context, userId string, workoutId string) error {
-	pk := models.UserKey + userId
-	sk := models.WorkoutKey + workoutId
+func RemoveWorkoutImage(ctx context.Context, userId, workoutId, imageId string) error {
+	// imageId is actually the S3 object key (e.g. "workouts/<hash>/<uuidv7>.png")
+	imageKey := strings.TrimPrefix(imageId, "/")
 
-	input := &dynamodb.UpdateItemInput{
-		TableName: aws.String(config.App.WorkoutsTable),
-		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: pk},
-			"SK": &types.AttributeValueMemberS{Value: sk},
-		},
-		UpdateExpression: aws.String("REMOVE #image, #key"),
-		ExpressionAttributeNames: map[string]string{
-			"#image": "image",
-			"#key":   "image_key",
+	if imageKey == "" {
+		return models.NewValidationError(errors.New("missing image key"))
+	}
+
+	pk := models.UserKey + userId
+	workoutSK := models.WorkoutKey + workoutId
+	progressSK := models.ProgressKey + workoutId + "#" + imageKey
+
+	tx := &dynamodb.TransactWriteItemsInput{
+		TransactItems: []types.TransactWriteItem{
+			{
+				Update: &types.Update{
+					TableName: aws.String(config.App.WorkoutsTable),
+					Key: map[string]types.AttributeValue{
+						"PK": &types.AttributeValueMemberS{Value: pk},
+						"SK": &types.AttributeValueMemberS{Value: workoutSK},
+					},
+					UpdateExpression: aws.String("DELETE #images :imageset"),
+					ExpressionAttributeNames: map[string]string{
+						"#images": "images",
+					},
+					ExpressionAttributeValues: map[string]types.AttributeValue{
+						":imageset": &types.AttributeValueMemberSS{Value: []string{imageKey}},
+					},
+					ConditionExpression: aws.String("attribute_exists(PK) AND attribute_exists(SK)"),
+				},
+			},
+			{
+				Delete: &types.Delete{
+					TableName: aws.String(config.App.WorkoutsTable),
+					Key: map[string]types.AttributeValue{
+						"PK": &types.AttributeValueMemberS{Value: pk},
+						"SK": &types.AttributeValueMemberS{Value: progressSK},
+					},
+				},
+			},
 		},
 	}
 
-	_, err := awsx.Db.UpdateItem(ctx, input)
+	_, err := awsx.Db.TransactWriteItems(ctx, tx)
 	if err != nil {
+		var notFound *types.ConditionalCheckFailedException
+		if ok := errors.As(err, &notFound); ok {
+			return models.NewNotFoundError("Workout not found", notFound)
+		}
 		return models.NewServerError(err)
 	}
 
@@ -224,10 +254,9 @@ func GetWorkoutGallery(ctx context.Context, userId string, limit int, cursor str
 		},
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":PK":     &types.AttributeValueMemberS{Value: pk},
-			":SK_MIN": &types.AttributeValueMemberS{Value: models.ProgressKey + "#"},
-			":SK_MAX": &types.AttributeValueMemberS{Value: models.ProgressKey + "$"}, // '$' sorts after '#'
+			":PREFIX": &types.AttributeValueMemberS{Value: models.ProgressKey},
 		},
-		KeyConditionExpression: aws.String("#PK = :PK AND #SK BETWEEN :SK_MIN AND :SK_MAX"),
+		KeyConditionExpression: aws.String("#PK = :PK AND begins_with(#SK, :PREFIX)"),
 		ScanIndexForward:       aws.Bool(false), // most recent workoutId first
 		Limit:                  aws.Int32(int32(limit)),
 	}
@@ -236,7 +265,7 @@ func GetWorkoutGallery(ctx context.Context, userId string, limit int, cursor str
 	if cursor != "" {
 		input.ExclusiveStartKey = map[string]types.AttributeValue{
 			"PK": &types.AttributeValueMemberS{Value: pk},
-			"SK": &types.AttributeValueMemberS{Value: "PROGRESS#" + cursor},
+			"SK": &types.AttributeValueMemberS{Value: models.ProgressKey + cursor},
 		}
 	}
 
