@@ -11,9 +11,10 @@ import (
 	"heart/internal/models"
 	"maps"
 	"strconv"
-	"time"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // test seams for dbx dependencies
@@ -58,7 +59,7 @@ func GetWorkouts(c *gin.Context, userId string) (any, error) {
 	}
 
 	return models.WorkoutResponse{
-		Workouts: models.NewWorkoutsArray(workouts),
+		Workouts: models.NewWorkoutsArray(workouts, config.App.MediaDistributionAlias),
 		Cursor:   last,
 	}, nil
 }
@@ -88,7 +89,7 @@ func GetWorkout(c *gin.Context, userId string) (any, error) {
 		return nil, models.NewServerError(err)
 	}
 
-	return models.NewWorkoutOut(workout), nil
+	return models.NewWorkoutOut(workout, config.App.MediaDistributionAlias), nil
 }
 
 // MakeWorkout godoc
@@ -119,7 +120,7 @@ func MakeWorkout(c *gin.Context, userID string) (any, error) {
 		return nil, err
 	}
 
-	return models.NewWorkoutOut(saved), nil
+	return models.NewWorkoutOut(saved, config.App.MediaDistributionAlias), nil
 }
 
 // DeleteWorkout godoc
@@ -196,7 +197,11 @@ func MakeWorkoutPresignedUrl(c *gin.Context, userId string) (any, error) {
 		return nil, models.NewServerError(err)
 	}
 
-	key := workoutImageKey(userId, workoutId, extension)
+	key, err := workoutImageKey(userId, workoutId, extension)
+
+	if err != nil {
+		return nil, models.NewServerError(err)
+	}
 
 	response, err := awsx.GeneratePresignedPostURL(
 		c.Request.Context(),
@@ -210,8 +215,7 @@ func MakeWorkoutPresignedUrl(c *gin.Context, userId string) (any, error) {
 		return nil, models.NewServerError(err)
 	}
 
-	now := time.Now().Format(time.RFC3339)
-	destinationUrl := fmt.Sprintf("%s/%s?v=%s", config.App.MediaDistributionAlias, key, now)
+	destinationUrl := fmt.Sprintf("%s/%s", config.App.MediaDistributionAlias, key)
 	return models.PresignedUrlResponse{
 		URL:            response.URL,
 		Fields:         response.Values,
@@ -219,11 +223,16 @@ func MakeWorkoutPresignedUrl(c *gin.Context, userId string) (any, error) {
 	}, nil
 }
 
-// workoutImageKey generates a deterministic, privacy-safe S3 key for workout images
-func workoutImageKey(userId, workoutId, extension string) string {
+func workoutImageKey(userId, workoutId, extension string) (string, error) {
 	h := sha256.Sum256([]byte(userId + ":" + workoutId))
 	hash := hex.EncodeToString(h[:])[:16] // 16 hex chars = 64 bits, plenty unique
-	return fmt.Sprintf("workouts/%s%s", hash, extension)
+	id, err := uuid.NewV7()
+
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("workouts/%s/%s%s", hash, id, extension), err
 }
 
 // DeleteWorkoutImage godoc
@@ -236,35 +245,49 @@ func workoutImageKey(userId, workoutId, extension string) string {
 //	@ID				deleteWorkoutImage
 //	@Param			X-App-Version	header	string	false	"Client app version"
 //	@Param			workoutId		path	string	true	"Workout ID"
+//	@Param			imageId			query	string	true	"Image ID"
 //	@Success		204				"No Content"
 //	@Failure		401				{object}	ErrorResponse	"Unauthorized"
 //	@Failure		404				{object}	ErrorResponse	"Not Found"
 //	@Failure		500				{object}	ErrorResponse	"Server error"
-//	@Router			/workouts/{workoutId}/image [delete]
+//	@Router			/workouts/{workoutId}/images [delete]
 //	@Security		BearerAuth
 func DeleteWorkoutImage(c *gin.Context, userId string) (any, error) {
 	workoutId := c.Param("workoutId")
 
-	// get workout to retrieve ImageKey
+	// Expect the client to send the S3 key to delete, e.g.:
+	// DELETE /workouts/{workoutId}/image?key=workouts/<hash>/<uuidv7>.png
+	key := strings.TrimSpace(c.Query("key"))
+	key = strings.TrimPrefix(key, "/")
+	if key == "" {
+		return nil, models.NewValidationError(errors.New("missing query param: key"))
+	}
+
 	workout, err := dbGetWorkout(c.Request.Context(), userId, workoutId)
 	if err != nil {
 		return nil, err
 	}
 
-	// check if workout has an image
-	if workout.ImageKey == nil || *workout.ImageKey == "" {
+	found := false
+	if workout.ImageKeys != nil {
+		for _, k := range *workout.ImageKeys {
+			if k == key {
+				found = true
+				break
+			}
+		}
+	}
+
+	if !found {
 		return models.NoContent, nil
 	}
 
-	// delete image from S3
-	_, err = awsx.DeleteObject(c.Request.Context(), config.App.MediaBucket, *workout.ImageKey)
+	_, err = awsx.DeleteObject(c.Request.Context(), config.App.MediaBucket, key)
 	if err != nil {
 		return nil, models.NewServerError(err)
 	}
 
-	// remove image attribute from DynamoDB
-	err = removeWorkoutImage(c.Request.Context(), userId, workoutId)
-	if err != nil {
+	if err = removeWorkoutImage(c.Request.Context(), userId, workoutId, key); err != nil {
 		return nil, err
 	}
 
