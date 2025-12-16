@@ -39,8 +39,7 @@ type ImageOut struct {
 } // @name Image
 
 type Workout struct {
-	ID        string            `dynamodbav:"-"`  // todo delete
-	UserID    string            `dynamodbav:"-"`  // todo delete
+	UserID    string            `dynamodbav:"-"`
 	PK        string            `dynamodbav:"PK"` // USER#<userID>
 	SK        string            `dynamodbav:"SK"` // WORKOUT#<workoutID>
 	Start     time.Time         `dynamodbav:"start"`
@@ -52,6 +51,10 @@ type Workout struct {
 
 func (w *Workout) String() string {
 	return w.Name
+}
+
+func (w *Workout) ID() string {
+	return strings.TrimPrefix(w.SK, WorkoutKey)
 }
 
 type WorkoutExercise struct {
@@ -106,7 +109,7 @@ type WorkoutOut struct {
 	Start     time.Time            `json:"start" example:"2023-01-01T12:00:00Z"`
 	End       *time.Time           `json:"end" example:"2023-01-01T12:00:00Z"`
 	Exercises []WorkoutExerciseOut `json:"exercises"`
-	Images    *[]ImageOut          `json:"images"`
+	Images    *[]ImageOut          `json:"images,omitempty"`
 } // @name Workout
 
 func NewSetOut(s *Set) SetOut {
@@ -136,7 +139,6 @@ func NewWorkoutExerciseOut(e *WorkoutExercise) WorkoutExerciseOut {
 
 func NewWorkout(w *WorkoutIn, userId string) Workout {
 	workout := Workout{
-		ID:        w.ID,
 		PK:        UserKey + userId,
 		SK:        WorkoutKey + w.ID,
 		Name:      w.Name,
@@ -188,7 +190,7 @@ func NewWorkoutOut(w *Workout, mediaDomain string) WorkoutOut {
 					Key:       image.Key,
 					URL:       image.Url(mediaDomain),
 					ID:        image.ID(),
-					WorkoutId: w.ID,
+					WorkoutId: w.ID(),
 				},
 			)
 		}

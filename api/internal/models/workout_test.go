@@ -31,7 +31,6 @@ func TestWorkout_StructFields(t *testing.T) {
 		}
 
 		workout := Workout{
-			ID:        id,
 			UserID:    userID,
 			PK:        UserKey + userID,
 			SK:        WorkoutKey + id,
@@ -41,7 +40,7 @@ func TestWorkout_StructFields(t *testing.T) {
 			Exercises: exercises,
 		}
 
-		assert.Equal(t, id, workout.ID)
+		assert.Equal(t, id, workout.ID())
 		assert.Equal(t, userID, workout.UserID)
 		assert.Equal(t, UserKey+userID, workout.PK)
 		assert.Equal(t, WorkoutKey+id, workout.SK)
@@ -57,11 +56,11 @@ func TestWorkout_StructFields(t *testing.T) {
 		startTime := time.Now()
 
 		workout := Workout{
-			ID:    id,
 			Start: startTime,
+			SK:    WorkoutKey + id,
 		}
 
-		assert.Equal(t, id, workout.ID)
+		assert.Equal(t, id, workout.ID())
 		assert.Equal(t, startTime, workout.Start)
 		assert.Nil(t, workout.End)
 		assert.Equal(t, "", workout.Name)
@@ -73,7 +72,6 @@ func TestWorkout_StructFields(t *testing.T) {
 		startTime := time.Now()
 
 		workout := Workout{
-			ID:        id,
 			UserID:    "user456",
 			PK:        UserKey + "user456",
 			SK:        WorkoutKey + id,
@@ -83,7 +81,7 @@ func TestWorkout_StructFields(t *testing.T) {
 			Exercises: []WorkoutExercise{},
 		}
 
-		assert.Equal(t, id, workout.ID)
+		assert.Equal(t, id, workout.ID())
 		assert.Equal(t, "user456", workout.UserID)
 		assert.Equal(t, startTime, workout.Start)
 		assert.Nil(t, workout.End)
@@ -413,7 +411,7 @@ func TestNewWorkout(t *testing.T) {
 
 		result := NewWorkout(workoutIn, userID)
 
-		assert.Equal(t, id, result.ID)
+		assert.Equal(t, id, result.ID())
 		assert.Equal(t, userID, result.UserID)
 		assert.Equal(t, UserKey+userID, result.PK)
 		assert.Equal(t, WorkoutKey+id, result.SK)
@@ -455,7 +453,7 @@ func TestNewWorkout(t *testing.T) {
 
 		result := NewWorkout(workoutIn, userID)
 
-		assert.Equal(t, id, result.ID)
+		assert.Equal(t, id, result.ID())
 		assert.Equal(t, userID, result.UserID)
 		assert.Equal(t, "Empty Workout", result.Name)
 		assert.Equal(t, startTime, result.Start)
@@ -475,7 +473,7 @@ func TestNewWorkout(t *testing.T) {
 
 		result := NewWorkout(workoutIn, "")
 
-		assert.Equal(t, id, result.ID)
+		assert.Equal(t, id, result.ID())
 		assert.Equal(t, "", result.UserID)
 		assert.Equal(t, UserKey, result.PK)
 		assert.Equal(t, WorkoutKey+id, result.SK)
@@ -731,7 +729,6 @@ func TestNewWorkoutOut(t *testing.T) {
 		}
 
 		workout := &Workout{
-			ID:        id,
 			PK:        UserKey + "user123",
 			SK:        WorkoutKey + id,
 			Name:      "Leg Day",
@@ -758,7 +755,6 @@ func TestNewWorkoutOut(t *testing.T) {
 		startTime := time.Now()
 
 		workout := &Workout{
-			ID:        id,
 			PK:        UserKey + "user456",
 			SK:        WorkoutKey + id,
 			Name:      "Empty Workout",
@@ -780,7 +776,6 @@ func TestNewWorkoutOut(t *testing.T) {
 		startTime := time.Now()
 
 		workout := &Workout{
-			ID:        id,
 			PK:        UserKey + "user123",
 			SK:        WorkoutKey + id,
 			Name:      "Test Workout",
@@ -838,7 +833,6 @@ func TestNewWorkoutsArray(t *testing.T) {
 
 		workouts := []Workout{
 			{
-				ID:    id1,
 				PK:    UserKey + "user123",
 				SK:    WorkoutKey + id1,
 				Name:  "Workout 1",
@@ -860,7 +854,6 @@ func TestNewWorkoutsArray(t *testing.T) {
 				},
 			},
 			{
-				ID:        id2,
 				PK:        UserKey + "user123",
 				SK:        WorkoutKey + id2,
 				Name:      "Workout 2",
@@ -893,7 +886,6 @@ func TestNewWorkoutsArray(t *testing.T) {
 
 		workouts := []Workout{
 			{
-				ID:        id,
 				PK:        UserKey + "user123",
 				SK:        WorkoutKey + id,
 				Name:      "Single Workout",
@@ -973,11 +965,9 @@ func TestWorkoutExercise_WithMixedSets(t *testing.T) {
 func TestWorkout_EdgeCases(t *testing.T) {
 	t.Run("Workout with very long name", func(t *testing.T) {
 		longName := "This is a very long workout name that might be used in some edge cases where users input extremely long names for their workouts"
-		id := "2025-07-18T05:40:48.329406Z"
 		startTime := time.Now()
 
 		workout := Workout{
-			ID:    id,
 			Name:  longName,
 			Start: startTime,
 		}
