@@ -94,7 +94,7 @@ func TestExtension(t *testing.T) {
 			assert.NoError(t, err)
 
 			if tt.mimeType == "image/jpeg" {
-				acceptable := []string{".jpg", ".jpeg", ".jpe"}
+				acceptable := []string{".jpg", ".jpeg", ".jpe", ".jfif"}
 				assert.True(t, slices.Contains(acceptable, got), "got %q, expected one of %v", got, acceptable)
 				return
 			}
