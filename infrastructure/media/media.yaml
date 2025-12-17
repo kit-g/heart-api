@@ -21,6 +21,10 @@ Parameters:
   AttachFunctionName:
     Type: String
     Default: "heart-attach"  # used in the bucket definition and to refer to it, to avoid cyclic dependencies
+  CachingOptimized:
+    Type: String
+    Default: "658327ea-f89d-4fab-a63d-7e88639e58f6"
+    Description: "CloudFront managed cache policy ID for CachingOptimized"
 
 Mappings:
   Env:
@@ -107,15 +111,13 @@ Resources:
           - PathPattern: "/exercises/*"
             TargetOriginId: ExerciseBucketOrigin
             ViewerProtocolPolicy: https-only
-            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            CachePolicyId: !Ref CachingOptimized
             AllowedMethods:
               - GET
               - HEAD
             CachedMethods:
               - GET
               - HEAD
-            ForwardedValues:
-              QueryString: false
           - PathPattern: "/workouts/*"
             TargetOriginId: UserMediaBucketOrigin
             ViewerProtocolPolicy: https-only
@@ -136,12 +138,10 @@ Resources:
             CachedMethods:
               - GET
               - HEAD
-            ForwardedValues:
-              QueryString: false
           - PathPattern: "/favicon.ico"
             TargetOriginId: UserMediaBucketOrigin
             ViewerProtocolPolicy: https-only
-            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            CachePolicyId: !Ref CachingOptimized
             AllowedMethods:
               - GET
               - HEAD
@@ -151,7 +151,7 @@ Resources:
           - PathPattern: "/config"
             TargetOriginId: UserMediaBucketOrigin
             ViewerProtocolPolicy: https-only
-            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            CachePolicyId: !Ref CachingOptimized
             AllowedMethods:
               - GET
               - HEAD
@@ -161,7 +161,7 @@ Resources:
           - PathPattern: "/templates"
             TargetOriginId: UserMediaBucketOrigin
             ViewerProtocolPolicy: https-only
-            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            CachePolicyId: !Ref CachingOptimized
             AllowedMethods:
               - GET
               - HEAD
@@ -177,8 +177,7 @@ Resources:
           CachedMethods:
             - GET
             - HEAD
-          ForwardedValues:
-            QueryString: false
+          CachePolicyId: !Ref CachingOptimized
         Origins:
           - DomainName: !GetAtt ExerciseBucket.RegionalDomainName
             Id: ExerciseBucketOrigin
