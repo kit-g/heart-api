@@ -23,12 +23,16 @@ func (i Image) Url(domain string) string {
 	return fmt.Sprintf("%s/%s", domain, i.Key)
 }
 
-// ID parses the UUID from the key filename (without extension).
+// imageId parses the UUID from the key filename (without extension).
 // Example: "workouts/abc/019b23cc-4de2-7a19-89a6-0960f4929e4c.png" -> UUID(...)
+func imageId(key string) string {
+	base := path.Base(key) // "....png"
+	ext := path.Ext(base)  // ".png"
+	return strings.TrimSuffix(base, ext)
+}
+
 func (i Image) ID() string {
-	base := path.Base(i.Key)             // "....png"
-	ext := path.Ext(base)                // ".png"
-	return strings.TrimSuffix(base, ext) // "<uuid>"
+	return imageId(i.Key)
 }
 
 type ImageOut struct {
@@ -231,9 +235,22 @@ type ProgressImage struct {
 	ImageKey  *string `dynamodbav:"image_key,omitempty" json:"key,omitempty" example:"workouts/<hash>.jpg"`
 }
 
+func (i ProgressImage) ID() string {
+	return imageId(*i.ImageKey)
+}
+
+func NewImageOut(i ProgressImage) ImageOut {
+	return ImageOut{
+		Key:       *i.ImageKey,
+		URL:       *i.Image,
+		ID:        i.ID(),
+		WorkoutId: i.WorkoutID,
+	}
+}
+
 type ProgressGalleryResponse struct {
-	Images []ProgressImage `json:"images"`
-	Cursor *string         `json:"cursor"`
+	Images []ImageOut `json:"images"`
+	Cursor *string    `json:"cursor"`
 } // @name ProgressGalleryResponse
 
 func ProgressCursorFromSK(sk string) string {

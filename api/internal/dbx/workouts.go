@@ -243,7 +243,7 @@ func RemoveWorkoutImage(ctx context.Context, userId, workoutId, imageId string) 
 	return nil
 }
 
-func GetWorkoutGallery(ctx context.Context, userId string, limit int, cursor string) ([]models.ProgressImage, *string, error) {
+func GetWorkoutGallery(ctx context.Context, userId string, limit int, cursor string) ([]models.ImageOut, *string, error) {
 	pk := models.UserKey + userId
 
 	input := &dynamodb.QueryInput{
@@ -289,5 +289,11 @@ func GetWorkoutGallery(ctx context.Context, userId string, limit int, cursor str
 		}
 	}
 
-	return items, nextCursor, nil
+	outs := make([]models.ImageOut, len(items))
+
+	for index, item := range items {
+		outs[index] = models.NewImageOut(item)
+	}
+
+	return outs, nextCursor, nil
 }

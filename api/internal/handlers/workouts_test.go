@@ -116,13 +116,13 @@ func TestGetWorkoutGallery_DefaultsAndHappyPath(t *testing.T) {
 	var gotPage int
 	var gotCursor string
 
-	dbGetWorkoutGallery = func(ctx context.Context, userId string, pageSize int, cursor string) ([]models.ProgressImage, *string, error) {
+	dbGetWorkoutGallery = func(ctx context.Context, userId string, pageSize int, cursor string) ([]models.ImageOut, *string, error) {
 		gotUser, gotPage, gotCursor = userId, pageSize, cursor
 		next := "2025-07-01T00:00:00Z#2025-12-01T00:00:00Z~aaaa"
-		items := []models.ProgressImage{
+		items := []models.ImageOut{
 			{
-				WorkoutID: "2025-07-25T18:20:01.253622Z",
-				PhotoID:   "2025-12-11T20:41:16.797Z~deadbeef",
+				WorkoutId: "2025-07-25T18:20:01.253622Z",
+				Key:       "workouts/2025-12-11T20:41:16.797Z~deadbeef",
 			},
 		}
 		return items, &next, nil
@@ -149,7 +149,7 @@ func TestGetWorkoutGallery_CustomPageAndCursor(t *testing.T) {
 	var gotPage int
 	var gotCursor string
 
-	dbGetWorkoutGallery = func(ctx context.Context, userId string, pageSize int, cursor string) ([]models.ProgressImage, *string, error) {
+	dbGetWorkoutGallery = func(ctx context.Context, userId string, pageSize int, cursor string) ([]models.ImageOut, *string, error) {
 		gotPage, gotCursor = pageSize, cursor
 		return nil, nil, nil
 	}
@@ -168,7 +168,7 @@ func TestGetWorkoutGallery_CustomPageAndCursor(t *testing.T) {
 
 func TestGetWorkoutGallery_DBErrorMapping(t *testing.T) {
 	orig := dbGetWorkoutGallery
-	dbGetWorkoutGallery = func(ctx context.Context, userId string, pageSize int, cursor string) ([]models.ProgressImage, *string, error) {
+	dbGetWorkoutGallery = func(ctx context.Context, userId string, pageSize int, cursor string) ([]models.ImageOut, *string, error) {
 		return nil, nil, errors.New("boom")
 	}
 	t.Cleanup(func() { dbGetWorkoutGallery = orig })

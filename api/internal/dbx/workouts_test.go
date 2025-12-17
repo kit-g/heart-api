@@ -99,7 +99,6 @@ func TestGetWorkoutGallery_PaginationAndUnmarshal(t *testing.T) {
 		PK:        "USER#u1",
 		SK:        models.ProgressKey + "2025-07-25T18:20:01.253622Z#2025-12-11T20:41:16.797Z~deadbeef",
 		WorkoutID: "2025-07-25T18:20:01.253622Z",
-		PhotoID:   "2025-12-11T20:41:16.797Z~deadbeef",
 		Image:     &imageURL,
 		ImageKey:  &imageKey,
 	}
@@ -151,10 +150,10 @@ func TestGetWorkoutGallery_PaginationAndUnmarshal(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Len(t, items, 1)
-	assert.Equal(t, "2025-07-25T18:20:01.253622Z", items[0].WorkoutID)
-	assert.Equal(t, "2025-12-11T20:41:16.797Z~deadbeef", items[0].PhotoID)
-	assert.NotNil(t, items[0].Image)
-	assert.Equal(t, imageURL, *items[0].Image)
+	assert.Equal(t, "2025-07-25T18:20:01.253622Z", items[0].WorkoutId)
+	assert.Equal(t, "abcd1234", items[0].ID)
+	assert.NotNil(t, items[0].URL)
+	assert.Equal(t, imageURL, items[0].URL)
 
 	assert.NotNil(t, next)
 	assert.Equal(t, "2025-06-01T00:00:00Z#2025-11-01T00:00:00Z~bbbb", *next)

@@ -1075,7 +1075,7 @@ func TestProgressImage_StructFields(t *testing.T) {
 func TestProgressGalleryResponse_CursorNullable(t *testing.T) {
 	t.Run("Cursor nil", func(t *testing.T) {
 		resp := ProgressGalleryResponse{
-			Images: []ProgressImage{},
+			Images: []ImageOut{},
 			Cursor: nil,
 		}
 
@@ -1087,12 +1087,10 @@ func TestProgressGalleryResponse_CursorNullable(t *testing.T) {
 	t.Run("Cursor present", func(t *testing.T) {
 		cursor := "2025-07-25T18:20:01.253622Z#2025-12-11T20:41:16.797Z~deadbeef"
 		resp := ProgressGalleryResponse{
-			Images: []ProgressImage{
+			Images: []ImageOut{
 				{
-					PK:        UserKey + "user123",
-					SK:        ProgressKey + cursor,
-					WorkoutID: "2025-07-25T18:20:01.253622Z",
-					PhotoID:   "2025-12-11T20:41:16.797Z~deadbeef",
+					WorkoutId: "2025-07-25T18:20:01.253622Z",
+					Key:       "workouts/2025-12-11T20:41:16.797Z~deadbeef",
 				},
 			},
 			Cursor: &cursor,
