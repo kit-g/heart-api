@@ -18,6 +18,16 @@ Mappings:
       HostingBucket: ""
 
 Resources:
+  StaticBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::AccountId}-heart-static"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
   GitHubActionsRole:
     Type: AWS::IAM::Role
     Properties:
@@ -32,10 +42,16 @@ Resources:
             Condition:
               StringLike:
                 token.actions.githubusercontent.com:sub:
+                  # backend repository
                   - "repo:kit-g/heart-go:*"
                   - "repo:kit-g/heart-go:ref:refs/heads/*"
                   - "repo:kit-g/heart-go:ref:refs/tags/*"
                   - "repo:kit-g/heart-go:environment:*"
+                  # app repository
+                  - "repo:kit-g/heart-of-yours:*"
+                  - "repo:kit-g/heart-of-yours:ref:refs/heads/*"
+                  - "repo:kit-g/heart-of-yours:ref:refs/tags/*"
+                  - "repo:kit-g/heart-of-yours:environment:*"
 
       Policies:
         - PolicyName: 'WebAppDeploymentPolicy'
@@ -54,6 +70,17 @@ Resources:
                   - !Sub
                     - 'arn:aws:s3:::${Bucket}/*'
                     - Bucket: !FindInMap [ Env, !Ref Env, HostingBucket ]
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:ListBucket'
+                Resource:
+                  - !Sub
+                    - 'arn:aws:s3:::${Bucket}'
+                    - Bucket: !Ref StaticBucket
+                  - !Sub
+                    - 'arn:aws:s3:::${Bucket}/*'
+                    - Bucket: !Ref StaticBucket
               - Effect: Allow
                 Action: 'cloudfront:CreateInvalidation'
                 Resource: !Sub
