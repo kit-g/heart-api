@@ -19,6 +19,9 @@ Parameters:
   DevAppDistribution:
     Type: String
     Default: "dsw54y29hvvfi.cloudfront.net"
+  CommunicationsEmail:
+    Type: String
+    Default: "info@heart-of.me"
 
 
 Resources:
@@ -152,6 +155,16 @@ Resources:
         - "20 mx2.improvmx.com"
       TTL: 14400
       Type: MX
+
+  DmarcRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !GetAtt Zone.Id
+      Name: "_dmarc.heart-of.me"
+      Type: TXT
+      TTL: 3600
+      ResourceRecords:
+        - !Sub "\"v=DMARC1; p=none; rua=mailto:${CommunicationsEmail}\""
 
   TxtRecord:
     Type: AWS::Route53::RecordSet
