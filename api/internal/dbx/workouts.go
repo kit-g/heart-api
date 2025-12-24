@@ -70,7 +70,6 @@ func SaveWorkout(ctx context.Context, in models.Workout) (*models.Workout, error
 			":start":     startAV,
 			":exercises": exercisesAV,
 		},
-		ConditionExpression: aws.String("attribute_exists(PK) AND attribute_exists(SK)"),
 	}
 
 	setParts := []string{
