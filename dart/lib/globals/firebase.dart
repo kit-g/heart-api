@@ -1,4 +1,4 @@
-import 'package:heart/models/user.dart';
+import 'package:heart_models/models.dart';
 import 'package:openid_client/openid_client.dart';
 import 'package:relic/relic.dart';
 
