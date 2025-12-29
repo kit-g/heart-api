@@ -1,4 +1,4 @@
-import 'model.dart';
+import 'package:heart_models/heart_models.dart';
 
 abstract class ApiException implements Model {
   int get statusCode;
