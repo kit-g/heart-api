@@ -1,4 +1,4 @@
-import 'package:heart_models/models.dart';
+import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
 final _userProperty = ContextProperty<User>('RequestUser');

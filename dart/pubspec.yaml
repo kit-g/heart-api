@@ -1,7 +1,8 @@
 name: heart
 description: "Heart of Yours API"
 version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+repository: "https://github.com/kit-g/heart-api.git"
+publish_to: none
 
 environment:
   sdk: ^3.10.4
@@ -10,9 +11,10 @@ dependencies:
   relic: ^0.14.0
   openid_client: ^0.4.9+2
   heart_models:
-
-workspace:
-  - "shared/models"
+    git:
+      url: "https://github.com/kit-g/heart-of-yours.git"
+      ref: "main"
+      path: "shared/heart_models"
 
 dev_dependencies:
   lints: ^6.0.0
