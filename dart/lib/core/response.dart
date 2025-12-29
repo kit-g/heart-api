@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:heart_models/models.dart';
+import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
 class _NotFound implements Model {
