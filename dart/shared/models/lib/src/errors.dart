@@ -1,4 +1,4 @@
-import 'package:heart/models/model.dart';
+import 'model.dart';
 
 abstract class ApiException implements Model {
   int get statusCode;
@@ -20,10 +20,7 @@ class NotFound implements ApiException {
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      'error': 'not found',
-      'message': toString(),
-    };
+    return {'error': 'not found', 'message': toString()};
   }
 
   @override

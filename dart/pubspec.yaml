@@ -9,6 +9,10 @@ environment:
 dependencies:
   relic: ^0.14.0
   openid_client: ^0.4.9+2
+  heart_models:
+
+workspace:
+  - "shared/models"
 
 dev_dependencies:
   lints: ^6.0.0
