@@ -1,8 +1,12 @@
-name: "Deploy"
+name: "Deploy Go API"
 
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'api/**'
+      - '.github/workflows/deploy-v1.yaml'
+      - 'infrastructure/api/**'
   workflow_dispatch:
 
 permissions:
@@ -127,6 +131,7 @@ jobs:
             --function-name ${{ env.FUNCTION_NAME }} \
             --zip-file fileb://api/function.zip \
             --region ${{ env.AWS_REGION }} > /dev/null
+
 
   smoke-test:
     name: "Smoke Test Deployed API"
