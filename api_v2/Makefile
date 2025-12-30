@@ -5,6 +5,7 @@ build-ApiV2Function:
 	dart pub get
 	dart compile exe bin/main.dart \
 		-DCOMMIT='$(COMMIT)' \
-		-DBUILD_TIME=$(BUILD_TIME) \
-		-o bootstrap \
-		--target-os=linux
+		-DBUILD_TIME='$(BUILD_TIME)' \
+		--target-os=linux \
+		--target-arch=arm64 \
+		-o $(ARTIFACTS_DIR)/bootstrap
