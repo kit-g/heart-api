@@ -29,6 +29,8 @@ class JsonResponse<T extends Model> extends Response {
 
   JsonResponse.ok({T? body, Headers? headers}) : this(200, body: body, headers: headers);
 
+  JsonResponse.noContent({Headers? headers}) : this(204, headers: headers);
+
   JsonResponse.unauthorized({T? body, Headers? headers}) : this(401, body: body, headers: headers);
 
   JsonResponse.forbidden({T? body, Headers? headers}) : this(403, body: body, headers: headers);
@@ -48,4 +50,4 @@ class JsonResponse<T extends Model> extends Response {
       );
 }
 
-typedef ModelHandler = Future<Model> Function(Request);
+typedef ModelHandler = Future<Model?> Function(Request);
