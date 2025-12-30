@@ -26,11 +26,7 @@ import (
 	"heart/internal/routerx"
 	"strings"
 
-	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/awslabs/aws-lambda-go-api-proxy/gin"
-
 	"log"
-	"os"
 )
 
 func Init() {
@@ -67,17 +63,7 @@ func main() {
 
 	r := routerx.Router(config.App.CORSOrigins)
 
-	mode := os.Getenv("MODE")
-
-	if mode == "lambda" {
-		// Route Gin router with the Lambda adapter
-		log.Println("Running in Lambda mode...")
-		lambda.Start(ginadapter.New(r).ProxyWithContext)
-	} else {
-		// Default: local dev mode
-		log.Println("Running in local mode on :8080...")
-		if err := r.Run(":8080"); err != nil {
-			log.Fatal("Server failed to start:", err)
-		}
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal("Server failed to start:", err)
 	}
 }
