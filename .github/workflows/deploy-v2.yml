@@ -2,7 +2,7 @@ name: "Deploy Dart API"
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, new-app ]
     paths:
       - 'api_v2/**'
       - '.github/workflows/deploy-v2.yaml'
