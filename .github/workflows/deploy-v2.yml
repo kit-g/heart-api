@@ -41,7 +41,7 @@ jobs:
 
       - name: "Export commit SHA"
         id: commit
-        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        run: echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - uses: dart-lang/setup-dart@v1
 
@@ -65,12 +65,15 @@ jobs:
             --zip-file fileb://api_v2/function.zip \
             --region ${{ env.AWS_REGION }} > /dev/null
 
+    outputs:
+      commit: ${{ steps.save-commit.outputs.sha }}
+
   smoke-test:
     name: "Smoke Test"
     runs-on: ubuntu-latest
     needs: [ build-and-deploy ]
     env:
-      EXPECTED_COMMIT: ${{ needs.build-and-deploy.outputs.sha }}
+      EXPECTED_COMMIT: ${{ needs.build-and-deploy.outputs.commit }}
     steps:
       - name: "Check /charts endpoint"
         run: |
