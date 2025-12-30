@@ -34,15 +34,29 @@ abstract interface class AppConfig {
   String? get testUserId;
 
   factory AppConfig.fromEnv() {
-    return _EnvConfig(
-      awsProfile: Platform.environment['AWS_PROFILE'],
-      awsRegion: Platform.environment['REGION']!,
-      env: Env.fromString(Platform.environment['ENV']!),
-      firebaseProjectId: Platform.environment['FIREBASE_PROJECT_ID']!,
-      logLevel: Platform.environment['LOG_LEVEL'] ?? 'ALL',
-      workoutsTable: Platform.environment['WORKOUTS_TABLE']!,
-      testUserId: Platform.environment['TEST_USER_ID'],
-    );
+    switch (Platform.environment) {
+      case {
+            'REGION': String region,
+            'ENV': String env,
+            'FIREBASE_PROJECT_ID': String firebaseProjectId,
+            'WORKOUTS_TABLE': String table,
+          }
+          when [region, env, firebaseProjectId, table].every((v) => v.isNotEmpty):
+        return _EnvConfig(
+          awsProfile: Platform.environment['AWS_PROFILE'],
+          awsRegion: region,
+          env: Env.fromString(env),
+          firebaseProjectId: firebaseProjectId,
+          logLevel: Platform.environment['LOG_LEVEL'] ?? 'ALL',
+          workoutsTable: table,
+          testUserId: Platform.environment['TEST_USER_ID'],
+        );
+      default:
+        throw StateError(
+          'Missing required environment variables. '
+          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, and WORKOUTS_TABLE are set.',
+        );
+    }
   }
 }
 
