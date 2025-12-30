@@ -34,15 +34,17 @@ Mappings:
     dev:
       AccountDeletionOffset: 2 # days
       CorsOrigins: "https://dev.media.heart-of.me,https://dev.app.heart-of.me,http://localhost:8080"
+      FirebaseProjectId: "heart-of-yours-dev"
       LogRetention: 3 # days
-      UploadBucket: "583168578067-upload"
       MediaBucket: "583168578067-user-media"
       MediaDistribution: "https://dev.media.heart-of.me"
       NeedDatabaseDeletionProtection: false
       SwaggerDocsEnabled: true
+      UploadBucket: "583168578067-upload"
     prod:
       AccountDeletionOffset: 30 # days
       CorsOrigins: "https://media.heart-of.me,https://app.heart-of.me"
+      FirebaseProjectId: ""
       LogRetention: 90 # days
       MediaDistribution: ""
       NeedDatabaseDeletionProtection: true
@@ -76,6 +78,9 @@ Resources:
     Properties:
       Name: "heart-api"
       Description: "Heart of yours API"
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
 
   ScheduleGroup:
     Type: AWS::Scheduler::ScheduleGroup
@@ -167,10 +172,31 @@ Resources:
                 Resource:
                   - !GetAtt WorkoutsDatabase.Arn
 
-  ProxyResource:
+  V1Resource:
     Type: AWS::ApiGateway::Resource
     Properties:
       ParentId: !GetAtt Api.RootResourceId
+      PathPart: "v1"
+      RestApiId: !Ref Api
+
+  V2Resource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt Api.RootResourceId
+      PathPart: "v2"
+      RestApiId: !Ref Api
+
+  ProxyResourceV1:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref V1Resource
+      PathPart: "{proxy+}"
+      RestApiId: !Ref Api
+
+  ProxyResourceV2:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref V2Resource
       PathPart: "{proxy+}"
       RestApiId: !Ref Api
 
@@ -206,6 +232,9 @@ Resources:
       Description: "Part of Heart: API handler"
       Environment:
         Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: "/opt/bootstrap"
+          AWS_LWA_PORT: 8080
+          AWS_LWA_REMOVE_BASE_PATH: "/v1"
           ACCOUNT_DELETION_OFFSET: !FindInMap [ Env, !Ref Env, AccountDeletionOffset ]
           BACKGROUND_FUNCTION: !GetAtt BackgroundFunction.Arn
           BACKGROUND_ROLE: !GetAtt LambdaExecutionRole.Arn
@@ -215,7 +244,6 @@ Resources:
           MEDIA_BUCKET: !FindInMap [ Env, !Ref Env, MediaBucket ]
           MEDIA_DISTRIBUTION_ALIAS: !FindInMap [ Env, !Ref Env, MediaDistribution ]
           MIN_APP_VERSION: "1.0.0"
-          MODE: "lambda"
           MONITORING_TOPIC: !Ref MonitoringTopic
           REGION: !Ref AWS::Region
           SCHEDULE_GROUP: !Ref ScheduleGroup
@@ -225,12 +253,42 @@ Resources:
           UPLOAD_BUCKET: !FindInMap [ Env, !Ref Env, UploadBucket ]
           WORKOUTS_TABLE: !Ref WorkoutsDatabase
       FunctionName: "heart-api"
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:753240598075:layer:LambdaAdapterLayerArm64:25"
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  ApiV2Function:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: ../../api_v2/ # where Makefile is
+      Description: "Part of Heart: API handler, v2"
+      Environment:
+        Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: "/opt/bootstrap"
+          AWS_LWA_PORT: 8080
+          AWS_LWA_REMOVE_BASE_PATH: "/v2"
+          ENV: !Ref Env
+          FIREBASE_PROJECT_ID: !FindInMap [ Env, !Ref Env, FirebaseProjectId ]
+          LOG_LEVEL: "ALL"
+          REGION: !Ref AWS::Region
+          WORKOUTS_TABLE: !Ref WorkoutsDatabase
+      FunctionName: "heart-api-v2"
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:753240598075:layer:LambdaAdapterLayerArm64:25"
       Role: !GetAtt LambdaExecutionRole.Arn
 
   ApiFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub  "/aws/lambda/${ApiFunction}"
+      RetentionInDays: !FindInMap [ Env, !Ref Env, LogRetention ]
+
+  ApiV2LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ApiV2Function}"
       RetentionInDays: !FindInMap [ Env, !Ref Env, LogRetention ]
 
   BackgroundFunctionLogGroup:
@@ -249,12 +307,22 @@ Resources:
         - "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*"
         - Api: !Ref Api
 
-  ApiMethod:
+  ApiV2Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ApiV2Function.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub
+        - "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*"
+        - Api: !Ref Api
+
+  ApiV1Method:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: None
       RestApiId: !Ref Api
-      ResourceId: !Ref ProxyResource
+      ResourceId: !Ref ProxyResourceV1
       HttpMethod: ANY
       Integration:
         Type: AWS_PROXY
@@ -263,10 +331,27 @@ Resources:
           Fn::Sub: >-
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiFunction.Arn}/invocations
 
+  ApiV2Method:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: None
+      RestApiId: !Ref Api
+      ResourceId: !Ref ProxyResourceV2
+      HttpMethod: ANY
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Sub: >-
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiV2Function.Arn}/invocations
+
   Deployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
       - ApiFunction
+      - ApiV2Function
+      - ApiV1Method
+      - ApiV2Method
     Properties:
       RestApiId: !Ref Api
 
