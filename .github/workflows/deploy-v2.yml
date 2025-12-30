@@ -43,7 +43,7 @@ jobs:
         working-directory: api_v2
         run: |
           dart pub get
-          ARTIFACTS_DIR=. make build-ApiV2Function
+          COMMIT=${{ github.sha }} ARTIFACTS_DIR=. make build-ApiV2Function
           zip function.zip bootstrap
 
       - name: "Configure AWS Credentials"
