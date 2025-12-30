@@ -1371,7 +1371,7 @@ const docTemplate = `{
                 "images": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.ProgressImage"
+                        "$ref": "#/definitions/Image"
                     }
                 }
             }
@@ -1677,27 +1677,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/Workout"
                     }
-                }
-            }
-        },
-        "models.ProgressImage": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "example": "2025-12-11T20:41:16.797Z~deadbeef"
-                },
-                "key": {
-                    "type": "string",
-                    "example": "workouts/\u003chash\u003e.jpg"
-                },
-                "url": {
-                    "type": "string",
-                    "example": "https://\u003ccdn-domain\u003e/workouts/\u003chash\u003e.jpg?v=\u003ccache-bust\u003e"
-                },
-                "workoutId": {
-                    "type": "string",
-                    "example": "2025-07-25T18:20:01.253622Z"
                 }
             }
         }
