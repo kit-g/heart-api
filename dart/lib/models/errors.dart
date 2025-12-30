@@ -26,3 +26,29 @@ class NotFound implements ApiException {
   @override
   int get statusCode => 404;
 }
+
+class NoContent implements ApiException {
+  const NoContent();
+
+  @override
+  Map<String, dynamic> toMap() {
+    throw UnimplementedError(); // no body
+  }
+
+  @override
+  int get statusCode => 204;
+}
+
+class BadRequest implements ApiException {
+  final String reason;
+
+  const BadRequest({required this.reason});
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {'error': 'bad request', 'reason': reason};
+  }
+
+  @override
+  int get statusCode => 400;
+}
