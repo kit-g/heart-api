@@ -55,7 +55,7 @@ Future<void> main() async {
     ..use('/', logRequests())
     ..use('/', configuration(override: config))
     ..use('/', authenticator(implementation: testAuth))
-    ..use('/', authentication())
+    ..use('/', authentication(shouldAuthenticate: (req) => !publicRoutes.contains(req.url.path)))
     ..use('/charts', chartsDb(db: database))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 
