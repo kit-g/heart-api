@@ -66,6 +66,4 @@ jobs:
     steps:
       - name: "Check /charts endpoint"
         run: |
-          # Note: This expects a 401/Unauthorized if no token is provided, 
-          # which confirms the Lambda is alive and Relic is running.
           curl -sI https://bsm50dxdal.execute-api.ca-central-1.amazonaws.com/api/v2/charts | grep "401"
