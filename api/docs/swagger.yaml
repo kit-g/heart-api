@@ -1,1135 +1,1219 @@
-basePath: /
-definitions:
-  EditAccountRequest:
-    properties:
-      action:
-        example: removeAvatar
-        type: string
-      mimeType:
-        example: image/png
-        type: string
-    required:
-    - action
-    type: object
-  EditExerciseIn:
-    properties:
-      archived:
-        type: boolean
-      category:
-        example: Body weight
-        type: string
-      instructions:
-        example: Keep your body straight and lower yourself until your chest almost
-          touches the ground.
-        type: string
-      target:
-        example: Chest
-        type: string
-    type: object
-  ErrorResponse:
-    properties:
-      code:
-        example: InternalError
-        type: string
-      error:
-        example: An unexpected error occurred
-        type: string
-    type: object
-  Exercise:
-    properties:
-      archived:
-        type: boolean
-      asset:
-        $ref: '#/definitions/ImageDescription'
-      category:
-        example: Body weight
-        type: string
-      instructions:
-        example: Keep your body straight and lower yourself until your chest almost
-          touches the ground.
-        type: string
-      name:
-        example: Push Up
-        type: string
-      own:
-        type: boolean
-      target:
-        example: Chest
-        type: string
-      thumbnail:
-        $ref: '#/definitions/ImageDescription'
-    required:
-    - category
-    - name
-    - target
-    type: object
-  ExercisesResponse:
-    properties:
-      exercises:
-        items:
-          $ref: '#/definitions/Exercise'
-        type: array
-    type: object
-  FeedbackRequest:
-    properties:
-      message:
-        example: Good job!
-        type: string
-    required:
-    - message
-    type: object
-  HasMimeType:
-    properties:
-      mimeType:
-        example: image/png
-        type: string
-    type: object
-  Image:
-    properties:
-      id:
-        example: 019b23cc-4de2-7a19-89a6-0960f4929e4c
-        type: string
-      key:
-        example: workouts/<workout>/<uuidv7>.png
-        type: string
-      url:
-        example: https://<cdn-domain>/workouts/<workout>/<uuidv7>.png
-        type: string
-      workoutId:
-        example: "2025-07-25T18:20:01.253622Z"
-        type: string
-    type: object
-  ImageDescription:
-    properties:
-      height:
-        example: 100
-        type: integer
-      link:
-        example: https://example.com/image.jpg
-        type: string
-      width:
-        example: 100
-        type: integer
-    required:
-    - link
-    type: object
-  PresignedUrlResponse:
-    properties:
-      destinationUrl:
-        type: string
-      fields:
-        additionalProperties:
-          type: string
-        type: object
-      url:
-        type: string
-    type: object
-  ProgressGalleryResponse:
-    properties:
-      cursor:
-        type: string
-      images:
-        items:
-          $ref: '#/definitions/models.ProgressImage'
-        type: array
-    type: object
-  Set:
-    properties:
-      completed:
-        example: true
-        type: boolean
-      distance:
-        example: 10
-        type: number
-      duration:
-        example: 10
-        type: number
-      id:
-        example: "2025-07-18T05:40:48.329406Z"
-        type: string
-      reps:
-        example: 10
-        type: integer
-      weight:
-        example: 100
-        type: number
-    required:
-    - completed
-    - id
-    type: object
-  Template:
-    properties:
-      exercises:
-        items:
-          $ref: '#/definitions/TemplateExercise'
-        type: array
-      id:
-        example: "2"
-        type: string
-      name:
-        example: Legs & Shoulders
-        type: string
-      order:
-        example: 1
-        type: integer
-    type: object
-  TemplateExercise:
-    properties:
-      exercise:
-        type: string
-      id:
-        example: "2025-07-18T05:40:48.329406Z"
-        type: string
-      order:
-        type: integer
-      sets:
-        items:
-          $ref: '#/definitions/Set'
-        type: array
-    type: object
-  TemplateIn:
-    properties:
-      exercises:
-        items:
-          $ref: '#/definitions/TemplateExercise'
-        type: array
-      id:
-        type: string
-      name:
-        type: string
-      order:
-        type: integer
-    type: object
-  User:
-    properties:
-      accountDeletionSchedule:
-        example: arn:aws:scheduler:ca-central-1:123:schedule/account-deletions/account-deletion-123
-        type: string
-      avatar:
-        example: https://example.com/avatar.png
-        type: string
-      displayName:
-        example: jane_doe
-        type: string
-      email:
-        example: jane_doe@mail.com
-        type: string
-      id:
-        example: HW4beTVvbTUPRxun9MXZxwKPjmC2
-        type: string
-      scheduledForDeletionAt:
-        example: "2022-01-01T00:00:00.000Z"
-        type: string
-    required:
-    - id
-    type: object
-  UserExercise:
-    properties:
-      category:
-        example: Body weight
-        type: string
-      instructions:
-        example: Keep your body straight and lower yourself until your chest almost
-          touches the ground.
-        type: string
-      name:
-        example: Push Up
-        type: string
-      target:
-        example: Chest
-        type: string
-    required:
-    - category
-    - name
-    - target
-    type: object
-  UserIn:
-    properties:
-      avatar:
-        example: https://example.com/avatar.png
-        type: string
-      displayName:
-        example: jane_doe
-        type: string
-      email:
-        example: jane_doe@mail.com
-        type: string
-      id:
-        example: HW4beTVvbTUPRxun9MXZxwKPjmC2
-        type: string
-    required:
-    - id
-    type: object
-  Workout:
-    properties:
-      end:
-        example: "2023-01-01T12:00:00Z"
-        type: string
-      exercises:
-        items:
-          $ref: '#/definitions/WorkoutExercise'
-        type: array
-      id:
-        example: "2025-07-18T05:40:48.329406Z"
-        type: string
-      images:
-        items:
-          $ref: '#/definitions/Image'
-        type: array
-      name:
-        example: Legs
-        type: string
-      start:
-        example: "2023-01-01T12:00:00Z"
-        type: string
-    type: object
-  WorkoutExercise:
-    properties:
-      exercise:
-        example: Push Up
-        type: string
-      id:
-        example: "2025-07-18T05:40:48.329406Z"
-        type: string
-      sets:
-        items:
-          $ref: '#/definitions/Set'
-        type: array
-    type: object
-  WorkoutExerciseIn:
-    properties:
-      exercise:
-        example: Push Up
-        type: string
-      id:
-        example: "2025-07-18T05:40:48.329406Z"
-        type: string
-      order:
-        example: 1
-        type: integer
-      sets:
-        items:
-          $ref: '#/definitions/Set'
-        type: array
-    required:
-    - exercise
-    - id
-    type: object
-  WorkoutIn:
-    properties:
-      end:
-        example: "2023-01-01T12:00:00Z"
-        type: string
-      exercises:
-        items:
-          $ref: '#/definitions/WorkoutExerciseIn'
-        type: array
-      id:
-        example: "2025-07-18T05:40:48.329406Z"
-        type: string
-      name:
-        example: Legs
-        type: string
-      start:
-        example: "2023-01-01T12:00:00Z"
-        type: string
-    required:
-    - exercises
-    - id
-    - start
-    type: object
-  WorkoutResponse:
-    properties:
-      cursor:
-        type: string
-      workouts:
-        items:
-          $ref: '#/definitions/Workout'
-        type: array
-    type: object
-  models.ProgressImage:
-    properties:
-      id:
-        example: 2025-12-11T20:41:16.797Z~deadbeef
-        type: string
-      key:
-        example: workouts/<hash>.jpg
-        type: string
-      url:
-        example: https://<cdn-domain>/workouts/<hash>.jpg?v=<cache-bust>
-        type: string
-      workoutId:
-        example: "2025-07-25T18:20:01.253622Z"
-        type: string
-    type: object
-host: localhost:8080
+components:
+    schemas:
+        EditAccountRequest:
+            properties:
+                action:
+                    example: removeAvatar
+                    type: string
+                mimeType:
+                    example: image/png
+                    type: string
+            required:
+                - action
+            type: object
+        EditExerciseIn:
+            properties:
+                archived:
+                    type: boolean
+                category:
+                    example: Body weight
+                    type: string
+                instructions:
+                    example: Keep your body straight and lower yourself until your chest almost touches the ground.
+                    type: string
+                target:
+                    example: Chest
+                    type: string
+            type: object
+        ErrorResponse:
+            properties:
+                code:
+                    example: InternalError
+                    type: string
+                error:
+                    example: An unexpected error occurred
+                    type: string
+            type: object
+        Exercise:
+            properties:
+                archived:
+                    type: boolean
+                asset:
+                    $ref: '#/components/schemas/ImageDescription'
+                category:
+                    example: Body weight
+                    type: string
+                instructions:
+                    example: Keep your body straight and lower yourself until your chest almost touches the ground.
+                    type: string
+                name:
+                    example: Push Up
+                    type: string
+                own:
+                    type: boolean
+                target:
+                    example: Chest
+                    type: string
+                thumbnail:
+                    $ref: '#/components/schemas/ImageDescription'
+            required:
+                - category
+                - name
+                - target
+            type: object
+        ExercisesResponse:
+            properties:
+                exercises:
+                    items:
+                        $ref: '#/components/schemas/Exercise'
+                    type: array
+            type: object
+        FeedbackRequest:
+            properties:
+                message:
+                    example: Good job!
+                    type: string
+            required:
+                - message
+            type: object
+        HasMimeType:
+            properties:
+                mimeType:
+                    example: image/png
+                    type: string
+            type: object
+        Image:
+            properties:
+                id:
+                    example: 019b23cc-4de2-7a19-89a6-0960f4929e4c
+                    type: string
+                key:
+                    example: workouts/<workout>/<uuidv7>.png
+                    type: string
+                url:
+                    example: https://<cdn-domain>/workouts/<workout>/<uuidv7>.png
+                    type: string
+                workoutId:
+                    example: "2025-07-25T18:20:01.253622Z"
+                    type: string
+            type: object
+        ImageDescription:
+            properties:
+                height:
+                    example: 100
+                    type: integer
+                link:
+                    example: https://example.com/image.jpg
+                    type: string
+                width:
+                    example: 100
+                    type: integer
+            required:
+                - link
+            type: object
+        PresignedUrlResponse:
+            properties:
+                destinationUrl:
+                    type: string
+                fields:
+                    additionalProperties:
+                        type: string
+                    type: object
+                url:
+                    type: string
+            type: object
+        ProgressGalleryResponse:
+            properties:
+                cursor:
+                    type: string
+                images:
+                    items:
+                        $ref: '#/components/schemas/Image'
+                    type: array
+            type: object
+        Set:
+            properties:
+                completed:
+                    example: true
+                    type: boolean
+                distance:
+                    example: 10
+                    type: number
+                duration:
+                    example: 10
+                    type: number
+                id:
+                    example: "2025-07-18T05:40:48.329406Z"
+                    type: string
+                reps:
+                    example: 10
+                    type: integer
+                weight:
+                    example: 100
+                    type: number
+            required:
+                - completed
+                - id
+            type: object
+        Template:
+            properties:
+                exercises:
+                    items:
+                        $ref: '#/components/schemas/TemplateExercise'
+                    type: array
+                id:
+                    example: "2"
+                    type: string
+                name:
+                    example: Legs & Shoulders
+                    type: string
+                order:
+                    example: 1
+                    type: integer
+            type: object
+        TemplateExercise:
+            properties:
+                exercise:
+                    type: string
+                id:
+                    example: "2025-07-18T05:40:48.329406Z"
+                    type: string
+                order:
+                    type: integer
+                sets:
+                    items:
+                        $ref: '#/components/schemas/Set'
+                    type: array
+            type: object
+        TemplateIn:
+            properties:
+                exercises:
+                    items:
+                        $ref: '#/components/schemas/TemplateExercise'
+                    type: array
+                id:
+                    type: string
+                name:
+                    type: string
+                order:
+                    type: integer
+            type: object
+        User:
+            properties:
+                accountDeletionSchedule:
+                    example: arn:aws:scheduler:ca-central-1:123:schedule/account-deletions/account-deletion-123
+                    type: string
+                avatar:
+                    example: https://example.com/avatar.png
+                    type: string
+                displayName:
+                    example: jane_doe
+                    type: string
+                email:
+                    example: jane_doe@mail.com
+                    type: string
+                id:
+                    example: HW4beTVvbTUPRxun9MXZxwKPjmC2
+                    type: string
+                scheduledForDeletionAt:
+                    example: "2022-01-01T00:00:00.000Z"
+                    type: string
+            required:
+                - id
+            type: object
+        UserExercise:
+            properties:
+                category:
+                    example: Body weight
+                    type: string
+                instructions:
+                    example: Keep your body straight and lower yourself until your chest almost touches the ground.
+                    type: string
+                name:
+                    example: Push Up
+                    type: string
+                target:
+                    example: Chest
+                    type: string
+            required:
+                - category
+                - name
+                - target
+            type: object
+        UserIn:
+            properties:
+                avatar:
+                    example: https://example.com/avatar.png
+                    type: string
+                displayName:
+                    example: jane_doe
+                    type: string
+                email:
+                    example: jane_doe@mail.com
+                    type: string
+                id:
+                    example: HW4beTVvbTUPRxun9MXZxwKPjmC2
+                    type: string
+            required:
+                - id
+            type: object
+        Workout:
+            properties:
+                end:
+                    example: "2023-01-01T12:00:00Z"
+                    type: string
+                exercises:
+                    items:
+                        $ref: '#/components/schemas/WorkoutExercise'
+                    type: array
+                id:
+                    example: "2025-07-18T05:40:48.329406Z"
+                    type: string
+                images:
+                    items:
+                        $ref: '#/components/schemas/Image'
+                    type: array
+                name:
+                    example: Legs
+                    type: string
+                start:
+                    example: "2023-01-01T12:00:00Z"
+                    type: string
+            type: object
+        WorkoutExercise:
+            properties:
+                exercise:
+                    example: Push Up
+                    type: string
+                id:
+                    example: "2025-07-18T05:40:48.329406Z"
+                    type: string
+                sets:
+                    items:
+                        $ref: '#/components/schemas/Set'
+                    type: array
+            type: object
+        WorkoutExerciseIn:
+            properties:
+                exercise:
+                    example: Push Up
+                    type: string
+                id:
+                    example: "2025-07-18T05:40:48.329406Z"
+                    type: string
+                order:
+                    example: 1
+                    type: integer
+                sets:
+                    items:
+                        $ref: '#/components/schemas/Set'
+                    type: array
+            required:
+                - exercise
+                - id
+            type: object
+        WorkoutIn:
+            properties:
+                end:
+                    example: "2023-01-01T12:00:00Z"
+                    type: string
+                exercises:
+                    items:
+                        $ref: '#/components/schemas/WorkoutExerciseIn'
+                    type: array
+                id:
+                    example: "2025-07-18T05:40:48.329406Z"
+                    type: string
+                name:
+                    example: Legs
+                    type: string
+                start:
+                    example: "2023-01-01T12:00:00Z"
+                    type: string
+            required:
+                - exercises
+                - id
+                - start
+            type: object
+        WorkoutResponse:
+            properties:
+                cursor:
+                    type: string
+                workouts:
+                    items:
+                        $ref: '#/components/schemas/Workout'
+                    type: array
+            type: object
+    securitySchemes:
+        BearerAuth:
+            in: header
+            name: Authorization
+            type: apiKey
 info:
-  contact:
-    name: Kit
-    url: https://github.com/kit-g
-  description: A simple fitness tracker API
-  license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
-  termsOfService: http://swagger.io/terms/
-  title: Heart of Yours API
-  version: "1.0"
+    contact:
+        name: Kit
+        url: https://github.com/kit-g
+    description: A simple fitness tracker API
+    license:
+        name: MIT
+        url: https://opensource.org/licenses/MIT
+    termsOfService: http://swagger.io/terms/
+    title: Heart of Yours API
+    version: "1.0"
+openapi: 3.0.3
 paths:
-  /accounts:
-    delete:
-      consumes:
-      - application/json
-      description: Schedules account deletion for the authenticated user
-      operationId: deleteAccount
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Delete user account
-      tags:
-      - accounts
-    post:
-      consumes:
-      - application/json
-      description: Accounts are managed by Firebase so we just need to store them
-      operationId: registerAccount
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: User request
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/UserIn'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/User'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Creates an account record
-      tags:
-      - accounts
-  /accounts/{accountId}:
-    get:
-      consumes:
-      - application/json
-      description: Returns user account information for the authenticated user
-      operationId: getAccount
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Account ID
-        in: path
-        name: accountId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/User'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get user account
-      tags:
-      - accounts
-    put:
-      consumes:
-      - application/json
-      description: 'Performs various account editing actions: undoAccountDeletion,
-        removeAvatar, uploadAvatar'
-      operationId: editAccount
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Account ID
-        in: path
-        name: accountId
-        required: true
-        type: string
-      - description: Edit account request
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/EditAccountRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/PresignedUrlResponse'
-        "204":
-          description: No Content
-        "400":
-          description: Validation error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Edit user account
-      tags:
-      - accounts
-  /exercises:
-    get:
-      consumes:
-      - application/json
-      description: Returns all exercises in a single page
-      operationId: getExercises
-      parameters:
-      - description: Client app version (e.g., 2.8.0)
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Filter exercises created by the authenticated user
-        in: query
-        name: owned
-        type: boolean
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ExercisesResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: List all exercises
-      tags:
-      - workouts
-    post:
-      consumes:
-      - application/json
-      description: Creates a new user exercise with the provided details
-      operationId: makeExercise
-      parameters:
-      - description: Client app version (e.g., 2.8.0)
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Exercise details
-        in: body
-        name: exercise
-        required: true
-        schema:
-          $ref: '#/definitions/UserExercise'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Exercise'
-        "400":
-          description: Validation error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Create new exercise
-      tags:
-      - workouts
-  /exercises/{exerciseName}:
-    put:
-      consumes:
-      - application/json
-      description: Edits target, category and instructions for the exercise created
-        by the authenticated user
-      operationId: editExercise
-      parameters:
-      - description: Client app version (e.g., 2.8.0)
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Name of the exercise to edit
-        in: path
-        name: exerciseName
-        required: true
-        type: string
-      - description: Exercise fields to edit
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/EditExerciseIn'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Exercise'
-        "400":
-          description: Validation error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Edit an exercise
-      tags:
-      - workouts
-  /feedback:
-    post:
-      consumes:
-      - application/json
-      description: Allows users to submit feedback with a message and optionally attach
-        a screenshot
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Feedback details
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/FeedbackRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/PresignedUrlResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Submit user feedback
-      tags:
-      - feedback
-  /templates:
-    get:
-      consumes:
-      - application/json
-      description: Returns all workout templates for the authenticated user
-      operationId: getTemplates
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/Template'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Lists workout templates
-      tags:
-      - templates
-    post:
-      consumes:
-      - application/json
-      description: Validates, saves and returns a workout template
-      operationId: makeTemplate
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Template request
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/TemplateIn'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Template'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Creates a workout template
-      tags:
-      - templates
-  /templates/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Deletes a specific workout template by ID
-      operationId: deleteTemplate
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Template ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Delete workout template
-      tags:
-      - templates
-    get:
-      consumes:
-      - application/json
-      description: Returns a specific workout template by ID
-      operationId: getTemplate
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Template ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Template'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get workout template
-      tags:
-      - templates
-  /workouts:
-    get:
-      consumes:
-      - application/json
-      description: Returns paginated list of user workouts with exercises and sets
-      operationId: getWorkouts
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Page size for pagination
-        in: query
-        name: pageSize
-        type: integer
-      - description: Cursor for pagination
-        in: query
-        name: cursor
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/WorkoutResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Returns user workouts
-      tags:
-      - workouts
-    post:
-      consumes:
-      - application/json
-      description: Validates, saves and returns a workout
-      operationId: makeWorkout
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Workout request
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/WorkoutIn'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Workout'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Creates a workout
-      tags:
-      - workouts
-  /workouts/{workoutId}:
-    delete:
-      consumes:
-      - application/json
-      description: Deletes a workout by ID
-      operationId: deleteWorkout
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Workout ID
-        in: path
-        name: workoutId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Deletes a workout
-      tags:
-      - workouts
-    get:
-      consumes:
-      - application/json
-      description: Returns a single workout by ID with exercises and sets
-      operationId: getWorkout
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Workout ID
-        in: path
-        name: workoutId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Workout'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Returns a workout
-      tags:
-      - workouts
-  /workouts/{workoutId}/image:
-    put:
-      consumes:
-      - application/json
-      description: Generates presigned URL and form fields for uploading workout files
-        to S3
-      operationId: makeWorkoutPresignedUrl
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Workout ID
-        in: path
-        name: workoutId
-        required: true
-        type: string
-      - description: Upload request
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/HasMimeType'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/PresignedUrlResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Generates presigned URL for workout file upload
-      tags:
-      - workouts
-  /workouts/{workoutId}/images:
-    delete:
-      consumes:
-      - application/json
-      description: Deletes the image associated with a workout from S3 and removes
-        the image reference from DynamoDB
-      operationId: deleteWorkoutImage
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Workout ID
-        in: path
-        name: workoutId
-        required: true
-        type: string
-      - description: Image ID
-        in: query
-        name: imageId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Deletes a workout image
-      tags:
-      - workouts
-  /workouts/images:
-    get:
-      consumes:
-      - application/json
-      description: Returns paginated list of workout progress images
-      operationId: getWorkoutGallery
-      parameters:
-      - description: Client app version
-        in: header
-        name: X-App-Version
-        type: string
-      - description: Page size for pagination
-        in: query
-        name: pageSize
-        type: integer
-      - description: Cursor for pagination
-        in: query
-        name: cursor
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ProgressGalleryResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Returns workout progress gallery
-      tags:
-      - workouts
-securityDefinitions:
-  BearerAuth:
-    in: header
-    name: Authorization
-    type: apiKey
-swagger: "2.0"
+    /accounts:
+        delete:
+            description: Schedules account deletion for the authenticated user
+            operationId: deleteAccount
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+            responses:
+                "204":
+                    description: No Content
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "404":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Not Found
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Delete user account
+            tags:
+                - accounts
+        post:
+            description: Accounts are managed by Firebase so we just need to store them
+            operationId: registerAccount
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UserIn'
+                description: User request
+                required: true
+                x-originalParamName: input
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+                    description: Created
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Creates an account record
+            tags:
+                - accounts
+    /accounts/{accountId}:
+        get:
+            description: Returns user account information for the authenticated user
+            operationId: getAccount
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Account ID
+                  in: path
+                  name: accountId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+                    description: OK
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "404":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Not Found
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Get user account
+            tags:
+                - accounts
+        put:
+            description: 'Performs various account editing actions: undoAccountDeletion, removeAvatar, uploadAvatar'
+            operationId: editAccount
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Account ID
+                  in: path
+                  name: accountId
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/EditAccountRequest'
+                description: Edit account request
+                required: true
+                x-originalParamName: input
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PresignedUrlResponse'
+                    description: OK
+                "204":
+                    description: No Content
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Validation error
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "403":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Forbidden
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Edit user account
+            tags:
+                - accounts
+    /exercises:
+        get:
+            description: Returns all exercises in a single page
+            operationId: getExercises
+            parameters:
+                - description: Client app version (e.g., 2.8.0)
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Filter exercises created by the authenticated user
+                  in: query
+                  name: owned
+                  schema:
+                    type: boolean
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExercisesResponse'
+                    description: OK
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: List all exercises
+            tags:
+                - workouts
+        post:
+            description: Creates a new user exercise with the provided details
+            operationId: makeExercise
+            parameters:
+                - description: Client app version (e.g., 2.8.0)
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UserExercise'
+                description: Exercise details
+                required: true
+                x-originalParamName: exercise
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Exercise'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Validation error
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Create new exercise
+            tags:
+                - workouts
+    /exercises/{exerciseName}:
+        put:
+            description: Edits target, category and instructions for the exercise created by the authenticated user
+            operationId: editExercise
+            parameters:
+                - description: Client app version (e.g., 2.8.0)
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Name of the exercise to edit
+                  in: path
+                  name: exerciseName
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/EditExerciseIn'
+                description: Exercise fields to edit
+                required: true
+                x-originalParamName: input
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Exercise'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Validation error
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Edit an exercise
+            tags:
+                - workouts
+    /feedback:
+        post:
+            description: Allows users to submit feedback with a message and optionally attach a screenshot
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FeedbackRequest'
+                description: Feedback details
+                required: true
+                x-originalParamName: request
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PresignedUrlResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Internal Server Error
+            security:
+                - BearerAuth: []
+            summary: Submit user feedback
+            tags:
+                - feedback
+    /templates:
+        get:
+            description: Returns all workout templates for the authenticated user
+            operationId: getTemplates
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Template'
+                                type: array
+                    description: OK
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Lists workout templates
+            tags:
+                - templates
+        post:
+            description: Validates, saves and returns a workout template
+            operationId: makeTemplate
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/TemplateIn'
+                description: Template request
+                required: true
+                x-originalParamName: input
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Template'
+                    description: OK
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Creates a workout template
+            tags:
+                - templates
+    /templates/{id}:
+        delete:
+            description: Deletes a specific workout template by ID
+            operationId: deleteTemplate
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Template ID
+                  in: path
+                  name: id
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "204":
+                    description: No Content
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "404":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Not Found
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Delete workout template
+            tags:
+                - templates
+        get:
+            description: Returns a specific workout template by ID
+            operationId: getTemplate
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Template ID
+                  in: path
+                  name: id
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Template'
+                    description: OK
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "404":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Not Found
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Get workout template
+            tags:
+                - templates
+    /workouts:
+        get:
+            description: Returns paginated list of user workouts with exercises and sets
+            operationId: getWorkouts
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Page size for pagination
+                  in: query
+                  name: pageSize
+                  schema:
+                    type: integer
+                - description: Cursor for pagination
+                  in: query
+                  name: cursor
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WorkoutResponse'
+                    description: OK
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Returns user workouts
+            tags:
+                - workouts
+        post:
+            description: Validates, saves and returns a workout
+            operationId: makeWorkout
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/WorkoutIn'
+                description: Workout request
+                required: true
+                x-originalParamName: input
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Workout'
+                    description: OK
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Creates a workout
+            tags:
+                - workouts
+    /workouts/{workoutId}:
+        delete:
+            description: Deletes a workout by ID
+            operationId: deleteWorkout
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Workout ID
+                  in: path
+                  name: workoutId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "204":
+                    description: No Content
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "404":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Not Found
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Deletes a workout
+            tags:
+                - workouts
+        get:
+            description: Returns a single workout by ID with exercises and sets
+            operationId: getWorkout
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Workout ID
+                  in: path
+                  name: workoutId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Workout'
+                    description: OK
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "404":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Not Found
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Returns a workout
+            tags:
+                - workouts
+    /workouts/{workoutId}/image:
+        put:
+            description: Generates presigned URL and form fields for uploading workout files to S3
+            operationId: makeWorkoutPresignedUrl
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Workout ID
+                  in: path
+                  name: workoutId
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/HasMimeType'
+                description: Upload request
+                required: true
+                x-originalParamName: input
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PresignedUrlResponse'
+                    description: OK
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Generates presigned URL for workout file upload
+            tags:
+                - workouts
+    /workouts/{workoutId}/images:
+        delete:
+            description: Deletes the image associated with a workout from S3 and removes the image reference from DynamoDB
+            operationId: deleteWorkoutImage
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Workout ID
+                  in: path
+                  name: workoutId
+                  required: true
+                  schema:
+                    type: string
+                - description: Image ID
+                  in: query
+                  name: imageId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "204":
+                    description: No Content
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "403":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Forbidden
+                "404":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Not Found
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Deletes a workout image
+            tags:
+                - workouts
+    /workouts/images:
+        get:
+            description: Returns paginated list of workout progress images
+            operationId: getWorkoutGallery
+            parameters:
+                - description: Client app version
+                  in: header
+                  name: X-App-Version
+                  schema:
+                    type: string
+                - description: Page size for pagination
+                  in: query
+                  name: pageSize
+                  schema:
+                    type: integer
+                - description: Cursor for pagination
+                  in: query
+                  name: cursor
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ProgressGalleryResponse'
+                    description: OK
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    description: Server error
+            security:
+                - BearerAuth: []
+            summary: Returns workout progress gallery
+            tags:
+                - workouts
+servers:
+    - url: https://localhost:8080/
