@@ -43,10 +43,10 @@ Resources:
               StringLike:
                 token.actions.githubusercontent.com:sub:
                   # backend repository
-                  - "repo:kit-g/heart-go:*"
-                  - "repo:kit-g/heart-go:ref:refs/heads/*"
-                  - "repo:kit-g/heart-go:ref:refs/tags/*"
-                  - "repo:kit-g/heart-go:environment:*"
+                  - "repo:kit-g/heart-api:*"
+                  - "repo:kit-g/heart-api:ref:refs/heads/*"
+                  - "repo:kit-g/heart-api:ref:refs/tags/*"
+                  - "repo:kit-g/heart-api:environment:*"
                   # app repository
                   - "repo:kit-g/heart-of-yours:*"
                   - "repo:kit-g/heart-of-yours:ref:refs/heads/*"
