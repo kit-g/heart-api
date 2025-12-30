@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' show Platform;
 
 import 'package:relic/relic.dart';
 
@@ -31,6 +31,8 @@ abstract interface class AppConfig {
 
   String? get awsProfile;
 
+  String? get testUserId;
+
   factory AppConfig.fromEnv() {
     return _EnvConfig(
       awsProfile: Platform.environment['AWS_PROFILE'],
@@ -39,6 +41,7 @@ abstract interface class AppConfig {
       firebaseProjectId: Platform.environment['FIREBASE_PROJECT_ID']!,
       logLevel: Platform.environment['LOG_LEVEL'] ?? 'ALL',
       workoutsTable: Platform.environment['WORKOUTS_TABLE']!,
+      testUserId: Platform.environment['TEST_USER_ID'],
     );
   }
 }
@@ -56,6 +59,8 @@ class _EnvConfig implements AppConfig {
   final String workoutsTable;
   @override
   final String? awsProfile;
+  @override
+  final String? testUserId;
 
   const _EnvConfig({
     required this.env,
@@ -64,6 +69,7 @@ class _EnvConfig implements AppConfig {
     required this.awsRegion,
     required this.workoutsTable,
     this.awsProfile,
+    this.testUserId,
   });
 }
 

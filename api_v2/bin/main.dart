@@ -9,6 +9,7 @@ import 'package:heart/middleware/config.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/routes/index.dart';
+import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart';
 import 'package:relic/io_adapter.dart';
 import 'package:relic/relic.dart';
@@ -45,10 +46,15 @@ Handler _handler(final ModelHandler handler) {
 Future<void> main() async {
   initLogging(config.logLevel, config.env);
 
+  final testAuth = switch (config.testUserId) {
+    String id => (String _, String _) async => User(id: id),
+    null => null,
+  };
+
   final app = RelicApp()
     ..use('/', logRequests())
     ..use('/', configuration(override: config))
-    ..use('/', authenticator())
+    ..use('/', authenticator(implementation: testAuth))
     ..use('/', authentication())
     ..use('/charts', chartsDb(db: database))
     ..fallback = respondWith((_) => JsonResponse.notFound());
