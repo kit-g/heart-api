@@ -60,10 +60,19 @@ jobs:
             --region ${{ env.AWS_REGION }} > /dev/null
 
   smoke-test:
-    name: "Smoke Test V2"
+    name: "Smoke Test"
     runs-on: ubuntu-latest
     needs: [ build-and-deploy ]
+    env:
+      API: "https://bsm50dxdal.execute-api.ca-central-1.amazonaws.com/api/v2"
     steps:
       - name: "Check /charts endpoint"
         run: |
-          curl -sI https://bsm50dxdal.execute-api.ca-central-1.amazonaws.com/api/v2/charts | grep "401"
+          response=$(curl -s $API/version)
+          echo "Response: $response"
+          
+          commit=$(echo "$response" | jq -r .commit)
+          if [ "$commit" == "dev" ] || [ "$commit" == "" ]; then
+              echo "Invalid commit returned: $commit"
+              exit 1
+          fi
