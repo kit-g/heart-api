@@ -69,6 +69,8 @@ jobs:
     name: "Smoke Test"
     runs-on: ubuntu-latest
     needs: [ build-and-deploy ]
+    env:
+      EXPECTED_COMMIT: ${{ needs.build-and-deploy.outputs.commit }}
     steps:
       - name: "Check /charts endpoint"
         run: |
