@@ -2,7 +2,6 @@ import 'package:heart/core/response.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/firebase.dart';
 import 'package:heart/globals/globals.dart';
-import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart';
 import 'package:relic/relic.dart';
 
