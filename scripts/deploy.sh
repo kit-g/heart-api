@@ -14,7 +14,6 @@ clean() {
 
 build() {
   sam build \
-    --use-container \
     --skip-pull-image \
     --parallel \
     -t "$TEMPLATE"
