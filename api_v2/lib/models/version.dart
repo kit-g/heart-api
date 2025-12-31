@@ -4,7 +4,10 @@ class VersionInfo implements Model {
   final String commit;
   final String deployedAt;
 
-  const VersionInfo({required this.commit, required this.deployedAt});
+  const VersionInfo({
+    required this.commit,
+    required this.deployedAt,
+  });
 
   @override
   Map<String, dynamic> toMap() => {
