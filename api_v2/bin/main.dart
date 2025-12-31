@@ -54,10 +54,10 @@ Future<void> main() async {
 
   final app = RelicApp()
     ..use('/', logRequests())
-    ..use('/', version(minimal: config.minimalAppVersion))
+    ..use('/', version(minimal: config.minimalAppVersion, shouldCheckVersion: isPublicRoute))
     ..use('/', configuration(override: config))
     ..use('/', authenticator(implementation: testAuth))
-    ..use('/', authentication(shouldAuthenticate: (req) => !publicRoutes.contains(req.url.path)))
+    ..use('/', authentication(shouldAuthenticate: isPublicRoute))
     ..use('/charts', chartsDb(db: database))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 
