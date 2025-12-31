@@ -139,7 +139,7 @@ jobs:
     needs: [ api-deploy, build-artifact ]
     env:
       EXPECTED_COMMIT: ${{ needs.build-artifact.outputs.commit }}
-      API: "https://bsm50dxdal.execute-api.ca-central-1.amazonaws.com/v1"
+      API: "https://bsm50dxdal.execute-api.ca-central-1.amazonaws.com/api/v1"
     steps:
       - name: "Check /version endpoint"
         run: |

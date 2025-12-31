@@ -249,7 +249,7 @@ Resources:
           SCHEDULE_GROUP: !Ref ScheduleGroup
           SWAGGER_HOST: !Sub "${Api}.execute-api.${AWS::Region}.amazonaws.com" # temporary
           SWAGGER_DOCS_ENABLED: !FindInMap [ Env, !Ref Env, SwaggerDocsEnabled ]
-          SWAGGER_BASE_PATH: !Sub "/${StageName}"
+          SWAGGER_BASE_PATH: !Sub "/${StageName}/v1"
           UPLOAD_BUCKET: !FindInMap [ Env, !Ref Env, UploadBucket ]
           WORKOUTS_TABLE: !Ref WorkoutsDatabase
       FunctionName: "heart-api"
