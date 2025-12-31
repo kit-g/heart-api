@@ -17,7 +17,7 @@ var AuthClient *auth.Client
 // It expects the JSON content of the account credentials file.
 func Init(credentialsFile string) error {
 	var err error
-	opt := option.WithCredentialsJSON([]byte(credentialsFile))
+	opt := option.WithAuthCredentialsJSON(option.ServiceAccount, []byte(credentialsFile))
 
 	firebaseApp, err = firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
