@@ -272,6 +272,7 @@ Resources:
           ENV: !Ref Env
           FIREBASE_PROJECT_ID: !FindInMap [ Env, !Ref Env, FirebaseProjectId ]
           LOG_LEVEL: "ALL"
+          MIN_APP_VERSION: "1.0.0"
           REGION: !Ref AWS::Region
           WORKOUTS_TABLE: !Ref WorkoutsDatabase
       FunctionName: "heart-api-v2"

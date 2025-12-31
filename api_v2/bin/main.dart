@@ -7,6 +7,7 @@ import 'package:heart/middleware/authentication.dart';
 import 'package:heart/middleware/authenticator.dart';
 import 'package:heart/middleware/config.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/middleware/version.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/routes/index.dart';
 import 'package:heart_models/heart_models.dart';
@@ -53,6 +54,7 @@ Future<void> main() async {
 
   final app = RelicApp()
     ..use('/', logRequests())
+    ..use('/', version(minimal: config.minimalAppVersion))
     ..use('/', configuration(override: config))
     ..use('/', authenticator(implementation: testAuth))
     ..use('/', authentication(shouldAuthenticate: (req) => !publicRoutes.contains(req.url.path)))

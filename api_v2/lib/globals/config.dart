@@ -33,6 +33,8 @@ abstract interface class AppConfig {
 
   String? get testUserId;
 
+  String get minimalAppVersion;
+
   factory AppConfig.fromEnv() {
     switch (Platform.environment) {
       case {
@@ -40,6 +42,7 @@ abstract interface class AppConfig {
             'ENV': String env,
             'FIREBASE_PROJECT_ID': String firebaseProjectId,
             'WORKOUTS_TABLE': String table,
+            'MIN_APP_VERSION': String version,
           }
           when [region, env, firebaseProjectId, table].every((v) => v.isNotEmpty):
         return _EnvConfig(
@@ -50,6 +53,7 @@ abstract interface class AppConfig {
           logLevel: Platform.environment['LOG_LEVEL'] ?? 'ALL',
           workoutsTable: table,
           testUserId: Platform.environment['TEST_USER_ID'],
+          minimalAppVersion: version,
         );
       default:
         throw StateError(
@@ -75,6 +79,8 @@ class _EnvConfig implements AppConfig {
   final String? awsProfile;
   @override
   final String? testUserId;
+  @override
+  final String minimalAppVersion;
 
   const _EnvConfig({
     required this.env,
@@ -84,6 +90,7 @@ class _EnvConfig implements AppConfig {
     required this.workoutsTable,
     this.awsProfile,
     this.testUserId,
+    required this.minimalAppVersion,
   });
 }
 
