@@ -10,4 +10,6 @@ final routes = <(String, Method), ModelHandler>{
   ('/charts/:preferenceId', .delete): charts.deleteChartPreference,
 };
 
-const publicRoutes = {'/version'};
+const _publicRoutes = {'/version'};
+
+bool isPublicRoute(Request request) => !_publicRoutes.contains(request.url.path);
