@@ -17,15 +17,15 @@ import 'package:relic/relic.dart';
 
 final _logger = Logger('API');
 
-final config = AppConfig.fromEnv();
+final _config = AppConfig.fromEnv();
 
-final awsAuth = switch (config.awsProfile) {
+final _awsAuth = switch (_config.awsProfile) {
   String profile => AwsClientCredentials.fromProfileFile(profile: profile),
   null => AwsClientCredentials.resolve(),
 };
 
-final dynamo = DocumentClient(region: config.awsRegion, credentials: awsAuth);
-final database = Database(client: dynamo, table: config.workoutsTable);
+final _dynamo = DocumentClient(region: _config.awsRegion, credentials: _awsAuth);
+final _database = Database(client: _dynamo, table: _config.workoutsTable);
 
 Handler _handler(final ModelHandler handler) {
   return (final Request request) async {
@@ -45,20 +45,20 @@ Handler _handler(final ModelHandler handler) {
 }
 
 Future<void> main() async {
-  initLogging(config.logLevel, config.env);
+  initLogging(_config.logLevel, _config.env);
 
-  final testAuth = switch (config.testUserId) {
+  final testAuth = switch (_config.testUserId) {
     String id => (String _, String _) async => User(id: id),
     null => null,
   };
 
   final app = RelicApp()
     ..use('/', logRequests())
-    ..use('/', version(minimal: config.minimalAppVersion, shouldCheckVersion: isPublicRoute))
-    ..use('/', configuration(override: config))
+    ..use('/', version(minimal: _config.minimalAppVersion, shouldCheckVersion: isPublicRoute))
+    ..use('/', configuration(override: _config))
     ..use('/', authenticator(implementation: testAuth))
     ..use('/', authentication(shouldAuthenticate: isPublicRoute))
-    ..use('/charts', chartsDb(db: database))
+    ..use('/charts', chartsDb(db: _database))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 
   for (final MapEntry(key: (route, verb), value: handler) in routes.entries) {
