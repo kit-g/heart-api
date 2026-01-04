@@ -75,8 +75,8 @@ Resources:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
-        Description: "OAC for various assets"
-        Name: "bucket-oac"
+        Description: "OAC for the Heart app resources"
+        Name: "heart-oac"
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
