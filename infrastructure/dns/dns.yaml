@@ -19,6 +19,9 @@ Parameters:
   DevAppDistribution:
     Type: String
     Default: "dsw54y29hvvfi.cloudfront.net"
+  DevWebDistribution:
+    Type: String
+    Default: "dbzlkz1jjlx7i.cloudfront.net"
   CommunicationsEmail:
     Type: String
     Default: "info@heart-of.me"
@@ -100,25 +103,25 @@ Resources:
       TTL: 14400
       Type: CNAME
 
-  DevAppDistributionCertificateValidationRecord1:
+  DevBaseDistributionCertificateValidationRecord1:
     Type: AWS::Route53::RecordSet
     Properties:
-      Comment: 'Dev app CF distribution'
+      Comment: 'Dev base CF distribution'
       HostedZoneId: !GetAtt Zone.Id
-      Name: _f05280c09b017b103351d8730a493786.dev.app.heart-of.me.
+      Name: _b7feebaf597a5b3dfa112fb63ad76a40.dev.heart-of.me.
       ResourceRecords:
-        - _255e9c88f095efa39931dcec9556a59e.xlfgrmvvlj.acm-validations.aws.
+        - _f3c60a3d8cc31b91fd49ea5e969c15f8.xlfgrmvvlj.acm-validations.aws.
       TTL: 14400
       Type: CNAME
 
-  DevAppDistributionCertificateValidationRecord2:
+  DevBaseDistributionCertificateValidationRecord2:
     Type: AWS::Route53::RecordSet
     Properties:
-      Comment: 'Dev app CF distribution'
+      Comment: 'Dev base CF distribution'
       HostedZoneId: !GetAtt Zone.Id
-      Name: _e9453692ccbd0645bd3d939805ec62bd.www.dev.app.heart-of.me.
+      Name: _323f7b7de154eed3a1faa0f26192a320.www.dev.heart-of.me.
       ResourceRecords:
-        - _cf535b2aa56b54ec8420a83a003bd176.xlfgrmvvlj.acm-validations.aws.
+        - _2b937ce14a76052f45b0f5e3e792251d.xlfgrmvvlj.acm-validations.aws.
       TTL: 14400
       Type: CNAME
 
@@ -133,16 +136,17 @@ Resources:
       TTL: 14400
       Type: CNAME
 
-  DevAppDistributionRecord:
+  DevWebDistributionRecord:
     Type: AWS::Route53::RecordSet
     Properties:
-      Comment: 'Dev app CF distribution'
+      Comment: 'Dev web CF distribution'
       HostedZoneId: !GetAtt Zone.Id
-      Name: "dev.app.heart-of.me"
-      ResourceRecords:
-        - !Ref DevAppDistribution
-      TTL: 14400
-      Type: CNAME
+      Name: "dev.heart-of.me"
+      Type: A
+      AliasTarget:
+        HostedZoneId: !Ref CloudfrontHostedZone
+        DNSName: !Ref DevWebDistribution
+        EvaluateTargetHealth: false
 
   MxRecord:
     Type: AWS::Route53::RecordSet
