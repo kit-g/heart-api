@@ -34,7 +34,7 @@ Mappings:
       MediaDistributionCertificate: "arn:aws:acm:us-east-1:583168578067:certificate/297c34bc-7a74-4cb1-82c4-71bfe0114eb7"
       StaticBucket: "arn:aws:s3:::583168578067-heart-static"
       StaticBucketRegionalDomainName: "583168578067-heart-static.s3.ca-central-1.amazonaws.com"
-      WebDistributionAlias: "dev.heart-of.me"
+      WebDistributionAliases: "dev.heart-of.me,www.dev.heart-of.me"
       WebDistributionCertificate: "arn:aws:acm:us-east-1:583168578067:certificate/2ac33117-c985-4f4d-a382-d2c8bad1766a"
       WorkoutsTableName: "workouts"
       WorkoutsTableArn: "arn:aws:dynamodb:ca-central-1:583168578067:table/workouts"
@@ -44,7 +44,7 @@ Mappings:
       MediaDistributionCertificate: ""
       StaticBucket: ""
       StaticBucketRegionalDomainName: ""
-      WebDistributionAlias: "heart-of.me"
+      WebDistributionAliases: "heart-of.me,www.heart-of.me"
       WebDistributionCertificate: ""
       WorkoutsTableName: "workouts"
       WorkoutsTableArn: ""
@@ -405,8 +405,7 @@ Resources:
               # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-distribution-s3originconfig.html#cfn-cloudfront-distribution-s3originconfig-originaccessidentity
               OriginAccessIdentity: ""
             OriginAccessControlId: !Ref BucketOriginAccessControl
-        Aliases:
-          - !FindInMap [ Env, !Ref Env, WebDistributionAlias ]
+        Aliases: !Split [ ",", !FindInMap [ Env, !Ref Env, WebDistributionAliases ] ]
         ViewerCertificate:
           AcmCertificateArn: !FindInMap [ Env, !Ref Env, WebDistributionCertificate ]
           SslSupportMethod: 'sni-only'
