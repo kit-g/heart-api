@@ -25,12 +25,23 @@ Parameters:
     Type: String
     Default: "658327ea-f89d-4fab-a63d-7e88639e58f6"
     Description: "CloudFront managed cache policy ID for CachingOptimized"
+  CachingDisabled:
+    Type: String
+    Default: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+    Description: "CloudFront managed cache policy ID for CachingDisabled"
+  AllViewerExceptHostHeader:
+    Type: String
+    Default: "b689b0a8-53d0-40ab-baf2-68738e2966ac"
+    Description: |
+      CloudFront managed origin request policy ID for AllViewerExceptHostHeader,
+      needed to forward Firebase auth requests to the app, with query params
 
 Mappings:
   Env:
     dev:
       LogRetention: 3 # days
       DistributionAlias: "dev.media.heart-of.me"
+      FirebaseAuthDomain: "heart-of-yours-dev.firebaseapp.com"
       MediaDistributionCertificate: "arn:aws:acm:us-east-1:583168578067:certificate/297c34bc-7a74-4cb1-82c4-71bfe0114eb7"
       StaticBucket: "arn:aws:s3:::583168578067-heart-static"
       StaticBucketRegionalDomainName: "583168578067-heart-static.s3.ca-central-1.amazonaws.com"
@@ -384,7 +395,16 @@ Resources:
       DistributionConfig:
         Enabled: true
         Comment: "Heart of yours, website and app"
-        CacheBehaviors: [ ]
+        CacheBehaviors:
+          - PathPattern: "/__/auth/*"
+            TargetOriginId: FirebaseAuthOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [ 'GET', 'HEAD' ]
+            CachedMethods: [ 'GET', 'HEAD' ]
+            CachePolicyId: !Ref CachingDisabled
+            Compress: true
+            OriginRequestPolicyId: !Ref AllViewerExceptHostHeader
+
         DefaultRootObject: "index.html"
         DefaultCacheBehavior:
           TargetOriginId: StaticBucket
@@ -405,6 +425,10 @@ Resources:
               # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-distribution-s3originconfig.html#cfn-cloudfront-distribution-s3originconfig-originaccessidentity
               OriginAccessIdentity: ""
             OriginAccessControlId: !Ref BucketOriginAccessControl
+          - Id: FirebaseAuthOrigin
+            DomainName: !FindInMap [ Env, !Ref Env, FirebaseAuthDomain ]
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
         Aliases: !Split [ ",", !FindInMap [ Env, !Ref Env, WebDistributionAliases ] ]
         ViewerCertificate:
           AcmCertificateArn: !FindInMap [ Env, !Ref Env, WebDistributionCertificate ]
