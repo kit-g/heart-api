@@ -12,24 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
           rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#1152d4",
-                        "background-light": "#f6f6f8",
-                        "background-dark": "#101622",
-                    },
-                    fontFamily: {
-                        "display": ["Plus Jakarta Sans", "sans-serif"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
-        }
-    </script>
+    <script src="assets/site.js"></script>
+
     <style>
         /* Custom subtle fade-in animation */
         @keyframes fadeIn {
@@ -131,6 +115,7 @@
         </div>
     </div>
 </main>
+
 <!-- Features / Highlights -->
 <section class="w-full py-12 px-6 bg-white dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
     <div class="max-w-[960px] mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8">
@@ -159,6 +144,7 @@
         </div>
     </div>
 </section>
+
 <!-- Minimal Footer -->
 <footer class="w-full py-10 px-6 border-t border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark">
     <div class="max-w-[960px] mx-auto flex flex-col items-center gap-6">
@@ -175,9 +161,6 @@
         </div>
         <p class="text-xs text-slate-400 font-light">
             © <span id="footer-year"></span> Heart of Yours. All rights reserved. Designed for peace of mind.
-            <script>
-                document.getElementById('footer-year').textContent = new Date().getFullYear().toString();
-            </script>
         </p>
     </div>
 </footer>
