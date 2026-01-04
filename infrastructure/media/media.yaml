@@ -32,12 +32,20 @@ Mappings:
       LogRetention: 3 # days
       DistributionAlias: "dev.media.heart-of.me"
       MediaDistributionCertificate: "arn:aws:acm:us-east-1:583168578067:certificate/297c34bc-7a74-4cb1-82c4-71bfe0114eb7"
+      StaticBucket: "arn:aws:s3:::583168578067-heart-static"
+      StaticBucketRegionalDomainName: "583168578067-heart-static.s3.ca-central-1.amazonaws.com"
+      WebDistributionAlias: "dev.heart-of.me"
+      WebDistributionCertificate: "arn:aws:acm:us-east-1:583168578067:certificate/2ac33117-c985-4f4d-a382-d2c8bad1766a"
       WorkoutsTableName: "workouts"
       WorkoutsTableArn: "arn:aws:dynamodb:ca-central-1:583168578067:table/workouts"
     prod:
       LogRetention: 90 # days
       DistributionAlias: "media.heart-of.me"
       MediaDistributionCertificate: ""
+      StaticBucket: ""
+      StaticBucketRegionalDomainName: ""
+      WebDistributionAlias: "heart-of.me"
+      WebDistributionCertificate: ""
       WorkoutsTableName: "workouts"
       WorkoutsTableArn: ""
 
@@ -352,6 +360,56 @@ Resources:
                     Value: "workouts/"
             Function: !GetAtt ImageConverterFunction.Arn
 
+  StaticBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Select [ 5, !Split [ ":", !FindInMap [ Env, !Ref Env, StaticBucket ] ] ]
+      PolicyDocument:
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipal
+            Effect: Allow
+            Action: "s3:GetObject"
+            Resource: !Sub
+              - "${Bucket}/*"
+              - Bucket: !FindInMap [ Env, !Ref Env, StaticBucket ]
+            Principal:
+              Service: "cloudfront.amazonaws.com"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${WebDistribution}"
+
+  WebDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: "Heart of yours, website and app"
+        CacheBehaviors: [ ]
+        DefaultRootObject: "index.html"
+        DefaultCacheBehavior:
+          TargetOriginId: StaticBucket
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          CachePolicyId: !Ref CachingOptimized
+        Origins:
+          - DomainName: !FindInMap [ Env, !Ref Env, StaticBucketRegionalDomainName ]
+            Id: StaticBucket
+            OriginPath: "/site"
+            S3OriginConfig:
+              # empty, as per
+              # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-distribution-s3originconfig.html#cfn-cloudfront-distribution-s3originconfig-originaccessidentity
+              OriginAccessIdentity: ""
+            OriginAccessControlId: !Ref BucketOriginAccessControl
+        Aliases:
+          - !FindInMap [ Env, !Ref Env, WebDistributionAlias ]
+        ViewerCertificate:
+          AcmCertificateArn: !FindInMap [ Env, !Ref Env, WebDistributionCertificate ]
+          SslSupportMethod: 'sni-only'
 
 Outputs:
   ExerciseBucketName:
