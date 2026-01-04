@@ -148,6 +148,18 @@ Resources:
         DNSName: !Ref DevWebDistribution
         EvaluateTargetHealth: false
 
+  DevWwwWebDistributionRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: 'Dev web CF distribution'
+      HostedZoneId: !GetAtt Zone.Id
+      Name: "www.dev.heart-of.me"
+      Type: A
+      AliasTarget:
+        HostedZoneId: !Ref CloudfrontHostedZone
+        DNSName: !Ref DevWebDistribution
+        EvaluateTargetHealth: false
+
   MxRecord:
     Type: AWS::Route53::RecordSet
     Properties:
