@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "me.heart.android.dev",
+      "sha256_cert_fingerprints": [
+        "46:C5:6B:EE:A8:A0:B6:8A:A6:AD:03:FF:FF:7D:A9:28:2D:5C:D4:71:13:16:D6:FA:A8:D0:F1:26:8C:20:3D:8E",
+        "35:F7:BF:0F:A2:30:4C:F9:1A:52:BA:05:49:2E:07:67:53:80:BC:E9:F0:46:55:CA:2F:DE:76:79:C2:56:34:2D"
+      ]
+    }
+  }
+]
