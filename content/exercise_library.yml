@@ -36,7 +36,7 @@ exercises:
     target: Core
 
   "Crunch (Stability Ball)":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Decline Crunch":
@@ -44,15 +44,15 @@ exercises:
     target: Core
 
   "Flat Knee Raise":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Flat Leg Raise":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Hanging Knee Raise":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Hanging Leg Raise":
@@ -68,11 +68,11 @@ exercises:
     target: Core
 
   "Knees to Elbows":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Oblique Crunch":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Plank":
@@ -88,11 +88,11 @@ exercises:
     target: Core
 
   "Russian Twist":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Flutter Kick":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Side Bend (Cable)":
@@ -100,7 +100,7 @@ exercises:
     target: Core
 
   "Side Bend (Band)":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Side Bend (Dumbbell)":
@@ -116,11 +116,11 @@ exercises:
     target: Core
 
   "Superman":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Toes To Bar":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Torso Rotation (Machine)":
@@ -128,7 +128,7 @@ exercises:
     target: Core
 
   "V Up":
-    category: RepsOnly,
+    category: Reps Only,
     target: Core
 
   "Bench Dip":
@@ -196,7 +196,7 @@ exercises:
     target: Arms
 
   "Reverse Curl (Band)":
-    category: RepsOnly,
+    category: Reps Only,
     target: Arms
 
   "Reverse Curl (Barbell)":
@@ -312,7 +312,7 @@ exercises:
     target: Back
 
   "Inverted Row (Bodyweight)":
-    category: RepsOnly,
+    category: Reps Only,
     target: Back
 
   "Iso-Lateral Row (Machine)":
@@ -320,7 +320,7 @@ exercises:
     target: Back
 
   "Kipping Pull Up":
-    category: RepsOnly,
+    category: Reps Only,
     target: Back
 
   "Kneeling Pulldown (Band)":
@@ -536,11 +536,11 @@ exercises:
     target: Chest
 
   "Push Up (Knees)":
-    category: RepsOnly,
+    category: Reps Only,
     target: Chest
 
   "Box Jump":
-    category: RepsOnly,
+    category: Reps Only,
     target: Legs
 
   "Box Squat (Barbell)":
@@ -604,7 +604,7 @@ exercises:
     target: Legs
 
   "High Knee Skips":
-    category: RepsOnly,
+    category: Reps Only,
     target: Legs
 
   "Hip Abductor (Machine)":
@@ -620,7 +620,7 @@ exercises:
     target: Legs
 
   "Hip Thrust (Bodyweight)":
-    category: RepsOnly,
+    category: Reps Only,
     target: Legs
 
   "Donkey Kick (Smith Machine)":
@@ -636,11 +636,11 @@ exercises:
     target: Legs
 
   "Jump Squat":
-    category: RepsOnly,
+    category: Reps Only,
     target: Legs
 
   "Lateral Box Jump":
-    category: RepsOnly,
+    category: Reps Only,
     target: Legs
 
   "Leg Extension (Machine)":
@@ -656,7 +656,7 @@ exercises:
     target: Legs
 
   "Lunge (Bodyweight)":
-    category: RepsOnly,
+    category: Reps Only,
     target: Legs
 
   "Lunge (Dumbbell)":
@@ -672,7 +672,7 @@ exercises:
     target: Legs
 
   "Mountain Climber":
-    category: RepsOnly,
+    category: Reps Only,
     target: Legs
 
   "Pistol Squat":
@@ -732,7 +732,7 @@ exercises:
     target: Legs
 
   "Standing Calf Raise (Bodyweight)":
-    category: RepsOnly,
+    category: Reps Only,
     target: Legs
 
   "Standing Calf Raise (Dumbbell)":
@@ -748,7 +748,7 @@ exercises:
     target: Legs
 
   "Step-up (Bodyweight)":
-    category: RepsOnly,
+    category: Reps Only,
     target: Legs
 
   "Step-up (Barbell)":
@@ -960,11 +960,11 @@ exercises:
     target: Full Body
 
   "Burpee":
-    category: RepsOnly,
+    category: Reps Only,
     target: Full Body
 
   "Jumping Jack":
-    category: RepsOnly,
+    category: Reps Only,
     target: Full Body
 
   "Kettlebell Swing":
@@ -980,7 +980,7 @@ exercises:
     target: Full Body
 
   "Squat Row (Band)":
-    category: RepsOnly,
+    category: Reps Only,
     target: Full Body
 
   "Sumo Deadlift High Pull (Barbell)":
@@ -1024,7 +1024,7 @@ exercises:
     target: Cardio
 
   "Jump Rope":
-    category: RepsOnly,
+    category: Reps Only,
     target: Cardio
 
   "Rowing (Machine)":
