@@ -360,6 +360,53 @@ exercises:
   "Crunch (Stability Ball)":
     category: Reps Only,
     target: Core
+    i18n:
+      en:
+        name: "Crunch (Stability Ball)"
+        instructions: |
+          ## Overview
+          The stability ball crunch is a bodyweight core exercise that primarily targets the rectus abdominis with an extended range of motion. It also engages the obliques, transverse abdominis, and lower back stabilizers as you work to maintain balance on the unstable surface.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on a stability ball and walk your feet forward until your lower back is supported by the ball
+          - Position the ball under your lower to mid-back with your feet flat on the floor, hip-width apart
+          - Place your hands lightly behind your head or crossed over your chest
+          - Allow your upper back to extend slightly over the ball
+          - Engage your core and keep your hips level
+
+          ### 2. Movement
+          1. Exhale and lift your shoulder blades by contracting your abdominal muscles
+          2. Curl your upper body forward, bringing your ribcage toward your pelvis
+          3. Keep your lower back in contact with the ball for stability
+          4. Squeeze your abs at the top of the movement for 1-2 seconds
+          5. Slowly lower back down with control, allowing a slight stretch over the ball
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you crunch up and contract your abs
+          - Inhale as you lower back to the starting position
+
+          ### 4. Tips
+          - Focus on curling your torso rather than just lifting your head
+          - Keep your feet firmly planted to maintain stability
+          - Avoid pulling on your neck with your hands
+          - Move slowly to challenge your balance and maximize core engagement
+          - Use the ball's instability to recruit more stabilizer muscles
+
+          ### 5. Common Mistakes
+          - Pulling on the neck or head, which can cause strain
+          - Moving too quickly and losing balance
+          - Allowing the hips to drop or sag during the movement
+          - Using momentum instead of controlled muscle contraction
+          - Positioning the ball too high or too low on your back
+          - Not taking advantage of the extended range of motion the ball provides
+
+          ### 6. Safety / Modifications
+          - Beginners can start with feet wider apart for better stability
+          - Place the ball against a wall for added support if needed
+          - Advanced variation: hold a weight plate on your chest for added resistance
+          - If you experience difficulty balancing, deflate the ball slightly for a more stable surface
 
   "Decline Crunch":
     category: Weighted Body Weight
