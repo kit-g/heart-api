@@ -668,6 +668,53 @@ exercises:
   "Jackknife Sit Up":
     category: Weighted Body Weight
     target: Core
+    i18n:
+      en:
+        name: "Jackknife Sit Up"
+        instructions: |
+          ## Overview
+          The jackknife sit up is a dynamic core exercise that primarily targets the entire rectus abdominis. It also engages the hip flexors, obliques, and transverse abdominis as you simultaneously lift your upper and lower body, creating an intense contraction through the entire core.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on your back on a mat with your arms extended overhead
+          - Keep your legs straight and together, fully extended on the mat
+          - Engage your core and press your lower back into the mat
+          - Keep your head in a neutral position aligned with your spine
+
+          ### 2. Movement
+          1. Simultaneously lift your legs and upper body off the mat
+          2. Reach your hands toward your toes while keeping your legs straight
+          3. Focus on bringing your ribcage and hips together at the top
+          4. Balance on your glutes at the peak of the movement
+          5. Pause briefly when your hands touch or reach toward your feet
+          6. Slowly lower both your upper and lower body back down with control
+          7. Return to the starting position and repeat for controlled reps
+
+          ### 3. Breathing
+          - Exhale as you fold up and bring your body together
+          - Inhale as you lower back to the starting position
+
+          ### 4. Tips
+          - Focus on using your core to fold your body, not momentum
+          - Keep your legs straight throughout the entire movement
+          - Maintain control during both the lifting and lowering phases
+          - Avoid using your arms to pull yourself up; let your core do the work
+          - Keep constant tension on your abs by moving slowly
+
+          ### 5. Common Mistakes
+          - Using momentum to swing up instead of controlled core contraction
+          - Bending the knees to make the exercise easier
+          - Allowing the arms to pull instead of letting the core drive the movement
+          - Moving too quickly and losing control
+          - Not fully extending back to the starting position
+          - Holding your breath during the movement
+
+          ### 6. Safety / Modifications
+          - Beginners should start with crunches and leg raises separately before combining them
+          - Perform a bent-knee variation if straight legs are too challenging
+          - Advanced variation: hold a light weight overhead for added resistance
+          - If you experience lower back discomfort, reduce your range of motion
 
   "Knee Raise (Captain's Chair)":
     category: Weighted Body Weight
