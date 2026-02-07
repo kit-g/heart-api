@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/schemas/exercises-master.2026-02-07.schema.json",
-  "title": "Exercise Library Master File (2026-02-07)",
+  "title": "Exercise Library Master File",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -12,7 +12,7 @@
   "properties": {
     "version": {
       "type": "string",
-      "const": "2026-02-07",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
       "description": "Schema/content version identifier."
     },
     "locales": {
