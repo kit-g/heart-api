@@ -258,6 +258,53 @@ exercises:
   "Crunch":
     category: Weighted Body Weight
     target: Core
+    i18n:
+      en:
+        name: "Crunch"
+        instructions: |
+          ## Overview
+          The crunch is a fundamental core exercise that primarily targets the rectus abdominis. It also engages the transverse abdominis and obliques as stabilizers, making it an accessible and effective exercise for building abdominal strength and endurance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on your back on a mat with your knees bent and feet flat on the floor
+          - Place your hands lightly behind your head or crossed over your chest
+          - Keep your elbows pointing out to the sides if hands are behind your head
+          - Engage your core and press your lower back into the mat
+          - Keep a small space between your chin and chest
+
+          ### 2. Movement
+          1. Lift your shoulder blades off the mat by contracting your abdominal muscles
+          2. Curl your upper body toward your knees, focusing on bringing your ribcage toward your pelvis
+          3. Exhale and squeeze your abs at the top of the movement for 1-2 seconds
+          4. Slowly lower your shoulders back down with control
+          5. Stop just before your shoulders touch the mat to maintain tension
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale forcefully as you crunch up and contract your abs
+          - Inhale as you lower back to the starting position
+
+          ### 4. Tips
+          - Focus on curling your torso rather than just lifting your head and neck
+          - Keep your lower back pressed against the mat throughout
+          - Avoid pulling on your head or neck with your hands
+          - Move slowly and with control to maximize muscle engagement
+          - Keep constant tension on your abs by not fully relaxing between reps
+
+          ### 5. Common Mistakes
+          - Pulling on the neck with your hands, which can cause strain
+          - Using momentum instead of controlled muscle contraction
+          - Lifting too high or using hip flexors instead of abs
+          - Allowing the lower back to arch off the mat
+          - Moving too quickly and sacrificing form for speed
+          - Completely relaxing between reps, losing core tension
+
+          ### 6. Safety / Modifications
+          - Beginners can place hands on thighs and slide them toward knees during the crunch
+          - Advanced variation: hold a weight plate on your chest for added resistance
+          - If you experience neck discomfort, keep your gaze focused on a spot on the ceiling
+          - Progress by adding a 3-5 second pause at peak contraction
 
   "Crunch (Machine)":
     category: Machine
