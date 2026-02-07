@@ -565,6 +565,53 @@ exercises:
   "Hanging Knee Raise":
     category: Reps Only,
     target: Core
+    i18n:
+      en:
+        name: "Hanging Knee Raise"
+        instructions: |
+          ## Overview
+          The hanging knee raise is a bodyweight core exercise that primarily targets the lower rectus abdominis and hip flexors. It also engages the obliques, transverse abdominis, and grip strength as you hang from a bar, making it more challenging than floor-based variations.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hang from a pull-up bar with your hands shoulder-width apart using an overhand grip
+          - Allow your body to hang fully extended with your feet off the ground
+          - Engage your core and keep your shoulders pulled down and back
+          - Keep your legs together and maintain a slight bend in your knees
+          - Avoid excessive swinging by stabilizing your body
+
+          ### 2. Movement
+          1. Lift your knees toward your chest by contracting your lower abs
+          2. Continue raising your knees until they reach at least hip level or higher
+          3. Keep the movement controlled and avoid using momentum
+          4. Pause briefly at the top of the movement
+          5. Slowly lower your knees back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you lift your knees toward your chest
+          - Inhale as you lower your knees back to the starting position
+
+          ### 4. Tips
+          - Focus on initiating the movement from your core, not just your hip flexors
+          - Minimize swinging by keeping your core tight and movement controlled
+          - Keep your shoulders engaged and avoid hanging passively
+          - Think about bringing your hips forward and up, not just your knees
+          - Maintain steady breathing throughout to avoid holding your breath
+
+          ### 5. Common Mistakes
+          - Using momentum and swinging instead of controlled muscle contraction
+          - Only lifting the knees partially without engaging the lower abs fully
+          - Allowing the shoulders to shrug up toward the ears
+          - Moving too quickly and losing control
+          - Releasing grip tension, which can compromise form
+          - Not bringing knees high enough to engage the abs effectively
+
+          ### 6. Safety / Modifications
+          - Beginners can use wrist straps for better grip support
+          - Use a captain's chair or dip station for an assisted version
+          - Advanced variation: pause for 2-3 seconds at the top of each rep
+          - Progress to hanging leg raises once you master the knee raise with proper form
 
   "Hanging Leg Raise":
     category: Weighted Body Weight
