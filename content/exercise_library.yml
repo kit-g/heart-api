@@ -1,0 +1,1064 @@
+version: 2026-02-07
+locales: [ en, en_CA, ru ]
+
+exercises:
+  "Ab Wheel":
+    category: Weighted Body Weight
+    target: Core
+    i18n:
+      en:
+        name: "Ab Wheel"
+        instructions: |
+
+
+  "Bicycle Crunch":
+    category: Weighted Body Weight
+    target: Core
+
+  "Cable Crunch":
+    category: Machine
+    target: Core
+
+  "Cable Twist":
+    category: Machine
+    target: Core
+
+  "Cross Body Crunch":
+    category: Weighted Body Weight
+    target: Core
+
+  "Crunch":
+    category: Weighted Body Weight
+    target: Core
+
+  "Crunch (Machine)":
+    category: Machine
+    target: Core
+
+  "Crunch (Stability Ball)":
+    category: RepsOnly,
+    target: Core
+
+  "Decline Crunch":
+    category: Weighted Body Weight
+    target: Core
+
+  "Flat Knee Raise":
+    category: RepsOnly,
+    target: Core
+
+  "Flat Leg Raise":
+    category: RepsOnly,
+    target: Core
+
+  "Hanging Knee Raise":
+    category: RepsOnly,
+    target: Core
+
+  "Hanging Leg Raise":
+    category: Weighted Body Weight
+    target: Core
+
+  "Jackknife Sit Up":
+    category: Weighted Body Weight
+    target: Core
+
+  "Knee Raise (Captain's Chair)":
+    category: Weighted Body Weight
+    target: Core
+
+  "Knees to Elbows":
+    category: RepsOnly,
+    target: Core
+
+  "Oblique Crunch":
+    category: RepsOnly,
+    target: Core
+
+  "Plank":
+    category: Duration
+    target: Core
+
+  "Reverse Crunch":
+    category: Weighted Body Weight
+    target: Core
+
+  "Reverse Plank":
+    category: Duration
+    target: Core
+
+  "Russian Twist":
+    category: RepsOnly,
+    target: Core
+
+  "Flutter Kick":
+    category: RepsOnly,
+    target: Core
+
+  "Side Bend (Cable)":
+    category: Machine
+    target: Core
+
+  "Side Bend (Band)":
+    category: RepsOnly,
+    target: Core
+
+  "Side Bend (Dumbbell)":
+    category: Dumbbell
+    target: Core
+
+  "Side Plank":
+    category: Duration
+    target: Core
+
+  "Sit Up":
+    category: Weighted Body Weight
+    target: Core
+
+  "Superman":
+    category: RepsOnly,
+    target: Core
+
+  "Toes To Bar":
+    category: RepsOnly,
+    target: Core
+
+  "Torso Rotation (Machine)":
+    category: Machine
+    target: Core
+
+  "V Up":
+    category: RepsOnly,
+    target: Core
+
+  "Bench Dip":
+    category: Weighted Body Weight
+    target: Arms
+
+  "Bench Press - Close Grip (Barbell)":
+    category: Barbell
+    target: Arms
+
+  "Bicep Curl (Barbell)":
+    category: Barbell
+    target: Arms
+
+  "Bicep Curl (Cable)":
+    category: Machine
+    target: Arms
+
+  "Bicep Curl (Dumbbell)":
+    category: Dumbbell
+    target: Arms
+
+  "Bicep Curl (Machine)":
+    category: Machine
+    target: Arms
+
+  "Cable Kickback":
+    category: Machine
+    target: Arms
+
+  "Concentration Curl (Dumbbell)":
+    category: Dumbbell
+    target: Arms
+
+  "Hammer Curl (Band)":
+    category: Weighted Body Weight
+    target: Arms
+
+  "Hammer Curl (Cable)":
+    category: Machine
+    target: Arms
+
+  "Incline Curl (Dumbbell)":
+    category: Dumbbell
+    target: Arms
+
+  "Hammer Curl (Dumbbell)":
+    category: Dumbbell
+    target: Arms
+
+  "Preacher Curl (Barbell)":
+    category: Barbell
+    target: Arms
+
+  "Preacher Curl (Dumbbell)":
+    category: Dumbbell
+    target: Arms
+
+  "Heart Pump":
+    category: Dumbbell
+    target: Arms
+
+  "Preacher Curl (Machine)":
+    category: Machine
+    target: Arms
+
+  "Reverse Curl (Band)":
+    category: RepsOnly,
+    target: Arms
+
+  "Reverse Curl (Barbell)":
+    category: Barbell
+    target: Arms
+
+  "Reverse Curl (Dumbbell)":
+    category: Dumbbell
+    target: Arms
+
+  "Reverse Grip Concentration Curl (Dumbbell)":
+    category: Dumbbell
+    target: Arms
+
+  "Seated Palms Up Wrist Curl (Dumbbell)":
+    category: Dumbbell
+    target: Arms
+
+  "Skullcrusher (Barbell)":
+    category: Barbell
+    target: Arms
+
+  "Skullcrusher (Dumbbell)":
+    category: Dumbbell
+    target: Arms
+
+  "Triceps Dip":
+    category: Weighted Body Weight
+    target: Arms
+
+  "Triceps Dip (Assisted)":
+    category: Machine
+    target: Arms
+
+  "Triceps Extension":
+    category: Barbell
+    target: Arms
+
+  "Triceps Extension (Barbell)":
+    category: Barbell
+    target: Arms
+
+  "Triceps Extension (Cable)":
+    category: Machine
+    target: Arms
+
+  "Triceps Extension (Dumbbell)":
+    category: Dumbbell
+    target: Arms
+
+  "Triceps Extension (Machine)":
+    category: Machine
+    target: Arms
+
+  "Triceps Pushdown (Cable - Straight Bar)":
+    category: Machine
+    target: Arms
+
+  "Upright Row (Cable)":
+    category: Machine
+    target: Arms
+
+  "Wrist Roller":
+    category: Machine
+    target: Arms
+
+  "Back Extension":
+    category: Weighted Body Weight
+    target: Back
+
+  "Back Extension (Machine)":
+    category: Machine
+    target: Back
+
+  "Bent Over One Arm Row (Dumbbell)":
+    category: Dumbbell
+    target: Back
+
+  "Bent Over Row (Band)":
+    category: Weighted Body Weight
+    target: Back
+
+  "Bent Over Row (Barbell)":
+    category: Barbell
+    target: Back
+
+  "Bent Over Row (Dumbbell)":
+    category: Dumbbell
+    target: Back
+
+  "Bent Over Row - Underhand (Barbell)":
+    category: Barbell
+    target: Back
+
+  "Chin Up":
+    category: Weighted Body Weight
+    target: Back
+
+  "Chin Up (Assisted)":
+    category: Assisted Body Weight
+    target: Back
+
+  "Deadlift (Barbell)":
+    category: Barbell
+    target: Back
+
+  "Good Morning (Barbell)":
+    category: Barbell
+    target: Back
+
+  "Incline Row (Dumbbell)":
+    category: Dumbbell
+    target: Back
+
+  "Inverted Row (Bodyweight)":
+    category: RepsOnly,
+    target: Back
+
+  "Iso-Lateral Row (Machine)":
+    category: Machine
+    target: Back
+
+  "Kipping Pull Up":
+    category: RepsOnly,
+    target: Back
+
+  "Kneeling Pulldown (Band)":
+    category: Weighted Body Weight
+    target: Back
+
+  "Lat Pulldown (Cable)":
+    category: Machine
+    target: Back
+
+  "Lat Pulldown (Machine)":
+    category: Machine
+    target: Back
+
+  "Lat Pulldown (Single Arm)":
+    category: Machine
+    target: Back
+
+  "Lat Pulldown - Underhand (Band)":
+    category: Weighted Body Weight
+    target: Back
+
+  "Lat Pulldown - Underhand (Cable)":
+    category: Machine
+    target: Back
+
+  "Lat Pulldown - Wide Grip (Cable)":
+    category: Machine
+    target: Back
+
+  "Pendlay Row (Barbell)":
+    category: Barbell
+    target: Back
+
+  "Pull Up":
+    category: Weighted Body Weight
+    target: Back
+
+  "Pull Up (Assisted)":
+    category: Assisted Body Weight
+    target: Back
+
+  "Pull Up (Band)":
+    category: Assisted Body Weight
+    target: Back
+
+  "Rack Pull (Barbell)":
+    category: Barbell
+    target: Back
+
+  "Romanian Deadlift (Barbell)":
+    category: Barbell
+    target: Back
+
+  "Seated Row (Cable)":
+    category: Machine
+    target: Back
+
+  "Seated Row (Machine)":
+    category: Machine
+    target: Back
+
+  "Seated Wide-Grip Row (Cable)":
+    category: Machine
+    target: Back
+
+  "Shrug (Machine)":
+    category: Machine
+    target: Back
+
+  "Shrug (Smith Machine)":
+    category: Machine
+    target: Back
+
+  "Stiff Leg Deadlift (Barbell)":
+    category: Barbell
+    target: Back
+
+  "Sumo Deadlift (Barbell)":
+    category: Barbell
+    target: Back
+
+  "T Bar Row":
+    category: Machine
+    target: Back
+
+  "Upright Row (Barbell)":
+    category: Barbell
+    target: Back
+
+  "Wide Pull Up":
+    category: Weighted Body Weight
+    target: Back
+
+  "Around the World":
+    category: Dumbbell
+    target: Chest
+
+  "Bench Press (Barbell)":
+    category: Barbell
+    target: Chest
+
+  "Bench Press (Cable)":
+    category: Machine
+    target: Chest
+
+  "Bench Press (Dumbbell)":
+    category: Dumbbell
+    target: Chest
+
+  "Bench Press (Smith Machine)":
+    category: Machine
+    target: Chest
+
+  "Bench Press - Wide Grip (Barbell)":
+    category: Barbell
+    target: Chest
+
+  "Cable Crossover":
+    category: Machine
+    target: Chest
+
+  "Chest Dip":
+    category: Weighted Body Weight
+    target: Chest
+
+  "Chest Dip (Assisted)":
+    category: Assisted Body Weight
+    target: Chest
+
+  "Chest Fly":
+    category: Machine
+    target: Chest
+
+  "Chest Fly (Band)":
+    category: Weighted Body Weight
+    target: Chest
+
+  "Chest Fly (Dumbbell)":
+    category: Dumbbell
+    target: Chest
+
+  "Chest Press (Band)":
+    category: Weighted Body Weight
+    target: Chest
+
+  "Chest Press (Machine)":
+    category: Machine
+    target: Chest
+
+  "Decline Bench Press (Barbell)":
+    category: Barbell
+    target: Chest
+
+  "Decline Bench Press (Dumbbell)":
+    category: Dumbbell
+    target: Chest
+
+  "Decline Bench Press (Smith Machine)":
+    category: Machine
+    target: Chest
+
+  "Floor Press (Barbell)":
+    category: Barbell
+    target: Chest
+
+  "Incline Bench Press (Barbell)":
+    category: Barbell
+    target: Chest
+
+  "Incline Bench Press (Cable)":
+    category: Machine
+    target: Chest
+
+  "Incline Bench Press (Dumbbell)":
+    category: Dumbbell
+    target: Chest
+
+  "Incline Bench Press (Smith Machine)":
+    category: Machine
+    target: Chest
+
+  "Incline Chest Fly (Dumbbell)":
+    category: Dumbbell
+    target: Chest
+
+  "Incline Chest Press (Machine)":
+    category: Machine
+    target: Chest
+
+  "Iso-Lateral Chest Press (Machine)":
+    category: Machine
+    target: Chest
+
+  "Pec Deck (Machine)":
+    category: Machine
+    target: Chest
+
+  "Pullover (Dumbbell)":
+    category: Dumbbell
+    target: Chest
+
+  "Pullover (Machine)":
+    category: Machine
+    target: Chest
+
+  "Push Up":
+    category: Weighted Body Weight
+    target: Chest
+
+  "Push Up (Band)":
+    category: Weighted Body Weight
+    target: Chest
+
+  "Push Up (Knees)":
+    category: RepsOnly,
+    target: Chest
+
+  "Box Jump":
+    category: RepsOnly,
+    target: Legs
+
+  "Box Squat (Barbell)":
+    category: Barbell
+    target: Legs
+
+  "Bulgarian Split Squat":
+    category: Barbell
+    target: Legs
+
+  "Cable Pull Through":
+    category: Machine
+    target: Legs
+
+  "Calf Press on Leg Press":
+    category: Machine
+    target: Legs
+
+  "Calf Press on Seated Leg Press":
+    category: Machine
+    target: Legs
+
+  "Deadlift (Band)":
+    category: Weighted Body Weight
+    target: Legs
+
+  "Deadlift (Dumbbell)":
+    category: Dumbbell
+    target: Legs
+
+  "Deadlift (Smith Machine)":
+    category: Machine
+    target: Legs
+
+  "Deficit Deadlift (Barbell)":
+    category: Barbell
+    target: Legs
+
+  "Front Squat (Barbell)":
+    category: Barbell
+    target: Legs
+
+  "Glute Ham Raise":
+    category: Weighted Body Weight
+    target: Legs
+
+  "Glute Kickback (Machine)":
+    category: Machine
+    target: Legs
+
+  "Goblet Squat (Kettlebell)":
+    category: Machine
+    target: Legs
+
+  "Hack Squat":
+    category: Barbell
+    target: Legs
+
+  "Hack Squat (Barbell)":
+    category: Barbell
+    target: Legs
+
+  "High Knee Skips":
+    category: RepsOnly,
+    target: Legs
+
+  "Hip Abductor (Machine)":
+    category: Machine
+    target: Legs
+
+  "Hip Adductor (Machine)":
+    category: Machine
+    target: Legs
+
+  "Hip Thrust (Barbell)":
+    category: Barbell
+    target: Legs
+
+  "Hip Thrust (Bodyweight)":
+    category: RepsOnly,
+    target: Legs
+
+  "Donkey Kick (Smith Machine)":
+    category: Machine
+    target: Legs
+
+  "Donkey Kick":
+    category: Weighted Body Weight
+    target: Legs
+
+  "Fire Hydrant":
+    category: Weighted Body Weight
+    target: Legs
+
+  "Jump Squat":
+    category: RepsOnly,
+    target: Legs
+
+  "Lateral Box Jump":
+    category: RepsOnly,
+    target: Legs
+
+  "Leg Extension (Machine)":
+    category: Machine
+    target: Legs
+
+  "Leg Press":
+    category: Machine
+    target: Legs
+
+  "Lunge (Barbell)":
+    category: Barbell
+    target: Legs
+
+  "Lunge (Bodyweight)":
+    category: RepsOnly,
+    target: Legs
+
+  "Lunge (Dumbbell)":
+    category: Dumbbell
+    target: Legs
+
+  "Step-Back Lunge":
+    category: Dumbbell
+    target: Legs
+
+  "Lying Leg Curl (Machine)":
+    category: Machine
+    target: Legs
+
+  "Mountain Climber":
+    category: RepsOnly,
+    target: Legs
+
+  "Pistol Squat":
+    category: Weighted Body Weight
+    target: Legs
+
+  "Romanian Deadlift (Dumbbell)":
+    category: Dumbbell
+    target: Legs
+
+  "Seated Calf Raise (Machine)":
+    category: Machine
+    target: Legs
+
+  "Seated Calf Raise (Plate Loaded)":
+    category: Machine
+    target: Legs
+
+  "Seated Leg Curl (Machine)":
+    category: Machine
+    target: Legs
+
+  "Seated Leg Press (Machine)":
+    category: Machine
+    target: Legs
+
+  "Single Leg Bridge":
+    category: Weighted Body Weight
+    target: Legs
+
+  "Squat (Band)":
+    category: Weighted Body Weight
+    target: Legs
+
+  "Squat (Barbell)":
+    category: Barbell
+    target: Legs
+
+  "Squat (Bodyweight)":
+    category: Weighted Body Weight
+    target: Legs
+
+  "Squat (Dumbbell)":
+    category: Dumbbell
+    target: Legs
+
+  "Squat (Machine)":
+    category: Machine
+    target: Legs
+
+  "Squat (Smith Machine)":
+    category: Machine
+    target: Legs
+
+  "Standing Calf Raise (Barbell)":
+    category: Barbell
+    target: Legs
+
+  "Standing Calf Raise (Bodyweight)":
+    category: RepsOnly,
+    target: Legs
+
+  "Standing Calf Raise (Dumbbell)":
+    category: Barbell
+    target: Legs
+
+  "Standing Calf Raise (Machine)":
+    category: Machine
+    target: Legs
+
+  "Standing Calf Raise (Smith Machine)":
+    category: Machine
+    target: Legs
+
+  "Step-up (Bodyweight)":
+    category: RepsOnly,
+    target: Legs
+
+  "Step-up (Barbell)":
+    category: Barbell
+    target: Legs
+
+  "Step-up (Dumbbell)":
+    category: Dumbbell
+    target: Legs
+
+  "Straight Leg Deadlift (Band)":
+    category: Weighted Body Weight
+    target: Legs
+
+  "Stiff Leg Deadlift (Dumbbell)":
+    category: Dumbbell
+    target: Legs
+
+  "Curtsey Lunges (Barbell)":
+    category: Dumbbell
+    target: Legs
+
+  "Deficit Squat":
+    category: Dumbbell
+    target: Legs
+
+  "Trap Bar Deadlift":
+    category: Barbell
+    target: Legs
+
+  "Zercher Squat (Barbell)":
+    category: Barbell
+    target: Legs
+
+  "Arnold Press (Dumbbell)":
+    category: Dumbbell
+    target: Shoulders
+
+  "Halo":
+    category: Dumbbell
+    target: Shoulders
+
+  "Handstand Push Up":
+    category: Weighted Body Weight
+    target: Shoulders
+
+  "Face Pull (Cable)":
+    category: Machine
+    target: Shoulders
+
+  "Front Raise (Band)":
+    category: Weighted Body Weight
+    target: Shoulders
+
+  "Front Raise (Barbell)":
+    category: Barbell
+    target: Shoulders
+
+  "Front Raise (Cable)":
+    category: Machine
+    target: Shoulders
+
+  "Front Raise (Dumbbell)":
+    category: Dumbbell
+    target: Shoulders
+
+  "Front Raise (Plate)":
+    category: Machine
+    target: Shoulders
+
+  "Lateral Raise (Band)":
+    category: Weighted Body Weight
+    target: Shoulders
+
+  "Lateral Raise (Cable)":
+    category: Machine
+    target: Shoulders
+
+  "Lateral Raise (Dumbbell)":
+    category: Dumbbell
+    target: Shoulders
+
+  "Lateral Raise (Machine)":
+    category: Machine
+    target: Shoulders
+
+  "Overhead Press (Barbell)":
+    category: Barbell
+    target: Shoulders
+
+  "Overhead Press (Cable)":
+    category: Machine
+    target: Shoulders
+
+  "Overhead Press (Dumbbell)":
+    category: Dumbbell
+    target: Shoulders
+
+  "Overhead Press (Smith Machine)":
+    category: Machine
+    target: Shoulders
+
+  "Push Press":
+    category: Barbell
+    target: Shoulders
+
+  "Reverse Fly (Cable)":
+    category: Machine
+    target: Shoulders
+
+  "Reverse Fly (Dumbbell)":
+    category: Dumbbell
+    target: Shoulders
+
+  "Reverse Fly (Machine)":
+    category: Machine
+    target: Shoulders
+
+  "Seated Overhead Press (Barbell)":
+    category: Barbell
+    target: Shoulders
+
+  "Seated Overhead Press (Dumbbell)":
+    category: Dumbbell
+    target: Shoulders
+
+  "Shoulder Press (Machine)":
+    category: Machine
+    target: Shoulders
+
+  "Shoulder Press (Plate Loaded)":
+    category: Machine
+    target: Shoulders
+
+  "Shrug (Barbell)":
+    category: Barbell
+    target: Shoulders
+
+  "Shrug (Dumbbell)":
+    category: Dumbbell
+    target: Shoulders
+
+  "Strict Military Press (Barbell)":
+    category: Barbell
+    target: Shoulders
+
+  "Upright Row (Dumbbell)":
+    category: Dumbbell
+    target: Shoulders
+
+  "Stretching":
+    category: Duration
+    target: Other
+
+  "Clean (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Clean and Jerk (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Deadlift High Pull (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Hang Clean (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Hang Snatch (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Jump Shrug (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Overhead Squat (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Power Clean":
+    category: Barbell
+    target: Olympic
+
+  "Power Snatch (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Press Under (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Snatch (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Snatch Pull (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Split Jerk (Barbell)":
+    category: Barbell
+    target: Olympic
+
+  "Ball Slams":
+    category: Machine
+    target: Full Body
+
+  "Burpee":
+    category: RepsOnly,
+    target: Full Body
+
+  "Jumping Jack":
+    category: RepsOnly,
+    target: Full Body
+
+  "Kettlebell Swing":
+    category: Machine
+    target: Full Body
+
+  "Kettlebell Turkish Get Up":
+    category: Machine
+    target: Full Body
+
+  "Muscle Up":
+    category: Weighted Body Weight
+    target: Full Body
+
+  "Squat Row (Band)":
+    category: RepsOnly,
+    target: Full Body
+
+  "Sumo Deadlift High Pull (Barbell)":
+    category: Barbell
+    target: Full Body
+
+  "Thruster (Barbell)":
+    category: Barbell
+    target: Full Body
+
+  "Thruster (Kettlebell)":
+    category: Machine
+    target: Full Body
+
+  "Aerobics":
+    category: Duration
+    target: Cardio
+
+  "Battle Ropes":
+    category: Cardio
+    target: Cardio
+
+  "Climbing":
+    category: Duration
+    target: Cardio
+
+  "Cycling":
+    category: Cardio
+    target: Cardio
+
+  "Cycling (Indoor)":
+    category: Cardio
+    target: Cardio
+
+  "Elliptical Machine":
+    category: Cardio
+    target: Cardio
+
+  "Hiking":
+    category: Cardio
+    target: Cardio
+
+  "Jump Rope":
+    category: RepsOnly,
+    target: Cardio
+
+  "Rowing (Machine)":
+    category: Cardio
+    target: Cardio
+
+  "Running":
+    category: Cardio
+    target: Cardio
+
+  "Running (Treadmill)":
+    category: Cardio
+    target: Cardio
+
+  "Skating":
+    category: Cardio
+    target: Cardio
+
+  "Skiing":
+    category: Cardio
+    target: Cardio
+
+  "Snowboarding":
+    category: Cardio
+    target: Cardio
+
+  "Swimming":
+    category: Cardio
+    target: Cardio
+
+  "Walking":
+    category: Cardio
+    target: Cardio
+
+  "Yoga":
+    category: Duration
+    target: Cardio
