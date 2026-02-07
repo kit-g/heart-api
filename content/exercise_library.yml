@@ -207,6 +207,53 @@ exercises:
   "Cross Body Crunch":
     category: Weighted Body Weight
     target: Core
+    i18n:
+      en:
+        name: "Cross Body Crunch"
+        instructions: |
+          ## Overview
+          The cross body crunch is a rotational core exercise that primarily targets the obliques and rectus abdominis. It also engages the hip flexors and transverse abdominis as you bring your elbow toward the opposite knee, making it effective for building rotational core strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on your back on a mat with your knees bent and feet flat on the floor
+          - Place your hands lightly behind your head with elbows pointing out to the sides
+          - Lift your shoulders slightly off the mat and engage your core
+          - Keep your lower back pressed into the mat throughout the movement
+
+          ### 2. Movement
+          1. Lift your right shoulder off the mat while bringing your left knee toward your chest
+          2. Rotate your torso to bring your right elbow toward your left knee
+          3. Focus on rotating your entire torso, not just moving your elbow
+          4. Pause briefly when your elbow and knee come close together
+          5. Lower back to the starting position with control
+          6. Repeat on the opposite side, bringing your left elbow toward your right knee
+          7. Continue alternating sides for the desired number of reps
+
+          ### 3. Breathing
+          - Exhale as you crunch and rotate toward your knee
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your neck relaxed and avoid pulling on your head with your hands
+          - Initiate the movement from your core, not your arms
+          - Maintain constant tension in your abs throughout the movement
+          - Keep your lower back pressed against the mat to protect your spine
+          - Move with control rather than speed for maximum effectiveness
+
+          ### 5. Common Mistakes
+          - Pulling on the neck or head instead of engaging the core
+          - Only moving the elbow instead of rotating the entire torso
+          - Allowing the lower back to arch off the mat
+          - Moving too quickly and losing proper form
+          - Using momentum instead of controlled muscle contraction
+          - Not fully engaging the obliques during the twist
+
+          ### 6. Safety / Modifications
+          - Beginners can keep both feet on the ground and perform the twist without raising the knee
+          - Advanced variation: hold the contracted position for 2-3 seconds on each side
+          - If you experience neck discomfort, support your head with one hand and reach with the other
+          - Progress by slowing down the tempo to increase time under tension
 
   "Crunch":
     category: Weighted Body Weight
