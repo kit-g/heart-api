@@ -54,6 +54,53 @@ exercises:
   "Bicycle Crunch":
     category: Weighted Body Weight
     target: Core
+    i18n:
+      en:
+        name: "Bicycle Crunch"
+        instructions: |
+          ## Overview
+          The bicycle crunch is a dynamic core exercise that primarily targets the rectus abdominis and obliques. It also engages the hip flexors and transverse abdominis as you coordinate the twisting motion with alternating leg movements.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on your back on a mat with your knees bent and feet flat on the floor
+          - Place your hands lightly behind your head with elbows pointing out to the sides
+          - Lift your shoulders slightly off the mat and engage your core
+          - Raise your feet off the floor with knees bent at 90 degrees
+          - Keep your lower back pressed into the mat
+
+          ### 2. Movement
+          1. Simultaneously bring your right elbow toward your left knee while extending your right leg straight
+          2. Twist your torso to bring your shoulder (not just your elbow) across your body
+          3. Pause briefly when your elbow and knee come close together
+          4. Return to the center position with both knees bent
+          5. Repeat on the opposite side, bringing your left elbow toward your right knee while extending your left leg
+          6. Continue alternating sides in a smooth, controlled pedaling motion
+
+          ### 3. Breathing
+          - Exhale as you twist and bring your elbow toward your knee
+          - Inhale as you return to center and switch sides
+
+          ### 4. Tips
+          - Focus on rotating your entire torso, not just moving your elbows
+          - Keep your neck relaxed and avoid pulling on your head with your hands
+          - Maintain constant tension in your core throughout the movement
+          - Move with control rather than speed for maximum effectiveness
+          - Keep your lower back pressed against the mat to protect your spine
+
+          ### 5. Common Mistakes
+          - Pulling on the neck or head instead of engaging the core
+          - Moving too quickly and losing proper form
+          - Only moving the elbows instead of rotating the torso
+          - Allowing the lower back to arch off the mat
+          - Not fully extending the legs on each repetition
+          - Holding your breath during the movement
+
+          ### 6. Safety / Modifications
+          - Beginners can keep their feet on the ground and perform the twist without leg movement
+          - Reduce range of motion if you experience neck or lower back discomfort
+          - Progress by slowing down the tempo to increase time under tension
+          - Advanced variation: pause for 2-3 seconds at each twist
 
   "Cable Crunch":
     category: Machine
