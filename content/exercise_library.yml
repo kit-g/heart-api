@@ -156,6 +156,53 @@ exercises:
   "Cable Twist":
     category: Machine
     target: Core
+    i18n:
+      en:
+        name: "Cable Twist"
+        instructions: |
+          ## Overview
+          The cable twist is a rotational core exercise that primarily targets the obliques and transverse abdominis. It also engages the rectus abdominis and hip stabilizers throughout the twisting movement, making it effective for building rotational strength and core stability.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand sideways to a cable machine with the pulley set at chest height
+          - Grip the handle with both hands and step away from the machine to create tension
+          - Position your feet shoulder-width apart with knees slightly bent
+          - Extend your arms out in front of your chest, keeping a slight bend in the elbows
+          - Engage your core and maintain an upright torso
+
+          ### 2. Movement
+          1. Rotate your torso away from the cable machine, pivoting through your core
+          2. Keep your arms extended and move as one unit with your torso
+          3. Rotate as far as comfortable while maintaining control and upright posture
+          4. Pause briefly at the end of the rotation
+          5. Slowly return to the starting position with control, resisting the cable's pull
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you rotate away from the machine
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Initiate the movement from your core, not your arms or shoulders
+          - Keep your hips facing forward throughout the movement
+          - Maintain a stable lower body while your upper body rotates
+          - Move slowly and with control to maximize core engagement
+          - Keep tension on the cable throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the weight instead of controlled rotation
+          - Allowing the hips to rotate along with the torso
+          - Bending or extending the arms during the movement
+          - Leaning backward or forward instead of maintaining an upright posture
+          - Choosing too heavy a weight that compromises form
+          - Twisting too quickly without proper control
+
+          ### 6. Safety / Modifications
+          - Start with a light weight to master the rotational pattern
+          - Beginners can perform half-range rotations until they build control
+          - Advanced variation: pause for 2-3 seconds at peak rotation for increased intensity
+          - If you experience lower back discomfort, reduce the range of motion or weight
 
   "Cross Body Crunch":
     category: Weighted Body Weight
