@@ -309,6 +309,53 @@ exercises:
   "Crunch (Machine)":
     category: Machine
     target: Core
+    i18n:
+      en:
+        name: "Crunch (Machine)"
+        instructions: |
+          ## Overview
+          The machine crunch is a resistance-based core exercise that primarily targets the rectus abdominis with consistent tension throughout the movement. It also engages the obliques and transverse abdominis as stabilizers, offering a controlled way to progressively overload your abdominal muscles.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the crunch machine with your back against the pad
+          - Place your feet under the foot pads or on the footrest
+          - Grip the handles above your head or at chest level, depending on the machine design
+          - Adjust the weight to a challenging but manageable resistance
+          - Engage your core and maintain a neutral spine position
+
+          ### 2. Movement
+          1. Exhale and crunch forward by contracting your abdominal muscles
+          2. Focus on curling your torso and bringing your ribcage toward your pelvis
+          3. Keep the movement controlled and avoid using momentum
+          4. Squeeze your abs hard at the bottom of the movement for 1-2 seconds
+          5. Slowly return to the starting position while maintaining tension on your core
+          6. Stop just before the weight stack touches to keep continuous tension on your abs
+
+          ### 3. Breathing
+          - Exhale forcefully as you crunch forward and contract your abs
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Focus on using your core to move the weight, not your arms or shoulders
+          - Keep your neck in a neutral position throughout the movement
+          - Maintain a controlled tempo to maximize muscle engagement
+          - Avoid letting the weight stack rest between reps
+          - Keep your lower back pressed against the pad
+
+          ### 5. Common Mistakes
+          - Using the arms or shoulders to pull the weight instead of engaging the core
+          - Moving too quickly and relying on momentum
+          - Choosing too heavy a weight that compromises form
+          - Allowing the weight stack to rest completely between reps
+          - Extending or arching the spine on the return movement
+          - Holding your breath during the exercise
+
+          ### 6. Safety / Modifications
+          - Start with a light weight to master proper form and mind-muscle connection
+          - Advanced variation: pause for 3-5 seconds at peak contraction
+          - If you experience lower back discomfort, reduce the weight and focus on core engagement
+          - Progress gradually by adding small weight increments over time
 
   "Crunch (Stability Ball)":
     category: Reps Only,
