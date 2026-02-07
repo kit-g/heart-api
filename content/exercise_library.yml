@@ -411,6 +411,53 @@ exercises:
   "Decline Crunch":
     category: Weighted Body Weight
     target: Core
+    i18n:
+      en:
+        name: "Decline Crunch"
+        instructions: |
+          ## Overview
+          The decline crunch is an advanced core exercise that primarily targets the rectus abdominis with increased resistance from gravity. It also engages the hip flexors and obliques as stabilizers, making it more challenging than the standard floor crunch due to the declined angle.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie back on a decline bench with your feet secured under the foot pads
+          - Adjust the bench to a moderate decline angle (typically 15-30 degrees)
+          - Place your hands lightly behind your head or crossed over your chest
+          - Keep your elbows pointing out to the sides if hands are behind your head
+          - Engage your core and maintain a neutral spine position
+
+          ### 2. Movement
+          1. Lift your shoulder blades off the bench by contracting your abdominal muscles
+          2. Curl your upper body forward, bringing your ribcage toward your pelvis
+          3. Exhale and squeeze your abs at the top of the movement for 1-2 seconds
+          4. Slowly lower your shoulders back down with control
+          5. Stop just before your shoulders touch the bench to maintain tension
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale forcefully as you crunch up and contract your abs
+          - Inhale as you lower back to the starting position
+
+          ### 4. Tips
+          - Focus on curling your torso rather than just lifting with your neck
+          - Keep constant tension on your abs by not fully relaxing between reps
+          - Avoid pulling on your head or neck with your hands
+          - Start with a shallow decline and progress to steeper angles
+          - Move slowly and with control to maximize muscle engagement
+
+          ### 5. Common Mistakes
+          - Pulling on the neck with your hands, which can cause strain
+          - Using momentum to swing up instead of controlled contraction
+          - Starting with too steep a decline before building adequate strength
+          - Allowing the lower back to hyperextend on the way down
+          - Moving too quickly and sacrificing form for reps
+          - Completely relaxing between reps, losing core tension
+
+          ### 6. Safety / Modifications
+          - Beginners should start with a flat or very shallow decline
+          - Advanced variation: hold a weight plate on your chest for added resistance
+          - If you experience discomfort, reduce the decline angle or return to floor crunches
+          - Progress by gradually increasing the decline angle as you build strength
 
   "Flat Knee Raise":
     category: Reps Only,
