@@ -105,6 +105,53 @@ exercises:
   "Cable Crunch":
     category: Machine
     target: Core
+    i18n:
+      en:
+        name: "Cable Crunch"
+        instructions: |
+          ## Overview
+          The cable crunch is an effective core exercise that primarily targets the rectus abdominis with constant tension throughout the movement. It also engages the obliques and transverse abdominis as stabilizers, making it a popular choice for building ab strength and definition.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Kneel in front of a high cable pulley with a rope attachment
+          - Grip the rope ends and position them beside your head or at your upper chest
+          - Keep your hips stationary and maintain a slight forward lean
+          - Engage your core and set your shoulder blades down and back
+          - Position yourself close enough that the weight stack doesn't rest between reps
+
+          ### 2. Movement
+          1. Exhale and crunch downward by contracting your abs and bringing your elbows toward your thighs
+          2. Focus on curling your torso forward, not just pulling with your arms
+          3. Squeeze your abs hard at the bottom of the movement for 1-2 seconds
+          4. Slowly return to the starting position under control while maintaining tension
+          5. Stop just before the weight stack touches down to keep constant tension on your core
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale forcefully as you crunch down and contract your abs
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your hips fixed throughout the movement; only your torso should move
+          - Think about bringing your ribcage toward your pelvis rather than just bending forward
+          - Maintain a controlled tempo; avoid jerking or using momentum
+          - Keep tension on your abs by not allowing the weight to rest between reps
+          - Your arms should remain in a fixed position relative to your head
+
+          ### 5. Common Mistakes
+          - Using the arms and shoulders to pull instead of contracting the abs
+          - Allowing the hips to rock back and forth
+          - Moving too quickly and relying on momentum
+          - Letting the weight stack rest completely between reps
+          - Choosing too heavy a weight that compromises form
+          - Extending the spine too far on the return, which can strain the lower back
+
+          ### 6. Safety / Modifications
+          - Start with a light weight to master the form and mind-muscle connection
+          - If you experience neck discomfort, try holding the rope at chest level instead of by your head
+          - Advanced variation: pause for 3-5 seconds at peak contraction for increased intensity
+          - Regression: perform standard bodyweight crunches until you build sufficient core strength
 
   "Cable Twist":
     category: Machine
