@@ -616,6 +616,54 @@ exercises:
   "Hanging Leg Raise":
     category: Weighted Body Weight
     target: Core
+    i18n:
+      en:
+        name: "Hanging Leg Raise"
+        instructions: |
+          ## Overview
+          The hanging leg raise is an advanced bodyweight core exercise that primarily targets the lower rectus abdominis and hip flexors. It also engages the entire core, including the obliques and transverse abdominis, along with grip and shoulder stability, making it one of the most challenging ab exercises.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hang from a pull-up bar with your hands shoulder-width apart using an overhand grip
+          - Allow your body to hang fully extended with your feet off the ground
+          - Engage your core and keep your shoulders pulled down and back
+          - Keep your legs together and fully extended
+          - Avoid excessive swinging by stabilizing your body
+
+          ### 2. Movement
+          1. Lift your legs toward the ceiling by contracting your lower abs
+          2. Keep your legs straight and together as you raise them
+          3. Continue until your legs are at least parallel to the ground or higher
+          4. Minimize swinging by keeping the movement controlled
+          5. Pause briefly at the top of the movement
+          6. Slowly lower your legs back to the starting position with control
+          7. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you lift your legs toward the ceiling
+          - Inhale as you lower your legs back to the starting position
+
+          ### 4. Tips
+          - Keep your legs completely straight throughout the entire movement
+          - Focus on using your core to lift your legs, not just your hip flexors
+          - Keep your shoulders engaged and avoid hanging passively
+          - Minimize body swing by maintaining core tension throughout
+          - Think about bringing your toes to the bar for maximum core engagement
+
+          ### 5. Common Mistakes
+          - Bending the knees to make the exercise easier
+          - Using momentum and swinging excessively
+          - Allowing the shoulders to shrug up toward the ears
+          - Not raising the legs high enough to fully engage the abs
+          - Moving too quickly and losing control
+          - Holding your breath during the movement
+
+          ### 6. Safety / Modifications
+          - Master hanging knee raises before attempting this advanced variation
+          - Use wrist straps if grip strength is limiting
+          - Beginners can perform the exercise on a captain's chair for support
+          - Advanced variation: add ankle weights or perform toes-to-bar raises
 
   "Jackknife Sit Up":
     category: Weighted Body Weight
