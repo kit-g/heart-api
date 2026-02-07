@@ -513,6 +513,54 @@ exercises:
   "Flat Leg Raise":
     category: Reps Only,
     target: Core
+    i18n:
+      en:
+        name: "Flat Leg Raise"
+        instructions: |
+          ## Overview
+          The flat leg raise is a challenging bodyweight core exercise that primarily targets the lower rectus abdominis and hip flexors. It also engages the transverse abdominis and obliques for stability, requiring greater core strength than the bent-knee variation due to the extended leg position.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on your back on a mat with your legs fully extended
+          - Place your hands beside your hips or under your glutes for support
+          - Press your lower back into the mat and engage your core
+          - Keep your head and shoulders relaxed on the mat
+          - Point your toes and maintain straight legs throughout
+
+          ### 2. Movement
+          1. Lift both legs toward the ceiling by contracting your lower abs
+          2. Keep your legs straight and together as you raise them
+          3. Continue until your legs are perpendicular to the floor or slightly beyond
+          4. Maintain your lower back pressed against the mat throughout
+          5. Pause briefly at the top of the movement
+          6. Slowly lower your legs back down with control
+          7. Stop just before your heels touch the floor to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you lift your legs toward the ceiling
+          - Inhale as you lower your legs back down
+
+          ### 4. Tips
+          - Keep your legs straight and together throughout the entire movement
+          - Focus on using your lower abs rather than relying on hip flexors
+          - Press your lower back firmly into the mat to protect your spine
+          - Lower your legs only as far as you can while maintaining lower back contact
+          - Move with control; slower is more challenging and effective
+
+          ### 5. Common Mistakes
+          - Allowing the lower back to arch off the mat, especially during the lowering phase
+          - Bending the knees to make the exercise easier
+          - Using momentum to swing the legs up instead of controlled contraction
+          - Lowering the legs too far and losing lower back contact
+          - Moving too quickly and sacrificing form
+          - Holding your breath during the movement
+
+          ### 6. Safety / Modifications
+          - Beginners should master flat knee raises before attempting this exercise
+          - Place hands under your glutes for additional lower back support
+          - Reduce range of motion by not lowering legs as far if you experience lower back strain
+          - Advanced variation: lower legs very slowly (3-5 seconds) to increase intensity
 
   "Hanging Knee Raise":
     category: Reps Only,
