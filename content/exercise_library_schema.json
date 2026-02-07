@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/exercises-master.2026-02-07.schema.json",
+  "title": "Exercise Library Master File (2026-02-07)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "locales",
+    "exercises"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "2026-02-07",
+      "description": "Schema/content version identifier."
+    },
+    "locales": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z]{2}(_[A-Z]{2})?$"
+      },
+      "description": "Locale codes like en, en_CA, ru."
+    },
+    "exercises": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^ex_[a-z0-9_]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/exercise"
+      },
+      "description": "Map: exerciseId -> exercise definition."
+    }
+  },
+  "$defs": {
+    "exercise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "target",
+        "i18n"
+      ],
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": [
+            "Weighted Body Weight",
+            "Assisted Body Weight",
+            "Reps Only",
+            "Cardio",
+            "Duration",
+            "Machine",
+            "Dumbbell",
+            "Barbell"
+          ],
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "enum": [
+            "Core",
+            "Arms",
+            "Back",
+            "Chest",
+            "Legs",
+            "Shoulders",
+            "Other",
+            "Olympic",
+            "Full Body",
+            "Cardio"
+          ],
+          "minLength": 1
+        },
+        "media": {
+          "$ref": "#/$defs/media"
+        },
+        "i18n": {
+          "$ref": "#/$defs/i18nMap"
+        }
+      }
+    },
+    "media": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "images": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "$ref": "#/$defs/assetPath"
+            },
+            "finish": {
+              "$ref": "#/$defs/assetPath"
+            }
+          }
+        }
+      }
+    },
+    "assetPath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^(assets/|asset://).+",
+      "description": "Relative path (assets/...) or custom scheme (asset://...)."
+    },
+    "i18nMap": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/i18nEntry"
+      },
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z]{2}(_[A-Z]{2})?$"
+      },
+      "description": "Per-locale content. Keys should be locale codes."
+    },
+    "i18nEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "instructions": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 20000,
+          "description": "Markdown content; may include images, e.g. ![](assets/...)."
+        }
+      }
+    }
+  }
+}
