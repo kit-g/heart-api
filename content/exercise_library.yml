@@ -462,6 +462,53 @@ exercises:
   "Flat Knee Raise":
     category: Reps Only,
     target: Core
+    i18n:
+      en:
+        name: "Flat Knee Raise"
+        instructions: |
+          ## Overview
+          The flat knee raise is a bodyweight core exercise that primarily targets the lower rectus abdominis and hip flexors. It also engages the transverse abdominis and obliques as stabilizers, making it an accessible entry point for developing lower ab strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on your back on a mat with your legs extended
+          - Place your hands beside your hips or under your glutes for support
+          - Press your lower back into the mat and engage your core
+          - Keep your head and shoulders relaxed on the mat
+          - Maintain a neutral neck position by looking at the ceiling
+
+          ### 2. Movement
+          1. Bend your knees and lift them toward your chest by contracting your lower abs
+          2. Continue until your knees are directly above your hips or slightly beyond
+          3. Keep your lower back pressed against the mat throughout the movement
+          4. Pause briefly at the top of the movement
+          5. Slowly lower your knees back down with control
+          6. Stop just before your feet touch the floor to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you lift your knees toward your chest
+          - Inhale as you lower your knees back to the starting position
+
+          ### 4. Tips
+          - Focus on using your lower abs to lift your knees, not just your hip flexors
+          - Keep your lower back pressed into the mat to protect your spine
+          - Move slowly and with control throughout the entire range of motion
+          - Maintain constant tension by not letting your feet touch the floor between reps
+          - Keep your upper body relaxed to avoid neck tension
+
+          ### 5. Common Mistakes
+          - Allowing the lower back to arch off the mat
+          - Using momentum to swing the legs up instead of controlled contraction
+          - Moving too quickly and sacrificing form
+          - Letting the feet touch the floor completely between reps
+          - Tensing the neck or upper body unnecessarily
+          - Holding your breath during the movement
+
+          ### 6. Safety / Modifications
+          - Beginners can perform smaller raises, not bringing knees as high
+          - Place hands under your glutes for additional lower back support
+          - Advanced variation: pause for 2-3 seconds at the top of each rep
+          - Progress to flat leg raises once you master the knee raise with proper form
 
   "Flat Leg Raise":
     category: Reps Only,
