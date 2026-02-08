@@ -29,8 +29,7 @@
       "type": "object",
       "minProperties": 1,
       "propertyNames": {
-        "type": "string",
-        "pattern": "^ex_[a-z0-9_]+$"
+        "type": "string"
       },
       "additionalProperties": {
         "$ref": "#/$defs/exercise"
