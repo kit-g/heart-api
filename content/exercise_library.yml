@@ -1127,6 +1127,53 @@ exercises:
   "Side Bend (Cable)":
     category: Machine
     target: Core
+    i18n:
+      en:
+        name: "Side Bend (Cable)"
+        instructions: |
+          ## Overview
+          The cable side bend is a resistance-based core exercise that primarily targets the obliques and transverse abdominis. It also engages the quadratus lumborum and erector spinae as stabilizers, providing constant tension throughout the movement for building lateral core strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand sideways to a low cable pulley machine with feet shoulder-width apart
+          - Grip the handle with the hand closest to the machine
+          - Step away slightly to create tension on the cable
+          - Place your free hand behind your head or on your hip
+          - Stand upright with your core engaged and shoulders level
+
+          ### 2. Movement
+          1. Slowly bend away from the cable by contracting your opposite-side obliques
+          2. Keep your hips stable and facing forward throughout
+          3. Bend laterally as far as comfortable while maintaining control
+          4. Pause briefly at the end of the movement
+          5. Return to the starting upright position with control, resisting the cable's pull
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you bend away from the cable
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Focus on pure lateral flexion without twisting or leaning forward
+          - Keep your hips and shoulders facing forward throughout
+          - Move slowly and with control to maximize oblique engagement
+          - Avoid bending toward the cable, which reduces effectiveness
+          - Keep tension on the cable throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Using too much weight and compromising form
+          - Twisting or rotating instead of pure lateral bending
+          - Allowing the hips to shift side to side
+          - Bending forward or backward instead of directly to the side
+          - Moving too quickly and using momentum
+          - Not controlling the return to starting position
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the movement pattern
+          - Beginners can perform without weight to establish proper form
+          - Advanced variation: pause for 2-3 seconds at peak contraction
+          - If you experience lower back discomfort, reduce weight and check your form
 
   "Side Bend (Band)":
     category: Reps Only
