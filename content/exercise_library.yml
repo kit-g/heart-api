@@ -822,6 +822,52 @@ exercises:
   "Oblique Crunch":
     category: Reps Only
     target: Core
+    i18n:
+      en:
+        name: "Oblique Crunch"
+        instructions: |
+          ## Overview
+          The oblique crunch is a bodyweight core exercise that primarily targets the obliques and rectus abdominis. It also engages the transverse abdominis as a stabilizer, making it effective for building lateral core strength and definition.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on your side on a mat with your legs stacked or staggered for stability
+          - Place your bottom arm on the floor for support or across your chest
+          - Place your top hand lightly behind your head with elbow pointing up
+          - Engage your core and maintain a neutral spine
+          - Keep your hips stacked and facing forward
+
+          ### 2. Movement
+          1. Lift your shoulder and upper torso toward your hip by contracting your obliques
+          2. Focus on bringing your ribcage toward your hip on the same side
+          3. Squeeze your obliques at the top of the movement for 1-2 seconds
+          4. Slowly lower back to the starting position with control
+          5. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you crunch up and contract your obliques
+          - Inhale as you lower back to the starting position
+
+          ### 4. Tips
+          - Focus on lateral flexion from your obliques, not forward flexion
+          - Keep your hips stable and avoid rotating them
+          - Move slowly and with control to maximize muscle engagement
+          - Avoid pulling on your head or neck with your hand
+          - Keep constant tension on your obliques throughout the movement
+
+          ### 5. Common Mistakes
+          - Pulling on the neck or head, which can cause strain
+          - Rotating the hips instead of isolating the obliques
+          - Using momentum instead of controlled muscle contraction
+          - Not fully engaging the obliques on each rep
+          - Moving too quickly and sacrificing form
+          - Forgetting to repeat on both sides equally
+
+          ### 6. Safety / Modifications
+          - Beginners can place both hands behind the head for more support
+          - Advanced variation: hold a weight plate on your chest for added resistance
+          - If you experience neck discomfort, place your top arm across your chest instead
+          - Progress by adding a 2-3 second pause at peak contraction
 
   "Plank":
     category: Duration
