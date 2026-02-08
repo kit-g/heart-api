@@ -1025,6 +1025,53 @@ exercises:
   "Russian Twist":
     category: Reps Only
     target: Core
+    i18n:
+      en:
+        name: "Russian Twist"
+        instructions: |
+          ## Overview
+          The Russian twist is a dynamic rotational core exercise that primarily targets the obliques and transverse abdominis. It also engages the rectus abdominis and hip flexors as stabilizers, making it effective for building rotational strength and core stability.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on a mat with your knees bent and feet flat on the floor
+          - Lean back slightly to engage your core, creating a V-shape with your torso and thighs
+          - Lift your feet slightly off the ground for added difficulty, or keep them planted
+          - Clasp your hands together in front of your chest
+          - Keep your back straight and core engaged throughout
+
+          ### 2. Movement
+          1. Rotate your torso to the right, bringing your hands toward the floor beside your hip
+          2. Keep your hips facing forward while your upper body twists
+          3. Pause briefly when your hands touch or come close to the floor
+          4. Rotate back through center to the opposite side
+          5. Bring your hands toward the floor beside your left hip
+          6. Continue alternating sides in a controlled, rhythmic motion for the desired number of reps
+
+          ### 3. Breathing
+          - Exhale as you twist to each side
+          - Inhale as you pass through center
+
+          ### 4. Tips
+          - Initiate the rotation from your core, not your arms
+          - Keep your chest lifted and back straight throughout
+          - Maintain a consistent lean-back angle without collapsing forward
+          - Move with control rather than speed for maximum effectiveness
+          - Keep your hips stable and facing forward
+
+          ### 5. Common Mistakes
+          - Rotating the hips along with the torso instead of keeping them stable
+          - Rounding the back and collapsing forward
+          - Moving too quickly and using momentum instead of control
+          - Only moving the arms instead of rotating the entire torso
+          - Holding your breath during the movement
+          - Leaning back too far, which can strain the lower back
+
+          ### 6. Safety / Modifications
+          - Beginners can keep their feet on the ground for better stability
+          - Advanced variation: hold a weight plate, dumbbell, or medicine ball for added resistance
+          - Reduce the range of motion if you experience lower back discomfort
+          - Progress by lifting feet higher or adding a pause at each side
 
   "Flutter Kick":
     category: Reps Only
