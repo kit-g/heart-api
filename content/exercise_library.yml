@@ -974,6 +974,53 @@ exercises:
   "Reverse Plank":
     category: Duration
     target: Core
+    i18n:
+      en:
+        name: "Reverse Plank"
+        instructions: |
+          ## Overview
+          The reverse plank is an isometric core exercise that primarily targets the transverse abdominis, lower back, and glutes. It also engages the shoulders, hamstrings, and upper back stabilizers, making it effective for building posterior chain strength and improving posture.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on a mat with your legs extended straight in front of you
+          - Place your hands on the floor behind you, fingers pointing toward your feet
+          - Position your hands shoulder-width apart with arms straight
+          - Engage your core and prepare to lift your hips
+          - Keep your feet together or hip-width apart
+
+          ### 2. Movement
+          1. Press through your hands and heels to lift your hips off the ground
+          2. Raise your hips until your body forms a straight line from head to heels
+          3. Keep your arms straight and shoulders pressed down
+          4. Engage your glutes and core to maintain the position
+          5. Hold this static position for the target duration, typically 20-45 seconds
+          6. Lower your hips back to the ground with control when complete
+
+          ### 3. Breathing
+          - Breathe steadily and naturally throughout the hold
+          - Avoid holding your breath; maintain consistent, calm breathing
+
+          ### 4. Tips
+          - Keep your body in a straight line without sagging or piking
+          - Squeeze your glutes throughout the hold to protect your lower back
+          - Press your chest up and open to engage your upper back
+          - Keep your neck neutral by looking slightly upward
+          - Distribute your weight evenly between your hands and heels
+
+          ### 5. Common Mistakes
+          - Allowing the hips to sag, which strains the lower back
+          - Bending the arms instead of keeping them straight
+          - Dropping the head back too far, which strains the neck
+          - Holding your breath instead of breathing naturally
+          - Not engaging the glutes, putting excess stress on the lower back
+          - Holding the position with poor form instead of reducing duration
+
+          ### 6. Safety / Modifications
+          - Beginners can start with bent knees (reverse tabletop position)
+          - Reduce hold time and focus on perfect form before increasing duration
+          - Advanced variation: lift one leg to increase difficulty
+          - If you experience wrist discomfort, perform on your forearms instead
 
   "Russian Twist":
     category: Reps Only
