@@ -1484,6 +1484,53 @@ exercises:
   "Torso Rotation (Machine)":
     category: Machine
     target: Core
+    i18n:
+      en:
+        name: "Torso Rotation (Machine)"
+        instructions: |
+          ## Overview
+          The torso rotation machine is a resistance-based core exercise that primarily targets the obliques and transverse abdominis. It also engages the rectus abdominis and deep core stabilizers through a controlled rotational movement, allowing you to progressively overload rotational core strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the torso rotation machine with your back against the pad
+          - Adjust the seat height so the pivot point aligns with your mid-torso
+          - Place your feet flat on the footrests and secure your thighs under the pads
+          - Grip the handles at chest height on either side
+          - Engage your core and maintain an upright posture
+
+          ### 2. Movement
+          1. Rotate your torso to one side by contracting your obliques
+          2. Keep your hips stable and facing forward throughout the movement
+          3. Rotate as far as the machine allows while maintaining control
+          4. Pause briefly at the end of the rotation
+          5. Return to the starting center position with control
+          6. Complete all reps on one side, then adjust the machine and repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you rotate to the side
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Focus on rotating from your core, not pulling with your arms
+          - Keep your hips and lower body completely stable
+          - Move slowly and with control to maximize oblique engagement
+          - Maintain an upright posture throughout the movement
+          - Keep tension on the weight stack by not letting it rest between reps
+
+          ### 5. Common Mistakes
+          - Using too much weight and compromising form
+          - Rotating the hips along with the torso
+          - Using momentum or jerking the weight
+          - Pulling with the arms instead of rotating with the core
+          - Moving too quickly through the range of motion
+          - Leaning forward or backward instead of staying upright
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the rotational pattern
+          - Perform equal reps on both sides for balanced development
+          - Advanced variation: pause for 2-3 seconds at peak rotation
+          - If you experience lower back discomfort, reduce weight and ensure proper form
 
   "V Up":
     category: Reps Only
