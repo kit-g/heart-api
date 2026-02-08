@@ -1178,6 +1178,53 @@ exercises:
   "Side Bend (Band)":
     category: Reps Only
     target: Core
+    i18n:
+      en:
+        name: "Side Bend (Band)"
+        instructions: |
+          ## Overview
+          The band side bend is a resistance-based core exercise that primarily targets the obliques and transverse abdominis. It also engages the quadratus lumborum as a stabilizer, providing progressive tension throughout the movement for building lateral core strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, stepping on the center of a resistance band
+          - Grip one end of the band with one hand at your side
+          - Place your free hand behind your head or on your hip
+          - Stand upright with your core engaged and shoulders level
+          - Ensure the band has slight tension even in the starting position
+
+          ### 2. Movement
+          1. Slowly bend away from the band by contracting your opposite-side obliques
+          2. Keep your hips stable and facing forward throughout
+          3. Bend laterally as far as comfortable while maintaining control
+          4. Pause briefly at the end of the movement
+          5. Return to the starting upright position with control, resisting the band's pull
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you bend away from the band
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Focus on pure lateral flexion without twisting or leaning forward
+          - Keep your hips and shoulders facing forward throughout
+          - Move slowly and with control to maximize oblique engagement
+          - Avoid bending toward the band side, which reduces effectiveness
+          - Maintain constant tension on the band throughout
+
+          ### 5. Common Mistakes
+          - Using too much band resistance and compromising form
+          - Twisting or rotating instead of pure lateral bending
+          - Allowing the hips to shift side to side
+          - Bending forward or backward instead of directly to the side
+          - Moving too quickly and using momentum
+          - Not controlling the return to starting position
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master the movement pattern
+          - Beginners can perform without band to establish proper form first
+          - Advanced variation: use a heavier resistance band or pause at peak contraction
+          - If you experience lower back discomfort, reduce resistance and check your form
 
   "Side Bend (Dumbbell)":
     category: Dumbbell
