@@ -1433,6 +1433,53 @@ exercises:
   "Toes To Bar":
     category: Reps Only
     target: Core
+    i18n:
+      en:
+        name: "Toes To Bar"
+        instructions: |
+          ## Overview
+          Toes to bar is an advanced hanging core exercise that primarily targets the entire rectus abdominis and hip flexors. It also engages the obliques, transverse abdominis, lats, grip strength, and shoulder stabilizers, making it one of the most challenging bodyweight ab exercises.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hang from a pull-up bar with your hands shoulder-width apart using an overhand grip
+          - Allow your body to hang fully extended with your feet off the ground
+          - Engage your core and keep your shoulders pulled down and back
+          - Keep your legs together and fully extended
+          - Minimize swinging by stabilizing your body
+
+          ### 2. Movement
+          1. Simultaneously lift your legs and bring your toes toward the bar
+          2. Keep your legs straight as you raise them in a smooth arc
+          3. Use core strength and a slight hip drive to reach your toes to the bar
+          4. Touch the bar with your toes at the top of the movement
+          5. Control the descent as you lower your legs back down
+          6. Return to the starting hanging position and repeat for controlled reps
+
+          ### 3. Breathing
+          - Exhale forcefully as you lift your legs toward the bar
+          - Inhale as you lower your legs back to the starting position
+
+          ### 4. Tips
+          - Generate momentum from your shoulders and core, not just your legs
+          - Think about bringing your toes to the bar in an arc, not straight up
+          - Keep your arms straight and shoulders engaged throughout
+          - Use a controlled swing rather than fighting against it
+          - Squeeze your abs hard at the top of the movement
+
+          ### 5. Common Mistakes
+          - Bending the knees to make the exercise easier
+          - Using excessive, uncontrolled swinging
+          - Not bringing the toes all the way to the bar
+          - Allowing the shoulders to shrug up toward the ears
+          - Dropping the legs too quickly on the descent
+          - Not engaging the lats to help control the movement
+
+          ### 6. Safety / Modifications
+          - Master hanging leg raises and knees to elbows before attempting this exercise
+          - Use wrist straps if grip strength is limiting
+          - Beginners can practice the kipping motion separately before combining it
+          - Advanced variation: perform strict toes to bar without any swing or kip
 
   "Torso Rotation (Machine)":
     category: Machine
