@@ -1,4 +1,4 @@
-version: 2026-02-07
+version: "2026-02-07"
 locales: [ en, en_CA, ru ]
 
 exercises:
