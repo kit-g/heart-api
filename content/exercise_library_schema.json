@@ -7,6 +7,7 @@
   "required": [
     "version",
     "locales",
+    "fallback_to_default",
     "exercises"
   ],
   "properties": {
@@ -24,6 +25,11 @@
         "pattern": "^[a-z]{2}(_[A-Z]{2})?$"
       },
       "description": "Locale codes like en, en_CA, ru."
+    },
+    "fallback_to_default": {
+      "type": "string",
+      "pattern": "^[a-z]{2}(_[A-Z]{2})?$",
+      "description": "Default read-only fallback locale used when a requested locale entry is missing or incomplete and no per-entry fallback_to is set."
     },
     "exercises": {
       "type": "object",
@@ -139,6 +145,11 @@
           "minLength": 0,
           "maxLength": 20000,
           "description": "Markdown content; may include images, e.g. ![](assets/...)."
+        },
+        "fallback_to": {
+          "type": "string",
+          "pattern": "^[a-z]{2}(_[A-Z]{2})?$",
+          "description": "If a field is missing in this locale entry, read it from this locale for the same exercise (read-only fallback). Example: en_CA -> en."
         }
       }
     }
