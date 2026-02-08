@@ -872,6 +872,53 @@ exercises:
   "Plank":
     category: Duration
     target: Core
+    i18n:
+      en:
+        name: "Plank"
+        instructions: |
+          ## Overview
+          The plank is an isometric core exercise that primarily targets the transverse abdominis and rectus abdominis. It also engages the shoulders, glutes, and lower back stabilizers throughout the hold, making it one of the most effective exercises for building overall core stability and endurance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Start in a prone position on a mat with your forearms on the ground
+          - Position your elbows directly under your shoulders with forearms parallel
+          - Extend your legs straight back with toes tucked under
+          - Lift your body off the ground, creating a straight line from head to heels
+          - Engage your core, squeeze your glutes, and keep your neck neutral
+
+          ### 2. Movement
+          1. Hold this static position while maintaining proper alignment
+          2. Keep your body in a straight line without sagging or piking
+          3. Breathe steadily and maintain core tension throughout
+          4. Focus on keeping your hips level and stable
+          5. Hold for the target duration, typically 20-60 seconds or longer
+          6. Lower to the ground with control when complete
+
+          ### 3. Breathing
+          - Breathe steadily and naturally throughout the hold
+          - Avoid holding your breath; maintain consistent, calm breathing
+
+          ### 4. Tips
+          - Keep your body in a straight line from head to heels
+          - Engage your glutes to prevent lower back sagging
+          - Pull your belly button toward your spine to activate deep core muscles
+          - Keep your neck neutral by looking at a spot on the floor
+          - Distribute your weight evenly between your forearms and toes
+
+          ### 5. Common Mistakes
+          - Allowing the hips to sag, which strains the lower back
+          - Piking the hips too high, which reduces core engagement
+          - Holding your breath instead of breathing naturally
+          - Letting the shoulders creep up toward the ears
+          - Dropping the head down or looking forward instead of maintaining neutral neck
+          - Holding the position with poor form instead of reducing duration
+
+          ### 6. Safety / Modifications
+          - Beginners can start on their knees instead of toes
+          - Reduce hold time and focus on perfect form before increasing duration
+          - Advanced variation: lift one leg or one arm to increase difficulty
+          - If you experience lower back discomfort, check your form and reduce hold time
 
   "Reverse Crunch":
     category: Weighted Body Weight
