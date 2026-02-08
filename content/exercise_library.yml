@@ -1382,6 +1382,53 @@ exercises:
   "Superman":
     category: Reps Only
     target: Core
+    i18n:
+      en:
+        name: "Superman"
+        instructions: |
+          ## Overview
+          The superman is a bodyweight core exercise that primarily targets the lower back (erector spinae) and glutes. It also engages the upper back, shoulders, and hamstrings, making it effective for strengthening the posterior chain and improving spinal extension.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie face down on a mat with your arms extended straight overhead
+          - Keep your legs straight and together, fully extended behind you
+          - Rest your forehead on the mat with your neck in a neutral position
+          - Engage your core and glutes before starting the movement
+          - Keep your toes pointed throughout
+
+          ### 2. Movement
+          1. Simultaneously lift your arms, chest, and legs off the mat
+          2. Raise them as high as comfortable while squeezing your lower back and glutes
+          3. Keep your arms and legs straight throughout the movement
+          4. Pause briefly at the top, squeezing your posterior chain
+          5. Slowly lower your arms, chest, and legs back to the mat with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you lift your arms, chest, and legs off the mat
+          - Inhale as you lower back to the starting position
+
+          ### 4. Tips
+          - Focus on squeezing your lower back and glutes at the top
+          - Keep your neck neutral by looking down at the mat
+          - Lift with control rather than momentum
+          - Keep your arms and legs straight throughout
+          - Imagine lengthening your body from fingertips to toes
+
+          ### 5. Common Mistakes
+          - Lifting the head and neck too high, which can cause strain
+          - Bending the arms or legs during the movement
+          - Using momentum instead of controlled muscle contraction
+          - Not engaging the glutes, relying only on the lower back
+          - Moving too quickly and sacrificing form
+          - Holding your breath during the exercise
+
+          ### 6. Safety / Modifications
+          - Beginners can lift only arms or only legs until they build strength
+          - Reduce range of motion if you experience lower back discomfort
+          - Advanced variation: hold the top position for 3-5 seconds for increased intensity
+          - Progress to alternating supermans (opposite arm and leg) for variation
 
   "Toes To Bar":
     category: Reps Only
