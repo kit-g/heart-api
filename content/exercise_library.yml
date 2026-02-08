@@ -1331,6 +1331,53 @@ exercises:
   "Sit Up":
     category: Weighted Body Weight
     target: Core
+    i18n:
+      en:
+        name: "Sit Up"
+        instructions: |
+          ## Overview
+          The sit up is a classic bodyweight core exercise that primarily targets the rectus abdominis and hip flexors. It also engages the obliques and transverse abdominis throughout the full range of motion, making it more dynamic than crunches but requiring greater hip flexor involvement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on your back on a mat with your knees bent and feet flat on the floor
+          - Secure your feet under a stable object or have a partner hold them if needed
+          - Place your hands behind your head, crossed over your chest, or extended toward your knees
+          - Keep your elbows pointing out to the sides if hands are behind your head
+          - Engage your core and press your lower back into the mat
+
+          ### 2. Movement
+          1. Lift your entire upper body off the mat by contracting your abs
+          2. Continue curling up until your torso is nearly vertical or chest reaches your knees
+          3. Keep your core engaged and exhale as you rise
+          4. Pause briefly at the top of the movement
+          5. Slowly lower your torso back down with control
+          6. Touch your shoulder blades to the mat before starting the next rep
+
+          ### 3. Breathing
+          - Exhale as you sit up and curl your torso forward
+          - Inhale as you lower back to the starting position
+
+          ### 4. Tips
+          - Focus on using your core to lift yourself, not pulling with your neck
+          - Keep your feet flat on the ground throughout the movement
+          - Move with control rather than momentum
+          - Avoid yanking on your head or neck if hands are behind your head
+          - Keep your lower back from arching excessively
+
+          ### 5. Common Mistakes
+          - Pulling on the neck or head, which can cause strain
+          - Using momentum to swing up instead of controlled muscle contraction
+          - Allowing the feet to lift off the ground
+          - Arching the lower back excessively during the movement
+          - Moving too quickly and sacrificing form
+          - Not fully lowering back down between reps
+
+          ### 6. Safety / Modifications
+          - Beginners can perform crunches instead until they build sufficient strength
+          - Place hands on thighs and slide them toward knees for an easier variation
+          - Advanced variation: hold a weight plate on your chest for added resistance
+          - If you experience lower back discomfort, switch to crunches or reduce range of motion
 
   "Superman":
     category: Reps Only
