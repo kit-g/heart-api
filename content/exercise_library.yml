@@ -923,6 +923,53 @@ exercises:
   "Reverse Crunch":
     category: Weighted Body Weight
     target: Core
+    i18n:
+      en:
+        name: "Reverse Crunch"
+        instructions: |
+          ## Overview
+          The reverse crunch is a bodyweight core exercise that primarily targets the lower rectus abdominis. It also engages the hip flexors, obliques, and transverse abdominis as stabilizers, making it effective for building lower ab strength with less strain on the neck than traditional crunches.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on your back on a mat with your knees bent at 90 degrees
+          - Lift your feet off the floor so your thighs are perpendicular to the ground
+          - Place your arms beside your body with palms facing down for support
+          - Press your lower back into the mat and engage your core
+          - Keep your head and upper back relaxed on the mat
+
+          ### 2. Movement
+          1. Lift your hips off the mat by contracting your lower abs
+          2. Curl your pelvis toward your ribcage, bringing your knees toward your chest
+          3. Focus on using your abs to lift your hips, not momentum
+          4. Pause briefly at the top when your hips are fully lifted
+          5. Slowly lower your hips back to the starting position with control
+          6. Stop just before your feet touch the floor to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you lift your hips and curl your pelvis
+          - Inhale as you lower back to the starting position
+
+          ### 4. Tips
+          - Focus on curling your pelvis rather than just lifting your legs
+          - Keep your lower back pressed against the mat throughout
+          - Move slowly and with control to maximize ab engagement
+          - Use your hands for balance only, not to push yourself up
+          - Keep constant tension on your abs by not fully relaxing between reps
+
+          ### 5. Common Mistakes
+          - Using momentum to swing the legs instead of controlled contraction
+          - Not lifting the hips off the mat, only moving the legs
+          - Allowing the lower back to arch during the movement
+          - Moving too quickly and sacrificing form
+          - Pushing with the arms instead of using the core
+          - Completely relaxing between reps, losing core tension
+
+          ### 6. Safety / Modifications
+          - Beginners can reduce range of motion by not bringing knees as close to chest
+          - Place hands under your glutes for additional lower back support
+          - Advanced variation: hold a medicine ball between your knees for added resistance
+          - If you experience lower back discomfort, focus on smaller movements with better control
 
   "Reverse Plank":
     category: Duration
