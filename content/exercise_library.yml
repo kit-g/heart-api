@@ -1076,6 +1076,53 @@ exercises:
   "Flutter Kick":
     category: Reps Only
     target: Core
+    i18n:
+      en:
+        name: "Flutter Kick"
+        instructions: |
+          ## Overview
+          The flutter kick is a dynamic bodyweight core exercise that primarily targets the lower rectus abdominis and hip flexors. It also engages the transverse abdominis and obliques as stabilizers, building lower ab endurance through continuous, alternating leg movements.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on your back on a mat with your legs fully extended
+          - Place your hands beside your hips or under your glutes for support
+          - Press your lower back into the mat and engage your core
+          - Lift your legs slightly off the ground, about 6-12 inches
+          - Keep your head and shoulders relaxed on the mat
+
+          ### 2. Movement
+          1. Alternate lifting each leg up and down in a small, rapid flutter motion
+          2. Keep your legs straight and toes pointed throughout
+          3. Maintain a consistent, controlled rhythm without touching the floor
+          4. Keep your lower back pressed firmly against the mat
+          5. Continue the alternating flutter for the desired number of reps or time duration
+          6. Focus on small, quick movements rather than large leg swings
+
+          ### 3. Breathing
+          - Breathe steadily and naturally throughout the movement
+          - Avoid holding your breath; maintain consistent breathing rhythm
+
+          ### 4. Tips
+          - Keep your legs relatively low to increase lower ab engagement
+          - Press your lower back into the mat to protect your spine
+          - Move from your hips, not your knees
+          - Keep your core tight throughout the entire set
+          - Focus on controlled, rapid movements rather than large kicks
+
+          ### 5. Common Mistakes
+          - Allowing the lower back to arch off the mat
+          - Making the leg movements too large, reducing core engagement
+          - Letting the legs drop too low or touch the floor between kicks
+          - Tensing the neck and upper body unnecessarily
+          - Moving too slowly or inconsistently
+          - Holding your breath during the exercise
+
+          ### 6. Safety / Modifications
+          - Beginners can raise legs higher to reduce intensity
+          - Place hands under your glutes for additional lower back support
+          - Advanced variation: perform with head and shoulders lifted in a crunch position
+          - If you experience lower back discomfort, raise your legs higher or reduce duration
 
   "Side Bend (Cable)":
     category: Machine
