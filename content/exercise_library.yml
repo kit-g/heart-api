@@ -1229,6 +1229,53 @@ exercises:
   "Side Bend (Dumbbell)":
     category: Dumbbell
     target: Core
+    i18n:
+      en:
+        name: "Side Bend (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell side bend is a weighted core exercise that primarily targets the obliques and transverse abdominis. It also engages the quadratus lumborum and erector spinae as stabilizers, making it effective for building lateral core strength and definition.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart holding a dumbbell in one hand
+          - Let the dumbbell hang at your side with your arm fully extended
+          - Place your free hand behind your head or on your hip
+          - Stand upright with your core engaged and shoulders level
+          - Keep your chest lifted and maintain a neutral spine
+
+          ### 2. Movement
+          1. Slowly bend toward the side holding the dumbbell, lowering it down your leg
+          2. Keep your hips stable and facing forward throughout
+          3. Lower as far as comfortable while maintaining control
+          4. Pause briefly at the bottom of the movement
+          5. Contract your opposite-side obliques to return to the starting upright position
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Inhale as you bend toward the weighted side
+          - Exhale as you return to the starting position
+
+          ### 4. Tips
+          - Focus on pure lateral flexion without twisting or leaning forward
+          - Keep your hips and shoulders facing forward throughout
+          - Move slowly and with control to maximize oblique engagement
+          - Let the weight stretch your obliques on the way down
+          - Contract the opposite obliques to pull yourself back up
+
+          ### 5. Common Mistakes
+          - Using too heavy a weight and compromising form
+          - Twisting or rotating instead of pure lateral bending
+          - Allowing the hips to shift side to side
+          - Bending forward or backward instead of directly to the side
+          - Moving too quickly and using momentum
+          - Holding a dumbbell in both hands, which reduces effectiveness
+
+          ### 6. Safety / Modifications
+          - Start with a light dumbbell to master the movement pattern
+          - Beginners can perform without weight to establish proper form
+          - Advanced variation: pause for 2-3 seconds at the bottom for increased stretch
+          - If you experience lower back discomfort, reduce weight and check your form
 
   "Side Plank":
     category: Duration
