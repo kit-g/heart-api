@@ -1535,6 +1535,53 @@ exercises:
   "V Up":
     category: Reps Only
     target: Core
+    i18n:
+      en:
+        name: "V Up"
+        instructions: |
+          ## Overview
+          The V up is an advanced bodyweight core exercise that primarily targets the entire rectus abdominis. It also engages the hip flexors, obliques, and transverse abdominis as you simultaneously lift your upper and lower body into a V position, creating intense core contraction.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on your back on a mat with your arms extended overhead
+          - Keep your legs straight and together, fully extended on the mat
+          - Engage your core and press your lower back into the mat
+          - Keep your head in a neutral position aligned with your spine
+
+          ### 2. Movement
+          1. Simultaneously lift your legs and upper body off the mat
+          2. Keep your arms and legs straight as you reach your hands toward your toes
+          3. Form a V shape with your body, balancing on your glutes
+          4. Touch or reach toward your toes at the peak of the movement
+          5. Pause briefly in the V position
+          6. Slowly lower both your upper and lower body back down with control
+          7. Return to the starting position and repeat for controlled reps
+
+          ### 3. Breathing
+          - Exhale as you fold up into the V position
+          - Inhale as you lower back to the starting position
+
+          ### 4. Tips
+          - Focus on using your core to fold your body, not momentum
+          - Keep your legs and arms straight throughout the entire movement
+          - Maintain control during both the lifting and lowering phases
+          - Balance on your glutes at the top of the movement
+          - Keep constant tension on your abs by moving slowly
+
+          ### 5. Common Mistakes
+          - Using momentum to swing up instead of controlled core contraction
+          - Bending the knees or arms to make the exercise easier
+          - Allowing the arms to pull instead of letting the core drive the movement
+          - Moving too quickly and losing control
+          - Not fully extending back to the starting position
+          - Holding your breath during the movement
+
+          ### 6. Safety / Modifications
+          - Beginners should master crunches and leg raises separately before combining them
+          - Perform a bent-knee variation (tuck V up) if straight legs are too challenging
+          - Advanced variation: hold a light weight between your feet for added resistance
+          - If you experience lower back discomfort, reduce your range of motion or switch to easier variations
 
   "Bench Dip":
     category: Weighted Body Weight
