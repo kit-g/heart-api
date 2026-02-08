@@ -1280,6 +1280,53 @@ exercises:
   "Side Plank":
     category: Duration
     target: Core
+    i18n:
+      en:
+        name: "Side Plank"
+        instructions: |
+          ## Overview
+          The side plank is an isometric core exercise that primarily targets the obliques and transverse abdominis. It also engages the shoulders, hip stabilizers, and quadratus lumborum, making it highly effective for building lateral core strength, stability, and balance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on your side on a mat with your legs stacked and body in a straight line
+          - Position your elbow directly under your shoulder with forearm perpendicular to your body
+          - Stack your feet or place the top foot in front for more stability
+          - Place your top hand on your hip or extend it toward the ceiling
+          - Engage your core and prepare to lift your hips
+
+          ### 2. Movement
+          1. Press through your forearm and feet to lift your hips off the ground
+          2. Raise your hips until your body forms a straight line from head to feet
+          3. Keep your core engaged and hips lifted throughout
+          4. Avoid letting your hips sag or pike upward
+          5. Hold this static position for the target duration, typically 20-45 seconds per side
+          6. Lower your hips back to the ground with control, then repeat on the other side
+
+          ### 3. Breathing
+          - Breathe steadily and naturally throughout the hold
+          - Avoid holding your breath; maintain consistent, calm breathing
+
+          ### 4. Tips
+          - Keep your body in a straight line without sagging or rotating
+          - Engage your obliques to keep your hips lifted
+          - Press your bottom shoulder down and away from your ear
+          - Keep your neck neutral by looking straight ahead
+          - Think about pushing the ground away with your forearm
+
+          ### 5. Common Mistakes
+          - Allowing the hips to sag toward the floor
+          - Rotating the torso forward or backward instead of staying in lateral alignment
+          - Letting the shoulders creep up toward the ears
+          - Holding your breath instead of breathing naturally
+          - Not stacking the body properly, creating misalignment
+          - Holding the position with poor form instead of reducing duration
+
+          ### 6. Safety / Modifications
+          - Beginners can perform on their knees instead of feet
+          - Reduce hold time and focus on perfect form before increasing duration
+          - Advanced variation: lift the top leg to increase difficulty
+          - Repeat on both sides for balanced core development
 
   "Sit Up":
     category: Weighted Body Weight
