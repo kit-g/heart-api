@@ -1,6 +1,6 @@
 version: "2026-02-07"
 locales: [ en, en_CA, ru ]
-
+fallback_to_default: en
 exercises:
   "Ab Wheel":
     category: Weighted Body Weight
@@ -1583,9 +1583,60 @@ exercises:
           - Advanced variation: hold a light weight between your feet for added resistance
           - If you experience lower back discomfort, reduce your range of motion or switch to easier variations
 
+      en_CA:
+        name: "V Up"
+        fallback_to: en
+
   "Bench Dip":
     category: Weighted Body Weight
     target: Arms
+    i18n:
+      en:
+        name: "Bench Dip"
+        instructions: |
+          ## Overview
+          The bench dip is a bodyweight exercise that primarily targets the triceps. It also engages the shoulders and chest as secondary muscles, making it an effective upper-body pushing movement that can be performed with minimal equipment.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the edge of a sturdy bench with your hands gripping the edge beside your hips
+          - Place your hands shoulder-width apart with fingers pointing forward
+          - Extend your legs out in front of you with heels on the ground
+          - Slide your glutes off the bench while keeping your hands in place
+          - Keep your back close to the bench and shoulders pressed down
+
+          ### 2. Movement
+          1. Lower your body by bending your elbows until they reach about 90 degrees
+          2. Keep your elbows pointing straight back, not flaring out to the sides
+          3. Maintain an upright torso and avoid hunching your shoulders
+          4. Pause briefly at the bottom of the movement
+          5. Press through your palms to extend your arms and return to the starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your body down
+          - Exhale as you press back up to the starting position
+
+          ### 4. Tips
+          - Keep your elbows tucked in close to your body throughout the movement
+          - Focus on using your triceps to lift yourself rather than pushing with your legs
+          - Keep your core engaged to maintain stability
+          - Avoid letting your shoulders shrug up toward your ears
+          - Move through a full range of motion while maintaining control
+
+          ### 5. Common Mistakes
+          - Allowing the elbows to flare out excessively to the sides
+          - Dropping too low and putting excessive strain on the shoulders
+          - Using leg drive instead of isolating the triceps
+          - Moving too quickly and using momentum
+          - Hunching the shoulders forward
+          - Not going low enough to adequately engage the triceps
+
+          ### 6. Safety / Modifications
+          - Beginners can bend their knees and place feet closer to the bench for easier leverage
+          - Advanced variation: elevate your feet on another bench to increase difficulty
+          - Place a weight plate on your lap for added resistance
+          - If you experience shoulder discomfort, reduce your range of motion
 
   "Bench Press - Close Grip (Barbell)":
     category: Barbell
