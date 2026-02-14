@@ -1794,6 +1794,53 @@ exercises:
   "Bicep Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    i18n:
+      en:
+        name: "Bicep Curl (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell bicep curl is a fundamental isolation exercise that primarily targets the biceps brachii. It also engages the brachialis and brachioradialis, allowing for independent arm training and natural wrist rotation throughout the movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a dumbbell in each hand
+          - Let the dumbbells hang at arm's length beside your thighs
+          - Keep your palms facing forward (supinated grip)
+          - Maintain an upright posture with your core engaged
+          - Keep your elbows close to your sides throughout
+
+          ### 2. Movement
+          1. Curl both dumbbells upward by bending your elbows and contracting your biceps
+          2. Keep your upper arms stationary and pinned to your sides
+          3. Continue lifting until the dumbbells reach shoulder height
+          4. Pause and squeeze your biceps at the top of the movement
+          5. Slowly lower the dumbbells back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you curl the dumbbells up
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - Keep your elbows stationary and close to your body throughout
+          - Avoid swinging or using momentum to lift the weight
+          - Focus on squeezing your biceps at the top of each rep
+          - Maintain a straight back and stable core
+          - Control both the lifting and lowering phases equally
+
+          ### 5. Common Mistakes
+          - Swinging the body or using momentum to lift the weight
+          - Allowing the elbows to drift forward during the curl
+          - Not fully extending the arms at the bottom
+          - Rotating the wrists excessively
+          - Dropping the weight too quickly on the way down
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master proper form
+          - Perform alternating curls (one arm at a time) for better focus
+          - Advanced variation: perform with a slow 3-5 second negative phase
+          - Seated variation can help eliminate momentum and body swing
 
   "Bicep Curl (Machine)":
     category: Machine
