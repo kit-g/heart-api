@@ -1692,6 +1692,53 @@ exercises:
   "Bicep Curl (Barbell)":
     category: Barbell
     target: Arms
+    i18n:
+      en:
+        name: "Bicep Curl (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell bicep curl is a classic isolation exercise that primarily targets the biceps brachii. It also engages the brachialis and brachioradialis as secondary muscles, making it one of the most effective exercises for building arm size and strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a barbell with an underhand grip
+          - Position your hands slightly wider than shoulder-width apart
+          - Let the bar hang at arm's length in front of your thighs
+          - Keep your elbows close to your sides throughout the movement
+          - Engage your core and maintain an upright posture
+
+          ### 2. Movement
+          1. Curl the bar upward by bending your elbows and contracting your biceps
+          2. Keep your upper arms stationary and close to your torso
+          3. Continue lifting until the bar reaches shoulder height
+          4. Pause and squeeze your biceps at the top of the movement
+          5. Slowly lower the bar back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you curl the bar up
+          - Inhale as you lower the bar back down
+
+          ### 4. Tips
+          - Keep your elbows pinned to your sides throughout the movement
+          - Avoid swinging or using momentum to lift the weight
+          - Focus on squeezing your biceps at the top of each rep
+          - Maintain a straight back and stable core
+          - Control both the lifting and lowering phases
+
+          ### 5. Common Mistakes
+          - Swinging the body or using momentum to lift the weight
+          - Allowing the elbows to drift forward during the curl
+          - Not fully extending the arms at the bottom
+          - Lifting the weight too quickly on the way up
+          - Dropping the weight too quickly on the way down
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with a light weight to master proper form
+          - Use an EZ curl bar if you experience wrist discomfort
+          - Advanced variation: perform slow negatives (3-5 seconds) on the lowering phase
+          - Beginners can use dumbbells for more natural wrist positioning
 
   "Bicep Curl (Cable)":
     category: Machine
