@@ -1743,6 +1743,53 @@ exercises:
   "Bicep Curl (Cable)":
     category: Machine
     target: Arms
+    i18n:
+      en:
+        name: "Bicep Curl (Cable)"
+        instructions: |
+          ## Overview
+          The cable bicep curl is an isolation exercise that primarily targets the biceps brachii with constant tension throughout the movement. It also engages the brachialis and brachioradialis, offering a smoother resistance curve than free weights for continuous muscle activation.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing a low cable pulley with feet hip-width apart
+          - Attach a straight bar or EZ curl bar to the low pulley
+          - Grip the bar with an underhand grip, hands shoulder-width apart
+          - Step back slightly to create tension on the cable
+          - Keep your elbows close to your sides and maintain an upright posture
+
+          ### 2. Movement
+          1. Curl the bar upward by bending your elbows and contracting your biceps
+          2. Keep your upper arms stationary and close to your torso
+          3. Continue lifting until the bar reaches shoulder height
+          4. Pause and squeeze your biceps at the top of the movement
+          5. Slowly lower the bar back to the starting position with control
+          6. Stop just before the weight stack touches to maintain constant tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you curl the bar up
+          - Inhale as you lower the bar back down
+
+          ### 4. Tips
+          - Keep your elbows pinned to your sides throughout the movement
+          - Avoid leaning back or using momentum to lift the weight
+          - Maintain constant tension by not letting the weight stack rest between reps
+          - Focus on squeezing your biceps at the top of each rep
+          - Control both the lifting and lowering phases
+
+          ### 5. Common Mistakes
+          - Swinging the body or using momentum to lift the weight
+          - Allowing the elbows to drift forward during the curl
+          - Letting the weight stack rest completely between reps
+          - Lifting the weight too quickly on the way up
+          - Not maintaining constant tension on the cable
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master proper form and mind-muscle connection
+          - Try different attachments (rope, straight bar, EZ bar) for variety
+          - Advanced variation: perform one arm at a time for unilateral focus
+          - Use a rope attachment if you experience wrist discomfort with bars
 
   "Bicep Curl (Dumbbell)":
     category: Dumbbell
