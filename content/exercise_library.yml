@@ -1641,6 +1641,53 @@ exercises:
   "Bench Press - Close Grip (Barbell)":
     category: Barbell
     target: Arms
+    i18n:
+      en:
+        name: "Bench Press - Close Grip (Barbell)"
+        instructions: |
+          ## Overview
+          The close grip bench press is a barbell exercise that primarily targets the triceps. It also engages the chest and front shoulders as secondary muscles, making it an effective compound movement for building upper-body pressing strength with greater triceps emphasis.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on a bench with your feet firmly planted on the floor
+          - Grip the barbell with your hands positioned slightly narrower than shoulder-width apart
+          - Position yourself so the bar is directly above your upper chest
+          - Unrack the bar and hold it with arms fully extended
+          - Keep your shoulder blades retracted and pressed into the bench
+
+          ### 2. Movement
+          1. Lower the bar slowly to your lower chest or upper abdomen
+          2. Keep your elbows tucked close to your sides at about a 45-degree angle from your body
+          3. Lower the bar until it lightly touches your torso
+          4. Pause briefly at the bottom
+          5. Press the bar back up by extending your arms
+          6. Lock out your elbows at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the bar to your chest
+          - Exhale as you press the bar back up
+
+          ### 4. Tips
+          - Keep your elbows tucked in throughout the movement to maximize triceps engagement
+          - Maintain a stable, flat back position on the bench
+          - Use a grip that's comfortable but closer than your regular bench press grip
+          - Keep your wrists straight and aligned over your forearms
+          - Control the descent and avoid bouncing the bar off your chest
+
+          ### 5. Common Mistakes
+          - Using a grip that's too narrow, which can strain the wrists
+          - Allowing the elbows to flare out excessively
+          - Bouncing the bar off the chest instead of controlled touch-and-press
+          - Arching the back excessively
+          - Using too much weight and compromising form
+          - Not lowering the bar all the way to the chest
+
+          ### 6. Safety / Modifications
+          - Use a spotter when lifting heavy weights
+          - Start with light weight to master the tucked-elbow technique
+          - If you experience wrist discomfort, slightly widen your grip
+          - Advanced variation: add chains or bands for accommodating resistance
 
   "Bicep Curl (Barbell)":
     category: Barbell
