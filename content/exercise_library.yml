@@ -1845,6 +1845,53 @@ exercises:
   "Bicep Curl (Machine)":
     category: Machine
     target: Arms
+    i18n:
+      en:
+        name: "Bicep Curl (Machine)"
+        instructions: |
+          ## Overview
+          The machine bicep curl is an isolation exercise that primarily targets the biceps brachii with a fixed movement path. It also engages the brachialis and brachioradialis, offering stability and support that allows you to focus purely on biceps contraction.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the machine with your back firmly against the pad
+          - Adjust the seat height so your elbows align with the machine's pivot point
+          - Position your upper arms on the arm pad with elbows slightly below shoulder level
+          - Grip the handles with an underhand grip
+          - Keep your chest up and core engaged
+
+          ### 2. Movement
+          1. Curl the handles upward by contracting your biceps
+          2. Keep your upper arms pressed firmly against the pad throughout
+          3. Continue lifting until your biceps are fully contracted
+          4. Pause and squeeze your biceps at the top of the movement
+          5. Slowly lower the handles back to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you curl the handles up
+          - Inhale as you lower the handles back down
+
+          ### 4. Tips
+          - Keep your upper arms pressed firmly against the pad throughout
+          - Avoid lifting your elbows off the pad during the curl
+          - Focus on squeezing your biceps at the top of each rep
+          - Maintain constant tension by not letting the weight stack rest
+          - Control both the lifting and lowering phases
+
+          ### 5. Common Mistakes
+          - Lifting the elbows off the arm pad during the curl
+          - Using momentum instead of controlled muscle contraction
+          - Not adjusting the seat properly for optimal elbow alignment
+          - Letting the weight stack rest completely between reps
+          - Using too much weight and compromising form
+          - Not achieving full range of motion
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure proper elbow alignment with the pivot point
+          - Start with light weight to establish mind-muscle connection
+          - Advanced variation: perform one arm at a time for unilateral focus
+          - Add a 2-3 second pause at peak contraction for increased intensity
 
   "Cable Kickback":
     category: Machine
