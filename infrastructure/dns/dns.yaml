@@ -190,6 +190,7 @@ Resources:
       Name: "heart-of.me"
       ResourceRecords:
         - "\"v=spf1 include:spf.improvmx.com ~all\""
+        - "\"google-site-verification=r5-Cw1hkYWb3xDhuBaLOv_dNujEY3h-w512B0KtSUSk\""
       TTL: 14400
       Type: TXT
 
