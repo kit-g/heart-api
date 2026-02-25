@@ -2050,6 +2050,53 @@ exercises:
   "Hammer Curl (Cable)":
     category: Machine
     target: Arms
+    i18n:
+      en:
+        name: "Hammer Curl (Cable)"
+        instructions: |
+          ## Overview
+          The cable hammer curl is an isolation exercise that primarily targets the brachialis and brachioradialis with constant tension. It also engages the biceps brachii, using a neutral grip attachment that emphasizes forearm and outer biceps development throughout the movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing a low cable pulley with feet hip-width apart
+          - Attach a rope handle to the low pulley
+          - Grip the rope ends with your palms facing each other (neutral grip)
+          - Step back slightly to create tension on the cable
+          - Keep your elbows close to your sides and maintain an upright posture
+
+          ### 2. Movement
+          1. Curl the rope upward by bending your elbows while keeping palms facing each other
+          2. Keep your upper arms stationary and close to your torso
+          3. Continue lifting until your hands reach shoulder height
+          4. Pause and squeeze at the top of the movement
+          5. Slowly lower the rope back to the starting position with control
+          6. Stop just before the weight stack touches to maintain constant tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you curl the rope up
+          - Inhale as you lower the rope back down
+
+          ### 4. Tips
+          - Maintain the neutral grip throughout the entire movement
+          - Keep your elbows pinned to your sides throughout
+          - Avoid leaning back or using momentum to lift the weight
+          - Maintain constant tension by not letting the weight stack rest
+          - Focus on squeezing at the top of each rep
+
+          ### 5. Common Mistakes
+          - Rotating the wrists instead of maintaining neutral grip
+          - Allowing the elbows to drift forward during the curl
+          - Letting the weight stack rest completely between reps
+          - Using body swing or momentum to lift the weight
+          - Not maintaining constant tension on the cable
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the neutral grip pattern with constant tension
+          - Try a single-arm variation for unilateral focus
+          - Advanced variation: perform with a slow 3-5 second negative phase
+          - Use different cable heights (low, mid, high) for varied muscle emphasis
 
   "Incline Curl (Dumbbell)":
     category: Dumbbell
