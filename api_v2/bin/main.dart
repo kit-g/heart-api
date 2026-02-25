@@ -12,8 +12,7 @@ import 'package:heart/models/errors.dart';
 import 'package:heart/routes/index.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart';
-import 'package:relic/io_adapter.dart';
-import 'package:relic/relic.dart';
+import 'package:relic/relic.dart' hide Logger;
 
 final _logger = Logger('API');
 
