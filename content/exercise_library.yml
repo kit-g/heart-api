@@ -1999,6 +1999,53 @@ exercises:
   "Hammer Curl (Band)":
     category: Weighted Body Weight
     target: Arms
+    i18n:
+      en:
+        name: "Hammer Curl (Band)"
+        instructions: |
+          ## Overview
+          The band hammer curl is an isolation exercise that primarily targets the brachialis and brachioradialis. It also engages the biceps brachii, using a neutral grip position that emphasizes forearm and outer biceps development with progressive resistance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, stepping on the center of a resistance band
+          - Grip each end of the band with your palms facing each other (neutral grip)
+          - Let your arms hang at your sides with slight tension on the band
+          - Keep your elbows close to your sides throughout
+          - Maintain an upright posture with your core engaged
+
+          ### 2. Movement
+          1. Curl the band upward by bending your elbows while keeping palms facing each other
+          2. Keep your upper arms stationary and pinned to your sides
+          3. Continue lifting until your hands reach shoulder height
+          4. Pause and squeeze at the top of the movement
+          5. Slowly lower your hands back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you curl the band up
+          - Inhale as you lower your hands back down
+
+          ### 4. Tips
+          - Maintain the neutral (hammer) grip throughout the entire movement
+          - Keep your elbows stationary and close to your body
+          - Avoid swinging or using momentum to lift the band
+          - Focus on the squeeze at the top of each rep
+          - Control the resistance on both the lifting and lowering phases
+
+          ### 5. Common Mistakes
+          - Rotating the wrists instead of maintaining neutral grip
+          - Allowing the elbows to drift forward during the curl
+          - Using momentum or body swing to lift the band
+          - Not achieving full range of motion
+          - Releasing tension on the band at the bottom
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master the neutral grip pattern
+          - Perform alternating hammer curls (one arm at a time) for better focus
+          - Advanced variation: use a heavier resistance band or pause at the top
+          - Adjust your foot position on the band to modify resistance level
 
   "Hammer Curl (Cable)":
     category: Machine
