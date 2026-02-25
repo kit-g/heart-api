@@ -1948,6 +1948,53 @@ exercises:
   "Concentration Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    i18n:
+      en:
+        name: "Concentration Curl (Dumbbell)"
+        instructions: |
+          ## Overview
+          The concentration curl is an isolation exercise that primarily targets the biceps brachii with maximum focus on the muscle. It also engages the brachialis and brachioradialis, with the seated, braced position eliminating momentum for strict biceps isolation.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on a bench with your legs spread wide
+          - Hold a dumbbell in one hand with your arm hanging straight down
+          - Place the back of your upper arm against your inner thigh
+          - Lean forward slightly and brace your free hand on your opposite thigh
+          - Keep your chest up and core engaged
+
+          ### 2. Movement
+          1. Curl the dumbbell upward by contracting your biceps
+          2. Keep your upper arm pressed firmly against your inner thigh throughout
+          3. Continue lifting until the dumbbell reaches shoulder height
+          4. Pause and squeeze your biceps hard at the top
+          5. Slowly lower the dumbbell back to the starting position with control
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you curl the dumbbell up
+          - Inhale as you lower the dumbbell back down
+
+          ### 4. Tips
+          - Keep your upper arm completely stationary against your thigh
+          - Focus on pure biceps contraction without any body movement
+          - Squeeze your biceps hard at the top of each rep
+          - Avoid letting the dumbbell swing or using momentum
+          - Control the weight throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Lifting the elbow off the thigh during the curl
+          - Using momentum or swinging the weight
+          - Not achieving full range of motion at top or bottom
+          - Leaning back or rocking the torso
+          - Using too much weight and compromising strict form
+          - Rushing through reps instead of focusing on muscle contraction
+
+          ### 6. Safety / Modifications
+          - Start with a moderate weight to ensure strict form
+          - Keep your back straight to avoid lower back strain
+          - Advanced variation: add a 3-5 second pause at peak contraction
+          - Perform with your arm braced on an incline bench for a different angle
 
   "Hammer Curl (Band)":
     category: Weighted Body Weight
