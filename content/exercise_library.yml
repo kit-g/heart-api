@@ -2152,6 +2152,53 @@ exercises:
   "Hammer Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    i18n:
+      en:
+        name: "Hammer Curl (Dumbbell)"
+        instructions: |
+          ## Overview
+          The hammer curl is an isolation exercise that primarily targets the brachialis and brachioradialis. It also engages the biceps brachii, using a neutral grip position that emphasizes forearm and outer biceps development for balanced arm strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a dumbbell in each hand
+          - Let the dumbbells hang at your sides with palms facing your body (neutral grip)
+          - Keep your elbows close to your sides throughout
+          - Maintain an upright posture with your core engaged
+          - Keep your shoulders back and chest up
+
+          ### 2. Movement
+          1. Curl both dumbbells upward by bending your elbows while keeping palms facing each other
+          2. Keep your upper arms stationary and pinned to your sides
+          3. Continue lifting until the dumbbells reach shoulder height
+          4. Pause and squeeze at the top of the movement
+          5. Slowly lower the dumbbells back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you curl the dumbbells up
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - Maintain the neutral (hammer) grip throughout the entire movement
+          - Keep your elbows stationary and close to your body
+          - Avoid swinging or using momentum to lift the weight
+          - Focus on the squeeze at the top of each rep
+          - Control both the lifting and lowering phases equally
+
+          ### 5. Common Mistakes
+          - Rotating the wrists instead of maintaining neutral grip
+          - Allowing the elbows to drift forward during the curl
+          - Using momentum or body swing to lift the weight
+          - Not achieving full range of motion
+          - Dropping the weight too quickly on the way down
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with moderate dumbbells to master the neutral grip pattern
+          - Perform alternating hammer curls (one arm at a time) for better focus
+          - Advanced variation: perform with a slow 3-5 second negative phase
+          - Seated variation can help eliminate momentum and body swing
 
   "Preacher Curl (Barbell)":
     category: Barbell
