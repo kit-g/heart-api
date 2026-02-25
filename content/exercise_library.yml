@@ -1896,6 +1896,54 @@ exercises:
   "Cable Kickback":
     category: Machine
     target: Arms
+    i18n:
+      en:
+        name: "Cable Kickback"
+        instructions: |
+          ## Overview
+          The cable kickback is an isolation exercise that primarily targets the triceps, particularly the long head. It also engages the shoulders and core as stabilizers, providing constant tension throughout the movement for effective triceps development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing a low cable pulley with a single handle attached
+          - Grip the handle with one hand and step back to create tension
+          - Hinge forward at the hips with your torso at about 45 degrees
+          - Keep your working arm's elbow bent at 90 degrees and tucked close to your side
+          - Place your free hand on your thigh or the machine for support
+          - Engage your core for stability
+
+          ### 2. Movement
+          1. Extend your arm backward by straightening your elbow
+          2. Keep your upper arm stationary and parallel to the floor
+          3. Continue until your arm is fully extended behind you
+          4. Pause and squeeze your triceps at full extension
+          5. Slowly return to the starting position with control
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you extend your arm backward
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your upper arm completely still throughout the movement
+          - Focus on isolating the triceps by only moving at the elbow joint
+          - Maintain a stable torso position without rocking back and forth
+          - Squeeze your triceps hard at full extension
+          - Keep tension on the cable throughout the entire movement
+
+          ### 5. Common Mistakes
+          - Allowing the upper arm to move during the extension
+          - Swinging the arm or using momentum
+          - Not achieving full elbow extension at the back
+          - Rocking the torso back and forth
+          - Using too much weight and compromising form
+          - Letting the cable slack at any point in the movement
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the isolation technique
+          - Keep your core engaged to protect your lower back in the bent position
+          - Advanced variation: pause for 2-3 seconds at full extension
+          - Use a rope attachment instead of a handle for a different grip option
 
   "Concentration Curl (Dumbbell)":
     category: Dumbbell
