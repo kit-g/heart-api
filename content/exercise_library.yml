@@ -2101,6 +2101,53 @@ exercises:
   "Incline Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    i18n:
+      en:
+        name: "Incline Curl (Dumbbell)"
+        instructions: |
+          ## Overview
+          The incline dumbbell curl is an isolation exercise that primarily targets the biceps brachii with an extended range of motion. It also engages the brachialis and brachioradialis, using the inclined position to create a greater stretch on the biceps at the start of each rep.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set an adjustable bench to a 45-60 degree incline
+          - Sit back on the bench with your back firmly against the pad
+          - Hold a dumbbell in each hand with your arms hanging straight down
+          - Keep your palms facing forward and elbows slightly behind your torso
+          - Maintain an upright chest and engaged core
+
+          ### 2. Movement
+          1. Curl both dumbbells upward by bending your elbows and contracting your biceps
+          2. Keep your upper arms stationary and perpendicular to the floor
+          3. Continue lifting until the dumbbells reach shoulder height
+          4. Pause and squeeze your biceps at the top of the movement
+          5. Slowly lower the dumbbells back to the starting position with full extension
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you curl the dumbbells up
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - Keep your upper arms stationary and perpendicular to the floor throughout
+          - Allow your arms to fully extend at the bottom for maximum stretch
+          - Avoid swinging or using momentum to lift the weight
+          - Keep your back pressed firmly against the bench
+          - Focus on the stretch at the bottom and squeeze at the top
+
+          ### 5. Common Mistakes
+          - Allowing the elbows to drift forward during the curl
+          - Not achieving full arm extension at the bottom
+          - Lifting the shoulders off the bench
+          - Using momentum or swinging the weights
+          - Choosing an incline that's too steep or too shallow
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with lighter weight than regular curls due to the extended range
+          - Adjust bench angle between 45-60 degrees to find your optimal position
+          - Perform alternating curls (one arm at a time) for better focus
+          - Advanced variation: add a 3-5 second negative phase for increased intensity
 
   "Hammer Curl (Dumbbell)":
     category: Dumbbell
