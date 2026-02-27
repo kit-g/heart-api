@@ -2203,6 +2203,53 @@ exercises:
   "Preacher Curl (Barbell)":
     category: Barbell
     target: Arms
+    i18n:
+      en:
+        name: "Preacher Curl (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell preacher curl is an isolation exercise that primarily targets the biceps brachii, particularly the lower portion. It also engages the brachialis and brachioradialis, using a preacher bench to eliminate momentum and maintain constant tension throughout the movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit at a preacher bench with your chest pressed against the pad
+          - Adjust the seat height so your armpits rest comfortably at the top of the pad
+          - Grip a barbell with an underhand grip, hands shoulder-width apart
+          - Extend your arms fully over the pad with a slight bend in your elbows
+          - Keep your upper arms flat against the pad throughout
+
+          ### 2. Movement
+          1. Curl the barbell upward by contracting your biceps
+          2. Keep your upper arms pressed firmly against the pad throughout
+          3. Continue lifting until your forearms are nearly vertical
+          4. Pause and squeeze your biceps at the top of the movement
+          5. Slowly lower the barbell back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you curl the barbell up
+          - Inhale as you lower the barbell back down
+
+          ### 4. Tips
+          - Keep your upper arms completely stationary against the pad
+          - Avoid lifting your elbows or chest off the pad during the curl
+          - Focus on the stretch at the bottom and squeeze at the top
+          - Control the weight throughout the entire range of motion
+          - Use a weight that allows strict form without momentum
+
+          ### 5. Common Mistakes
+          - Lifting the elbows or upper arms off the pad
+          - Using momentum or swinging the weight
+          - Not achieving full arm extension at the bottom
+          - Dropping the weight too quickly on the descent
+          - Leaning back or shifting body position
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the strict, isolated movement
+          - Use an EZ curl bar if you experience wrist discomfort
+          - Advanced variation: add a 3-5 second negative phase for increased intensity
+          - Ensure full arm extension at the bottom without hyperextending
 
   "Preacher Curl (Dumbbell)":
     category: Dumbbell
