@@ -2764,6 +2764,53 @@ exercises:
   "Triceps Dip":
     category: Weighted Body Weight
     target: Arms
+    i18n:
+      en:
+        name: "Triceps Dip"
+        instructions: |
+          ## Overview
+          The triceps dip is a bodyweight exercise that primarily targets the triceps. It also engages the chest and front shoulders as secondary muscles, making it an effective compound movement for building upper-body pressing strength and triceps mass.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself on parallel dip bars with arms fully extended
+          - Grip the bars firmly with hands slightly wider than shoulder-width
+          - Keep your body upright with a slight forward lean
+          - Cross your ankles behind you or keep legs straight
+          - Engage your core and keep your shoulders pressed down
+
+          ### 2. Movement
+          1. Lower your body by bending your elbows until they reach about 90 degrees
+          2. Keep your elbows pointing straight back, not flaring excessively
+          3. Maintain an upright torso to emphasize triceps over chest
+          4. Pause briefly at the bottom of the movement
+          5. Press through your palms to extend your arms and return to the starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your body down
+          - Exhale as you press back up to the starting position
+
+          ### 4. Tips
+          - Keep your body relatively upright to maximize triceps engagement
+          - Keep your elbows tucked close to your body throughout
+          - Focus on using your triceps to lift yourself rather than momentum
+          - Avoid dropping too low and putting excessive strain on the shoulders
+          - Maintain control throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Leaning too far forward, which shifts emphasis to the chest
+          - Allowing the elbows to flare out excessively
+          - Dropping too low and straining the shoulders
+          - Using momentum or bouncing at the bottom
+          - Not achieving full elbow extension at the top
+          - Hunching the shoulders forward
+
+          ### 6. Safety / Modifications
+          - Use an assisted dip machine or resistance band for support if needed
+          - Reduce range of motion if you experience shoulder discomfort
+          - Advanced variation: add weight using a dip belt or weight vest
+          - Progress gradually to avoid shoulder strain
 
   "Triceps Dip (Assisted)":
     category: Machine
