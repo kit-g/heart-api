@@ -2713,6 +2713,53 @@ exercises:
   "Skullcrusher (Dumbbell)":
     category: Dumbbell
     target: Arms
+    i18n:
+      en:
+        name: "Skullcrusher (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell skullcrusher is an isolation exercise that primarily targets the triceps with independent arm movement. It also engages all three triceps heads, using a lying position with dumbbells to allow natural arm paths and address strength imbalances.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on a bench with your feet firmly planted on the floor
+          - Hold a dumbbell in each hand with a neutral grip
+          - Extend your arms straight up above your chest
+          - Angle your arms slightly back toward your head (not perfectly vertical)
+          - Keep your elbows stationary throughout the movement
+
+          ### 2. Movement
+          1. Lower the dumbbells by bending your elbows, bringing them toward your forehead or temples
+          2. Keep your upper arms stationary and angled slightly back
+          3. Lower until your forearms are just past parallel to the floor
+          4. Pause briefly at the bottom stretch position
+          5. Extend your elbows to press the dumbbells back to the starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the dumbbells toward your forehead
+          - Exhale as you press the dumbbells back up
+
+          ### 4. Tips
+          - Keep your upper arms completely stationary throughout
+          - Lower the dumbbells under control to avoid hitting your head
+          - Focus on keeping tension on your triceps throughout
+          - Allow your wrists to rotate naturally if comfortable
+          - Keep your elbows relatively close together
+
+          ### 5. Common Mistakes
+          - Allowing the elbows to flare out excessively
+          - Moving the upper arms instead of keeping them stationary
+          - Lowering the dumbbells too quickly without control
+          - Not achieving a full stretch at the bottom
+          - Using too much weight and compromising form
+          - Letting the elbows drift forward during the extension
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master the controlled lowering technique
+          - Perform one arm at a time for unilateral focus if needed
+          - Advanced variation: lower the dumbbells beside your head for increased stretch
+          - Use a neutral or pronated grip based on comfort
 
   "Triceps Dip":
     category: Weighted Body Weight
