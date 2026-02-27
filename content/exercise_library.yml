@@ -2254,6 +2254,53 @@ exercises:
   "Preacher Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    i18n:
+      en:
+        name: "Preacher Curl (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell preacher curl is an isolation exercise that primarily targets the biceps brachii with independent arm training. It also engages the brachialis and brachioradialis, using a preacher bench to eliminate momentum and allow for natural wrist rotation.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit at a preacher bench with your chest pressed against the pad
+          - Adjust the seat height so your armpit rests comfortably at the top of the pad
+          - Hold a dumbbell in one hand with an underhand grip
+          - Extend your working arm fully over the pad with a slight bend in your elbow
+          - Keep your upper arm flat against the pad throughout
+
+          ### 2. Movement
+          1. Curl the dumbbell upward by contracting your biceps
+          2. Keep your upper arm pressed firmly against the pad throughout
+          3. Continue lifting until your forearm is nearly vertical
+          4. Pause and squeeze your biceps at the top of the movement
+          5. Slowly lower the dumbbell back to the starting position with control
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you curl the dumbbell up
+          - Inhale as you lower the dumbbell back down
+
+          ### 4. Tips
+          - Keep your upper arm completely stationary against the pad
+          - Allow natural wrist rotation during the curl if comfortable
+          - Focus on the stretch at the bottom and squeeze at the top
+          - Avoid lifting your elbow or chest off the pad
+          - Control the weight throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Lifting the elbow or upper arm off the pad
+          - Using momentum or swinging the weight
+          - Not achieving full arm extension at the bottom
+          - Rotating the torso to assist the movement
+          - Dropping the weight too quickly on the descent
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with a moderate dumbbell to ensure strict form on each arm
+          - Perform both arms simultaneously if preferred for balanced development
+          - Advanced variation: pause for 2-3 seconds at peak contraction
+          - Ensure full arm extension at the bottom without hyperextending
 
   "Heart Pump":
     category: Dumbbell
