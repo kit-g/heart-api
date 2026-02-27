@@ -3070,6 +3070,53 @@ exercises:
   "Triceps Extension (Machine)":
     category: Machine
     target: Arms
+    i18n:
+      en:
+        name: "Triceps Extension (Machine)"
+        instructions: |
+          ## Overview
+          The machine triceps extension is an isolation exercise that primarily targets all three heads of the triceps with a guided movement path. It also engages the shoulders minimally, using a fixed machine to provide stability and consistent resistance throughout the extension.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the machine with your back firmly against the pad
+          - Adjust the seat height so your elbows align with the machine's pivot point
+          - Grip the handles with an overhand or neutral grip, depending on the machine
+          - Position your elbows at about 90 degrees to start
+          - Keep your upper arms pressed against the pad if applicable
+
+          ### 2. Movement
+          1. Extend your arms by pressing the handles down or forward
+          2. Keep your upper arms stationary against the pad throughout
+          3. Continue until your arms are fully extended
+          4. Pause and squeeze your triceps at full extension
+          5. Slowly return to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you extend your arms
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your upper arms completely stationary throughout
+          - Maintain constant tension by not letting the weight stack rest
+          - Focus on squeezing your triceps at full extension
+          - Control both the extension and return phases
+          - Avoid using momentum or body movement
+
+          ### 5. Common Mistakes
+          - Lifting the upper arms or elbows off the pad
+          - Using momentum instead of controlled muscle contraction
+          - Letting the weight stack rest completely between reps
+          - Not achieving full arm extension
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure proper elbow alignment with the pivot point
+          - Start with light weight to establish mind-muscle connection
+          - Advanced variation: add a 2-3 second pause at full extension
+          - Perform one arm at a time if the machine allows for unilateral training
 
   "Triceps Pushdown (Cable - Straight Bar)":
     category: Machine
