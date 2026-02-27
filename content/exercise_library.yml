@@ -2968,6 +2968,53 @@ exercises:
   "Triceps Extension (Cable)":
     category: Machine
     target: Arms
+    i18n:
+      en:
+        name: "Triceps Extension (Cable)"
+        instructions: |
+          ## Overview
+          The cable triceps extension is an isolation exercise that primarily targets all three heads of the triceps with constant tension. It also engages the shoulders and core as stabilizers, using an overhead cable position to maintain continuous resistance throughout the movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing away from a high cable pulley with a rope attachment
+          - Grip the rope ends and step forward to create tension
+          - Position your arms overhead with elbows bent
+          - Keep your elbows pointing forward and relatively close to your head
+          - Stagger your stance for stability and engage your core
+
+          ### 2. Movement
+          1. Extend your elbows to press your hands forward and up
+          2. Keep your upper arms stationary and close to your head
+          3. Continue until your arms are fully extended
+          4. Pause and squeeze your triceps at full extension
+          5. Slowly return to the starting position with control
+          6. Stop before the weight stack touches to maintain constant tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you extend your arms forward
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your upper arms stationary throughout the movement
+          - Maintain constant tension by not letting the weight stack rest
+          - Keep your elbows relatively close together
+          - Avoid arching your lower back during the movement
+          - Focus on the squeeze at full extension
+
+          ### 5. Common Mistakes
+          - Allowing the elbows to flare out excessively
+          - Moving the upper arms instead of keeping them stationary
+          - Letting the weight stack rest between reps
+          - Leaning too far forward
+          - Using momentum instead of controlled movement
+          - Not achieving full elbow extension
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the overhead cable position
+          - Try different attachments (rope, straight bar, V-bar) for variety
+          - Advanced variation: perform one arm at a time for unilateral focus
+          - Kneel on both knees for a more stable position if needed
 
   "Triceps Extension (Dumbbell)":
     category: Dumbbell
