@@ -2815,6 +2815,53 @@ exercises:
   "Triceps Dip (Assisted)":
     category: Machine
     target: Arms
+    i18n:
+      en:
+        name: "Triceps Dip (Assisted)"
+        instructions: |
+          ## Overview
+          The assisted triceps dip is a machine-based exercise that primarily targets the triceps with support. It also engages the chest and front shoulders, using counterbalance assistance to make the dip movement more accessible while building strength toward unassisted dips.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set the weight on the assisted dip machine (more weight = more assistance)
+          - Step onto the platform and grip the handles
+          - Position your knees or feet on the assistance pad
+          - Start with arms fully extended and body upright
+          - Engage your core and keep your shoulders pressed down
+
+          ### 2. Movement
+          1. Lower your body by bending your elbows until they reach about 90 degrees
+          2. Keep your elbows pointing back and body relatively upright
+          3. Maintain control as the assistance pad supports your weight
+          4. Pause briefly at the bottom of the movement
+          5. Press through your palms to extend your arms and return to the starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your body down
+          - Exhale as you press back up to the starting position
+
+          ### 4. Tips
+          - Keep your body relatively upright to maximize triceps engagement
+          - Gradually reduce assistance weight as you build strength
+          - Focus on controlled movement throughout the range of motion
+          - Keep your elbows relatively close to your body
+          - Avoid relying too heavily on the assistance
+
+          ### 5. Common Mistakes
+          - Using too much assistance and not challenging yourself
+          - Leaning too far forward, shifting emphasis to the chest
+          - Allowing the elbows to flare out excessively
+          - Using momentum instead of controlled movement
+          - Not achieving full range of motion
+          - Hunching the shoulders forward
+
+          ### 6. Safety / Modifications
+          - Start with higher assistance and gradually decrease as you get stronger
+          - Reduce range of motion if you experience shoulder discomfort
+          - Progress toward unassisted dips by consistently reducing assistance weight
+          - Focus on form over decreasing assistance too quickly
 
   "Triceps Extension":
     category: Barbell
