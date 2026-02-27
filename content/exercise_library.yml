@@ -2356,6 +2356,53 @@ exercises:
   "Preacher Curl (Machine)":
     category: Machine
     target: Arms
+    i18n:
+      en:
+        name: "Preacher Curl (Machine)"
+        instructions: |
+          ## Overview
+          The machine preacher curl is an isolation exercise that primarily targets the biceps brachii with a guided movement path. It also engages the brachialis and brachioradialis, using a fixed machine to provide stability and constant resistance throughout the curl.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit at the preacher curl machine with your chest against the pad
+          - Adjust the seat height so your armpits rest at the top of the arm pad
+          - Position your upper arms flat on the pad
+          - Grip the handles with an underhand grip
+          - Select an appropriate weight on the stack
+
+          ### 2. Movement
+          1. Curl the handles upward by contracting your biceps
+          2. Keep your upper arms pressed firmly against the pad throughout
+          3. Continue lifting until your biceps are fully contracted
+          4. Pause and squeeze your biceps at the top of the movement
+          5. Slowly lower the handles back to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you curl the handles up
+          - Inhale as you lower the handles back down
+
+          ### 4. Tips
+          - Keep your upper arms completely stationary against the pad
+          - Avoid lifting your chest or elbows off the pad
+          - Maintain constant tension by not letting the weight stack rest
+          - Focus on the squeeze at the top of each rep
+          - Control both the lifting and lowering phases
+
+          ### 5. Common Mistakes
+          - Lifting the elbows or upper arms off the pad
+          - Using momentum instead of controlled muscle contraction
+          - Letting the weight stack rest completely between reps
+          - Not achieving full range of motion
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure proper arm alignment with the pivot point
+          - Start with light weight to establish mind-muscle connection
+          - Advanced variation: add a 2-3 second pause at peak contraction
+          - Perform one arm at a time if the machine allows for unilateral training
 
   "Reverse Curl (Band)":
     category: Reps Only
