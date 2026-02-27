@@ -2305,6 +2305,53 @@ exercises:
   "Heart Pump":
     category: Dumbbell
     target: Arms
+    i18n:
+      en:
+        name: "Heart Pump"
+        instructions: |
+          ## Overview
+          The heart pump is a dynamic dumbbell exercise that primarily targets the biceps and forearms through continuous pumping motion. It also engages the shoulders and grip strength, using a rhythmic movement pattern that maintains constant tension for muscular endurance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding dumbbells at your sides
+          - Keep your elbows close to your body and core engaged
+          - Position dumbbells with a neutral grip (palms facing your body)
+          - Maintain an upright posture with shoulders back
+          - Prepare for continuous movement without resting
+
+          ### 2. Movement
+          1. Simultaneously curl both dumbbells upward with short, rapid pulses
+          2. Move through partial range of motion, pumping from mid-range to near-top
+          3. Keep your elbows stationary and maintain constant tension
+          4. Continue the rhythmic pumping motion for the target duration or rep count
+          5. Focus on keeping the movement controlled and continuous
+          6. Finish by lowering the dumbbells to the starting position
+
+          ### 3. Breathing
+          - Breathe steadily and naturally throughout the continuous movement
+          - Avoid holding your breath; maintain consistent breathing rhythm
+
+          ### 4. Tips
+          - Keep the movement rapid but controlled, not jerky
+          - Maintain constant tension on your biceps throughout
+          - Focus on the pump and burn sensation in your arms
+          - Keep your core tight to avoid swinging
+          - Use lighter weight than standard curls due to continuous nature
+
+          ### 5. Common Mistakes
+          - Using too much weight and losing the pumping rhythm
+          - Swinging the body or using momentum
+          - Moving through full range instead of focused partial pulses
+          - Allowing the elbows to drift forward
+          - Holding your breath during the exercise
+          - Pausing or resting during the set
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master the continuous pumping motion
+          - Reduce duration if you experience excessive fatigue
+          - Advanced variation: increase tempo or add pauses at different positions
+          - Perform seated to eliminate lower body momentum
 
   "Preacher Curl (Machine)":
     category: Machine
