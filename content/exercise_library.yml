@@ -3019,6 +3019,53 @@ exercises:
   "Triceps Extension (Dumbbell)":
     category: Dumbbell
     target: Arms
+    i18n:
+      en:
+        name: "Triceps Extension (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell triceps extension is an isolation exercise that primarily targets all three heads of the triceps. It also engages the shoulders and core as stabilizers, using an overhead dumbbell position to allow natural arm movement and maximize triceps stretch.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart or sit on a bench with back support
+          - Hold a single dumbbell with both hands, gripping one end
+          - Press the dumbbell overhead until your arms are fully extended
+          - Keep your elbows pointing forward and close to your head
+          - Engage your core for stability
+
+          ### 2. Movement
+          1. Lower the dumbbell behind your head by bending your elbows
+          2. Keep your upper arms stationary and vertical throughout
+          3. Lower until you feel a deep stretch in your triceps
+          4. Pause briefly at the bottom position
+          5. Extend your elbows to press the dumbbell back to the starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the dumbbell behind your head
+          - Exhale as you press the dumbbell back up
+
+          ### 4. Tips
+          - Keep your upper arms stationary and vertical throughout
+          - Keep your elbows as close together as comfortable
+          - Avoid arching your lower back during the movement
+          - Focus on the stretch at the bottom and squeeze at the top
+          - Control the weight throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Allowing the elbows to flare out excessively
+          - Moving the upper arms instead of keeping them stationary
+          - Arching the lower back excessively
+          - Using too much weight and compromising form
+          - Not achieving full range of motion
+          - Leaning forward or backward during the movement
+
+          ### 6. Safety / Modifications
+          - Start with a moderate dumbbell to master the overhead position
+          - Perform seated with back support for added stability
+          - Advanced variation: perform with one arm at a time for unilateral focus
+          - Use two dumbbells (one in each hand) for independent arm movement
 
   "Triceps Extension (Machine)":
     category: Machine
