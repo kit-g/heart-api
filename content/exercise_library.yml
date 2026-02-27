@@ -8,6 +8,7 @@ exercises:
     i18n:
       en:
         name: "Ab Wheel"
+        validated: true
         instructions: |
           ## Overview
           The ab wheel rollout is a challenging core exercise that primarily targets the rectus abdominis and transverse abdominis. It also engages the obliques, hip flexors, and shoulders as stabilizers throughout the movement.
@@ -57,6 +58,7 @@ exercises:
     i18n:
       en:
         name: "Bicycle Crunch"
+        validated: true
         instructions: |
           ## Overview
           The bicycle crunch is a dynamic core exercise that primarily targets the rectus abdominis and obliques. It also engages the hip flexors and transverse abdominis as you coordinate the twisting motion with alternating leg movements.
@@ -108,6 +110,7 @@ exercises:
     i18n:
       en:
         name: "Cable Crunch"
+        validated: true
         instructions: |
           ## Overview
           The cable crunch is an effective core exercise that primarily targets the rectus abdominis with constant tension throughout the movement. It also engages the obliques and transverse abdominis as stabilizers, making it a popular choice for building ab strength and definition.
@@ -159,6 +162,7 @@ exercises:
     i18n:
       en:
         name: "Cable Twist"
+        validated: true
         instructions: |
           ## Overview
           The cable twist is a rotational core exercise that primarily targets the obliques and transverse abdominis. It also engages the rectus abdominis and hip stabilizers throughout the twisting movement, making it effective for building rotational strength and core stability.
@@ -210,6 +214,7 @@ exercises:
     i18n:
       en:
         name: "Cross Body Crunch"
+        validated: true
         instructions: |
           ## Overview
           The cross body crunch is a rotational core exercise that primarily targets the obliques and rectus abdominis. It also engages the hip flexors and transverse abdominis as you bring your elbow toward the opposite knee, making it effective for building rotational core strength.
@@ -261,6 +266,7 @@ exercises:
     i18n:
       en:
         name: "Crunch"
+        validated: true
         instructions: |
           ## Overview
           The crunch is a fundamental core exercise that primarily targets the rectus abdominis. It also engages the transverse abdominis and obliques as stabilizers, making it an accessible and effective exercise for building abdominal strength and endurance.
@@ -312,6 +318,7 @@ exercises:
     i18n:
       en:
         name: "Crunch (Machine)"
+        validated: true
         instructions: |
           ## Overview
           The machine crunch is a resistance-based core exercise that primarily targets the rectus abdominis with consistent tension throughout the movement. It also engages the obliques and transverse abdominis as stabilizers, offering a controlled way to progressively overload your abdominal muscles.
@@ -363,6 +370,7 @@ exercises:
     i18n:
       en:
         name: "Crunch (Stability Ball)"
+        validated: true
         instructions: |
           ## Overview
           The stability ball crunch is a bodyweight core exercise that primarily targets the rectus abdominis with an extended range of motion. It also engages the obliques, transverse abdominis, and lower back stabilizers as you work to maintain balance on the unstable surface.
@@ -414,6 +422,7 @@ exercises:
     i18n:
       en:
         name: "Decline Crunch"
+        validated: true
         instructions: |
           ## Overview
           The decline crunch is an advanced core exercise that primarily targets the rectus abdominis with increased resistance from gravity. It also engages the hip flexors and obliques as stabilizers, making it more challenging than the standard floor crunch due to the declined angle.
@@ -465,6 +474,7 @@ exercises:
     i18n:
       en:
         name: "Flat Knee Raise"
+        validated: true
         instructions: |
           ## Overview
           The flat knee raise is a bodyweight core exercise that primarily targets the lower rectus abdominis and hip flexors. It also engages the transverse abdominis and obliques as stabilizers, making it an accessible entry point for developing lower ab strength.
@@ -516,6 +526,7 @@ exercises:
     i18n:
       en:
         name: "Flat Leg Raise"
+        validated: true
         instructions: |
           ## Overview
           The flat leg raise is a challenging bodyweight core exercise that primarily targets the lower rectus abdominis and hip flexors. It also engages the transverse abdominis and obliques for stability, requiring greater core strength than the bent-knee variation due to the extended leg position.
@@ -568,6 +579,7 @@ exercises:
     i18n:
       en:
         name: "Hanging Knee Raise"
+        validated: true
         instructions: |
           ## Overview
           The hanging knee raise is a bodyweight core exercise that primarily targets the lower rectus abdominis and hip flexors. It also engages the obliques, transverse abdominis, and grip strength as you hang from a bar, making it more challenging than floor-based variations.
@@ -619,6 +631,7 @@ exercises:
     i18n:
       en:
         name: "Hanging Leg Raise"
+        validated: true
         instructions: |
           ## Overview
           The hanging leg raise is an advanced bodyweight core exercise that primarily targets the lower rectus abdominis and hip flexors. It also engages the entire core, including the obliques and transverse abdominis, along with grip and shoulder stability, making it one of the most challenging ab exercises.
@@ -671,6 +684,7 @@ exercises:
     i18n:
       en:
         name: "Jackknife Sit Up"
+        validated: true
         instructions: |
           ## Overview
           The jackknife sit up is a dynamic core exercise that primarily targets the entire rectus abdominis. It also engages the hip flexors, obliques, and transverse abdominis as you simultaneously lift your upper and lower body, creating an intense contraction through the entire core.
@@ -722,6 +736,7 @@ exercises:
     i18n:
       en:
         name: "Knee Raise (Captain's Chair)"
+        validated: true
         instructions: |
           ## Overview
           The captain's chair knee raise is a supported core exercise that primarily targets the lower rectus abdominis and hip flexors. It also engages the obliques and transverse abdominis for stability, offering more support than hanging variations while still providing an effective lower ab workout.
@@ -773,6 +788,7 @@ exercises:
     i18n:
       en:
         name: "Knees to Elbows"
+        validated: true
         instructions: |
           ## Overview
           Knees to elbows is an advanced hanging core exercise that primarily targets the entire rectus abdominis and hip flexors. It also engages the obliques, transverse abdominis, grip strength, and shoulder stabilizers, requiring significant core control and coordination.
@@ -825,6 +841,7 @@ exercises:
     i18n:
       en:
         name: "Oblique Crunch"
+        validated: true
         instructions: |
           ## Overview
           The oblique crunch is a bodyweight core exercise that primarily targets the obliques and rectus abdominis. It also engages the transverse abdominis as a stabilizer, making it effective for building lateral core strength and definition.
@@ -875,6 +892,7 @@ exercises:
     i18n:
       en:
         name: "Plank"
+        validated: true
         instructions: |
           ## Overview
           The plank is an isometric core exercise that primarily targets the transverse abdominis and rectus abdominis. It also engages the shoulders, glutes, and lower back stabilizers throughout the hold, making it one of the most effective exercises for building overall core stability and endurance.
@@ -926,6 +944,7 @@ exercises:
     i18n:
       en:
         name: "Reverse Crunch"
+        validated: true
         instructions: |
           ## Overview
           The reverse crunch is a bodyweight core exercise that primarily targets the lower rectus abdominis. It also engages the hip flexors, obliques, and transverse abdominis as stabilizers, making it effective for building lower ab strength with less strain on the neck than traditional crunches.
@@ -977,6 +996,7 @@ exercises:
     i18n:
       en:
         name: "Reverse Plank"
+        validated: true
         instructions: |
           ## Overview
           The reverse plank is an isometric core exercise that primarily targets the transverse abdominis, lower back, and glutes. It also engages the shoulders, hamstrings, and upper back stabilizers, making it effective for building posterior chain strength and improving posture.
@@ -1028,6 +1048,7 @@ exercises:
     i18n:
       en:
         name: "Russian Twist"
+        validated: true
         instructions: |
           ## Overview
           The Russian twist is a dynamic rotational core exercise that primarily targets the obliques and transverse abdominis. It also engages the rectus abdominis and hip flexors as stabilizers, making it effective for building rotational strength and core stability.
@@ -1079,6 +1100,7 @@ exercises:
     i18n:
       en:
         name: "Flutter Kick"
+        validated: true
         instructions: |
           ## Overview
           The flutter kick is a dynamic bodyweight core exercise that primarily targets the lower rectus abdominis and hip flexors. It also engages the transverse abdominis and obliques as stabilizers, building lower ab endurance through continuous, alternating leg movements.
@@ -1130,6 +1152,7 @@ exercises:
     i18n:
       en:
         name: "Side Bend (Cable)"
+        validated: true
         instructions: |
           ## Overview
           The cable side bend is a resistance-based core exercise that primarily targets the obliques and transverse abdominis. It also engages the quadratus lumborum and erector spinae as stabilizers, providing constant tension throughout the movement for building lateral core strength.
@@ -1181,6 +1204,7 @@ exercises:
     i18n:
       en:
         name: "Side Bend (Band)"
+        validated: true
         instructions: |
           ## Overview
           The band side bend is a resistance-based core exercise that primarily targets the obliques and transverse abdominis. It also engages the quadratus lumborum as a stabilizer, providing progressive tension throughout the movement for building lateral core strength.
@@ -1232,6 +1256,7 @@ exercises:
     i18n:
       en:
         name: "Side Bend (Dumbbell)"
+        validated: true
         instructions: |
           ## Overview
           The dumbbell side bend is a weighted core exercise that primarily targets the obliques and transverse abdominis. It also engages the quadratus lumborum and erector spinae as stabilizers, making it effective for building lateral core strength and definition.
@@ -1283,6 +1308,7 @@ exercises:
     i18n:
       en:
         name: "Side Plank"
+        validated: true
         instructions: |
           ## Overview
           The side plank is an isometric core exercise that primarily targets the obliques and transverse abdominis. It also engages the shoulders, hip stabilizers, and quadratus lumborum, making it highly effective for building lateral core strength, stability, and balance.
@@ -1334,6 +1360,7 @@ exercises:
     i18n:
       en:
         name: "Sit Up"
+        validated: true
         instructions: |
           ## Overview
           The sit up is a classic bodyweight core exercise that primarily targets the rectus abdominis and hip flexors. It also engages the obliques and transverse abdominis throughout the full range of motion, making it more dynamic than crunches but requiring greater hip flexor involvement.
@@ -1385,6 +1412,7 @@ exercises:
     i18n:
       en:
         name: "Superman"
+        validated: true
         instructions: |
           ## Overview
           The superman is a bodyweight core exercise that primarily targets the lower back (erector spinae) and glutes. It also engages the upper back, shoulders, and hamstrings, making it effective for strengthening the posterior chain and improving spinal extension.
@@ -1436,6 +1464,7 @@ exercises:
     i18n:
       en:
         name: "Toes To Bar"
+        validated: true
         instructions: |
           ## Overview
           Toes to bar is an advanced hanging core exercise that primarily targets the entire rectus abdominis and hip flexors. It also engages the obliques, transverse abdominis, lats, grip strength, and shoulder stabilizers, making it one of the most challenging bodyweight ab exercises.
@@ -1487,6 +1516,7 @@ exercises:
     i18n:
       en:
         name: "Torso Rotation (Machine)"
+        validated: true
         instructions: |
           ## Overview
           The torso rotation machine is a resistance-based core exercise that primarily targets the obliques and transverse abdominis. It also engages the rectus abdominis and deep core stabilizers through a controlled rotational movement, allowing you to progressively overload rotational core strength.
@@ -1538,6 +1568,7 @@ exercises:
     i18n:
       en:
         name: "V Up"
+        validated: true
         instructions: |
           ## Overview
           The V up is an advanced bodyweight core exercise that primarily targets the entire rectus abdominis. It also engages the hip flexors, obliques, and transverse abdominis as you simultaneously lift your upper and lower body into a V position, creating intense core contraction.
@@ -1593,6 +1624,7 @@ exercises:
     i18n:
       en:
         name: "Bench Dip"
+        validated: true
         instructions: |
           ## Overview
           The bench dip is a bodyweight exercise that primarily targets the triceps. It also engages the shoulders and chest as secondary muscles, making it an effective upper-body pushing movement that can be performed with minimal equipment.
@@ -1644,6 +1676,7 @@ exercises:
     i18n:
       en:
         name: "Bench Press - Close Grip (Barbell)"
+        validated: true
         instructions: |
           ## Overview
           The close grip bench press is a barbell exercise that primarily targets the triceps. It also engages the chest and front shoulders as secondary muscles, making it an effective compound movement for building upper-body pressing strength with greater triceps emphasis.
@@ -1695,6 +1728,7 @@ exercises:
     i18n:
       en:
         name: "Bicep Curl (Barbell)"
+        validated: true
         instructions: |
           ## Overview
           The barbell bicep curl is a classic isolation exercise that primarily targets the biceps brachii. It also engages the brachialis and brachioradialis as secondary muscles, making it one of the most effective exercises for building arm size and strength.
@@ -1746,6 +1780,7 @@ exercises:
     i18n:
       en:
         name: "Bicep Curl (Cable)"
+        validated: true
         instructions: |
           ## Overview
           The cable bicep curl is an isolation exercise that primarily targets the biceps brachii with constant tension throughout the movement. It also engages the brachialis and brachioradialis, offering a smoother resistance curve than free weights for continuous muscle activation.
@@ -1797,6 +1832,7 @@ exercises:
     i18n:
       en:
         name: "Bicep Curl (Dumbbell)"
+        validated: true
         instructions: |
           ## Overview
           The dumbbell bicep curl is a fundamental isolation exercise that primarily targets the biceps brachii. It also engages the brachialis and brachioradialis, allowing for independent arm training and natural wrist rotation throughout the movement.
@@ -1848,6 +1884,7 @@ exercises:
     i18n:
       en:
         name: "Bicep Curl (Machine)"
+        validated: true
         instructions: |
           ## Overview
           The machine bicep curl is an isolation exercise that primarily targets the biceps brachii with a fixed movement path. It also engages the brachialis and brachioradialis, offering stability and support that allows you to focus purely on biceps contraction.
@@ -1899,6 +1936,7 @@ exercises:
     i18n:
       en:
         name: "Cable Kickback"
+        validated: true
         instructions: |
           ## Overview
           The cable kickback is an isolation exercise that primarily targets the triceps, particularly the long head. It also engages the shoulders and core as stabilizers, providing constant tension throughout the movement for effective triceps development.
@@ -1951,6 +1989,7 @@ exercises:
     i18n:
       en:
         name: "Concentration Curl (Dumbbell)"
+        validated: true
         instructions: |
           ## Overview
           The concentration curl is an isolation exercise that primarily targets the biceps brachii with maximum focus on the muscle. It also engages the brachialis and brachioradialis, with the seated, braced position eliminating momentum for strict biceps isolation.
@@ -2002,6 +2041,7 @@ exercises:
     i18n:
       en:
         name: "Hammer Curl (Band)"
+        validated: true
         instructions: |
           ## Overview
           The band hammer curl is an isolation exercise that primarily targets the brachialis and brachioradialis. It also engages the biceps brachii, using a neutral grip position that emphasizes forearm and outer biceps development with progressive resistance.
@@ -2053,6 +2093,7 @@ exercises:
     i18n:
       en:
         name: "Hammer Curl (Cable)"
+        validated: true
         instructions: |
           ## Overview
           The cable hammer curl is an isolation exercise that primarily targets the brachialis and brachioradialis with constant tension. It also engages the biceps brachii, using a neutral grip attachment that emphasizes forearm and outer biceps development throughout the movement.
@@ -2104,6 +2145,7 @@ exercises:
     i18n:
       en:
         name: "Incline Curl (Dumbbell)"
+        validated: true
         instructions: |
           ## Overview
           The incline dumbbell curl is an isolation exercise that primarily targets the biceps brachii with an extended range of motion. It also engages the brachialis and brachioradialis, using the inclined position to create a greater stretch on the biceps at the start of each rep.
@@ -2155,6 +2197,7 @@ exercises:
     i18n:
       en:
         name: "Hammer Curl (Dumbbell)"
+        validated: true
         instructions: |
           ## Overview
           The hammer curl is an isolation exercise that primarily targets the brachialis and brachioradialis. It also engages the biceps brachii, using a neutral grip position that emphasizes forearm and outer biceps development for balanced arm strength.
@@ -2206,6 +2249,7 @@ exercises:
     i18n:
       en:
         name: "Preacher Curl (Barbell)"
+        validated: true
         instructions: |
           ## Overview
           The barbell preacher curl is an isolation exercise that primarily targets the biceps brachii, particularly the lower portion. It also engages the brachialis and brachioradialis, using a preacher bench to eliminate momentum and maintain constant tension throughout the movement.
