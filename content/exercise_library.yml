@@ -3121,6 +3121,53 @@ exercises:
   "Triceps Pushdown (Cable - Straight Bar)":
     category: Machine
     target: Arms
+    i18n:
+      en:
+        name: "Triceps Pushdown (Cable - Straight Bar)"
+        instructions: |
+          ## Overview
+          The cable triceps pushdown is an isolation exercise that primarily targets all three heads of the triceps with constant tension. It also engages the shoulders minimally as stabilizers, using a high cable pulley with a straight bar for consistent resistance throughout the movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing a high cable pulley with a straight bar attached
+          - Grip the bar with an overhand grip, hands shoulder-width apart
+          - Position your elbows close to your sides with forearms parallel to the floor
+          - Keep your feet hip-width apart with a slight forward stance
+          - Engage your core and maintain an upright posture
+
+          ### 2. Movement
+          1. Push the bar down by extending your elbows fully
+          2. Keep your upper arms stationary and pinned to your sides
+          3. Continue pressing until your arms are fully extended at your thighs
+          4. Pause and squeeze your triceps at full extension
+          5. Slowly allow the bar to rise back to the starting position with control
+          6. Stop before the weight stack touches to maintain constant tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you push the bar down
+          - Inhale as you allow the bar to return to the starting position
+
+          ### 4. Tips
+          - Keep your elbows completely stationary and tucked to your sides
+          - Focus on isolating the triceps by only moving at the elbow joint
+          - Maintain constant tension by not letting the weight stack rest
+          - Avoid leaning forward or using body momentum
+          - Squeeze your triceps hard at the bottom of each rep
+
+          ### 5. Common Mistakes
+          - Allowing the elbows to drift forward or flare out
+          - Leaning forward and using body weight to push the bar
+          - Not achieving full elbow extension at the bottom
+          - Letting the weight stack rest between reps
+          - Using momentum instead of controlled movement
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the strict elbow isolation
+          - Try different attachments (rope, V-bar, single handle) for variety
+          - Advanced variation: perform one arm at a time for unilateral focus
+          - Add a 2-3 second pause at full extension for increased intensity
 
   "Upright Row (Cable)":
     category: Machine
