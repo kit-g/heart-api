@@ -3172,7 +3172,53 @@ exercises:
   "Upright Row (Cable)":
     category: Machine
     target: Arms
+    i18n:
+      en:
+        name: "Upright Row (Cable)"
+        instructions: |
+          ## Overview
+          The cable upright row is a compound exercise that primarily targets the lateral deltoids and upper trapezius. It also engages the biceps, forearms, and middle trapezius, using a low cable pulley to provide constant tension throughout the vertical pulling movement.
 
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing a low cable pulley with a straight bar or rope attached
+          - Grip the attachment with an overhand grip, hands slightly narrower than shoulder-width
+          - Stand upright with feet hip-width apart
+          - Let your arms hang straight down with the cable under tension
+          - Keep your shoulders back and core engaged
+
+          ### 2. Movement
+          1. Pull the attachment upward along your body by raising your elbows
+          2. Lead with your elbows, keeping them higher than your wrists
+          3. Continue pulling until the attachment reaches upper chest or chin height
+          4. Keep the attachment close to your body throughout
+          5. Pause briefly at the top of the movement
+          6. Slowly lower the attachment back to the starting position with control
+
+          ### 3. Breathing
+          - Exhale as you pull the attachment upward
+          - Inhale as you lower the attachment back down
+
+          ### 4. Tips
+          - Lead with your elbows, not your hands
+          - Keep the attachment close to your body throughout the movement
+          - Avoid shrugging your shoulders at the top
+          - Maintain constant tension by not letting the weight stack rest
+          - Control both the lifting and lowering phases
+
+          ### 5. Common Mistakes
+          - Pulling too high and straining the shoulders
+          - Allowing the elbows to drop below the wrists
+          - Using momentum or swinging the body
+          - Letting the weight stack rest between reps
+          - Leaning backward during the pull
+          - Using too wide a grip, which can cause shoulder impingement
+
+          ### 6. Safety / Modifications
+          - Use a moderate grip width to avoid shoulder discomfort
+          - Stop at shoulder height if you experience any shoulder pain
+          - Try a rope attachment for a more natural hand position
+          - Advanced variation: perform one arm at a time for unilateral focus
   "Wrist Roller":
     category: Machine
     target: Arms
