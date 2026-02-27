@@ -2662,6 +2662,53 @@ exercises:
   "Skullcrusher (Barbell)":
     category: Barbell
     target: Arms
+    i18n:
+      en:
+        name: "Skullcrusher (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell skullcrusher is an isolation exercise that primarily targets the triceps, particularly the long head. It also engages the medial and lateral triceps heads, using a lying position to maximize stretch and contraction throughout the movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on a bench with your feet firmly planted on the floor
+          - Hold a barbell with a narrow to shoulder-width overhand grip
+          - Extend your arms straight up above your chest
+          - Angle your arms slightly back toward your head (not perfectly vertical)
+          - Keep your elbows stationary throughout the movement
+
+          ### 2. Movement
+          1. Lower the barbell by bending your elbows, bringing the bar toward your forehead
+          2. Keep your upper arms stationary and angled slightly back
+          3. Lower until your forearms are just past parallel to the floor
+          4. Pause briefly at the bottom stretch position
+          5. Extend your elbows to press the bar back to the starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the barbell toward your forehead
+          - Exhale as you press the barbell back up
+
+          ### 4. Tips
+          - Keep your upper arms stationary throughout the movement
+          - Lower the bar under control to avoid hitting your forehead
+          - Focus on keeping tension on your triceps throughout
+          - Keep your elbows relatively close together, not flaring out
+          - Angle your arms slightly back to maximize triceps engagement
+
+          ### 5. Common Mistakes
+          - Allowing the elbows to flare out excessively
+          - Moving the upper arms instead of keeping them stationary
+          - Lowering the bar too quickly without control
+          - Not achieving a full stretch at the bottom
+          - Using too much weight and compromising form
+          - Letting the elbows drift forward during the extension
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the controlled lowering technique
+          - Use an EZ curl bar if you experience wrist or elbow discomfort
+          - Have a spotter for heavier sets
+          - Advanced variation: lower the bar behind your head for increased stretch
 
   "Skullcrusher (Dumbbell)":
     category: Dumbbell
