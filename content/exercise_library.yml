@@ -2611,6 +2611,53 @@ exercises:
   "Seated Palms Up Wrist Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    i18n:
+      en:
+        name: "Seated Palms Up Wrist Curl (Dumbbell)"
+        instructions: |
+          ## Overview
+          The seated palms up wrist curl is an isolation exercise that primarily targets the forearm flexors. It also engages the wrist flexors and grip muscles, using a seated position with forearms supported to isolate the wrist movement for forearm development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on a bench with your feet flat on the floor
+          - Hold a dumbbell in each hand with an underhand grip (palms facing up)
+          - Rest your forearms on your thighs with wrists extending just beyond your knees
+          - Allow the dumbbells to roll down to your fingertips
+          - Keep your forearms flat and stationary throughout
+
+          ### 2. Movement
+          1. Curl your wrists upward by contracting your forearm flexors
+          2. Bring the dumbbells up as high as comfortable
+          3. Keep your forearms pressed firmly against your thighs
+          4. Pause and squeeze at the top of the movement
+          5. Slowly lower the dumbbells back down with control
+          6. Allow the weight to roll to your fingertips for a full stretch, then repeat
+
+          ### 3. Breathing
+          - Exhale as you curl your wrists up
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - Keep your forearms completely stationary on your thighs
+          - Focus on pure wrist movement without lifting your forearms
+          - Allow a full stretch at the bottom by rolling weight to fingertips
+          - Control both the lifting and lowering phases
+          - Use moderate weight to maintain strict form
+
+          ### 5. Common Mistakes
+          - Lifting the forearms off the thighs during the curl
+          - Using momentum instead of controlled muscle contraction
+          - Not allowing full range of motion at the bottom
+          - Gripping too tightly and limiting range of motion
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master the wrist isolation
+          - Perform one arm at a time for better focus if needed
+          - Advanced variation: pause for 2-3 seconds at peak contraction
+          - If you experience discomfort, reduce weight and ensure proper forearm support
 
   "Skullcrusher (Barbell)":
     category: Barbell
