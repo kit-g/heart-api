@@ -2917,6 +2917,53 @@ exercises:
   "Triceps Extension (Barbell)":
     category: Barbell
     target: Arms
+    i18n:
+      en:
+        name: "Triceps Extension (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell triceps extension is an isolation exercise that primarily targets all three heads of the triceps. It also engages the shoulders and core as stabilizers, using an overhead position to maximize stretch and contraction of the triceps throughout the movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart or sit on a bench with back support
+          - Hold a barbell with a narrow overhand grip
+          - Press the barbell overhead until your arms are fully extended
+          - Keep your elbows pointing forward and close to your head
+          - Engage your core for stability
+
+          ### 2. Movement
+          1. Lower the barbell behind your head by bending your elbows
+          2. Keep your upper arms stationary and vertical throughout
+          3. Lower until you feel a deep stretch in your triceps
+          4. Pause briefly at the bottom position
+          5. Extend your elbows to press the barbell back to the starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the barbell behind your head
+          - Exhale as you press the barbell back up
+
+          ### 4. Tips
+          - Keep your upper arms stationary and vertical throughout
+          - Keep your elbows as close together as comfortable
+          - Avoid arching your lower back during the movement
+          - Focus on the stretch at the bottom and squeeze at the top
+          - Control the weight throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Allowing the elbows to flare out excessively
+          - Moving the upper arms instead of keeping them stationary
+          - Arching the lower back excessively
+          - Using too much weight and compromising form
+          - Not achieving full range of motion
+          - Leaning forward or backward during the movement
+
+          ### 6. Safety / Modifications
+          - Use an EZ curl bar if you experience wrist or elbow discomfort
+          - Start with light weight to master the overhead position
+          - Perform seated with back support for added stability
+          - Advanced variation: perform standing to engage more core muscles
 
   "Triceps Extension (Cable)":
     category: Machine
