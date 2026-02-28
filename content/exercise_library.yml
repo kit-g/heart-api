@@ -4440,6 +4440,53 @@ exercises:
   "Pendlay Row (Barbell)":
     category: Barbell
     target: Back
+    i18n:
+      en:
+        name: "Pendlay Row (Barbell)"
+        instructions: |
+          ## Overview
+          The Pendlay row is an explosive barbell rowing exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the lower back and hamstrings, using a dead-stop position between reps to eliminate momentum and maximize power development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, barbell on the floor over mid-foot
+          - Hinge forward until your torso is parallel to the floor
+          - Grip the bar with an overhand grip, hands slightly wider than shoulder-width
+          - Keep your back flat, chest facing down, and arms fully extended
+          - Engage your core and lats before each rep
+
+          ### 2. Movement
+          1. Explosively pull the barbell toward your lower chest or upper abdomen
+          2. Drive your elbows back and up in a powerful motion
+          3. Touch the bar to your torso at the top of the movement
+          4. Squeeze your shoulder blades together briefly
+          5. Lower the bar back to the floor with control
+          6. Allow the bar to come to a complete dead stop on the floor before starting the next rep
+
+          ### 3. Breathing
+          - Take a breath and brace before each rep
+          - Exhale as you pull or after completing the rep
+
+          ### 4. Tips
+          - Keep your torso parallel to the floor throughout
+          - Each rep should start from a complete dead stop on the floor
+          - Pull explosively while maintaining control
+          - Keep your back flat and core tight
+          - Focus on generating power from your back muscles
+
+          ### 5. Common Mistakes
+          - Not returning the bar to a complete dead stop on the floor
+          - Lifting the torso during the pull instead of staying parallel
+          - Using momentum from bouncing the bar off the floor
+          - Rounding the back during the movement
+          - Not pulling the bar high enough to touch the torso
+          - Moving too slowly and losing the explosive nature
+
+          ### 6. Safety / Modifications
+          - Start with lighter weight to master the dead-stop technique
+          - Ensure your back remains flat throughout to protect your spine
+          - Use smaller weight plates on a platform if needed for proper starting height
+          - If you experience lower back discomfort, reduce weight and check your form
 
   "Pull Up":
     category: Weighted Body Weight
