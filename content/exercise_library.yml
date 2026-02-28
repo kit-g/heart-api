@@ -4185,6 +4185,53 @@ exercises:
   "Lat Pulldown (Machine)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Lat Pulldown (Machine)"
+        instructions: |
+          ## Overview
+          The machine lat pulldown is a guided pulling exercise that primarily targets the latissimus dorsi. It also engages the rhomboids, middle trapezius, and biceps, using a fixed movement path to provide stability and consistent resistance throughout the pulling motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the lat pulldown machine with your thighs secured under the pads
+          - Adjust the seat height so your arms can fully extend overhead
+          - Grip the handles with an overhand or neutral grip, depending on the machine
+          - Keep your chest up and shoulders down
+          - Engage your core and maintain an upright torso
+
+          ### 2. Movement
+          1. Pull the handles down toward your chest by driving your elbows down and back
+          2. Keep your torso upright throughout the movement
+          3. Continue until the handles reach your upper chest
+          4. Squeeze your shoulder blades together at the bottom
+          5. Slowly return the handles to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the handles down
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your chest up and shoulders back throughout
+          - Lead with your elbows, pulling them down and back
+          - Focus on squeezing your shoulder blades together
+          - Maintain constant tension by not letting the weight stack rest
+          - Control the weight throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Leaning back excessively during the pull
+          - Using momentum instead of controlled muscle contraction
+          - Not achieving full range of motion
+          - Allowing the shoulders to shrug up
+          - Letting the weight stack rest between reps
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat height and thigh pad for proper positioning
+          - Start with light weight to establish mind-muscle connection
+          - Try different grip attachments if available
+          - Advanced variation: pause for 2-3 seconds at the bottom of each rep
 
   "Lat Pulldown (Single Arm)":
     category: Machine
