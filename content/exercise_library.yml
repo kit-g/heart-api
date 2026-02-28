@@ -4389,6 +4389,53 @@ exercises:
   "Lat Pulldown - Wide Grip (Cable)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Lat Pulldown - Wide Grip (Cable)"
+        instructions: |
+          ## Overview
+          The wide grip cable lat pulldown is a machine-based pulling exercise that primarily targets the latissimus dorsi with emphasis on back width. It also engages the rhomboids and middle trapezius, using a wider grip to target the outer lats and build a wider back appearance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit at a lat pulldown station with your thighs secured under the pads
+          - Grip the bar with an overhand grip, hands significantly wider than shoulder-width
+          - Extend your arms fully overhead while maintaining tension on the cable
+          - Keep your chest up and shoulders down
+          - Engage your core and maintain an upright torso
+
+          ### 2. Movement
+          1. Pull the bar down toward your upper chest by driving your elbows down and out
+          2. Keep your torso upright or lean back very slightly
+          3. Continue until the bar reaches your upper chest
+          4. Squeeze your shoulder blades together at the bottom
+          5. Slowly return the bar to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the bar down
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your elbows flared out wider due to the grip width
+          - Focus on pulling your elbows down toward your sides
+          - Keep your chest up and shoulders back throughout
+          - Maintain constant tension by not letting the weight stack rest
+          - Avoid excessive leaning or body swing
+
+          ### 5. Common Mistakes
+          - Using a grip that's too wide, limiting range of motion
+          - Leaning back excessively and turning it into a row
+          - Not achieving full range of motion
+          - Allowing the shoulders to shrug up
+          - Letting the weight stack rest between reps
+          - Pulling the bar behind the neck, which can strain shoulders
+
+          ### 6. Safety / Modifications
+          - Start with moderate weight to adapt to the wider grip
+          - Avoid pulling the bar behind your neck to prevent shoulder strain
+          - Advanced variation: pause for 2-3 seconds at the bottom of each rep
+          - If you experience shoulder discomfort, narrow your grip slightly
 
   "Pendlay Row (Barbell)":
     category: Barbell
