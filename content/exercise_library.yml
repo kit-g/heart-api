@@ -4236,6 +4236,53 @@ exercises:
   "Lat Pulldown (Single Arm)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Lat Pulldown (Single Arm)"
+        instructions: |
+          ## Overview
+          The single arm lat pulldown is a unilateral pulling exercise that primarily targets the latissimus dorsi. It also engages the rhomboids, middle trapezius, and core stabilizers, using independent arm movement to address strength imbalances and improve overall back development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit at a lat pulldown station with your thighs secured under the pads
+          - Attach a single handle to the high cable pulley
+          - Grip the handle with one hand using an overhand or neutral grip
+          - Extend your arm fully overhead while maintaining tension
+          - Keep your torso upright and core engaged
+
+          ### 2. Movement
+          1. Pull the handle down toward your shoulder by driving your elbow down and back
+          2. Keep your torso stable and avoid rotating excessively
+          3. Continue until the handle reaches your shoulder or upper chest
+          4. Squeeze your shoulder blade down and back at the bottom
+          5. Slowly return the handle to the starting position with control
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you pull the handle down
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your torso stable and minimize rotation
+          - Lead with your elbow, pulling it down and back
+          - Focus on squeezing your shoulder blade toward your spine
+          - Maintain constant tension throughout the movement
+          - Control the weight in both directions
+
+          ### 5. Common Mistakes
+          - Rotating the torso excessively instead of stabilizing
+          - Using momentum to pull the weight down
+          - Not achieving full range of motion
+          - Allowing the shoulder to shrug up
+          - Letting the weight stack rest between reps
+          - Not performing equal reps on both sides
+
+          ### 6. Safety / Modifications
+          - Start with lighter weight than bilateral pulldowns
+          - Place your free hand on the machine for additional stability
+          - Advanced variation: pause for 2-3 seconds at the bottom of each rep
+          - Ensure equal reps and focus on both sides for balanced development
 
   "Lat Pulldown - Underhand (Band)":
     category: Weighted Body Weight
