@@ -4033,6 +4033,52 @@ exercises:
   "Kipping Pull Up":
     category: Reps Only
     target: Back
+    i18n:
+      en:
+        name: "Kipping Pull Up"
+        instructions: |
+          ## Overview
+          The kipping pull up is a dynamic bodyweight pulling exercise that primarily targets the latissimus dorsi using momentum. It also engages the shoulders, core, and hip flexors through a coordinated swinging motion, making it a functional movement for CrossFit and athletic training.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hang from a pull-up bar with an overhand grip, hands slightly wider than shoulder-width
+          - Allow your body to hang fully extended with arms straight
+          - Engage your core and prepare to initiate the kipping motion
+          - Keep your shoulders active, not passively hanging
+
+          ### 2. Movement
+          1. Generate momentum by pushing forward and then pulling your body backward in an arch
+          2. As your body swings forward, drive your hips toward the bar
+          3. Use the upward momentum to pull your chin over the bar
+          4. Push away from the bar at the top to begin the next kip
+          5. Allow your body to swing back into the arch position
+          6. Repeat the kipping motion in a fluid, continuous rhythm
+
+          ### 3. Breathing
+          - Breathe rhythmically throughout the continuous kipping motion
+          - Avoid holding your breath during the movement
+
+          ### 4. Tips
+          - Master strict pull-ups before attempting kipping variations
+          - Generate momentum from your hips, not just your arms
+          - Keep the movement fluid and continuous
+          - Think of the motion as a coordinated full-body swing
+          - Practice the hollow and arch positions separately before combining them
+
+          ### 5. Common Mistakes
+          - Attempting kipping without sufficient strict pull-up strength
+          - Using excessive, uncontrolled swinging
+          - Not coordinating the hip drive with the pull
+          - Breaking rhythm between reps
+          - Allowing shoulders to disengage at the bottom
+          - Kipping without understanding proper progression
+
+          ### 6. Safety / Modifications
+          - Build a foundation with 5-10 strict pull-ups before kipping
+          - Practice hollow and arch swings separately
+          - Use an assisted pull-up machine to build foundational strength
+          - Work with a coach to learn proper kipping mechanics safely
 
   "Kneeling Pulldown (Band)":
     category: Weighted Body Weight
