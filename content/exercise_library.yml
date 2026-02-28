@@ -3369,6 +3369,53 @@ exercises:
   "Back Extension (Machine)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Back Extension (Machine)"
+        instructions: |
+          ## Overview
+          The machine back extension is a resistance-based exercise that primarily targets the erector spinae and lower back muscles. It also engages the glutes and hamstrings, providing guided support and adjustable resistance for safe and effective lower back strengthening.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the back extension machine with your back against the pad
+          - Adjust the pad height so it rests comfortably against your mid to upper back
+          - Secure your feet on the footrest or under the foot pads
+          - Cross your arms over your chest or grip the handles
+          - Select an appropriate weight on the stack
+
+          ### 2. Movement
+          1. Push back against the pad by extending your spine and hips
+          2. Continue until your back is straight or slightly extended
+          3. Keep your core engaged and movement controlled
+          4. Pause briefly at full extension
+          5. Slowly return to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you extend your back against the pad
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your core engaged throughout the movement
+          - Avoid hyperextending your spine excessively
+          - Focus on smooth, controlled movement in both directions
+          - Maintain constant tension by not letting the weight stack rest
+          - Keep your feet firmly planted throughout
+
+          ### 5. Common Mistakes
+          - Using too much weight and compromising form
+          - Hyperextending the spine excessively
+          - Using momentum instead of controlled muscle contraction
+          - Letting the weight stack rest between reps
+          - Arching the neck instead of maintaining neutral alignment
+          - Moving too quickly through the range of motion
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master proper form and control
+          - Adjust pad height to ensure proper back positioning
+          - Advanced variation: pause for 2-3 seconds at full extension
+          - If you experience discomfort, reduce weight and ensure proper pad alignment
 
   "Bent Over One Arm Row (Dumbbell)":
     category: Dumbbell
