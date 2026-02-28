@@ -3573,6 +3573,53 @@ exercises:
   "Bent Over Row (Dumbbell)":
     category: Dumbbell
     target: Back
+    i18n:
+      en:
+        name: "Bent Over Row (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell bent over row is a compound pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the biceps and rear deltoids, allowing for independent arm movement and natural wrist positioning throughout the rowing motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a dumbbell in each hand
+          - Hinge forward at the hips with a slight bend in your knees
+          - Keep your back flat, chest up, and core engaged
+          - Let the dumbbells hang at arm's length with palms facing each other or your body
+          - Maintain a neutral spine throughout
+
+          ### 2. Movement
+          1. Pull both dumbbells toward your hips or lower ribcage
+          2. Drive your elbows back and up, keeping them close to your body
+          3. Continue until the dumbbells reach your torso
+          4. Squeeze your shoulder blades together at the top
+          5. Slowly lower the dumbbells back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull the dumbbells toward your torso
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - Keep your back flat and core tight throughout
+          - Lead with your elbows, pulling them back behind you
+          - Focus on squeezing your shoulder blades together
+          - Maintain a consistent torso angle throughout the set
+          - Allow natural wrist rotation if comfortable
+
+          ### 5. Common Mistakes
+          - Rounding the back instead of maintaining a flat spine
+          - Standing too upright and reducing back engagement
+          - Using momentum to swing the weights up
+          - Not achieving full range of motion
+          - Allowing the torso to rotate side to side
+          - Moving too quickly and losing control
+
+          ### 6. Safety / Modifications
+          - Start with moderate dumbbells to master the hip hinge position
+          - Perform one arm at a time for better focus and stability
+          - Advanced variation: pause for 2-3 seconds at the top of each rep
+          - Keep knees slightly bent to protect your lower back
 
   "Bent Over Row - Underhand (Barbell)":
     category: Barbell
