@@ -3471,6 +3471,53 @@ exercises:
   "Bent Over Row (Band)":
     category: Weighted Body Weight
     target: Back
+    i18n:
+      en:
+        name: "Bent Over Row (Band)"
+        instructions: |
+          ## Overview
+          The band bent over row is a resistance-based pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the biceps and rear deltoids, providing progressive resistance throughout the movement for effective back development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, stepping on the center of a resistance band
+          - Grip each end of the band with your hands
+          - Hinge forward at the hips with a slight bend in your knees
+          - Keep your back flat and core engaged
+          - Let your arms hang straight down with tension on the band
+
+          ### 2. Movement
+          1. Pull the band toward your torso by driving your elbows back
+          2. Keep your elbows close to your body as you row
+          3. Continue until your hands reach your lower ribcage or hips
+          4. Squeeze your shoulder blades together at the top
+          5. Slowly release back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull the band toward your torso
+          - Inhale as you release back to the starting position
+
+          ### 4. Tips
+          - Keep your back flat and core tight throughout
+          - Lead with your elbows, pulling them back behind you
+          - Focus on squeezing your shoulder blades together
+          - Maintain constant tension on the band
+          - Avoid rounding your back during the movement
+
+          ### 5. Common Mistakes
+          - Rounding the back instead of maintaining a flat spine
+          - Using momentum instead of controlled movement
+          - Not achieving full range of motion
+          - Standing too upright and reducing back engagement
+          - Releasing tension on the band at the bottom
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master the hip hinge position
+          - Adjust foot position on the band to modify resistance
+          - Advanced variation: use a heavier resistance band or add a pause at the top
+          - Keep knees slightly bent to protect your lower back
 
   "Bent Over Row (Barbell)":
     category: Barbell
