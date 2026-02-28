@@ -4134,6 +4134,53 @@ exercises:
   "Lat Pulldown (Cable)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Lat Pulldown (Cable)"
+        instructions: |
+          ## Overview
+          The cable lat pulldown is a machine-based pulling exercise that primarily targets the latissimus dorsi. It also engages the rhomboids, middle trapezius, and biceps, using a high cable pulley with constant tension to build back width and pulling strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit at a lat pulldown station with your thighs secured under the pads
+          - Grip the bar with an overhand grip, hands slightly wider than shoulder-width
+          - Extend your arms fully overhead while maintaining tension on the cable
+          - Keep your chest up and shoulders down
+          - Engage your core and maintain an upright torso
+
+          ### 2. Movement
+          1. Pull the bar down toward your upper chest by driving your elbows down and back
+          2. Keep your torso upright or lean back slightly
+          3. Continue until the bar reaches your upper chest or collarbone
+          4. Squeeze your shoulder blades together at the bottom
+          5. Slowly return the bar to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the bar down
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Lead with your elbows, not your hands
+          - Keep your chest up and shoulders back throughout
+          - Focus on squeezing your shoulder blades together
+          - Maintain constant tension by not letting the weight stack rest
+          - Avoid using momentum or excessive body swing
+
+          ### 5. Common Mistakes
+          - Leaning back excessively and turning it into a row
+          - Using momentum to swing the weight down
+          - Not achieving full range of motion at top or bottom
+          - Allowing the shoulders to shrug up
+          - Letting the weight stack rest between reps
+          - Pulling the bar behind the neck, which can strain shoulders
+
+          ### 6. Safety / Modifications
+          - Adjust seat height and thigh pad to secure your lower body
+          - Start with moderate weight to master proper form
+          - Try an underhand grip for different muscle emphasis
+          - Advanced variation: pause for 2-3 seconds at the bottom of each rep
 
   "Lat Pulldown (Machine)":
     category: Machine
