@@ -3624,6 +3624,53 @@ exercises:
   "Bent Over Row - Underhand (Barbell)":
     category: Barbell
     target: Back
+    i18n:
+      en:
+        name: "Bent Over Row - Underhand (Barbell)"
+        instructions: |
+          ## Overview
+          The underhand barbell bent over row is a compound pulling exercise that primarily targets the latissimus dorsi and lower lats with greater emphasis. It also engages the biceps more than the overhand variation, along with the rhomboids and middle trapezius, making it effective for building back width and arm strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, holding a barbell with an underhand grip
+          - Position your hands slightly narrower than shoulder-width apart
+          - Hinge forward at the hips with a slight bend in your knees
+          - Keep your back flat, chest up, and core engaged
+          - Let the barbell hang at arm's length below your shoulders
+
+          ### 2. Movement
+          1. Pull the barbell toward your lower chest or upper abdomen
+          2. Drive your elbows back and slightly outward as you row
+          3. Continue until the bar touches your torso
+          4. Squeeze your shoulder blades together at the top
+          5. Slowly lower the barbell back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull the barbell toward your torso
+          - Inhale as you lower the barbell back down
+
+          ### 4. Tips
+          - Keep your back flat and core tight throughout
+          - The underhand grip allows your elbows to stay closer to your body
+          - Focus on squeezing your lats and shoulder blades
+          - Maintain a consistent torso angle throughout the set
+          - Control the weight in both directions
+
+          ### 5. Common Mistakes
+          - Rounding the back instead of maintaining a flat spine
+          - Standing too upright and reducing back engagement
+          - Using momentum to swing the weight up
+          - Not achieving full range of motion
+          - Allowing the elbows to flare out excessively
+          - Moving too quickly and losing control
+
+          ### 6. Safety / Modifications
+          - Start with lighter weight than your overhand row to master the grip
+          - Use lifting straps if grip strength is limiting
+          - Advanced variation: perform with a narrower grip for increased biceps emphasis
+          - If you experience lower back discomfort, reduce weight and check your form
 
   "Chin Up":
     category: Weighted Body Weight
