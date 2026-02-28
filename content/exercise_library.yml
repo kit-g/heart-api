@@ -4746,6 +4746,53 @@ exercises:
   "Seated Row (Cable)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Seated Row (Cable)"
+        instructions: |
+          ## Overview
+          The cable seated row is a horizontal pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the biceps and rear deltoids, using a cable machine to provide constant tension throughout the rowing motion for effective back development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the seated row machine with your feet on the footrests
+          - Grip the handle with both hands, arms fully extended
+          - Keep your knees slightly bent and back straight
+          - Sit upright with your chest up and shoulders back
+          - Engage your core throughout the movement
+
+          ### 2. Movement
+          1. Pull the handle toward your torso by driving your elbows back
+          2. Keep your torso upright and avoid leaning back excessively
+          3. Continue until the handle reaches your lower chest or upper abdomen
+          4. Squeeze your shoulder blades together at the back of the movement
+          5. Slowly extend your arms back to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the handle toward your torso
+          - Inhale as you extend your arms back to the starting position
+
+          ### 4. Tips
+          - Keep your torso upright with minimal lean
+          - Lead with your elbows, pulling them back behind you
+          - Focus on squeezing your shoulder blades together
+          - Maintain constant tension by not letting the weight stack rest
+          - Control the weight throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Leaning back excessively and using momentum
+          - Rounding the back during the movement
+          - Not achieving full range of motion
+          - Allowing the shoulders to shrug up
+          - Letting the weight stack rest between reps
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Adjust foot position to ensure knees stay slightly bent
+          - Try different handle attachments (wide, narrow, neutral grip) for variety
+          - Perform one arm at a time for unilateral focus
+
 
   "Seated Row (Machine)":
     category: Machine
