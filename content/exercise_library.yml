@@ -3777,6 +3777,54 @@ exercises:
   "Deadlift (Barbell)":
     category: Barbell
     target: Back
+    i18n:
+      en:
+        name: "Deadlift (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell deadlift is a compound exercise that primarily targets the erector spinae, glutes, and hamstrings. It also engages the quadriceps, lats, traps, and grip muscles, making it one of the most effective full-body strength exercises for building overall posterior chain power.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, barbell over mid-foot
+          - Grip the bar just outside your legs with hands shoulder-width apart
+          - Hinge at the hips and bend your knees to reach the bar
+          - Keep your chest up, back flat, and shoulders slightly ahead of the bar
+          - Engage your core and lats before lifting
+
+          ### 2. Movement
+          1. Drive through your heels and extend your hips and knees simultaneously
+          2. Keep the bar close to your body as you lift
+          3. Stand up fully by extending your hips and knees
+          4. Keep your shoulders back and chest up at the top
+          5. Lower the bar by pushing your hips back and bending your knees
+          6. Return the bar to the floor with control and repeat
+
+          ### 3. Breathing
+          - Take a deep breath and brace your core before lifting
+          - Hold your breath during the lift
+          - Exhale at the top or as you lower the bar
+
+          ### 4. Tips
+          - Keep the bar close to your shins and thighs throughout
+          - Lead with your chest as you stand up
+          - Keep your spine neutral, avoiding rounding or hyperextension
+          - Drive through your entire foot, not just your toes
+          - Think about pushing the floor away rather than lifting the bar
+
+          ### 5. Common Mistakes
+          - Rounding the lower back during the lift
+          - Starting with hips too high or too low
+          - Letting the bar drift away from the body
+          - Not fully extending hips at the top
+          - Looking up or down instead of maintaining neutral neck
+          - Using arms to pull instead of legs and hips to drive
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master proper form and hip hinge
+          - Use lifting straps if grip strength is limiting
+          - Advanced variation: perform deficit deadlifts or Romanian deadlifts
+          - If you experience lower back discomfort, reduce weight and check your form with a professional
 
   "Good Morning (Barbell)":
     category: Barbell
