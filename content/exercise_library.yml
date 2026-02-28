@@ -4287,6 +4287,53 @@ exercises:
   "Lat Pulldown - Underhand (Band)":
     category: Weighted Body Weight
     target: Back
+    i18n:
+      en:
+        name: "Lat Pulldown - Underhand (Band)"
+        instructions: |
+          ## Overview
+          The underhand band lat pulldown is a resistance-based pulling exercise that primarily targets the latissimus dorsi with greater biceps engagement. It also engages the rhomboids and middle trapezius, using an underhand grip with progressive band resistance throughout the movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Anchor a resistance band overhead to a secure point
+          - Stand or kneel facing the anchor point
+          - Grip the band with both hands using an underhand grip (palms facing you)
+          - Extend your arms overhead with tension on the band
+          - Keep your core engaged and torso upright
+
+          ### 2. Movement
+          1. Pull the band down toward your chest by driving your elbows down and back
+          2. Keep your torso upright throughout the movement
+          3. Continue until your hands reach your upper chest or shoulders
+          4. Squeeze your shoulder blades together at the bottom
+          5. Slowly return your arms to the overhead position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull the band down
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - The underhand grip allows elbows to stay closer to your body
+          - Focus on pulling with your back muscles, not just your arms
+          - Keep your chest up and shoulders back throughout
+          - Maintain constant tension on the band
+          - Control the resistance on both the pulling and releasing phases
+
+          ### 5. Common Mistakes
+          - Leaning back excessively to use body weight
+          - Not maintaining constant tension on the band
+          - Using momentum instead of controlled movement
+          - Allowing the shoulders to shrug up
+          - Relying too heavily on biceps instead of back muscles
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master the underhand grip pattern
+          - Adjust distance from anchor point to modify resistance
+          - Perform kneeling if standing is too challenging
+          - Advanced variation: use a heavier resistance band or add a pause at the bottom
 
   "Lat Pulldown - Underhand (Cable)":
     category: Machine
