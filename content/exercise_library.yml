@@ -4542,6 +4542,53 @@ exercises:
   "Pull Up (Assisted)":
     category: Assisted Body Weight
     target: Back
+    i18n:
+      en:
+        name: "Pull Up (Assisted)"
+        instructions: |
+          ## Overview
+          The assisted pull up is a machine-based pulling exercise that primarily targets the latissimus dorsi with support. It also engages the rhomboids, middle trapezius, and biceps, using counterbalance assistance to make the pull up movement more accessible while building strength toward unassisted pull ups.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set the weight on the assisted pull up machine (more weight = more assistance)
+          - Grip the handles with an overhand grip, hands slightly wider than shoulder-width
+          - Position your knees or feet on the assistance pad
+          - Hang with arms fully extended and shoulders engaged
+          - Keep your core tight and body stable
+
+          ### 2. Movement
+          1. Pull yourself up by driving your elbows down and back
+          2. Continue until your chin clears the handles or bar
+          3. Keep your core engaged and movement controlled
+          4. Pause briefly at the top of the movement
+          5. Slowly lower yourself back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull yourself up
+          - Inhale as you lower yourself back down
+
+          ### 4. Tips
+          - Gradually reduce assistance weight as you build strength
+          - Focus on pulling with your back muscles, not just your arms
+          - Keep your shoulders down and back throughout
+          - Control both the pulling and lowering phases
+          - Avoid relying too heavily on the assistance
+
+          ### 5. Common Mistakes
+          - Using too much assistance and not challenging yourself
+          - Not achieving full range of motion
+          - Allowing the shoulders to shrug up
+          - Using momentum instead of controlled movement
+          - Not gradually reducing assistance weight over time
+          - Pulling with arms only instead of engaging the back
+
+          ### 6. Safety / Modifications
+          - Start with higher assistance and gradually decrease as you get stronger
+          - Focus on form over reducing assistance too quickly
+          - Progress toward band-assisted or negative pull ups before attempting unassisted
+          - Perform lat pulldowns as an alternative to build foundational strength
 
   "Pull Up (Band)":
     category: Assisted Body Weight
