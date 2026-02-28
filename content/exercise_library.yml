@@ -3263,9 +3263,57 @@ exercises:
           - Stop at shoulder height if you experience any shoulder pain
           - Try a rope attachment for a more natural hand position
           - Advanced variation: perform one arm at a time for unilateral focus
+
   "Wrist Roller":
     category: Machine
     target: Arms
+    i18n:
+      en:
+        name: "Wrist Roller"
+        instructions: |
+          ## Overview
+          The wrist roller is a forearm exercise that primarily targets the wrist flexors and extensors. It also engages the grip muscles and forearms through a continuous rolling motion, making it effective for building forearm strength and endurance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand upright holding a wrist roller device with both hands
+          - Grip the handle with an overhand grip, palms facing down
+          - Extend your arms straight out in front of you at shoulder height
+          - Keep your feet shoulder-width apart and core engaged
+          - Ensure the weight is hanging freely from the rope
+
+          ### 2. Movement
+          1. Begin rolling the handle by alternating wrist flexion with each hand
+          2. Roll the rope upward, winding the weight toward the handle
+          3. Keep your arms extended and parallel to the floor throughout
+          4. Continue rolling until the weight reaches the top
+          5. Reverse the motion by slowly unwinding the rope back down
+          6. Maintain control during both the rolling up and unwinding phases
+
+          ### 3. Breathing
+          - Breathe steadily and naturally throughout the movement
+          - Avoid holding your breath during the continuous rolling motion
+
+          ### 4. Tips
+          - Keep your arms extended at shoulder height throughout
+          - Focus on controlled wrist movements rather than using momentum
+          - Maintain steady, continuous motion without pausing
+          - Keep your wrists aligned with your forearms
+          - Start with lighter weight to master the technique
+
+          ### 5. Common Mistakes
+          - Dropping the arms below shoulder height
+          - Using momentum or jerky movements
+          - Allowing the weight to drop uncontrolled on the descent
+          - Bending the elbows during the movement
+          - Rolling too quickly and losing control
+          - Tensing the shoulders and upper body unnecessarily
+
+          ### 6. Safety / Modifications
+          - Start with a light weight to build forearm endurance
+          - Rest between sets as forearms fatigue quickly
+          - Advanced variation: roll the weight up and down multiple times without resting
+          - Reverse grip variation: use an underhand grip to emphasize different forearm muscles
 
   "Back Extension":
     category: Weighted Body Weight
