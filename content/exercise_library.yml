@@ -4593,6 +4593,53 @@ exercises:
   "Pull Up (Band)":
     category: Assisted Body Weight
     target: Back
+    i18n:
+      en:
+        name: "Pull Up (Band)"
+        instructions: |
+          ## Overview
+          The band-assisted pull up is a modified pulling exercise that primarily targets the latissimus dorsi with elastic support. It also engages the rhomboids, middle trapezius, and biceps, using resistance bands to provide variable assistance throughout the movement while building strength toward unassisted pull ups.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Loop a resistance band over a pull-up bar
+          - Pull one end through the other to secure it to the bar
+          - Grip the bar with an overhand grip, hands slightly wider than shoulder-width
+          - Place one or both knees or feet in the bottom loop of the band
+          - Hang with arms fully extended and shoulders engaged
+
+          ### 2. Movement
+          1. Pull yourself up by driving your elbows down and back
+          2. The band will provide more assistance at the bottom and less at the top
+          3. Continue until your chin clears the bar
+          4. Keep your core engaged and movement controlled
+          5. Slowly lower yourself back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull yourself up
+          - Inhale as you lower yourself back down
+
+          ### 4. Tips
+          - Start with a thicker band for more assistance
+          - Gradually progress to thinner bands as you build strength
+          - Focus on pulling with your back muscles, not just your arms
+          - Keep your shoulders down and back throughout
+          - Control both the pulling and lowering phases
+
+          ### 5. Common Mistakes
+          - Using a band with too much assistance
+          - Not achieving full range of motion
+          - Allowing the shoulders to shrug up
+          - Using momentum or kipping motion
+          - Not gradually progressing to lighter bands
+          - Pulling with arms only instead of engaging the back
+
+          ### 6. Safety / Modifications
+          - Start with a heavy resistance band and progress to lighter ones
+          - Place both feet in the band for maximum assistance
+          - Use one foot for moderate assistance as you get stronger
+          - Combine band-assisted pull ups with negative pull ups for faster progress
 
   "Rack Pull (Barbell)":
     category: Barbell
