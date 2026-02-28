@@ -4491,6 +4491,53 @@ exercises:
   "Pull Up":
     category: Weighted Body Weight
     target: Back
+    i18n:
+      en:
+        name: "Pull Up"
+        instructions: |
+          ## Overview
+          The pull up is a bodyweight pulling exercise that primarily targets the latissimus dorsi. It also engages the rhomboids, middle trapezius, biceps, and core, making it one of the most effective upper body exercises for building back width and pulling strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hang from a pull-up bar with an overhand grip, hands slightly wider than shoulder-width
+          - Allow your body to hang fully extended with arms straight
+          - Engage your core and keep your shoulders pulled down
+          - Cross your ankles or keep legs straight
+          - Avoid excessive swinging
+
+          ### 2. Movement
+          1. Pull yourself up by driving your elbows down and back
+          2. Lead with your chest and keep your shoulders back
+          3. Continue pulling until your chin clears the bar
+          4. Keep your core tight throughout the movement
+          5. Pause briefly at the top
+          6. Slowly lower yourself back to the starting position with full arm extension
+
+          ### 3. Breathing
+          - Exhale as you pull yourself up
+          - Inhale as you lower yourself back down
+
+          ### 4. Tips
+          - Think about pulling your elbows down rather than pulling your chin up
+          - Keep your shoulders engaged and avoid letting them shrug
+          - Control the descent for maximum muscle engagement
+          - Aim for full range of motion from dead hang to chin over bar
+          - Keep your core tight to minimize swinging
+
+          ### 5. Common Mistakes
+          - Using momentum or kipping instead of strict form
+          - Not achieving full range of motion at top or bottom
+          - Allowing the shoulders to shrug up toward the ears
+          - Swinging excessively during the movement
+          - Not fully extending the arms at the bottom
+          - Pulling with arms only instead of engaging the back
+
+          ### 6. Safety / Modifications
+          - Use an assisted pull-up machine or resistance band for support
+          - Perform negative pull-ups (jump to the top and lower slowly) to build strength
+          - Advanced variation: add weight using a dip belt or weight vest
+          - Progress gradually to avoid shoulder strain
 
   "Pull Up (Assisted)":
     category: Assisted Body Weight
