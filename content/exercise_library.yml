@@ -3931,6 +3931,53 @@ exercises:
   "Inverted Row (Bodyweight)":
     category: Reps Only
     target: Back
+    i18n:
+      en:
+        name: "Inverted Row (Bodyweight)"
+        instructions: |
+          ## Overview
+          The inverted row is a bodyweight pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the biceps, rear deltoids, and core, making it an effective horizontal pulling movement for building back strength and muscle endurance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself under a fixed bar set at waist to chest height
+          - Grip the bar with an overhand grip, hands shoulder-width apart
+          - Extend your body straight with heels on the ground and arms fully extended
+          - Keep your body in a straight line from head to heels
+          - Engage your core and glutes throughout
+
+          ### 2. Movement
+          1. Pull your chest toward the bar by driving your elbows back
+          2. Keep your body straight and core tight as you pull
+          3. Continue until your chest touches or nearly touches the bar
+          4. Squeeze your shoulder blades together at the top
+          5. Slowly lower yourself back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull your chest toward the bar
+          - Inhale as you lower yourself back down
+
+          ### 4. Tips
+          - Keep your body in a straight line throughout the movement
+          - Lead with your chest and keep your elbows close to your body
+          - Focus on squeezing your shoulder blades together
+          - Avoid letting your hips sag or pike upward
+          - Control both the pulling and lowering phases
+
+          ### 5. Common Mistakes
+          - Allowing the hips to sag or pike upward
+          - Not achieving full range of motion at the top
+          - Using momentum instead of controlled movement
+          - Allowing the elbows to flare out excessively
+          - Not maintaining a straight body line
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Raise the bar higher to make the exercise easier for beginners
+          - Lower the bar or elevate your feet for increased difficulty
+          - Perform with an underhand grip for different muscle emphasis
+          - Advanced variation: pause for 2-3 seconds at the top of each rep
 
   "Iso-Lateral Row (Machine)":
     category: Machine
