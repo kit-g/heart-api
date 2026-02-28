@@ -129,7 +129,7 @@ if __name__ == '__main__':
     for each in library.locales:
         localized = library.json_for_locale(each)
 
-        with open(f'{output_dir}/exercises_{each}.json', 'w', encoding='utf-8') as f:
+        with open(f'{output_dir}/exercises_{each.lower()}.json', 'w', encoding='utf-8') as f:
             json.dump({'exercises': localized}, f, ensure_ascii=False, indent=2)
 
         print(f'Generated {output_dir}/exercises_{each}.json')
