@@ -3420,6 +3420,53 @@ exercises:
   "Bent Over One Arm Row (Dumbbell)":
     category: Dumbbell
     target: Back
+    i18n:
+      en:
+        name: "Bent Over One Arm Row (Dumbbell)"
+        instructions: |
+          ## Overview
+          The bent over one arm dumbbell row is a unilateral pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the biceps and rear deltoids, allowing you to address strength imbalances and achieve a greater range of motion than bilateral rows.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Place one knee and the same-side hand on a flat bench for support
+          - Position your other foot on the floor with a slight bend in the knee
+          - Hold a dumbbell in your free hand with your arm hanging straight down
+          - Keep your back flat and parallel to the floor
+          - Engage your core and maintain a neutral spine
+
+          ### 2. Movement
+          1. Pull the dumbbell upward by driving your elbow toward the ceiling
+          2. Keep your elbow close to your body as you row
+          3. Continue until the dumbbell reaches your hip or lower ribcage
+          4. Squeeze your shoulder blade toward your spine at the top
+          5. Slowly lower the dumbbell back to the starting position with control
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you pull the dumbbell up
+          - Inhale as you lower the dumbbell back down
+
+          ### 4. Tips
+          - Lead with your elbow, not your hand
+          - Keep your torso stable and avoid rotating
+          - Focus on squeezing your back muscles at the top
+          - Maintain a flat back throughout the movement
+          - Control the weight in both directions
+
+          ### 5. Common Mistakes
+          - Rotating the torso instead of keeping it stable
+          - Using momentum to swing the weight up
+          - Not achieving full range of motion
+          - Rounding the back instead of keeping it flat
+          - Pulling with the arm instead of the back muscles
+          - Moving too quickly and losing control
+
+          ### 6. Safety / Modifications
+          - Start with moderate weight to master the form
+          - Perform without a bench by hinging at the hips and placing your free hand on your thigh
+          - Advanced variation: pause for 2-3 seconds at the top of each rep
+          - Ensure equal reps on both sides for balanced development
 
   "Bent Over Row (Band)":
     category: Weighted Body Weight
