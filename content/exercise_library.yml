@@ -3982,6 +3982,53 @@ exercises:
   "Iso-Lateral Row (Machine)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Iso-Lateral Row (Machine)"
+        instructions: |
+          ## Overview
+          The iso-lateral row is a machine-based pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the biceps and rear deltoids, using independent arm movement to address strength imbalances and allow unilateral or bilateral training.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the iso-lateral row machine with your chest against the pad
+          - Adjust the seat height so the handles align with your mid-chest
+          - Grip the handles with a neutral or overhand grip
+          - Keep your feet flat on the footrests and core engaged
+          - Position your shoulders back and down
+
+          ### 2. Movement
+          1. Pull the handles toward your torso by driving your elbows back
+          2. Keep your chest pressed against the pad throughout
+          3. Continue until your elbows are behind your torso
+          4. Squeeze your shoulder blades together at the end of the movement
+          5. Slowly return the handles to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull the handles toward your torso
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your chest firmly against the pad to isolate your back
+          - Lead with your elbows, pulling them back behind you
+          - Focus on squeezing your shoulder blades together
+          - Perform both arms together or alternate for unilateral training
+          - Control the weight throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Lifting your chest off the pad during the row
+          - Using momentum instead of controlled muscle contraction
+          - Not achieving full range of motion
+          - Allowing the shoulders to shrug up
+          - Moving too quickly through the repetitions
+          - Not equalizing strength between both arms
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure proper alignment with the handles
+          - Start with light weight to establish proper form
+          - Perform one arm at a time to address imbalances
+          - Advanced variation: pause for 2-3 seconds at peak contraction
 
   "Kipping Pull Up":
     category: Reps Only
