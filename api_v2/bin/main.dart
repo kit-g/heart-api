@@ -1,4 +1,5 @@
 import 'package:aws_client/dynamo_document.dart';
+import 'package:aws_client/s3_2006_03_01.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/db/db.dart';
 import 'package:heart/globals/config.dart';
@@ -7,9 +8,11 @@ import 'package:heart/middleware/authentication.dart';
 import 'package:heart/middleware/authenticator.dart';
 import 'package:heart/middleware/config.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/middleware/s3.dart';
 import 'package:heart/middleware/version.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/routes/index.dart';
+import 'package:heart/storage/s3.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart';
 import 'package:relic/relic.dart' hide Logger;
@@ -25,6 +28,8 @@ final _awsAuth = switch (_config.awsProfile) {
 
 final _dynamo = DocumentClient(region: _config.awsRegion, credentials: _awsAuth);
 final _database = Database(client: _dynamo, table: _config.workoutsTable);
+final _s3 = S3(region: _config.awsRegion, credentials: _awsAuth);
+final _storage = Storage(client: _s3, exerciseBucket: _config.exerciseBucket);
 
 Handler _handler(final ModelHandler handler) {
   return (final Request request) async {
@@ -43,6 +48,11 @@ Handler _handler(final ModelHandler handler) {
   };
 }
 
+bool _shouldCheckVersion(final Request request) {
+  if (_config.shouldCheckVersion) return isPublicRoute(request);
+  return false;
+}
+
 Future<void> main() async {
   initLogging(_config.logLevel, _config.env);
 
@@ -53,11 +63,12 @@ Future<void> main() async {
 
   final app = RelicApp()
     ..use('/', logRequests())
-    ..use('/', version(minimal: _config.minimalAppVersion, shouldCheckVersion: isPublicRoute))
+    ..use('/', version(minimal: _config.minimalAppVersion, shouldCheckVersion: _shouldCheckVersion))
     ..use('/', configuration(override: _config))
     ..use('/', authenticator(implementation: testAuth))
     ..use('/', authentication(shouldAuthenticate: isPublicRoute))
     ..use('/charts', chartsDb(db: _database))
+    ..use('/exercises', exercisesDb(db: _storage))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 
   for (final MapEntry(key: (route, verb), value: handler) in routes.entries) {
