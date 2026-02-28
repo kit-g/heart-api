@@ -4793,50 +4793,567 @@ exercises:
           - Try different handle attachments (wide, narrow, neutral grip) for variety
           - Perform one arm at a time for unilateral focus
 
-
   "Seated Row (Machine)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Seated Row (Machine)"
+        instructions: |
+          ## Overview
+          The machine seated row is a horizontal pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the biceps and rear deltoids, using a fixed movement path to provide stability and consistent resistance throughout the rowing motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the machine with your chest pressed against the pad
+          - Adjust the seat height so the handles align with your mid-chest
+          - Place your feet firmly on the footrests
+          - Grip the handles with both hands
+          - Keep your chest up and shoulders back
+
+          ### 2. Movement
+          1. Pull the handles toward your torso by driving your elbows back
+          2. Keep your chest pressed against the pad throughout
+          3. Continue until your elbows are behind your torso
+          4. Squeeze your shoulder blades together at the end of the movement
+          5. Slowly return the handles to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the handles toward your torso
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your chest firmly against the pad to isolate your back
+          - Lead with your elbows, pulling them back behind you
+          - Focus on squeezing your shoulder blades together
+          - Maintain constant tension by not letting the weight stack rest
+          - Control the weight throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Lifting your chest off the pad during the row
+          - Using momentum instead of controlled muscle contraction
+          - Not achieving full range of motion
+          - Allowing the shoulders to shrug up
+          - Letting the weight stack rest between reps
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure proper alignment with the handles
+          - Start with light weight to establish mind-muscle connection
+          - Try different grip attachments if available
+          - Advanced variation: pause for 2-3 seconds at peak contraction
 
   "Seated Wide-Grip Row (Cable)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Seated Wide-Grip Row (Cable)"
+        instructions: |
+          ## Overview
+          The seated wide-grip cable row is a horizontal pulling exercise that primarily targets the latissimus dorsi with emphasis on the outer back. It also engages the rhomboids, middle trapezius, and rear deltoids, using a wider grip to target upper back width and improve posture.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the seated row machine with your feet on the footrests
+          - Grip a wide bar attachment with hands significantly wider than shoulder-width
+          - Keep your knees slightly bent and back straight
+          - Sit upright with your chest up and shoulders back
+          - Extend your arms fully with tension on the cable
+
+          ### 2. Movement
+          1. Pull the bar toward your upper chest by driving your elbows back and out
+          2. Keep your torso upright throughout the movement
+          3. Continue until the bar reaches your upper chest
+          4. Squeeze your shoulder blades together at the back of the movement
+          5. Slowly extend your arms back to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the bar toward your chest
+          - Inhale as you extend your arms back to the starting position
+
+          ### 4. Tips
+          - Keep your elbows flared out wider due to the grip width
+          - Focus on pulling your elbows back and squeezing your shoulder blades
+          - Maintain an upright torso with minimal lean
+          - Maintain constant tension by not letting the weight stack rest
+          - Control the weight throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Leaning back excessively and using momentum
+          - Not keeping elbows wide enough to match the grip
+          - Rounding the back during the movement
+          - Allowing the shoulders to shrug up
+          - Letting the weight stack rest between reps
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with moderate weight to adapt to the wider grip
+          - Adjust foot position to ensure knees stay slightly bent
+          - Try a narrower grip if you experience shoulder discomfort
+          - Advanced variation: pause for 2-3 seconds at peak contraction
 
   "Shrug (Machine)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Shrug (Machine)"
+        instructions: |
+          ## Overview
+          The machine shrug is an isolation exercise that primarily targets the upper trapezius. It also engages the levator scapulae and rhomboids, using a fixed movement path to provide stability and allow you to focus purely on the shrugging motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself in the shrug machine according to its design
+          - Grip the handles with both hands
+          - Stand or sit upright with your arms hanging straight down
+          - Keep your feet shoulder-width apart if standing
+          - Engage your core and maintain a neutral spine
+
+          ### 2. Movement
+          1. Elevate your shoulders straight up toward your ears
+          2. Keep your arms straight throughout the movement
+          3. Continue until your shoulders reach maximum elevation
+          4. Pause and squeeze your traps at the top
+          5. Slowly lower your shoulders back to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you elevate your shoulders
+          - Inhale as you lower your shoulders back down
+
+          ### 4. Tips
+          - Focus on lifting your shoulders straight up, not rolling them
+          - Keep your arms straight and relaxed throughout
+          - Avoid using momentum or bouncing
+          - Squeeze your traps hard at the top of each rep
+          - Maintain constant tension by not letting the weight stack rest
+
+          ### 5. Common Mistakes
+          - Rolling the shoulders instead of lifting straight up
+          - Bending the elbows during the shrug
+          - Using momentum or bouncing the weight
+          - Not achieving full range of motion
+          - Letting the weight stack rest between reps
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with moderate weight to master the straight-up shrugging motion
+          - Adjust machine settings to fit your body properly
+          - Advanced variation: pause for 2-3 seconds at the top of each rep
+          - Perform with a slow 3-5 second negative phase for increased intensity
 
   "Shrug (Smith Machine)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Shrug (Smith Machine)"
+        instructions: |
+          ## Overview
+          The Smith machine shrug is an isolation exercise that primarily targets the upper trapezius. It also engages the levator scapulae and rhomboids, using a fixed vertical bar path to provide stability and allow for heavy loading with controlled movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position the bar on a Smith machine at mid-thigh height
+          - Stand inside the machine with feet hip-width apart
+          - Grip the bar with an overhand grip, hands shoulder-width apart
+          - Unrack the bar and let it hang at arm's length
+          - Keep your arms straight and core engaged
+
+          ### 2. Movement
+          1. Elevate your shoulders straight up toward your ears
+          2. Keep your arms straight throughout the movement
+          3. Continue until your shoulders reach maximum elevation
+          4. Pause and squeeze your traps at the top
+          5. Slowly lower your shoulders back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you elevate your shoulders
+          - Inhale as you lower your shoulders back down
+
+          ### 4. Tips
+          - Focus on lifting your shoulders straight up, not rolling them
+          - Keep your arms straight and relaxed throughout
+          - Avoid using momentum or bouncing
+          - Squeeze your traps hard at the top of each rep
+          - The Smith machine's fixed path helps maintain proper form
+
+          ### 5. Common Mistakes
+          - Rolling the shoulders instead of lifting straight up
+          - Bending the elbows during the shrug
+          - Using momentum or bouncing the weight
+          - Not achieving full range of motion
+          - Looking up instead of maintaining neutral neck position
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the straight-up shrugging motion
+          - Adjust bar height to mid-thigh for optimal starting position
+          - Advanced variation: pause for 3-5 seconds at the top of each rep
+          - Use lifting straps if grip strength is limiting
 
   "Stiff Leg Deadlift (Barbell)":
     category: Barbell
     target: Back
+    i18n:
+      en:
+        name: "Stiff Leg Deadlift (Barbell)"
+        instructions: |
+          ## Overview
+          The stiff leg barbell deadlift is a hip hinge exercise that primarily targets the hamstrings and erector spinae. It also engages the glutes and lats as stabilizers, using minimal knee bend to emphasize the posterior chain and build lower back and hamstring strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a barbell with an overhand grip
+          - Position your hands just outside your legs
+          - Stand upright with the barbell at hip level
+          - Keep your chest up, shoulders back, and core engaged
+          - Maintain only a very slight bend in your knees throughout
+
+          ### 2. Movement
+          1. Hinge at the hips by pushing them back and lowering the barbell
+          2. Keep your back flat and the bar close to your legs
+          3. Keep your legs nearly straight with minimal knee bend
+          4. Lower until you feel a stretch in your hamstrings, typically mid-shin
+          5. Drive your hips forward to return to the starting position
+          6. Squeeze your glutes at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the barbell
+          - Exhale as you drive your hips forward to stand up
+
+          ### 4. Tips
+          - Keep your legs nearly straight throughout the movement
+          - Focus on the hip hinge, not squatting
+          - Keep your back flat and chest up throughout
+          - Push your hips back as far as possible
+          - Feel the stretch in your hamstrings at the bottom
+
+          ### 5. Common Mistakes
+          - Rounding the back instead of maintaining a flat spine
+          - Bending the knees too much, turning it into a Romanian deadlift
+          - Not pushing the hips back far enough
+          - Lowering the bar too far beyond the point of hamstring stretch
+          - Using too much weight and compromising form
+          - Looking up instead of maintaining neutral neck position
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the hip hinge with straight legs
+          - Progress from Romanian deadlifts if this variation feels too intense
+          - Perform with dumbbells if barbell feels unstable
+          - If you experience lower back discomfort, reduce weight and ensure proper form
 
   "Sumo Deadlift (Barbell)":
     category: Barbell
     target: Back
+    i18n:
+      en:
+        name: "Sumo Deadlift (Barbell)"
+        instructions: |
+          ## Overview
+          The sumo barbell deadlift is a compound exercise that primarily targets the glutes, hamstrings, and quadriceps with greater emphasis than conventional deadlifts. It also engages the erector spinae, lats, and adductors, using a wide stance to reduce stress on the lower back and allow for a more upright torso.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet significantly wider than shoulder-width, toes pointed outward
+          - Position the barbell over mid-foot
+          - Grip the bar with hands inside your legs, shoulder-width apart
+          - Lower your hips and keep your chest up
+          - Keep your back flat and shoulders slightly ahead of the bar
+
+          ### 2. Movement
+          1. Drive through your heels and extend your hips and knees simultaneously
+          2. Keep the bar close to your body as you lift
+          3. Stand up fully by extending your hips and pulling your shoulders back
+          4. Keep your torso more upright than in a conventional deadlift
+          5. Lower the bar by pushing your hips back and bending your knees
+          6. Return the bar to the floor with control and repeat
+
+          ### 3. Breathing
+          - Take a deep breath and brace your core before lifting
+          - Hold your breath during the lift
+          - Exhale at the top or as you lower the bar
+
+          ### 4. Tips
+          - Keep your knees tracking over your toes throughout
+          - Drive your knees outward to engage your glutes
+          - Keep the bar close to your shins and thighs
+          - Maintain a more upright torso than conventional deadlifts
+          - Focus on pushing the floor away with your legs
+
+          ### 5. Common Mistakes
+          - Not maintaining a wide enough stance
+          - Allowing the knees to cave inward
+          - Rounding the lower back during the lift
+          - Starting with hips too high or too low
+          - Letting the bar drift away from the body
+          - Not fully extending hips at the top
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the wide stance and hip mechanics
+          - Ensure your hip mobility allows for proper sumo positioning
+          - Use lifting straps if grip strength is limiting
+          - If you experience hip discomfort, adjust your stance width or foot angle
 
   "T Bar Row":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "T Bar Row"
+        instructions: |
+          ## Overview
+          The T-bar row is a compound pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the lower back, biceps, and rear deltoids, using a fixed pivot point to allow for heavy loading with a stable movement pattern.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Straddle the T-bar row machine with feet shoulder-width apart
+          - Grip the handles with both hands
+          - Hinge at the hips with your torso at about 45 degrees
+          - Keep your back flat, chest up, and core engaged
+          - Let the weight hang at arm's length
+
+          ### 2. Movement
+          1. Pull the handles toward your lower chest or upper abdomen
+          2. Drive your elbows back and up, keeping them close to your body
+          3. Continue until the handles reach your torso
+          4. Squeeze your shoulder blades together at the top
+          5. Slowly lower the weight back to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the handles toward your torso
+          - Inhale as you lower the weight back down
+
+          ### 4. Tips
+          - Keep your back flat and core tight throughout
+          - Lead with your elbows, pulling them back behind you
+          - Focus on squeezing your shoulder blades together
+          - Maintain a consistent torso angle throughout the set
+          - Keep the weight close to your body
+
+          ### 5. Common Mistakes
+          - Rounding the back instead of maintaining a flat spine
+          - Standing too upright and reducing back engagement
+          - Using momentum to swing the weight up
+          - Not achieving full range of motion
+          - Allowing the torso to rise and fall with each rep
+          - Letting the weight rest completely between reps
+
+          ### 6. Safety / Modifications
+          - Start with moderate weight to master the hinged position
+          - Use a chest-supported T-bar row if available to eliminate lower back strain
+          - Try different handle attachments for variety
+          - Advanced variation: pause for 2-3 seconds at the top of each rep
 
   "Upright Row (Barbell)":
     category: Barbell
     target: Back
+    i18n:
+      en:
+        name: "Upright Row (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell upright row is a compound pulling exercise that primarily targets the lateral deltoids and upper trapezius. It also engages the biceps, forearms, and middle trapezius, using a vertical pulling motion to build shoulder and upper back strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a barbell with an overhand grip
+          - Position your hands slightly narrower than shoulder-width apart
+          - Let the bar hang at arm's length in front of your thighs
+          - Keep your shoulders back and core engaged
+          - Maintain an upright posture throughout
+
+          ### 2. Movement
+          1. Pull the barbell upward along your body by raising your elbows
+          2. Lead with your elbows, keeping them higher than your wrists
+          3. Continue pulling until the bar reaches upper chest or chin height
+          4. Keep the bar close to your body throughout
+          5. Pause briefly at the top of the movement
+          6. Slowly lower the bar back to the starting position with control
+
+          ### 3. Breathing
+          - Exhale as you pull the barbell upward
+          - Inhale as you lower the barbell back down
+
+          ### 4. Tips
+          - Lead with your elbows, not your hands
+          - Keep the bar close to your body throughout the movement
+          - Avoid shrugging your shoulders at the top
+          - Control both the lifting and lowering phases
+          - Use a moderate grip width to protect your shoulders
+
+          ### 5. Common Mistakes
+          - Pulling too high and straining the shoulders
+          - Allowing the elbows to drop below the wrists
+          - Using momentum or swinging the body
+          - Leaning backward during the pull
+          - Using too wide a grip, which can cause shoulder impingement
+          - Moving too quickly and losing control
+
+          ### 6. Safety / Modifications
+          - Use a moderate grip width to avoid shoulder discomfort
+          - Stop at shoulder height if you experience any shoulder pain
+          - Use an EZ curl bar if straight bar causes wrist discomfort
+          - Advanced variation: perform with dumbbells for independent arm movement
 
   "Wide Pull Up":
     category: Weighted Body Weight
     target: Back
+    i18n:
+      en:
+        name: "Wide Pull Up"
+        instructions: |
+          ## Overview
+          The wide pull up is a bodyweight pulling exercise that primarily targets the latissimus dorsi with emphasis on back width. It also engages the rhomboids, middle trapezius, and biceps, using a wider grip to target the outer lats for building a wider back appearance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hang from a pull-up bar with an overhand grip, hands significantly wider than shoulder-width
+          - Allow your body to hang fully extended with arms straight
+          - Engage your core and keep your shoulders pulled down
+          - Cross your ankles or keep legs straight
+          - Avoid excessive swinging
+
+          ### 2. Movement
+          1. Pull yourself up by driving your elbows down and out to the sides
+          2. Focus on pulling with your lats rather than your arms
+          3. Continue pulling until your chin clears the bar
+          4. Keep your core tight throughout the movement
+          5. Pause briefly at the top
+          6. Slowly lower yourself back to the starting position with full arm extension
+
+          ### 3. Breathing
+          - Exhale as you pull yourself up
+          - Inhale as you lower yourself back down
+
+          ### 4. Tips
+          - Keep your elbows flared out wider due to the grip width
+          - Focus on pulling your elbows down toward your sides
+          - Lead with your chest and maintain proper posture
+          - Control the descent for maximum muscle engagement
+          - Think about bringing your elbows to your sides rather than hands to bar
+
+          ### 5. Common Mistakes
+          - Using a grip that's too wide, limiting range of motion
+          - Not achieving full range of motion at top or bottom
+          - Using momentum or kipping instead of strict form
+          - Allowing the shoulders to shrug up toward the ears
+          - Not fully extending the arms at the bottom
+          - Pulling with arms only instead of engaging the lats
+
+          ### 6. Safety / Modifications
+          - Use an assisted pull-up machine or resistance band for support
+          - Perform lat pulldowns to build foundational strength
+          - Advanced variation: add weight using a dip belt or weight vest
+          - If you experience shoulder discomfort, narrow your grip slightly
 
   "Around the World":
     category: Dumbbell
     target: Chest
+    i18n:
+      en:
+        name: "Around the World"
+        instructions: |
+          ## Overview
+          The around the world is a dynamic chest exercise that primarily targets the pectoralis major through a wide arc of motion. It also engages the front deltoids and core as stabilizers, using dumbbells to create constant tension throughout a circular movement pattern.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on a bench with your feet firmly planted on the floor
+          - Hold a dumbbell in each hand with arms extended straight up above your chest
+          - Keep a slight bend in your elbows throughout the movement
+          - Engage your core and press your back into the bench
+          - Position dumbbells with palms facing each other
+
+          ### 2. Movement
+          1. Lower the dumbbells out to the sides and down in a wide arc
+          2. Continue the arc until dumbbells are beside your hips
+          3. Reverse the motion, bringing dumbbells up and around to starting position
+          4. Keep a slight bend in your elbows throughout the circular path
+          5. Maintain control and tension on your chest muscles
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the dumbbells down and around
+          - Exhale as you bring the dumbbells back to the starting position
+
+          ### 4. Tips
+          - Keep a consistent slight bend in your elbows throughout
+          - Focus on moving the weights in a smooth, controlled arc
+          - Keep constant tension on your chest muscles
+          - Avoid locking out your elbows at any point
+          - Use lighter weight than standard chest exercises
+
+          ### 5. Common Mistakes
+          - Using too much weight and compromising the arc motion
+          - Straightening the elbows completely during the movement
+          - Moving too quickly and losing control
+          - Not maintaining constant tension on the chest
+          - Arching the lower back excessively off the bench
+          - Stopping at the bottom instead of maintaining continuous motion
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master the circular movement pattern
+          - Keep elbows slightly bent to protect the shoulder joints
+          - Perform the reverse direction for variety
+          - If you experience shoulder discomfort, reduce range of motion or weight
 
   "Bench Press (Barbell)":
     category: Barbell
     target: Chest
+    i18n:
+      en:
+        name: "Bench Press (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell bench press is a compound upper body exercise that primarily targets the pectoralis major. It also engages the front deltoids and triceps, making it one of the most effective exercises for building overall chest strength and upper body pressing power.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on a bench with your feet firmly planted on the floor
+          - Position yourself so your eyes are directly under the bar
+          - Grip the bar with hands slightly wider than shoulder-width apart
+          - Unrack the bar and hold it with arms fully extended above your chest
+          - Keep your shoulder blades retracted and pressed into the bench
+
+          ### 2. Movement
+          1. Lower the bar slowly to your mid to lower chest
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Touch the bar lightly to your chest
+          4. Pause briefly at the bottom
+          5. Press the bar back up by extending your arms
+          6. Lock out your elbows at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the bar to your chest
+          - Exhale as you press the bar back up
+
+          ### 4. Tips
+          - Keep your shoulder blades retracted throughout the movement
+          - Maintain a natural arch in your lower back
+          - Keep your feet flat and drive through them for stability
+          - Control the descent and avoid bouncing the bar off your chest
+          - Keep your wrists straight and aligned over your forearms
+
+          ### 5. Common Mistakes
+          - Bouncing the bar off the chest instead of controlled touch-and-press
+          - Allowing the elbows to flare out excessively
+          - Lifting the glutes off the bench during the press
+          - Not achieving full range of motion
+          - Using too much weight and compromising form
+          - Not keeping shoulder blades retracted
+
+          ### 6. Safety / Modifications
+          - Always use a spotter when lifting heavy weights
+          - Start with light weight to master proper form
+          - Use a wider or narrower grip based on comfort and goals
+          - Advanced variation: add chains or bands for accommodating resistance
 
   "Bench Press (Cable)":
     category: Machine

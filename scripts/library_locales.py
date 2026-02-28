@@ -101,6 +101,9 @@ class Library:
     def __post_init__(self):
         assert self.fallback_to, 'Fallback localization is required'
 
+    def __getitem__(self, item):
+        return self.exercises[item]
+
     def json_for_locale(self, locale: str) -> list[dict]:
         """
         Generates the full list of exercises for a specific locale.
