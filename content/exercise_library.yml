@@ -4644,6 +4644,53 @@ exercises:
   "Rack Pull (Barbell)":
     category: Barbell
     target: Back
+    i18n:
+      en:
+        name: "Rack Pull (Barbell)"
+        instructions: |
+          ## Overview
+          The rack pull is a partial-range deadlift that primarily targets the upper back, traps, and erector spinae. It also engages the glutes and hamstrings, using an elevated starting position to allow heavier loads and focus on the lockout portion of the deadlift.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set a barbell on a power rack at knee height or just below
+          - Stand with feet hip-width apart, barbell over mid-foot
+          - Grip the bar just outside your legs with an overhand or mixed grip
+          - Keep your chest up, back flat, and shoulders slightly ahead of the bar
+          - Engage your core and lats before lifting
+
+          ### 2. Movement
+          1. Drive through your heels and extend your hips to lift the bar
+          2. Keep the bar close to your body as you pull
+          3. Stand up fully by extending your hips and pulling your shoulders back
+          4. Squeeze your shoulder blades together at the top
+          5. Lower the bar back to the rack pins with control
+          6. Reset and repeat for controlled reps
+
+          ### 3. Breathing
+          - Take a deep breath and brace your core before each rep
+          - Exhale at the top or as you lower the bar
+
+          ### 4. Tips
+          - Keep your back flat and chest up throughout
+          - Focus on driving through your heels
+          - Pull your shoulders back at the top for full lockout
+          - Keep the bar close to your body throughout the movement
+          - Use heavier weight than your regular deadlift due to reduced range
+
+          ### 5. Common Mistakes
+          - Rounding the upper back during the pull
+          - Starting with hips too low
+          - Letting the bar drift away from the body
+          - Not fully locking out at the top
+          - Using momentum instead of controlled movement
+          - Setting the pins too high and missing the training benefit
+
+          ### 6. Safety / Modifications
+          - Start with the pins at knee height and adjust based on goals
+          - Use lifting straps if grip strength is limiting
+          - Advanced variation: perform with a deficit stance for increased range
+          - If you experience lower back discomfort, raise the pins and reduce weight
 
   "Romanian Deadlift (Barbell)":
     category: Barbell
