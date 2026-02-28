@@ -3318,6 +3318,53 @@ exercises:
   "Back Extension":
     category: Weighted Body Weight
     target: Back
+    i18n:
+      en:
+        name: "Back Extension"
+        instructions: |
+          ## Overview
+          The back extension is a bodyweight exercise that primarily targets the erector spinae and lower back muscles. It also engages the glutes and hamstrings as secondary muscles, making it effective for strengthening the posterior chain and improving spinal stability.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself face down on a back extension bench
+          - Secure your ankles under the footpads with your thighs resting on the support pad
+          - Cross your arms over your chest or place hands behind your head
+          - Begin with your torso hinged forward at approximately 90 degrees
+          - Keep your spine neutral and core engaged
+
+          ### 2. Movement
+          1. Raise your torso by contracting your lower back and glutes
+          2. Continue lifting until your body forms a straight line from head to heels
+          3. Keep your neck neutral and avoid hyperextending your spine
+          4. Pause briefly at the top position
+          5. Slowly lower your torso back down with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you raise your torso up
+          - Inhale as you lower your torso back down
+
+          ### 4. Tips
+          - Focus on engaging your lower back and glutes throughout
+          - Avoid hyperextending or arching excessively at the top
+          - Keep your core tight to protect your spine
+          - Move slowly and with control in both directions
+          - Keep your neck in a neutral position aligned with your spine
+
+          ### 5. Common Mistakes
+          - Hyperextending the spine at the top of the movement
+          - Using momentum instead of controlled muscle contraction
+          - Allowing the hips to lift off the pad
+          - Moving too quickly and losing control
+          - Arching the neck to look forward
+          - Not engaging the glutes during the movement
+
+          ### 6. Safety / Modifications
+          - Beginners can reduce range of motion until they build strength
+          - Hold a weight plate at your chest for added resistance
+          - Perform on the floor without equipment if no bench is available
+          - If you experience lower back discomfort, reduce range of motion and consult a professional
 
   "Back Extension (Machine)":
     category: Machine
