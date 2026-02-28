@@ -3829,6 +3829,53 @@ exercises:
   "Good Morning (Barbell)":
     category: Barbell
     target: Back
+    i18n:
+      en:
+        name: "Good Morning (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell good morning is a hip hinge exercise that primarily targets the erector spinae, glutes, and hamstrings. It also engages the core and upper back as stabilizers, making it effective for strengthening the posterior chain and improving hip hinge mechanics.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a barbell across your upper back as you would for a squat
+          - Stand with feet hip to shoulder-width apart
+          - Grip the bar with hands slightly wider than shoulder-width
+          - Keep your chest up, core engaged, and knees slightly bent
+          - Maintain a neutral spine throughout
+
+          ### 2. Movement
+          1. Hinge forward at the hips by pushing your hips back
+          2. Keep your back flat and core tight as you lower your torso
+          3. Continue until your torso is near parallel to the floor or you feel a stretch in your hamstrings
+          4. Maintain a slight bend in your knees throughout
+          5. Drive your hips forward to return to the starting position
+          6. Squeeze your glutes at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you hinge forward
+          - Exhale as you drive your hips forward to stand up
+
+          ### 4. Tips
+          - Focus on the hip hinge movement, not squatting
+          - Keep your back flat and chest up throughout
+          - Push your hips back as far as possible
+          - Keep the bar secure on your upper back
+          - Control the descent and avoid dropping quickly
+
+          ### 5. Common Mistakes
+          - Rounding the back instead of maintaining a flat spine
+          - Bending the knees too much, turning it into a squat
+          - Not pushing the hips back far enough
+          - Using too much weight and compromising form
+          - Moving too quickly and losing control
+          - Hyperextending the back at the top
+
+          ### 6. Safety / Modifications
+          - Start with light weight or just the bar to master the hip hinge
+          - Keep knees slightly bent to protect your hamstrings
+          - Perform with dumbbells held at your sides if barbell feels unstable
+          - If you experience lower back discomfort, reduce weight and ensure proper form
 
   "Incline Row (Dumbbell)":
     category: Dumbbell
