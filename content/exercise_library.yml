@@ -4695,6 +4695,53 @@ exercises:
   "Romanian Deadlift (Barbell)":
     category: Barbell
     target: Back
+    i18n:
+      en:
+        name: "Romanian Deadlift (Barbell)"
+        instructions: |
+          ## Overview
+          The Romanian deadlift is a hip hinge exercise that primarily targets the hamstrings, glutes, and erector spinae. It also engages the lats and traps as stabilizers, using a controlled lowering motion to emphasize the eccentric phase and build posterior chain strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a barbell with an overhand grip
+          - Position your hands just outside your legs
+          - Stand upright with the barbell at hip level
+          - Keep your chest up, shoulders back, and core engaged
+          - Maintain a slight bend in your knees throughout
+
+          ### 2. Movement
+          1. Hinge at the hips by pushing them back and lowering the barbell
+          2. Keep your back flat and the bar close to your legs
+          3. Lower until you feel a stretch in your hamstrings, typically mid-shin
+          4. Maintain a slight knee bend throughout the movement
+          5. Drive your hips forward to return to the starting position
+          6. Squeeze your glutes at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the barbell
+          - Exhale as you drive your hips forward to stand up
+
+          ### 4. Tips
+          - Focus on the hip hinge, not squatting or bending your knees
+          - Keep your back flat and chest up throughout
+          - Push your hips back as far as possible
+          - Keep the barbell close to your legs throughout
+          - Feel the stretch in your hamstrings at the bottom
+
+          ### 5. Common Mistakes
+          - Rounding the back instead of maintaining a flat spine
+          - Bending the knees too much, turning it into a squat
+          - Not pushing the hips back far enough
+          - Lowering the bar too far beyond the point of hamstring stretch
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the hip hinge pattern
+          - Keep a slight bend in your knees to protect your hamstrings
+          - Perform with dumbbells if barbell feels unstable
+          - If you experience lower back discomfort, reduce weight and ensure proper form
 
   "Seated Row (Cable)":
     category: Machine
