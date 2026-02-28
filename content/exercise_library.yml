@@ -4338,6 +4338,53 @@ exercises:
   "Lat Pulldown - Underhand (Cable)":
     category: Machine
     target: Back
+    i18n:
+      en:
+        name: "Lat Pulldown - Underhand (Cable)"
+        instructions: |
+          ## Overview
+          The underhand cable lat pulldown is a machine-based pulling exercise that primarily targets the latissimus dorsi with increased biceps activation. It also engages the rhomboids and middle trapezius, using an underhand grip to emphasize the lower lats and inner back muscles.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit at a lat pulldown station with your thighs secured under the pads
+          - Grip the bar with an underhand grip (palms facing you), hands shoulder-width apart
+          - Extend your arms fully overhead while maintaining tension on the cable
+          - Keep your chest up and shoulders down
+          - Engage your core and maintain an upright torso
+
+          ### 2. Movement
+          1. Pull the bar down toward your upper chest by driving your elbows down and back
+          2. Keep your torso upright throughout the movement
+          3. Continue until the bar reaches your upper chest or collarbone
+          4. Squeeze your shoulder blades together at the bottom
+          5. Slowly return the bar to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the bar down
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - The underhand grip allows your elbows to stay closer to your body
+          - Focus on engaging your lats, not just pulling with your biceps
+          - Keep your chest up and shoulders back throughout
+          - Maintain constant tension by not letting the weight stack rest
+          - Control the weight throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Relying too heavily on biceps instead of back muscles
+          - Leaning back excessively during the pull
+          - Not achieving full range of motion
+          - Allowing the shoulders to shrug up
+          - Letting the weight stack rest between reps
+          - Using momentum to swing the weight down
+
+          ### 6. Safety / Modifications
+          - Start with lighter weight than your overhand pulldown
+          - Adjust seat height for proper arm extension
+          - Advanced variation: pause for 2-3 seconds at the bottom of each rep
+          - Try a narrower grip for different muscle emphasis
 
   "Lat Pulldown - Wide Grip (Cable)":
     category: Machine
