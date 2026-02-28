@@ -3880,6 +3880,53 @@ exercises:
   "Incline Row (Dumbbell)":
     category: Dumbbell
     target: Back
+    i18n:
+      en:
+        name: "Incline Row (Dumbbell)"
+        instructions: |
+          ## Overview
+          The incline dumbbell row is a chest-supported pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the biceps and rear deltoids, using an incline bench to eliminate lower back strain while allowing you to focus purely on back muscle contraction.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set an adjustable bench to a 30-45 degree incline
+          - Lie face down on the bench with your chest against the pad
+          - Hold a dumbbell in each hand with arms hanging straight down
+          - Keep your feet flat on the floor for stability
+          - Engage your core and maintain a neutral spine
+
+          ### 2. Movement
+          1. Pull both dumbbells toward your hips or lower ribcage
+          2. Drive your elbows back and up, keeping them close to your body
+          3. Continue until the dumbbells reach your torso
+          4. Squeeze your shoulder blades together at the top
+          5. Slowly lower the dumbbells back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull the dumbbells up
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - Keep your chest pressed firmly against the bench
+          - Lead with your elbows, not your hands
+          - Focus on squeezing your shoulder blades together
+          - Avoid using momentum or swinging the weights
+          - Control the weight throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Lifting your chest off the bench during the row
+          - Using momentum to swing the weights up
+          - Not achieving full range of motion
+          - Allowing the elbows to flare out excessively
+          - Moving too quickly and losing control
+          - Not squeezing the shoulder blades at the top
+
+          ### 6. Safety / Modifications
+          - Start with moderate dumbbells to master the chest-supported position
+          - Adjust bench angle between 30-60 degrees for different muscle emphasis
+          - Perform one arm at a time for unilateral focus
+          - Advanced variation: pause for 2-3 seconds at the top of each rep
 
   "Inverted Row (Bodyweight)":
     category: Reps Only
