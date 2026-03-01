@@ -7807,170 +7807,2128 @@ exercises:
   "Hip Thrust (Barbell)":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Hip Thrust (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell hip thrust is an isolation exercise that primarily targets the glutes. It also engages the hamstrings and lower back, using a horizontal hip extension movement with a barbell to build powerful glute strength and muscle development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the floor with your upper back against a bench
+          - Roll a barbell over your legs and position it across your hips
+          - Use a pad or towel for comfort if needed
+          - Plant your feet flat on the floor, hip-width apart
+          - Keep your shoulders on the bench and core engaged
+
+          ### 2. Movement
+          1. Drive through your heels to lift your hips and the barbell upward
+          2. Extend your hips until your body forms a straight line from shoulders to knees
+          3. Keep your chin tucked and avoid overextending your lower back
+          4. Squeeze your glutes hard at the top of the movement
+          5. Slowly lower your hips back down with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your hips down
+          - Exhale as you drive your hips up
+
+          ### 4. Tips
+          - Focus on squeezing your glutes at the top, not arching your back
+          - Keep your ribs down and core engaged to prevent hyperextension
+          - Drive through your heels, not your toes
+          - Keep your chin tucked throughout the movement
+          - Position the barbell in the crease of your hips for optimal leverage
+
+          ### 5. Common Mistakes
+          - Hyperextending the lower back at the top instead of using glutes
+          - Positioning feet too close or too far from the body
+          - Not achieving full hip extension at the top
+          - Arching the neck to look up during the movement
+          - Using momentum instead of controlled glute contraction
+          - Not using a pad, causing discomfort and distraction
+
+          ### 6. Safety / Modifications
+          - Start with bodyweight hip thrusts to master the movement pattern
+          - Use a barbell pad or towel to protect your hips
+          - Place a resistance band around your knees to increase glute activation
+          - Advanced variation: perform single-leg barbell hip thrusts or add a pause at the top
 
   "Hip Thrust (Bodyweight)":
     category: Reps Only
     target: Legs
+    i18n:
+      en:
+        name: "Hip Thrust (Bodyweight)"
+        instructions: |
+          ## Overview
+          The bodyweight hip thrust is an isolation exercise that primarily targets the glutes. It also engages the hamstrings and lower back, using horizontal hip extension without added weight to build foundational glute strength and activation.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the floor with your upper back against a bench
+          - Position your shoulder blades on the edge of the bench
+          - Plant your feet flat on the floor, hip-width apart
+          - Keep your arms crossed over your chest or at your sides
+          - Engage your core throughout
+
+          ### 2. Movement
+          1. Drive through your heels to lift your hips upward
+          2. Extend your hips until your body forms a straight line from shoulders to knees
+          3. Keep your chin tucked and avoid overextending your lower back
+          4. Squeeze your glutes hard at the top of the movement
+          5. Slowly lower your hips back down with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your hips down
+          - Exhale as you drive your hips up
+
+          ### 4. Tips
+          - Focus on squeezing your glutes at the top, not arching your back
+          - Keep your ribs down and core engaged to prevent hyperextension
+          - Drive through your heels, not your toes
+          - Keep your chin tucked throughout the movement
+          - Control both the lifting and lowering phases
+
+          ### 5. Common Mistakes
+          - Hyperextending the lower back at the top instead of using glutes
+          - Positioning feet too close or too far from the body
+          - Not achieving full hip extension at the top
+          - Arching the neck to look up during the movement
+          - Using momentum instead of controlled glute contraction
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Master this variation before adding weight
+          - Place a resistance band around your knees to increase glute activation
+          - Elevate your feet on a step for increased range of motion
+          - Advanced variation: perform single-leg bodyweight hip thrusts or add a pause at the top
 
   "Donkey Kick (Smith Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Donkey Kick (Smith Machine)"
+        instructions: |
+          ## Overview
+          The Smith machine donkey kick is an isolation exercise that primarily targets the glutes. It also engages the hamstrings, using a fixed vertical bar path to provide stable resistance for the hip extension movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself on all fours under the Smith machine bar
+          - Place the sole of one foot against the underside of the bar
+          - Position hands directly under shoulders and knee under hip
+          - Keep your core engaged and back flat
+          - Set the bar at an appropriate starting height
+
+          ### 2. Movement
+          1. Press your foot up against the bar by extending your hip
+          2. Keep your knee bent at 90 degrees throughout
+          3. Continue until your thigh is in line with your torso or slightly higher
+          4. Squeeze your glute hard at the top of the movement
+          5. Slowly lower the bar back to the starting position with control
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you press the bar up
+          - Inhale as you lower the bar back down
+
+          ### 4. Tips
+          - Keep your core engaged and back flat throughout
+          - Focus on using your glute to drive the movement
+          - Maintain a 90-degree bend in your knee
+          - Avoid arching your lower back excessively
+          - Keep your hips square to the floor
+
+          ### 5. Common Mistakes
+          - Arching the lower back excessively to lift higher
+          - Rotating the hips instead of keeping them square
+          - Using momentum instead of controlled glute contraction
+          - Straightening the working leg during the movement
+          - Not achieving full hip extension
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with light weight or just the bar to master the movement
+          - Adjust starting bar height for comfortable range of motion
+          - Keep your supporting knee padded for comfort
+          - Advanced variation: pause for 2-3 seconds at the top of each rep
 
   "Donkey Kick":
     category: Weighted Body Weight
     target: Legs
+    i18n:
+      en:
+        name: "Donkey Kick"
+        instructions: |
+          ## Overview
+          The donkey kick is a bodyweight isolation exercise that primarily targets the glutes. It also engages the hamstrings and core, using a kicking motion from an all-fours position to activate and strengthen the glute muscles.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Start on all fours with hands directly under shoulders
+          - Position knees directly under hips
+          - Keep your core engaged and back flat
+          - Maintain a neutral spine throughout
+          - Keep your head aligned with your spine
+
+          ### 2. Movement
+          1. Lift one leg by extending your hip while keeping knee bent at 90 degrees
+          2. Press your heel toward the ceiling as if stamping upward
+          3. Continue until your thigh is in line with your torso or slightly higher
+          4. Squeeze your glute hard at the top of the movement
+          5. Slowly lower your knee back to the starting position with control
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you kick your leg up
+          - Inhale as you lower your leg back down
+
+          ### 4. Tips
+          - Keep your core engaged and back flat throughout
+          - Focus on using your glute to drive the movement
+          - Maintain a 90-degree bend in your knee
+          - Avoid arching your lower back excessively
+          - Keep your hips square to the floor
+
+          ### 5. Common Mistakes
+          - Arching the lower back excessively to lift higher
+          - Rotating the hips instead of keeping them square
+          - Using momentum instead of controlled glute contraction
+          - Straightening the working leg during the movement
+          - Not achieving full hip extension
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Use a mat or padding under your knees for comfort
+          - Add ankle weights or resistance band for increased difficulty
+          - Perform slower tempo reps for greater muscle engagement
+          - Advanced variation: add a pulse at the top or hold for 2-3 seconds
 
   "Fire Hydrant":
     category: Weighted Body Weight
     target: Legs
+    i18n:
+      en:
+        name: "Fire Hydrant"
+        instructions: |
+          ## Overview
+          The fire hydrant is a bodyweight isolation exercise that primarily targets the gluteus medius and minimus. It also engages the hip abductors and core stabilizers, using a lateral leg lift from an all-fours position to strengthen the outer hip and improve hip stability.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Start on all fours with hands directly under shoulders
+          - Position knees directly under hips
+          - Keep your core engaged and back flat
+          - Maintain a neutral spine throughout
+          - Keep your head aligned with your spine
+
+          ### 2. Movement
+          1. Lift one knee out to the side while keeping it bent at 90 degrees
+          2. Raise your leg until your thigh is parallel to the floor or as high as comfortable
+          3. Keep your hips square and avoid rotating your torso
+          4. Pause and squeeze your outer glute at the top
+          5. Slowly lower your knee back to the starting position with control
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you lift your leg out to the side
+          - Inhale as you lower your leg back down
+
+          ### 4. Tips
+          - Keep your core engaged and back flat throughout
+          - Focus on using your outer hip muscles to lift the leg
+          - Maintain a 90-degree bend in your knee
+          - Avoid rotating your hips or torso during the movement
+          - Keep your supporting arm and leg stable
+
+          ### 5. Common Mistakes
+          - Rotating the hips or torso instead of keeping them square
+          - Arching or rounding the lower back
+          - Using momentum instead of controlled movement
+          - Not maintaining the 90-degree knee bend
+          - Lifting the leg too high and losing form
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Use a mat or padding under your knees and hands for comfort
+          - Add ankle weights or resistance band for increased difficulty
+          - Perform with small pulses at the top for increased burn
+          - Advanced variation: hold for 2-3 seconds at the top of each rep
 
   "Jump Squat":
     category: Reps Only
     target: Legs
+    i18n:
+      en:
+        name: "Jump Squat"
+        instructions: |
+          ## Overview
+          The jump squat is a plyometric exercise that primarily targets the quadriceps, glutes, and calves. It also engages the hamstrings and core, using explosive jumping from a squat position to build lower body power and cardiovascular endurance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart
+          - Keep your chest up and core engaged
+          - Position your arms at your sides or in front of you
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Lower into a squat by bending your knees and hips
+          2. Descend until thighs are at least parallel to the floor
+          3. Explosively jump upward, extending through your hips, knees, and ankles
+          4. Swing your arms upward to generate momentum
+          5. Land softly with bent knees to absorb the impact
+          6. Immediately descend into the next squat and repeat
+
+          ### 3. Breathing
+          - Inhale as you descend into the squat
+          - Exhale explosively as you jump
+
+          ### 4. Tips
+          - Focus on explosive power when jumping upward
+          - Land softly with bent knees to absorb impact
+          - Keep your chest up throughout the movement
+          - Use your arms to generate momentum
+          - Maintain control throughout the entire movement
+
+          ### 5. Common Mistakes
+          - Landing with straight legs, increasing injury risk
+          - Not descending low enough before jumping
+          - Allowing the knees to cave inward during landing
+          - Using momentum without control
+          - Not fully extending during the jump phase
+          - Landing too heavily instead of softly
+
+          ### 6. Safety / Modifications
+          - Start with bodyweight squats to master form before adding jumps
+          - Perform on a softer surface to reduce impact
+          - Reduce jump height if experiencing knee or ankle discomfort
+          - Advanced variation: add a weighted vest or hold dumbbells
 
   "Lateral Box Jump":
     category: Reps Only
     target: Legs
+    i18n:
+      en:
+        name: "Lateral Box Jump"
+        instructions: |
+          ## Overview
+          The lateral box jump is a plyometric exercise that primarily targets the quadriceps, glutes, and calves. It also engages the hip abductors and core stabilizers, using lateral explosive jumping to build lower body power, coordination, and lateral athleticism.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand beside a sturdy box or platform with feet hip-width apart
+          - Position yourself about one foot away from the box
+          - Keep your chest up and core engaged
+          - Bend your knees slightly and prepare for a lateral jump
+          - Keep your arms ready to generate momentum
+
+          ### 2. Movement
+          1. Swing your arms and explosively jump laterally onto the box
+          2. Land softly on the box with both feet simultaneously
+          3. Absorb the impact by landing in a partial squat position
+          4. Stand up fully on top of the box
+          5. Step down on the opposite side of the box
+          6. Immediately jump back laterally to the starting side and repeat
+
+          ### 3. Breathing
+          - Inhale during the preparatory phase
+          - Exhale explosively as you jump
+
+          ### 4. Tips
+          - Focus on explosive lateral power from your legs
+          - Land softly with bent knees to absorb impact
+          - Keep your chest up and eyes on the box
+          - Use your arms to generate lateral momentum
+          - Start with a lower box height and progress gradually
+
+          ### 5. Common Mistakes
+          - Landing with straight legs, increasing injury risk
+          - Using a box that's too high for your current ability
+          - Not landing with both feet simultaneously
+          - Jumping down instead of stepping down
+          - Losing balance during the lateral jump
+          - Rushing reps without proper reset between jumps
+
+          ### 6. Safety / Modifications
+          - Start with a low, stable box (12-18 inches) to master technique
+          - Ensure the box is stable and won't slip or tip
+          - Practice lateral jumps on the floor before adding box height
+          - Advanced variation: increase box height or perform continuous lateral jumps without pausing
 
   "Leg Extension (Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Leg Extension (Machine)"
+        instructions: |
+          ## Overview
+          The machine leg extension is an isolation exercise that primarily targets the quadriceps. It uses a guided movement path with adjustable resistance to isolate and strengthen the four muscles of the front thigh.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the leg extension machine with your back firmly against the pad
+          - Adjust the pad so your knees align with the machine's pivot point
+          - Position your ankles behind the lower pad
+          - Grip the handles at your sides for stability
+          - Keep your core engaged throughout
+
+          ### 2. Movement
+          1. Extend your legs by contracting your quadriceps
+          2. Continue until your legs are fully extended
+          3. Pause and squeeze your quads at full extension
+          4. Slowly lower the weight back to the starting position with control
+          5. Stop just before the weight stack touches to maintain tension
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you extend your legs
+          - Inhale as you lower the weight back down
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - Focus on squeezing your quadriceps at full extension
+          - Control both the extending and lowering phases
+          - Maintain constant tension by not letting the weight stack rest
+          - Point your toes straight ahead or slightly upward
+
+          ### 5. Common Mistakes
+          - Lifting your glutes off the seat during extension
+          - Using momentum or swinging the weight
+          - Not achieving full knee extension at the top
+          - Letting the weight stack rest between reps
+          - Moving too quickly through the repetitions
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Adjust seat and pad positions for proper knee alignment
+          - Start with light weight to establish proper form
+          - Avoid this exercise if you have knee issues; consult a professional
+          - Advanced variation: perform one leg at a time or add a pause at extension
 
   "Leg Press":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Leg Press"
+        instructions: |
+          ## Overview
+          The leg press is a compound lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It uses a guided machine to provide stable resistance while allowing for heavy loading with reduced stress on the lower back compared to free weight squats.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit in the leg press machine with your back and hips firmly against the pads
+          - Position your feet shoulder-width apart on the platform
+          - Keep your feet flat with toes pointing slightly outward
+          - Unlock the safety handles
+          - Keep your core engaged and hands on the handles
+
+          ### 2. Movement
+          1. Lower the platform by bending your knees toward your chest
+          2. Continue until your knees reach approximately 90 degrees
+          3. Pause briefly at the bottom
+          4. Drive through your heels to press the platform back up
+          5. Extend your legs without locking your knees completely
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the platform down
+          - Exhale as you press the platform back up
+
+          ### 4. Tips
+          - Keep your back and hips pressed firmly against the pads
+          - Drive through your entire foot, not just your toes
+          - Avoid locking your knees completely at full extension
+          - Keep your knees tracking over your toes
+          - Maintain constant tension throughout the movement
+
+          ### 5. Common Mistakes
+          - Lifting your glutes or lower back off the pad
+          - Locking knees completely at full extension
+          - Allowing the knees to cave inward
+          - Not achieving adequate depth (at least 90 degrees)
+          - Using too much weight and compromising form
+          - Placing feet too low on the platform, increasing knee stress
+
+          ### 6. Safety / Modifications
+          - Adjust foot position (higher, lower, wider, narrower) to target different muscles
+          - Never lock out your knees completely to protect the joint
+          - Start with moderate weight to master proper form
+          - Advanced variation: perform single-leg leg press or add a pause at the bottom
 
   "Lunge (Barbell)":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Lunge (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell lunge is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and stabilizer muscles, using a barbell across the upper back to add resistance while challenging balance and coordination.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a barbell across your upper back as you would for a squat
+          - Stand with feet hip-width apart
+          - Keep your chest up, core engaged, and eyes forward
+          - Grip the bar with hands slightly wider than shoulder-width
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Step forward with one leg into a long stride
+          2. Lower your hips by bending both knees
+          3. Continue until your front thigh is parallel to the floor
+          4. Keep your front knee aligned over your ankle
+          5. Push through your front heel to return to standing position
+          6. Repeat on the same leg or alternate legs for desired reps
+
+          ### 3. Breathing
+          - Inhale as you step forward and lower down
+          - Exhale as you push back to standing
+
+          ### 4. Tips
+          - Keep your torso upright throughout the movement
+          - Ensure your front knee doesn't extend past your toes
+          - Push through your front heel, not your toes
+          - Take a long enough stride to maintain balance
+          - Keep the barbell stable on your upper back
+
+          ### 5. Common Mistakes
+          - Leaning too far forward during the lunge
+          - Allowing the front knee to cave inward
+          - Taking too short a stride, causing knee stress
+          - Not achieving adequate depth
+          - Letting the back knee slam into the floor
+          - Losing balance or wobbling during the movement
+
+          ### 6. Safety / Modifications
+          - Start with bodyweight lunges to master balance before adding a barbell
+          - Perform walking lunges to maintain momentum
+          - Use dumbbells instead if barbell feels unstable
+          - Advanced variation: add a deficit by stepping onto a platform with your front foot
 
   "Lunge (Bodyweight)":
     category: Reps Only
     target: Legs
+    i18n:
+      en:
+        name: "Lunge (Bodyweight)"
+        instructions: |
+          ## Overview
+          The bodyweight lunge is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and stabilizer muscles, using body weight alone to build foundational single-leg strength, balance, and coordination.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart
+          - Keep your chest up, core engaged, and eyes forward
+          - Place your hands on your hips or at your sides
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Step forward with one leg into a long stride
+          2. Lower your hips by bending both knees
+          3. Continue until your front thigh is parallel to the floor
+          4. Keep your front knee aligned over your ankle
+          5. Push through your front heel to return to standing position
+          6. Repeat on the same leg or alternate legs for desired reps
+
+          ### 3. Breathing
+          - Inhale as you step forward and lower down
+          - Exhale as you push back to standing
+
+          ### 4. Tips
+          - Keep your torso upright throughout the movement
+          - Ensure your front knee doesn't extend past your toes
+          - Push through your front heel, not your toes
+          - Take a long enough stride to maintain balance
+          - Focus on controlled movement in both directions
+
+          ### 5. Common Mistakes
+          - Leaning too far forward during the lunge
+          - Allowing the front knee to cave inward
+          - Taking too short a stride, causing knee stress
+          - Not achieving adequate depth
+          - Letting the back knee slam into the floor
+          - Using momentum instead of controlled movement
+
+          ### 6. Safety / Modifications
+          - Hold onto a support for balance initially
+          - Perform walking lunges to maintain momentum
+          - Reduce range of motion if you experience knee discomfort
+          - Advanced variation: add dumbbells, jump lunges, or walking lunges
 
   "Lunge (Dumbbell)":
     category: Dumbbell
     target: Legs
+    i18n:
+      en:
+        name: "Lunge (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell lunge is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and stabilizer muscles, using dumbbells held at the sides to add resistance while maintaining better balance than barbell variations.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a dumbbell in each hand
+          - Let the dumbbells hang at your sides with arms straight
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Step forward with one leg into a long stride
+          2. Lower your hips by bending both knees
+          3. Continue until your front thigh is parallel to the floor
+          4. Keep your front knee aligned over your ankle
+          5. Push through your front heel to return to standing position
+          6. Repeat on the same leg or alternate legs for desired reps
+
+          ### 3. Breathing
+          - Inhale as you step forward and lower down
+          - Exhale as you push back to standing
+
+          ### 4. Tips
+          - Keep your torso upright throughout the movement
+          - Ensure your front knee doesn't extend past your toes
+          - Push through your front heel, not your toes
+          - Let the dumbbells hang naturally at your sides
+          - Take a long enough stride to maintain balance
+
+          ### 5. Common Mistakes
+          - Leaning too far forward during the lunge
+          - Allowing the front knee to cave inward
+          - Taking too short a stride, causing knee stress
+          - Not achieving adequate depth
+          - Letting the back knee slam into the floor
+          - Swinging the dumbbells for momentum
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master balance and form
+          - Perform walking lunges to maintain momentum
+          - Hold one dumbbell to work on single-side stability
+          - Advanced variation: add a deficit, perform jump lunges, or increase dumbbell weight
 
   "Step-Back Lunge":
     category: Dumbbell
     target: Legs
+    i18n:
+      en:
+        name: "Step-Back Lunge"
+        instructions: |
+          ## Overview
+          The step-back lunge is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and stabilizers, using a backward stepping motion that reduces knee stress compared to forward lunges while building single-leg strength and balance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding dumbbells at your sides
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Step backward with one leg into a long stride
+          2. Lower your hips by bending both knees
+          3. Continue until your front thigh is parallel to the floor
+          4. Keep your front knee aligned over your ankle
+          5. Push through your front heel to return to standing position
+          6. Repeat on the same leg or alternate legs for desired reps
+
+          ### 3. Breathing
+          - Inhale as you step back and lower down
+          - Exhale as you push back to standing
+
+          ### 4. Tips
+          - Keep your torso upright throughout the movement
+          - The backward step is often easier on the knees than forward lunges
+          - Push through your front heel to return to standing
+          - Take a long enough stride to maintain balance
+          - Let the dumbbells hang naturally at your sides
+
+          ### 5. Common Mistakes
+          - Leaning too far forward during the lunge
+          - Allowing the front knee to cave inward
+          - Taking too short a stride backward
+          - Not achieving adequate depth
+          - Letting the back knee slam into the floor
+          - Using momentum instead of controlled movement
+
+          ### 6. Safety / Modifications
+          - Start with bodyweight to master the backward stepping motion
+          - This variation is often better for those with knee concerns
+          - Hold one dumbbell to work on single-side stability
+          - Advanced variation: add a knee drive at the top or increase dumbbell weight
 
   "Lying Leg Curl (Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Lying Leg Curl (Machine)"
+        instructions: |
+          ## Overview
+          The lying leg curl is an isolation exercise that primarily targets the hamstrings. It also engages the calves, using a guided machine to isolate and strengthen the muscles on the back of the thigh through knee flexion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie face down on the leg curl machine
+          - Position the pad against the back of your lower legs, just above your ankles
+          - Align your knees with the machine's pivot point
+          - Grip the handles for stability
+          - Keep your hips pressed down against the bench
+
+          ### 2. Movement
+          1. Curl your legs up by bending your knees
+          2. Continue until the pad nearly touches your glutes
+          3. Pause and squeeze your hamstrings at full flexion
+          4. Slowly lower the weight back to the starting position with control
+          5. Stop just before the weight stack touches to maintain tension
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you curl your legs up
+          - Inhale as you lower the weight back down
+
+          ### 4. Tips
+          - Keep your hips pressed firmly against the bench
+          - Focus on squeezing your hamstrings at full flexion
+          - Control both the curling and lowering phases
+          - Maintain constant tension by not letting the weight stack rest
+          - Avoid using momentum or swinging your legs
+
+          ### 5. Common Mistakes
+          - Lifting your hips off the bench during the curl
+          - Using momentum or swinging the weight up
+          - Not achieving full range of motion
+          - Letting the weight stack rest between reps
+          - Moving too quickly through the repetitions
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Adjust pad position to ensure proper knee alignment
+          - Start with light weight to establish proper form
+          - Point your toes forward, inward, or outward to emphasize different hamstring areas
+          - Advanced variation: perform one leg at a time or add a pause at full flexion
 
   "Mountain Climber":
     category: Reps Only
     target: Legs
+    i18n:
+      en:
+        name: "Mountain Climber"
+        instructions: |
+          ## Overview
+          The mountain climber is a dynamic full-body exercise that primarily targets the core, hip flexors, and shoulders. It also engages the quadriceps and cardiovascular system, using a running motion from a plank position to build endurance, coordination, and core stability.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Begin in a high plank position with hands directly under shoulders
+          - Keep your body in a straight line from head to heels
+          - Engage your core and keep your hips level
+          - Position your feet hip-width apart
+
+          ### 2. Movement
+          1. Drive one knee toward your chest in a running motion
+          2. Quickly switch legs by extending the bent leg back and bringing the other knee forward
+          3. Continue alternating legs in a rhythmic running motion
+          4. Keep your core tight and hips level throughout
+          5. Maintain a steady pace or increase speed for intensity
+          6. Continue for the desired number of reps or time
+
+          ### 3. Breathing
+          - Breathe rhythmically and steadily throughout the movement
+          - Avoid holding your breath
+
+          ### 4. Tips
+          - Keep your core engaged to prevent hips from sagging or piking
+          - Maintain a plank position throughout the movement
+          - Focus on bringing knees toward chest, not just moving legs
+          - Start slowly to master form before increasing speed
+          - Keep your hands firmly planted and shoulders stable
+
+          ### 5. Common Mistakes
+          - Allowing the hips to sag or pike upward
+          - Bouncing the hips up and down with each rep
+          - Not bringing knees far enough toward the chest
+          - Letting the shoulders round forward
+          - Moving too quickly and losing form
+          - Holding your breath during the exercise
+
+          ### 6. Safety / Modifications
+          - Start with slow mountain climbers to master form
+          - Elevate your hands on a bench for an easier variation
+          - Perform slow and controlled reps for increased core engagement
+          - Advanced variation: add a twist by bringing knee to opposite elbow or increase speed
 
   "Pistol Squat":
     category: Weighted Body Weight
     target: Legs
+    i18n:
+      en:
+        name: "Pistol Squat"
+        instructions: |
+          ## Overview
+          The pistol squat is an advanced unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core, hip flexors, and balance stabilizers, using a single-leg squat to full depth to build exceptional leg strength, mobility, and balance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand on one leg with the other leg extended straight in front of you
+          - Keep your chest up, core engaged, and arms extended forward for balance
+          - Maintain good posture and focus on a point ahead
+
+          ### 2. Movement
+          1. Lower yourself by bending your standing knee and hip
+          2. Keep your extended leg straight and parallel to the floor
+          3. Continue descending as low as possible while maintaining balance
+          4. Keep your heel on the ground and chest up
+          5. Drive through your heel to return to standing position
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Inhale as you lower yourself down
+          - Exhale as you drive back up to standing
+
+          ### 4. Tips
+          - This exercise requires significant strength, mobility, and balance
+          - Keep your chest up and core tight throughout
+          - Your extended leg should remain straight and off the ground
+          - Focus on controlled movement in both directions
+          - Use your arms for counterbalance
+
+          ### 5. Common Mistakes
+          - Not achieving adequate depth due to mobility limitations
+          - Allowing the knee to cave inward
+          - Losing balance and putting the extended leg down
+          - Rounding the back or leaning too far forward
+          - Not keeping the extended leg straight
+          - Attempting pistol squats before building adequate strength
+
+          ### 6. Safety / Modifications
+          - Build up to pistol squats with assisted variations first
+          - Hold onto a support for balance assistance
+          - Perform box pistol squats (sitting back to a box)
+          - Start with elevated pistol squats (standing on a step)
+          - If you experience knee discomfort, improve mobility before progressing
 
   "Romanian Deadlift (Dumbbell)":
     category: Dumbbell
     target: Legs
+    i18n:
+      en:
+        name: "Romanian Deadlift (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell Romanian deadlift is a hip hinge exercise that primarily targets the hamstrings, glutes, and erector spinae. It also engages the lats and traps as stabilizers, using dumbbells for independent arm movement and a more natural hand position while emphasizing the eccentric phase.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a dumbbell in each hand
+          - Position dumbbells in front of your thighs with palms facing your body
+          - Stand upright with chest up, shoulders back, and core engaged
+          - Maintain a slight bend in your knees throughout
+
+          ### 2. Movement
+          1. Hinge at the hips by pushing them back and lowering the dumbbells
+          2. Keep your back flat and dumbbells close to your legs
+          3. Lower until you feel a stretch in your hamstrings, typically mid-shin
+          4. Maintain a slight knee bend throughout the movement
+          5. Drive your hips forward to return to the starting position
+          6. Squeeze your glutes at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the dumbbells
+          - Exhale as you drive your hips forward to stand up
+
+          ### 4. Tips
+          - Focus on the hip hinge, not squatting or bending your knees
+          - Keep your back flat and chest up throughout
+          - Push your hips back as far as possible
+          - Keep the dumbbells close to your legs throughout
+          - Feel the stretch in your hamstrings at the bottom
+
+          ### 5. Common Mistakes
+          - Rounding the back instead of maintaining a flat spine
+          - Bending the knees too much, turning it into a squat
+          - Not pushing the hips back far enough
+          - Lowering the dumbbells too far beyond the point of hamstring stretch
+          - Using too much weight and compromising form
+          - Looking up instead of maintaining neutral neck position
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master the hip hinge pattern
+          - Keep a slight bend in your knees to protect your hamstrings
+          - The dumbbell variation allows for a more natural grip than barbells
+          - If you experience lower back discomfort, reduce weight and ensure proper form
 
   "Seated Calf Raise (Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Seated Calf Raise (Machine)"
+        instructions: |
+          ## Overview
+          The seated calf raise is an isolation exercise that primarily targets the soleus muscle of the calf. It also engages the gastrocnemius, using a seated position with bent knees to emphasize the soleus for complete calf development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the seated calf raise machine with the pad resting on your lower thighs
+          - Position the balls of your feet on the platform with heels hanging off
+          - Adjust the pad height so it rests comfortably on your thighs
+          - Release the safety lever
+          - Keep your knees bent at 90 degrees throughout
+
+          ### 2. Movement
+          1. Lower your heels by flexing your ankles as far as possible
+          2. Allow a full stretch in your calves at the bottom
+          3. Pause briefly at the bottom stretch position
+          4. Press through the balls of your feet to raise your heels as high as possible
+          5. Squeeze your calves hard at the top
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your heels
+          - Exhale as you press up onto your toes
+
+          ### 4. Tips
+          - Keep your knees stationary and bent throughout
+          - The seated position emphasizes the soleus muscle
+          - Achieve full range of motion from deep stretch to high contraction
+          - Focus on squeezing your calves at the top
+          - Control the weight throughout both phases
+
+          ### 5. Common Mistakes
+          - Not achieving full range of motion at top or bottom
+          - Bouncing at the bottom instead of controlled stretch
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+          - Not squeezing at the top contraction
+          - Extending or moving the knees during the movement
+
+          ### 6. Safety / Modifications
+          - Adjust pad height for comfort and proper positioning
+          - Vary foot position (neutral, toes in, toes out) for complete calf development
+          - Combine with standing calf raises for comprehensive calf training
+          - Advanced variation: pause for 2-3 seconds at peak contraction
 
   "Seated Calf Raise (Plate Loaded)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Seated Calf Raise (Plate Loaded)"
+        instructions: |
+          ## Overview
+          The plate-loaded seated calf raise is an isolation exercise that primarily targets the soleus muscle of the calf. It also engages the gastrocnemius, using weight plates placed on the thighs in a seated position to emphasize the soleus for complete calf development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on a bench with a step or platform in front of you
+          - Position the balls of your feet on the edge of the step with heels hanging off
+          - Place a weight plate or barbell across your lower thighs
+          - Hold the weight in place with your hands
+          - Keep your knees bent at 90 degrees throughout
+
+          ### 2. Movement
+          1. Lower your heels by flexing your ankles as far as possible
+          2. Allow a full stretch in your calves at the bottom
+          3. Pause briefly at the bottom stretch position
+          4. Press through the balls of your feet to raise your heels as high as possible
+          5. Squeeze your calves hard at the top
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your heels
+          - Exhale as you press up onto your toes
+
+          ### 4. Tips
+          - Keep your knees stationary and bent throughout
+          - The seated position emphasizes the soleus muscle
+          - Achieve full range of motion from deep stretch to high contraction
+          - Focus on squeezing your calves at the top
+          - Use a towel or pad for comfort under the weight
+
+          ### 5. Common Mistakes
+          - Not achieving full range of motion at top or bottom
+          - Bouncing at the bottom instead of controlled stretch
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+          - Not squeezing at the top contraction
+          - Letting the weight shift or become unstable
+
+          ### 6. Safety / Modifications
+          - Use a pad or towel under the weight for thigh comfort
+          - Start with light weight to establish proper form
+          - Vary foot position (neutral, toes in, toes out) for complete calf development
+          - Advanced variation: pause for 2-3 seconds at peak contraction
 
   "Seated Leg Curl (Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Seated Leg Curl (Machine)"
+        instructions: |
+          ## Overview
+          The seated leg curl is an isolation exercise that primarily targets the hamstrings. It also engages the calves, using a seated position with a guided machine to isolate and strengthen the muscles on the back of the thigh through knee flexion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the leg curl machine with your back firmly against the pad
+          - Position the pad against the back of your lower legs, just above your ankles
+          - Adjust the machine so your knees align with the pivot point
+          - Grip the handles for stability
+          - Keep your thighs secured under the thigh pad
+
+          ### 2. Movement
+          1. Curl your legs down and back by bending your knees
+          2. Continue until the pad nearly touches the back of the seat
+          3. Pause and squeeze your hamstrings at full flexion
+          4. Slowly return the weight to the starting position with control
+          5. Stop just before the weight stack touches to maintain tension
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you curl your legs down
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - Focus on squeezing your hamstrings at full flexion
+          - Control both the curling and extending phases
+          - Maintain constant tension by not letting the weight stack rest
+          - Avoid using momentum or jerking the weight
+
+          ### 5. Common Mistakes
+          - Lifting your glutes off the seat during the curl
+          - Using momentum or swinging the weight
+          - Not achieving full range of motion
+          - Letting the weight stack rest between reps
+          - Moving too quickly through the repetitions
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Adjust pad and seat positions for proper knee alignment
+          - Start with light weight to establish proper form
+          - The seated position may be more comfortable than lying variations
+          - Advanced variation: perform one leg at a time or add a pause at full flexion
 
   "Seated Leg Press (Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Seated Leg Press (Machine)"
+        instructions: |
+          ## Overview
+          The seated leg press is a compound lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It uses a seated machine with a more upright back position than traditional leg press machines, providing stable resistance with reduced lower back stress.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit in the seated leg press machine with your back firmly against the pad
+          - Position your feet shoulder-width apart on the platform
+          - Keep your feet flat with toes pointing slightly outward
+          - Unlock the safety handles if present
+          - Keep your core engaged and hands on the handles
+
+          ### 2. Movement
+          1. Press the platform forward by extending your legs
+          2. Continue until your legs are fully extended without locking your knees
+          3. Pause briefly at full extension
+          4. Slowly bend your knees to return the platform to the starting position
+          5. Continue until your knees reach approximately 90 degrees
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you press the platform forward
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your back and hips pressed firmly against the pads
+          - Drive through your entire foot, not just your toes
+          - Avoid locking your knees completely at full extension
+          - Keep your knees tracking over your toes
+          - Maintain constant tension throughout the movement
+
+          ### 5. Common Mistakes
+          - Lifting your glutes or lower back off the pad
+          - Locking knees completely at full extension
+          - Allowing the knees to cave inward
+          - Not achieving adequate depth (at least 90 degrees)
+          - Using too much weight and compromising form
+          - Placing feet too low on the platform, increasing knee stress
+
+          ### 6. Safety / Modifications
+          - Adjust foot position (higher, lower, wider, narrower) to target different muscles
+          - Never lock out your knees completely to protect the joint
+          - Start with moderate weight to master proper form
+          - Advanced variation: perform single-leg seated leg press or add a pause at the bottom
 
   "Single Leg Bridge":
     category: Weighted Body Weight
     target: Legs
+    i18n:
+      en:
+        name: "Single Leg Bridge"
+        instructions: |
+          ## Overview
+          The single leg bridge is a unilateral bodyweight exercise that primarily targets the glutes and hamstrings. It also engages the core and hip stabilizers, using a single-leg position to build glute strength, address imbalances, and improve hip stability.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on your back with knees bent and feet flat on the floor
+          - Position your feet hip-width apart near your glutes
+          - Extend one leg straight out, keeping it in line with your thigh
+          - Keep your arms at your sides on the floor
+          - Engage your core throughout
+
+          ### 2. Movement
+          1. Drive through the heel of your planted foot to lift your hips upward
+          2. Raise your hips until your body forms a straight line from shoulders to knees
+          3. Keep your extended leg straight and in line with your working thigh
+          4. Squeeze your glute hard at the top of the movement
+          5. Slowly lower your hips back down with control
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Inhale as you lower your hips down
+          - Exhale as you drive your hips up
+
+          ### 4. Tips
+          - Focus on squeezing your glute at the top, not arching your back
+          - Keep your hips level throughout the movement
+          - Drive through your heel, not your toes
+          - Keep your extended leg straight and engaged
+          - Control both the lifting and lowering phases
+
+          ### 5. Common Mistakes
+          - Hyperextending the lower back at the top instead of using glutes
+          - Allowing the hips to rotate or tilt to one side
+          - Not achieving full hip extension at the top
+          - Pushing through the toes instead of the heel
+          - Bending the extended leg during the movement
+          - Moving too quickly and losing control
+
+          ### 6. Safety / Modifications
+          - Master regular glute bridges before progressing to single leg
+          - Place your hands on your hips to check for level hips
+          - Reduce range of motion if you experience lower back discomfort
+          - Advanced variation: elevate your foot on a bench or add a pause at the top
 
   "Squat (Band)":
     category: Weighted Body Weight
     target: Legs
+    i18n:
+      en:
+        name: "Squat (Band)"
+        instructions: |
+          ## Overview
+          The band squat is a resistance-based compound exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core, using progressive band resistance to teach proper squat mechanics with lighter loading and constant tension.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart, stepping on the center of a resistance band
+          - Hold the band handles at shoulder height or loop the band over your shoulders
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Initiate the squat by bending your knees and hips simultaneously
+          2. Keep your chest up and weight on your heels
+          3. Descend until thighs are at least parallel to the floor
+          4. Pause briefly at the bottom
+          5. Drive through your heels to return to standing position
+          6. Fully extend your hips and knees at the top, then repeat
+
+          ### 3. Breathing
+          - Inhale as you descend into the squat
+          - Exhale as you drive back up to standing
+
+          ### 4. Tips
+          - The band provides increasing resistance as you stand
+          - Keep your knees tracking over your toes
+          - Maintain an upright torso throughout
+          - Drive through your entire foot, not just your toes
+          - Focus on controlled movement in both directions
+
+          ### 5. Common Mistakes
+          - Allowing the knees to cave inward
+          - Not achieving adequate depth
+          - Rising onto your toes instead of keeping weight on heels
+          - Rounding the back during descent
+          - Using momentum instead of controlled movement
+          - Not maintaining constant tension on the band
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master the movement pattern
+          - Adjust foot position on the band to modify resistance
+          - Use this variation to learn squat mechanics before progressing to barbells
+          - Advanced variation: use a heavier resistance band or add a pause at the bottom
 
   "Squat (Barbell)":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Squat (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell squat is a compound lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core, lower back, and upper back, making it one of the most effective full-body strength exercises for building overall lower body power.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a barbell in a rack at upper chest height
+          - Step under the bar and position it across your upper back (high bar) or lower on your rear delts (low bar)
+          - Grip the bar with hands slightly wider than shoulder-width
+          - Unrack the bar and step back with feet shoulder-width apart
+          - Keep your chest up, core engaged, and eyes forward
+
+          ### 2. Movement
+          1. Initiate the squat by bending your knees and hips simultaneously
+          2. Keep your chest up and weight on your heels
+          3. Descend until thighs are at least parallel to the floor
+          4. Maintain a neutral spine throughout the movement
+          5. Drive through your heels to return to standing position
+          6. Fully extend your hips and knees at the top, then repeat
+
+          ### 3. Breathing
+          - Take a deep breath and brace your core before descending
+          - Hold your breath during the descent and bottom position
+          - Exhale as you drive back up or at the top
+
+          ### 4. Tips
+          - Keep your knees tracking over your toes
+          - Maintain an upright torso throughout
+          - Drive through your entire foot, not just your toes
+          - Keep the bar path vertical over mid-foot
+          - Focus on controlled descent and explosive ascent
+
+          ### 5. Common Mistakes
+          - Allowing the knees to cave inward
+          - Not achieving adequate depth (at least parallel)
+          - Rising onto your toes instead of keeping weight on heels
+          - Rounding the back or losing neutral spine
+          - Letting the bar drift forward during descent
+          - Using too much weight before mastering form
+
+          ### 6. Safety / Modifications
+          - Always use safety bars or a spotter when lifting heavy
+          - Start with light weight to master proper form
+          - Adjust bar position (high vs. low bar) based on comfort and goals
+          - Advanced variation: add chains, bands, or perform pause squats
 
   "Squat (Bodyweight)":
     category: Weighted Body Weight
     target: Legs
+    i18n:
+      en:
+        name: "Squat (Bodyweight)"
+        instructions: |
+          ## Overview
+          The bodyweight squat is a fundamental compound exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and lower back, using body weight alone to build foundational lower body strength, mobility, and movement patterns.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart
+          - Keep your chest up, core engaged, and eyes forward
+          - Position your arms extended in front of you or at your sides
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Initiate the squat by bending your knees and hips simultaneously
+          2. Keep your chest up and weight on your heels
+          3. Descend until thighs are at least parallel to the floor
+          4. Pause briefly at the bottom
+          5. Drive through your heels to return to standing position
+          6. Fully extend your hips and knees at the top, then repeat
+
+          ### 3. Breathing
+          - Inhale as you descend into the squat
+          - Exhale as you drive back up to standing
+
+          ### 4. Tips
+          - Keep your knees tracking over your toes
+          - Maintain an upright torso throughout
+          - Drive through your entire foot, not just your toes
+          - Focus on controlled movement in both directions
+          - Aim for depth where thighs are parallel or below
+
+          ### 5. Common Mistakes
+          - Allowing the knees to cave inward
+          - Not achieving adequate depth
+          - Rising onto your toes instead of keeping weight on heels
+          - Rounding the back during descent
+          - Using momentum instead of controlled movement
+          - Letting the knees extend past the toes excessively
+
+          ### 6. Safety / Modifications
+          - Start with partial squats and gradually increase depth as mobility improves
+          - Hold onto a support for balance initially
+          - Place a box behind you to practice consistent depth
+          - Advanced variation: add jump squats, pistol squats, or progress to weighted squats
 
   "Squat (Dumbbell)":
     category: Dumbbell
     target: Legs
+    i18n:
+      en:
+        name: "Squat (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell squat is a compound lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and stabilizers, using dumbbells held at the sides or shoulders to add resistance while maintaining better balance than barbell variations.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart holding a dumbbell in each hand
+          - Position dumbbells at your sides with arms straight or at shoulder height
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Initiate the squat by bending your knees and hips simultaneously
+          2. Keep your chest up and weight on your heels
+          3. Descend until thighs are at least parallel to the floor
+          4. Pause briefly at the bottom
+          5. Drive through your heels to return to standing position
+          6. Fully extend your hips and knees at the top, then repeat
+
+          ### 3. Breathing
+          - Inhale as you descend into the squat
+          - Exhale as you drive back up to standing
+
+          ### 4. Tips
+          - Keep your knees tracking over your toes
+          - Maintain an upright torso throughout
+          - Let the dumbbells hang naturally at your sides
+          - Drive through your entire foot, not just your toes
+          - Focus on controlled movement in both directions
+
+          ### 5. Common Mistakes
+          - Allowing the knees to cave inward
+          - Not achieving adequate depth
+          - Rising onto your toes instead of keeping weight on heels
+          - Rounding the back during descent
+          - Swinging the dumbbells for momentum
+          - Using too much weight before mastering form
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master balance and form
+          - Hold dumbbells at shoulder height (goblet style) for variation
+          - Perform with one dumbbell to work on single-side stability
+          - Advanced variation: add a pause at the bottom or increase dumbbell weight
 
   "Squat (Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Squat (Machine)"
+        instructions: |
+          ## Overview
+          The machine squat is a compound lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It uses a guided movement path to provide stability and consistent resistance while reducing stress on the lower back compared to free weight squats.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself in the squat machine according to its design
+          - Place your shoulders under the pads or grip the handles
+          - Position your feet shoulder-width apart on the platform
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Initiate the squat by bending your knees and hips simultaneously
+          2. Keep your chest up and weight on your heels
+          3. Descend until thighs are at least parallel to the platform
+          4. Pause briefly at the bottom
+          5. Drive through your heels to return to starting position
+          6. Fully extend your legs, then repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you descend into the squat
+          - Exhale as you drive back up to starting position
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad if applicable
+          - The guided path helps maintain proper form
+          - Drive through your entire foot, not just your toes
+          - Keep your knees tracking over your toes
+          - Maintain constant tension throughout the movement
+
+          ### 5. Common Mistakes
+          - Lifting your back off the pad during the movement
+          - Not achieving adequate depth
+          - Allowing the knees to cave inward
+          - Locking out knees completely at the top
+          - Using too much weight and compromising form
+          - Placing feet too low on the platform, increasing knee stress
+
+          ### 6. Safety / Modifications
+          - Adjust foot position on the platform to target different muscle groups
+          - Start with light weight to master the machine's movement pattern
+          - The guided path is helpful for beginners learning squat mechanics
+          - Advanced variation: perform single-leg machine squats or add a pause at the bottom
 
   "Squat (Smith Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Squat (Smith Machine)"
+        instructions: |
+          ## Overview
+          The Smith machine squat is a guided compound exercise that primarily targets the quadriceps, glutes, and hamstrings. It uses a fixed vertical bar path to provide stability and allow focus on the squatting motion while reducing balance demands.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself under the Smith machine bar
+          - Place the bar across your upper back as you would for a regular squat
+          - Position feet shoulder-width apart, slightly in front of the bar
+          - Unrack the bar by rotating it and stand upright
+          - Keep your chest up, core engaged, and eyes forward
+
+          ### 2. Movement
+          1. Initiate the squat by bending your knees and hips simultaneously
+          2. Keep your chest up throughout the movement
+          3. Descend until thighs are at least parallel to the floor
+          4. Pause briefly at the bottom
+          5. Drive through your heels to return to standing position
+          6. Fully extend your hips and knees at the top, then repeat
+
+          ### 3. Breathing
+          - Inhale as you descend into the squat
+          - Exhale as you drive back up to standing
+
+          ### 4. Tips
+          - Position feet slightly in front of the bar for optimal form
+          - The fixed bar path allows you to sit back more than free weight squats
+          - Keep your knees tracking over your toes
+          - Use the safety catches for added security
+          - Take advantage of the guided path for consistent form
+
+          ### 5. Common Mistakes
+          - Positioning feet too close to the bar
+          - Not achieving adequate depth
+          - Allowing the knees to cave inward
+          - Rounding the back during descent
+          - Using too much weight before mastering form
+          - Relying too heavily on the machine's guided path
+
+          ### 6. Safety / Modifications
+          - Adjust foot position to find your optimal stance relative to the bar
+          - Use the safety catches at appropriate height
+          - Start with light weight to adapt to the fixed bar path
+          - Advanced variation: perform single-leg Smith machine squats or add a pause at the bottom
 
   "Standing Calf Raise (Barbell)":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Standing Calf Raise (Barbell)"
+        instructions: |
+          ## Overview
+          The standing barbell calf raise is an isolation exercise that primarily targets the gastrocnemius muscle of the calf. It also engages the soleus, using a barbell across the upper back to provide heavy resistance for building calf strength and size.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a barbell across your upper back as you would for a squat
+          - Stand with the balls of your feet on an elevated surface or platform
+          - Keep your heels hanging off the edge
+          - Stand upright with feet hip-width apart
+          - Keep your legs straight but not locked throughout
+
+          ### 2. Movement
+          1. Lower your heels by flexing your ankles as far as possible
+          2. Allow a full stretch in your calves at the bottom
+          3. Pause briefly at the bottom stretch position
+          4. Press through the balls of your feet to raise your heels as high as possible
+          5. Squeeze your calves hard at the top
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your heels
+          - Exhale as you press up onto your toes
+
+          ### 4. Tips
+          - Keep your legs straight throughout to isolate the calves
+          - Achieve full range of motion from deep stretch to high contraction
+          - Focus on squeezing your calves at the top
+          - Control the weight throughout both phases
+          - Keep your core engaged for stability
+
+          ### 5. Common Mistakes
+          - Bending the knees during the movement
+          - Not achieving full range of motion at top or bottom
+          - Bouncing at the bottom instead of controlled stretch
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+          - Not squeezing at the top contraction
+
+          ### 6. Safety / Modifications
+          - Start with moderate weight to master the full range of motion
+          - Use a power rack with safety bars for added security
+          - Vary foot position (neutral, toes in, toes out) for complete calf development
+          - Advanced variation: perform single-leg barbell calf raises
 
   "Standing Calf Raise (Bodyweight)":
     category: Reps Only
     target: Legs
+    i18n:
+      en:
+        name: "Standing Calf Raise (Bodyweight)"
+        instructions: |
+          ## Overview
+          The bodyweight standing calf raise is an isolation exercise that primarily targets the gastrocnemius muscle of the calf. It also engages the soleus, using body weight alone to build foundational calf strength, endurance, and ankle stability.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with the balls of your feet on an elevated surface or step
+          - Keep your heels hanging off the edge
+          - Stand upright with feet hip-width apart
+          - Hold onto a wall or support for balance if needed
+          - Keep your legs straight but not locked throughout
+
+          ### 2. Movement
+          1. Lower your heels by flexing your ankles as far as possible
+          2. Allow a full stretch in your calves at the bottom
+          3. Pause briefly at the bottom stretch position
+          4. Press through the balls of your feet to raise your heels as high as possible
+          5. Squeeze your calves hard at the top
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your heels
+          - Exhale as you press up onto your toes
+
+          ### 4. Tips
+          - Keep your legs straight throughout to isolate the calves
+          - Achieve full range of motion from deep stretch to high contraction
+          - Focus on squeezing your calves at the top
+          - Control the movement throughout both phases
+          - Use a support for balance if needed
+
+          ### 5. Common Mistakes
+          - Bending the knees during the movement
+          - Not achieving full range of motion at top or bottom
+          - Bouncing at the bottom instead of controlled stretch
+          - Moving too quickly through the repetitions
+          - Not squeezing at the top contraction
+          - Using momentum instead of controlled movement
+
+          ### 6. Safety / Modifications
+          - Perform on flat ground if a step is unavailable, though range will be limited
+          - Hold a support for balance initially
+          - Vary foot position (neutral, toes in, toes out) for complete calf development
+          - Advanced variation: perform single-leg bodyweight calf raises or add a pause at the top
 
   "Standing Calf Raise (Dumbbell)":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Standing Calf Raise (Dumbbell)"
+        instructions: |
+          ## Overview
+          The standing dumbbell calf raise is an isolation exercise that primarily targets the gastrocnemius muscle of the calf. It also engages the soleus, using dumbbells held at the sides to provide resistance while allowing for easier balance than barbell variations.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with the balls of your feet on an elevated surface or step
+          - Hold a dumbbell in each hand with arms straight at your sides
+          - Keep your heels hanging off the edge
+          - Stand upright with feet hip-width apart
+          - Keep your legs straight but not locked throughout
+
+          ### 2. Movement
+          1. Lower your heels by flexing your ankles as far as possible
+          2. Allow a full stretch in your calves at the bottom
+          3. Pause briefly at the bottom stretch position
+          4. Press through the balls of your feet to raise your heels as high as possible
+          5. Squeeze your calves hard at the top
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your heels
+          - Exhale as you press up onto your toes
+
+          ### 4. Tips
+          - Keep your legs straight throughout to isolate the calves
+          - Let the dumbbells hang naturally at your sides
+          - Achieve full range of motion from deep stretch to high contraction
+          - Focus on squeezing your calves at the top
+          - Control the weight throughout both phases
+
+          ### 5. Common Mistakes
+          - Bending the knees during the movement
+          - Not achieving full range of motion at top or bottom
+          - Bouncing at the bottom instead of controlled stretch
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+          - Not squeezing at the top contraction
+
+          ### 6. Safety / Modifications
+          - Start with moderate dumbbells to master the full range of motion
+          - Hold onto a support with one hand and use one dumbbell if balance is difficult
+          - Vary foot position (neutral, toes in, toes out) for complete calf development
+          - Advanced variation: perform single-leg dumbbell calf raises
 
   "Standing Calf Raise (Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Standing Calf Raise (Machine)"
+        instructions: |
+          ## Overview
+          The machine standing calf raise is an isolation exercise that primarily targets the gastrocnemius muscle of the calf. It also engages the soleus, using a guided machine to provide stable resistance and allow for heavy loading with proper form.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself in the standing calf raise machine
+          - Place the balls of your feet on the platform with heels hanging off
+          - Position your shoulders under the pads
+          - Stand upright and release the safety lever if present
+          - Keep your legs straight but not locked throughout
+
+          ### 2. Movement
+          1. Lower your heels by flexing your ankles as far as possible
+          2. Allow a full stretch in your calves at the bottom
+          3. Pause briefly at the bottom stretch position
+          4. Press through the balls of your feet to raise your heels as high as possible
+          5. Squeeze your calves hard at the top
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your heels
+          - Exhale as you press up onto your toes
+
+          ### 4. Tips
+          - Keep your legs straight throughout to isolate the calves
+          - Achieve full range of motion from deep stretch to high contraction
+          - Focus on squeezing your calves at the top
+          - Control the weight throughout both phases
+          - The machine provides stability for heavy loading
+
+          ### 5. Common Mistakes
+          - Bending the knees during the movement
+          - Not achieving full range of motion at top or bottom
+          - Bouncing at the bottom instead of controlled stretch
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+          - Not squeezing at the top contraction
+
+          ### 6. Safety / Modifications
+          - Adjust shoulder pad height for proper positioning
+          - Start with moderate weight to master the full range of motion
+          - Vary foot position (neutral, toes in, toes out) for complete calf development
+          - Advanced variation: perform single-leg machine calf raises or pause at the top
 
   "Standing Calf Raise (Smith Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Standing Calf Raise (Smith Machine)"
+        instructions: |
+          ## Overview
+          The Smith machine standing calf raise is an isolation exercise that primarily targets the gastrocnemius muscle of the calf. It also engages the soleus, using a fixed vertical bar path to provide stable resistance for building calf strength and size.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a step or platform under the Smith machine bar
+          - Place the bar across your upper back as you would for a squat
+          - Stand with the balls of your feet on the step with heels hanging off
+          - Unrack the bar by rotating it
+          - Keep your legs straight but not locked throughout
+
+          ### 2. Movement
+          1. Lower your heels by flexing your ankles as far as possible
+          2. Allow a full stretch in your calves at the bottom
+          3. Pause briefly at the bottom stretch position
+          4. Press through the balls of your feet to raise your heels as high as possible
+          5. Squeeze your calves hard at the top
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your heels
+          - Exhale as you press up onto your toes
+
+          ### 4. Tips
+          - Keep your legs straight throughout to isolate the calves
+          - The fixed bar path provides stability for heavy loading
+          - Achieve full range of motion from deep stretch to high contraction
+          - Focus on squeezing your calves at the top
+          - Control the weight throughout both phases
+
+          ### 5. Common Mistakes
+          - Bending the knees during the movement
+          - Not achieving full range of motion at top or bottom
+          - Bouncing at the bottom instead of controlled stretch
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+          - Not squeezing at the top contraction
+
+          ### 6. Safety / Modifications
+          - Adjust step height and bar position for comfortable range of motion
+          - Use the safety catches for added security
+          - Vary foot position (neutral, toes in, toes out) for complete calf development
+          - Advanced variation: perform single-leg Smith machine calf raises
 
   "Step-up (Bodyweight)":
     category: Reps Only
     target: Legs
+    i18n:
+      en:
+        name: "Step-up (Bodyweight)"
+        instructions: |
+          ## Overview
+          The bodyweight step-up is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and stabilizers, using body weight and an elevated platform to build single-leg strength, balance, and functional movement patterns.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing a sturdy box or bench at knee height or below
+          - Keep your chest up, core engaged, and eyes forward
+          - Position your arms at your sides or on your hips
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Place one foot fully on top of the box
+          2. Drive through the heel of your elevated foot to step up
+          3. Bring your other foot up to meet it on the box
+          4. Stand fully upright on top of the box
+          5. Step down with the same leg that stepped up first
+          6. Repeat for desired reps, then switch legs
+
+          ### 3. Breathing
+          - Inhale before stepping up
+          - Exhale as you drive up onto the box
+
+          ### 4. Tips
+          - Drive through your elevated heel, not your toes
+          - Avoid pushing off with your trailing leg
+          - Keep your chest up and torso upright throughout
+          - Focus on controlled movement in both directions
+          - Start with a lower box height and progress gradually
+
+          ### 5. Common Mistakes
+          - Using momentum from the trailing leg to push up
+          - Leaning too far forward during the step-up
+          - Not placing the full foot on the box
+          - Allowing the knee to cave inward
+          - Using a box that's too high for proper form
+          - Not fully standing up on top of the box
+
+          ### 6. Safety / Modifications
+          - Ensure the box is stable and won't slip or tip
+          - Start with a low box height (12-18 inches) to master technique
+          - Hold onto a support for balance initially
+          - Advanced variation: add dumbbells, a barbell, or increase box height
 
   "Step-up (Barbell)":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Step-up (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell step-up is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and stabilizers, using a barbell across the upper back to add significant resistance while building single-leg strength and balance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a barbell across your upper back as you would for a squat
+          - Stand facing a sturdy box or bench at knee height or below
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Place one foot fully on top of the box
+          2. Drive through the heel of your elevated foot to step up
+          3. Bring your other foot up to meet it on the box
+          4. Stand fully upright on top of the box
+          5. Step down with the same leg that stepped up first
+          6. Repeat for desired reps, then switch legs
+
+          ### 3. Breathing
+          - Inhale before stepping up
+          - Exhale as you drive up onto the box
+
+          ### 4. Tips
+          - Drive through your elevated heel, not your toes
+          - Avoid pushing off with your trailing leg
+          - Keep your chest up and torso upright throughout
+          - Keep the barbell stable on your upper back
+          - Focus on controlled movement in both directions
+
+          ### 5. Common Mistakes
+          - Using momentum from the trailing leg to push up
+          - Leaning too far forward during the step-up
+          - Not placing the full foot on the box
+          - Allowing the knee to cave inward
+          - Using a box that's too high for proper form with added weight
+          - Not fully standing up on top of the box
+
+          ### 6. Safety / Modifications
+          - Ensure the box is stable and won't slip or tip
+          - Start with bodyweight step-ups before adding a barbell
+          - Use a lower box height than bodyweight variations when first adding weight
+          - Advanced variation: increase box height or barbell weight gradually
 
   "Step-up (Dumbbell)":
     category: Dumbbell
     target: Legs
+    i18n:
+      en:
+        name: "Step-up (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell step-up is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and stabilizers, using dumbbells held at the sides to add resistance while maintaining better balance than barbell variations.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing a sturdy box or bench at knee height or below
+          - Hold a dumbbell in each hand with arms straight at your sides
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Place one foot fully on top of the box
+          2. Drive through the heel of your elevated foot to step up
+          3. Bring your other foot up to meet it on the box
+          4. Stand fully upright on top of the box
+          5. Step down with the same leg that stepped up first
+          6. Repeat for desired reps, then switch legs
+
+          ### 3. Breathing
+          - Inhale before stepping up
+          - Exhale as you drive up onto the box
+
+          ### 4. Tips
+          - Drive through your elevated heel, not your toes
+          - Avoid pushing off with your trailing leg
+          - Keep your chest up and torso upright throughout
+          - Let the dumbbells hang naturally at your sides
+          - Focus on controlled movement in both directions
+
+          ### 5. Common Mistakes
+          - Using momentum from the trailing leg to push up
+          - Leaning too far forward during the step-up
+          - Not placing the full foot on the box
+          - Allowing the knee to cave inward
+          - Using a box that's too high for proper form
+          - Not fully standing up on top of the box
+
+          ### 6. Safety / Modifications
+          - Ensure the box is stable and won't slip or tip
+          - Start with light dumbbells to master balance and form
+          - Use a lower box height when first adding weight
+          - Advanced variation: increase box height, add weight, or hold one dumbbell for unilateral focus
 
   "Straight Leg Deadlift (Band)":
     category: Weighted Body Weight
     target: Legs
+    i18n:
+      en:
+        name: "Straight Leg Deadlift (Band)"
+        instructions: |
+          ## Overview
+          The band straight leg deadlift is a resistance-based hip hinge exercise that primarily targets the hamstrings and erector spinae. It also engages the glutes and lats, using progressive band resistance with minimal knee bend to emphasize the posterior chain.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, stepping on the center of a resistance band
+          - Grip both ends of the band with hands just outside your legs
+          - Stand upright with chest up, shoulders back, and core engaged
+          - Maintain only a very slight bend in your knees throughout
+
+          ### 2. Movement
+          1. Hinge at the hips by pushing them back and lowering your torso
+          2. Keep your back flat and the band close to your legs
+          3. Keep your legs nearly straight with minimal knee bend
+          4. Lower until you feel a stretch in your hamstrings
+          5. Drive your hips forward to return to the starting position
+          6. Squeeze your glutes at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you hinge forward
+          - Exhale as you drive your hips forward to stand up
+
+          ### 4. Tips
+          - Keep your legs nearly straight throughout the movement
+          - Focus on the hip hinge, not squatting
+          - Keep your back flat and chest up throughout
+          - Push your hips back as far as possible
+          - The band provides increasing resistance as you stand
+
+          ### 5. Common Mistakes
+          - Rounding the back instead of maintaining a flat spine
+          - Bending the knees too much, turning it into a Romanian deadlift
+          - Not pushing the hips back far enough
+          - Lowering too far beyond the point of hamstring stretch
+          - Not maintaining constant tension on the band
+          - Looking up instead of maintaining neutral neck position
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master the hip hinge with straight legs
+          - Adjust foot position on the band to modify resistance
+          - Progress from Romanian deadlifts if this variation feels too intense
+          - If you experience lower back discomfort, reduce resistance and ensure proper form
 
   "Stiff Leg Deadlift (Dumbbell)":
     category: Dumbbell
     target: Legs
+    i18n:
+      en:
+        name: "Stiff Leg Deadlift (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell stiff leg deadlift is a hip hinge exercise that primarily targets the hamstrings and erector spinae. It also engages the glutes and lats as stabilizers, using dumbbells with minimal knee bend to emphasize the posterior chain and build lower back and hamstring strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a dumbbell in each hand
+          - Position dumbbells in front of your thighs with palms facing your body
+          - Stand upright with chest up, shoulders back, and core engaged
+          - Maintain only a very slight bend in your knees throughout
+
+          ### 2. Movement
+          1. Hinge at the hips by pushing them back and lowering the dumbbells
+          2. Keep your back flat and dumbbells close to your legs
+          3. Keep your legs nearly straight with minimal knee bend
+          4. Lower until you feel a stretch in your hamstrings, typically mid-shin
+          5. Drive your hips forward to return to the starting position
+          6. Squeeze your glutes at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the dumbbells
+          - Exhale as you drive your hips forward to stand up
+
+          ### 4. Tips
+          - Keep your legs nearly straight throughout the movement
+          - Focus on the hip hinge, not squatting
+          - Keep your back flat and chest up throughout
+          - Push your hips back as far as possible
+          - Feel the stretch in your hamstrings at the bottom
+
+          ### 5. Common Mistakes
+          - Rounding the back instead of maintaining a flat spine
+          - Bending the knees too much, turning it into a Romanian deadlift
+          - Not pushing the hips back far enough
+          - Lowering the dumbbells too far beyond the point of hamstring stretch
+          - Using too much weight and compromising form
+          - Looking up instead of maintaining neutral neck position
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master the hip hinge with straight legs
+          - Progress from Romanian deadlifts if this variation feels too intense
+          - The dumbbell variation allows for a more natural grip than barbells
+          - If you experience lower back discomfort, reduce weight and ensure proper form
 
   "Curtsey Lunges (Barbell)":
     category: Dumbbell
     target: Legs
+    i18n:
+      en:
+        name: "Curtsey Lunges (Barbell)"
+        instructions: |
+          ## Overview
+          The curtsey lunge is a unilateral lower body exercise that primarily targets the glutes, quadriceps, and hip abductors. It also engages the core and stabilizers, using a diagonal backward stepping motion to emphasize the glutes and outer hips.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding dumbbells at your sides
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Step one leg back and across behind your other leg in a curtsey motion
+          2. Lower your hips by bending both knees
+          3. Continue until your front thigh is near parallel to the floor
+          4. Keep your chest up and torso upright
+          5. Push through your front heel to return to standing position
+          6. Repeat on the same leg or alternate legs for desired reps
+
+          ### 3. Breathing
+          - Inhale as you step back and lower down
+          - Exhale as you push back to standing
+
+          ### 4. Tips
+          - The diagonal stepping motion emphasizes the glutes and outer hips
+          - Keep your torso upright throughout the movement
+          - Focus on balance and control during the cross-behind step
+          - Drive through your front heel to return to standing
+          - Let the dumbbells hang naturally at your sides
+
+          ### 5. Common Mistakes
+          - Leaning too far forward during the lunge
+          - Allowing the front knee to cave inward
+          - Not stepping far enough back and across
+          - Not achieving adequate depth
+          - Losing balance during the diagonal step
+          - Using momentum instead of controlled movement
+
+          ### 6. Safety / Modifications
+          - Start with bodyweight to master the diagonal stepping motion
+          - Hold onto a support for balance initially
+          - Use light dumbbells when first adding weight
+          - Advanced variation: increase dumbbell weight or add a pulse at the bottom
 
   "Deficit Squat":
     category: Dumbbell
     target: Legs
+    i18n:
+      en:
+        name: "Deficit Squat"
+        instructions: |
+          ## Overview
+          The deficit squat is an advanced compound exercise that primarily targets the quadriceps, glutes, and hamstrings with increased range of motion. It uses an elevated platform to increase the depth and difficulty of the squat, building strength in the bottom position and improving mobility.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand on a 1-3 inch elevated platform with feet shoulder-width apart
+          - Hold dumbbells at your sides or a barbell across your upper back
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Initiate the squat by bending your knees and hips simultaneously
+          2. Keep your chest up and weight on your heels
+          3. Descend deeper than a regular squat due to the elevated platform
+          4. Pause briefly at the bottom
+          5. Drive through your heels to return to standing position
+          6. Fully extend your hips and knees at the top, then repeat
+
+          ### 3. Breathing
+          - Inhale as you descend into the squat
+          - Exhale as you drive back up to standing
+
+          ### 4. Tips
+          - The deficit increases range of motion and difficulty
+          - Keep your knees tracking over your toes
+          - Maintain an upright torso throughout
+          - Use lighter weight than your standard squat
+          - This variation builds strength in the bottom position
+
+          ### 5. Common Mistakes
+          - Using a platform that's too high for your mobility
+          - Not achieving the increased depth the deficit allows
+          - Allowing the knees to cave inward
+          - Rising onto your toes instead of keeping weight on heels
+          - Using too much weight before adapting to the increased range
+          - Losing neutral spine at the bottom
+
+          ### 6. Safety / Modifications
+          - Start with a 1-inch deficit and progress gradually
+          - Ensure you have adequate mobility for the increased range
+          - Use less weight than your standard squat
+          - If you experience knee discomfort, reduce deficit height or weight
 
   "Trap Bar Deadlift":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Trap Bar Deadlift"
+        instructions: |
+          ## Overview
+          The trap bar deadlift is a compound exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the erector spinae, lats, and traps, using a hexagonal bar design that allows for a more neutral spine position and reduced lower back stress.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand inside a trap bar with feet hip-width apart
+          - Grip the handles at your sides with a neutral grip
+          - Hinge at the hips and bend your knees to reach the handles
+          - Keep your chest up, back flat, and shoulders over the bar
+          - Engage your core and lats before lifting
+
+          ### 2. Movement
+          1. Drive through your heels and extend your hips and knees simultaneously
+          2. Keep the bar close to your body as you lift
+          3. Stand up fully by extending your hips and knees
+          4. Keep your shoulders back and chest up at the top
+          5. Lower the bar by pushing your hips back and bending your knees
+          6. Return the bar to the floor with control and repeat
+
+          ### 3. Breathing
+          - Take a deep breath and brace your core before lifting
+          - Hold your breath during the lift
+          - Exhale at the top or as you lower the bar
+
+          ### 4. Tips
+          - The trap bar allows for a more natural and neutral grip
+          - The bar path is more vertical than conventional deadlifts
+          - This variation is often easier on the lower back
+          - Drive through your entire foot, not just your toes
+          - Think about pushing the floor away rather than lifting the bar
+
+          ### 5. Common Mistakes
+          - Rounding the lower back during the lift
+          - Starting with hips too high or too low
+          - Not fully extending hips at the top
+          - Looking up or down instead of maintaining neutral neck
+          - Using arms to pull instead of legs and hips to drive
+          - Not taking advantage of the neutral grip position
+
+          ### 6. Safety / Modifications
+          - Start with lighter weight to adapt to the trap bar
+          - Many trap bars have high and low handles; start with high handles
+          - This variation is excellent for those with lower back concerns
+          - If you experience lower back discomfort, check your form and reduce weight
 
   "Zercher Squat (Barbell)":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Zercher Squat (Barbell)"
+        instructions: |
+          ## Overview
+          The Zercher squat is an advanced compound exercise that primarily targets the quadriceps, glutes, and hamstrings. It also heavily engages the core, upper back, and biceps, using a barbell held in the crooks of the elbows to create a unique loading pattern that promotes upright posture.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a barbell in a rack at elbow height
+          - Step under the bar and position it in the crooks of your elbows
+          - Clasp your hands together in front of your chest
+          - Stand with feet shoulder-width apart
+          - Keep your chest up, core engaged, and elbows tucked
+
+          ### 2. Movement
+          1. Initiate the squat by bending your knees and hips simultaneously
+          2. Keep your torso upright and elbows tucked throughout
+          3. Descend until thighs are at least parallel to the floor
+          4. Maintain an upright posture with the bar secure in your elbows
+          5. Drive through your heels to return to standing position
+          6. Fully extend your hips and knees at the top, then repeat
+
+          ### 3. Breathing
+          - Take a deep breath and brace your core before descending
+          - Hold your breath during the descent and bottom position
+          - Exhale as you drive back up or at the top
+
+          ### 4. Tips
+          - The front-loaded position forces an extremely upright torso
+          - Keep your elbows tucked to prevent the bar from slipping
+          - Use a pad or towel for comfort in the crooks of your elbows
+          - This variation heavily emphasizes the core and upper back
+          - Start with light weight to adapt to the unique bar position
+
+          ### 5. Common Mistakes
+          - Allowing the bar to slip out of the elbows
+          - Leaning too far forward despite the front load
+          - Not achieving adequate depth
+          - Allowing the elbows to flare out
+          - Using too much weight before mastering the position
+          - Not maintaining core tension throughout
+
+          ### 6. Safety / Modifications
+          - Start with a very light barbell or even a training bar
+          - Use a thick pad or towel in the crooks of your elbows for comfort
+          - This is an advanced variation; master front squats first
+          - If you experience discomfort, reduce weight or try a different squat variation
 
   "Arnold Press (Dumbbell)":
     category: Dumbbell
