@@ -11411,167 +11411,1715 @@ exercises:
           - Stop at shoulder height if you experience any shoulder pain
           - Start with light dumbbells to master the movement pattern
           - If you experience shoulder discomfort, consider face pulls as an alternative
-
   "Stretching":
     category: Duration
     target: Other
+    i18n:
+      en:
+        name: "Stretching"
+        instructions: |
+          ## Overview
+          Stretching is a flexibility exercise that targets multiple muscle groups throughout the body. It helps improve range of motion, reduce muscle tension, and promote recovery, making it essential for overall mobility and injury prevention.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Choose a comfortable space with enough room to move freely
+          - Wear comfortable, non-restrictive clothing
+          - Begin with light movement to warm up your muscles
+          - Focus on areas that feel tight or will be used in your workout
+
+          ### 2. Movement
+          1. Select stretches targeting your desired muscle groups
+          2. Move slowly into each stretch until you feel gentle tension
+          3. Hold each stretch for 15-30 seconds without bouncing
+          4. Breathe deeply and relax into each position
+          5. Release slowly and move to the next stretch
+          6. Continue for your desired duration
+
+          ### 3. Breathing
+          - Breathe slowly and deeply throughout each stretch
+          - Exhale as you deepen into a stretch
+          - Never hold your breath while stretching
+
+          ### 4. Tips
+          - Stretch after workouts when muscles are warm
+          - Focus on major muscle groups and areas of tightness
+          - Stretching should feel comfortable, never painful
+          - Include both upper and lower body stretches
+          - Consistency is more important than duration
+
+          ### 5. Common Mistakes
+          - Bouncing or jerking movements during stretches
+          - Pushing into painful ranges of motion
+          - Holding your breath during stretches
+          - Rushing through stretches without proper hold time
+          - Stretching cold muscles without warming up
+          - Neglecting certain muscle groups
+
+          ### 6. Safety / Modifications
+          - Never stretch to the point of sharp pain
+          - Use props like yoga blocks or straps if needed
+          - Reduce intensity if recovering from injury
+          - Consider dynamic stretching before workouts and static after
 
   "Clean (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Clean (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell clean is an explosive Olympic weightlifting movement that primarily targets the quadriceps, glutes, and hamstrings. It also engages the entire posterior chain, traps, and shoulders, using a powerful hip extension and pull to move the barbell from floor to shoulders.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, barbell over mid-foot
+          - Grip the bar just outside your legs with a hook grip
+          - Hinge at hips and bend knees to reach the bar
+          - Keep your back flat, chest up, and shoulders over the bar
+          - Engage your lats and core before pulling
+
+          ### 2. Movement
+          1. Drive explosively through your legs to lift the bar off the floor
+          2. Keep the bar close to your body as it travels upward
+          3. Extend your hips and knees powerfully when the bar reaches mid-thigh
+          4. Pull yourself under the bar as it rises
+          5. Catch the bar on your shoulders in a front squat position
+          6. Stand up fully to complete the rep
+
+          ### 3. Breathing
+          - Take a deep breath before pulling
+          - Hold your breath through the pull and catch
+          - Exhale after standing up
+
+          ### 4. Tips
+          - This is an advanced technical movement requiring coaching
+          - Focus on explosive hip extension at the right moment
+          - Keep the bar path close to your body throughout
+          - Catch the bar with elbows high and forward
+          - Master the movement with light weight before loading
+
+          ### 5. Common Mistakes
+          - Starting with hips too high or too low
+          - Pulling with arms too early instead of using legs
+          - Letting the bar drift away from the body
+          - Not extending fully at the hips before pulling under
+          - Landing with elbows low or not receiving properly
+          - Attempting heavy weight without proper technique
+
+          ### 6. Safety / Modifications
+          - Learn from a qualified Olympic lifting coach
+          - Master the hang clean before full cleans from the floor
+          - Practice with PVC pipe or empty bar first
+          - Use bumper plates and lifting platform for safe dropping
 
   "Clean and Jerk (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Clean and Jerk (Barbell)"
+        instructions: |
+          ## Overview
+          The clean and jerk is a complete Olympic weightlifting movement that targets the entire body. It combines the clean (floor to shoulders) with the jerk (shoulders to overhead), engaging the legs, hips, back, shoulders, and core in one of the most demanding full-body exercises.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Perform a full clean to bring the bar to your shoulders
+          - Adjust your feet to shoulder-width or slightly wider
+          - Keep elbows high with the bar resting on your front deltoids
+          - Stand tall with core engaged and ready to dip
+
+          ### 2. Movement
+          1. Perform a clean to bring the bar to your shoulders
+          2. Dip by bending your knees slightly while keeping torso vertical
+          3. Drive explosively upward extending through your legs
+          4. Press the bar overhead while splitting your feet or pushing them out
+          5. Lock out your arms with the bar stable overhead
+          6. Recover by bringing your feet back together under the bar
+
+          ### 3. Breathing
+          - Breathe during the setup and between phases
+          - Hold your breath during the dip and drive
+          - Exhale once the bar is locked out overhead
+
+          ### 4. Tips
+          - This is the most technically demanding Olympic lift
+          - The dip should be controlled and vertical
+          - Use leg drive, not just arms, to get the bar overhead
+          - Practice split jerk or power jerk footwork separately
+          - Master both the clean and overhead movements independently first
+
+          ### 5. Common Mistakes
+          - Dipping forward instead of staying vertical
+          - Not using enough leg drive in the jerk
+          - Pressing with arms before driving with legs
+          - Poor bar path during the jerk portion
+          - Not fully locking out arms overhead
+          - Attempting without proper technical foundation
+
+          ### 6. Safety / Modifications
+          - Requires extensive coaching from qualified Olympic lifting instructor
+          - Master the clean and the jerk separately before combining
+          - Use bumper plates and proper lifting platform
+          - Progress very gradually with weight increases
 
   "Deadlift High Pull (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Deadlift High Pull (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell deadlift high pull is an Olympic lifting accessory exercise that targets the entire posterior chain, traps, and shoulders. It combines a deadlift with an explosive upright pull, building power and teaching the second pull mechanics used in cleans and snatches.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, barbell over mid-foot
+          - Grip the bar slightly wider than shoulder-width
+          - Hinge at hips and bend knees to reach the bar
+          - Keep your back flat, chest up, and shoulders over the bar
+          - Engage your core and lats before pulling
+
+          ### 2. Movement
+          1. Perform a deadlift by driving through your legs
+          2. When the bar reaches mid-thigh, explosively extend hips and knees
+          3. Shrug your shoulders and pull the bar upward with your elbows high
+          4. Continue pulling until the bar reaches chest or lower rib height
+          5. Lower the bar back to the starting position with control
+          6. Repeat for the desired number of explosive reps
+
+          ### 3. Breathing
+          - Inhale before starting the pull
+          - Hold your breath through the explosive pull
+          - Exhale as you lower the bar
+
+          ### 4. Tips
+          - Focus on explosive hip extension at mid-thigh
+          - Lead with your elbows during the high pull
+          - Keep the bar close to your body throughout
+          - This exercise teaches the second pull of Olympic lifts
+          - Use lighter weight than your deadlift max
+
+          ### 5. Common Mistakes
+          - Pulling with arms too early before hip extension
+          - Not fully extending hips and ankles at the power position
+          - Letting the bar drift away from the body
+          - Using too much weight and losing explosive speed
+          - Rounding the back during the pull
+          - Not keeping elbows high during the pull phase
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the explosive movement
+          - This is an accessory exercise for Olympic lifting
+          - Master the deadlift before adding the high pull component
+          - Use this to develop power for cleans and snatches
 
   "Hang Clean (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Hang Clean (Barbell)"
+        instructions: |
+          ## Overview
+          The hang clean is an Olympic lifting variation that targets the quadriceps, glutes, hamstrings, and upper back. It starts from a standing position rather than the floor, focusing on the explosive hip extension and catch phases while reducing technical complexity.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand holding a barbell at arm's length
+          - Position the bar at mid-thigh with feet hip-width apart
+          - Keep your chest up, back flat, and core engaged
+          - Hinge slightly at the hips with knees bent
+          - Grip just outside your legs with a hook grip if possible
+
+          ### 2. Movement
+          1. Lower the bar slightly below the knees with control
+          2. Explosively extend your hips and knees to jump upward
+          3. Shrug your shoulders and pull yourself under the bar
+          4. Catch the bar on your front shoulders in a front squat position
+          5. Stand up fully with the bar on your shoulders
+          6. Lower the bar back to the hang position and repeat
+
+          ### 3. Breathing
+          - Inhale during the lowering phase
+          - Hold your breath through the explosive pull and catch
+          - Exhale after standing up
+
+          ### 4. Tips
+          - This variation focuses on the power position of the clean
+          - Keep the bar close to your body during the pull
+          - Catch the bar with elbows high and forward
+          - The hang position reduces technical demands versus floor cleans
+          - Focus on explosive hip extension
+
+          ### 5. Common Mistakes
+          - Lowering the bar too slowly and losing tension
+          - Pulling with arms instead of driving with hips
+          - Letting the bar drift away from the body
+          - Catching with elbows low or back position
+          - Not fully extending hips before pulling under
+          - Using too much weight before mastering technique
+
+          ### 6. Safety / Modifications
+          - Learn this variation before progressing to full cleans from floor
+          - Master the power clean (catching high) before full squat cleans
+          - Use bumper plates for safe dropping if needed
+          - Seek coaching for proper Olympic lifting technique
 
   "Hang Snatch (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Hang Snatch (Barbell)"
+        instructions: |
+          ## Overview
+          The hang snatch is an Olympic lifting variation that targets the entire body with emphasis on explosive power. Starting from a standing position, it requires moving the barbell from thighs to overhead in one fluid motion, building full-body coordination and power.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand holding a barbell with a wide snatch grip
+          - Position the bar at mid-thigh with feet hip-width apart
+          - Keep your chest up, back flat, and core engaged
+          - Hinge slightly at the hips with knees bent
+          - Arms should be straight and wide on the bar
+
+          ### 2. Movement
+          1. Lower the bar slightly below the knees with control
+          2. Explosively extend your hips and knees to jump upward
+          3. Pull yourself under the bar as it rises
+          4. Catch the bar overhead in a full squat or power position
+          5. Stand up fully with the bar locked out overhead
+          6. Lower the bar back to the hang position and repeat
+
+          ### 3. Breathing
+          - Inhale during the lowering phase
+          - Hold your breath through the explosive pull and catch
+          - Exhale after standing with the bar overhead
+
+          ### 4. Tips
+          - The wide grip creates a shorter pull distance
+          - This is one of the most technical Olympic lifting movements
+          - Keep the bar close during the pull
+          - Catch with arms locked and bar over mid-foot
+          - Master the hang position before progressing to full snatches
+
+          ### 5. Common Mistakes
+          - Using a grip that's too narrow
+          - Pulling with arms before full hip extension
+          - Pressing the bar out instead of pulling under it
+          - Landing with feet too wide or in poor position
+          - Not achieving full lockout overhead
+          - Attempting without adequate mobility and technique training
+
+          ### 6. Safety / Modifications
+          - This requires extensive coaching from qualified instructors
+          - Master the muscle snatch and overhead squat first
+          - Use bumper plates and proper lifting platform
+          - Progress very gradually with weight
 
   "Jump Shrug (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Jump Shrug (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell jump shrug is an explosive Olympic lifting accessory exercise that primarily targets the traps, calves, and glutes. It teaches the explosive triple extension (ankles, knees, hips) essential for Olympic lifts while building power and trap development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a barbell
+          - Position the bar at mid-thigh with arms straight
+          - Keep your chest up, back flat, and core engaged
+          - Grip the bar just outside your legs
+          - Maintain a slight bend in your knees
+
+          ### 2. Movement
+          1. Dip slightly by bending your knees
+          2. Explosively extend your ankles, knees, and hips to jump upward
+          3. Shrug your shoulders powerfully at the top of the jump
+          4. Land softly with bent knees
+          5. Reset to the starting position
+          6. Repeat for the desired number of explosive reps
+
+          ### 3. Breathing
+          - Inhale during the dip
+          - Exhale explosively during the jump and shrug
+
+          ### 4. Tips
+          - Focus on maximum explosive power with each rep
+          - The shrug should happen at full extension
+          - Keep arms straight throughout the movement
+          - This exercise teaches the triple extension for Olympic lifts
+          - Use lighter weight to maintain explosive speed
+
+          ### 5. Common Mistakes
+          - Pulling with arms instead of using legs and shrug
+          - Not fully extending ankles, knees, and hips
+          - Dipping too deep before the jump
+          - Using too much weight and losing explosive quality
+          - Landing with straight legs
+          - Not shrugging at the peak of the jump
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the explosive movement
+          - Land softly to protect your joints
+          - This is an accessory exercise for Olympic lifting
+          - Use this to develop power for cleans and snatches
 
   "Overhead Squat (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Overhead Squat (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell overhead squat is an Olympic lifting accessory that targets the quadriceps, glutes, and entire core. It also requires significant shoulder mobility and stability, building full-body strength, balance, and the receiving position used in snatches.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Start with the barbell overhead in a wide snatch grip
+          - Stand with feet shoulder-width apart, toes slightly out
+          - Lock your arms completely with the bar over mid-foot
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain active shoulders pushing up into the bar
+
+          ### 2. Movement
+          1. Initiate the squat by bending your knees and hips simultaneously
+          2. Keep the bar directly over mid-foot as you descend
+          3. Maintain locked arms and active shoulders throughout
+          4. Descend until thighs are at least parallel to the floor
+          5. Drive through your heels to return to standing
+          6. Keep the bar overhead and stable throughout, then repeat
+
+          ### 3. Breathing
+          - Inhale before descending
+          - Hold your breath during the descent and bottom position
+          - Exhale as you drive back up
+
+          ### 4. Tips
+          - This exercise requires excellent shoulder and hip mobility
+          - The bar should remain over mid-foot throughout
+          - Keep arms locked and push up into the bar constantly
+          - Start with PVC pipe or empty bar to learn the movement
+          - This builds the receiving position for snatches
+
+          ### 5. Common Mistakes
+          - Allowing arms to bend during the squat
+          - Letting the bar drift forward or backward
+          - Not maintaining active shoulders pushing into the bar
+          - Inadequate hip or shoulder mobility for proper depth
+          - Looking down instead of forward
+          - Attempting without adequate mobility preparation
+
+          ### 6. Safety / Modifications
+          - Master with PVC pipe before adding weight
+          - Work on shoulder and hip mobility separately
+          - Use a spotter when learning with weight
+          - This is essential preparation for Olympic snatch training
 
   "Power Clean":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Power Clean"
+        instructions: |
+          ## Overview
+          The power clean is an Olympic lifting variation that targets the entire posterior chain, traps, and shoulders. It differs from the full clean by catching the bar in a partial squat rather than full depth, emphasizing explosive power and being more accessible for athletes.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, barbell over mid-foot
+          - Grip the bar just outside your legs
+          - Hinge at hips and bend knees to reach the bar
+          - Keep your back flat, chest up, and shoulders over the bar
+          - Engage your lats and core before pulling
+
+          ### 2. Movement
+          1. Drive explosively through your legs to lift the bar off the floor
+          2. Keep the bar close to your body as it travels upward
+          3. Extend your hips and knees powerfully when the bar reaches mid-thigh
+          4. Pull yourself under the bar slightly
+          5. Catch the bar on your shoulders in a partial squat position
+          6. Stand up fully to complete the rep
+
+          ### 3. Breathing
+          - Take a deep breath before pulling
+          - Hold your breath through the pull and catch
+          - Exhale after standing up
+
+          ### 4. Tips
+          - Catch the bar higher than in a full clean (above parallel)
+          - Focus on explosive hip extension and speed under the bar
+          - This variation requires less mobility than full cleans
+          - Keep the bar path close to your body
+          - More accessible for general athletic training
+
+          ### 5. Common Mistakes
+          - Catching too high with no knee bend
+          - Pulling with arms too early instead of using legs
+          - Letting the bar drift away from the body
+          - Not extending fully at the hips before pulling under
+          - Landing with elbows low
+          - Using too much weight before mastering technique
+
+          ### 6. Safety / Modifications
+          - Learn from a qualified coach or trainer
+          - Master the hang power clean before full power cleans
+          - Use bumper plates for safe dropping
+          - This variation is excellent for athletic power development
 
   "Power Snatch (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Power Snatch (Barbell)"
+        instructions: |
+          ## Overview
+          The power snatch is an Olympic lifting variation that targets the entire body with explosive power emphasis. It moves the barbell from floor to overhead in one motion, catching in a partial squat rather than full depth, making it more accessible while still building tremendous power.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, barbell over mid-foot
+          - Grip the bar with a wide snatch grip
+          - Hinge at hips and bend knees to reach the bar
+          - Keep your back flat, chest up, and shoulders over the bar
+          - Arms should be straight and wide on the bar
+
+          ### 2. Movement
+          1. Drive explosively through your legs to lift the bar off the floor
+          2. Keep the bar close to your body as it travels upward
+          3. Extend your hips and knees powerfully at mid-thigh
+          4. Pull yourself under the bar as it rises
+          5. Catch the bar overhead in a partial squat with arms locked
+          6. Stand up fully with the bar overhead to complete the rep
+
+          ### 3. Breathing
+          - Take a deep breath before pulling
+          - Hold your breath through the pull and catch
+          - Exhale after standing with the bar overhead
+
+          ### 4. Tips
+          - Catch the bar higher than a full snatch (above parallel)
+          - The wide grip creates a shorter pull distance
+          - This variation requires less mobility than full snatches
+          - Keep the bar close during the explosive pull
+          - Focus on speed and power generation
+
+          ### 5. Common Mistakes
+          - Using a grip that's too narrow
+          - Pulling with arms before full hip extension
+          - Pressing the bar out instead of pulling under it
+          - Landing with feet too wide
+          - Not achieving full lockout overhead
+          - Attempting without adequate coaching
+
+          ### 6. Safety / Modifications
+          - Requires coaching from qualified Olympic lifting instructor
+          - Master the muscle snatch first
+          - Use bumper plates and proper lifting platform
+          - More accessible than full snatches for general athletes
 
   "Press Under (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Press Under (Barbell)"
+        instructions: |
+          ## Overview
+          The press under is an Olympic lifting accessory exercise that targets the shoulders, triceps, and core. It teaches the movement pattern of pressing under the barbell during the catch phase of snatches and jerks, building speed, positioning, and confidence.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a barbell at chest height
+          - Use your snatch or jerk grip width depending on which lift you're training
+          - Keep your chest up, core engaged, and elbows slightly below the bar
+          - The bar should rest on your front shoulders for jerk practice
+
+          ### 2. Movement
+          1. Press the bar slightly overhead while simultaneously dropping under it
+          2. Move your feet out to your receiving stance as you press
+          3. Lock your arms out completely in the overhead position
+          4. Land in a partial squat with the bar stable overhead
+          5. Stand up fully with the bar overhead
+          6. Return the bar to the starting position and repeat
+
+          ### 3. Breathing
+          - Inhale before initiating the press
+          - Hold your breath during the press and drop
+          - Exhale after achieving the lockout position
+
+          ### 4. Tips
+          - This is a skill-building accessory for Olympic lifts
+          - Focus on speed moving under the bar, not pressing power
+          - The press is minimal; emphasis is on dropping under
+          - Practice the footwork pattern for your jerk or snatch
+          - Use light weight to develop speed and confidence
+
+          ### 5. Common Mistakes
+          - Pressing too much instead of dropping under
+          - Not moving feet to proper receiving position
+          - Hesitating instead of committing to the movement
+          - Using too much weight and slowing down
+          - Not achieving full lockout overhead
+          - Poor bar path during the press
+
+          ### 6. Safety / Modifications
+          - Start with PVC pipe or empty bar to learn the pattern
+          - This is a teaching tool, not a strength exercise
+          - Keep weight light to maintain speed
+          - Essential for learning the split jerk and snatch
 
   "Snatch (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Snatch (Barbell)"
+        instructions: |
+          ## Overview
+          The snatch is a complete Olympic weightlifting movement that targets the entire body. It requires moving the barbell from floor to locked out overhead in one continuous explosive motion, demanding maximum power, speed, mobility, and technical precision.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, barbell over mid-foot
+          - Grip the bar with a wide snatch grip (arms almost at collars)
+          - Hinge at hips and bend knees to reach the bar
+          - Keep your back flat, chest up, and shoulders over the bar
+          - Arms should be straight and relaxed
+
+          ### 2. Movement
+          1. Drive explosively through your legs to lift the bar off the floor
+          2. Keep the bar close as it travels up your legs
+          3. Extend your hips and knees powerfully at mid-thigh
+          4. Pull yourself under the bar as it rises
+          5. Catch the bar overhead in a full squat with arms locked
+          6. Stand up fully with the bar overhead to complete the lift
+
+          ### 3. Breathing
+          - Take a deep breath before pulling
+          - Hold your breath through the pull, catch, and recovery
+          - Exhale after standing with the bar overhead
+
+          ### 4. Tips
+          - This is the most technical lift in weightlifting
+          - The wide grip shortens the pulling distance
+          - Speed and technique matter more than strength
+          - Every phase must be perfect for a successful lift
+          - Requires extensive coaching and practice
+
+          ### 5. Common Mistakes
+          - Using incorrect grip width
+          - Pulling with arms before completing leg drive
+          - Pressing the bar out instead of pulling under
+          - Poor receiving position and balance
+          - Inadequate mobility for deep overhead squat
+          - Attempting without proper technical foundation
+
+          ### 6. Safety / Modifications
+          - Requires extensive coaching from qualified Olympic lifting instructor
+          - Master all component parts before attempting full snatches
+          - Use bumper plates and proper lifting platform
+          - This lift demands years of practice to master
 
   "Snatch Pull (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Snatch Pull (Barbell)"
+        instructions: |
+          ## Overview
+          The snatch pull is an Olympic lifting accessory exercise that targets the posterior chain, traps, and shoulders. It isolates the pulling portion of the snatch without the catch, allowing heavier loads to develop pulling strength and reinforce proper bar path.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, barbell over mid-foot
+          - Grip the bar with a wide snatch grip
+          - Hinge at hips and bend knees to reach the bar
+          - Keep your back flat, chest up, and shoulders over the bar
+          - Engage your lats and core before pulling
+
+          ### 2. Movement
+          1. Drive explosively through your legs to lift the bar off the floor
+          2. Keep the bar close to your body as it travels upward
+          3. Extend your hips and knees powerfully at mid-thigh
+          4. Shrug your shoulders and rise onto your toes at full extension
+          5. Lower the bar back to the floor with control
+          6. Repeat for the desired number of powerful reps
+
+          ### 3. Breathing
+          - Take a deep breath before pulling
+          - Hold your breath during the pull
+          - Exhale as you lower the bar
+
+          ### 4. Tips
+          - Focus on maximum power and speed in the pull
+          - Keep the bar close to your body throughout
+          - This exercise allows heavier weight than full snatches
+          - Emphasize the triple extension at the power position
+          - Use this to develop pulling strength for snatches
+
+          ### 5. Common Mistakes
+          - Pulling with arms too early
+          - Not fully extending hips and ankles
+          - Letting the bar drift away from the body
+          - Using too much weight and losing bar speed
+          - Rounding the back during the pull
+          - Not maintaining proper bar path
+
+          ### 6. Safety / Modifications
+          - Master the snatch deadlift before adding the full pull
+          - Use 100-110% of your snatch max for this accessory
+          - Use straps if grip is limiting
+          - This is a key accessory for developing snatch strength
 
   "Split Jerk (Barbell)":
     category: Barbell
     target: Olympic
+    i18n:
+      en:
+        name: "Split Jerk (Barbell)"
+        instructions: |
+          ## Overview
+          The split jerk is an Olympic lifting movement that targets the shoulders, triceps, and legs. It involves driving a barbell from the shoulders to overhead while splitting the feet fore and aft, allowing for greater stability and heavier weights than power jerks.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Start with the barbell resting on your front shoulders
+          - Stand with feet hip-width apart
+          - Keep elbows slightly forward and high
+          - Engage your core and maintain an upright torso
+          - Prepare for a controlled dip
+
+          ### 2. Movement
+          1. Dip by bending your knees slightly while keeping torso vertical
+          2. Drive explosively upward extending through your legs
+          3. Split your feet fore and aft as you press the bar overhead
+          4. Land with front knee bent and back leg extended
+          5. Lock out your arms with the bar stable overhead
+          6. Recover by bringing your front foot back, then your back foot
+
+          ### 3. Breathing
+          - Take a breath before the dip
+          - Hold your breath during the dip, drive, and split
+          - Exhale once the bar is locked out and stable
+
+          ### 4. Tips
+          - The split stance provides more stability than other jerks
+          - Dip must be vertical without leaning forward
+          - Drive aggressively with your legs before arms press
+          - Front shin should be vertical in the receiving position
+          - This is the most common jerk variation in competition
+
+          ### 5. Common Mistakes
+          - Dipping forward instead of staying vertical
+          - Not splitting feet far enough apart
+          - Pressing with arms before driving with legs
+          - Landing with front knee past the toes
+          - Poor bar path during the drive
+          - Not fully locking out arms overhead
+
+          ### 6. Safety / Modifications
+          - Requires coaching from qualified Olympic lifting instructor
+          - Practice the split footwork without weight first
+          - Master the power jerk before learning split jerk
+          - Use blocks to practice the receiving position
 
   "Ball Slams":
     category: Machine
     target: Full Body
+    i18n:
+      en:
+        name: "Ball Slams"
+        instructions: |
+          ## Overview
+          Ball slams are an explosive full-body exercise that primarily targets the core, shoulders, and lats. They also engage the entire posterior chain and cardiovascular system, using a medicine ball to build power, release stress, and develop explosive strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart holding a medicine ball
+          - Hold the ball at chest height with both hands
+          - Keep your chest up, core engaged, and knees slightly bent
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Raise the ball overhead by reaching up tall
+          2. Forcefully slam the ball straight down to the ground
+          3. Use your entire body to generate power in the slam
+          4. Bend your knees and hips as you slam
+          5. Catch or pick up the ball as it bounces
+          6. Immediately repeat for the desired number of explosive reps
+
+          ### 3. Breathing
+          - Inhale as you raise the ball overhead
+          - Exhale forcefully as you slam the ball down
+
+          ### 4. Tips
+          - Use your entire body, not just your arms
+          - Slam with maximum force and aggression
+          - This exercise is excellent for building power and releasing stress
+          - Maintain control of the movement despite the explosiveness
+          - Use a ball designed for slamming
+
+          ### 5. Common Mistakes
+          - Using only arms instead of full body
+          - Not slamming with full force
+          - Letting the ball bounce uncontrolled
+          - Standing too upright and not engaging the core
+          - Using a ball that bounces too much
+          - Poor posture during the movement
+
+          ### 6. Safety / Modifications
+          - Use a slam ball designed for this purpose
+          - Start with a lighter ball to master the explosive movement
+          - Perform on a surface that can handle the impact
+          - Vary the tempo from explosive to controlled for different goals
 
   "Burpee":
     category: Reps Only
     target: Full Body
+    i18n:
+      en:
+        name: "Burpee"
+        instructions: |
+          ## Overview
+          The burpee is a full-body calisthenics exercise that primarily targets the chest, shoulders, core, and legs. It combines a push-up, squat, and jump into one continuous movement, building cardiovascular endurance, strength, and explosive power.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart
+          - Keep your chest up and core engaged
+          - Prepare to move quickly through the entire sequence
+
+          ### 2. Movement
+          1. Squat down and place your hands on the floor
+          2. Jump or step your feet back into a high plank position
+          3. Perform a push-up by lowering your chest to the floor
+          4. Push back up to plank position
+          5. Jump or step your feet back toward your hands
+          6. Explosively jump up with arms overhead and repeat
+
+          ### 3. Breathing
+          - Breathe throughout the movement as needed
+          - Exhale during the push-up and jump phases
+
+          ### 4. Tips
+          - Maintain a steady rhythm throughout the reps
+          - Keep your core tight during the plank and push-up
+          - Land softly from the jump
+          - Modifications can eliminate the push-up or jump
+          - Focus on form over speed when learning
+
+          ### 5. Common Mistakes
+          - Allowing hips to sag during the plank position
+          - Not achieving chest-to-floor on the push-up
+          - Landing too heavily from the jump
+          - Rushing through reps and losing form
+          - Not fully extending during the jump
+          - Holding your breath throughout
+
+          ### 6. Safety / Modifications
+          - Step back instead of jumping to reduce impact
+          - Eliminate the push-up for an easier version
+          - Remove the jump at the end if needed
+          - Advanced variation: add a pull-up or increase speed
 
   "Jumping Jack":
     category: Reps Only
     target: Full Body
+    i18n:
+      en:
+        name: "Jumping Jack"
+        instructions: |
+          ## Overview
+          The jumping jack is a basic cardiovascular exercise that primarily targets the legs, core, and shoulders. It involves jumping while spreading the legs and raising the arms, building cardiovascular endurance, coordination, and serving as an effective warm-up movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet together and arms at your sides
+          - Keep your chest up, core engaged, and eyes forward
+          - Prepare to jump and move your limbs simultaneously
+
+          ### 2. Movement
+          1. Jump and spread your feet wider than shoulder-width
+          2. Simultaneously raise your arms out to the sides and overhead
+          3. Jump again and return feet together while lowering arms
+          4. Continue alternating in a smooth, rhythmic motion
+          5. Maintain good posture throughout
+          6. Repeat for the desired number of reps or time
+
+          ### 3. Breathing
+          - Breathe rhythmically and steadily throughout
+          - Inhale and exhale with each jump cycle
+
+          ### 4. Tips
+          - Land softly on the balls of your feet
+          - Maintain a steady, controlled rhythm
+          - This is an excellent warm-up exercise
+          - Keep your core engaged throughout
+          - Arms and legs should move in coordination
+
+          ### 5. Common Mistakes
+          - Landing too heavily on your heels
+          - Not fully raising arms overhead
+          - Moving too quickly and losing coordination
+          - Landing with locked knees
+          - Poor posture with rounded shoulders
+          - Holding your breath
+
+          ### 6. Safety / Modifications
+          - Step side to side instead of jumping for low-impact version
+          - Reduce range of motion if needed
+          - Increase speed for greater intensity
+          - Advanced variation: add a squat or reach variation
 
   "Kettlebell Swing":
     category: Machine
     target: Full Body
+    i18n:
+      en:
+        name: "Kettlebell Swing"
+        instructions: |
+          ## Overview
+          The kettlebell swing is a dynamic full-body exercise that primarily targets the glutes, hamstrings, and core. It also engages the shoulders, back, and cardiovascular system, using an explosive hip hinge motion to develop power, endurance, and posterior chain strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet slightly wider than shoulder-width apart
+          - Place a kettlebell on the floor about one foot in front of you
+          - Hinge at your hips and grip the kettlebell with both hands
+          - Keep your back flat, chest up, and core engaged
+          - Pull the kettlebell slightly back between your legs
+
+          ### 2. Movement
+          1. Explosively drive your hips forward to swing the kettlebell up
+          2. Let the kettlebell float to chest or shoulder height
+          3. Keep your arms straight and let your hips do the work
+          4. As the kettlebell descends, hinge at your hips again
+          5. Let the kettlebell swing back between your legs
+          6. Immediately drive hips forward again to continue the swing
+
+          ### 3. Breathing
+          - Exhale forcefully as you drive your hips forward
+          - Inhale as the kettlebell descends
+
+          ### 4. Tips
+          - This is a hip hinge movement, not a squat
+          - The power comes from your hips, not your arms
+          - Keep your core tight throughout the movement
+          - The kettlebell should feel weightless at the top
+          - Maintain a neutral spine throughout
+
+          ### 5. Common Mistakes
+          - Squatting instead of hip hinging
+          - Using arms to lift the kettlebell instead of hips
+          - Hyperextending the back at the top of the swing
+          - Not driving hips forward explosively
+          - Letting the kettlebell drop too low between legs
+          - Rounding the back during the hinge
+
+          ### 6. Safety / Modifications
+          - Start with a lighter kettlebell to master the hip hinge
+          - Master the deadlift before attempting kettlebell swings
+          - Stop if you experience lower back discomfort
+          - Advanced variation: single-arm swings or American swings (overhead)
 
   "Kettlebell Turkish Get Up":
     category: Machine
     target: Full Body
+    i18n:
+      en:
+        name: "Kettlebell Turkish Get Up"
+        instructions: |
+          ## Overview
+          The Turkish get up is a complex full-body movement that targets the shoulders, core, and legs. It involves moving from lying down to standing while holding a kettlebell overhead, building shoulder stability, core strength, coordination, and full-body control.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on your back with a kettlebell beside your right shoulder
+          - Grip the kettlebell with your right hand and press it overhead
+          - Bend your right knee with foot flat on the floor
+          - Extend your left arm at 45 degrees on the floor
+          - Keep your eyes on the kettlebell throughout
+
+          ### 2. Movement
+          1. Roll onto your left elbow while keeping the kettlebell overhead
+          2. Press up onto your left hand
+          3. Lift your hips off the floor into a bridge position
+          4. Sweep your left leg back under you into a kneeling position
+          5. Stand up from the kneeling position
+          6. Reverse all steps to return to the starting position, then repeat on the other side
+
+          ### 3. Breathing
+          - Breathe steadily throughout the multi-step movement
+          - Never hold your breath during any phase
+
+          ### 4. Tips
+          - This is a highly technical movement requiring practice
+          - Keep your eyes on the kettlebell at all times
+          - Move slowly and deliberately through each phase
+          - Each step should be distinct and controlled
+          - Master with no weight before adding a kettlebell
+
+          ### 5. Common Mistakes
+          - Moving too quickly through the phases
+          - Not keeping eyes on the kettlebell
+          - Bending the arm holding the kettlebell
+          - Poor sequencing of the movement steps
+          - Attempting with too much weight too soon
+          - Not maintaining shoulder stability throughout
+
+          ### 6. Safety / Modifications
+          - Learn the movement without weight first
+          - Break down and practice each phase separately
+          - Start with a very light kettlebell
+          - Consider working with a qualified instructor initially
 
   "Muscle Up":
     category: Weighted Body Weight
     target: Full Body
+    i18n:
+      en:
+        name: "Muscle Up"
+        instructions: |
+          ## Overview
+          The muscle up is an advanced bodyweight exercise that combines a pull-up with a dip. It primarily targets the lats, chest, shoulders, and triceps, requiring significant upper body strength, explosive power, and technical skill to transition from below to above the bar or rings.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hang from a pull-up bar or gymnastic rings
+          - Use a false grip (thumbs over the bar) for easier transition
+          - Keep your body in a hollow position
+          - Engage your core and prepare for an explosive pull
+          - Generate a slight swing if needed for momentum
+
+          ### 2. Movement
+          1. Explosively pull yourself up toward the bar
+          2. As you rise, lean back slightly and pull your chest over the bar
+          3. Aggressively transition your chest and shoulders over the bar
+          4. Press down to complete the movement in a supported position
+          5. Lower yourself back down with control to the starting hang
+          6. Repeat for the desired number of reps
+
+          ### 3. Breathing
+          - Take a breath before pulling
+          - Exhale explosively during the pull and transition
+          - Inhale during the descent
+
+          ### 4. Tips
+          - This is an advanced movement requiring significant strength
+          - The transition phase is the most technical part
+          - Explosive pulling power is essential
+          - Practice pull-ups and dips separately first
+          - Consider using resistance bands for assistance when learning
+
+          ### 5. Common Mistakes
+          - Not generating enough explosive pull momentum
+          - Failing to lean back during the transition
+          - Inadequate strength in pull-ups or dips
+          - Poor timing of the transition phase
+          - Attempting without sufficient prerequisite strength
+          - Using too much swing or momentum
+
+          ### 6. Safety / Modifications
+          - Master strict pull-ups (15+) and dips (20+) first
+          - Use resistance band assistance when learning
+          - Practice the transition phase separately
+          - Ring muscle ups are generally easier to learn than bar muscle ups
 
   "Squat Row (Band)":
     category: Reps Only
     target: Full Body
+    i18n:
+      en:
+        name: "Squat Row (Band)"
+        instructions: |
+          ## Overview
+          The band squat row is a compound full-body exercise that combines a squat with a rowing motion. It primarily targets the legs, back, and core, using a resistance band to coordinate lower and upper body movement while building strength and coordination.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Anchor a resistance band at chest height
+          - Stand facing the anchor point holding both ends of the band
+          - Walk back until the band has tension with arms extended
+          - Stand with feet shoulder-width apart
+          - Keep your chest up and core engaged
+
+          ### 2. Movement
+          1. Simultaneously squat down and allow your arms to extend forward
+          2. At the bottom of the squat, begin pulling the band toward your body
+          3. Row the band to your chest as you drive up from the squat
+          4. Finish standing with the band pulled to your chest
+          5. Extend your arms as you lower into the next squat
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you squat down
+          - Exhale as you row and stand up
+
+          ### 4. Tips
+          - Coordinate the squat and row movements smoothly
+          - Keep constant tension on the band throughout
+          - Engage your core to maintain stability
+          - Focus on both the lower and upper body working together
+          - This exercise builds full-body coordination
+
+          ### 5. Common Mistakes
+          - Not coordinating the squat and row together
+          - Allowing the band tension to drop
+          - Rounding the back during the squat
+          - Using only arms to row without engaging back
+          - Poor squat depth
+          - Moving too quickly and losing control
+
+          ### 6. Safety / Modifications
+          - Adjust band resistance by moving closer or farther from anchor
+          - Focus on form over speed or resistance
+          - Perform squats and rows separately first to master each
+          - Anchor the band securely before starting
 
   "Sumo Deadlift High Pull (Barbell)":
     category: Barbell
     target: Full Body
+    i18n:
+      en:
+        name: "Sumo Deadlift High Pull (Barbell)"
+        instructions: |
+          ## Overview
+          The sumo deadlift high pull is a compound full-body exercise that combines elements of Olympic lifting. It primarily targets the legs, glutes, traps, and shoulders, using a wide sumo stance with an explosive pull to build power and full-body coordination.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet wider than shoulder-width, toes pointed out
+          - Position a barbell over mid-foot
+          - Grip the bar with hands inside your legs, arms straight
+          - Keep your back flat, chest up, and hips low
+          - Engage your core and lats before pulling
+
+          ### 2. Movement
+          1. Drive explosively through your legs to lift the bar
+          2. Extend your hips and knees powerfully as the bar rises
+          3. Once fully extended, pull the bar upward with your elbows high
+          4. Continue pulling until the bar reaches chest height
+          5. Lower the bar back to the floor with control
+          6. Reset and repeat for the desired number of explosive reps
+
+          ### 3. Breathing
+          - Inhale before starting the lift
+          - Hold your breath through the pull
+          - Exhale as you lower the bar
+
+          ### 4. Tips
+          - The wide stance emphasizes the legs and glutes
+          - Explode through the lift with maximum power
+          - Lead with your elbows during the high pull
+          - This exercise combines strength and power development
+          - Keep the bar close to your body throughout
+
+          ### 5. Common Mistakes
+          - Not opening hips fully before pulling
+          - Pulling with arms before completing leg drive
+          - Using too much weight and losing explosive speed
+          - Rounding the back during the pull
+          - Not keeping elbows high during the pull
+          - Letting the bar drift away from the body
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the explosive movement
+          - Ensure adequate hip mobility for the wide stance
+          - Master the sumo deadlift before adding the high pull
+          - This is an excellent exercise for CrossFit and functional training
 
   "Thruster (Barbell)":
     category: Barbell
     target: Full Body
+    i18n:
+      en:
+        name: "Thruster (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell thruster is a compound full-body exercise that combines a front squat with an overhead press. It primarily targets the legs, shoulders, and core, using one continuous explosive movement to build power, endurance, and full-body strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hold a barbell in the front rack position at shoulder height
+          - Stand with feet shoulder-width apart
+          - Keep your elbows high and chest up
+          - Engage your core throughout
+
+          ### 2. Movement
+          1. Descend into a front squat until thighs are parallel or below
+          2. Explosively drive up from the squat
+          3. Use the momentum to press the bar overhead as you stand
+          4. Lock out the bar overhead with arms fully extended
+          5. Lower the bar back to the front rack position
+          6. Immediately descend into the next squat and repeat
+
+          ### 3. Breathing
+          - Inhale as you descend into the squat
+          - Exhale explosively as you drive up and press
+
+          ### 4. Tips
+          - Use the leg drive to help press the bar overhead
+          - Keep the movement fluid and continuous
+          - Maintain an upright torso during the squat
+          - This is one of the most demanding full-body exercises
+          - Start light to master the coordination
+
+          ### 5. Common Mistakes
+          - Not using leg drive to assist the press
+          - Pausing between the squat and press
+          - Allowing the chest to collapse during the squat
+          - Not achieving full lockout overhead
+          - Poor front rack position with low elbows
+          - Using too much weight before mastering form
+
+          ### 6. Safety / Modifications
+          - Master front squats and overhead presses separately first
+          - Start with an empty bar or light dumbbells
+          - This exercise is popular in CrossFit and metabolic conditioning
+          - Reduce weight for higher rep endurance sets
 
   "Thruster (Kettlebell)":
     category: Machine
     target: Full Body
+    i18n:
+      en:
+        name: "Thruster (Kettlebell)"
+        instructions: |
+          ## Overview
+          The kettlebell thruster is a compound full-body exercise that combines a squat with an overhead press. It primarily targets the legs, shoulders, and core, using kettlebells to allow for independent arm movement while building power, endurance, and coordination.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hold one or two kettlebells in the rack position at shoulder height
+          - Stand with feet shoulder-width apart
+          - Keep your elbows tucked and chest up
+          - Engage your core throughout
+
+          ### 2. Movement
+          1. Descend into a squat until thighs are parallel or below
+          2. Explosively drive up from the squat
+          3. Use the momentum to press the kettlebells overhead as you stand
+          4. Lock out the kettlebells overhead with arms fully extended
+          5. Lower the kettlebells back to the rack position
+          6. Immediately descend into the next squat and repeat
+
+          ### 3. Breathing
+          - Inhale as you descend into the squat
+          - Exhale explosively as you drive up and press
+
+          ### 4. Tips
+          - Use the leg drive to help press the kettlebells overhead
+          - Keep the movement fluid and continuous
+          - Maintain an upright torso during the squat
+          - Kettlebells allow for a more natural arm path than barbells
+          - Start light to master the coordination
+
+          ### 5. Common Mistakes
+          - Not using leg drive to assist the press
+          - Pausing between the squat and press
+          - Allowing the chest to collapse during the squat
+          - Not achieving full lockout overhead
+          - Poor rack position with kettlebells
+          - Using too much weight before mastering form
+
+          ### 6. Safety / Modifications
+          - Master goblet squats and kettlebell presses separately first
+          - Start with one light kettlebell before using two
+          - Perform with dumbbells if kettlebells are unavailable
+          - This exercise is excellent for metabolic conditioning
 
   "Aerobics":
     category: Duration
     target: Cardio
+    i18n:
+      en:
+        name: "Aerobics"
+        instructions: |
+          ## Overview
+          Aerobics is a form of cardiovascular exercise that combines rhythmic movements with music. It targets the cardiovascular system and various muscle groups, improving heart health, endurance, coordination, and overall fitness through sustained moderate to vigorous activity.
 
   "Battle Ropes":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Battle Ropes"
+        instructions: |
+          ## Overview
+          Battle ropes are a high-intensity cardiovascular and strength exercise that targets the shoulders, arms, core, and legs. Using thick, heavy ropes to create waves and patterns, it builds power, endurance, grip strength, and provides an effective full-body metabolic workout.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing the anchor point with feet shoulder-width apart
+          - Hold one end of each rope in each hand
+          - Maintain a slight bend in your knees with core engaged
+          - Keep your back straight and chest up
+          - Position yourself at a distance where the ropes have slight slack
+
+          ### 2. Movement
+          1. Choose a rope pattern (alternating waves, double waves, slams, etc.)
+          2. Create powerful, rhythmic waves by moving your arms
+          3. Maintain the movement for a set time interval
+          4. Keep your core engaged and use your whole body
+          5. Generate continuous waves without stopping
+          6. Continue for the desired work interval (typically 20-60 seconds)
+
+          ### 3. Breathing
+          - Breathe steadily and rhythmically throughout
+          - Exhale with effort during intense portions
+          - Avoid holding your breath
+
+          ### 4. Tips
+          - Engage your core to protect your lower back
+          - Use your hips and legs, not just your arms
+          - Start with shorter intervals and build endurance
+          - Various wave patterns target different muscle groups
+          - This is excellent for high-intensity interval training
+
+          ### 5. Common Mistakes
+          - Using only arms instead of full body
+          - Standing too upright without athletic stance
+          - Not creating consistent wave patterns
+          - Holding your breath during the work
+          - Starting with intervals that are too long
+          - Poor posture with rounded back
+
+          ### 6. Safety / Modifications
+          - Start with lighter ropes or shorter intervals
+          - Reduce intensity by creating smaller waves
+          - Alternate between different wave patterns
+          - Rest adequately between intervals
 
   "Climbing":
     category: Duration
     target: Cardio
+    i18n:
+      en:
+        name: "Climbing"
+        instructions: |
+          ## Overview
+          Climbing is a full-body cardiovascular and strength activity that targets the back, arms, core, and legs. Whether rock climbing, wall climbing, or rope climbing, it builds grip strength, muscular endurance, problem-solving skills, and cardiovascular fitness.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Approach the climbing wall or surface with appropriate safety gear
+          - Assess your route before beginning
+          - Wear climbing shoes and use chalk if needed
+          - Ensure proper belay setup for safety if applicable
+          - Start from a stable position
+
+          ### 2. Movement
+          1. Plan your route and identify handholds and footholds
+          2. Use your legs to push up rather than pulling with arms alone
+          3. Maintain three points of contact when possible
+          4. Shift your weight efficiently between holds
+          5. Pace yourself to maintain endurance throughout the climb
+          6. Continue climbing for your desired duration or route
+
+          ### 3. Breathing
+          - Breathe steadily throughout the climb
+          - Take brief breaks on stable holds if needed
+          - Avoid holding your breath during difficult sections
+
+          ### 4. Tips
+          - Use your legs to push, not just arms to pull
+          - Keep your hips close to the wall for better balance
+          - Look ahead to plan your next several moves
+          - Rest on good holds when you find them
+          - Focus on technique over pure strength
+
+          ### 5. Common Mistakes
+          - Over-gripping holds and wasting energy
+          - Relying too much on arms instead of legs
+          - Not planning ahead and getting stuck
+          - Climbing too quickly and exhausting yourself
+          - Poor body positioning away from the wall
+          - Not resting on good holds
+
+          ### 6. Safety / Modifications
+          - Always climb with proper safety equipment and supervision
+          - Start with easier routes and progress gradually
+          - Consider bouldering (low heights, crash pads) for beginners
+          - Learn proper technique from experienced climbers or instructors
 
   "Cycling":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Cycling"
+        instructions: |
+          ## Overview
+          Cycling is a cardiovascular exercise that primarily targets the quadriceps, hamstrings, and glutes. Whether outdoors or on a stationary bike, it provides low-impact aerobic conditioning while building leg strength, endurance, and cardiovascular fitness.
+
+          ## How to Perform
+          ### 1. Safety 
+          - Wear a helmet when cycling outdoors
+          - Start with shorter durations and build endurance
+          - Adjust intensity by changing resistance or terrain
+          - Consider indoor cycling for weather or safety concerns
 
   "Cycling (Indoor)":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Cycling (Indoor)"
+        instructions: |
+          ## Overview
+          Indoor cycling is a cardiovascular exercise performed on a stationary bike that targets the quadriceps, hamstrings, and glutes. It provides controlled, low-impact aerobic conditioning while building leg strength and endurance in a climate-controlled environment.
+
+          ## How to Perform
+          ### 1. Safety 
+          - Adjust seat and handlebars before each session
+          - Start with beginner classes or programs
+          - Modify intensity by adjusting resistance
+          - Take breaks if needed during challenging intervals
 
   "Elliptical Machine":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Elliptical Machine"
+        instructions: |
+          ## Overview
+          The elliptical machine is a low-impact cardiovascular exercise that targets the legs, glutes, and cardiovascular system. It mimics running motion without impact stress on joints, providing effective aerobic conditioning with options for upper body engagement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Step onto the elliptical and place feet on the pedals
+          - Grip the stationary or moving handles
+          - Stand upright with core engaged
+          - Start with low resistance
+          - Begin with a comfortable stride length
+
+          ### 2. Movement
+          1. Begin moving in a forward elliptical motion
+          2. Push through your entire foot, not just toes
+          3. Use arm handles for upper body engagement if desired
+          4. Maintain an upright posture throughout
+          5. Adjust resistance and incline for desired intensity
+          6. Continue for your desired duration
+
+          ### 3. Breathing
+          - Breathe steadily and rhythmically throughout
+          - Increase breathing rate with intensity
+          - Never hold your breath
+
+          ### 4. Tips
+          - Keep your feet flat on the pedals throughout
+          - Maintain an upright posture, avoid leaning forward
+          - Use moving handles to engage upper body
+          - Adjust stride length, incline, and resistance for variety
+          - This is excellent for low-impact cardio conditioning
+
+          ### 5. Common Mistakes
+          - Leaning too heavily on the handles
+          - Allowing heels to lift off the pedals
+          - Poor posture with rounded shoulders
+          - Using only toe pressure instead of full foot
+          - Setting resistance too high initially
+          - Not engaging core during the movement
+
+          ### 6. Safety / Modifications
+          - Start with low resistance and short duration
+          - Gradually increase intensity and time
+          - Ideal for those with joint concerns or recovering from injury
+          - Vary incline and resistance for different training effects
 
   "Hiking":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Hiking"
+        instructions: |
+          ## Overview
+          Hiking is an outdoor cardiovascular activity that targets the legs, glutes, and cardiovascular system. Walking on varied terrain, especially with elevation changes, builds endurance, leg strength, and provides mental health benefits from nature exposure.
+
+          ## How to Perform
+          ### 1. Safety 
+          - Always tell someone your hiking plans
+          - Bring a fully charged phone and map
+          - Start with flat, well-marked trails
+          - Gradually progress to longer distances and elevation gain
 
   "Jump Rope":
     category: Reps Only
     target: Cardio
+    i18n:
+      en:
+        name: "Jump Rope"
+        instructions: |
+          ## Overview
+          Jump rope is a high-intensity cardiovascular exercise that targets the calves, shoulders, and cardiovascular system. It builds coordination, agility, endurance, and provides an efficient full-body workout with minimal equipment.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hold the rope handles with hands at hip level
+          - Position the rope behind your heels
+          - Stand with feet together or slightly apart
+          - Keep elbows close to your sides
+          - Maintain upright posture with core engaged
+
+          ### 2. Movement
+          1. Swing the rope over your head using your wrists
+          2. Jump with both feet to clear the rope as it passes under
+          3. Land softly on the balls of your feet
+          4. Keep jumps low, just high enough to clear the rope
+          5. Maintain a steady rhythm
+          6. Continue for desired duration or rep count
+
+          ### 3. Breathing
+          - Breathe rhythmically and steadily throughout
+          - Find a breathing pattern that matches your rhythm
+          - Avoid holding your breath
+
+          ### 4. Tips
+          - Use your wrists to turn the rope, not your arms
+          - Keep jumps small and efficient
+          - Land softly to reduce joint impact
+          - Start with shorter intervals and build endurance
+          - Various techniques (single leg, double-unders) add variety
+
+          ### 5. Common Mistakes
+          - Jumping too high unnecessarily
+          - Using arms instead of wrists to turn rope
+          - Landing too heavily on heels
+          - Holding handles too far from body
+          - Poor posture with rounded shoulders
+          - Rope length not adjusted properly for height
+
+          ### 6. Safety / Modifications
+          - Adjust rope length appropriately for your height
+          - Start with basic bounce and progress to variations
+          - Perform on appropriate surface (not concrete)
+          - Wear supportive athletic shoes
 
   "Rowing (Machine)":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Rowing (Machine)"
+        instructions: |
+          ## Overview
+          The rowing machine is a full-body cardiovascular exercise that targets the legs, back, core, and arms. It provides low-impact aerobic conditioning while building strength and endurance through a rowing motion that engages approximately 85% of body muscles.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the rower with feet secured in the foot straps
+          - Grip the handle with an overhand grip
+          - Start with shins vertical and body leaning slightly forward
+          - Keep your back straight and core engaged
+          - Arms should be extended reaching for the handle
+
+          ### 2. Movement
+          1. Push through your legs to begin the drive
+          2. Once legs are extended, lean back slightly and pull handle to chest
+          3. Reverse the motion: extend arms, lean forward, bend knees
+          4. Maintain a smooth, continuous rhythm
+          5. The drive should be powerful, the recovery controlled
+          6. Continue rowing for your desired duration or distance
+
+          ### 3. Breathing
+          - Exhale during the drive (power phase)
+          - Inhale during the recovery
+
+          ### 4. Tips
+          - The power comes from your legs (60%), core (20%), then arms (20%)
+          - Maintain good posture throughout the stroke
+          - Keep the handle moving smoothly and steadily
+          - Aim for a consistent stroke rate (20-30 strokes per minute)
+          - Watch the display for feedback on pace and power
+
+          ### 5. Common Mistakes
+          - Using only arms instead of legs for power
+          - Rounding the back during the stroke
+          - Pulling with bent arms before legs are extended
+          - Gripping the handle too tightly
+          - Rushing the recovery phase
+          - Leaning back too far at the finish
+
+          ### 6. Safety / Modifications
+          - Start with short sessions to learn proper form
+          - Adjust foot strap position for comfort
+          - Reduce resistance (damper setting) for longer sessions
+          - This provides excellent full-body low-impact cardio
 
   "Running":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Running"
+        instructions: |
+          ## Overview
+          Running is a high-impact cardiovascular exercise that primarily targets the legs and cardiovascular system. It builds endurance, burns calories efficiently, strengthens bones, and provides mental health benefits while requiring minimal equipment.
+          
+          ## How to Perform
+          ### 1. Safety 
+          - Get properly fitted running shoes
+          - Start with shorter distances and build gradually
+          - Run in safe, well-lit areas
+          - Consider run-walk method for beginners
 
   "Running (Treadmill)":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Running (Treadmill)"
+        instructions: |
+          ## Overview
+          Treadmill running is a cardiovascular exercise that targets the legs and cardiovascular system in a controlled environment. It provides the benefits of running with adjustable pace, incline, and climate control while reducing some variables of outdoor running.
+          
+          ## How to Perform
+          ### 1. Safety 
+          - Always use the safety clip
+          - Start and stop the belt gradually
+          - Position yourself in center of the belt
+          - Stop immediately if you feel dizzy or unstable
 
   "Skating":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Skating"
+        instructions: |
+          ## Overview
+          Skating (ice skating, roller skating, or inline skating) is a cardiovascular activity that targets the legs, glutes, and core. It builds balance, coordination, leg strength, and provides effective aerobic conditioning while being relatively low-impact on joints.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Wear appropriate skates that fit properly
+          - Use protective gear (helmet, knee pads, wrist guards)
+          - Start in a stable, balanced stance
+          - Keep knees slightly bent
+          - Maintain an athletic posture
+
+          ### 2. Movement
+          1. Push off with one leg at an angle
+          2. Glide on the opposite leg
+          3. Shift weight and push with the other leg
+          4. Maintain a rhythmic side-to-side motion
+          5. Keep your core engaged and knees bent
+          6. Continue skating for your desired duration
+
+          ### 3. Breathing
+          - Breathe steadily and rhythmically throughout
+          - Adjust pace to maintain comfortable breathing
+          - Take breaks if needed when learning
+
+          ### 4. Tips
+          - Bend your knees for better balance and power
+          - Push to the side, not straight back
+          - Keep your weight over your skates
+          - Relax and find your rhythm
+          - Practice stopping techniques before building speed
+
+          ### 5. Common Mistakes
+          - Standing too upright with locked knees
+          - Pushing straight back instead of to the side
+          - Not wearing proper safety equipment
+          - Skating beyond current skill level
+          - Looking down at feet instead of forward
+          - Tensing up instead of staying relaxed
+
+          ### 6. Safety / Modifications
+          - Always wear appropriate protective gear
+          - Learn proper falling techniques
+          - Start on smooth, flat surfaces
+          - Take lessons from qualified instructors for faster progression
 
   "Skiing":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Skiing"
+        instructions: |
+          ## Overview
+          Skiing is a full-body cardiovascular and strength activity that primarily targets the legs, core, and cardiovascular system. Whether downhill or cross-country, it builds leg strength, balance, endurance, and provides an exhilarating outdoor winter workout.
+
+          ## How to Perform
+          ### 1. Safety 
+          - Take lessons from qualified instructors
+          - Always wear a helmet
+          - Ski within your ability level
+          - Check weather and avalanche conditions
 
   "Snowboarding":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Snowboarding"
+        instructions: |
+          ## Overview
+          Snowboarding is a full-body cardiovascular and strength activity that targets the legs, core, and cardiovascular system. It builds leg strength, balance, core stability, and provides an exciting winter sport workout that engages the entire body.
+
+          ## How to Perform
+          ### 1. Safety 
+          - Always wear a helmet and wrist guards
+          - Take lessons from qualified instructors
+          - Start on beginner slopes and progress gradually
+          - Check weather and snow conditions before riding
 
   "Swimming":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Swimming"
+        instructions: |
+          ## Overview
+          Swimming is a full-body, low-impact cardiovascular exercise that targets all major muscle groups. It provides excellent aerobic conditioning while building strength and endurance with zero impact on joints, making it ideal for all fitness levels.
+
+          ## How to Perform
+          ### 1. Safety 
+          - Never swim alone
+          - Learn proper technique from qualified instructors
+          - Start with easier strokes and shorter distances
+          - Use flotation devices if needed while learning
 
   "Walking":
     category: Cardio
     target: Cardio
+    i18n:
+      en:
+        name: "Walking"
+        instructions: |
+          ## Overview
+          Walking is a low-impact cardiovascular exercise that targets the legs, glutes, and cardiovascular system. It provides accessible aerobic conditioning for all fitness levels, improves overall health, and requires no special equipment or training.
 
   "Yoga":
     category: Duration
     target: Cardio
+    i18n:
+      en:
+        name: "Yoga"
+        instructions: |
+          ## Overview
+          Yoga is a mind-body practice that targets flexibility, strength, balance, and mental well-being. It combines physical postures, breathing techniques, and meditation to improve overall fitness, reduce stress, and enhance body awareness and control.
+          
+          ## How to Perform
+          ### 1. Safety 
+          - Learn from qualified yoga instructors
+          - Use props to make poses accessible
+          - Inform instructor of any injuries or limitations
+          - Start with beginner classes and progress gradually
