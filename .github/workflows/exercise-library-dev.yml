@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  dev:
     uses: ./.github/workflows/exercise-library.yml
     with:
       AWS_ROLE: 'arn:aws:iam::583168578067:role/HeartGitHubActionsDeployRole'
