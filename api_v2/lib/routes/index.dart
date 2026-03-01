@@ -1,5 +1,6 @@
 import 'package:heart/core/response.dart';
 import 'package:heart/routes/charts.dart' as charts;
+import 'package:heart/routes/exercises.dart' as exercises;
 import 'package:heart/routes/misc.dart' as version;
 import 'package:relic/relic.dart';
 
@@ -8,6 +9,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/charts', .get): charts.getChartPreferences,
   ('/charts', .post): charts.saveChartPreference,
   ('/charts/:preferenceId', .delete): charts.deleteChartPreference,
+  ('/exercises', .get): exercises.getExercises,
 };
 
 const _publicRoutes = {'/version'};

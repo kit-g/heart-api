@@ -35,6 +35,14 @@ abstract interface class AppConfig {
 
   String get minimalAppVersion;
 
+  bool get shouldCheckVersion;
+
+  String get exerciseBucket;
+
+  List<String> get supportedLocales;
+
+  String get defaultLocale;
+
   factory AppConfig.fromEnv() {
     switch (Platform.environment) {
       case {
@@ -43,8 +51,9 @@ abstract interface class AppConfig {
             'FIREBASE_PROJECT_ID': String firebaseProjectId,
             'WORKOUTS_TABLE': String table,
             'MIN_APP_VERSION': String version,
+            'EXERCISE_BUCKET': String exerciseBucket,
           }
-          when [region, env, firebaseProjectId, table].every((v) => v.isNotEmpty):
+          when [region, env, firebaseProjectId, table, exerciseBucket].every((v) => v.isNotEmpty):
         return _EnvConfig(
           awsProfile: Platform.environment['AWS_PROFILE'],
           awsRegion: region,
@@ -54,11 +63,15 @@ abstract interface class AppConfig {
           workoutsTable: table,
           testUserId: Platform.environment['TEST_USER_ID'],
           minimalAppVersion: version,
+          shouldCheckVersion: Platform.environment['SHOULD_CHECK_VERSION']?.toLowerCase() == 'true',
+          exerciseBucket: exerciseBucket,
+          supportedLocales: Platform.environment['SUPPORTED_LOCALES']?.split(',') ?? ['en'],
+          defaultLocale: Platform.environment['DEFAULT_LOCALE'] ?? 'en',
         );
       default:
         throw StateError(
           'Missing required environment variables. '
-          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, and WORKOUTS_TABLE are set.',
+          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, EXERCISE_BUCKET, and WORKOUTS_TABLE are set.',
         );
     }
   }
@@ -81,6 +94,14 @@ class _EnvConfig implements AppConfig {
   final String? testUserId;
   @override
   final String minimalAppVersion;
+  @override
+  final bool shouldCheckVersion;
+  @override
+  final String exerciseBucket;
+  @override
+  final List<String> supportedLocales;
+  @override
+  final String defaultLocale;
 
   const _EnvConfig({
     required this.env,
@@ -91,6 +112,10 @@ class _EnvConfig implements AppConfig {
     this.awsProfile,
     this.testUserId,
     required this.minimalAppVersion,
+    required this.shouldCheckVersion,
+    required this.exerciseBucket,
+    required this.supportedLocales,
+    required this.defaultLocale,
   });
 }
 

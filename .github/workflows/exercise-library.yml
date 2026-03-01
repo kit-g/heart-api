@@ -1,0 +1,62 @@
+name: "Generate Exercise library"
+
+on:
+  workflow_dispatch:
+    inputs:
+      AWS_REGION:
+        required: true
+        type: string
+        default: 'ca-central-1'
+      AWS_ROLE:
+        required: true
+        type: string
+      EXERCISE_BUCKET:
+        required: true
+        type: string
+
+  workflow_call:
+    inputs:
+      AWS_REGION:
+        required: true
+        type: string
+        default: 'ca-central-1'
+      AWS_ROLE:
+        required: true
+        type: string
+      EXERCISE_BUCKET:
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  generate-library:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: "Install dependencies"
+        run: |
+          pip install pyyaml
+
+      - name: "Generate JSON Files"
+        run: |
+          cd scripts
+          python library_locales.py
+
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ inputs.AWS_ROLE }}
+          aws-region: ${{ inputs.AWS_REGION }}
+
+      - name: "Sync to S3"
+        run: |
+          aws s3 sync scripts/dist/ s3://${{ inputs.EXERCISE_BUCKET }}/library/ --delete
