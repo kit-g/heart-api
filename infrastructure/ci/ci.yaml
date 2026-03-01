@@ -12,6 +12,7 @@ Mappings:
       CloudFrontDistribution: "E2QX06VIJT572Y"
       GitHubIdp: "arn:aws:iam::583168578067:oidc-provider/token.actions.githubusercontent.com"
       HostingBucket: "583168578067-heart-app"
+      AssetsBucket: "583168578067-user-media"
     prod:
       CloudFrontDistribution: ""
       GitHubIdp: ""
@@ -95,6 +96,22 @@ Resources:
                   - 'lambda:UpdateFunctionCode'
                 Resource:
                   - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:heart-*"
+        - PolicyName: 'ExerciseLibraryPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                  - 's3:ListBucket'
+                  - 's3:DeleteObject'
+                Resource:
+                  - !Sub
+                    - 'arn:aws:s3:::${Bucket}'
+                    - Bucket: !FindInMap [ Env, !Ref Env, AssetsBucket ]
+                  - !Sub
+                    - 'arn:aws:s3:::${Bucket}/*'
+                    - Bucket: !FindInMap [ Env, !Ref Env, AssetsBucket ]
 
 Outputs:
   GitHubOIDCProvider:
