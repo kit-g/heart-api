@@ -6221,78 +6221,924 @@ exercises:
           - Start with lighter weight than your flat bench press
           - Adjust incline angle between 30-45 degrees based on comfort
           - If you experience shoulder discomfort, adjust your grip width or incline angle
-
   "Incline Bench Press (Cable)":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Incline Bench Press (Cable)"
+        instructions: |
+          ## Overview
+          The cable incline bench press is a machine-based pressing exercise that primarily targets the upper pectoralis major. It also engages the front deltoids and triceps, using cables on an incline to provide constant tension throughout the movement for effective upper chest development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set an adjustable bench to a 30-45 degree incline between two low cable pulleys
+          - Attach handles to both low pulleys and set appropriate weight
+          - Lie back on the incline bench with your feet firmly planted on the floor
+          - Grip both handles with arms extended, hands at upper chest level
+          - Keep your shoulder blades retracted and pressed into the bench
+
+          ### 2. Movement
+          1. Lower the handles slowly toward your upper chest by bending your elbows
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Lower until your hands are beside your upper chest
+          4. Pause briefly at the bottom
+          5. Press the handles back up by extending your arms
+          6. Stop just before full lockout to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Inhale as you lower the handles toward your chest
+          - Exhale as you press the handles back up
+
+          ### 4. Tips
+          - Maintain constant tension by not fully locking out at the top
+          - Keep your shoulder blades retracted throughout
+          - Focus on squeezing your upper chest at the top
+          - Control both the lowering and pressing phases equally
+          - Keep your feet flat and core engaged for stability
+
+          ### 5. Common Mistakes
+          - Fully locking out and losing tension on the chest
+          - Allowing the elbows to flare out excessively
+          - Using momentum instead of controlled movement
+          - Lifting the glutes off the bench
+          - Not maintaining shoulder blade retraction
+          - Setting the incline too steep, shifting emphasis to shoulders
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the cable press pattern on an incline
+          - Adjust incline angle between 30-45 degrees for optimal upper chest engagement
+          - Use one arm at a time for unilateral training
+          - Advanced variation: add a pause at the bottom for increased intensity
 
   "Incline Bench Press (Dumbbell)":
     category: Dumbbell
     target: Chest
+    i18n:
+      en:
+        name: "Incline Bench Press (Dumbbell)"
+        instructions: |
+          ## Overview
+          The incline dumbbell bench press is a compound pressing exercise that primarily targets the upper pectoralis major. It also engages the front deltoids and triceps, using an inclined position with independent arm movement for greater range of motion and upper chest development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set an adjustable bench to a 30-45 degree incline
+          - Sit back on the bench with your feet firmly planted on the floor
+          - Hold a dumbbell in each hand at upper chest level
+          - Position dumbbells with a neutral or pronated grip
+          - Keep your shoulder blades retracted and pressed into the bench
+
+          ### 2. Movement
+          1. Press both dumbbells upward by extending your arms
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Continue until your arms are fully extended above your upper chest
+          4. Bring dumbbells together at the top without clashing them
+          5. Slowly lower the dumbbells back to starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the dumbbells to your chest
+          - Exhale as you press the dumbbells back up
+
+          ### 4. Tips
+          - Keep your shoulder blades retracted throughout
+          - Focus on squeezing your upper chest at the top
+          - Allow dumbbells to travel deeper than a barbell would
+          - Control both the lowering and pressing phases
+          - Maintain a 30-45 degree incline for optimal upper chest engagement
+
+          ### 5. Common Mistakes
+          - Setting the incline too steep, shifting emphasis to shoulders
+          - Bouncing dumbbells off the chest
+          - Allowing the elbows to flare out excessively
+          - Lifting the glutes off the bench during the press
+          - Clashing dumbbells together at the top
+          - Losing shoulder blade retraction
+
+          ### 6. Safety / Modifications
+          - Start with lighter dumbbells than your flat press
+          - Adjust incline angle between 30-45 degrees based on comfort
+          - Use a spotter when attempting heavy weights
+          - Advanced variation: pause for 2-3 seconds at the bottom
 
   "Incline Bench Press (Smith Machine)":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Incline Bench Press (Smith Machine)"
+        instructions: |
+          ## Overview
+          The Smith machine incline bench press is a guided pressing exercise that primarily targets the upper pectoralis major. It also engages the front deltoids and triceps, using a fixed vertical bar path on an incline to provide stability and emphasize the upper chest.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set an adjustable bench to a 30-45 degree incline under the Smith machine bar
+          - Lie back on the bench with your upper chest aligned under the bar
+          - Grip the bar with hands slightly wider than shoulder-width apart
+          - Unrack the bar by rotating it and hold with arms extended
+          - Keep your shoulder blades retracted and feet flat on the floor
+
+          ### 2. Movement
+          1. Lower the bar slowly to your upper chest or collarbone
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Touch the bar lightly to your chest
+          4. Pause briefly at the bottom
+          5. Press the bar back up by extending your arms
+          6. Lock out your elbows at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the bar to your chest
+          - Exhale as you press the bar back up
+
+          ### 4. Tips
+          - Position the bench so the bar path aligns naturally with your press
+          - Keep your shoulder blades retracted throughout
+          - Focus on squeezing your upper chest at the top
+          - Take advantage of the fixed path for controlled reps
+          - Maintain a 30-45 degree incline for optimal upper chest engagement
+
+          ### 5. Common Mistakes
+          - Positioning the bench incorrectly relative to the bar path
+          - Setting the incline too steep, shifting emphasis to shoulders
+          - Bouncing the bar off the chest
+          - Allowing the elbows to flare out excessively
+          - Not achieving full range of motion
+          - Relying too heavily on the machine's stability
+
+          ### 6. Safety / Modifications
+          - Adjust bench position to ensure natural bar path over your upper chest
+          - Use the safety catches at appropriate height
+          - Adjust incline angle between 30-45 degrees based on comfort
+          - Advanced variation: use slow negatives or add chains
 
   "Incline Chest Fly (Dumbbell)":
     category: Dumbbell
     target: Chest
+    i18n:
+      en:
+        name: "Incline Chest Fly (Dumbbell)"
+        instructions: |
+          ## Overview
+          The incline dumbbell chest fly is an isolation exercise that primarily targets the upper pectoralis major. It also engages the front deltoids as stabilizers, using an inclined position with dumbbells to create a wide arc of motion that stretches and contracts the upper chest muscles.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set an adjustable bench to a 30-45 degree incline
+          - Lie back on the bench with your feet firmly planted on the floor
+          - Hold a dumbbell in each hand with arms extended above your upper chest
+          - Position dumbbells with palms facing each other
+          - Keep a slight bend in your elbows throughout
+
+          ### 2. Movement
+          1. Lower both dumbbells out to the sides in a wide arc
+          2. Keep your elbows slightly bent throughout the movement
+          3. Continue lowering until you feel a stretch in your upper chest
+          4. Pause briefly at the bottom
+          5. Bring the dumbbells back together above your chest in a hugging motion
+          6. Squeeze your upper chest at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the dumbbells out to the sides
+          - Exhale as you bring the dumbbells back together
+
+          ### 4. Tips
+          - Keep a consistent slight bend in your elbows throughout
+          - Focus on the stretch at the bottom and squeeze at the top
+          - Maintain shoulder blade retraction throughout
+          - The incline emphasizes the upper chest fibers
+          - Control the weight throughout the entire arc
+
+          ### 5. Common Mistakes
+          - Straightening the arms completely, turning it into a press
+          - Bending the elbows too much, reducing chest engagement
+          - Lowering the dumbbells too far and straining the shoulders
+          - Setting the incline too steep, shifting emphasis to shoulders
+          - Using too much weight and losing the arc motion
+          - Not squeezing at the top of the movement
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master the arc motion on an incline
+          - Keep elbows slightly bent to protect shoulder joints
+          - Adjust incline angle between 30-45 degrees for comfort
+          - Advanced variation: pause for 2-3 seconds at the bottom stretch
 
   "Incline Chest Press (Machine)":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Incline Chest Press (Machine)"
+        instructions: |
+          ## Overview
+          The incline machine chest press is a guided pressing exercise that primarily targets the upper pectoralis major. It also engages the front deltoids and triceps, using a fixed movement path on an incline to provide stability and consistent resistance for upper chest development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the incline chest press machine with your back firmly against the pad
+          - Adjust the seat height so the handles align with your upper chest
+          - Grip the handles with both hands
+          - Plant your feet flat on the floor and engage your core
+          - Keep your shoulder blades retracted against the pad
+
+          ### 2. Movement
+          1. Press the handles forward and upward by extending your arms
+          2. Keep your back pressed firmly against the pad throughout
+          3. Continue until your arms are fully extended
+          4. Pause briefly at full extension
+          5. Slowly return the handles to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you press the handles forward
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - Focus on squeezing your upper chest at full extension
+          - Maintain shoulder blade retraction throughout
+          - Control both the pressing and returning phases
+          - Maintain constant tension by not letting the weight stack rest
+
+          ### 5. Common Mistakes
+          - Lifting your back off the pad during the press
+          - Using momentum instead of controlled muscle contraction
+          - Letting the weight stack rest between reps
+          - Not achieving full range of motion
+          - Allowing the shoulders to shrug forward
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure handles align with your upper chest
+          - Start with light weight to establish proper form
+          - Try different grip positions if available
+          - Advanced variation: pause for 2-3 seconds at full extension
 
   "Iso-Lateral Chest Press (Machine)":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Iso-Lateral Chest Press (Machine)"
+        instructions: |
+          ## Overview
+          The iso-lateral chest press is a machine-based pressing exercise that primarily targets the pectoralis major. It also engages the front deltoids and triceps, using independent arm movement to address strength imbalances and allow unilateral or bilateral training.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the iso-lateral chest press machine with your back firmly against the pad
+          - Adjust the seat height so the handles align with your mid-chest
+          - Grip the handles with both hands
+          - Plant your feet flat on the floor and engage your core
+          - Keep your shoulder blades retracted against the pad
+
+          ### 2. Movement
+          1. Press the handles forward by extending your arms
+          2. Keep your back pressed firmly against the pad throughout
+          3. Continue until your arms are fully extended
+          4. Pause briefly at full extension
+          5. Slowly return the handles to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you press the handles forward
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your back firmly against the pad to isolate your chest
+          - Perform both arms together or alternate for unilateral training
+          - Focus on squeezing your chest at full extension
+          - Control the weight throughout the entire range of motion
+          - Maintain constant tension by not letting the weight stack rest
+
+          ### 5. Common Mistakes
+          - Lifting your back off the pad during the press
+          - Using momentum instead of controlled muscle contraction
+          - Letting the weight stack rest between reps
+          - Not achieving full range of motion
+          - Not equalizing strength between both arms
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure proper alignment with the handles
+          - Start with light weight to establish proper form
+          - Perform one arm at a time to address imbalances
+          - Advanced variation: pause for 2-3 seconds at full extension
 
   "Pec Deck (Machine)":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Pec Deck (Machine)"
+        instructions: |
+          ## Overview
+          The pec deck is an isolation exercise that primarily targets the pectoralis major. It also engages the front deltoids minimally, using a fixed movement path with padded arms to provide stability and consistent resistance throughout the fly motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the pec deck machine with your back firmly against the pad
+          - Adjust the seat height so your upper arms are parallel to the floor
+          - Position your forearms against the padded arms of the machine
+          - Grip the handles lightly or rest your forearms on the pads
+          - Keep your feet flat on the floor and engage your core
+
+          ### 2. Movement
+          1. Bring both padded arms together in front of your chest
+          2. Keep your elbows at roughly shoulder height throughout
+          3. Continue until the pads meet or nearly touch
+          4. Squeeze your chest hard at the peak contraction
+          5. Slowly return the pads to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you bring the pads together
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - Focus on squeezing your chest at the peak
+          - Maintain constant tension by not letting the weight stack rest
+          - Keep your elbows at roughly shoulder height
+          - Control both the squeezing and opening phases
+
+          ### 5. Common Mistakes
+          - Lifting your back off the pad during the movement
+          - Using momentum instead of controlled muscle contraction
+          - Letting the weight stack rest between reps
+          - Lowering the pads too far back and straining the shoulders
+          - Moving too quickly and losing the squeeze
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure proper arm alignment
+          - Start with light weight to establish mind-muscle connection
+          - Reduce range of motion if you experience shoulder discomfort
+          - Advanced variation: pause for 2-3 seconds at peak contraction
 
   "Pullover (Dumbbell)":
     category: Dumbbell
     target: Chest
+    i18n:
+      en:
+        name: "Pullover (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell pullover is a compound exercise that primarily targets the pectoralis major and latissimus dorsi. It also engages the triceps and serratus anterior, using a unique overhead arc motion that stretches and contracts both chest and back muscles.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie perpendicular across a flat bench with only your upper back supported
+          - Hold a single dumbbell with both hands above your chest
+          - Grip the dumbbell by cupping the inner plate with both palms
+          - Keep your hips slightly lower than your shoulders
+          - Plant your feet flat on the floor for stability
+
+          ### 2. Movement
+          1. Lower the dumbbell in an arc behind your head
+          2. Keep a slight bend in your elbows throughout
+          3. Continue until you feel a stretch in your chest and lats
+          4. Pause briefly at the bottom
+          5. Pull the dumbbell back to the starting position in the same arc
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale deeply as you lower the dumbbell behind your head
+          - Exhale as you pull the dumbbell back up
+
+          ### 4. Tips
+          - Keep your hips slightly dropped throughout to maximize stretch
+          - Maintain a slight bend in your elbows throughout
+          - Focus on the stretch in your chest and lats at the bottom
+          - Control the weight throughout the entire arc
+          - Keep your core engaged for stability
+
+          ### 5. Common Mistakes
+          - Using too much weight and losing control
+          - Straightening the arms completely
+          - Bending the elbows too much, turning it into a triceps extension
+          - Not achieving a full stretch at the bottom
+          - Moving too quickly through the repetitions
+          - Raising the hips too high and losing the stretch
+
+          ### 6. Safety / Modifications
+          - Start with a moderate dumbbell to master the arc motion
+          - Keep elbows slightly bent to protect shoulder and elbow joints
+          - Perform on a flat bench lying lengthwise for more stability
+          - Advanced variation: pause for 2-3 seconds at the bottom stretch
 
   "Pullover (Machine)":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Pullover (Machine)"
+        instructions: |
+          ## Overview
+          The machine pullover is an isolation exercise that primarily targets the latissimus dorsi and pectoralis major. It also engages the triceps and serratus anterior, using a fixed movement path to provide stability and consistent resistance throughout the pullover motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the pullover machine with your back firmly against the pad
+          - Adjust the seat height so your shoulders align with the machine's pivot point
+          - Position your elbows on the padded arm rests
+          - Grip the handles or bar lightly
+          - Keep your feet flat on the floor and engage your core
+
+          ### 2. Movement
+          1. Pull the padded arms down and forward in an arc motion
+          2. Keep your elbows relatively stationary on the pads
+          3. Continue until the bar reaches your upper abdomen or chest
+          4. Squeeze your lats and chest at the bottom
+          5. Slowly return the arms to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the arms down and forward
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - Focus on pulling with your lats and chest, not your arms
+          - Maintain constant tension by not letting the weight stack rest
+          - Keep your elbows positioned on the pads throughout
+          - Control both the pulling and returning phases
+
+          ### 5. Common Mistakes
+          - Lifting your back off the pad during the pull
+          - Using momentum instead of controlled muscle contraction
+          - Letting the weight stack rest between reps
+          - Pulling with your arms instead of your lats and chest
+          - Not achieving full range of motion
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure proper shoulder alignment with the pivot point
+          - Start with light weight to establish mind-muscle connection
+          - Advanced variation: pause for 2-3 seconds at the bottom contraction
+          - Focus on feeling the stretch at the top and contraction at the bottom
 
   "Push Up":
     category: Weighted Body Weight
     target: Chest
+    i18n:
+      en:
+        name: "Push Up"
+        instructions: |
+          ## Overview
+          The push up is a bodyweight pressing exercise that primarily targets the pectoralis major. It also engages the front deltoids, triceps, and core, making it one of the most effective and versatile upper body exercises for building strength and endurance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Begin in a high plank position with hands slightly wider than shoulder-width apart
+          - Position your hands directly under your shoulders
+          - Keep your body in a straight line from head to heels
+          - Engage your core and glutes throughout
+          - Keep your feet together or hip-width apart
+
+          ### 2. Movement
+          1. Lower your body by bending your elbows
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Continue lowering until your chest nearly touches the floor
+          4. Pause briefly at the bottom
+          5. Press through your palms to extend your arms and return to starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your body down
+          - Exhale as you press back up to the starting position
+
+          ### 4. Tips
+          - Maintain a straight body line from head to heels throughout
+          - Keep your core and glutes engaged to prevent sagging
+          - Focus on controlled movement in both directions
+          - Keep your neck neutral, looking slightly ahead of your hands
+          - Achieve full range of motion from chest near floor to arms fully extended
+
+          ### 5. Common Mistakes
+          - Allowing the hips to sag or pike upward
+          - Flaring the elbows out excessively
+          - Not achieving full range of motion
+          - Letting the head drop or looking down
+          - Using momentum instead of controlled movement
+          - Holding your breath during the movement
+
+          ### 6. Safety / Modifications
+          - Start with knee push ups if standard push ups are too challenging
+          - Elevate your hands on a bench or wall for an easier variation
+          - Advanced variation: add weight with a vest or resistance band across your back
+          - Try different hand positions (wide, narrow, diamond) for variety
 
   "Push Up (Band)":
     category: Weighted Body Weight
     target: Chest
+    i18n:
+      en:
+        name: "Push Up (Band)"
+        instructions: |
+          ## Overview
+          The band push up is a resistance-enhanced bodyweight exercise that primarily targets the pectoralis major. It also engages the front deltoids, triceps, and core, using a resistance band to provide progressive resistance throughout the movement for increased difficulty.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Loop a resistance band across your upper back
+          - Hold one end of the band in each hand
+          - Begin in a high plank position with hands slightly wider than shoulder-width
+          - Position the band under your palms on the floor
+          - Keep your body in a straight line from head to heels
+
+          ### 2. Movement
+          1. Lower your body by bending your elbows against the band resistance
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Continue lowering until your chest nearly touches the floor
+          4. Pause briefly at the bottom
+          5. Press through your palms against the band resistance to return to starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your body down
+          - Exhale as you press back up to the starting position
+
+          ### 4. Tips
+          - The band provides more resistance at the top of the movement
+          - Maintain a straight body line from head to heels throughout
+          - Keep your core and glutes engaged to prevent sagging
+          - Focus on controlled movement in both directions
+          - Adjust band thickness to modify resistance level
+
+          ### 5. Common Mistakes
+          - Allowing the hips to sag or pike upward
+          - Flaring the elbows out excessively
+          - Not achieving full range of motion
+          - Letting the band slip out of position
+          - Using momentum instead of controlled movement
+          - Holding your breath during the movement
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master the movement
+          - Perform knee push ups with the band if needed
+          - Adjust band tension by changing hand position or band thickness
+          - Advanced variation: use a heavier resistance band or add a pause at the bottom
 
   "Push Up (Knees)":
     category: Reps Only
     target: Chest
+    i18n:
+      en:
+        name: "Push Up (Knees)"
+        instructions: |
+          ## Overview
+          The knee push up is a modified bodyweight pressing exercise that primarily targets the pectoralis major. It also engages the front deltoids, triceps, and core, using a kneeling position to reduce the load and make the exercise more accessible for beginners.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Begin in a high plank position then lower your knees to the floor
+          - Position your hands slightly wider than shoulder-width apart
+          - Keep your body in a straight line from head to knees
+          - Cross your ankles behind you or keep them down
+          - Engage your core throughout
+
+          ### 2. Movement
+          1. Lower your body by bending your elbows
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Continue lowering until your chest nearly touches the floor
+          4. Pause briefly at the bottom
+          5. Press through your palms to extend your arms and return to starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your body down
+          - Exhale as you press back up to the starting position
+
+          ### 4. Tips
+          - Maintain a straight line from head to knees throughout
+          - Keep your core engaged to prevent sagging
+          - Focus on controlled movement in both directions
+          - Keep your neck neutral, looking slightly ahead of your hands
+          - Achieve full range of motion from chest near floor to arms fully extended
+
+          ### 5. Common Mistakes
+          - Allowing the hips to sag downward
+          - Flaring the elbows out excessively
+          - Not achieving full range of motion
+          - Letting the head drop or looking down
+          - Using momentum instead of controlled movement
+          - Positioning knees too far forward, reducing difficulty too much
+
+          ### 6. Safety / Modifications
+          - Use a mat or padding under your knees for comfort
+          - Elevate your hands on a bench for an even easier variation
+          - Progress to standard push ups once you can perform 15-20 controlled reps
+          - Try different hand positions for variety once you build strength
 
   "Box Jump":
     category: Reps Only
     target: Legs
+    i18n:
+      en:
+        name: "Box Jump"
+        instructions: |
+          ## Overview
+          The box jump is a plyometric exercise that primarily targets the quadriceps, glutes, and calves. It also engages the hamstrings and core, using explosive jumping to build lower body power, athleticism, and coordination.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing a sturdy box or platform with feet hip-width apart
+          - Position yourself an arm's length away from the box
+          - Keep your chest up and core engaged
+          - Bend your knees slightly and swing your arms back
+          - Prepare for an explosive jump
+
+          ### 2. Movement
+          1. Swing your arms forward and explosively jump onto the box
+          2. Land softly on the box with both feet simultaneously
+          3. Absorb the impact by landing in a partial squat position
+          4. Stand up fully on top of the box
+          5. Step down carefully one foot at a time
+          6. Reset and repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale during the preparatory phase
+          - Exhale explosively as you jump
+
+          ### 4. Tips
+          - Focus on explosive power from your legs, not just height
+          - Land softly with bent knees to absorb impact
+          - Start with a lower box height and progress gradually
+          - Keep your chest up and eyes on the box throughout
+          - Step down rather than jumping down to reduce joint stress
+
+          ### 5. Common Mistakes
+          - Landing with straight legs, increasing injury risk
+          - Jumping down instead of stepping down
+          - Using a box that's too high for your current ability
+          - Not fully extending at the top of the box
+          - Landing with feet in different positions
+          - Rushing reps without proper reset between jumps
+
+          ### 6. Safety / Modifications
+          - Start with a low, stable box (12-18 inches) to master technique
+          - Ensure the box is stable and won't slip or tip
+          - Progress to higher boxes only after mastering lower heights
+          - Advanced variation: add a weighted vest or perform single-leg box jumps
 
   "Box Squat (Barbell)":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Box Squat (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell box squat is a compound lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and lower back, using a box to ensure consistent depth and teach proper squat mechanics while allowing for heavier loads.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a box or bench behind you at appropriate height (slightly below parallel)
+          - Stand with feet shoulder-width apart, barbell across your upper back
+          - Grip the bar with hands slightly wider than shoulder-width
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain a neutral spine throughout
+
+          ### 2. Movement
+          1. Initiate the squat by pushing your hips back and bending your knees
+          2. Lower yourself until you sit back onto the box
+          3. Pause briefly on the box while maintaining tension
+          4. Drive through your heels to stand back up explosively
+          5. Extend your hips and knees to return to the starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale deeply before descending
+          - Hold your breath during the descent and pause
+          - Exhale as you drive back up
+
+          ### 4. Tips
+          - Sit back onto the box rather than dropping down
+          - Maintain tension in your muscles even when sitting on the box
+          - Drive through your heels when standing back up
+          - Keep your chest up and core tight throughout
+          - The box teaches proper depth and hip hinge mechanics
+
+          ### 5. Common Mistakes
+          - Relaxing completely when sitting on the box
+          - Using a box that's too high or too low
+          - Allowing the knees to cave inward
+          - Leaning too far forward during descent
+          - Not driving through the heels when standing
+          - Bouncing off the box instead of pausing
+
+          ### 6. Safety / Modifications
+          - Start with a higher box and gradually lower it as mobility improves
+          - Use a safety rack or spotter when lifting heavy weights
+          - Perform without weight initially to master the movement pattern
+          - Advanced variation: add chains or bands for accommodating resistance
 
   "Bulgarian Split Squat":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Bulgarian Split Squat"
+        instructions: |
+          ## Overview
+          The Bulgarian split squat is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and hip stabilizers, using an elevated rear foot position to increase range of motion and challenge balance while building single-leg strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing away from a bench or elevated surface
+          - Place the top of your rear foot on the bench behind you
+          - Position your front foot far enough forward to allow a deep lunge
+          - Keep your chest up, core engaged, and torso upright
+          - Hold dumbbells at your sides or a barbell across your upper back
+
+          ### 2. Movement
+          1. Lower your body by bending your front knee and hip
+          2. Keep your front knee tracking over your toes
+          3. Continue lowering until your front thigh is parallel to the floor
+          4. Pause briefly at the bottom
+          5. Drive through your front heel to return to the starting position
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Inhale as you lower your body down
+          - Exhale as you drive back up to the starting position
+
+          ### 4. Tips
+          - Keep most of your weight on your front leg
+          - Maintain an upright torso throughout the movement
+          - Find the optimal front foot position for your flexibility
+          - Focus on controlling the descent and explosive drive up
+          - Keep your front knee aligned with your toes
+
+          ### 5. Common Mistakes
+          - Positioning front foot too close to the bench
+          - Allowing the front knee to cave inward
+          - Leaning too far forward during the movement
+          - Putting too much weight on the rear foot
+          - Not achieving adequate depth
+          - Rushing through reps instead of controlling the movement
+
+          ### 6. Safety / Modifications
+          - Start with bodyweight only to master balance and form
+          - Use a lower surface for the rear foot if needed
+          - Hold onto a support for balance initially
+          - Advanced variation: add weight with dumbbells, barbell, or weighted vest
 
   "Cable Pull Through":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Cable Pull Through"
+        instructions: |
+          ## Overview
+          The cable pull through is a hip hinge exercise that primarily targets the glutes and hamstrings. It also engages the lower back and core, using a cable to provide constant tension throughout the movement while teaching proper hip hinge mechanics.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Attach a rope handle to a low cable pulley
+          - Stand facing away from the cable with feet shoulder-width apart
+          - Reach between your legs and grip the rope with both hands
+          - Step forward to create tension on the cable
+          - Keep your chest up and core engaged
+
+          ### 2. Movement
+          1. Hinge at your hips by pushing them back
+          2. Allow the cable to pull your arms between your legs
+          3. Keep your back flat and knees slightly bent
+          4. Continue until you feel a stretch in your hamstrings
+          5. Drive your hips forward explosively to return to standing
+          6. Squeeze your glutes hard at the top, then repeat
+
+          ### 3. Breathing
+          - Inhale as you hinge forward
+          - Exhale as you drive your hips forward
+
+          ### 4. Tips
+          - Focus on the hip hinge movement, not squatting
+          - Drive through your heels when standing up
+          - Squeeze your glutes hard at the top of each rep
+          - Keep the cable tension constant throughout
+          - Maintain a neutral spine and flat back
+
+          ### 5. Common Mistakes
+          - Squatting instead of hip hinging
+          - Rounding the back during the movement
+          - Not pushing the hips back far enough
+          - Using too much weight and compromising form
+          - Not fully extending hips at the top
+          - Allowing the knees to cave inward
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the hip hinge pattern
+          - Keep a slight bend in your knees throughout
+          - Use this exercise to learn proper deadlift mechanics
+          - Advanced variation: perform single-leg cable pull throughs
 
   "Calf Press on Leg Press":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Calf Press on Leg Press"
+        instructions: |
+          ## Overview
+          The calf press on leg press is an isolation exercise that primarily targets the gastrocnemius and soleus muscles of the calves. It uses the leg press machine to provide stable resistance while allowing for heavy loading and full range of motion in the ankle joint.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit in the leg press machine with your back firmly against the pad
+          - Position only the balls of your feet on the bottom edge of the platform
+          - Keep your heels hanging off with legs fully extended
+          - Unlock the safety catches
+          - Keep your knees straight but not locked throughout
+
+          ### 2. Movement
+          1. Lower the platform by flexing your ankles and dropping your heels
+          2. Allow a full stretch in your calves at the bottom
+          3. Pause briefly at the bottom stretch position
+          4. Press through the balls of your feet to extend your ankles
+          5. Raise your heels as high as possible
+          6. Squeeze your calves hard at the top, then repeat
+
+          ### 3. Breathing
+          - Inhale as you lower your heels
+          - Exhale as you press up onto your toes
+
+          ### 4. Tips
+          - Keep your legs straight throughout to isolate the calves
+          - Achieve full range of motion from deep stretch to high contraction
+          - Focus on squeezing your calves at the top
+          - Control the weight throughout both phases
+          - Keep your core engaged for stability
+
+          ### 5. Common Mistakes
+          - Bending the knees during the movement
+          - Not achieving full range of motion at top or bottom
+          - Bouncing at the bottom instead of controlled stretch
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+          - Not squeezing at the top contraction
+
+          ### 6. Safety / Modifications
+          - Start with moderate weight to master the full range of motion
+          - Vary foot position (neutral, toes in, toes out) for complete calf development
+          - Advanced variation: perform single-leg calf presses
+          - Pause for 2-3 seconds at peak contraction for increased intensity
 
   "Calf Press on Seated Leg Press":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Calf Press on Seated Leg Press"
+        instructions: |
+          ## Overview
+          The calf press on seated leg press is an isolation exercise that primarily targets the gastrocnemius and soleus muscles of the calves. It uses the seated leg press machine to provide stable resistance at a different angle, emphasizing the soleus muscle more due to the seated, bent-knee position.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit in the seated leg press machine with your back firmly against the pad
+          - Position only the balls of your feet on the bottom edge of the platform
+          - Keep your heels hanging off with knees bent at 90 degrees
+          - Unlock the safety catches if present
+          - Keep your knees stationary throughout the movement
+
+          ### 2. Movement
+          1. Lower the platform by flexing your ankles and dropping your heels
+          2. Allow a full stretch in your calves at the bottom
+          3. Pause briefly at the bottom stretch position
+          4. Press through the balls of your feet to extend your ankles
+          5. Raise your heels as high as possible
+          6. Squeeze your calves hard at the top, then repeat
+
+          ### 3. Breathing
+          - Inhale as you lower your heels
+          - Exhale as you press up onto your toes
+
+          ### 4. Tips
+          - Keep your knees stationary and bent throughout
+          - The seated position emphasizes the soleus muscle
+          - Achieve full range of motion from deep stretch to high contraction
+          - Focus on squeezing your calves at the top
+          - Control the weight throughout both phases
+
+          ### 5. Common Mistakes
+          - Extending or moving the knees during the movement
+          - Not achieving full range of motion at top or bottom
+          - Bouncing at the bottom instead of controlled stretch
+          - Using too much weight and compromising form
+          - Moving too quickly through the repetitions
+          - Not squeezing at the top contraction
+
+          ### 6. Safety / Modifications
+          - Start with moderate weight to master the full range of motion
+          - Vary foot position (neutral, toes in, toes out) for complete calf development
+          - Combine with standing calf raises for complete calf training
+          - Advanced variation: pause for 2-3 seconds at peak contraction
 
   "Deadlift (Band)":
     category: Weighted Body Weight
