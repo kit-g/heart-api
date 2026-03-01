@@ -1,84 +1,73 @@
 # Heart of Yours
 
-A comprehensive fitness tracking application with a serverless backend architecture.
+A comprehensive fitness tracking application with a modern, serverless backend architecture.
 
 ## Project Overview
 
-Heart of Yours is a fitness tracking application that allows users to:
-- Track workouts and exercise history
-- Create and manage workout templates
-- Manage a personal exercise library
-- Monitor fitness progress
+Heart of Yours is a fitness tracking platform designed to help users:
+- **Track Workouts**: Log exercises, sets, and reps with historical tracking.
+- **Manage Templates**: Create and reuse workout templates for consistent routines.
+- **Exercise Library**: Access a categorized library of exercises (managed via YAML/S3).
+- **Progress Monitoring**: Visualize fitness progress through charts and data.
 
-The application is built with a serverless architecture on AWS, featuring a Go-based API backend.
+The project features a dual-generation serverless backend architecture on AWS, transitioning from Go to Dart.
 
 ## Repository Structure
 
-This repository contains the complete codebase for the Heart of Yours application:
+This repository contains the complete codebase for the Heart of Yours application backend and infrastructure:
 
-```
+```text
 heart-go/
-├── api/                 # Go-based serverless API
-├── infrastructure/      # AWS CloudFormation templates
-├── scripts/             # Utility scripts
-└── .github/workflows/   # CI/CD pipelines
+├── api/             # 1st Generation: Go-based serverless API
+├── api_v2/          # 2nd Generation: Dart-based serverless API (Current)
+├── infrastructure/  # AWS CloudFormation (SAM) templates
+├── content/         # Exercise library and static content definitions
+├── scripts/         # Utility scripts (Python, Bash) for maintenance
+└── .github/         # CI/CD pipelines (GitHub Actions)
 ```
 
-### Key Components
+### Core Components
 
-#### API
+#### API v2 (Second Generation)
+The `api_v2/` directory contains the modern Dart-based API built with the [relic](https://pub.dev/packages/relic) framework. This version is the current focus, providing high-performance endpoints for exercises and user preferences.
+[See API v2 documentation →](api_v2/README.md)
 
-The `api/` directory contains the Go-based serverless API that powers the Heart of Yours application. It handles user authentication, workout tracking, exercise management, and more.
-
+#### API (First Generation)
+The `api/` directory contains the original Go-based serverless API. It provides a wide range of services including workout tracking, templates, and account management using the Gin framework.
 [See API documentation →](api/README.md)
 
 #### Infrastructure
-
-The `infrastructure/` directory contains AWS CloudFormation templates and configuration files for deploying the application infrastructure, including Lambda functions, DynamoDB tables, API Gateway, and CI/CD resources.
-
+The `infrastructure/` directory manages the AWS resources via CloudFormation and SAM. It includes definitions for Lambda functions, DynamoDB tables, API Gateway, SNS, and EventBridge scheduling.
 [See Infrastructure documentation →](infrastructure/README.md)
 
-#### Scripts
+#### Content & Scripts
+- `content/`: Contains the master `exercise_library.yml` and other localized content used to populate the API's exercise data.
+- `scripts/`: Python and shell scripts for processing content, generating documentation, and managing locales.
 
-The `scripts/` directory contains utility scripts:
-- `deploy.sh` - Helper script for deploying infrastructure using AWS SAM
-- `docs.sh` - Script for generating API documentation using Swagger
+## Architecture
 
-#### CI/CD
+Heart of Yours leverages a fully serverless architecture on AWS for scalability and cost-efficiency:
 
-The `.github/workflows/` directory contains GitHub Actions workflows for continuous integration and deployment:
-- `deploy.yaml` - Workflow for building, testing, and deploying the API to AWS Lambda
+- **Compute**: AWS Lambda (Go and Dart runtimes).
+- **Storage**: 
+  - **DynamoDB**: Stores workout logs, templates, and user preferences.
+  - **S3**: Hosts the exercise library data and user-uploaded media.
+- **API Gateway**: RESTful endpoints for both Go and Dart APIs.
+- **Authentication**: Firebase Authentication (OIDC) for secure user access.
+- **DevOps**: GitHub Actions for automated testing and SAM-based deployments.
+- **Scheduling**: EventBridge Scheduler for background tasks
+- **Monitoring**: SNS for notifications and CloudWatch for logging
 
 ## Getting Started
 
 ### Prerequisites
-
-- Go 1.24 or higher
-- AWS CLI configured with appropriate permissions
-- AWS SAM CLI for infrastructure deployment
-- Firebase project with authentication enabled
+- **Go 1.24+** (for API v1)
+- **Dart 3.10+** (for API v2)
+- **AWS CLI & SAM CLI** (for infrastructure)
+- **Firebase Project** (for authentication)
 
 ### Development Workflow
-
-1. **API Development**:
-   - Follow the instructions in the [API README](api/README.md) for local development and testing
-
-2. **Infrastructure Deployment**:
-   - Follow the instructions in the [Infrastructure README](infrastructure/README.md) for deploying the AWS resources
-
-3. **CI/CD**:
-   - Changes pushed to the `main` branch will automatically trigger the deployment workflow
-
-## Architecture
-
-Heart of Yours uses a serverless architecture on AWS:
-
-- **Compute**: AWS Lambda functions for API and background processing
-- **Storage**: 
-  - DynamoDB for workout data
-  - S3 for file storage
-- **API Gateway**: REST API endpoints
-- **Authentication**: Firebase Authentication
-- **Scheduling**: EventBridge Scheduler for background tasks
-- **Monitoring**: SNS for notifications and CloudWatch for logging
+1. **Explore the APIs**: Choose the relevant directory (`api/` or `api_v2/`) and follow its specific setup instructions.
+2. **Deploy Infrastructure**: Use the SAM CLI from the `infrastructure/` directory to provision your environment.
+3. **Manage Content**: Update `content/exercise_library.yml` and use `scripts/` to sync with S3.
 
