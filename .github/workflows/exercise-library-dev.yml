@@ -8,6 +8,10 @@ on:
       - content/exercise_library.yml
       - content/exercise_library_schema.json
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy:
     uses: ./.github/workflows/exercise-library.yml
