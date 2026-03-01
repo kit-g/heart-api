@@ -5358,70 +5358,869 @@ exercises:
   "Bench Press (Cable)":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Bench Press (Cable)"
+        instructions: |
+          ## Overview
+          The cable bench press is a machine-based pressing exercise that primarily targets the pectoralis major. It also engages the front deltoids and triceps, using cables to provide constant tension throughout the movement for consistent chest activation.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a flat bench between two low cable pulleys
+          - Attach handles to both low pulleys and set appropriate weight
+          - Lie flat on the bench with your feet firmly planted on the floor
+          - Grip both handles with arms extended, hands at chest level
+          - Keep your shoulder blades retracted and pressed into the bench
+
+          ### 2. Movement
+          1. Lower the handles slowly toward your chest by bending your elbows
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Lower until your hands are beside your chest
+          4. Pause briefly at the bottom
+          5. Press the handles back up by extending your arms
+          6. Stop just before full lockout to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Inhale as you lower the handles toward your chest
+          - Exhale as you press the handles back up
+
+          ### 4. Tips
+          - Maintain constant tension by not fully locking out at the top
+          - Keep your shoulder blades retracted throughout
+          - Control both the lowering and pressing phases equally
+          - Keep your feet flat and core engaged for stability
+          - Focus on squeezing your chest at the top of each rep
+
+          ### 5. Common Mistakes
+          - Fully locking out and losing tension on the chest
+          - Allowing the elbows to flare out excessively
+          - Using momentum instead of controlled movement
+          - Lifting the glutes off the bench
+          - Not maintaining shoulder blade retraction
+          - Arching the lower back excessively
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the cable press pattern
+          - Adjust cable height for different angles (low, mid, high)
+          - Perform on an incline or decline bench for muscle variation
+          - Use one arm at a time for unilateral training
 
   "Bench Press (Dumbbell)":
     category: Dumbbell
     target: Chest
+    i18n:
+      en:
+        name: "Bench Press (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell bench press is a compound pressing exercise that primarily targets the pectoralis major. It also engages the front deltoids and triceps, allowing for independent arm movement and a greater range of motion than the barbell variation.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on a bench with your feet firmly planted on the floor
+          - Hold a dumbbell in each hand at chest level
+          - Position dumbbells with a neutral or pronated grip
+          - Keep your shoulder blades retracted and pressed into the bench
+          - Extend your arms fully with dumbbells above your chest
+
+          ### 2. Movement
+          1. Lower both dumbbells slowly toward your chest by bending your elbows
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Lower until dumbbells are beside your chest
+          4. Pause briefly at the bottom
+          5. Press the dumbbells back up by extending your arms
+          6. Bring dumbbells together at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the dumbbells to your chest
+          - Exhale as you press the dumbbells back up
+
+          ### 4. Tips
+          - Keep your shoulder blades retracted throughout
+          - Maintain a natural arch in your lower back
+          - Control the descent to maximize chest stretch
+          - Allow dumbbells to travel deeper than a barbell would
+          - Keep your wrists straight and stable
+
+          ### 5. Common Mistakes
+          - Bouncing dumbbells off the chest
+          - Allowing the elbows to flare out excessively
+          - Lifting the glutes off the bench during the press
+          - Not achieving full range of motion
+          - Clashing dumbbells together at the top
+          - Losing shoulder blade retraction
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master balance and control
+          - Use a spotter when attempting heavy weights
+          - Perform on an incline or decline bench for variation
+          - Advanced variation: pause for 2-3 seconds at the bottom
 
   "Bench Press (Smith Machine)":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Bench Press (Smith Machine)"
+        instructions: |
+          ## Overview
+          The Smith machine bench press is a guided pressing exercise that primarily targets the pectoralis major. It also engages the front deltoids and triceps, using a fixed vertical bar path to provide stability and allow you to focus on pressing power.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a flat bench under the Smith machine bar
+          - Lie flat with your chest aligned under the bar
+          - Grip the bar with hands slightly wider than shoulder-width apart
+          - Unrack the bar by rotating it and hold with arms extended
+          - Keep your shoulder blades retracted and feet flat on the floor
+
+          ### 2. Movement
+          1. Lower the bar slowly to your mid to lower chest
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Touch the bar lightly to your chest
+          4. Pause briefly at the bottom
+          5. Press the bar back up by extending your arms
+          6. Lock out your elbows at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the bar to your chest
+          - Exhale as you press the bar back up
+
+          ### 4. Tips
+          - Position the bench so the bar path aligns with your natural press
+          - Keep your shoulder blades retracted throughout
+          - Take advantage of the fixed path for controlled reps
+          - Maintain a natural arch in your lower back
+          - Keep your feet flat and drive through them for stability
+
+          ### 5. Common Mistakes
+          - Positioning the bench incorrectly relative to the bar path
+          - Bouncing the bar off the chest
+          - Allowing the elbows to flare out excessively
+          - Lifting the glutes off the bench
+          - Not achieving full range of motion
+          - Relying too heavily on the machine's stability
+
+          ### 6. Safety / Modifications
+          - Adjust bench position to ensure natural bar path over your chest
+          - Use the safety catches at appropriate height
+          - Perform on an incline or decline bench for variation
+          - Advanced variation: add chains or use slow negatives
 
   "Bench Press - Wide Grip (Barbell)":
     category: Barbell
     target: Chest
+    i18n:
+      en:
+        name: "Bench Press - Wide Grip (Barbell)"
+        instructions: |
+          ## Overview
+          The wide grip barbell bench press is a compound pressing exercise that primarily targets the outer pectoralis major. It also engages the front deltoids and triceps, using a wider hand placement to emphasize chest width and reduce triceps involvement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on a bench with your feet firmly planted on the floor
+          - Position yourself so your eyes are directly under the bar
+          - Grip the bar with hands significantly wider than shoulder-width
+          - Unrack the bar and hold it with arms fully extended above your chest
+          - Keep your shoulder blades retracted and pressed into the bench
+
+          ### 2. Movement
+          1. Lower the bar slowly to your mid to upper chest
+          2. Keep your elbows flared out more than a standard press
+          3. Touch the bar lightly to your chest
+          4. Pause briefly at the bottom
+          5. Press the bar back up by extending your arms
+          6. Lock out your elbows at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the bar to your chest
+          - Exhale as you press the bar back up
+
+          ### 4. Tips
+          - The wider grip reduces range of motion but increases chest stretch
+          - Keep your shoulder blades retracted throughout
+          - Focus on squeezing your chest at the top
+          - Maintain a natural arch in your lower back
+          - Keep your wrists straight despite the wider grip
+
+          ### 5. Common Mistakes
+          - Using a grip that's too wide and straining the shoulders
+          - Bouncing the bar off the chest
+          - Not achieving a full chest stretch at the bottom
+          - Lifting the glutes off the bench
+          - Using too much weight and compromising form
+          - Losing shoulder blade retraction
+
+          ### 6. Safety / Modifications
+          - Always use a spotter when lifting heavy weights
+          - Start with lighter weight than your standard bench press
+          - Gradually widen grip to find your optimal position
+          - If you experience shoulder discomfort, narrow your grip slightly
 
   "Cable Crossover":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Cable Crossover"
+        instructions: |
+          ## Overview
+          The cable crossover is an isolation exercise that primarily targets the pectoralis major, particularly the inner chest. It also engages the front deltoids as stabilizers, using cables to provide constant tension throughout a wide arc of motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand centered between two high cable pulleys
+          - Grip a handle in each hand with arms extended out to the sides
+          - Step forward into a staggered stance for stability
+          - Lean forward slightly from the hips with chest up
+          - Keep a slight bend in your elbows throughout
+
+          ### 2. Movement
+          1. Bring both handles down and together in front of your chest
+          2. Keep your elbows slightly bent in a hugging motion
+          3. Continue until your hands meet or cross at chest level
+          4. Squeeze your chest hard at the peak contraction
+          5. Slowly return your arms to the starting position with control
+          6. Stop before losing tension on the cables, then repeat
+
+          ### 3. Breathing
+          - Exhale as you bring the handles together
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep a consistent elbow bend throughout the movement
+          - Focus on squeezing your chest, not pulling with your arms
+          - Maintain constant tension by controlling both phases
+          - Keep your core tight to prevent excessive forward lean
+          - Adjust cable height for different chest angles
+
+          ### 5. Common Mistakes
+          - Straightening the arms completely during the movement
+          - Using momentum or swinging the body
+          - Not maintaining constant tension on the cables
+          - Leaning too far forward
+          - Moving too quickly and losing the squeeze
+          - Using weight that's too heavy and bending elbows excessively
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the arc motion
+          - Adjust pulley height (high, mid, low) for different chest emphasis
+          - Perform one arm at a time for unilateral focus
+          - Advanced variation: pause for 2-3 seconds at peak contraction
 
   "Chest Dip":
     category: Weighted Body Weight
     target: Chest
+    i18n:
+      en:
+        name: "Chest Dip"
+        instructions: |
+          ## Overview
+          The chest dip is a bodyweight pressing exercise that primarily targets the lower pectoralis major. It also engages the triceps and front deltoids, using a forward lean to shift emphasis from triceps to chest for effective lower chest development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself on parallel dip bars with arms fully extended
+          - Grip the bars firmly with hands slightly wider than shoulder-width if possible
+          - Lean your torso forward at about 30-45 degrees
+          - Cross your ankles behind you or keep legs straight
+          - Engage your core and keep your shoulders pressed down
+
+          ### 2. Movement
+          1. Lower your body by bending your elbows until they reach about 90 degrees
+          2. Keep your elbows flared out slightly and torso leaning forward
+          3. Continue lowering until you feel a stretch in your chest
+          4. Pause briefly at the bottom of the movement
+          5. Press through your palms to extend your arms and return to starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your body down
+          - Exhale as you press back up to the starting position
+
+          ### 4. Tips
+          - Lean forward throughout to keep emphasis on your chest
+          - Keep your elbows flared out more than triceps dips
+          - Focus on the stretch in your chest at the bottom
+          - Avoid dropping too low and straining your shoulders
+          - Maintain control throughout the entire range of motion
+
+          ### 5. Common Mistakes
+          - Staying too upright, which shifts emphasis to triceps
+          - Not leaning forward enough
+          - Dropping too low and straining the shoulders
+          - Using momentum or bouncing at the bottom
+          - Not achieving full elbow extension at the top
+          - Allowing shoulders to shrug up
+
+          ### 6. Safety / Modifications
+          - Use an assisted dip machine or resistance band for support
+          - Reduce range of motion if you experience shoulder discomfort
+          - Advanced variation: add weight using a dip belt or weight vest
+          - Progress gradually to avoid shoulder strain
 
   "Chest Dip (Assisted)":
     category: Assisted Body Weight
     target: Chest
+    i18n:
+      en:
+        name: "Chest Dip (Assisted)"
+        instructions: |
+          ## Overview
+          The assisted chest dip is a machine-based pressing exercise that primarily targets the lower pectoralis major with support. It also engages the triceps and front deltoids, using counterbalance assistance to make the dip movement more accessible while building strength toward unassisted dips.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set the weight on the assisted dip machine (more weight = more assistance)
+          - Grip the handles with hands slightly wider than shoulder-width
+          - Position your knees or feet on the assistance pad
+          - Start with arms fully extended and torso leaning forward
+          - Engage your core and keep your shoulders pressed down
+
+          ### 2. Movement
+          1. Lower your body by bending your elbows until they reach about 90 degrees
+          2. Keep your torso leaning forward throughout the movement
+          3. Maintain control as the assistance pad supports your weight
+          4. Pause briefly at the bottom of the movement
+          5. Press through your palms to extend your arms and return to starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your body down
+          - Exhale as you press back up to the starting position
+
+          ### 4. Tips
+          - Maintain a forward lean to emphasize chest over triceps
+          - Gradually reduce assistance weight as you build strength
+          - Focus on controlled movement throughout the range of motion
+          - Keep your elbows flared slightly for chest emphasis
+          - Avoid relying too heavily on the assistance
+
+          ### 5. Common Mistakes
+          - Using too much assistance and not challenging yourself
+          - Staying too upright instead of leaning forward
+          - Allowing the elbows to flare out excessively
+          - Using momentum instead of controlled movement
+          - Not achieving full range of motion
+          - Not gradually reducing assistance weight over time
+
+          ### 6. Safety / Modifications
+          - Start with higher assistance and gradually decrease as you get stronger
+          - Focus on form over reducing assistance too quickly
+          - Progress toward band-assisted or negative dips before attempting unassisted
+          - Reduce range of motion if you experience shoulder discomfort
 
   "Chest Fly":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Chest Fly"
+        instructions: |
+          ## Overview
+          The machine chest fly is an isolation exercise that primarily targets the pectoralis major. It also engages the front deltoids minimally, using a fixed movement path to provide stability and consistent resistance throughout the fly motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the chest fly machine with your back firmly against the pad
+          - Adjust the seat height so the handles align with your mid-chest
+          - Grip the handles with arms extended out to the sides
+          - Keep a slight bend in your elbows throughout
+          - Plant your feet flat on the floor and engage your core
+
+          ### 2. Movement
+          1. Bring both handles together in front of your chest
+          2. Keep your elbows slightly bent in a hugging motion
+          3. Continue until the handles meet or nearly touch
+          4. Squeeze your chest hard at the peak contraction
+          5. Slowly return your arms to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you bring the handles together
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep a consistent elbow bend throughout the movement
+          - Focus on squeezing your chest at the peak
+          - Maintain constant tension by not letting the weight stack rest
+          - Keep your back pressed firmly against the pad
+          - Control both the squeezing and opening phases
+
+          ### 5. Common Mistakes
+          - Straightening the arms completely during the movement
+          - Using momentum instead of controlled muscle contraction
+          - Letting the weight stack rest between reps
+          - Lifting your back off the pad
+          - Moving too quickly and losing the squeeze
+          - Using too much weight and bending elbows excessively
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure handles align with your chest
+          - Start with light weight to establish mind-muscle connection
+          - Advanced variation: pause for 2-3 seconds at peak contraction
+          - Adjust handle position for different stretch depths
 
   "Chest Fly (Band)":
     category: Weighted Body Weight
     target: Chest
+    i18n:
+      en:
+        name: "Chest Fly (Band)"
+        instructions: |
+          ## Overview
+          The band chest fly is a resistance-based isolation exercise that primarily targets the pectoralis major. It also engages the front deltoids, using progressive band resistance to provide increasing tension throughout the fly motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Anchor a resistance band at chest height behind you
+          - Hold one end of the band in each hand
+          - Step forward to create tension with arms extended out to the sides
+          - Stand in a staggered stance for stability
+          - Keep a slight bend in your elbows throughout
+
+          ### 2. Movement
+          1. Bring both hands together in front of your chest
+          2. Keep your elbows slightly bent in a hugging motion
+          3. Continue until your hands meet at chest level
+          4. Squeeze your chest hard at the peak contraction
+          5. Slowly return your arms to the starting position with control
+          6. Stop before losing tension on the band, then repeat
+
+          ### 3. Breathing
+          - Exhale as you bring your hands together
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep a consistent elbow bend throughout the movement
+          - Focus on squeezing your chest, not pulling with your arms
+          - Maintain constant tension by controlling both phases
+          - Keep your core tight and body stable
+          - Adjust your distance from the anchor to modify resistance
+
+          ### 5. Common Mistakes
+          - Straightening the arms completely during the movement
+          - Using momentum or swinging the body
+          - Not maintaining constant tension on the band
+          - Leaning too far forward
+          - Moving too quickly and losing the squeeze
+          - Releasing all tension at the starting position
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master the movement
+          - Adjust distance from anchor point to modify resistance level
+          - Perform one arm at a time for unilateral focus
+          - Advanced variation: pause for 2-3 seconds at peak contraction
 
   "Chest Fly (Dumbbell)":
     category: Dumbbell
     target: Chest
+    i18n:
+      en:
+        name: "Chest Fly (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell chest fly is an isolation exercise that primarily targets the pectoralis major. It also engages the front deltoids as stabilizers, using dumbbells to create a wide arc of motion that stretches and contracts the chest muscles.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on a bench with your feet firmly planted on the floor
+          - Hold a dumbbell in each hand with arms extended above your chest
+          - Position dumbbells with palms facing each other
+          - Keep a slight bend in your elbows throughout
+          - Keep your shoulder blades retracted and pressed into the bench
+
+          ### 2. Movement
+          1. Lower both dumbbells out to the sides in a wide arc
+          2. Keep your elbows slightly bent throughout the movement
+          3. Continue lowering until you feel a stretch in your chest
+          4. Pause briefly at the bottom
+          5. Bring the dumbbells back together above your chest in a hugging motion
+          6. Squeeze your chest at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the dumbbells out to the sides
+          - Exhale as you bring the dumbbells back together
+
+          ### 4. Tips
+          - Keep a consistent slight bend in your elbows throughout
+          - Focus on the stretch at the bottom and squeeze at the top
+          - Maintain shoulder blade retraction throughout
+          - Think of hugging a large tree during the movement
+          - Control the weight throughout the entire arc
+
+          ### 5. Common Mistakes
+          - Straightening the arms completely, turning it into a press
+          - Bending the elbows too much, reducing chest engagement
+          - Lowering the dumbbells too far and straining the shoulders
+          - Using too much weight and losing the arc motion
+          - Bouncing the dumbbells at the bottom
+          - Not squeezing at the top of the movement
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master the arc motion
+          - Keep elbows slightly bent to protect shoulder joints
+          - Perform on an incline or decline bench for variation
+          - Advanced variation: pause for 2-3 seconds at the bottom stretch
 
   "Chest Press (Band)":
     category: Weighted Body Weight
     target: Chest
+    i18n:
+      en:
+        name: "Chest Press (Band)"
+        instructions: |
+          ## Overview
+          The band chest press is a resistance-based pressing exercise that primarily targets the pectoralis major. It also engages the front deltoids and triceps, using progressive band resistance to provide increasing tension at full extension.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Anchor a resistance band at chest height behind you
+          - Hold one end of the band in each hand at chest level
+          - Step forward to create tension with elbows bent
+          - Stand in a staggered stance for stability
+          - Keep your chest up and core engaged
+
+          ### 2. Movement
+          1. Press both hands forward by extending your arms
+          2. Keep your hands at chest height throughout
+          3. Continue until your arms are fully extended
+          4. Pause and squeeze your chest at full extension
+          5. Slowly return your hands to chest level with control
+          6. Stop before losing tension on the band, then repeat
+
+          ### 3. Breathing
+          - Exhale as you press your hands forward
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Maintain constant tension by controlling both phases
+          - Keep your body stable and avoid leaning forward
+          - Focus on squeezing your chest at full extension
+          - Keep your wrists straight throughout
+          - Adjust your distance from the anchor to modify resistance
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the body
+          - Not maintaining constant tension on the band
+          - Leaning too far forward during the press
+          - Allowing the elbows to flare out excessively
+          - Moving too quickly through the repetitions
+          - Releasing all tension at the starting position
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master the movement
+          - Adjust distance from anchor point to modify resistance level
+          - Perform one arm at a time for unilateral focus
+          - Advanced variation: use a heavier resistance band or add a pause at extension
 
   "Chest Press (Machine)":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Chest Press (Machine)"
+        instructions: |
+          ## Overview
+          The machine chest press is a guided pressing exercise that primarily targets the pectoralis major. It also engages the front deltoids and triceps, using a fixed movement path to provide stability and consistent resistance throughout the pressing motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the chest press machine with your back firmly against the pad
+          - Adjust the seat height so the handles align with your mid-chest
+          - Grip the handles with both hands
+          - Plant your feet flat on the floor and engage your core
+          - Keep your shoulder blades retracted against the pad
+
+          ### 2. Movement
+          1. Press the handles forward by extending your arms
+          2. Keep your back pressed firmly against the pad throughout
+          3. Continue until your arms are fully extended
+          4. Pause briefly at full extension
+          5. Slowly return the handles to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you press the handles forward
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - Maintain shoulder blade retraction throughout
+          - Control both the pressing and returning phases
+          - Maintain constant tension by not letting the weight stack rest
+          - Focus on squeezing your chest at full extension
+
+          ### 5. Common Mistakes
+          - Lifting your back off the pad during the press
+          - Using momentum instead of controlled muscle contraction
+          - Letting the weight stack rest between reps
+          - Not achieving full range of motion
+          - Allowing the shoulders to shrug forward
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure handles align with your chest
+          - Start with light weight to establish proper form
+          - Try different grip positions if available
+          - Advanced variation: pause for 2-3 seconds at full extension
 
   "Decline Bench Press (Barbell)":
     category: Barbell
     target: Chest
+    i18n:
+      en:
+        name: "Decline Bench Press (Barbell)"
+        instructions: |
+          ## Overview
+          The decline barbell bench press is a compound pressing exercise that primarily targets the lower pectoralis major. It also engages the front deltoids and triceps, using a declined bench position to emphasize the lower chest with typically heavier loads than flat pressing.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on a decline bench with your feet secured under the foot pads
+          - Position yourself so your eyes are directly under the bar
+          - Grip the bar with hands slightly wider than shoulder-width apart
+          - Unrack the bar and hold it with arms fully extended above your lower chest
+          - Keep your shoulder blades retracted and pressed into the bench
+
+          ### 2. Movement
+          1. Lower the bar slowly to your lower chest
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Touch the bar lightly to your chest
+          4. Pause briefly at the bottom
+          5. Press the bar back up by extending your arms
+          6. Lock out your elbows at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the bar to your chest
+          - Exhale as you press the bar back up
+
+          ### 4. Tips
+          - Keep your shoulder blades retracted throughout
+          - Focus on squeezing your lower chest at the top
+          - Control the descent and avoid bouncing the bar
+          - Keep your feet secured to maintain stability
+          - The decline angle typically allows for heavier weights
+
+          ### 5. Common Mistakes
+          - Bouncing the bar off the chest
+          - Allowing the elbows to flare out excessively
+          - Not securing feet properly, causing instability
+          - Not achieving full range of motion
+          - Using too much weight and compromising form
+          - Losing shoulder blade retraction
+
+          ### 6. Safety / Modifications
+          - Always use a spotter when lifting heavy weights
+          - Ensure your feet are securely anchored before unracking
+          - Start with lighter weight than your flat bench press to adapt
+          - If you experience shoulder discomfort, adjust your grip width
 
   "Decline Bench Press (Dumbbell)":
     category: Dumbbell
     target: Chest
+    i18n:
+      en:
+        name: "Decline Bench Press (Dumbbell)"
+        instructions: |
+          ## Overview
+          The decline dumbbell bench press is a compound pressing exercise that primarily targets the lower pectoralis major. It also engages the front deltoids and triceps, using a declined position with independent arm movement for greater range of motion and muscle activation.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on a decline bench with your feet secured under the foot pads
+          - Hold a dumbbell in each hand at chest level
+          - Position dumbbells with a neutral or pronated grip
+          - Keep your shoulder blades retracted and pressed into the bench
+          - Extend your arms fully with dumbbells above your lower chest
+
+          ### 2. Movement
+          1. Lower both dumbbells slowly toward your lower chest
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Lower until dumbbells are beside your chest
+          4. Pause briefly at the bottom
+          5. Press the dumbbells back up by extending your arms
+          6. Bring dumbbells together at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the dumbbells to your chest
+          - Exhale as you press the dumbbells back up
+
+          ### 4. Tips
+          - Keep your shoulder blades retracted throughout
+          - Focus on squeezing your lower chest at the top
+          - Allow dumbbells to travel deeper than a barbell would
+          - Keep your feet secured for stability
+          - Control both the lowering and pressing phases
+
+          ### 5. Common Mistakes
+          - Bouncing dumbbells off the chest
+          - Allowing the elbows to flare out excessively
+          - Not securing feet properly before starting
+          - Not achieving full range of motion
+          - Clashing dumbbells together at the top
+          - Losing shoulder blade retraction
+
+          ### 6. Safety / Modifications
+          - Ensure your feet are securely anchored before starting
+          - Start with lighter dumbbells than your flat press
+          - Use a spotter when attempting heavy weights
+          - Advanced variation: pause for 2-3 seconds at the bottom
 
   "Decline Bench Press (Smith Machine)":
     category: Machine
     target: Chest
+    i18n:
+      en:
+        name: "Decline Bench Press (Smith Machine)"
+        instructions: |
+          ## Overview
+          The Smith machine decline bench press is a guided pressing exercise that primarily targets the lower pectoralis major. It also engages the front deltoids and triceps, using a fixed vertical bar path on a decline angle to provide stability and emphasize the lower chest.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a decline bench under the Smith machine bar
+          - Lie on the bench with your feet secured and chest aligned under the bar
+          - Grip the bar with hands slightly wider than shoulder-width apart
+          - Unrack the bar by rotating it and hold with arms extended
+          - Keep your shoulder blades retracted and feet secured
+
+          ### 2. Movement
+          1. Lower the bar slowly to your lower chest
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Touch the bar lightly to your chest
+          4. Pause briefly at the bottom
+          5. Press the bar back up by extending your arms
+          6. Lock out your elbows at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the bar to your chest
+          - Exhale as you press the bar back up
+
+          ### 4. Tips
+          - Position the bench so the bar path aligns naturally with your press
+          - Keep your shoulder blades retracted throughout
+          - Take advantage of the fixed path for controlled reps
+          - Focus on squeezing your lower chest at the top
+          - Keep your feet secured throughout the movement
+
+          ### 5. Common Mistakes
+          - Positioning the bench incorrectly relative to the bar path
+          - Bouncing the bar off the chest
+          - Not securing feet properly before starting
+          - Allowing the elbows to flare out excessively
+          - Not achieving full range of motion
+          - Relying too heavily on the machine's stability
+
+          ### 6. Safety / Modifications
+          - Adjust bench position to ensure natural bar path
+          - Use the safety catches at appropriate height
+          - Ensure feet are securely anchored before unracking
+          - Advanced variation: use slow negatives or add chains
 
   "Floor Press (Barbell)":
     category: Barbell
     target: Chest
+    i18n:
+      en:
+        name: "Floor Press (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell floor press is a partial-range pressing exercise that primarily targets the pectoralis major and triceps. It also engages the front deltoids, using the floor to limit range of motion and reduce shoulder strain while allowing for heavy pressing.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie flat on the floor with your knees bent and feet flat
+          - Position yourself under a racked barbell or have spotters hand you the bar
+          - Grip the bar with hands slightly wider than shoulder-width apart
+          - Hold the bar with arms fully extended above your chest
+          - Keep your shoulder blades retracted against the floor
+
+          ### 2. Movement
+          1. Lower the bar slowly until your elbows touch the floor
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Pause briefly when your triceps contact the floor
+          4. Press the bar back up by extending your arms
+          5. Lock out your elbows at the top
+          6. Repeat for controlled reps without bouncing elbows off the floor
+
+          ### 3. Breathing
+          - Inhale as you lower the bar
+          - Exhale as you press the bar back up
+
+          ### 4. Tips
+          - The floor limits your range of motion and reduces shoulder stress
+          - Pause briefly when elbows touch the floor, don't bounce
+          - Focus on explosive pressing from the bottom position
+          - Keep your shoulder blades retracted throughout
+          - This variation allows for heavier loads than full-range pressing
+
+          ### 5. Common Mistakes
+          - Bouncing elbows off the floor to generate momentum
+          - Allowing the elbows to flare out excessively
+          - Not pausing when elbows touch the floor
+          - Arching the back excessively
+          - Using too much weight and compromising control
+          - Lifting the glutes off the floor
+
+          ### 6. Safety / Modifications
+          - Use a power rack with safety pins set at appropriate height
+          - Have spotters help you get into and out of position with heavy weights
+          - Start with moderate weight to adapt to the limited range
+          - Advanced variation: add chains or use slow negatives
 
   "Incline Bench Press (Barbell)":
     category: Barbell
     target: Chest
+    i18n:
+      en:
+        name: "Incline Bench Press (Barbell)"
+        instructions: |
+          ## Overview
+          The incline barbell bench press is a compound pressing exercise that primarily targets the upper pectoralis major. It also engages the front deltoids and triceps, using an inclined bench position to emphasize the upper chest and build overall pressing strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set an adjustable bench to a 30-45 degree incline
+          - Lie back on the bench with your feet firmly planted on the floor
+          - Position yourself so your eyes are under the bar
+          - Grip the bar with hands slightly wider than shoulder-width apart
+          - Unrack the bar and hold it with arms extended above your upper chest
+
+          ### 2. Movement
+          1. Lower the bar slowly to your upper chest or collarbone
+          2. Keep your elbows at about a 45-degree angle from your body
+          3. Touch the bar lightly to your chest
+          4. Pause briefly at the bottom
+          5. Press the bar back up by extending your arms
+          6. Lock out your elbows at the top and repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower the bar to your chest
+          - Exhale as you press the bar back up
+
+          ### 4. Tips
+          - Keep your shoulder blades retracted throughout
+          - Maintain the incline angle of 30-45 degrees for optimal upper chest engagement
+          - Control the descent and avoid bouncing the bar
+          - Keep your feet flat and core engaged for stability
+          - Focus on squeezing your upper chest at the top
+
+          ### 5. Common Mistakes
+          - Setting the incline too steep (over 45 degrees), shifting emphasis to shoulders
+          - Bouncing the bar off the chest
+          - Allowing the elbows to flare out excessively
+          - Lifting the glutes off the bench
+          - Not achieving full range of motion
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Always use a spotter when lifting heavy weights
+          - Start with lighter weight than your flat bench press
+          - Adjust incline angle between 30-45 degrees based on comfort
+          - If you experience shoulder discomfort, adjust your grip width or incline angle
 
   "Incline Bench Press (Cable)":
     category: Machine
