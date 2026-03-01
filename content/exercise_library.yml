@@ -9933,118 +9933,1484 @@ exercises:
   "Arnold Press (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Arnold Press (Dumbbell)"
+        instructions: |
+          ## Overview
+          The Arnold press is a compound shoulder exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using a rotating dumbbell press motion to provide complete shoulder development through a unique range of motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on a bench with back support, holding a dumbbell in each hand
+          - Position dumbbells at shoulder height with palms facing your body
+          - Keep your elbows in front of your torso
+          - Engage your core and keep your back pressed against the pad
+          - Plant your feet flat on the floor
+
+          ### 2. Movement
+          1. Press the dumbbells upward while rotating your palms outward
+          2. Continue pressing and rotating until arms are fully extended overhead
+          3. At the top, palms should be facing forward
+          4. Pause briefly at the top
+          5. Reverse the motion by rotating palms back inward as you lower
+          6. Return to starting position with palms facing your body and repeat
+
+          ### 3. Breathing
+          - Inhale at the starting position
+          - Exhale as you press the dumbbells up
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - The rotation should be smooth and controlled throughout
+          - Keep your core engaged to protect your lower back
+          - Focus on the rotation as much as the pressing motion
+          - Control both the pressing and lowering phases equally
+          - The unique rotation targets all three deltoid heads
+
+          ### 5. Common Mistakes
+          - Rotating too quickly and losing control
+          - Arching the lower back excessively
+          - Not completing the full rotation
+          - Using too much weight and compromising form
+          - Allowing the elbows to flare out too early
+          - Rushing through the movement
+
+          ### 6. Safety / Modifications
+          - Start with lighter dumbbells than standard shoulder presses
+          - Master the rotation pattern before adding weight
+          - Perform standing for an additional core challenge
+          - If you experience shoulder discomfort, reduce weight or range of motion
 
   "Halo":
     category: Dumbbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Halo"
+        instructions: |
+          ## Overview
+          The halo is a dynamic shoulder mobility exercise that primarily targets the deltoids and rotator cuff muscles. It also engages the core and upper back, using a circular motion around the head to improve shoulder mobility, stability, and coordination.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart or kneel for added stability
+          - Hold one dumbbell or kettlebell by the horns at chest height
+          - Keep your chest up, core engaged, and eyes forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Circle the weight around your head in a controlled motion
+          2. Keep the weight close to your head as it travels around
+          3. Maintain an upright torso and stable lower body
+          4. Complete the full circle and return to the starting position
+          5. Repeat for desired reps in one direction
+          6. Switch directions and repeat for equal reps
+
+          ### 3. Breathing
+          - Breathe steadily and rhythmically throughout the movement
+          - Avoid holding your breath
+
+          ### 4. Tips
+          - Keep the weight close to your head throughout the circle
+          - Focus on smooth, controlled movement
+          - Keep your core tight to prevent torso rotation
+          - Start with a light weight to master the movement pattern
+          - This exercise is excellent for shoulder warm-ups and mobility
+
+          ### 5. Common Mistakes
+          - Using too much weight and losing control
+          - Allowing the torso to rotate with the weight
+          - Moving too quickly through the circles
+          - Not keeping the weight close to the head
+          - Arching the lower back during the movement
+          - Holding your breath
+
+          ### 6. Safety / Modifications
+          - Start with a very light dumbbell or kettlebell
+          - Kneel for added stability if balance is an issue
+          - Use this exercise as a warm-up before shoulder training
+          - Reduce range of motion if you experience shoulder discomfort
 
   "Handstand Push Up":
     category: Weighted Body Weight
     target: Shoulders
+    i18n:
+      en:
+        name: "Handstand Push Up"
+        instructions: |
+          ## Overview
+          The handstand push up is an advanced bodyweight pressing exercise that primarily targets the shoulders. It also engages the triceps, upper chest, and core, using an inverted position to create maximum shoulder loading through vertical pressing.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Kick up into a handstand position against a wall
+          - Position your hands slightly wider than shoulder-width apart
+          - Keep your body in a straight line from hands to feet
+          - Engage your core and keep your head in a neutral position
+          - Maintain balance with assistance from the wall
+
+          ### 2. Movement
+          1. Lower your body by bending your elbows
+          2. Descend until the top of your head nearly touches the floor
+          3. Keep your elbows at about a 45-degree angle from your body
+          4. Pause briefly at the bottom
+          5. Press through your palms to extend your arms
+          6. Return to the starting handstand position and repeat
+
+          ### 3. Breathing
+          - Inhale as you lower your body down
+          - Exhale as you press back up
+
+          ### 4. Tips
+          - This is an advanced exercise requiring significant strength
+          - Keep your core tight to maintain body alignment
+          - Control the descent to maximize muscle engagement
+          - Focus on pressing straight up, not away from the wall
+          - Use the wall for balance assistance
+
+          ### 5. Common Mistakes
+          - Allowing the back to arch excessively
+          - Not achieving full range of motion
+          - Flaring the elbows out too wide
+          - Losing core tension and body alignment
+          - Attempting this exercise before building adequate strength
+          - Moving too quickly and losing control
+
+          ### 6. Safety / Modifications
+          - Build up to this with pike push ups or elevated pike push ups
+          - Use an assisted handstand push up with resistance band
+          - Perform negative-only reps (lowering only) to build strength
+          - Ensure you can hold a wall handstand for 30+ seconds before attempting
 
   "Face Pull (Cable)":
     category: Machine
     target: Shoulders
+    i18n:
+      en:
+        name: "Face Pull (Cable)"
+        instructions: |
+          ## Overview
+          The cable face pull is an isolation exercise that primarily targets the rear deltoids and upper back. It also engages the rhomboids and middle trapezius, using a rope attachment to improve shoulder health, posture, and rear delt development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Attach a rope to a cable pulley at upper chest height
+          - Stand facing the cable with feet shoulder-width apart
+          - Grip the rope with both hands using a neutral grip
+          - Step back to create tension on the cable
+          - Keep your chest up and core engaged
+
+          ### 2. Movement
+          1. Pull the rope toward your face by driving your elbows back and out
+          2. Separate the rope ends as you pull, moving them past your ears
+          3. Focus on squeezing your shoulder blades together
+          4. Continue until your hands are beside your ears
+          5. Pause and squeeze your rear delts and upper back
+          6. Slowly return to the starting position with control and repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the rope toward your face
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Focus on pulling with your rear delts and upper back, not your arms
+          - Keep your elbows high and flared out during the pull
+          - Separate the rope ends to maximize rear delt contraction
+          - Maintain constant tension on the cable throughout
+          - This exercise is excellent for shoulder health and posture
+
+          ### 5. Common Mistakes
+          - Pulling too low toward the chest instead of the face
+          - Not separating the rope ends at the finish
+          - Using momentum or jerking the weight
+          - Allowing the elbows to drop during the pull
+          - Using too much weight and compromising form
+          - Not squeezing the shoulder blades together
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the movement pattern
+          - Adjust cable height between upper chest and face level
+          - Perform with a resistance band if cables are unavailable
+          - Focus on controlled reps and proper form over heavy weight
 
   "Front Raise (Band)":
     category: Weighted Body Weight
     target: Shoulders
+    i18n:
+      en:
+        name: "Front Raise (Band)"
+        instructions: |
+          ## Overview
+          The band front raise is an isolation exercise that primarily targets the front deltoids. It also engages the upper chest, using progressive band resistance to build shoulder strength and muscle definition in the front of the shoulders.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, stepping on the center of a resistance band
+          - Grip both ends of the band with hands in front of your thighs
+          - Keep your arms straight with a slight bend in your elbows
+          - Stand upright with chest up and core engaged
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Raise both arms forward and upward in front of your body
+          2. Keep your arms straight with only a slight elbow bend
+          3. Continue raising until your arms are at shoulder height or slightly above
+          4. Pause briefly at the top
+          5. Slowly lower your arms back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you raise your arms up
+          - Inhale as you lower your arms back down
+
+          ### 4. Tips
+          - The band provides increasing resistance as you raise
+          - Keep your torso stable and avoid using momentum
+          - Focus on squeezing your front delts at the top
+          - Maintain constant tension by controlling both phases
+          - Adjust foot position on the band to modify resistance
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the arms
+          - Leaning back during the raise
+          - Bending the elbows excessively
+          - Raising the arms too high above shoulder level
+          - Not maintaining constant tension on the band
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master the movement
+          - Adjust foot position on band for comfortable resistance
+          - Perform one arm at a time for unilateral focus
+          - If you experience shoulder discomfort, reduce range of motion or resistance
 
   "Front Raise (Barbell)":
     category: Barbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Front Raise (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell front raise is an isolation exercise that primarily targets the front deltoids. It also engages the upper chest, using a barbell to provide stable bilateral resistance for building shoulder strength and muscle definition.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart holding a barbell
+          - Grip the bar with hands slightly wider than shoulder-width, palms facing down
+          - Position the bar in front of your thighs with arms straight
+          - Keep your chest up, core engaged, and maintain good posture
+          - Maintain a slight bend in your elbows throughout
+
+          ### 2. Movement
+          1. Raise the barbell forward and upward in front of your body
+          2. Keep your arms straight with only a slight elbow bend
+          3. Continue raising until the bar reaches shoulder height
+          4. Pause briefly at the top
+          5. Slowly lower the bar back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you raise the bar up
+          - Inhale as you lower the bar back down
+
+          ### 4. Tips
+          - Keep your torso stable and avoid using momentum
+          - Focus on lifting with your front delts, not your arms
+          - Maintain a slight bend in your elbows throughout
+          - Control both the raising and lowering phases
+          - The barbell allows for heavier loading than dumbbells
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the bar
+          - Leaning back during the raise
+          - Bending the elbows excessively
+          - Raising the bar too high above shoulder level
+          - Using too much weight and compromising form
+          - Not maintaining constant tension
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the movement pattern
+          - Use an EZ curl bar if straight bar causes wrist discomfort
+          - Perform with dumbbells for independent arm movement
+          - If you experience shoulder discomfort, reduce weight or range of motion
 
   "Front Raise (Cable)":
     category: Machine
     target: Shoulders
+    i18n:
+      en:
+        name: "Front Raise (Cable)"
+        instructions: |
+          ## Overview
+          The cable front raise is an isolation exercise that primarily targets the front deltoids. It also engages the upper chest, using a cable to provide constant tension throughout the movement for consistent shoulder activation.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing away from a low cable pulley
+          - Attach a straight bar or rope handle to the low pulley
+          - Grip the attachment with both hands
+          - Step forward to create tension with the attachment in front of your thighs
+          - Keep your chest up, core engaged, and arms straight with slight elbow bend
+
+          ### 2. Movement
+          1. Raise the attachment forward and upward in front of your body
+          2. Keep your arms straight with only a slight elbow bend
+          3. Continue raising until your arms are at shoulder height
+          4. Pause briefly at the top
+          5. Slowly lower the attachment back to the starting position with control
+          6. Stop just before losing tension on the cable and repeat
+
+          ### 3. Breathing
+          - Exhale as you raise the attachment up
+          - Inhale as you lower it back down
+
+          ### 4. Tips
+          - Maintain constant tension by not letting the weight stack touch
+          - Keep your torso stable and avoid using momentum
+          - Focus on squeezing your front delts at the top
+          - Control both the raising and lowering phases equally
+          - The cable provides consistent resistance throughout
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the attachment
+          - Leaning back during the raise
+          - Bending the elbows excessively
+          - Raising the attachment too high above shoulder level
+          - Letting the weight stack rest between reps
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the cable movement pattern
+          - Adjust cable height and position as needed
+          - Perform one arm at a time for unilateral focus
+          - If you experience shoulder discomfort, reduce weight or range of motion
 
   "Front Raise (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Front Raise (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell front raise is an isolation exercise that primarily targets the front deltoids. It also engages the upper chest, using dumbbells for independent arm movement to build shoulder strength, muscle definition, and address imbalances.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart holding a dumbbell in each hand
+          - Position dumbbells in front of your thighs with palms facing your body
+          - Keep your arms straight with a slight bend in your elbows
+          - Stand upright with chest up and core engaged
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Raise both dumbbells forward and upward in front of your body
+          2. Keep your arms straight with only a slight elbow bend
+          3. Continue raising until your arms are at shoulder height
+          4. Pause briefly at the top
+          5. Slowly lower the dumbbells back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you raise the dumbbells up
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - Keep your torso stable and avoid using momentum
+          - Focus on lifting with your front delts, not your arms
+          - Maintain a slight bend in your elbows throughout
+          - You can alternate arms or raise both simultaneously
+          - Control both the raising and lowering phases
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the dumbbells
+          - Leaning back during the raise
+          - Bending the elbows excessively
+          - Raising the dumbbells too high above shoulder level
+          - Using too much weight and compromising form
+          - Not maintaining constant tension
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master the movement pattern
+          - Perform alternating front raises to reduce fatigue
+          - Perform one arm at a time for better focus and control
+          - If you experience shoulder discomfort, reduce weight or range of motion
 
   "Front Raise (Plate)":
     category: Machine
     target: Shoulders
+    i18n:
+      en:
+        name: "Front Raise (Plate)"
+        instructions: |
+          ## Overview
+          The plate front raise is an isolation exercise that primarily targets the front deltoids. It also engages the upper chest and core, using a weight plate held with both hands to provide stable resistance for shoulder strength and definition.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart holding a weight plate
+          - Grip the plate with both hands at the sides (like a steering wheel)
+          - Position the plate in front of your thighs with arms straight
+          - Keep your chest up, core engaged, and maintain good posture
+          - Maintain a slight bend in your elbows throughout
+
+          ### 2. Movement
+          1. Raise the plate forward and upward in front of your body
+          2. Keep your arms straight with only a slight elbow bend
+          3. Continue raising until the plate reaches shoulder height
+          4. Pause briefly at the top
+          5. Slowly lower the plate back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you raise the plate up
+          - Inhale as you lower the plate back down
+
+          ### 4. Tips
+          - Keep your torso stable and avoid using momentum
+          - Focus on lifting with your front delts, not your arms
+          - Grip the plate firmly at the sides throughout
+          - Control both the raising and lowering phases
+          - The plate provides a unique grip variation
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the plate
+          - Leaning back during the raise
+          - Bending the elbows excessively
+          - Raising the plate too high above shoulder level
+          - Using too heavy a plate and compromising form
+          - Not maintaining constant tension
+
+          ### 6. Safety / Modifications
+          - Start with a light plate to master the movement pattern
+          - Ensure you have a firm grip on the plate throughout
+          - Use a bumper plate for easier gripping
+          - If you experience shoulder discomfort, reduce weight or range of motion
 
   "Lateral Raise (Band)":
     category: Weighted Body Weight
     target: Shoulders
+    i18n:
+      en:
+        name: "Lateral Raise (Band)"
+        instructions: |
+          ## Overview
+          The band lateral raise is an isolation exercise that primarily targets the middle deltoids. It also engages the upper trapezius, using progressive band resistance to build shoulder width and improve the appearance of broader shoulders.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, stepping on the center of a resistance band
+          - Grip both ends of the band with hands at your sides
+          - Keep your arms straight with a slight bend in your elbows
+          - Stand upright with chest up and core engaged
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Raise both arms out to the sides in a wide arc
+          2. Keep your arms straight with only a slight elbow bend
+          3. Continue raising until your arms are at shoulder height
+          4. Pause briefly at the top
+          5. Slowly lower your arms back to your sides with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you raise your arms to the sides
+          - Inhale as you lower your arms back down
+
+          ### 4. Tips
+          - The band provides increasing resistance as you raise
+          - Keep your torso stable and avoid using momentum
+          - Focus on leading with your elbows slightly bent
+          - Maintain constant tension by controlling both phases
+          - Adjust foot position on the band to modify resistance
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the arms
+          - Shrugging the shoulders during the raise
+          - Bending the elbows excessively
+          - Raising the arms too high above shoulder level
+          - Not maintaining constant tension on the band
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master the movement
+          - Adjust foot position on band for comfortable resistance
+          - Perform one arm at a time for unilateral focus
+          - If you experience shoulder discomfort, reduce range of motion or resistance
 
   "Lateral Raise (Cable)":
     category: Machine
     target: Shoulders
+    i18n:
+      en:
+        name: "Lateral Raise (Cable)"
+        instructions: |
+          ## Overview
+          The cable lateral raise is an isolation exercise that primarily targets the middle deltoids. It also engages the upper trapezius, using a cable to provide constant tension throughout the movement for consistent shoulder activation and width development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand beside a low cable pulley with the cable on the side away from the machine
+          - Attach a D-handle to the low pulley
+          - Grip the handle with your far hand, arm across your body
+          - Stand upright with feet shoulder-width apart
+          - Keep a slight bend in your elbow throughout
+
+          ### 2. Movement
+          1. Raise your arm out to the side in a wide arc
+          2. Keep your arm straight with only a slight elbow bend
+          3. Continue raising until your arm is at shoulder height
+          4. Pause briefly at the top
+          5. Slowly lower your arm back across your body with control
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you raise your arm to the side
+          - Inhale as you lower your arm back down
+
+          ### 4. Tips
+          - Maintain constant tension by not letting the weight stack touch
+          - Keep your torso stable and avoid leaning
+          - Focus on leading with your elbow slightly bent
+          - Control both the raising and lowering phases equally
+          - The cable provides consistent resistance throughout
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the arm
+          - Shrugging the shoulder during the raise
+          - Bending the elbow excessively
+          - Raising the arm too high above shoulder level
+          - Letting the weight stack rest between reps
+          - Leaning away from the cable during the raise
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the cable movement pattern
+          - Stand slightly away from the machine for optimal cable angle
+          - Perform both arms simultaneously by standing between two cable stacks
+          - If you experience shoulder discomfort, reduce weight or range of motion
 
   "Lateral Raise (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Lateral Raise (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell lateral raise is an isolation exercise that primarily targets the middle deltoids. It also engages the upper trapezius, using dumbbells for independent arm movement to build shoulder width and create the appearance of broader shoulders.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart holding a dumbbell in each hand
+          - Let the dumbbells hang at your sides with palms facing inward
+          - Keep your arms straight with a slight bend in your elbows
+          - Stand upright with chest up and core engaged
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Raise both arms out to the sides in a wide arc
+          2. Keep your arms straight with only a slight elbow bend
+          3. Continue raising until your arms are at shoulder height
+          4. Pause briefly at the top
+          5. Slowly lower the dumbbells back to your sides with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you raise the dumbbells to the sides
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - Keep your torso stable and avoid using momentum
+          - Focus on leading with your elbows slightly bent
+          - Think of pouring water from a pitcher at the top
+          - Control both the raising and lowering phases
+          - Maintain constant tension throughout
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the dumbbells
+          - Shrugging the shoulders during the raise
+          - Bending the elbows excessively
+          - Raising the dumbbells too high above shoulder level
+          - Using too much weight and compromising form
+          - Not maintaining constant tension
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master the movement pattern
+          - Perform one arm at a time for better focus and control
+          - Perform seated to eliminate momentum from the lower body
+          - If you experience shoulder discomfort, reduce weight or range of motion
 
   "Lateral Raise (Machine)":
     category: Machine
     target: Shoulders
+    i18n:
+      en:
+        name: "Lateral Raise (Machine)"
+        instructions: |
+          ## Overview
+          The machine lateral raise is an isolation exercise that primarily targets the middle deltoids. It also engages the upper trapezius, using a guided machine to provide stable resistance and consistent form for building shoulder width.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the lateral raise machine with your back against the pad
+          - Adjust the seat height so the pivot points align with your shoulders
+          - Position your arms against the padded levers
+          - Grip the handles lightly
+          - Keep your feet flat and core engaged
+
+          ### 2. Movement
+          1. Raise your arms out to the sides by pushing against the pads
+          2. Continue raising until your arms are at shoulder height
+          3. Keep your elbows slightly bent throughout
+          4. Pause briefly at the top
+          5. Slowly lower your arms back to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension and repeat
+
+          ### 3. Breathing
+          - Exhale as you raise your arms to the sides
+          - Inhale as you lower your arms back down
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - Focus on lifting with your middle delts, not your traps
+          - Control both the raising and lowering phases
+          - Maintain constant tension by not letting the weight stack rest
+          - Avoid shrugging your shoulders during the movement
+
+          ### 5. Common Mistakes
+          - Lifting your back off the pad during the raise
+          - Shrugging the shoulders instead of isolating the delts
+          - Using momentum instead of controlled movement
+          - Letting the weight stack rest between reps
+          - Raising the arms too high above shoulder level
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat and pad positions for proper shoulder alignment
+          - Start with light weight to establish proper form
+          - Focus on controlled movement over heavy weight
+          - If you experience shoulder discomfort, reduce weight or range of motion
 
   "Overhead Press (Barbell)":
     category: Barbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Overhead Press (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell overhead press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps, upper chest, and core, making it one of the most effective exercises for building overall shoulder strength and upper body pressing power.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart, barbell racked at upper chest height
+          - Grip the bar slightly wider than shoulder-width with palms facing forward
+          - Unrack the bar and hold it at shoulder level
+          - Keep your chest up, core engaged, and elbows slightly forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Press the bar straight up overhead by extending your arms
+          2. Move your head slightly back to allow the bar to pass
+          3. Continue pressing until your arms are fully extended overhead
+          4. Lock out your elbows at the top with the bar over mid-foot
+          5. Lower the bar back to shoulder level with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Take a breath and brace your core before pressing
+          - Hold your breath during the press
+          - Exhale at the top or as you lower the bar
+
+          ### 4. Tips
+          - Press the bar in a straight vertical line
+          - Keep your core tight to prevent arching your lower back
+          - Lock out your arms fully at the top
+          - Keep the bar path close to your face
+          - This exercise can be performed standing or seated
+
+          ### 5. Common Mistakes
+          - Arching the lower back excessively during the press
+          - Pressing the bar forward instead of straight up
+          - Not achieving full lockout at the top
+          - Flaring the elbows out too wide
+          - Using momentum from the legs (turning it into a push press)
+          - Not maintaining core tension throughout
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the vertical pressing path
+          - Use a power rack with safety pins when training alone
+          - Perform seated overhead press for more stability
+          - If you experience shoulder discomfort, check your grip width and bar path
 
   "Overhead Press (Cable)":
     category: Machine
     target: Shoulders
+    i18n:
+      en:
+        name: "Overhead Press (Cable)"
+        instructions: |
+          ## Overview
+          The cable overhead press is a machine-based compound exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using cables to provide constant tension throughout the pressing movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand between two low cable pulleys or use a single cable
+          - Attach handles to the pulleys and set appropriate weight
+          - Grip the handles at shoulder height with palms facing forward
+          - Stand with feet shoulder-width apart
+          - Keep your chest up, core engaged, and elbows slightly forward
+
+          ### 2. Movement
+          1. Press the handles straight up overhead by extending your arms
+          2. Continue pressing until your arms are fully extended
+          3. Pause briefly at the top
+          4. Slowly lower the handles back to shoulder level with control
+          5. Stop just before losing tension on the cables
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you press the handles overhead
+          - Inhale as you lower the handles back down
+
+          ### 4. Tips
+          - Maintain constant tension by not releasing the weight completely
+          - Keep your core tight to prevent arching your lower back
+          - Focus on pressing straight up, not forward
+          - Control both the pressing and lowering phases
+          - The cables provide consistent resistance throughout
+
+          ### 5. Common Mistakes
+          - Fully releasing tension at the bottom
+          - Arching the lower back excessively during the press
+          - Pressing forward instead of straight up
+          - Not achieving full extension at the top
+          - Using momentum instead of controlled movement
+          - Letting the weight stack rest between reps
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the cable press pattern
+          - Perform one arm at a time for unilateral focus
+          - Adjust cable height and angle as needed
+          - If you experience shoulder discomfort, reduce weight or check your form
 
   "Overhead Press (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Overhead Press (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell overhead press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using dumbbells for independent arm movement and a greater range of motion than barbell variations.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand or sit with feet shoulder-width apart holding a dumbbell in each hand
+          - Position dumbbells at shoulder height with palms facing forward
+          - Keep your elbows below your wrists
+          - Maintain an upright torso with chest up and core engaged
+          - Keep your feet flat on the floor
+
+          ### 2. Movement
+          1. Press both dumbbells straight up overhead by extending your arms
+          2. Continue pressing until your arms are fully extended
+          3. Bring the dumbbells together at the top without clashing them
+          4. Pause briefly at the top
+          5. Lower the dumbbells back to shoulder level with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you press the dumbbells overhead
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - Keep your core tight to prevent arching your lower back
+          - Press straight up, not forward or back
+          - Control both the pressing and lowering phases
+          - The dumbbells allow for independent arm movement
+          - Avoid clashing the dumbbells together at the top
+
+          ### 5. Common Mistakes
+          - Arching the lower back excessively during the press
+          - Pressing forward instead of straight up
+          - Not achieving full extension at the top
+          - Clashing the dumbbells together at the top
+          - Using too much weight and compromising form
+          - Allowing one arm to dominate the movement
+
+          ### 6. Safety / Modifications
+          - Start with moderate dumbbells to master balance and form
+          - Perform seated for more stability and back support
+          - Perform one arm at a time for unilateral focus
+          - If you experience shoulder discomfort, reduce weight or check your form
 
   "Overhead Press (Smith Machine)":
     category: Machine
     target: Shoulders
+    i18n:
+      en:
+        name: "Overhead Press (Smith Machine)"
+        instructions: |
+          ## Overview
+          The Smith machine overhead press is a guided compound exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using a fixed vertical bar path to provide stability and allow focus on pressing power.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a bench under the Smith machine bar (or stand)
+          - Adjust the bar height to upper chest level
+          - Grip the bar slightly wider than shoulder-width with palms facing forward
+          - Unrack the bar by rotating it
+          - Keep your chest up, core engaged, and feet flat
+
+          ### 2. Movement
+          1. Press the bar straight up overhead by extending your arms
+          2. Continue pressing until your arms are fully extended
+          3. Lock out your elbows at the top
+          4. Pause briefly at the top
+          5. Lower the bar back to shoulder level with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you press the bar overhead
+          - Inhale as you lower the bar back down
+
+          ### 4. Tips
+          - The fixed bar path helps maintain proper form
+          - Keep your core tight to prevent arching your lower back
+          - Take advantage of the guided path for controlled reps
+          - Focus on pressing straight up
+          - Use the safety catches for added security
+
+          ### 5. Common Mistakes
+          - Positioning yourself incorrectly relative to the bar path
+          - Arching the lower back excessively during the press
+          - Not achieving full lockout at the top
+          - Flaring the elbows out too wide
+          - Relying too heavily on the machine's stability
+          - Using too much weight before mastering form
+
+          ### 6. Safety / Modifications
+          - Adjust starting position to ensure natural bar path
+          - Use the safety catches at appropriate height
+          - Perform seated for added stability
+          - If you experience shoulder discomfort, adjust grip width or reduce weight
 
   "Push Press":
     category: Barbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Push Press"
+        instructions: |
+          ## Overview
+          The push press is a compound power exercise that primarily targets the deltoids with leg drive assistance. It also engages the triceps, upper chest, quadriceps, and core, using an explosive leg drive to press heavier weights overhead than strict pressing allows.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart, barbell racked at upper chest height
+          - Grip the bar slightly wider than shoulder-width with palms facing forward
+          - Unrack the bar and hold it at shoulder level
+          - Keep your chest up, core engaged, and elbows slightly forward
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Dip slightly by bending your knees and hips
+          2. Explosively drive upward with your legs while pressing the bar overhead
+          3. Use the leg momentum to help press the bar overhead
+          4. Continue pressing until your arms are fully extended
+          5. Lock out your elbows at the top with the bar overhead
+          6. Lower the bar back to shoulder level with control and repeat
+
+          ### 3. Breathing
+          - Inhale during the dip phase
+          - Exhale explosively as you drive and press
+
+          ### 4. Tips
+          - The leg drive should be explosive and powerful
+          - Time the leg drive with the arm press for maximum efficiency
+          - Keep your core tight throughout the movement
+          - This exercise allows for heavier loads than strict pressing
+          - Focus on smooth coordination between legs and arms
+
+          ### 5. Common Mistakes
+          - Dipping too deep or not deep enough
+          - Not coordinating the leg drive with the arm press
+          - Pressing forward instead of straight up
+          - Arching the lower back excessively
+          - Not achieving full lockout at the top
+          - Using the legs to do all the work instead of assisting
+
+          ### 6. Safety / Modifications
+          - Master the strict overhead press before progressing to push press
+          - Start with moderate weight to learn the leg drive timing
+          - Use a power rack with safety pins when training alone
+          - This exercise is excellent for building explosive power
 
   "Reverse Fly (Cable)":
     category: Machine
     target: Shoulders
+    i18n:
+      en:
+        name: "Reverse Fly (Cable)"
+        instructions: |
+          ## Overview
+          The cable reverse fly is an isolation exercise that primarily targets the rear deltoids and upper back. It also engages the rhomboids and middle trapezius, using cables to provide constant tension for improved shoulder balance, posture, and rear delt development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand centered between two cable pulleys set at shoulder height
+          - Cross your arms in front and grip the opposite cable handle
+          - Step back slightly to create tension with arms extended
+          - Keep a slight bend in your elbows throughout
+          - Stand with chest up and core engaged
+
+          ### 2. Movement
+          1. Pull both handles out to the sides in a wide arc
+          2. Keep your elbows slightly bent throughout the movement
+          3. Focus on squeezing your shoulder blades together
+          4. Continue until your arms are extended to your sides
+          5. Pause and squeeze your rear delts at the end
+          6. Slowly return your arms to the crossed starting position and repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the handles out to the sides
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Focus on pulling with your rear delts and upper back
+          - Keep your elbows slightly bent in a fixed position
+          - Squeeze your shoulder blades together at the end
+          - Maintain constant tension by not letting the weight stack touch
+          - Keep your torso stable and avoid rotating
+
+          ### 5. Common Mistakes
+          - Straightening the arms completely during the movement
+          - Using momentum or swinging the weight
+          - Not squeezing the shoulder blades together
+          - Rotating the torso instead of keeping it stable
+          - Letting the weight stack rest between reps
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the movement pattern
+          - Adjust cable height for different angles of emphasis
+          - Perform one arm at a time for unilateral focus
+          - If you experience shoulder discomfort, reduce weight or range of motion
 
   "Reverse Fly (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Reverse Fly (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell reverse fly is an isolation exercise that primarily targets the rear deltoids and upper back. It also engages the rhomboids and middle trapezius, using dumbbells with a bent-over position to build rear shoulder strength, improve posture, and balance shoulder development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a dumbbell in each hand
+          - Hinge forward at the hips until your torso is nearly parallel to the floor
+          - Let the dumbbells hang below your chest with palms facing each other
+          - Keep a slight bend in your knees and maintain a flat back
+          - Engage your core throughout
+
+          ### 2. Movement
+          1. Raise both dumbbells out to the sides in a wide arc
+          2. Keep your elbows slightly bent throughout the movement
+          3. Focus on squeezing your shoulder blades together
+          4. Continue until your arms are parallel to the floor
+          5. Pause and squeeze your rear delts at the top
+          6. Slowly lower the dumbbells back to the starting position and repeat
+
+          ### 3. Breathing
+          - Exhale as you raise the dumbbells to the sides
+          - Inhale as you lower them back down
+
+          ### 4. Tips
+          - Focus on pulling with your rear delts and upper back
+          - Keep your elbows slightly bent in a fixed position
+          - Squeeze your shoulder blades together at the top
+          - Maintain a flat back throughout the movement
+          - Control both the raising and lowering phases
+
+          ### 5. Common Mistakes
+          - Straightening the arms completely during the movement
+          - Rounding the back instead of maintaining a flat spine
+          - Using momentum or swinging the dumbbells
+          - Not squeezing the shoulder blades together
+          - Raising the dumbbells too high
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Start with light dumbbells to master the bent-over position
+          - Perform seated while leaning forward for added stability
+          - Perform on an incline bench face down for support
+          - If you experience lower back discomfort, use a supported variation
 
   "Reverse Fly (Machine)":
     category: Machine
     target: Shoulders
+    i18n:
+      en:
+        name: "Reverse Fly (Machine)"
+        instructions: |
+          ## Overview
+          The machine reverse fly is an isolation exercise that primarily targets the rear deltoids and upper back. It also engages the rhomboids and middle trapezius, using a guided machine to provide stable resistance for improving shoulder balance and rear delt development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the reverse fly machine facing the pad
+          - Adjust the seat height so handles align with your shoulders
+          - Grip the handles with arms extended in front of you
+          - Keep your chest against the pad and feet flat on the floor
+          - Maintain a slight bend in your elbows throughout
+
+          ### 2. Movement
+          1. Pull both handles back and out to the sides in a wide arc
+          2. Keep your elbows slightly bent throughout the movement
+          3. Focus on squeezing your shoulder blades together
+          4. Continue until your arms are in line with your body
+          5. Pause and squeeze your rear delts at the end
+          6. Slowly return to the starting position with control and repeat
+
+          ### 3. Breathing
+          - Exhale as you pull the handles back
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Keep your chest pressed firmly against the pad
+          - Focus on pulling with your rear delts and upper back
+          - Squeeze your shoulder blades together at the end
+          - Control both the pulling and returning phases
+          - Maintain constant tension by not letting the weight stack rest
+
+          ### 5. Common Mistakes
+          - Lifting your chest off the pad during the pull
+          - Straightening the arms completely during the movement
+          - Using momentum instead of controlled movement
+          - Not squeezing the shoulder blades together
+          - Letting the weight stack rest between reps
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure proper shoulder alignment
+          - Start with light weight to establish proper form
+          - Focus on controlled movement over heavy weight
+          - If you experience shoulder discomfort, reduce weight or range of motion
 
   "Seated Overhead Press (Barbell)":
     category: Barbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Seated Overhead Press (Barbell)"
+        instructions: |
+          ## Overview
+          The seated barbell overhead press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using a seated position with back support to eliminate leg drive and isolate the shoulders.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on a bench with back support, feet flat on the floor
+          - Position a barbell at upper chest height in a rack
+          - Grip the bar slightly wider than shoulder-width with palms facing forward
+          - Unrack the bar and hold it at shoulder level
+          - Keep your back pressed against the pad and core engaged
+
+          ### 2. Movement
+          1. Press the bar straight up overhead by extending your arms
+          2. Continue pressing until your arms are fully extended
+          3. Lock out your elbows at the top
+          4. Pause briefly at the top
+          5. Lower the bar back to shoulder level with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Take a breath and brace before pressing
+          - Hold your breath during the press
+          - Exhale at the top or as you lower the bar
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - The seated position eliminates leg drive for strict shoulder work
+          - Press straight up, not forward
+          - Focus on full range of motion
+          - This variation is excellent for isolating the shoulders
+
+          ### 5. Common Mistakes
+          - Arching the lower back off the pad during the press
+          - Pressing forward instead of straight up
+          - Not achieving full lockout at the top
+          - Using momentum by lifting the glutes off the seat
+          - Flaring the elbows out too wide
+          - Not maintaining core tension
+
+          ### 6. Safety / Modifications
+          - Use a spotter when lifting heavy weights
+          - Start with lighter weight than your standing press
+          - Adjust back pad angle if available for comfort
+          - If you experience shoulder discomfort, check your grip width and bar path
 
   "Seated Overhead Press (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Seated Overhead Press (Dumbbell)"
+        instructions: |
+          ## Overview
+          The seated dumbbell overhead press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using a seated position with dumbbells for independent arm movement and strict shoulder isolation.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on a bench with back support, feet flat on the floor
+          - Hold a dumbbell in each hand at shoulder height
+          - Position dumbbells with palms facing forward
+          - Keep your back pressed against the pad and core engaged
+          - Maintain your elbows below your wrists
+
+          ### 2. Movement
+          1. Press both dumbbells straight up overhead by extending your arms
+          2. Continue pressing until your arms are fully extended
+          3. Bring the dumbbells together at the top without clashing them
+          4. Pause briefly at the top
+          5. Lower the dumbbells back to shoulder level with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you press the dumbbells overhead
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - The seated position provides stability for strict pressing
+          - Press straight up, not forward or back
+          - Control both the pressing and lowering phases
+          - Avoid clashing the dumbbells together at the top
+
+          ### 5. Common Mistakes
+          - Arching the lower back off the pad during the press
+          - Pressing forward instead of straight up
+          - Not achieving full extension at the top
+          - Clashing the dumbbells together at the top
+          - Using too much weight and compromising form
+          - Allowing one arm to dominate the movement
+
+          ### 6. Safety / Modifications
+          - Start with moderate dumbbells to master the seated position
+          - Adjust back pad angle if available for comfort
+          - Perform alternating presses to reduce fatigue
+          - If you experience shoulder discomfort, reduce weight or check your form
 
   "Shoulder Press (Machine)":
     category: Machine
     target: Shoulders
+    i18n:
+      en:
+        name: "Shoulder Press (Machine)"
+        instructions: |
+          ## Overview
+          The machine shoulder press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps, using a guided machine to provide stable resistance and consistent form for shoulder development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the shoulder press machine with your back firmly against the pad
+          - Adjust the seat height so handles align with your shoulders
+          - Grip the handles with palms facing forward
+          - Plant your feet flat on the floor and engage your core
+          - Keep your back pressed against the pad
+
+          ### 2. Movement
+          1. Press the handles straight up overhead by extending your arms
+          2. Continue pressing until your arms are fully extended
+          3. Pause briefly at the top
+          4. Slowly lower the handles back to shoulder level with control
+          5. Stop just before the weight stack touches to maintain tension
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you press the handles overhead
+          - Inhale as you lower the handles back down
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - The guided path helps maintain proper form
+          - Focus on full range of motion
+          - Control both the pressing and lowering phases
+          - Maintain constant tension by not letting the weight stack rest
+
+          ### 5. Common Mistakes
+          - Lifting your back off the pad during the press
+          - Not achieving full extension at the top
+          - Using momentum instead of controlled movement
+          - Letting the weight stack rest between reps
+          - Arching the lower back excessively
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure proper handle alignment
+          - Start with light weight to establish proper form
+          - The machine provides stability for beginners
+          - If you experience shoulder discomfort, reduce weight or check positioning
 
   "Shoulder Press (Plate Loaded)":
     category: Machine
     target: Shoulders
+    i18n:
+      en:
+        name: "Shoulder Press (Plate Loaded)"
+        instructions: |
+          ## Overview
+          The plate-loaded shoulder press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps, using a plate-loaded machine to provide independent arm movement with the stability of a guided path.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the plate-loaded shoulder press machine with your back against the pad
+          - Adjust the seat height so handles align with your shoulders
+          - Grip the handles with palms facing forward
+          - Plant your feet flat on the floor and engage your core
+          - Keep your back pressed against the pad
+
+          ### 2. Movement
+          1. Press the handles straight up overhead by extending your arms
+          2. Continue pressing until your arms are fully extended
+          3. Pause briefly at the top
+          4. Slowly lower the handles back to shoulder level with control
+          5. Stop just before the plates touch to maintain tension
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you press the handles overhead
+          - Inhale as you lower the handles back down
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - The plate-loaded design allows for independent arm movement
+          - Focus on full range of motion
+          - Control both the pressing and lowering phases
+          - Maintain constant tension by not letting the plates rest
+
+          ### 5. Common Mistakes
+          - Lifting your back off the pad during the press
+          - Not achieving full extension at the top
+          - Allowing one arm to dominate the movement
+          - Letting the plates rest between reps
+          - Arching the lower back excessively
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust seat height to ensure proper handle alignment
+          - Start with light plates to establish proper form
+          - Perform one arm at a time to address imbalances
+          - If you experience shoulder discomfort, reduce weight or check positioning
 
   "Shrug (Barbell)":
     category: Barbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Shrug (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell shrug is an isolation exercise that primarily targets the upper trapezius muscles. It also engages the levator scapulae and rhomboids, using a barbell to provide heavy loading for building thick, powerful traps and improving shoulder stability.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a barbell
+          - Grip the bar with hands slightly wider than shoulder-width, palms facing your body
+          - Let the bar hang at arm's length in front of your thighs
+          - Keep your arms straight with a slight bend in your elbows
+          - Stand upright with chest up and core engaged
+
+          ### 2. Movement
+          1. Elevate your shoulders straight up toward your ears
+          2. Keep your arms straight throughout the movement
+          3. Shrug as high as possible, focusing on your traps
+          4. Pause and squeeze your traps at the top
+          5. Slowly lower your shoulders back to the starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you shrug your shoulders up
+          - Inhale as you lower your shoulders back down
+
+          ### 4. Tips
+          - Focus on moving your shoulders straight up, not rolling them
+          - Keep your arms straight throughout the movement
+          - Squeeze your traps hard at the top of each rep
+          - Avoid using momentum or jerking the weight
+          - The barbell allows for heavy loading of the traps
+
+          ### 5. Common Mistakes
+          - Rolling the shoulders instead of shrugging straight up
+          - Bending the elbows and turning it into a row
+          - Using momentum or jerking the weight
+          - Not achieving full range of motion
+          - Shrugging forward or backward instead of straight up
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with moderate weight to master the straight-up shrugging motion
+          - Use lifting straps if grip strength is limiting
+          - Perform behind-the-back barbell shrugs for variation
+          - If you experience neck discomfort, reduce weight and ensure proper form
 
   "Shrug (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Shrug (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell shrug is an isolation exercise that primarily targets the upper trapezius muscles. It also engages the levator scapulae and rhomboids, using dumbbells for independent side movement and a more natural hand position while building trap strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart holding a dumbbell in each hand
+          - Let the dumbbells hang at arm's length at your sides
+          - Keep your arms straight with a slight bend in your elbows
+          - Stand upright with chest up and core engaged
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Elevate your shoulders straight up toward your ears
+          2. Keep your arms straight throughout the movement
+          3. Shrug as high as possible, focusing on your traps
+          4. Pause and squeeze your traps at the top
+          5. Slowly lower your shoulders back to the starting position
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you shrug your shoulders up
+          - Inhale as you lower your shoulders back down
+
+          ### 4. Tips
+          - Focus on moving your shoulders straight up, not rolling them
+          - Keep your arms straight throughout the movement
+          - Squeeze your traps hard at the top of each rep
+          - Avoid using momentum or jerking the weight
+          - The dumbbells allow for a more natural hand position
+
+          ### 5. Common Mistakes
+          - Rolling the shoulders instead of shrugging straight up
+          - Bending the elbows and turning it into a row
+          - Using momentum or jerking the weight
+          - Not achieving full range of motion
+          - Shrugging forward or backward instead of straight up
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Start with moderate dumbbells to master the straight-up shrugging motion
+          - Use lifting straps if grip strength is limiting
+          - Perform one arm at a time for unilateral focus
+          - If you experience neck discomfort, reduce weight and ensure proper form
 
   "Strict Military Press (Barbell)":
     category: Barbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Strict Military Press (Barbell)"
+        instructions: |
+          ## Overview
+          The strict military press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps, upper chest, and core, using a strict standing position with no leg drive to build pure shoulder pressing strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand at attention with feet together or very close, barbell at upper chest
+          - Grip the bar slightly wider than shoulder-width with palms facing forward
+          - Unrack the bar and hold it at shoulder level
+          - Keep your body rigid with chest up, core tight, and glutes engaged
+          - Maintain military posture throughout
+
+          ### 2. Movement
+          1. Press the bar straight up overhead by extending your arms
+          2. Keep your body completely rigid with no leg drive or momentum
+          3. Continue pressing until your arms are fully extended overhead
+          4. Lock out your elbows at the top with the bar over mid-foot
+          5. Lower the bar back to shoulder level with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Take a breath and brace your core before pressing
+          - Hold your breath during the press
+          - Exhale at the top or as you lower the bar
+
+          ### 4. Tips
+          - Maintain strict military posture with no leg drive whatsoever
+          - Keep your entire body rigid from feet to shoulders
+          - Press the bar in a straight vertical line
+          - The strict form builds pure shoulder strength
+          - This variation requires lighter weight than standard overhead press
+
+          ### 5. Common Mistakes
+          - Using any leg drive or momentum
+          - Arching the lower back excessively during the press
+          - Pressing the bar forward instead of straight up
+          - Not maintaining rigid body position
+          - Widening stance beyond military attention
+          - Using too much weight before mastering strict form
+
+          ### 6. Safety / Modifications
+          - Start with significantly lighter weight than standard overhead press
+          - Master the standard overhead press before attempting strict military press
+          - Use a power rack with safety pins when training alone
+          - This is an advanced variation emphasizing strict form and control
 
   "Upright Row (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    i18n:
+      en:
+        name: "Upright Row (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell upright row is a compound upper body exercise that primarily targets the middle deltoids and upper trapezius. It also engages the front deltoids and biceps, using dumbbells for independent arm movement to build shoulder width and upper trap development.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet shoulder-width apart holding a dumbbell in each hand
+          - Let the dumbbells hang at arm's length in front of your thighs
+          - Keep your palms facing your body
+          - Stand upright with chest up and core engaged
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Pull the dumbbells straight up along your body
+          2. Lead with your elbows, keeping them higher than your hands
+          3. Continue pulling until dumbbells reach upper chest or shoulder height
+          4. Pause briefly at the top
+          5. Slowly lower the dumbbells back to the starting position with control
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull the dumbbells up
+          - Inhale as you lower the dumbbells back down
+
+          ### 4. Tips
+          - Keep the dumbbells close to your body as you pull
+          - Lead with your elbows throughout the movement
+          - Focus on pulling with your shoulders and traps
+          - Control both the pulling and lowering phases
+          - The dumbbells allow for a more natural arm path
+
+          ### 5. Common Mistakes
+          - Pulling too high and straining the shoulders
+          - Allowing the elbows to drop below the wrists
+          - Using momentum or swinging the body
+          - Leaning backward during the pull
+          - Using too wide a grip, which can cause shoulder impingement
+          - Moving too quickly and losing control
+
+          ### 6. Safety / Modifications
+          - Use a moderate grip width to avoid shoulder discomfort
+          - Stop at shoulder height if you experience any shoulder pain
+          - Start with light dumbbells to master the movement pattern
+          - If you experience shoulder discomfort, consider face pulls as an alternative
 
   "Stretching":
     category: Duration
