@@ -7143,54 +7143,666 @@ exercises:
   "Deadlift (Band)":
     category: Weighted Body Weight
     target: Legs
+    i18n:
+      en:
+        name: "Deadlift (Band)"
+        instructions: |
+          ## Overview
+          The band deadlift is a resistance-based compound exercise that primarily targets the glutes, hamstrings, and erector spinae. It also engages the quadriceps, lats, and core, using progressive band resistance to teach proper deadlift mechanics with lighter loading.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, stepping on the center of a resistance band
+          - Grip both ends of the band with hands just outside your legs
+          - Hinge at the hips and bend your knees to reach the band
+          - Keep your chest up, back flat, and shoulders slightly ahead of your hands
+          - Engage your core and lats before lifting
+
+          ### 2. Movement
+          1. Drive through your heels and extend your hips and knees simultaneously
+          2. Keep the band close to your body as you lift
+          3. Stand up fully by extending your hips and knees
+          4. Keep your shoulders back and chest up at the top
+          5. Lower back down by pushing your hips back and bending your knees
+          6. Return to the starting position with control and repeat
+
+          ### 3. Breathing
+          - Take a deep breath and brace your core before lifting
+          - Hold your breath during the lift
+          - Exhale at the top or as you lower back down
+
+          ### 4. Tips
+          - Keep the band close to your shins and thighs throughout
+          - Lead with your chest as you stand up
+          - Keep your spine neutral, avoiding rounding or hyperextension
+          - The band provides increasing resistance as you stand
+          - Focus on the hip hinge pattern
+
+          ### 5. Common Mistakes
+          - Rounding the lower back during the lift
+          - Starting with hips too high or too low
+          - Letting the band drift away from the body
+          - Not fully extending hips at the top
+          - Looking up or down instead of maintaining neutral neck
+          - Using arms to pull instead of legs and hips to drive
+
+          ### 6. Safety / Modifications
+          - Start with lighter band resistance to master proper form
+          - Adjust foot position on the band to modify resistance
+          - Use this variation to learn deadlift mechanics before progressing to barbells
+          - Advanced variation: use a heavier resistance band or perform single-leg band deadlifts
 
   "Deadlift (Dumbbell)":
     category: Dumbbell
     target: Legs
+    i18n:
+      en:
+        name: "Deadlift (Dumbbell)"
+        instructions: |
+          ## Overview
+          The dumbbell deadlift is a compound exercise that primarily targets the glutes, hamstrings, and erector spinae. It also engages the quadriceps, lats, traps, and grip muscles, using dumbbells for independent arm movement and a more natural hand position than barbells.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, dumbbells on the floor beside your feet
+          - Hinge at the hips and bend your knees to grip the dumbbells
+          - Hold dumbbells with a neutral or pronated grip
+          - Keep your chest up, back flat, and shoulders slightly ahead of the dumbbells
+          - Engage your core and lats before lifting
+
+          ### 2. Movement
+          1. Drive through your heels and extend your hips and knees simultaneously
+          2. Keep the dumbbells close to your body as you lift
+          3. Stand up fully by extending your hips and knees
+          4. Keep your shoulders back and chest up at the top
+          5. Lower the dumbbells by pushing your hips back and bending your knees
+          6. Return the dumbbells to the floor with control and repeat
+
+          ### 3. Breathing
+          - Take a deep breath and brace your core before lifting
+          - Hold your breath during the lift
+          - Exhale at the top or as you lower the dumbbells
+
+          ### 4. Tips
+          - Keep the dumbbells close to your shins and thighs throughout
+          - Lead with your chest as you stand up
+          - Keep your spine neutral, avoiding rounding or hyperextension
+          - The neutral grip can be more comfortable for some lifters
+          - Think about pushing the floor away rather than lifting the dumbbells
+
+          ### 5. Common Mistakes
+          - Rounding the lower back during the lift
+          - Starting with hips too high or too low
+          - Letting the dumbbells drift away from the body
+          - Not fully extending hips at the top
+          - Looking up or down instead of maintaining neutral neck
+          - Using arms to pull instead of legs and hips to drive
+
+          ### 6. Safety / Modifications
+          - Start with moderate dumbbells to master proper form
+          - Use lifting straps if grip strength is limiting
+          - Advanced variation: perform single-leg dumbbell deadlifts
+          - If you experience lower back discomfort, reduce weight and check your form
 
   "Deadlift (Smith Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Deadlift (Smith Machine)"
+        instructions: |
+          ## Overview
+          The Smith machine deadlift is a guided compound exercise that primarily targets the glutes, hamstrings, and erector spinae. It also engages the quadriceps, lats, and traps, using a fixed vertical bar path to provide stability and allow focus on the lifting motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position the bar on a Smith machine at mid-shin height
+          - Stand inside the machine with feet hip-width apart, bar over mid-foot
+          - Grip the bar just outside your legs with an overhand or mixed grip
+          - Hinge at the hips and bend your knees to reach the bar
+          - Keep your chest up, back flat, and shoulders slightly ahead of the bar
+
+          ### 2. Movement
+          1. Unrack the bar by rotating it, then drive through your heels
+          2. Extend your hips and knees simultaneously to stand up
+          3. Keep the bar close to your body as you lift
+          4. Stand up fully with shoulders back and chest up
+          5. Lower the bar by pushing your hips back and bending your knees
+          6. Return the bar to the starting position and repeat
+
+          ### 3. Breathing
+          - Take a deep breath and brace your core before lifting
+          - Hold your breath during the lift
+          - Exhale at the top or as you lower the bar
+
+          ### 4. Tips
+          - The fixed bar path can help maintain proper form
+          - Keep the bar close to your shins and thighs throughout
+          - Lead with your chest as you stand up
+          - Keep your spine neutral throughout the movement
+          - Use the safety catches for added security
+
+          ### 5. Common Mistakes
+          - Rounding the lower back during the lift
+          - Starting with hips too high or too low
+          - Not adjusting foot position relative to the fixed bar path
+          - Not fully extending hips at the top
+          - Looking up or down instead of maintaining neutral neck
+          - Relying too heavily on the machine's guided path
+
+          ### 6. Safety / Modifications
+          - Adjust starting bar height to mid-shin for optimal form
+          - Use the safety catches at appropriate height
+          - Experiment with foot position to find your optimal stance relative to the bar
+          - If you experience lower back discomfort, reduce weight and check your form
 
   "Deficit Deadlift (Barbell)":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Deficit Deadlift (Barbell)"
+        instructions: |
+          ## Overview
+          The deficit barbell deadlift is an advanced compound exercise that primarily targets the glutes, hamstrings, and erector spinae with increased range of motion. It also engages the quadriceps more than standard deadlifts, using an elevated platform to increase difficulty and strengthen the bottom position.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand on a 1-3 inch elevated platform with feet hip-width apart
+          - Position a barbell over mid-foot on the floor below
+          - Grip the bar just outside your legs with an overhand or mixed grip
+          - Hinge at the hips and bend your knees deeper to reach the bar
+          - Keep your chest up, back flat, and shoulders slightly ahead of the bar
+
+          ### 2. Movement
+          1. Drive through your heels and extend your hips and knees simultaneously
+          2. Keep the bar close to your body as you lift from the deeper position
+          3. Stand up fully by extending your hips and knees
+          4. Keep your shoulders back and chest up at the top
+          5. Lower the bar by pushing your hips back and bending your knees
+          6. Return the bar to the floor with control and repeat
+
+          ### 3. Breathing
+          - Take a deep breath and brace your core before lifting
+          - Hold your breath during the lift
+          - Exhale at the top or as you lower the bar
+
+          ### 4. Tips
+          - The deficit increases range of motion and difficulty
+          - Keep the bar close to your shins and thighs throughout
+          - Focus on explosive drive from the bottom position
+          - Use lighter weight than your standard deadlift
+          - This variation builds strength in the hardest part of the lift
+
+          ### 5. Common Mistakes
+          - Using a platform that's too high for your mobility
+          - Rounding the lower back due to increased range of motion
+          - Starting with hips too high to compensate for the deficit
+          - Using too much weight and compromising form
+          - Not maintaining bar path close to the body
+          - Losing neutral spine at the bottom
+
+          ### 6. Safety / Modifications
+          - Start with a 1-inch deficit and progress gradually
+          - Use 10-20% less weight than your standard deadlift
+          - Ensure you have adequate mobility for the increased range
+          - If you experience lower back discomfort, reduce deficit height or weight
 
   "Front Squat (Barbell)":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Front Squat (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell front squat is a compound lower body exercise that primarily targets the quadriceps with greater emphasis than back squats. It also engages the glutes, hamstrings, core, and upper back, using a front-loaded barbell position that promotes upright torso positioning.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position a barbell in a rack at upper chest height
+          - Step under the bar and position it across your front deltoids
+          - Create a shelf with your shoulders, keeping elbows high and pointed forward
+          - Grip can be clean grip (fingers under bar) or crossed-arm grip
+          - Stand with feet shoulder-width apart, toes slightly out
+
+          ### 2. Movement
+          1. Unrack the bar and step back with feet shoulder-width apart
+          2. Initiate the squat by bending your knees and hips simultaneously
+          3. Keep your torso upright and elbows high throughout
+          4. Descend until thighs are at least parallel to the floor
+          5. Drive through your heels to return to standing position
+          6. Keep elbows up and chest proud, then repeat for controlled reps
+
+          ### 3. Breathing
+          - Take a deep breath and brace your core before descending
+          - Hold your breath during the descent and bottom position
+          - Exhale as you drive back up or at the top
+
+          ### 4. Tips
+          - Keep your elbows as high as possible throughout
+          - The front-loaded position forces a more upright torso
+          - Focus on keeping your chest up and core tight
+          - Drive your knees out as you descend
+          - The front squat emphasizes quadriceps more than back squats
+
+          ### 5. Common Mistakes
+          - Allowing the elbows to drop, causing the bar to roll forward
+          - Leaning too far forward and losing the upright position
+          - Not achieving adequate depth
+          - Allowing the knees to cave inward
+          - Using too much weight before mastering the position
+          - Not maintaining core tension throughout
+
+          ### 6. Safety / Modifications
+          - Start with light weight to master the front rack position
+          - Use a crossed-arm grip if the clean grip is uncomfortable
+          - Practice front squats with just the bar first
+          - Advanced variation: add a pause at the bottom or perform tempo front squats
 
   "Glute Ham Raise":
     category: Weighted Body Weight
     target: Legs
+    i18n:
+      en:
+        name: "Glute Ham Raise"
+        instructions: |
+          ## Overview
+          The glute ham raise is an advanced bodyweight exercise that primarily targets the hamstrings and glutes. It also engages the lower back and calves, using eccentric and concentric hamstring contraction to build posterior chain strength and injury resilience.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself face down on a glute ham raise machine
+          - Secure your ankles under the ankle pads with thighs on the support pad
+          - Start with your torso upright and perpendicular to the floor
+          - Cross your arms over your chest or place hands in front
+          - Engage your core and glutes throughout
+
+          ### 2. Movement
+          1. Slowly lower your torso forward by extending at the knees
+          2. Keep your body straight from knees to head as you descend
+          3. Control the descent using your hamstrings and glutes
+          4. Lower until your torso is nearly parallel to the floor
+          5. Pull yourself back to the starting position using your hamstrings
+          6. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower your torso forward
+          - Exhale as you pull yourself back to the starting position
+
+          ### 4. Tips
+          - Focus on controlling the eccentric (lowering) phase
+          - Keep your body in a straight line throughout
+          - Use your hamstrings and glutes, not momentum
+          - Start with partial range of motion if full reps are too difficult
+          - This exercise builds significant hamstring strength
+
+          ### 5. Common Mistakes
+          - Bending at the hips instead of maintaining a straight body
+          - Dropping too quickly on the eccentric phase
+          - Using momentum to swing back up
+          - Not engaging the glutes throughout
+          - Arching the lower back excessively
+          - Attempting full range before building adequate strength
+
+          ### 6. Safety / Modifications
+          - Use a resistance band for assistance if needed
+          - Start with eccentric-only reps (lowering only, then reset)
+          - Push off the floor with your hands to help return to start
+          - Advanced variation: hold a weight plate at your chest for added resistance
 
   "Glute Kickback (Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Glute Kickback (Machine)"
+        instructions: |
+          ## Overview
+          The machine glute kickback is an isolation exercise that primarily targets the glutes. It also engages the hamstrings, using a guided movement path to provide stability and consistent resistance throughout the hip extension motion.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself on the glute kickback machine following its design
+          - Place one foot on the foot platform with knee bent
+          - Grip the handles for stability
+          - Keep your torso stable and core engaged
+          - Align your working hip with the machine's pivot point
+
+          ### 2. Movement
+          1. Push the foot platform back by extending your hip
+          2. Keep your knee slightly bent throughout the movement
+          3. Continue until your leg is fully extended behind you
+          4. Squeeze your glute hard at full extension
+          5. Slowly return the platform to the starting position with control
+          6. Complete all reps on one side, then repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you extend your leg back
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Focus on using your glute to drive the movement
+          - Keep your torso stable and avoid arching your back
+          - Squeeze your glute hard at full extension
+          - Control both the extending and returning phases
+          - Keep constant tension by not letting the weight stack rest
+
+          ### 5. Common Mistakes
+          - Arching the lower back excessively during the kickback
+          - Using momentum instead of controlled glute contraction
+          - Not achieving full hip extension
+          - Letting the weight stack rest between reps
+          - Rotating the hips or torso during the movement
+          - Using too much weight and compromising form
+
+          ### 6. Safety / Modifications
+          - Adjust machine settings to fit your body properly
+          - Start with light weight to establish proper form
+          - Focus on the glute squeeze rather than kicking high
+          - Advanced variation: pause for 2-3 seconds at full extension
 
   "Goblet Squat (Kettlebell)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Goblet Squat (Kettlebell)"
+        instructions: |
+          ## Overview
+          The goblet squat is a compound lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and upper back, using a front-loaded kettlebell or dumbbell position to promote proper squat mechanics and upright torso positioning.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hold a kettlebell by the horns (handles) or a dumbbell vertically at chest height
+          - Stand with feet slightly wider than shoulder-width apart
+          - Point your toes slightly outward
+          - Keep your chest up, core engaged, and elbows pointing down
+          - Maintain an upright torso throughout
+
+          ### 2. Movement
+          1. Initiate the squat by bending your knees and hips simultaneously
+          2. Keep the kettlebell close to your chest throughout
+          3. Descend until your elbows touch the inside of your knees or deeper
+          4. Keep your chest up and weight on your heels
+          5. Drive through your heels to return to standing position
+          6. Fully extend your hips and knees at the top, then repeat
+
+          ### 3. Breathing
+          - Inhale as you descend into the squat
+          - Exhale as you drive back up to standing
+
+          ### 4. Tips
+          - The front-loaded position encourages proper squat form
+          - Use the kettlebell as a counterbalance to sit back deeper
+          - Keep your elbows inside your knees at the bottom
+          - Drive your knees out as you descend and ascend
+          - This variation is excellent for learning squat mechanics
+
+          ### 5. Common Mistakes
+          - Allowing the chest to collapse forward
+          - Not achieving adequate depth
+          - Allowing the knees to cave inward
+          - Letting the kettlebell drift away from your chest
+          - Rising onto your toes instead of keeping weight on heels
+          - Rushing through reps instead of controlled movement
+
+          ### 6. Safety / Modifications
+          - Start with a light kettlebell to master the movement pattern
+          - Use a dumbbell if kettlebells are unavailable
+          - Place a box behind you to ensure consistent depth
+          - Advanced variation: add a pause at the bottom or perform tempo goblet squats
 
   "Hack Squat":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Hack Squat"
+        instructions: |
+          ## Overview
+          The hack squat is a compound lower body exercise that primarily targets the quadriceps. It also engages the glutes and hamstrings, using a machine or barbell position that allows for heavy loading with reduced lower back stress compared to traditional squats.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Position yourself on a hack squat machine with back against the pad
+          - Place feet shoulder-width apart on the platform, toes slightly out
+          - Position shoulders under the shoulder pads
+          - Release the safety handles and hold the side handles
+          - Keep your chest up and core engaged
+
+          ### 2. Movement
+          1. Lower yourself by bending your knees and hips
+          2. Keep your back pressed against the pad throughout
+          3. Descend until thighs are at least parallel to the platform
+          4. Pause briefly at the bottom
+          5. Drive through your heels to return to starting position
+          6. Fully extend your legs at the top, then repeat for controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower yourself down
+          - Exhale as you drive back up to starting position
+
+          ### 4. Tips
+          - Keep your back pressed firmly against the pad
+          - The angled path emphasizes quadriceps development
+          - Drive through your entire foot, not just your toes
+          - Keep your knees tracking over your toes
+          - Maintain constant tension throughout the movement
+
+          ### 5. Common Mistakes
+          - Lifting your back off the pad during the movement
+          - Not achieving adequate depth
+          - Allowing the knees to cave inward
+          - Locking out knees completely at the top
+          - Using too much weight and compromising form
+          - Placing feet too low on the platform, increasing knee stress
+
+          ### 6. Safety / Modifications
+          - Adjust foot position on the platform to target different quad areas
+          - Keep knees behind or in line with toes to reduce knee stress
+          - Start with light weight to master the movement pattern
+          - Advanced variation: perform single-leg hack squats or add a pause at the bottom
 
   "Hack Squat (Barbell)":
     category: Barbell
     target: Legs
+    i18n:
+      en:
+        name: "Hack Squat (Barbell)"
+        instructions: |
+          ## Overview
+          The barbell hack squat is a compound lower body exercise that primarily targets the quadriceps. It also engages the glutes, hamstrings, and lower back, using a barbell positioned behind the legs to create a unique loading pattern that emphasizes the quads.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with feet hip-width apart, barbell on the floor behind your heels
+          - Squat down and grip the barbell behind your legs with an overhand grip
+          - Position hands slightly wider than shoulder-width apart
+          - Keep your chest up, core engaged, and weight on your heels
+          - Maintain a neutral spine throughout
+
+          ### 2. Movement
+          1. Drive through your heels to stand up, lifting the barbell
+          2. Keep the bar close to your legs as you ascend
+          3. Extend your hips and knees to reach full standing position
+          4. Pause briefly at the top
+          5. Lower the barbell back down by bending your knees and hips
+          6. Return the bar to the floor with control and repeat
+
+          ### 3. Breathing
+          - Take a deep breath and brace before lifting
+          - Hold your breath during the lift
+          - Exhale at the top or as you lower the bar
+
+          ### 4. Tips
+          - The bar position behind your legs emphasizes quadriceps
+          - Keep the bar close to your legs throughout
+          - Focus on driving through your heels
+          - Keep your torso as upright as possible
+          - Start with light weight to master the unique bar position
+
+          ### 5. Common Mistakes
+          - Rounding the back during the lift
+          - Letting the bar drift away from the legs
+          - Leaning too far forward
+          - Not achieving full hip extension at the top
+          - Using too much weight before mastering form
+          - Allowing the knees to cave inward
+
+          ### 6. Safety / Modifications
+          - Start with very light weight or just the bar
+          - Use lifting straps if grip strength is limiting
+          - This variation is less common than machine hack squats
+          - If you experience discomfort, consider using a hack squat machine instead
 
   "High Knee Skips":
     category: Reps Only
     target: Legs
+    i18n:
+      en:
+        name: "High Knee Skips"
+        instructions: |
+          ## Overview
+          High knee skips are a plyometric cardio exercise that primarily targets the hip flexors, quadriceps, and calves. They also engage the core and improve coordination, using explosive skipping movements to build lower body power and cardiovascular endurance.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand tall with feet hip-width apart
+          - Keep your chest up, core engaged, and arms at your sides
+          - Prepare to move forward with explosive skipping motion
+          - Maintain good posture throughout
+
+          ### 2. Movement
+          1. Skip forward while driving one knee up toward your chest
+          2. Swing the opposite arm forward as you drive the knee up
+          3. Land on the ball of your foot and immediately skip with the other leg
+          4. Continue alternating legs with explosive, exaggerated skipping motion
+          5. Drive knees as high as possible with each skip
+          6. Maintain rhythm and continue for desired reps or time
+
+          ### 4. Tips
+          - Focus on explosive power with each skip
+          - Drive your knees up as high as possible
+          - Use your arms to generate momentum
+          - Land softly on the balls of your feet
+          - Maintain an upright posture throughout
+
+          ### 5. Common Mistakes
+          - Not driving knees high enough
+          - Landing flat-footed instead of on the balls of feet
+          - Leaning too far forward or backward
+          - Not using arms to assist with momentum
+          - Moving too slowly without explosive power
+          - Holding your breath during the exercise
+
+          ### 6. Safety / Modifications
+          - Start with regular high knees in place before adding the skip
+          - Reduce height and speed if you experience knee or hip discomfort
+          - Perform on a softer surface to reduce impact
+          - Advanced variation: add a weighted vest or increase speed and height
 
   "Hip Abductor (Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Hip Abductor (Machine)"
+        instructions: |
+          ## Overview
+          The machine hip abductor is an isolation exercise that primarily targets the gluteus medius and minimus. It also engages the tensor fasciae latae, using a guided movement path to strengthen the outer hip muscles and improve hip stability.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the hip abductor machine with your back firmly against the pad
+          - Position the outside of your thighs against the padded levers
+          - Adjust the machine so your knees are aligned with the pivot point
+          - Grip the handles for stability
+          - Keep your feet flat and core engaged
+
+          ### 2. Movement
+          1. Push your legs apart by contracting your outer hip muscles
+          2. Move against the resistance in a controlled manner
+          3. Continue until your legs are as far apart as comfortable
+          4. Pause and squeeze your outer glutes at full abduction
+          5. Slowly return your legs to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you push your legs apart
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Focus on using your outer hip muscles, not momentum
+          - Keep your back pressed firmly against the pad
+          - Avoid rotating your torso during the movement
+          - Control both the abduction and adduction phases
+          - Maintain constant tension by not letting the weight stack rest
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the legs
+          - Lifting the glutes off the seat
+          - Rotating the torso instead of keeping it stable
+          - Not achieving full range of motion
+          - Letting the weight stack rest between reps
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust pad position to ensure proper knee alignment
+          - Start with light weight to establish proper form
+          - Focus on controlled movement over heavy weight
+          - Advanced variation: pause for 2-3 seconds at full abduction
 
   "Hip Adductor (Machine)":
     category: Machine
     target: Legs
+    i18n:
+      en:
+        name: "Hip Adductor (Machine)"
+        instructions: |
+          ## Overview
+          The machine hip adductor is an isolation exercise that primarily targets the adductor muscles of the inner thighs. It also engages the gracilis and pectineus, using a guided movement path to strengthen the inner hip muscles and improve hip stability.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the hip adductor machine with your back firmly against the pad
+          - Position the inside of your thighs against the padded levers
+          - Adjust the machine so your legs start in a wide, open position
+          - Grip the handles for stability
+          - Keep your feet flat and core engaged
+
+          ### 2. Movement
+          1. Bring your legs together by contracting your inner thigh muscles
+          2. Move against the resistance in a controlled manner
+          3. Continue until your legs come together or nearly touch
+          4. Pause and squeeze your inner thighs at full adduction
+          5. Slowly return your legs to the starting position with control
+          6. Stop just before the weight stack touches to maintain tension, then repeat
+
+          ### 3. Breathing
+          - Exhale as you bring your legs together
+          - Inhale as you return to the starting position
+
+          ### 4. Tips
+          - Focus on using your inner thigh muscles, not momentum
+          - Keep your back pressed firmly against the pad
+          - Avoid rotating your torso during the movement
+          - Control both the adduction and abduction phases
+          - Maintain constant tension by not letting the weight stack rest
+
+          ### 5. Common Mistakes
+          - Using momentum or swinging the legs
+          - Lifting the glutes off the seat
+          - Rotating the torso instead of keeping it stable
+          - Not achieving full range of motion
+          - Letting the weight stack rest between reps
+          - Moving too quickly through the repetitions
+
+          ### 6. Safety / Modifications
+          - Adjust the starting leg position for comfortable range of motion
+          - Start with light weight to establish proper form
+          - Focus on controlled movement over heavy weight
+          - Advanced variation: pause for 2-3 seconds at full adduction
 
   "Hip Thrust (Barbell)":
     category: Barbell
