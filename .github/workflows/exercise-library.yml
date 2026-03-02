@@ -26,6 +26,15 @@ on:
       EXERCISE_BUCKET:
         required: true
         type: string
+        description: "S3 bucket for exercise assets"
+      ASSET_BUCKET:
+        required: true
+        type: string
+        description: "S3 bucket for exercise images"
+      DISTRIBUTION_URL:
+        required: true
+        type: string
+        description: "CloudFront distribution for exercise assets"
 
 permissions:
   id-token: write
@@ -46,16 +55,19 @@ jobs:
         run: |
           pip install pyyaml
 
-      - name: "Generate JSON Files"
-        run: |
-          cd scripts
-          python library_locales.py
-
       - name: "Configure AWS Credentials"
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ inputs.AWS_ROLE }}
           aws-region: ${{ inputs.AWS_REGION }}
+
+      - name: "Generate localization files"
+        env:
+          BUCKET: ${{ inputs.ASSET_BUCKET }}
+          BASE_URL: ${{ inputs.DISTRIBUTION_URL }}
+        run: |
+          cd scripts
+          python library_locales.py
 
       - name: "Sync to S3"
         run: |

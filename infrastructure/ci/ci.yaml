@@ -13,10 +13,13 @@ Mappings:
       GitHubIdp: "arn:aws:iam::583168578067:oidc-provider/token.actions.githubusercontent.com"
       HostingBucket: "583168578067-heart-app"
       AssetsBucket: "583168578067-user-media"
+      ExerciseBucket: "583168578067-exercise-assets"
     prod:
       CloudFrontDistribution: ""
       GitHubIdp: ""
       HostingBucket: ""
+      AssetsBucket: ""
+      ExerciseBucket: ""
 
 Resources:
   StaticBucket:
@@ -102,6 +105,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - 's3:GetObject'
                   - 's3:PutObject'
                   - 's3:ListBucket'
                   - 's3:DeleteObject'
@@ -112,6 +116,12 @@ Resources:
                   - !Sub
                     - 'arn:aws:s3:::${Bucket}/*'
                     - Bucket: !FindInMap [ Env, !Ref Env, AssetsBucket ]
+                  - !Sub
+                    - 'arn:aws:s3:::${Bucket}'
+                    - Bucket: !FindInMap [ Env, !Ref Env, ExerciseBucket ]
+                  - !Sub
+                    - 'arn:aws:s3:::${Bucket}/*'
+                    - Bucket: !FindInMap [ Env, !Ref Env, ExerciseBucket ]
 
 Outputs:
   GitHubOIDCProvider:
