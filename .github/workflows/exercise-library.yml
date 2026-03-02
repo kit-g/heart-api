@@ -53,6 +53,10 @@ jobs:
 
       - name: "Install dependencies"
         run: |
+          pip install pyyaml boto3
+
+      - name: "Install dependencies"
+        run: |
           pip install pyyaml
 
       - name: "Configure AWS Credentials"
