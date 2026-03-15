@@ -18,16 +18,16 @@ jobs:
     name: "Lint Go Code"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v6
         with:
           go-version: 1.25
           cache: true
           cache-dependency-path: api/go.sum
 
       - name: "Cache golangci-lint"
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: ~/.cache/golangci-lint
           key: golangci-lint-${{ runner.os }}-${{ hashFiles('api/go.sum', '.golangci.yml') }}
@@ -43,8 +43,8 @@ jobs:
     name: "Build Lambda Artifact"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: 1.25
           cache: true
@@ -75,7 +75,7 @@ jobs:
         run: zip function.zip bootstrap
 
       - name: "Upload Lambda artifact"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lambda-zip
           path: api/function.zip
@@ -92,9 +92,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ lint, build-artifact ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v6
         with:
           go-version: 1.25
           cache: true
@@ -114,13 +114,13 @@ jobs:
       FUNCTION_NAME: "heart-api"
     steps:
       - name: "Configure AWS Credentials"
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: "Download Lambda Artifact"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: lambda-zip
           path: api/
