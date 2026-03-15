@@ -39,6 +39,46 @@ def sort_assets(assets: list[str], make_link: Callable[[str], str]) -> dict:
 
 
 @dataclass
+class MuscleRole:
+    groups: list[str]
+    ids: list[str]
+
+    @classmethod
+    def parse(cls, source: dict) -> Self:
+        return cls(
+            groups=source.get('groups', []),
+            ids=source.get('ids', []),
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            'groups': self.groups,
+            'ids': self.ids,
+        }
+
+
+@dataclass
+class Muscles:
+    primary: MuscleRole
+    secondary: MuscleRole
+
+    @classmethod
+    def parse(cls, source: dict | None) -> Self | None:
+        if source is None:
+            return None
+        return cls(
+            primary=MuscleRole.parse(source.get('primary', {})),
+            secondary=MuscleRole.parse(source.get('secondary', {})),
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            'primary': self.primary.to_dict(),
+            'secondary': self.secondary.to_dict(),
+        }
+
+
+@dataclass
 class ExerciseLocalization:
     localization_name: str
     exercise_name: str
@@ -69,6 +109,7 @@ class Exercise:
     name: str
     category: str
     target: str
+    muscles: Muscles | None
     localizations: dict[str, ExerciseLocalization]
     fallback: str | None
 
@@ -78,6 +119,7 @@ class Exercise:
             name=name,
             category=source['category'],
             target=source['target'],
+            muscles=Muscles.parse(source.get('muscles')),
             localizations={
                 key: ExerciseLocalization.parse(value, key)
                 for key, value in source.get('i18n', {}).items()
@@ -108,6 +150,7 @@ class Exercise:
             'name': loc.exercise_name if loc else self.name,
             'category': self.category,
             'target': self.target,
+            'muscles': self.muscles.to_dict() if self.muscles else None,
             'instructions': loc.instructions if loc else None,
             'asset': asset.get('asset'),
             'thumbnail': asset.get('thumbnail'),
