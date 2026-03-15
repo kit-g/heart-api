@@ -52,6 +52,23 @@ exercises:
           - If you experience lower back discomfort, reduce your range of motion
           - Progress to standing rollouts only after mastering the kneeling version
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
+          - rectus_abdominis_3_l
+          - rectus_abdominis_3_r
+          - rectus_abdominis_4_l
+          - rectus_abdominis_4_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
+        ids:
+          - external_oblique_l
+          - external_oblique_r
   "Bicycle Crunch":
     category: Weighted Body Weight
     target: Core
@@ -104,6 +121,17 @@ exercises:
           - Progress by slowing down the tempo to increase time under tension
           - Advanced variation: pause for 2-3 seconds at each twist
 
+    muscles:
+      primary:
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
+      secondary:
+        groups:
+          - legs
   "Cable Crunch":
     category: Machine
     target: Core
@@ -156,6 +184,17 @@ exercises:
           - Advanced variation: pause for 3-5 seconds at peak contraction for increased intensity
           - Regression: perform standard bodyweight crunches until you build sufficient core strength
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
+          - rectus_abdominis_3_l
+          - rectus_abdominis_3_r
+      secondary:
+        groups:
+          - arms
   "Cable Twist":
     category: Machine
     target: Core
@@ -208,6 +247,15 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at peak rotation for increased intensity
           - If you experience lower back discomfort, reduce the range of motion or weight
 
+    muscles:
+      primary:
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+      secondary:
+        groups:
+          - core
+          - shoulders
   "Cross Body Crunch":
     category: Weighted Body Weight
     target: Core
@@ -260,6 +308,15 @@ exercises:
           - If you experience neck discomfort, support your head with one hand and reach with the other
           - Progress by slowing down the tempo to increase time under tension
 
+    muscles:
+      primary:
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
+      secondary: {}
   "Crunch":
     category: Weighted Body Weight
     target: Core
@@ -312,6 +369,13 @@ exercises:
           - If you experience neck discomfort, keep your gaze focused on a spot on the ceiling
           - Progress by adding a 3-5 second pause at peak contraction
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
+      secondary: {}
   "Crunch (Machine)":
     category: Machine
     target: Core
@@ -364,6 +428,13 @@ exercises:
           - If you experience lower back discomfort, reduce the weight and focus on core engagement
           - Progress gradually by adding small weight increments over time
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
+      secondary: {}
   "Crunch (Stability Ball)":
     category: Reps Only
     target: Core
@@ -416,6 +487,13 @@ exercises:
           - Advanced variation: hold a weight plate on your chest for added resistance
           - If you experience difficulty balancing, deflate the ball slightly for a more stable surface
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
+      secondary: {}
   "Decline Crunch":
     category: Weighted Body Weight
     target: Core
@@ -468,6 +546,13 @@ exercises:
           - If you experience discomfort, reduce the decline angle or return to floor crunches
           - Progress by gradually increasing the decline angle as you build strength
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
+      secondary: {}
   "Flat Knee Raise":
     category: Reps Only
     target: Core
@@ -520,6 +605,16 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at the top of each rep
           - Progress to flat leg raises once you master the knee raise with proper form
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_3_l
+          - rectus_abdominis_3_r
+          - rectus_abdominis_4_l
+          - rectus_abdominis_4_r
+      secondary:
+        groups:
+          - legs
   "Flat Leg Raise":
     category: Reps Only
     target: Core
@@ -573,6 +668,16 @@ exercises:
           - Reduce range of motion by not lowering legs as far if you experience lower back strain
           - Advanced variation: lower legs very slowly (3-5 seconds) to increase intensity
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_3_l
+          - rectus_abdominis_3_r
+          - rectus_abdominis_4_l
+          - rectus_abdominis_4_r
+      secondary:
+        groups:
+          - legs
   "Hanging Knee Raise":
     category: Reps Only
     target: Core
@@ -625,6 +730,16 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at the top of each rep
           - Progress to hanging leg raises once you master the knee raise with proper form
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_3_l
+          - rectus_abdominis_3_r
+          - rectus_abdominis_4_l
+          - rectus_abdominis_4_r
+      secondary:
+        groups:
+          - legs
   "Hanging Leg Raise":
     category: Weighted Body Weight
     target: Core
@@ -678,6 +793,16 @@ exercises:
           - Beginners can perform the exercise on a captain's chair for support
           - Advanced variation: add ankle weights or perform toes-to-bar raises
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_3_l
+          - rectus_abdominis_3_r
+          - rectus_abdominis_4_l
+          - rectus_abdominis_4_r
+      secondary:
+        groups:
+          - legs
   "Jackknife Sit Up":
     category: Weighted Body Weight
     target: Core
@@ -730,6 +855,14 @@ exercises:
           - Advanced variation: hold a light weight overhead for added resistance
           - If you experience lower back discomfort, reduce your range of motion
 
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        groups:
+          - legs
+          - shoulders
   "Knee Raise (Captain's Chair)":
     category: Weighted Body Weight
     target: Core
@@ -782,6 +915,16 @@ exercises:
           - Progress to captain's chair leg raises by extending your legs straight
           - If you experience shoulder discomfort, adjust your grip or arm position
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_3_l
+          - rectus_abdominis_3_r
+          - rectus_abdominis_4_l
+          - rectus_abdominis_4_r
+      secondary:
+        groups:
+          - legs
   "Knees to Elbows":
     category: Reps Only
     target: Core
@@ -835,6 +978,14 @@ exercises:
           - Beginners can perform the exercise on a captain's chair for support
           - Advanced variation: add a twist to alternate bringing knees to opposite elbows
 
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        groups:
+          - legs
+          - shoulders
   "Oblique Crunch":
     category: Reps Only
     target: Core
@@ -886,6 +1037,16 @@ exercises:
           - If you experience neck discomfort, place your top arm across your chest instead
           - Progress by adding a 2-3 second pause at peak contraction
 
+    muscles:
+      primary:
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+      secondary:
+        ids:
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
   "Plank":
     category: Duration
     target: Core
@@ -938,6 +1099,14 @@ exercises:
           - Advanced variation: lift one leg or one arm to increase difficulty
           - If you experience lower back discomfort, check your form and reduce hold time
 
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        groups:
+          - glutes
+          - shoulders
   "Reverse Crunch":
     category: Weighted Body Weight
     target: Core
@@ -990,6 +1159,16 @@ exercises:
           - Advanced variation: hold a medicine ball between your knees for added resistance
           - If you experience lower back discomfort, focus on smaller movements with better control
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_3_l
+          - rectus_abdominis_3_r
+          - rectus_abdominis_4_l
+          - rectus_abdominis_4_r
+      secondary:
+        groups:
+          - legs
   "Reverse Plank":
     category: Duration
     target: Core
@@ -1042,6 +1221,16 @@ exercises:
           - Advanced variation: lift one leg to increase difficulty
           - If you experience wrist discomfort, perform on your forearms instead
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - core
+          - glutes
+          - hamstrings
+      secondary:
+        groups:
+          - shoulders
   "Russian Twist":
     category: Reps Only
     target: Core
@@ -1094,6 +1283,16 @@ exercises:
           - Reduce the range of motion if you experience lower back discomfort
           - Progress by lifting feet higher or adding a pause at each side
 
+    muscles:
+      primary:
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+      secondary:
+        ids:
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
   "Flutter Kick":
     category: Reps Only
     target: Core
@@ -1146,6 +1345,16 @@ exercises:
           - Advanced variation: perform with head and shoulders lifted in a crunch position
           - If you experience lower back discomfort, raise your legs higher or reduce duration
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_3_l
+          - rectus_abdominis_3_r
+          - rectus_abdominis_4_l
+          - rectus_abdominis_4_r
+      secondary:
+        groups:
+          - legs
   "Side Bend (Cable)":
     category: Machine
     target: Core
@@ -1198,6 +1407,12 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at peak contraction
           - If you experience lower back discomfort, reduce weight and check your form
 
+    muscles:
+      primary:
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+      secondary: {}
   "Side Bend (Band)":
     category: Reps Only
     target: Core
@@ -1250,6 +1465,12 @@ exercises:
           - Advanced variation: use a heavier resistance band or pause at peak contraction
           - If you experience lower back discomfort, reduce resistance and check your form
 
+    muscles:
+      primary:
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+      secondary: {}
   "Side Bend (Dumbbell)":
     category: Dumbbell
     target: Core
@@ -1302,6 +1523,12 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at the bottom for increased stretch
           - If you experience lower back discomfort, reduce weight and check your form
 
+    muscles:
+      primary:
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+      secondary: {}
   "Side Plank":
     category: Duration
     target: Core
@@ -1354,6 +1581,15 @@ exercises:
           - Advanced variation: lift the top leg to increase difficulty
           - Repeat on both sides for balanced core development
 
+    muscles:
+      primary:
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+      secondary:
+        groups:
+          - core
+          - shoulders
   "Sit Up":
     category: Weighted Body Weight
     target: Core
@@ -1406,6 +1642,17 @@ exercises:
           - Advanced variation: hold a weight plate on your chest for added resistance
           - If you experience lower back discomfort, switch to crunches or reduce range of motion
 
+    muscles:
+      primary:
+        ids:
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
+          - rectus_abdominis_3_l
+          - rectus_abdominis_3_r
+      secondary:
+        groups:
+          - legs
   "Superman":
     category: Reps Only
     target: Core
@@ -1458,6 +1705,12 @@ exercises:
           - Advanced variation: hold the top position for 3-5 seconds for increased intensity
           - Progress to alternating supermans (opposite arm and leg) for variation
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+      secondary: {}
   "Toes To Bar":
     category: Reps Only
     target: Core
@@ -1510,6 +1763,14 @@ exercises:
           - Beginners can practice the kipping motion separately before combining it
           - Advanced variation: perform strict toes to bar without any swing or kip
 
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        groups:
+          - legs
+          - shoulders
   "Torso Rotation (Machine)":
     category: Machine
     target: Core
@@ -1562,6 +1823,14 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at peak rotation
           - If you experience lower back discomfort, reduce weight and ensure proper form
 
+    muscles:
+      primary:
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+      secondary:
+        groups:
+          - core
   "V Up":
     category: Reps Only
     target: Core
@@ -1618,6 +1887,14 @@ exercises:
         name: "V Up"
         fallback_to: en
 
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        groups:
+          - legs
+          - shoulders
   "Bench Dip":
     category: Weighted Body Weight
     target: Arms
@@ -1670,6 +1947,19 @@ exercises:
           - Place a weight plate on your lap for added resistance
           - If you experience shoulder discomfort, reduce your range of motion
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary:
+        groups:
+          - chest
+          - shoulders
   "Bench Press - Close Grip (Barbell)":
     category: Barbell
     target: Arms
@@ -1722,6 +2012,18 @@ exercises:
           - If you experience wrist discomfort, slightly widen your grip
           - Advanced variation: add chains or bands for accommodating resistance
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary:
+        groups:
+          - chest
   "Bicep Curl (Barbell)":
     category: Barbell
     target: Arms
@@ -1774,6 +2076,17 @@ exercises:
           - Advanced variation: perform slow negatives (3-5 seconds) on the lowering phase
           - Beginners can use dumbbells for more natural wrist positioning
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+      secondary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
   "Bicep Curl (Cable)":
     category: Machine
     target: Arms
@@ -1826,6 +2139,17 @@ exercises:
           - Advanced variation: perform one arm at a time for unilateral focus
           - Use a rope attachment if you experience wrist discomfort with bars
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+      secondary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
   "Bicep Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
@@ -1878,6 +2202,17 @@ exercises:
           - Advanced variation: perform with a slow 3-5 second negative phase
           - Seated variation can help eliminate momentum and body swing
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+      secondary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
   "Bicep Curl (Machine)":
     category: Machine
     target: Arms
@@ -1930,6 +2265,17 @@ exercises:
           - Advanced variation: perform one arm at a time for unilateral focus
           - Add a 2-3 second pause at peak contraction for increased intensity
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+      secondary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
   "Cable Kickback":
     category: Machine
     target: Arms
@@ -1983,6 +2329,16 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at full extension
           - Use a rope attachment instead of a handle for a different grip option
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary: {}
   "Concentration Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
@@ -2035,6 +2391,17 @@ exercises:
           - Advanced variation: add a 3-5 second pause at peak contraction
           - Perform with your arm braced on an incline bench for a different angle
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+      secondary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
   "Hammer Curl (Band)":
     category: Weighted Body Weight
     target: Arms
@@ -2087,6 +2454,14 @@ exercises:
           - Advanced variation: use a heavier resistance band or pause at the top
           - Adjust your foot position on the band to modify resistance level
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+          - brachioradialis_l
+          - brachioradialis_r
+      secondary: {}
   "Hammer Curl (Cable)":
     category: Machine
     target: Arms
@@ -2139,6 +2514,14 @@ exercises:
           - Advanced variation: perform with a slow 3-5 second negative phase
           - Use different cable heights (low, mid, high) for varied muscle emphasis
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+          - brachioradialis_l
+          - brachioradialis_r
+      secondary: {}
   "Incline Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
@@ -2191,6 +2574,11 @@ exercises:
           - Perform alternating curls (one arm at a time) for better focus
           - Advanced variation: add a 3-5 second negative phase for increased intensity
 
+    muscles:
+      primary:
+        groups:
+          - arms
+      secondary: {}
   "Hammer Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
@@ -2243,6 +2631,14 @@ exercises:
           - Advanced variation: perform with a slow 3-5 second negative phase
           - Seated variation can help eliminate momentum and body swing
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+          - brachioradialis_l
+          - brachioradialis_r
+      secondary: {}
   "Preacher Curl (Barbell)":
     category: Barbell
     target: Arms
@@ -2295,6 +2691,17 @@ exercises:
           - Advanced variation: add a 3-5 second negative phase for increased intensity
           - Ensure full arm extension at the bottom without hyperextending
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+      secondary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
   "Preacher Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
@@ -2346,6 +2753,17 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at peak contraction
           - Ensure full arm extension at the bottom without hyperextending
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+      secondary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
   "Heart Pump":
     category: Dumbbell
     target: Arms
@@ -2397,6 +2815,17 @@ exercises:
           - Advanced variation: increase tempo or add pauses at different positions
           - Perform seated to eliminate lower body momentum
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+      secondary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
   "Preacher Curl (Machine)":
     category: Machine
     target: Arms
@@ -2448,6 +2877,17 @@ exercises:
           - Advanced variation: add a 2-3 second pause at peak contraction
           - Perform one arm at a time if the machine allows for unilateral training
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+      secondary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
   "Reverse Curl (Band)":
     category: Reps Only
     target: Arms
@@ -2499,6 +2939,15 @@ exercises:
           - Advanced variation: use a heavier resistance band or pause at the top
           - Adjust your foot position on the band to modify resistance level
 
+    muscles:
+      primary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
+      secondary:
+        ids:
+          - extensor_digitorum_l
+          - extensor_digitorum_r
   "Reverse Curl (Barbell)":
     category: Barbell
     target: Arms
@@ -2550,6 +2999,15 @@ exercises:
           - Advanced variation: perform with a slow 3-5 second negative phase
           - Keep wrists in a neutral position to avoid strain
 
+    muscles:
+      primary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
+      secondary:
+        ids:
+          - extensor_digitorum_l
+          - extensor_digitorum_r
   "Reverse Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
@@ -2601,6 +3059,15 @@ exercises:
           - Advanced variation: perform with a slow 3-5 second negative phase
           - Seated variation can help eliminate momentum and body swing
 
+    muscles:
+      primary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
+      secondary:
+        ids:
+          - extensor_digitorum_l
+          - extensor_digitorum_r
   "Reverse Grip Concentration Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
@@ -2652,6 +3119,17 @@ exercises:
           - Advanced variation: add a 3-5 second pause at peak contraction
           - Focus on the squeeze in your forearm and outer biceps
 
+    muscles:
+      primary:
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
+      secondary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
   "Seated Palms Up Wrist Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
@@ -2703,6 +3181,14 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at peak contraction
           - If you experience discomfort, reduce weight and ensure proper forearm support
 
+    muscles:
+      primary:
+        ids:
+          - flexor_carpi_radialis_l
+          - flexor_carpi_radialis_r
+          - flexor_carpi_ulnaris_l
+          - flexor_carpi_ulnaris_r
+      secondary: {}
   "Skullcrusher (Barbell)":
     category: Barbell
     target: Arms
@@ -2754,6 +3240,16 @@ exercises:
           - Have a spotter for heavier sets
           - Advanced variation: lower the bar behind your head for increased stretch
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary: {}
   "Skullcrusher (Dumbbell)":
     category: Dumbbell
     target: Arms
@@ -2805,6 +3301,16 @@ exercises:
           - Advanced variation: lower the dumbbells beside your head for increased stretch
           - Use a neutral or pronated grip based on comfort
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary: {}
   "Triceps Dip":
     category: Weighted Body Weight
     target: Arms
@@ -2856,6 +3362,19 @@ exercises:
           - Advanced variation: add weight using a dip belt or weight vest
           - Progress gradually to avoid shoulder strain
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary:
+        groups:
+          - chest
+          - shoulders
   "Triceps Dip (Assisted)":
     category: Machine
     target: Arms
@@ -2907,6 +3426,19 @@ exercises:
           - Progress toward unassisted dips by consistently reducing assistance weight
           - Focus on form over decreasing assistance too quickly
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary:
+        groups:
+          - chest
+          - shoulders
   "Triceps Extension":
     category: Barbell
     target: Arms
@@ -2958,6 +3490,16 @@ exercises:
           - Perform seated with back support for added stability
           - Advanced variation: perform standing to engage more core muscles
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary: {}
   "Triceps Extension (Barbell)":
     category: Barbell
     target: Arms
@@ -3009,6 +3551,16 @@ exercises:
           - Perform seated with back support for added stability
           - Advanced variation: perform standing to engage more core muscles
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary: {}
   "Triceps Extension (Cable)":
     category: Machine
     target: Arms
@@ -3060,6 +3612,16 @@ exercises:
           - Advanced variation: perform one arm at a time for unilateral focus
           - Kneel on both knees for a more stable position if needed
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary: {}
   "Triceps Extension (Dumbbell)":
     category: Dumbbell
     target: Arms
@@ -3111,6 +3673,16 @@ exercises:
           - Advanced variation: perform with one arm at a time for unilateral focus
           - Use two dumbbells (one in each hand) for independent arm movement
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary: {}
   "Triceps Extension (Machine)":
     category: Machine
     target: Arms
@@ -3162,6 +3734,16 @@ exercises:
           - Advanced variation: add a 2-3 second pause at full extension
           - Perform one arm at a time if the machine allows for unilateral training
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary: {}
   "Triceps Pushdown (Cable - Straight Bar)":
     category: Machine
     target: Arms
@@ -3213,6 +3795,16 @@ exercises:
           - Advanced variation: perform one arm at a time for unilateral focus
           - Add a 2-3 second pause at full extension for increased intensity
 
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary: {}
   "Upright Row (Cable)":
     category: Machine
     target: Arms
@@ -3264,6 +3856,17 @@ exercises:
           - Try a rope attachment for a more natural hand position
           - Advanced variation: perform one arm at a time for unilateral focus
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Wrist Roller":
     category: Machine
     target: Arms
@@ -3315,6 +3918,11 @@ exercises:
           - Advanced variation: roll the weight up and down multiple times without resting
           - Reverse grip variation: use an underhand grip to emphasize different forearm muscles
 
+    muscles:
+      primary:
+        groups:
+          - arms
+      secondary: {}
   "Back Extension":
     category: Weighted Body Weight
     target: Back
@@ -3366,6 +3974,14 @@ exercises:
           - Perform on the floor without equipment if no bench is available
           - If you experience lower back discomfort, reduce range of motion and consult a professional
 
+    muscles:
+      primary:
+        groups:
+          - back
+      secondary:
+        groups:
+          - glutes
+          - hamstrings
   "Back Extension (Machine)":
     category: Machine
     target: Back
@@ -3417,6 +4033,14 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at full extension
           - If you experience discomfort, reduce weight and ensure proper pad alignment
 
+    muscles:
+      primary:
+        groups:
+          - back
+      secondary:
+        groups:
+          - glutes
+          - hamstrings
   "Bent Over One Arm Row (Dumbbell)":
     category: Dumbbell
     target: Back
@@ -3468,6 +4092,17 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at the top of each rep
           - Ensure equal reps on both sides for balanced development
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Bent Over Row (Band)":
     category: Weighted Body Weight
     target: Back
@@ -3519,6 +4154,17 @@ exercises:
           - Advanced variation: use a heavier resistance band or add a pause at the top
           - Keep knees slightly bent to protect your lower back
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Bent Over Row (Barbell)":
     category: Barbell
     target: Back
@@ -3570,6 +4216,17 @@ exercises:
           - Advanced variation: perform with an underhand grip for different muscle emphasis
           - If you experience lower back discomfort, reduce weight and check your form
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Bent Over Row (Dumbbell)":
     category: Dumbbell
     target: Back
@@ -3621,6 +4278,17 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at the top of each rep
           - Keep knees slightly bent to protect your lower back
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Bent Over Row - Underhand (Barbell)":
     category: Barbell
     target: Back
@@ -3672,6 +4340,17 @@ exercises:
           - Advanced variation: perform with a narrower grip for increased biceps emphasis
           - If you experience lower back discomfort, reduce weight and check your form
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Chin Up":
     category: Weighted Body Weight
     target: Back
@@ -3723,6 +4402,20 @@ exercises:
           - Advanced variation: add weight using a dip belt or weight vest
           - Progress gradually to avoid shoulder strain
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
   "Chin Up (Assisted)":
     category: Assisted Body Weight
     target: Back
@@ -3774,6 +4467,20 @@ exercises:
           - Progress toward band-assisted or negative chin ups before attempting unassisted
           - Perform lat pulldowns as an alternative to build foundational strength
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
+        ids:
+          - biceps_brachii_caput_breve_l
+          - biceps_brachii_caput_breve_r
+          - biceps_brachii_caput_longum_l
+          - biceps_brachii_caput_longum_r
   "Deadlift (Barbell)":
     category: Barbell
     target: Back
@@ -3826,6 +4533,15 @@ exercises:
           - Advanced variation: perform deficit deadlifts or Romanian deadlifts
           - If you experience lower back discomfort, reduce weight and check your form with a professional
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - hamstrings
   "Good Morning (Barbell)":
     category: Barbell
     target: Back
@@ -3877,6 +4593,14 @@ exercises:
           - Perform with dumbbells held at your sides if barbell feels unstable
           - If you experience lower back discomfort, reduce weight and ensure proper form
 
+    muscles:
+      primary:
+        groups:
+          - back
+      secondary:
+        groups:
+          - glutes
+          - hamstrings
   "Incline Row (Dumbbell)":
     category: Dumbbell
     target: Back
@@ -3928,6 +4652,17 @@ exercises:
           - Perform one arm at a time for unilateral focus
           - Advanced variation: pause for 2-3 seconds at the top of each rep
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Inverted Row (Bodyweight)":
     category: Reps Only
     target: Back
@@ -3979,6 +4714,17 @@ exercises:
           - Perform with an underhand grip for different muscle emphasis
           - Advanced variation: pause for 2-3 seconds at the top of each rep
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Iso-Lateral Row (Machine)":
     category: Machine
     target: Back
@@ -4030,6 +4776,17 @@ exercises:
           - Perform one arm at a time to address imbalances
           - Advanced variation: pause for 2-3 seconds at peak contraction
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Kipping Pull Up":
     category: Reps Only
     target: Back
@@ -4080,6 +4837,15 @@ exercises:
           - Use an assisted pull-up machine to build foundational strength
           - Work with a coach to learn proper kipping mechanics safely
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Kneeling Pulldown (Band)":
     category: Weighted Body Weight
     target: Back
@@ -4131,6 +4897,15 @@ exercises:
           - Perform standing if kneeling is uncomfortable
           - Advanced variation: use a heavier resistance band or add a pause at the bottom
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Lat Pulldown (Cable)":
     category: Machine
     target: Back
@@ -4182,6 +4957,15 @@ exercises:
           - Try an underhand grip for different muscle emphasis
           - Advanced variation: pause for 2-3 seconds at the bottom of each rep
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Lat Pulldown (Machine)":
     category: Machine
     target: Back
@@ -4233,6 +5017,15 @@ exercises:
           - Try different grip attachments if available
           - Advanced variation: pause for 2-3 seconds at the bottom of each rep
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Lat Pulldown (Single Arm)":
     category: Machine
     target: Back
@@ -4284,6 +5077,15 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at the bottom of each rep
           - Ensure equal reps and focus on both sides for balanced development
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Lat Pulldown - Underhand (Band)":
     category: Weighted Body Weight
     target: Back
@@ -4335,6 +5137,15 @@ exercises:
           - Perform kneeling if standing is too challenging
           - Advanced variation: use a heavier resistance band or add a pause at the bottom
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Lat Pulldown - Underhand (Cable)":
     category: Machine
     target: Back
@@ -4386,6 +5197,15 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at the bottom of each rep
           - Try a narrower grip for different muscle emphasis
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Lat Pulldown - Wide Grip (Cable)":
     category: Machine
     target: Back
@@ -4437,6 +5257,15 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at the bottom of each rep
           - If you experience shoulder discomfort, narrow your grip slightly
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Pendlay Row (Barbell)":
     category: Barbell
     target: Back
@@ -4488,6 +5317,17 @@ exercises:
           - Use smaller weight plates on a platform if needed for proper starting height
           - If you experience lower back discomfort, reduce weight and check your form
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Pull Up":
     category: Weighted Body Weight
     target: Back
@@ -4539,6 +5379,15 @@ exercises:
           - Advanced variation: add weight using a dip belt or weight vest
           - Progress gradually to avoid shoulder strain
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Pull Up (Assisted)":
     category: Assisted Body Weight
     target: Back
@@ -4590,6 +5439,15 @@ exercises:
           - Progress toward band-assisted or negative pull ups before attempting unassisted
           - Perform lat pulldowns as an alternative to build foundational strength
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Pull Up (Band)":
     category: Assisted Body Weight
     target: Back
@@ -4641,6 +5499,15 @@ exercises:
           - Use one foot for moderate assistance as you get stronger
           - Combine band-assisted pull ups with negative pull ups for faster progress
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Rack Pull (Barbell)":
     category: Barbell
     target: Back
@@ -4692,6 +5559,14 @@ exercises:
           - Advanced variation: perform with a deficit stance for increased range
           - If you experience lower back discomfort, raise the pins and reduce weight
 
+    muscles:
+      primary:
+        groups:
+          - back
+      secondary:
+        groups:
+          - glutes
+          - hamstrings
   "Romanian Deadlift (Barbell)":
     category: Barbell
     target: Back
@@ -4743,6 +5618,14 @@ exercises:
           - Perform with dumbbells if barbell feels unstable
           - If you experience lower back discomfort, reduce weight and ensure proper form
 
+    muscles:
+      primary:
+        groups:
+          - hamstrings
+      secondary:
+        groups:
+          - back
+          - glutes
   "Seated Row (Cable)":
     category: Machine
     target: Back
@@ -4793,6 +5676,17 @@ exercises:
           - Try different handle attachments (wide, narrow, neutral grip) for variety
           - Perform one arm at a time for unilateral focus
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Seated Row (Machine)":
     category: Machine
     target: Back
@@ -4844,6 +5738,17 @@ exercises:
           - Try different grip attachments if available
           - Advanced variation: pause for 2-3 seconds at peak contraction
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Seated Wide-Grip Row (Cable)":
     category: Machine
     target: Back
@@ -4895,6 +5800,17 @@ exercises:
           - Try a narrower grip if you experience shoulder discomfort
           - Advanced variation: pause for 2-3 seconds at peak contraction
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Shrug (Machine)":
     category: Machine
     target: Back
@@ -4946,6 +5862,12 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at the top of each rep
           - Perform with a slow 3-5 second negative phase for increased intensity
 
+    muscles:
+      primary:
+        ids:
+          - trapezius_upper_l
+          - trapezius_upper_r
+      secondary: {}
   "Shrug (Smith Machine)":
     category: Machine
     target: Back
@@ -4997,6 +5919,12 @@ exercises:
           - Advanced variation: pause for 3-5 seconds at the top of each rep
           - Use lifting straps if grip strength is limiting
 
+    muscles:
+      primary:
+        ids:
+          - trapezius_upper_l
+          - trapezius_upper_r
+      secondary: {}
   "Stiff Leg Deadlift (Barbell)":
     category: Barbell
     target: Back
@@ -5048,6 +5976,14 @@ exercises:
           - Perform with dumbbells if barbell feels unstable
           - If you experience lower back discomfort, reduce weight and ensure proper form
 
+    muscles:
+      primary:
+        groups:
+          - hamstrings
+      secondary:
+        groups:
+          - back
+          - glutes
   "Sumo Deadlift (Barbell)":
     category: Barbell
     target: Back
@@ -5100,6 +6036,16 @@ exercises:
           - Use lifting straps if grip strength is limiting
           - If you experience hip discomfort, adjust your stance width or foot angle
 
+    muscles:
+      primary:
+        groups:
+          - adductors
+          - glutes
+      secondary:
+        groups:
+          - back
+          - hamstrings
+          - legs
   "T Bar Row":
     category: Machine
     target: Back
@@ -5151,6 +6097,17 @@ exercises:
           - Try different handle attachments for variety
           - Advanced variation: pause for 2-3 seconds at the top of each rep
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Upright Row (Barbell)":
     category: Barbell
     target: Back
@@ -5202,6 +6159,17 @@ exercises:
           - Use an EZ curl bar if straight bar causes wrist discomfort
           - Advanced variation: perform with dumbbells for independent arm movement
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Wide Pull Up":
     category: Weighted Body Weight
     target: Back
@@ -5253,6 +6221,15 @@ exercises:
           - Advanced variation: add weight using a dip belt or weight vest
           - If you experience shoulder discomfort, narrow your grip slightly
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Around the World":
     category: Dumbbell
     target: Chest
@@ -5304,6 +6281,11 @@ exercises:
           - Perform the reverse direction for variety
           - If you experience shoulder discomfort, reduce range of motion or weight
 
+    muscles:
+      primary:
+        groups:
+          - chest
+      secondary: {}
   "Bench Press (Barbell)":
     category: Barbell
     target: Chest
@@ -5355,6 +6337,21 @@ exercises:
           - Use a wider or narrower grip based on comfort and goals
           - Advanced variation: add chains or bands for accommodating resistance
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Bench Press (Cable)":
     category: Machine
     target: Chest
@@ -5406,6 +6403,21 @@ exercises:
           - Perform on an incline or decline bench for muscle variation
           - Use one arm at a time for unilateral training
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Bench Press (Dumbbell)":
     category: Dumbbell
     target: Chest
@@ -5457,6 +6469,21 @@ exercises:
           - Perform on an incline or decline bench for variation
           - Advanced variation: pause for 2-3 seconds at the bottom
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Bench Press (Smith Machine)":
     category: Machine
     target: Chest
@@ -5508,6 +6535,21 @@ exercises:
           - Perform on an incline or decline bench for variation
           - Advanced variation: add chains or use slow negatives
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Bench Press - Wide Grip (Barbell)":
     category: Barbell
     target: Chest
@@ -5559,6 +6601,21 @@ exercises:
           - Gradually widen grip to find your optimal position
           - If you experience shoulder discomfort, narrow your grip slightly
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Cable Crossover":
     category: Machine
     target: Chest
@@ -5610,6 +6667,15 @@ exercises:
           - Perform one arm at a time for unilateral focus
           - Advanced variation: pause for 2-3 seconds at peak contraction
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
   "Chest Dip":
     category: Weighted Body Weight
     target: Chest
@@ -5661,6 +6727,20 @@ exercises:
           - Advanced variation: add weight using a dip belt or weight vest
           - Progress gradually to avoid shoulder strain
 
+    muscles:
+      primary:
+        groups:
+          - chest
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Chest Dip (Assisted)":
     category: Assisted Body Weight
     target: Chest
@@ -5712,6 +6792,20 @@ exercises:
           - Progress toward band-assisted or negative dips before attempting unassisted
           - Reduce range of motion if you experience shoulder discomfort
 
+    muscles:
+      primary:
+        groups:
+          - chest
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Chest Fly":
     category: Machine
     target: Chest
@@ -5763,6 +6857,15 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at peak contraction
           - Adjust handle position for different stretch depths
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
   "Chest Fly (Band)":
     category: Weighted Body Weight
     target: Chest
@@ -5814,6 +6917,15 @@ exercises:
           - Perform one arm at a time for unilateral focus
           - Advanced variation: pause for 2-3 seconds at peak contraction
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
   "Chest Fly (Dumbbell)":
     category: Dumbbell
     target: Chest
@@ -5865,6 +6977,15 @@ exercises:
           - Perform on an incline or decline bench for variation
           - Advanced variation: pause for 2-3 seconds at the bottom stretch
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
   "Chest Press (Band)":
     category: Weighted Body Weight
     target: Chest
@@ -5916,6 +7037,21 @@ exercises:
           - Perform one arm at a time for unilateral focus
           - Advanced variation: use a heavier resistance band or add a pause at extension
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Chest Press (Machine)":
     category: Machine
     target: Chest
@@ -5967,6 +7103,21 @@ exercises:
           - Try different grip positions if available
           - Advanced variation: pause for 2-3 seconds at full extension
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Decline Bench Press (Barbell)":
     category: Barbell
     target: Chest
@@ -6018,6 +7169,21 @@ exercises:
           - Start with lighter weight than your flat bench press to adapt
           - If you experience shoulder discomfort, adjust your grip width
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Decline Bench Press (Dumbbell)":
     category: Dumbbell
     target: Chest
@@ -6069,6 +7235,21 @@ exercises:
           - Use a spotter when attempting heavy weights
           - Advanced variation: pause for 2-3 seconds at the bottom
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Decline Bench Press (Smith Machine)":
     category: Machine
     target: Chest
@@ -6120,6 +7301,21 @@ exercises:
           - Ensure feet are securely anchored before unracking
           - Advanced variation: use slow negatives or add chains
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Floor Press (Barbell)":
     category: Barbell
     target: Chest
@@ -6171,6 +7367,21 @@ exercises:
           - Start with moderate weight to adapt to the limited range
           - Advanced variation: add chains or use slow negatives
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Incline Bench Press (Barbell)":
     category: Barbell
     target: Chest
@@ -6221,6 +7432,21 @@ exercises:
           - Start with lighter weight than your flat bench press
           - Adjust incline angle between 30-45 degrees based on comfort
           - If you experience shoulder discomfort, adjust your grip width or incline angle
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Incline Bench Press (Cable)":
     category: Machine
     target: Chest
@@ -6272,6 +7498,21 @@ exercises:
           - Use one arm at a time for unilateral training
           - Advanced variation: add a pause at the bottom for increased intensity
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Incline Bench Press (Dumbbell)":
     category: Dumbbell
     target: Chest
@@ -6323,6 +7564,21 @@ exercises:
           - Use a spotter when attempting heavy weights
           - Advanced variation: pause for 2-3 seconds at the bottom
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Incline Bench Press (Smith Machine)":
     category: Machine
     target: Chest
@@ -6374,6 +7630,21 @@ exercises:
           - Adjust incline angle between 30-45 degrees based on comfort
           - Advanced variation: use slow negatives or add chains
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Incline Chest Fly (Dumbbell)":
     category: Dumbbell
     target: Chest
@@ -6425,6 +7696,15 @@ exercises:
           - Adjust incline angle between 30-45 degrees for comfort
           - Advanced variation: pause for 2-3 seconds at the bottom stretch
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
   "Incline Chest Press (Machine)":
     category: Machine
     target: Chest
@@ -6476,6 +7756,21 @@ exercises:
           - Try different grip positions if available
           - Advanced variation: pause for 2-3 seconds at full extension
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Iso-Lateral Chest Press (Machine)":
     category: Machine
     target: Chest
@@ -6527,6 +7822,21 @@ exercises:
           - Perform one arm at a time to address imbalances
           - Advanced variation: pause for 2-3 seconds at full extension
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Pec Deck (Machine)":
     category: Machine
     target: Chest
@@ -6578,6 +7888,15 @@ exercises:
           - Reduce range of motion if you experience shoulder discomfort
           - Advanced variation: pause for 2-3 seconds at peak contraction
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
   "Pullover (Dumbbell)":
     category: Dumbbell
     target: Chest
@@ -6629,6 +7948,14 @@ exercises:
           - Perform on a flat bench lying lengthwise for more stability
           - Advanced variation: pause for 2-3 seconds at the bottom stretch
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary: {}
   "Pullover (Machine)":
     category: Machine
     target: Chest
@@ -6680,6 +8007,14 @@ exercises:
           - Advanced variation: pause for 2-3 seconds at the bottom contraction
           - Focus on feeling the stretch at the top and contraction at the bottom
 
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary: {}
   "Push Up":
     category: Weighted Body Weight
     target: Chest
@@ -6731,6 +8066,16 @@ exercises:
           - Advanced variation: add weight with a vest or resistance band across your back
           - Try different hand positions (wide, narrow, diamond) for variety
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        groups:
+          - arms
+          - core
+          - shoulders
   "Push Up (Band)":
     category: Weighted Body Weight
     target: Chest
@@ -6782,6 +8127,16 @@ exercises:
           - Adjust band tension by changing hand position or band thickness
           - Advanced variation: use a heavier resistance band or add a pause at the bottom
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        groups:
+          - arms
+          - core
+          - shoulders
   "Push Up (Knees)":
     category: Reps Only
     target: Chest
@@ -6833,6 +8188,16 @@ exercises:
           - Progress to standard push ups once you can perform 15-20 controlled reps
           - Try different hand positions for variety once you build strength
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        groups:
+          - arms
+          - core
+          - shoulders
   "Box Jump":
     category: Reps Only
     target: Legs
@@ -6884,6 +8249,14 @@ exercises:
           - Progress to higher boxes only after mastering lower heights
           - Advanced variation: add a weighted vest or perform single-leg box jumps
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
+          - glutes
   "Box Squat (Barbell)":
     category: Barbell
     target: Legs
@@ -6936,6 +8309,15 @@ exercises:
           - Perform without weight initially to master the movement pattern
           - Advanced variation: add chains or bands for accommodating resistance
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Bulgarian Split Squat":
     category: Barbell
     target: Legs
@@ -6987,6 +8369,15 @@ exercises:
           - Hold onto a support for balance initially
           - Advanced variation: add weight with dumbbells, barbell, or weighted vest
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Cable Pull Through":
     category: Machine
     target: Legs
@@ -7038,6 +8429,14 @@ exercises:
           - Use this exercise to learn proper deadlift mechanics
           - Advanced variation: perform single-leg cable pull throughs
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - hamstrings
+      secondary:
+        groups:
+          - back
   "Calf Press on Leg Press":
     category: Machine
     target: Legs
@@ -7089,6 +8488,15 @@ exercises:
           - Advanced variation: perform single-leg calf presses
           - Pause for 2-3 seconds at peak contraction for increased intensity
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Calf Press on Seated Leg Press":
     category: Machine
     target: Legs
@@ -7140,6 +8548,15 @@ exercises:
           - Combine with standing calf raises for complete calf training
           - Advanced variation: pause for 2-3 seconds at peak contraction
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Deadlift (Band)":
     category: Weighted Body Weight
     target: Legs
@@ -7192,6 +8609,15 @@ exercises:
           - Use this variation to learn deadlift mechanics before progressing to barbells
           - Advanced variation: use a heavier resistance band or perform single-leg band deadlifts
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - hamstrings
   "Deadlift (Dumbbell)":
     category: Dumbbell
     target: Legs
@@ -7244,6 +8670,15 @@ exercises:
           - Advanced variation: perform single-leg dumbbell deadlifts
           - If you experience lower back discomfort, reduce weight and check your form
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - hamstrings
   "Deadlift (Smith Machine)":
     category: Machine
     target: Legs
@@ -7296,6 +8731,15 @@ exercises:
           - Experiment with foot position to find your optimal stance relative to the bar
           - If you experience lower back discomfort, reduce weight and check your form
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - hamstrings
   "Deficit Deadlift (Barbell)":
     category: Barbell
     target: Legs
@@ -7348,6 +8792,15 @@ exercises:
           - Ensure you have adequate mobility for the increased range
           - If you experience lower back discomfort, reduce deficit height or weight
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - hamstrings
   "Front Squat (Barbell)":
     category: Barbell
     target: Legs
@@ -7400,6 +8853,15 @@ exercises:
           - Practice front squats with just the bar first
           - Advanced variation: add a pause at the bottom or perform tempo front squats
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - back
+          - core
+          - glutes
   "Glute Ham Raise":
     category: Weighted Body Weight
     target: Legs
@@ -7451,6 +8913,11 @@ exercises:
           - Push off the floor with your hands to help return to start
           - Advanced variation: hold a weight plate at your chest for added resistance
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary: {}
   "Glute Kickback (Machine)":
     category: Machine
     target: Legs
@@ -7502,6 +8969,13 @@ exercises:
           - Focus on the glute squeeze rather than kicking high
           - Advanced variation: pause for 2-3 seconds at full extension
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+      secondary:
+        groups:
+          - hamstrings
   "Goblet Squat (Kettlebell)":
     category: Machine
     target: Legs
@@ -7553,6 +9027,15 @@ exercises:
           - Place a box behind you to ensure consistent depth
           - Advanced variation: add a pause at the bottom or perform tempo goblet squats
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Hack Squat":
     category: Barbell
     target: Legs
@@ -7604,6 +9087,15 @@ exercises:
           - Start with light weight to master the movement pattern
           - Advanced variation: perform single-leg hack squats or add a pause at the bottom
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Hack Squat (Barbell)":
     category: Barbell
     target: Legs
@@ -7656,6 +9148,15 @@ exercises:
           - This variation is less common than machine hack squats
           - If you experience discomfort, consider using a hack squat machine instead
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "High Knee Skips":
     category: Reps Only
     target: Legs
@@ -7702,6 +9203,14 @@ exercises:
           - Perform on a softer surface to reduce impact
           - Advanced variation: add a weighted vest or increase speed and height
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
+          - glutes
   "Hip Abductor (Machine)":
     category: Machine
     target: Legs
@@ -7753,6 +9262,14 @@ exercises:
           - Focus on controlled movement over heavy weight
           - Advanced variation: pause for 2-3 seconds at full abduction
 
+    muscles:
+      primary:
+        ids:
+          - gluteus_medius_1_l
+          - gluteus_medius_1_r
+          - gluteus_medius_2_l
+          - gluteus_medius_2_r
+      secondary: {}
   "Hip Adductor (Machine)":
     category: Machine
     target: Legs
@@ -7804,6 +9321,11 @@ exercises:
           - Focus on controlled movement over heavy weight
           - Advanced variation: pause for 2-3 seconds at full adduction
 
+    muscles:
+      primary:
+        groups:
+          - adductors
+      secondary: {}
   "Hip Thrust (Barbell)":
     category: Barbell
     target: Legs
@@ -7855,6 +9377,13 @@ exercises:
           - Place a resistance band around your knees to increase glute activation
           - Advanced variation: perform single-leg barbell hip thrusts or add a pause at the top
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+      secondary:
+        groups:
+          - hamstrings
   "Hip Thrust (Bodyweight)":
     category: Reps Only
     target: Legs
@@ -7906,6 +9435,13 @@ exercises:
           - Elevate your feet on a step for increased range of motion
           - Advanced variation: perform single-leg bodyweight hip thrusts or add a pause at the top
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+      secondary:
+        groups:
+          - hamstrings
   "Donkey Kick (Smith Machine)":
     category: Machine
     target: Legs
@@ -7957,6 +9493,13 @@ exercises:
           - Keep your supporting knee padded for comfort
           - Advanced variation: pause for 2-3 seconds at the top of each rep
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+      secondary:
+        groups:
+          - hamstrings
   "Donkey Kick":
     category: Weighted Body Weight
     target: Legs
@@ -8008,6 +9551,13 @@ exercises:
           - Perform slower tempo reps for greater muscle engagement
           - Advanced variation: add a pulse at the top or hold for 2-3 seconds
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+      secondary:
+        groups:
+          - hamstrings
   "Fire Hydrant":
     category: Weighted Body Weight
     target: Legs
@@ -8059,6 +9609,13 @@ exercises:
           - Perform with small pulses at the top for increased burn
           - Advanced variation: hold for 2-3 seconds at the top of each rep
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+      secondary:
+        groups:
+          - hamstrings
   "Jump Squat":
     category: Reps Only
     target: Legs
@@ -8109,6 +9666,15 @@ exercises:
           - Reduce jump height if experiencing knee or ankle discomfort
           - Advanced variation: add a weighted vest or hold dumbbells
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Lateral Box Jump":
     category: Reps Only
     target: Legs
@@ -8160,6 +9726,14 @@ exercises:
           - Practice lateral jumps on the floor before adding box height
           - Advanced variation: increase box height or perform continuous lateral jumps without pausing
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
+          - glutes
   "Leg Extension (Machine)":
     category: Machine
     target: Legs
@@ -8211,6 +9785,16 @@ exercises:
           - Avoid this exercise if you have knee issues; consult a professional
           - Advanced variation: perform one leg at a time or add a pause at extension
 
+    muscles:
+      primary:
+        ids:
+          - rectus_femoris_l
+          - rectus_femoris_r
+          - vastus_lateralis_l
+          - vastus_lateralis_r
+          - vastus_medialis_l
+          - vastus_medialis_r
+      secondary: {}
   "Leg Press":
     category: Machine
     target: Legs
@@ -8262,6 +9846,15 @@ exercises:
           - Start with moderate weight to master proper form
           - Advanced variation: perform single-leg leg press or add a pause at the bottom
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Lunge (Barbell)":
     category: Barbell
     target: Legs
@@ -8313,6 +9906,15 @@ exercises:
           - Use dumbbells instead if barbell feels unstable
           - Advanced variation: add a deficit by stepping onto a platform with your front foot
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Lunge (Bodyweight)":
     category: Reps Only
     target: Legs
@@ -8363,6 +9965,15 @@ exercises:
           - Reduce range of motion if you experience knee discomfort
           - Advanced variation: add dumbbells, jump lunges, or walking lunges
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Lunge (Dumbbell)":
     category: Dumbbell
     target: Legs
@@ -8413,6 +10024,15 @@ exercises:
           - Hold one dumbbell to work on single-side stability
           - Advanced variation: add a deficit, perform jump lunges, or increase dumbbell weight
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Step-Back Lunge":
     category: Dumbbell
     target: Legs
@@ -8462,6 +10082,15 @@ exercises:
           - Hold one dumbbell to work on single-side stability
           - Advanced variation: add a knee drive at the top or increase dumbbell weight
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Lying Leg Curl (Machine)":
     category: Machine
     target: Legs
@@ -8513,6 +10142,11 @@ exercises:
           - Point your toes forward, inward, or outward to emphasize different hamstring areas
           - Advanced variation: perform one leg at a time or add a pause at full flexion
 
+    muscles:
+      primary:
+        groups:
+          - hamstrings
+      secondary: {}
   "Mountain Climber":
     category: Reps Only
     target: Legs
@@ -8563,6 +10197,14 @@ exercises:
           - Perform slow and controlled reps for increased core engagement
           - Advanced variation: add a twist by bringing knee to opposite elbow or increase speed
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
+          - glutes
   "Pistol Squat":
     category: Weighted Body Weight
     target: Legs
@@ -8613,6 +10255,15 @@ exercises:
           - Start with elevated pistol squats (standing on a step)
           - If you experience knee discomfort, improve mobility before progressing
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Romanian Deadlift (Dumbbell)":
     category: Dumbbell
     target: Legs
@@ -8663,6 +10314,14 @@ exercises:
           - The dumbbell variation allows for a more natural grip than barbells
           - If you experience lower back discomfort, reduce weight and ensure proper form
 
+    muscles:
+      primary:
+        groups:
+          - hamstrings
+      secondary:
+        groups:
+          - back
+          - glutes
   "Seated Calf Raise (Machine)":
     category: Machine
     target: Legs
@@ -8714,6 +10373,12 @@ exercises:
           - Combine with standing calf raises for comprehensive calf training
           - Advanced variation: pause for 2-3 seconds at peak contraction
 
+    muscles:
+      primary:
+        ids:
+          - gastrocnemius_l
+          - gastrocnemius_r
+      secondary: {}
   "Seated Calf Raise (Plate Loaded)":
     category: Machine
     target: Legs
@@ -8765,6 +10430,12 @@ exercises:
           - Vary foot position (neutral, toes in, toes out) for complete calf development
           - Advanced variation: pause for 2-3 seconds at peak contraction
 
+    muscles:
+      primary:
+        ids:
+          - gastrocnemius_l
+          - gastrocnemius_r
+      secondary: {}
   "Seated Leg Curl (Machine)":
     category: Machine
     target: Legs
@@ -8816,6 +10487,11 @@ exercises:
           - The seated position may be more comfortable than lying variations
           - Advanced variation: perform one leg at a time or add a pause at full flexion
 
+    muscles:
+      primary:
+        groups:
+          - hamstrings
+      secondary: {}
   "Seated Leg Press (Machine)":
     category: Machine
     target: Legs
@@ -8867,6 +10543,15 @@ exercises:
           - Start with moderate weight to master proper form
           - Advanced variation: perform single-leg seated leg press or add a pause at the bottom
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Single Leg Bridge":
     category: Weighted Body Weight
     target: Legs
@@ -8918,6 +10603,13 @@ exercises:
           - Reduce range of motion if you experience lower back discomfort
           - Advanced variation: elevate your foot on a bench or add a pause at the top
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+      secondary:
+        groups:
+          - hamstrings
   "Squat (Band)":
     category: Weighted Body Weight
     target: Legs
@@ -8968,6 +10660,15 @@ exercises:
           - Use this variation to learn squat mechanics before progressing to barbells
           - Advanced variation: use a heavier resistance band or add a pause at the bottom
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Squat (Barbell)":
     category: Barbell
     target: Legs
@@ -9020,6 +10721,15 @@ exercises:
           - Adjust bar position (high vs. low bar) based on comfort and goals
           - Advanced variation: add chains, bands, or perform pause squats
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Squat (Bodyweight)":
     category: Weighted Body Weight
     target: Legs
@@ -9070,6 +10780,15 @@ exercises:
           - Place a box behind you to practice consistent depth
           - Advanced variation: add jump squats, pistol squats, or progress to weighted squats
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Squat (Dumbbell)":
     category: Dumbbell
     target: Legs
@@ -9120,6 +10839,15 @@ exercises:
           - Perform with one dumbbell to work on single-side stability
           - Advanced variation: add a pause at the bottom or increase dumbbell weight
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Squat (Machine)":
     category: Machine
     target: Legs
@@ -9171,6 +10899,15 @@ exercises:
           - The guided path is helpful for beginners learning squat mechanics
           - Advanced variation: perform single-leg machine squats or add a pause at the bottom
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Squat (Smith Machine)":
     category: Machine
     target: Legs
@@ -9222,6 +10959,15 @@ exercises:
           - Start with light weight to adapt to the fixed bar path
           - Advanced variation: perform single-leg Smith machine squats or add a pause at the bottom
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Standing Calf Raise (Barbell)":
     category: Barbell
     target: Legs
@@ -9273,6 +11019,12 @@ exercises:
           - Vary foot position (neutral, toes in, toes out) for complete calf development
           - Advanced variation: perform single-leg barbell calf raises
 
+    muscles:
+      primary:
+        ids:
+          - gastrocnemius_l
+          - gastrocnemius_r
+      secondary: {}
   "Standing Calf Raise (Bodyweight)":
     category: Reps Only
     target: Legs
@@ -9324,6 +11076,12 @@ exercises:
           - Vary foot position (neutral, toes in, toes out) for complete calf development
           - Advanced variation: perform single-leg bodyweight calf raises or add a pause at the top
 
+    muscles:
+      primary:
+        ids:
+          - gastrocnemius_l
+          - gastrocnemius_r
+      secondary: {}
   "Standing Calf Raise (Dumbbell)":
     category: Barbell
     target: Legs
@@ -9375,6 +11133,12 @@ exercises:
           - Vary foot position (neutral, toes in, toes out) for complete calf development
           - Advanced variation: perform single-leg dumbbell calf raises
 
+    muscles:
+      primary:
+        ids:
+          - gastrocnemius_l
+          - gastrocnemius_r
+      secondary: {}
   "Standing Calf Raise (Machine)":
     category: Machine
     target: Legs
@@ -9426,6 +11190,12 @@ exercises:
           - Vary foot position (neutral, toes in, toes out) for complete calf development
           - Advanced variation: perform single-leg machine calf raises or pause at the top
 
+    muscles:
+      primary:
+        ids:
+          - gastrocnemius_l
+          - gastrocnemius_r
+      secondary: {}
   "Standing Calf Raise (Smith Machine)":
     category: Machine
     target: Legs
@@ -9477,6 +11247,12 @@ exercises:
           - Vary foot position (neutral, toes in, toes out) for complete calf development
           - Advanced variation: perform single-leg Smith machine calf raises
 
+    muscles:
+      primary:
+        ids:
+          - gastrocnemius_l
+          - gastrocnemius_r
+      secondary: {}
   "Step-up (Bodyweight)":
     category: Reps Only
     target: Legs
@@ -9527,6 +11303,15 @@ exercises:
           - Hold onto a support for balance initially
           - Advanced variation: add dumbbells, a barbell, or increase box height
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Step-up (Barbell)":
     category: Barbell
     target: Legs
@@ -9577,6 +11362,15 @@ exercises:
           - Use a lower box height than bodyweight variations when first adding weight
           - Advanced variation: increase box height or barbell weight gradually
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Step-up (Dumbbell)":
     category: Dumbbell
     target: Legs
@@ -9627,6 +11421,15 @@ exercises:
           - Use a lower box height when first adding weight
           - Advanced variation: increase box height, add weight, or hold one dumbbell for unilateral focus
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Straight Leg Deadlift (Band)":
     category: Weighted Body Weight
     target: Legs
@@ -9677,6 +11480,14 @@ exercises:
           - Progress from Romanian deadlifts if this variation feels too intense
           - If you experience lower back discomfort, reduce resistance and ensure proper form
 
+    muscles:
+      primary:
+        groups:
+          - hamstrings
+      secondary:
+        groups:
+          - back
+          - glutes
   "Stiff Leg Deadlift (Dumbbell)":
     category: Dumbbell
     target: Legs
@@ -9727,6 +11538,14 @@ exercises:
           - The dumbbell variation allows for a more natural grip than barbells
           - If you experience lower back discomfort, reduce weight and ensure proper form
 
+    muscles:
+      primary:
+        groups:
+          - hamstrings
+      secondary:
+        groups:
+          - back
+          - glutes
   "Curtsey Lunges (Barbell)":
     category: Dumbbell
     target: Legs
@@ -9776,6 +11595,15 @@ exercises:
           - Use light dumbbells when first adding weight
           - Advanced variation: increase dumbbell weight or add a pulse at the bottom
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Deficit Squat":
     category: Dumbbell
     target: Legs
@@ -9826,6 +11654,15 @@ exercises:
           - Use less weight than your standard squat
           - If you experience knee discomfort, reduce deficit height or weight
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Trap Bar Deadlift":
     category: Barbell
     target: Legs
@@ -9878,6 +11715,15 @@ exercises:
           - This variation is excellent for those with lower back concerns
           - If you experience lower back discomfort, check your form and reduce weight
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - hamstrings
   "Zercher Squat (Barbell)":
     category: Barbell
     target: Legs
@@ -9930,6 +11776,15 @@ exercises:
           - This is an advanced variation; master front squats first
           - If you experience discomfort, reduce weight or try a different squat variation
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
   "Arnold Press (Dumbbell)":
     category: Dumbbell
     target: Shoulders
@@ -9982,6 +11837,21 @@ exercises:
           - Perform standing for an additional core challenge
           - If you experience shoulder discomfort, reduce weight or range of motion
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Halo":
     category: Dumbbell
     target: Shoulders
@@ -10032,6 +11902,13 @@ exercises:
           - Use this exercise as a warm-up before shoulder training
           - Reduce range of motion if you experience shoulder discomfort
 
+    muscles:
+      primary:
+        groups:
+          - shoulders
+      secondary:
+        groups:
+          - core
   "Handstand Push Up":
     category: Weighted Body Weight
     target: Shoulders
@@ -10083,6 +11960,16 @@ exercises:
           - Perform negative-only reps (lowering only) to build strength
           - Ensure you can hold a wall handstand for 30+ seconds before attempting
 
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        groups:
+          - arms
+          - core
+          - shoulders
   "Face Pull (Cable)":
     category: Machine
     target: Shoulders
@@ -10134,6 +12021,14 @@ exercises:
           - Perform with a resistance band if cables are unavailable
           - Focus on controlled reps and proper form over heavy weight
 
+    muscles:
+      primary:
+        ids:
+          - posterior_deltoid_l
+          - posterior_deltoid_r
+      secondary:
+        groups:
+          - back
   "Front Raise (Band)":
     category: Weighted Body Weight
     target: Shoulders
@@ -10185,6 +12080,12 @@ exercises:
           - Perform one arm at a time for unilateral focus
           - If you experience shoulder discomfort, reduce range of motion or resistance
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+      secondary: {}
   "Front Raise (Barbell)":
     category: Barbell
     target: Shoulders
@@ -10236,6 +12137,12 @@ exercises:
           - Perform with dumbbells for independent arm movement
           - If you experience shoulder discomfort, reduce weight or range of motion
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+      secondary: {}
   "Front Raise (Cable)":
     category: Machine
     target: Shoulders
@@ -10287,6 +12194,12 @@ exercises:
           - Perform one arm at a time for unilateral focus
           - If you experience shoulder discomfort, reduce weight or range of motion
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+      secondary: {}
   "Front Raise (Dumbbell)":
     category: Dumbbell
     target: Shoulders
@@ -10338,6 +12251,12 @@ exercises:
           - Perform one arm at a time for better focus and control
           - If you experience shoulder discomfort, reduce weight or range of motion
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+      secondary: {}
   "Front Raise (Plate)":
     category: Machine
     target: Shoulders
@@ -10389,6 +12308,12 @@ exercises:
           - Use a bumper plate for easier gripping
           - If you experience shoulder discomfort, reduce weight or range of motion
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+      secondary: {}
   "Lateral Raise (Band)":
     category: Weighted Body Weight
     target: Shoulders
@@ -10440,6 +12365,12 @@ exercises:
           - Perform one arm at a time for unilateral focus
           - If you experience shoulder discomfort, reduce range of motion or resistance
 
+    muscles:
+      primary:
+        ids:
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary: {}
   "Lateral Raise (Cable)":
     category: Machine
     target: Shoulders
@@ -10491,6 +12422,12 @@ exercises:
           - Perform both arms simultaneously by standing between two cable stacks
           - If you experience shoulder discomfort, reduce weight or range of motion
 
+    muscles:
+      primary:
+        ids:
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary: {}
   "Lateral Raise (Dumbbell)":
     category: Dumbbell
     target: Shoulders
@@ -10542,6 +12479,12 @@ exercises:
           - Perform seated to eliminate momentum from the lower body
           - If you experience shoulder discomfort, reduce weight or range of motion
 
+    muscles:
+      primary:
+        ids:
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary: {}
   "Lateral Raise (Machine)":
     category: Machine
     target: Shoulders
@@ -10593,6 +12536,12 @@ exercises:
           - Focus on controlled movement over heavy weight
           - If you experience shoulder discomfort, reduce weight or range of motion
 
+    muscles:
+      primary:
+        ids:
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary: {}
   "Overhead Press (Barbell)":
     category: Barbell
     target: Shoulders
@@ -10645,6 +12594,21 @@ exercises:
           - Perform seated overhead press for more stability
           - If you experience shoulder discomfort, check your grip width and bar path
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Overhead Press (Cable)":
     category: Machine
     target: Shoulders
@@ -10696,6 +12660,21 @@ exercises:
           - Adjust cable height and angle as needed
           - If you experience shoulder discomfort, reduce weight or check your form
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Overhead Press (Dumbbell)":
     category: Dumbbell
     target: Shoulders
@@ -10747,6 +12726,21 @@ exercises:
           - Perform one arm at a time for unilateral focus
           - If you experience shoulder discomfort, reduce weight or check your form
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Overhead Press (Smith Machine)":
     category: Machine
     target: Shoulders
@@ -10798,6 +12792,21 @@ exercises:
           - Perform seated for added stability
           - If you experience shoulder discomfort, adjust grip width or reduce weight
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Push Press":
     category: Barbell
     target: Shoulders
@@ -10849,6 +12858,21 @@ exercises:
           - Use a power rack with safety pins when training alone
           - This exercise is excellent for building explosive power
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Reverse Fly (Cable)":
     category: Machine
     target: Shoulders
@@ -10900,6 +12924,14 @@ exercises:
           - Perform one arm at a time for unilateral focus
           - If you experience shoulder discomfort, reduce weight or range of motion
 
+    muscles:
+      primary:
+        ids:
+          - posterior_deltoid_l
+          - posterior_deltoid_r
+      secondary:
+        groups:
+          - back
   "Reverse Fly (Dumbbell)":
     category: Dumbbell
     target: Shoulders
@@ -10951,6 +12983,14 @@ exercises:
           - Perform on an incline bench face down for support
           - If you experience lower back discomfort, use a supported variation
 
+    muscles:
+      primary:
+        ids:
+          - posterior_deltoid_l
+          - posterior_deltoid_r
+      secondary:
+        groups:
+          - back
   "Reverse Fly (Machine)":
     category: Machine
     target: Shoulders
@@ -11002,6 +13042,14 @@ exercises:
           - Focus on controlled movement over heavy weight
           - If you experience shoulder discomfort, reduce weight or range of motion
 
+    muscles:
+      primary:
+        ids:
+          - posterior_deltoid_l
+          - posterior_deltoid_r
+      secondary:
+        groups:
+          - back
   "Seated Overhead Press (Barbell)":
     category: Barbell
     target: Shoulders
@@ -11054,6 +13102,21 @@ exercises:
           - Adjust back pad angle if available for comfort
           - If you experience shoulder discomfort, check your grip width and bar path
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Seated Overhead Press (Dumbbell)":
     category: Dumbbell
     target: Shoulders
@@ -11105,6 +13168,21 @@ exercises:
           - Perform alternating presses to reduce fatigue
           - If you experience shoulder discomfort, reduce weight or check your form
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Shoulder Press (Machine)":
     category: Machine
     target: Shoulders
@@ -11156,6 +13234,21 @@ exercises:
           - The machine provides stability for beginners
           - If you experience shoulder discomfort, reduce weight or check positioning
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Shoulder Press (Plate Loaded)":
     category: Machine
     target: Shoulders
@@ -11207,6 +13300,21 @@ exercises:
           - Perform one arm at a time to address imbalances
           - If you experience shoulder discomfort, reduce weight or check positioning
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Shrug (Barbell)":
     category: Barbell
     target: Shoulders
@@ -11258,6 +13366,12 @@ exercises:
           - Perform behind-the-back barbell shrugs for variation
           - If you experience neck discomfort, reduce weight and ensure proper form
 
+    muscles:
+      primary:
+        ids:
+          - trapezius_upper_l
+          - trapezius_upper_r
+      secondary: {}
   "Shrug (Dumbbell)":
     category: Dumbbell
     target: Shoulders
@@ -11309,6 +13423,12 @@ exercises:
           - Perform one arm at a time for unilateral focus
           - If you experience neck discomfort, reduce weight and ensure proper form
 
+    muscles:
+      primary:
+        ids:
+          - trapezius_upper_l
+          - trapezius_upper_r
+      secondary: {}
   "Strict Military Press (Barbell)":
     category: Barbell
     target: Shoulders
@@ -11361,6 +13481,21 @@ exercises:
           - Use a power rack with safety pins when training alone
           - This is an advanced variation emphasizing strict form and control
 
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - lateral_deltoid_l
+          - lateral_deltoid_r
+      secondary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
   "Upright Row (Dumbbell)":
     category: Dumbbell
     target: Shoulders
@@ -11411,6 +13546,17 @@ exercises:
           - Stop at shoulder height if you experience any shoulder pain
           - Start with light dumbbells to master the movement pattern
           - If you experience shoulder discomfort, consider face pulls as an alternative
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Stretching":
     category: Duration
     target: Other
@@ -11462,6 +13608,9 @@ exercises:
           - Reduce intensity if recovering from injury
           - Consider dynamic stretching before workouts and static after
 
+    muscles:
+      primary: {}
+      secondary: {}
   "Clean (Barbell)":
     category: Barbell
     target: Olympic
@@ -11514,6 +13663,18 @@ exercises:
           - Practice with PVC pipe or empty bar first
           - Use bumper plates and lifting platform for safe dropping
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - core
+          - hamstrings
   "Clean and Jerk (Barbell)":
     category: Barbell
     target: Olympic
@@ -11565,6 +13726,18 @@ exercises:
           - Use bumper plates and proper lifting platform
           - Progress very gradually with weight increases
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - core
+          - hamstrings
   "Deadlift High Pull (Barbell)":
     category: Barbell
     target: Olympic
@@ -11617,6 +13790,15 @@ exercises:
           - Master the deadlift before adding the high pull component
           - Use this to develop power for cleans and snatches
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - hamstrings
   "Hang Clean (Barbell)":
     category: Barbell
     target: Olympic
@@ -11669,6 +13851,18 @@ exercises:
           - Use bumper plates for safe dropping if needed
           - Seek coaching for proper Olympic lifting technique
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - core
+          - hamstrings
   "Hang Snatch (Barbell)":
     category: Barbell
     target: Olympic
@@ -11721,6 +13915,18 @@ exercises:
           - Use bumper plates and proper lifting platform
           - Progress very gradually with weight
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - core
+          - hamstrings
   "Jump Shrug (Barbell)":
     category: Barbell
     target: Olympic
@@ -11772,6 +13978,12 @@ exercises:
           - This is an accessory exercise for Olympic lifting
           - Use this to develop power for cleans and snatches
 
+    muscles:
+      primary:
+        ids:
+          - trapezius_upper_l
+          - trapezius_upper_r
+      secondary: {}
   "Overhead Squat (Barbell)":
     category: Barbell
     target: Olympic
@@ -11824,6 +14036,15 @@ exercises:
           - Use a spotter when learning with weight
           - This is essential preparation for Olympic snatch training
 
+    muscles:
+      primary:
+        groups:
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - back
+          - core
   "Power Clean":
     category: Barbell
     target: Olympic
@@ -11876,6 +14097,18 @@ exercises:
           - Use bumper plates for safe dropping
           - This variation is excellent for athletic power development
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - core
+          - hamstrings
   "Power Snatch (Barbell)":
     category: Barbell
     target: Olympic
@@ -11928,6 +14161,18 @@ exercises:
           - Use bumper plates and proper lifting platform
           - More accessible than full snatches for general athletes
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - core
+          - hamstrings
   "Press Under (Barbell)":
     category: Barbell
     target: Olympic
@@ -11979,6 +14224,9 @@ exercises:
           - Keep weight light to maintain speed
           - Essential for learning the split jerk and snatch
 
+    muscles:
+      primary: {}
+      secondary: {}
   "Snatch (Barbell)":
     category: Barbell
     target: Olympic
@@ -12031,6 +14279,18 @@ exercises:
           - Use bumper plates and proper lifting platform
           - This lift demands years of practice to master
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - core
+          - hamstrings
   "Snatch Pull (Barbell)":
     category: Barbell
     target: Olympic
@@ -12083,6 +14343,18 @@ exercises:
           - Use straps if grip is limiting
           - This is a key accessory for developing snatch strength
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - core
+          - hamstrings
   "Split Jerk (Barbell)":
     category: Barbell
     target: Olympic
@@ -12135,6 +14407,18 @@ exercises:
           - Master the power jerk before learning split jerk
           - Use blocks to practice the receiving position
 
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - core
+          - hamstrings
   "Ball Slams":
     category: Machine
     target: Full Body
@@ -12185,6 +14469,15 @@ exercises:
           - Perform on a surface that can handle the impact
           - Vary the tempo from explosive to controlled for different goals
 
+    muscles:
+      primary:
+        groups:
+          - core
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - legs
   "Burpee":
     category: Reps Only
     target: Full Body
@@ -12234,6 +14527,16 @@ exercises:
           - Remove the jump at the end if needed
           - Advanced variation: add a pull-up or increase speed
 
+    muscles:
+      primary:
+        groups:
+          - chest
+          - legs
+      secondary:
+        groups:
+          - arms
+          - core
+          - shoulders
   "Jumping Jack":
     category: Reps Only
     target: Full Body
@@ -12283,6 +14586,13 @@ exercises:
           - Increase speed for greater intensity
           - Advanced variation: add a squat or reach variation
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - shoulders
   "Kettlebell Swing":
     category: Machine
     target: Full Body
@@ -12334,6 +14644,16 @@ exercises:
           - Stop if you experience lower back discomfort
           - Advanced variation: single-arm swings or American swings (overhead)
 
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - hamstrings
+      secondary:
+        groups:
+          - back
+          - core
+          - shoulders
   "Kettlebell Turkish Get Up":
     category: Machine
     target: Full Body
@@ -12385,6 +14705,16 @@ exercises:
           - Start with a very light kettlebell
           - Consider working with a qualified instructor initially
 
+    muscles:
+      primary:
+        groups:
+          - core
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - back
+          - glutes
   "Muscle Up":
     category: Weighted Body Weight
     target: Full Body
@@ -12437,6 +14767,16 @@ exercises:
           - Practice the transition phase separately
           - Ring muscle ups are generally easier to learn than bar muscle ups
 
+    muscles:
+      primary:
+        groups:
+          - arms
+          - back
+          - chest
+      secondary:
+        groups:
+          - core
+          - shoulders
   "Squat Row (Band)":
     category: Reps Only
     target: Full Body
@@ -12488,6 +14828,17 @@ exercises:
           - Perform squats and rows separately first to master each
           - Anchor the band securely before starting
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Sumo Deadlift High Pull (Barbell)":
     category: Barbell
     target: Full Body
@@ -12540,6 +14891,16 @@ exercises:
           - Master the sumo deadlift before adding the high pull
           - This is an excellent exercise for CrossFit and functional training
 
+    muscles:
+      primary:
+        groups:
+          - adductors
+          - glutes
+      secondary:
+        groups:
+          - back
+          - hamstrings
+          - legs
   "Thruster (Barbell)":
     category: Barbell
     target: Full Body
@@ -12590,6 +14951,15 @@ exercises:
           - This exercise is popular in CrossFit and metabolic conditioning
           - Reduce weight for higher rep endurance sets
 
+    muscles:
+      primary:
+        groups:
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - core
+          - glutes
   "Thruster (Kettlebell)":
     category: Machine
     target: Full Body
@@ -12640,6 +15010,15 @@ exercises:
           - Perform with dumbbells if kettlebells are unavailable
           - This exercise is excellent for metabolic conditioning
 
+    muscles:
+      primary:
+        groups:
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - core
+          - glutes
   "Aerobics":
     category: Duration
     target: Cardio
@@ -12650,6 +15029,13 @@ exercises:
           ## Overview
           Aerobics is a form of cardiovascular exercise that combines rhythmic movements with music. It targets the cardiovascular system and various muscle groups, improving heart health, endurance, coordination, and overall fitness through sustained moderate to vigorous activity.
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Battle Ropes":
     category: Cardio
     target: Cardio
@@ -12702,6 +15088,14 @@ exercises:
           - Alternate between different wave patterns
           - Rest adequately between intervals
 
+    muscles:
+      primary:
+        groups:
+          - arms
+          - shoulders
+      secondary:
+        groups:
+          - core
   "Climbing":
     category: Duration
     target: Cardio
@@ -12754,6 +15148,13 @@ exercises:
           - Consider bouldering (low heights, crash pads) for beginners
           - Learn proper technique from experienced climbers or instructors
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Cycling":
     category: Cardio
     target: Cardio
@@ -12771,6 +15172,13 @@ exercises:
           - Adjust intensity by changing resistance or terrain
           - Consider indoor cycling for weather or safety concerns
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Cycling (Indoor)":
     category: Cardio
     target: Cardio
@@ -12788,6 +15196,13 @@ exercises:
           - Modify intensity by adjusting resistance
           - Take breaks if needed during challenging intervals
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Elliptical Machine":
     category: Cardio
     target: Cardio
@@ -12840,6 +15255,13 @@ exercises:
           - Ideal for those with joint concerns or recovering from injury
           - Vary incline and resistance for different training effects
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Hiking":
     category: Cardio
     target: Cardio
@@ -12857,6 +15279,13 @@ exercises:
           - Start with flat, well-marked trails
           - Gradually progress to longer distances and elevation gain
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Jump Rope":
     category: Reps Only
     target: Cardio
@@ -12909,6 +15338,13 @@ exercises:
           - Perform on appropriate surface (not concrete)
           - Wear supportive athletic shoes
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Rowing (Machine)":
     category: Cardio
     target: Cardio
@@ -12960,6 +15396,17 @@ exercises:
           - Reduce resistance (damper setting) for longer sessions
           - This provides excellent full-body low-impact cardio
 
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Running":
     category: Cardio
     target: Cardio
@@ -12977,6 +15424,13 @@ exercises:
           - Run in safe, well-lit areas
           - Consider run-walk method for beginners
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Running (Treadmill)":
     category: Cardio
     target: Cardio
@@ -12994,6 +15448,13 @@ exercises:
           - Position yourself in center of the belt
           - Stop immediately if you feel dizzy or unstable
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Skating":
     category: Cardio
     target: Cardio
@@ -13046,6 +15507,13 @@ exercises:
           - Start on smooth, flat surfaces
           - Take lessons from qualified instructors for faster progression
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Skiing":
     category: Cardio
     target: Cardio
@@ -13063,6 +15531,13 @@ exercises:
           - Ski within your ability level
           - Check weather and avalanche conditions
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Snowboarding":
     category: Cardio
     target: Cardio
@@ -13080,6 +15555,13 @@ exercises:
           - Start on beginner slopes and progress gradually
           - Check weather and snow conditions before riding
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Swimming":
     category: Cardio
     target: Cardio
@@ -13097,6 +15579,15 @@ exercises:
           - Start with easier strokes and shorter distances
           - Use flotation devices if needed while learning
 
+    muscles:
+      primary:
+        groups:
+          - arms
+          - back
+          - legs
+      secondary:
+        groups:
+          - core
   "Walking":
     category: Cardio
     target: Cardio
@@ -13107,6 +15598,13 @@ exercises:
           ## Overview
           Walking is a low-impact cardiovascular exercise that targets the legs, glutes, and cardiovascular system. It provides accessible aerobic conditioning for all fitness levels, improves overall health, and requires no special equipment or training.
 
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
   "Yoga":
     category: Duration
     target: Cardio
@@ -13123,3 +15621,10 @@ exercises:
           - Use props to make poses accessible
           - Inform instructor of any injuries or limitations
           - Start with beginner classes and progress gradually
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
