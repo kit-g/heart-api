@@ -29,3 +29,4 @@ ignored/
 .junie/
 
 infrastructure/api/api.toml
+content/assets/**
