@@ -69,15 +69,21 @@
             button below from your mobile device to be taken directly to the account deletion screen in the app.
         </p>
 
-        <a href="/profile/settings/account"
+        <a id="app-settings-link"
+           target="_blank"
+           href="#"
            class="inline-flex items-center justify-center gap-2 h-14 px-8 rounded-xl bg-red-500 text-white font-semibold shadow-sm hover:bg-red-600 transition-all hover:shadow-md hover:-translate-y-0.5 w-full sm:w-auto">
             <span class="material-symbols-outlined">open_in_new</span>
             Open App Settings
         </a>
 
+        <script>
+            document.getElementById('app-settings-link').href = window.location.origin + '/profile/settings/account';
+        </script>
+
         <div class="mt-8 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-sm text-slate-500 dark:text-slate-400 text-left">
             <strong>Note:</strong> If the button doesn't open the app automatically, you can manually navigate to:
-            <br><em>Profile > Settings > Account control > Delete Account</em> inside the Heart of Yours app.
+            <em>Profile > Settings > Account control > Delete Account</em> inside the Heart of Yours app.
         </div>
     </div>
 </main>
