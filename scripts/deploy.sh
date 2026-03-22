@@ -2,7 +2,7 @@ ENV=$1
 CONFIG=$2
 TEMPLATE=$3
 
-PROFILE="personal"
+PROFILE="heart-dev"
 
 
 clean() {
