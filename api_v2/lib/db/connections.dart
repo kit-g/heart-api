@@ -54,7 +54,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
               value: {
                 'PK': AttributeValue(s: connectionPk(targetId)),
                 'SK': AttributeValue(s: connectionSk(reciprocalRole, domain, initiatorId)),
-                'targetId': AttributeValue(s: targetId),
+                'targetId': AttributeValue(s: initiatorId),
                 'role': AttributeValue(s: reciprocalRole.value),
                 'domain': AttributeValue(s: domain.value),
                 'status': AttributeValue(s: connection.status),
