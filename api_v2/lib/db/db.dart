@@ -8,19 +8,19 @@ part 'charts.dart';
 part 'connections.dart';
 
 abstract class _DatabaseBase {
-  DocumentClient get client;
+  DocumentClient get _client;
 
   const _DatabaseBase();
 }
 
 class Database extends _DatabaseBase with _Charts, _Connections implements ChartPreferenceService, ConnectionsService {
   @override
-  final DocumentClient client;
+  final DocumentClient _client;
   @override
   final String table;
 
   const Database({
-    required this.client,
+    required DocumentClient client,
     required this.table,
-  });
+  }) : _client = client;
 }
