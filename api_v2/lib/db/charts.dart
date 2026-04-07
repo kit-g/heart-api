@@ -12,7 +12,7 @@ mixin _Charts on _DatabaseBase implements ChartPreferenceService {
 
   @override
   Future<void> deleteChartPreference(String preferenceId, String userId) async {
-    await client.delete(
+    await _client.delete(
       key: {
         'PK': AttributeValue(s: pk(userId)),
         'SK': AttributeValue(s: sk(preferenceId)),
@@ -23,7 +23,7 @@ mixin _Charts on _DatabaseBase implements ChartPreferenceService {
 
   @override
   Future<Iterable<ChartPreference>> getPreferences(String userId) async {
-    final response = await client.query(
+    final response = await _client.query(
       tableName: table,
       keyConditionExpression: '#PK = :PK AND begins_with(#SK, :prefix)',
       expressionAttributeNames: {
@@ -40,7 +40,7 @@ mixin _Charts on _DatabaseBase implements ChartPreferenceService {
 
   @override
   Future<ChartPreference> saveChartPreference(ChartPreference preference, String userId) async {
-    await client.put(
+    await _client.put(
       item: {
         'PK': AttributeValue(s: pk(userId)),
         'SK': AttributeValue(s: sk(preference.id!)),

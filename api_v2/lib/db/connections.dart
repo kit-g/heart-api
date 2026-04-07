@@ -30,7 +30,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     );
 
     try {
-      await client.transactWrite(
+      await _client.transactWrite(
         transactItems: [
           TransactWrite(
             put: Operation(
@@ -70,7 +70,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       }
 
       // connection exists, query
-      final response = await client.query(
+      final response = await _client.query(
         tableName: table,
         keyConditionExpression: '#PK = :PK AND #SK = :SK',
         expressionAttributeNames: {
@@ -98,7 +98,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
   Future<Iterable<Connection>> getConnections(String userId, {ConnectionRole? roleFilter}) async {
     final prefix = roleFilter != null ? '$_connectionSk${roleFilter.value}#' : _connectionSk;
 
-    final response = await client.query(
+    final response = await _client.query(
       tableName: table,
       keyConditionExpression: '#PK = :PK AND begins_with(#SK, :prefix)',
       expressionAttributeNames: {
@@ -124,7 +124,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     final reciprocalRole = role.reciprocal;
 
     try {
-      await client.transactWrite(
+      await _client.transactWrite(
         transactItems: [
           TransactWrite(
             delete: Operation(
@@ -162,7 +162,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     required ConnectionRole role,
     required ConnectionDomain domain,
   }) async {
-    final response = await client.get(
+    final response = await _client.get(
       tableName: table,
       key: {
         'PK': AttributeValue(s: connectionPk(initiatorId)),
@@ -202,7 +202,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       throw StateError('Cannot transition connection from ${existing.status.name} to ${newStatus.name}');
     }
 
-    await client.transactWrite(
+    await _client.transactWrite(
       transactItems: [
         TransactWrite(
           update: UpdateOperation(
