@@ -13,8 +13,8 @@ final routes = <(String, Method), ModelHandler>{
   ('/exercises', .get): exercises.getExercises,
   ('/connections', .get): connections.getConnections,
   ('/connections', .post): connections.createConnection,
-  ('/connections/:targetId', .delete): connections.deleteConnection,
   ('/connections/:connectionId', .delete): connections.deleteConnection,
+  ('/connections/:connectionId', .put): connections.reactToConnection,
 };
 
 const _publicRoutes = {'/version'};

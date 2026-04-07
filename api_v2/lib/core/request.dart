@@ -9,4 +9,12 @@ extension JsonBody on Request {
       _ => throw UnimplementedError('Could not decode JSON request body'),
     };
   }
+
+  /// reproducible raw shape of the request
+  Map<String, String> signature() {
+    return {
+      ...url.queryParameters,
+      ...pathParameters.raw.map((k, v) => MapEntry(k.toString(), v)),
+    };
+  }
 }
