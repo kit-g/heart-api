@@ -8,7 +8,7 @@ enum ConnectionRole {
 
   String get value => name.toUpperCase();
 
-  static ConnectionRole fromString(String val) {
+  factory ConnectionRole.fromString(String val) {
     return values.firstWhere((e) => e.value == val.toUpperCase(), orElse: () => peer);
   }
 
@@ -30,8 +30,35 @@ enum ConnectionDomain {
 
   String get value => name.toLowerCase();
 
-  static ConnectionDomain fromString(String val) {
+  factory ConnectionDomain.fromString(String val) {
     return values.firstWhere((e) => e.value == val.toLowerCase(), orElse: () => general);
+  }
+}
+
+enum ConnectionStatus {
+  pending,
+  active,
+  declined,
+  severed,
+  blocked,
+  paused
+  ;
+
+  factory ConnectionStatus.fromString(String val) {
+    return values.firstWhere((e) => e.name == val.toLowerCase(), orElse: () => pending);
+  }
+
+  bool canTransitionTo(ConnectionStatus next) {
+    if (this == next) return false;
+
+    return switch (this) {
+      pending => next == active || next == declined || next == blocked,
+      active => next == paused || next == severed || next == blocked,
+      paused => next == active || next == severed || next == blocked,
+      declined => next == pending || next == blocked,
+      severed => next == pending || next == blocked,
+      blocked => next == severed,
+    };
   }
 }
 
@@ -44,7 +71,7 @@ abstract interface class Connection implements Model {
 
   ConnectionDomain get domain;
 
-  String get status;
+  ConnectionStatus get status;
 
   DateTime get createdAt;
 
@@ -52,7 +79,7 @@ abstract interface class Connection implements Model {
     required final String targetId,
     required final ConnectionRole role,
     required final ConnectionDomain domain,
-    required final String status,
+    required final ConnectionStatus status,
     required final DateTime createdAt,
   }) = _Connection.new;
 
@@ -61,7 +88,7 @@ abstract interface class Connection implements Model {
       targetId: row['targetId'] as String,
       role: ConnectionRole.fromString(row['role'] as String),
       domain: ConnectionDomain.fromString(row['domain'] as String),
-      status: row['status'] as String,
+      status: ConnectionStatus.fromString(row['status'] as String),
       createdAt: DateTime.parse(row['createdAt'] as String),
     );
   }
@@ -86,7 +113,7 @@ class _Connection implements Connection {
   @override
   final ConnectionDomain domain;
   @override
-  final String status;
+  final ConnectionStatus status;
   @override
   final DateTime createdAt;
 
@@ -108,7 +135,7 @@ class _Connection implements Connection {
       'targetId': targetId,
       'role': role.value.toUpperCase(),
       'domain': domain.value.toUpperCase(),
-      'status': status,
+      'status': status.name,
       'createdAt': createdAt.toIso8601String(),
     };
   }
@@ -143,4 +170,19 @@ abstract interface class ConnectionsService {
   });
 
   Future<Iterable<Connection>> getConnections(String userId, {ConnectionRole? roleFilter});
+
+  Future<Connection> changeConnectionStatus({
+    required String initiatorId,
+    required String targetId,
+    required ConnectionRole role,
+    required ConnectionDomain domain,
+    required ConnectionStatus newStatus,
+  });
+
+  Future<Connection?> getConnection({
+    required String initiatorId,
+    required String targetId,
+    required ConnectionRole role,
+    required ConnectionDomain domain,
+  });
 }

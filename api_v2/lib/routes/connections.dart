@@ -8,12 +8,10 @@ import 'package:relic/relic.dart';
 
 Future<ConnectionListResponse> getConnections(final Request request) async {
   final db = request.connectionsService;
-  final roleQuery = request.url.queryParameters['role'];
-
-  ConnectionRole? roleFilter;
-  if (roleQuery != null && roleQuery.isNotEmpty) {
-    roleFilter = ConnectionRole.fromString(roleQuery);
-  }
+  final roleFilter = switch (request.url.queryParameters['role']) {
+    String s when s.isNotEmpty => ConnectionRole.fromString(s),
+    _ => null,
+  };
 
   final connections = await db.getConnections(request.userId, roleFilter: roleFilter);
   return ConnectionListResponse(connections.toList());
@@ -53,10 +51,46 @@ Future<Model?> deleteConnection(final Request request) async {
   } on ArgumentError catch (e) {
     throw BadRequest(
       reason: e.message.toString(),
+      payload: request.signature(),
+    );
+  }
+}
+
+Future<Connection?> reactToConnection(final Request request) async {
+  final db = request.connectionsService;
+  final connectionId = request.pathParameters.raw[#connectionId]!;
+  final body = await request.json();
+  final status = body['status'] as String?;
+
+  if (status == null) {
+    throw BadRequest(
+      reason: 'Status required',
       payload: {
-        ...request.url.queryParameters,
-        ...request.pathParameters.raw,
+        ...request.signature(),
+        ...body,
       },
+    );
+  }
+
+  try {
+    final (targetId, role, domain) = Connection.fromId(connectionId);
+
+    return await db.changeConnectionStatus(
+      initiatorId: request.userId,
+      targetId: targetId,
+      role: role,
+      domain: domain,
+      newStatus: ConnectionStatus.fromString(status),
+    );
+  } on ArgumentError catch (e) {
+    throw BadRequest(
+      reason: e.message.toString(),
+      payload: request.signature(),
+    );
+  } on StateError catch (e) {
+    throw BadRequest(
+      reason: e.message.toString(),
+      payload: request.signature(),
     );
   }
 }

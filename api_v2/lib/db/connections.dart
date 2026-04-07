@@ -25,7 +25,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       targetId: targetId,
       role: role,
       domain: domain,
-      status: 'active',
+      status: .pending,
       createdAt: now,
     );
 
@@ -42,7 +42,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
                 'targetId': AttributeValue(s: targetId),
                 'role': AttributeValue(s: role.value),
                 'domain': AttributeValue(s: domain.value),
-                'status': AttributeValue(s: connection.status),
+                'status': AttributeValue(s: connection.status.name),
                 'createdAt': AttributeValue(s: now.toIso8601String()),
               },
             ),
@@ -57,7 +57,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
                 'targetId': AttributeValue(s: initiatorId),
                 'role': AttributeValue(s: reciprocalRole.value),
                 'domain': AttributeValue(s: domain.value),
-                'status': AttributeValue(s: connection.status),
+                'status': AttributeValue(s: connection.status.name),
                 'createdAt': AttributeValue(s: now.toIso8601String()),
               },
             ),
@@ -153,5 +153,100 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
         rethrow;
       }
     }
+  }
+
+  @override
+  Future<Connection?> getConnection({
+    required String initiatorId,
+    required String targetId,
+    required ConnectionRole role,
+    required ConnectionDomain domain,
+  }) async {
+    final response = await client.get(
+      tableName: table,
+      key: {
+        'PK': AttributeValue(s: connectionPk(initiatorId)),
+        'SK': AttributeValue(s: connectionSk(role, domain, targetId)),
+      },
+    );
+
+    try {
+      return Connection.fromRow(response.item);
+    } on TypeError {
+      return null;
+    }
+  }
+
+  @override
+  Future<Connection> changeConnectionStatus({
+    required String initiatorId,
+    required String targetId,
+    required ConnectionRole role,
+    required ConnectionDomain domain,
+    required ConnectionStatus newStatus,
+  }) async {
+    final reciprocalRole = role.reciprocal;
+
+    final existing = await getConnection(
+      initiatorId: initiatorId,
+      targetId: targetId,
+      role: role,
+      domain: domain,
+    );
+
+    if (existing == null) {
+      throw StateError('No connection between these users');
+    }
+
+    if (!existing.status.canTransitionTo(newStatus)) {
+      throw StateError('Cannot transition connection from ${existing.status.name} to ${newStatus.name}');
+    }
+
+    await client.transactWrite(
+      transactItems: [
+        TransactWrite(
+          update: UpdateOperation(
+            tableName: table,
+            expression: 'attribute_exists(PK)',
+            value: {
+              'PK': AttributeValue(s: connectionPk(initiatorId)),
+              'SK': AttributeValue(s: connectionSk(role, domain, targetId)),
+            },
+            updateExpression: 'SET #status = :newStatus',
+            expressionAttributeNames: {
+              '#status': 'status',
+            },
+            expressionAttributeValues: {
+              ':newStatus': AttributeValue(s: newStatus.name),
+            },
+          ),
+        ),
+        TransactWrite(
+          update: UpdateOperation(
+            tableName: table,
+            expression: 'attribute_exists(PK)',
+            value: {
+              'PK': AttributeValue(s: connectionPk(targetId)),
+              'SK': AttributeValue(s: connectionSk(reciprocalRole, domain, initiatorId)),
+            },
+            updateExpression: 'SET #status = :newStatus',
+            expressionAttributeNames: {
+              '#status': 'status',
+            },
+            expressionAttributeValues: {
+              ':newStatus': AttributeValue(s: newStatus.name),
+            },
+          ),
+        ),
+      ],
+    );
+
+    return Connection(
+      targetId: existing.targetId,
+      role: existing.role,
+      domain: existing.domain,
+      status: newStatus,
+      createdAt: existing.createdAt,
+    );
   }
 }
