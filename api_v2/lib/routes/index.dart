@@ -14,6 +14,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/connections', .get): connections.getConnections,
   ('/connections', .post): connections.createConnection,
   ('/connections/:targetId', .delete): connections.deleteConnection,
+  ('/connections/:connectionId', .delete): connections.deleteConnection,
 };
 
 const _publicRoutes = {'/version'};
