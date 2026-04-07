@@ -9,7 +9,7 @@ import '../models/exercises.dart';
 part 'exercises.dart';
 
 abstract class _StorageBase {
-  S3 get client;
+  S3 get _client;
 
   String get exerciseBucket;
 
@@ -18,12 +18,12 @@ abstract class _StorageBase {
 
 class Storage extends _StorageBase with _Exercises implements ExerciseService {
   @override
-  final S3 client;
+  final S3 _client;
   @override
   final String exerciseBucket;
 
   const Storage({
-    required this.client,
+    required S3 client,
     required this.exerciseBucket,
-  });
+  }) : _client = client;
 }
