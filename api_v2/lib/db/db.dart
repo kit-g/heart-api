@@ -1,9 +1,11 @@
 library;
 
 import 'package:aws_client/dynamo_document.dart';
+import 'package:heart/models/connections.dart';
 import 'package:heart_models/heart_models.dart';
 
 part 'charts.dart';
+part 'connections.dart';
 
 abstract class _DatabaseBase {
   DocumentClient get client;
@@ -11,7 +13,7 @@ abstract class _DatabaseBase {
   const _DatabaseBase();
 }
 
-class Database extends _DatabaseBase with _Charts implements ChartPreferenceService {
+class Database extends _DatabaseBase with _Charts, _Connections implements ChartPreferenceService, ConnectionsService {
   @override
   final DocumentClient client;
   @override
