@@ -35,20 +35,26 @@ enum ConnectionDomain {
   }
 }
 
-class Connection implements Model {
-  final String targetId;
-  final ConnectionRole role;
-  final ConnectionDomain domain;
-  final String status;
-  final DateTime createdAt;
+abstract interface class Connection implements Model {
+  String get id;
 
-  const Connection({
-    required this.targetId,
-    required this.role,
-    required this.domain,
-    required this.status,
-    required this.createdAt,
-  });
+  String get targetId;
+
+  ConnectionRole get role;
+
+  ConnectionDomain get domain;
+
+  String get status;
+
+  DateTime get createdAt;
+
+  factory Connection({
+    required final String targetId,
+    required final ConnectionRole role,
+    required final ConnectionDomain domain,
+    required final String status,
+    required final DateTime createdAt,
+  }) = _Connection.new;
 
   factory Connection.fromRow(Map<String, dynamic> row) {
     return Connection(
@@ -60,9 +66,45 @@ class Connection implements Model {
     );
   }
 
+  static (String, ConnectionRole, ConnectionDomain) fromId(String id) {
+    return switch (id.split('|')) {
+      [String id, String role, String domain] => (
+        id,
+        ConnectionRole.fromString(role),
+        ConnectionDomain.fromString(domain),
+      ),
+      _ => throw ArgumentError('Invalid connection ID format'),
+    };
+  }
+}
+
+class _Connection implements Connection {
+  @override
+  final String targetId;
+  @override
+  final ConnectionRole role;
+  @override
+  final ConnectionDomain domain;
+  @override
+  final String status;
+  @override
+  final DateTime createdAt;
+
+  const _Connection({
+    required this.targetId,
+    required this.role,
+    required this.domain,
+    required this.status,
+    required this.createdAt,
+  });
+
+  @override
+  String get id => '$targetId|${role.value.toUpperCase()}|${domain.value.toUpperCase()}';
+
   @override
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'targetId': targetId,
       'role': role.value.toUpperCase(),
       'domain': domain.value.toUpperCase(),
