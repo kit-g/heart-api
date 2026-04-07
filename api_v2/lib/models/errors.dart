@@ -41,8 +41,12 @@ class NoContent implements ApiException {
 
 class BadRequest implements ApiException {
   final String reason;
+  final Map? payload;
 
-  const BadRequest({required this.reason});
+  const BadRequest({
+    required this.reason,
+    this.payload,
+  });
 
   @override
   Map<String, dynamic> toMap() {
@@ -51,4 +55,12 @@ class BadRequest implements ApiException {
 
   @override
   int get statusCode => 400;
+
+  @override
+  String toString() {
+    if (payload != null) {
+      return '$runtimeType: $reason, $payload';
+    }
+    return '$runtimeType: $reason';
+  }
 }
