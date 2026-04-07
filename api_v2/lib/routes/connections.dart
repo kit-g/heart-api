@@ -6,7 +6,7 @@ import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-Future<ConnectionListResponse> getConnections(Request request) async {
+Future<ConnectionListResponse> getConnections(final Request request) async {
   final db = request.connectionsService;
   final roleQuery = request.url.queryParameters['role'];
 
@@ -19,7 +19,7 @@ Future<ConnectionListResponse> getConnections(Request request) async {
   return ConnectionListResponse(connections.toList());
 }
 
-Future<Connection> createConnection(Request request) async {
+Future<Connection> createConnection(final Request request) async {
   final db = request.connectionsService;
   final body = await request.json();
 
@@ -35,32 +35,28 @@ Future<Connection> createConnection(Request request) async {
   );
 }
 
-Future<Model?> deleteConnection(Request request) async {
+Future<Model?> deleteConnection(final Request request) async {
   final db = request.connectionsService;
-  final targetId = request.pathParameters.raw[#targetId]!;
+  final connectionId = request.pathParameters.raw[#connectionId]!;
 
-  final roleParam = request.url.queryParameters['role'];
-  final domainParam = request.url.queryParameters['domain'];
+  try {
+    final (targetId, role, domain) = Connection.fromId(connectionId);
 
-  if (roleParam == null || domainParam == null) {
+    await db.deleteConnection(
+      initiatorId: request.userId,
+      targetId: targetId,
+      role: role,
+      domain: domain,
+    );
+
+    throw const NoContent();
+  } on ArgumentError catch (e) {
     throw BadRequest(
-      reason: 'role and domain query parameters are required for deletion',
+      reason: e.message.toString(),
       payload: {
         ...request.url.queryParameters,
         ...request.pathParameters.raw,
       },
     );
   }
-
-  final role = ConnectionRole.fromString(roleParam);
-  final domain = ConnectionDomain.fromString(domainParam);
-
-  await db.deleteConnection(
-    initiatorId: request.userId,
-    targetId: targetId,
-    role: role,
-    domain: domain,
-  );
-
-  throw const NoContent();
 }
