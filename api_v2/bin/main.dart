@@ -68,6 +68,7 @@ Future<void> main() async {
     ..use('/', authenticator(implementation: testAuth))
     ..use('/', authentication(shouldAuthenticate: isPublicRoute))
     ..use('/charts', chartsDb(db: _database))
+    ..use('/connections', connectionsDb(db: _database))
     ..use('/exercises', exercisesDb(db: _storage))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 
