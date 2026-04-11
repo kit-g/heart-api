@@ -75,7 +75,7 @@ abstract interface class AppConfig {
       default:
         throw StateError(
           'Missing required environment variables. '
-          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, EXERCISE_BUCKET, and WORKOUTS_TABLE are set.',
+          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, EXERCISE_BUCKET, MEDIA_DISTRIBUTION, and WORKOUTS_TABLE are set.',
         );
     }
   }
