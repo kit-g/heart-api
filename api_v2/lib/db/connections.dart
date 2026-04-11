@@ -1,8 +1,5 @@
 part of 'db.dart';
 
-const _connectionPk = 'USER#';
-const _connectionSk = 'CONN#';
-
 mixin _Connections on _DatabaseBase implements ConnectionsService {
   String get table;
 
