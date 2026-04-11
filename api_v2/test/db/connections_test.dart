@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_dynamic_calls
 import 'package:aws_client/dynamo_db_2012_08_10.dart' as db_api;
 import 'package:aws_client/dynamo_document.dart';
 import 'package:heart/models/connections.dart';
