@@ -43,6 +43,8 @@ abstract interface class AppConfig {
 
   String get defaultLocale;
 
+  String get mediaDistribution;
+
   factory AppConfig.fromEnv() {
     switch (Platform.environment) {
       case {
@@ -52,6 +54,7 @@ abstract interface class AppConfig {
             'WORKOUTS_TABLE': String table,
             'MIN_APP_VERSION': String version,
             'EXERCISE_BUCKET': String exerciseBucket,
+            'MEDIA_DISTRIBUTION': String mediaDistribution,
           }
           when [region, env, firebaseProjectId, table, exerciseBucket].every((v) => v.isNotEmpty):
         return _EnvConfig(
@@ -67,6 +70,7 @@ abstract interface class AppConfig {
           exerciseBucket: exerciseBucket,
           supportedLocales: Platform.environment['SUPPORTED_LOCALES']?.split(',') ?? ['en'],
           defaultLocale: Platform.environment['DEFAULT_LOCALE'] ?? 'en',
+          mediaDistribution: mediaDistribution,
         );
       default:
         throw StateError(
@@ -75,6 +79,8 @@ abstract interface class AppConfig {
         );
     }
   }
+
+  String workoutImageUrl(String key);
 }
 
 class _EnvConfig implements AppConfig {
@@ -102,6 +108,8 @@ class _EnvConfig implements AppConfig {
   final List<String> supportedLocales;
   @override
   final String defaultLocale;
+  @override
+  final String mediaDistribution;
 
   const _EnvConfig({
     required this.env,
@@ -116,7 +124,13 @@ class _EnvConfig implements AppConfig {
     required this.exerciseBucket,
     required this.supportedLocales,
     required this.defaultLocale,
+    required this.mediaDistribution,
   });
+
+  @override
+  String workoutImageUrl(String key) {
+    return Uri.https(mediaDistribution, key).toString();
+  }
 }
 
 final _configProperty = ContextProperty<AppConfig>('AppConfig');
