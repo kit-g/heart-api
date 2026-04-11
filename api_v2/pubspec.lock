@@ -246,7 +246,7 @@ packages:
     description:
       path: "shared/heart_models"
       ref: main
-      resolved-ref: "1167374a23bad2fc9f7d35353c4a2ae6fe921850"
+      resolved-ref: c8d128461e3c57b5f10fe5151f7149e84686aa60
       url: "https://github.com/kit-g/heart-of-yours.git"
     source: git
     version: "1.0.0"

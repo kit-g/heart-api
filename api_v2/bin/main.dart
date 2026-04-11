@@ -70,6 +70,7 @@ Future<void> main() async {
     ..use('/charts', chartsDb(db: _database))
     ..use('/connections', connectionsDb(db: _database))
     ..use('/exercises', exercisesDb(db: _storage))
+    ..use('/users', workoutsDb(db: _database))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 
   for (final MapEntry(key: (route, verb), value: handler) in routes.entries) {
