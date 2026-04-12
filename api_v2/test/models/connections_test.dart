@@ -67,11 +67,11 @@ void main() {
 
     test('fromRow parses database row correctly', () {
       final row = {
-        'targetId': 'user_123',
+        'target_id': 'user_123',
         'role': 'COACH',
         'domain': 'fitness',
         'status': 'active',
-        'createdAt': now.toIso8601String(),
+        'created_at': now.toIso8601String(),
       };
 
       final connection = Connection.fromRow(row);
