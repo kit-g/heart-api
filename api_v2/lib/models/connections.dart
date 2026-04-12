@@ -103,6 +103,8 @@ abstract interface class Connection implements Model {
       _ => throw ArgumentError('Invalid connection ID format'),
     };
   }
+
+  bool allows(String targetUserId);
 }
 
 class _Connection implements Connection {
@@ -138,6 +140,12 @@ class _Connection implements Connection {
       'status': status.name,
       'createdAt': createdAt.toIso8601String(),
     };
+  }
+
+  @override
+  bool allows(String targetUserId) {
+    if (targetUserId != targetId) return false;
+    return role == .coach || role == .peer;
   }
 }
 
