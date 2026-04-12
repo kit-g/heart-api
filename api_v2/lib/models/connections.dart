@@ -149,15 +149,18 @@ class _Connection implements Connection {
   }
 }
 
-class ConnectionListResponse implements Model {
+class ConnectionListResponse with Iterable<Connection> implements Model {
   final List<Connection> connections;
 
   const ConnectionListResponse(this.connections);
 
   @override
+  Iterator<Connection> get iterator => connections.iterator;
+
+  @override
   Map<String, dynamic> toMap() {
     return {
-      'connections': connections.map((c) => c.toMap()).toList(),
+      'connections': map((c) => c.toMap()).toList(),
     };
   }
 }
