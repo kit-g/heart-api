@@ -85,11 +85,11 @@ abstract interface class Connection implements Model {
 
   factory Connection.fromRow(Map<String, dynamic> row) {
     return Connection(
-      targetId: row['targetId'] as String,
+      targetId: row['target_id'] as String,
       role: ConnectionRole.fromString(row['role'] as String),
       domain: ConnectionDomain.fromString(row['domain'] as String),
       status: ConnectionStatus.fromString(row['status'] as String),
-      createdAt: DateTime.parse(row['createdAt'] as String),
+      createdAt: DateTime.parse(row['created_at'] as String),
     );
   }
 

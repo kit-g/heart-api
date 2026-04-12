@@ -75,11 +75,11 @@ void main() {
       );
 
       final existingRow = {
-        'targetId': targetId,
+        'target_id': targetId,
         'role': 'COACH',
         'domain': 'fitness',
         'status': 'active',
-        'createdAt': DateTime.now().toIso8601String(),
+        'created_at': DateTime.now().toIso8601String(),
       };
 
       testEnv.mockQueryResponse([existingRow]);
@@ -121,11 +121,11 @@ void main() {
     test('getConnections calls query with correct prefix', () async {
       final mockRows = [
         {
-          'targetId': 'target1',
+          'target_id': 'target1',
           'role': 'STUDENT',
           'domain': 'fitness',
           'status': 'active',
-          'createdAt': DateTime.now().toIso8601String(),
+          'created_at': DateTime.now().toIso8601String(),
         },
       ];
 
@@ -164,11 +164,11 @@ void main() {
 
     test('getConnection returns model if exists', () async {
       final row = {
-        'targetId': targetId,
+        'target_id': targetId,
         'role': 'COACH',
         'domain': 'fitness',
         'status': 'active',
-        'createdAt': DateTime.now().toIso8601String(),
+        'created_at': DateTime.now().toIso8601String(),
       };
 
       testEnv.mockGetResponse(row);
@@ -228,11 +228,11 @@ void main() {
 
     test('changeConnectionStatus updates status', () async {
       final row = {
-        'targetId': targetId,
+        'target_id': targetId,
         'role': 'COACH',
         'domain': 'fitness',
         'status': 'pending',
-        'createdAt': DateTime.now().toIso8601String(),
+        'created_at': DateTime.now().toIso8601String(),
       };
 
       testEnv.mockGetResponse(row);
@@ -272,11 +272,11 @@ void main() {
 
     test('changeConnectionStatus throws on invalid transition', () async {
       final row = {
-        'targetId': targetId,
+        'target_id': targetId,
         'role': 'COACH',
         'domain': 'fitness',
         'status': 'active',
-        'createdAt': DateTime.now().toIso8601String(),
+        'created_at': DateTime.now().toIso8601String(),
       };
 
       testEnv.mockGetResponse(row);
