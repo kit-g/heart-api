@@ -64,3 +64,20 @@ class BadRequest implements ApiException {
     return '$runtimeType: $reason';
   }
 }
+
+class Forbidden implements ApiException {
+  final String reason;
+
+  const Forbidden({required this.reason});
+
+  @override
+  int get statusCode => 403;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'error': 'forbidden',
+      'reason': reason,
+    };
+  }
+}
