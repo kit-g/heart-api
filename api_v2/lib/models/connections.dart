@@ -193,4 +193,6 @@ abstract interface class ConnectionsService {
     required ConnectionRole role,
     required ConnectionDomain domain,
   });
+
+  Future<Iterable<Connection>?> queryConnections({required String initiatorId, required String targetId});
 }
