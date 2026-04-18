@@ -81,3 +81,20 @@ class Forbidden implements ApiException {
     };
   }
 }
+
+class NotImplemented implements ApiException {
+  final String reason;
+
+  const NotImplemented({required this.reason});
+
+  @override
+  int get statusCode => 501;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'error': 'not implemented',
+      'reason': reason,
+    };
+  }
+}
