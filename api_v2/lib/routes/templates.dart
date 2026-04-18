@@ -5,6 +5,24 @@ import 'package:heart/models/templates.dart';
 import 'package:heart/routes/permissions.dart';
 import 'package:relic/relic.dart';
 
+const _limitParam = IntQueryParam('pageSize');
+
+Future<TemplateListResponse> getMyTemplates(final Request request) async {
+  return request.templatesService.getTemplates(
+    userId: request.userId,
+    pageSize: request.queryParameters(_limitParam),
+    cursor: request.queryParameters.raw['cursor'],
+  );
+}
+
+Future<TemplateShareListResponse> getMyTemplateShares(final Request request) async {
+  return request.templatesService.getTemplateShares(
+    userId: request.userId,
+    pageSize: request.queryParameters(_limitParam),
+    cursor: request.queryParameters.raw['cursor'],
+  );
+}
+
 Future<TemplateItem> assignTemplateToUser(final Request request) async {
   final templatesDb = request.templatesService;
   final connectionsDb = request.connectionsService;

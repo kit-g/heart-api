@@ -128,8 +128,8 @@ abstract interface class TemplateShareItem implements Model {
     final sk = row['SK'] as String;
     return _TemplateShareItem(
       studentId: sk.split('#').last, // TEMPLATE_SHARE#<templateId>#<studentId>
-      studentTemplateId: row['studentTemplateId'] as String,
-      assignedAt: DateTime.parse(row['assignedAt'] as String),
+      studentTemplateId: row['student_template_id'] as String,
+      assignedAt: DateTime.parse(row['assigned_at'] as String),
     );
   }
 }
@@ -158,10 +158,76 @@ class _TemplateShareItem implements TemplateShareItem {
   }
 }
 
+abstract interface class TemplateListResponse implements Model, Iterable<TemplateItem> {
+  List<TemplateItem> get templates;
+
+  String? get cursor;
+
+  factory TemplateListResponse({
+    required List<TemplateItem> templates,
+    required String? cursor,
+  }) = _TemplateListResponse;
+}
+
+class _TemplateListResponse with Iterable<TemplateItem> implements TemplateListResponse {
+  @override
+  final List<TemplateItem> templates;
+  @override
+  final String? cursor;
+
+  const _TemplateListResponse({required this.templates, required this.cursor});
+
+  @override
+  Iterator<TemplateItem> get iterator => templates.iterator;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'templates': map((t) => t.toMap()).toList(),
+      'cursor': ?cursor,
+    };
+  }
+}
+
+abstract interface class TemplateShareListResponse implements Model, Iterable<TemplateShareItem> {
+  List<TemplateShareItem> get shares;
+
+  String? get cursor;
+
+  factory TemplateShareListResponse({
+    required List<TemplateShareItem> shares,
+    required String? cursor,
+  }) = _TemplateShareListResponse;
+}
+
+class _TemplateShareListResponse with Iterable<TemplateShareItem> implements TemplateShareListResponse {
+  @override
+  final List<TemplateShareItem> shares;
+  @override
+  final String? cursor;
+
+  const _TemplateShareListResponse({required this.shares, required this.cursor});
+
+  @override
+  Iterator<TemplateShareItem> get iterator => shares.iterator;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'shares': map((s) => s.toMap()).toList(),
+      'cursor': ?cursor,
+    };
+  }
+}
+
 abstract interface class ApiTemplateService {
   Future<TemplateItem> shareTemplate({
     required String coachId,
     required String studentId,
     required String masterTemplateId,
   });
+
+  Future<TemplateListResponse> getTemplates({required String userId, String? cursor, int? pageSize});
+
+  Future<TemplateShareListResponse> getTemplateShares({required String userId, String? cursor, int? pageSize});
 }
