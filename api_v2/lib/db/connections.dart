@@ -3,12 +3,6 @@ part of 'db.dart';
 mixin _Connections on _DatabaseBase implements ConnectionsService {
   String get table;
 
-  static String connectionPk(String userId) => '$_connectionPk$userId';
-
-  static String connectionSk(ConnectionRole role, ConnectionDomain domain, String targetId) {
-    return '$_connectionSk${role.value.toUpperCase()}#${domain.value.toUpperCase()}#$targetId';
-  }
-
   @override
   Future<Connection> createConnection({
     required String initiatorId,

@@ -1,26 +1,48 @@
 library;
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:aws_client/dynamo_document.dart';
+import 'package:heart/models/av.dart';
 import 'package:heart/models/connections.dart';
-import 'package:heart_models/heart_models.dart' hide WorkoutService;
+import 'package:heart_models/heart_models.dart' hide WorkoutService, TemplateService;
 
+import '../models/profile.dart';
+import '../models/templates.dart';
 import '../models/workouts.dart';
 
 part 'charts.dart';
 part 'connections.dart';
+part 'templates.dart';
 part 'workouts.dart';
+
+const _userPk = 'USER#';
+const _connectionPk = _userPk;
+const _connectionSk = 'CONN#';
+const _workoutSk = 'WORKOUT#';
+const _templateSk = 'TEMPLATE#';
+const _templateShareSk = 'TEMPLATE_SHARE#';
 
 abstract class _DatabaseBase {
   DocumentClient get _client;
 
   const _DatabaseBase();
+
+  String connectionPk(String userId) => '$_connectionPk$userId';
+
+  String connectionSk(ConnectionRole role, ConnectionDomain domain, String targetId) {
+    return '$_connectionSk${role.value.toUpperCase()}#${domain.value.toUpperCase()}#$targetId';
+  }
+
+  String templatePk(String userId) => '$_userPk$userId';
+
+  String templateSk(String templateId) => '$_templateSk$templateId';
 }
 
 class Database extends _DatabaseBase
-    with _Charts, _Connections, _Workouts
-    implements ChartPreferenceService, ConnectionsService, ApiWorkoutService {
+    with _Charts, _Connections, _Workouts, _Templates
+    implements ChartPreferenceService, ConnectionsService, ApiWorkoutService, ApiTemplateService {
   @override
   final DocumentClient _client;
   @override
