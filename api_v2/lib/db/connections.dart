@@ -24,6 +24,16 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       await _client.transactWrite(
         transactItems: [
           TransactWrite(
+            conditionCheck: Operation(
+              tableName: table,
+              value: {
+                'PK': AttributeValue(s: connectionPk(targetId)),
+                'SK': AttributeValue(s: connectionPk(targetId)),
+              },
+              expression: 'attribute_exists(PK)',
+            ),
+          ),
+          TransactWrite(
             put: Operation(
               tableName: table,
               expression: 'attribute_not_exists(PK)',
@@ -60,7 +70,12 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
         rethrow;
       }
 
-      // connection exists, query
+      final reasons = RegExp(r'\[(.+?)\]').firstMatch(e.message ?? '')?.group(1)?.split(', ') ?? [];
+      if (reasons.firstOrNull == 'ConditionalCheckFailed') {
+        throw NotFound(type: 'User', id: targetId);
+      }
+
+      // connection already exists, query
       final response = await _client.query(
         tableName: table,
         keyConditionExpression: '#PK = :PK AND #SK = :SK',
