@@ -76,4 +76,66 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
 
     return masterTemplate.copyWith(assignedBy: assignedBy);
   }
+
+  @override
+  Future<TemplateListResponse> getTemplates({
+    required String userId,
+    String? cursor,
+    int? pageSize = 30,
+  }) async {
+    final response = await _client.query(
+      tableName: table,
+      keyConditionExpression: '#PK = :PK AND begins_with(#SK, :PREFIX)',
+      expressionAttributeNames: {'#PK': 'PK', '#SK': 'SK'},
+      expressionAttributeValues: {
+        ':PK': AttributeValue(s: templatePk(userId)),
+        ':PREFIX': AttributeValue(s: _templateSk),
+      },
+      scanIndexForward: false,
+      limit: pageSize,
+      exclusiveStartKey: switch (cursor?.fromBase64()) {
+        String s when s.isNotEmpty => {
+          'PK': AttributeValue(s: templatePk(userId)),
+          'SK': AttributeValue(s: s),
+        },
+        _ => null,
+      },
+    );
+
+    return TemplateListResponse(
+      templates: response.items.map((item) => TemplateItem.fromRow(item)).toList(),
+      cursor: (response.lastEvaluatedKey['SK'] as String?)?.toBase64(),
+    );
+  }
+
+  @override
+  Future<TemplateShareListResponse> getTemplateShares({
+    required String userId,
+    String? cursor,
+    int? pageSize = 30,
+  }) async {
+    final response = await _client.query(
+      tableName: table,
+      keyConditionExpression: '#PK = :PK AND begins_with(#SK, :PREFIX)',
+      expressionAttributeNames: {'#PK': 'PK', '#SK': 'SK'},
+      expressionAttributeValues: {
+        ':PK': AttributeValue(s: templatePk(userId)),
+        ':PREFIX': AttributeValue(s: _templateShareSk),
+      },
+      scanIndexForward: false,
+      limit: pageSize,
+      exclusiveStartKey: switch (cursor?.fromBase64()) {
+        String s when s.isNotEmpty => {
+          'PK': AttributeValue(s: templatePk(userId)),
+          'SK': AttributeValue(s: s),
+        },
+        _ => null,
+      },
+    );
+
+    return TemplateShareListResponse(
+      shares: response.items.map((item) => TemplateShareItem.fromRow(item)).toList(),
+      cursor: (response.lastEvaluatedKey['SK'] as String?)?.toBase64(),
+    );
+  }
 }
