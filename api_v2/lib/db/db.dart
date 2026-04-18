@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:aws_client/dynamo_document.dart';
 import 'package:heart/models/av.dart';
 import 'package:heart/models/connections.dart';
+import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart' hide WorkoutService, TemplateService;
 
 import '../models/profile.dart';

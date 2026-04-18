@@ -16,7 +16,7 @@ abstract interface class TemplateItem implements DynamoItem, Iterable<ExerciseIt
 
   Profile? get assignedBy;
 
-  bool get syncEnabled;
+  bool? get syncEnabled;
 
   factory TemplateItem.fromRow(Map<String, dynamic> row) {
     final sk = row['SK'] as String;
@@ -33,7 +33,7 @@ abstract interface class TemplateItem implements DynamoItem, Iterable<ExerciseIt
         Map m => Profile.fromJson(m),
         _ => null,
       },
-      syncEnabled: row['sync_enabled'] as bool? ?? true,
+      syncEnabled: row['sync_enabled'] as bool?,
     );
   }
 
@@ -61,7 +61,7 @@ class _TemplateItem with Iterable<ExerciseItem> implements TemplateItem {
   @override
   final Profile? assignedBy;
   @override
-  final bool syncEnabled;
+  final bool? syncEnabled;
 
   const _TemplateItem({
     required this.id,
@@ -70,7 +70,7 @@ class _TemplateItem with Iterable<ExerciseItem> implements TemplateItem {
     required this.exercises,
     this.sourceTemplateId,
     this.assignedBy,
-    this.syncEnabled = true,
+    this.syncEnabled,
   });
 
   @override
@@ -83,9 +83,9 @@ class _TemplateItem with Iterable<ExerciseItem> implements TemplateItem {
       'name': name,
       'order': order,
       'exercises': exercises.map((ex) => ex.toMap()).toList(),
-      'sourceTemplateId': sourceTemplateId,
+      'sourceTemplateId': ?sourceTemplateId,
       'assignedBy': ?assignedBy?.toMap(),
-      'syncEnabled': syncEnabled,
+      'syncEnabled': ?syncEnabled,
     };
   }
 
@@ -118,41 +118,78 @@ class _TemplateItem with Iterable<ExerciseItem> implements TemplateItem {
 }
 
 abstract interface class TemplateShareItem implements Model {
-  String get studentId;
-
   String get studentTemplateId;
+
+  String get templateName;
+
+  Profile get assignedTo;
 
   DateTime get assignedAt;
 
+  factory TemplateShareItem({
+    required String studentTemplateId,
+    required String templateName,
+    required Profile assignedTo,
+    required DateTime assignedAt,
+  }) = _TemplateShareItem;
+
   factory TemplateShareItem.fromRow(Map<String, dynamic> row) {
-    final sk = row['SK'] as String;
     return _TemplateShareItem(
-      studentId: sk.split('#').last, // TEMPLATE_SHARE#<templateId>#<studentId>
       studentTemplateId: row['student_template_id'] as String,
+      templateName: row['template_name'] as String,
+      assignedTo: Profile.fromJson(row['student'] as Map),
       assignedAt: DateTime.parse(row['assigned_at'] as String),
     );
   }
+
+  TemplateShareItem copyWith({
+    String? studentId,
+    String? studentTemplateId,
+    String? templateName,
+    Profile? assignedTo,
+    DateTime? assignedAt,
+  });
 }
 
 class _TemplateShareItem implements TemplateShareItem {
   @override
-  final String studentId;
-  @override
   final String studentTemplateId;
+  @override
+  final String templateName;
+  @override
+  final Profile assignedTo;
   @override
   final DateTime assignedAt;
 
   const _TemplateShareItem({
-    required this.studentId,
     required this.studentTemplateId,
+    required this.templateName,
+    required this.assignedTo,
     required this.assignedAt,
   });
 
   @override
+  TemplateShareItem copyWith({
+    String? studentId,
+    String? studentTemplateId,
+    String? templateName,
+    Profile? assignedTo,
+    DateTime? assignedAt,
+  }) {
+    return _TemplateShareItem(
+      studentTemplateId: studentTemplateId ?? this.studentTemplateId,
+      templateName: templateName ?? this.templateName,
+      assignedTo: assignedTo ?? this.assignedTo,
+      assignedAt: assignedAt ?? this.assignedAt,
+    );
+  }
+
+  @override
   Map<String, dynamic> toMap() {
     return {
-      'studentId': studentId,
       'studentTemplateId': studentTemplateId,
+      'templateName': templateName,
+      'assignedTo': assignedTo.toMap(),
       'assignedAt': assignedAt.toIso8601String(),
     };
   }
@@ -221,9 +258,9 @@ class _TemplateShareListResponse with Iterable<TemplateShareItem> implements Tem
 }
 
 abstract interface class ApiTemplateService {
-  Future<TemplateItem> shareTemplate({
+  Future<TemplateShareItem> shareTemplate({
     required String coachId,
-    required String studentId,
+    required String targetUserId,
     required String masterTemplateId,
   });
 

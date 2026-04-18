@@ -1,3 +1,4 @@
+import 'package:heart/core/request.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
@@ -23,7 +24,7 @@ Future<TemplateShareListResponse> getMyTemplateShares(final Request request) asy
   );
 }
 
-Future<TemplateItem> assignTemplateToUser(final Request request) async {
+Future<TemplateShareItem> assignTemplateToUser(final Request request) async {
   final templatesDb = request.templatesService;
   final connectionsDb = request.connectionsService;
   final userId = request.userId;
@@ -40,9 +41,16 @@ Future<TemplateItem> assignTemplateToUser(final Request request) async {
     throw const Forbidden(reason: 'You do not have permission to assign templates to this user.');
   }
 
-  return templatesDb.shareTemplate(
-    coachId: request.userId,
-    studentId: targetUserId,
-    masterTemplateId: templateId,
-  );
+  try {
+    return await templatesDb.shareTemplate(
+      coachId: request.userId,
+      targetUserId: targetUserId,
+      masterTemplateId: templateId,
+    );
+  } on StateError catch (e) {
+    throw BadRequest(
+      reason: e.message,
+      payload: request.signature(),
+    );
+  }
 }
