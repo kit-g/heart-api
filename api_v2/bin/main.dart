@@ -41,6 +41,9 @@ Handler _handler(final ModelHandler handler) {
     } on ApiException catch (e) {
       _logger.warning('API exception:', e);
       return JsonResponse(e.statusCode, body: e);
+    } on UnimplementedError catch (e) {
+      _logger.warning('API exception:', e.message);
+      return JsonResponse.notImplemented(body: NotImplemented(reason: e.message ?? 'Not implemented'));
     } catch (e, stackTrace) {
       _logger.severe('API server error:', e, stackTrace);
       return JsonResponse.serverError();

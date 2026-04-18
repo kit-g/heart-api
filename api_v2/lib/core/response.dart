@@ -48,6 +48,13 @@ class JsonResponse<T extends Model> extends Response {
         body: body ?? _ServerError() as T,
         headers: headers,
       );
+
+  JsonResponse.notImplemented({T? body, Headers? headers})
+    : this(
+        501,
+        body: body ?? _ServerError() as T,
+        headers: headers,
+      );
 }
 
 typedef ModelHandler = Future<Model?> Function(Request);
