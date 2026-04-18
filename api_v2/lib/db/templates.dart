@@ -164,4 +164,103 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
       cursor: (response.lastEvaluatedKey['SK'] as String?)?.toBase64(),
     );
   }
+
+  @override
+  Future<void> deleteTemplate({
+    required String coachId,
+    required String templateId,
+  }) async {
+    final coachKey = templatePk(coachId);
+
+    final sharesResponse = await _client.query(
+      tableName: table,
+      keyConditionExpression: '#PK = :PK AND begins_with(#SK, :PREFIX)',
+      expressionAttributeNames: {'#PK': 'PK', '#SK': 'SK'},
+      expressionAttributeValues: {
+        ':PK': AttributeValue(s: coachKey),
+        ':PREFIX': AttributeValue(s: '$_templateShareSk$templateId#'),
+      },
+    );
+
+    await _client.transactWrite(
+      transactItems: [
+        TransactWrite(
+          delete: Operation(
+            tableName: table,
+            expression: 'attribute_exists(PK)',
+            value: {
+              'PK': AttributeValue(s: coachKey),
+              'SK': AttributeValue(s: templateSk(templateId)),
+            },
+          ),
+        ),
+        ...sharesResponse.items.map(
+          (item) => TransactWrite(
+            delete: Operation(
+              tableName: table,
+              expression: 'attribute_exists(PK)',
+              value: {
+                'PK': AttributeValue(s: item['PK'] as String),
+                'SK': AttributeValue(s: item['SK'] as String),
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Future<void> deleteShare({
+    required String coachId,
+    required String shareId,
+  }) async {
+    final parts = shareId.split('|');
+    if (parts.length != 2) throw ArgumentError('Invalid share ID: $shareId');
+    final studentId = parts[0];
+    final masterTemplateId = parts[1];
+
+    final coachKey = templatePk(coachId);
+    final shareSk = '$_templateShareSk$masterTemplateId#$studentId';
+
+    final response = await _client.get(
+      tableName: table,
+      key: {
+        'PK': AttributeValue(s: coachKey),
+        'SK': AttributeValue(s: shareSk),
+      },
+    );
+
+    String studentTemplateId;
+    try {
+      studentTemplateId = response.item['student_template_id'] as String;
+    } on TypeError {
+      throw NotFound(type: 'TemplateShare', id: shareId);
+    }
+
+    await _client.transactWrite(
+      transactItems: [
+        TransactWrite(
+          delete: Operation(
+            tableName: table,
+            expression: 'attribute_exists(PK)',
+            value: {
+              'PK': AttributeValue(s: coachKey),
+              'SK': AttributeValue(s: shareSk),
+            },
+          ),
+        ),
+        TransactWrite(
+          delete: Operation(
+            tableName: table,
+            expression: 'attribute_exists(PK)',
+            value: {
+              'PK': AttributeValue(s: templatePk(studentId)),
+              'SK': AttributeValue(s: templateSk(studentTemplateId)),
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }

@@ -279,4 +279,8 @@ abstract interface class ApiTemplateService {
   Future<TemplateListResponse> getTemplates({required String userId, String? cursor, int? pageSize});
 
   Future<TemplateShareListResponse> getTemplateShares({required String userId, String? cursor, int? pageSize});
+
+  Future<void> deleteTemplate({required String coachId, required String templateId});
+
+  Future<void> deleteShare({required String coachId, required String shareId});
 }
