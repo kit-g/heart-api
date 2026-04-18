@@ -4,77 +4,102 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
   String get table;
 
   @override
-  Future<TemplateItem> shareTemplate({
+  Future<TemplateShareItem> shareTemplate({
     required String coachId,
-    required String studentId,
+    required String targetUserId,
     required String masterTemplateId,
   }) async {
-    final userKey = templatePk(coachId);
+    final coachKey = templatePk(coachId);
+    final targetUserKey = templatePk(targetUserId);
     final templateKey = templateSk(masterTemplateId);
     final masterResponse = await _client.batchGet(
       requestItems: {
         table: KeysAndProjection(
           keys: [
-            {
-              'PK': userKey,
-              'SK': templateKey,
-            },
-            {
-              'PK': userKey,
-              'SK': userKey,
-            },
+            {'PK': coachKey, 'SK': templateKey},
+            {'PK': coachKey, 'SK': coachKey},
+            {'PK': targetUserKey, 'SK': targetUserKey},
           ],
         ),
       },
     );
 
-    final (masterTemplate, coachItem) = switch (masterResponse.responses[table]) {
-      [Map one, Map two] when one['PK'] == userKey && one['SK'] == templateKey => (
-        TemplateItem.fromRow(one.cast<String, dynamic>()),
-        two,
-      ),
-      [Map one, Map two] when two['PK'] == userKey && two['SK'] == templateKey => (
-        TemplateItem.fromRow(two.cast<String, dynamic>()),
-        one,
-      ),
-      _ => throw StateError('Master template not found'),
-    };
-
-    final now = DateTime.now().toIso8601String();
-    final assignedBy = Profile.fromJson(coachItem);
-
-    await _client.transactWrite(
-      transactItems: [
-        TransactWrite(
-          put: Operation(
-            tableName: table,
-            expression: 'attribute_not_exists(PK)',
-            value: {
-              ...masterTemplate.toAttributeValue(),
-              'PK': toDynamoType(templatePk(studentId)),
-              'SK': templateSk(now),
-              'source_template_id': masterTemplateId,
-              'assigned_by': assignedBy.toAttributeValue(),
-              'sync_enabled': true,
-            },
-          ),
-        ),
-        TransactWrite(
-          put: Operation(
-            tableName: table,
-            expression: 'attribute_not_exists(PK)',
-            value: {
-              'PK': templatePk(coachId),
-              'SK': '$_templateShareSk$masterTemplateId#$studentId',
-              'student_template_id': now,
-              'assigned_at': now,
-            }.toAttributeValue(),
-          ),
-        ),
-      ],
+    final items = (masterResponse.responses[table] ?? []).cast<Map<String, dynamic>>();
+    final templateRow = items.firstWhere(
+      (item) => item['SK'] == templateKey,
+      orElse: () => throw StateError('Master template not found'),
+    );
+    final coachRow = items.firstWhere(
+      (item) => item['PK'] == coachKey && item['SK'] == coachKey,
+      orElse: () => throw StateError('Coach profile not found'),
+    );
+    final studentRow = items.firstWhere(
+      (item) => item['PK'] == targetUserKey && item['SK'] == targetUserKey,
+      orElse: () => throw StateError('Student profile not found'),
     );
 
-    return masterTemplate.copyWith(assignedBy: assignedBy);
+    final masterTemplate = TemplateItem.fromRow(templateRow);
+    final now = DateTime.now().toIso8601String();
+    final assignedBy = Profile.fromJson(coachRow);
+    final studentProfile = Profile.fromJson(studentRow);
+
+    final shareSk = '$_templateShareSk$masterTemplateId#$targetUserId';
+
+    try {
+      await _client.transactWrite(
+        transactItems: [
+          TransactWrite(
+            put: Operation(
+              tableName: table,
+              expression: 'attribute_not_exists(PK)',
+              value: {
+                ...masterTemplate.toAttributeValue(),
+                'PK': toDynamoType(templatePk(targetUserId)),
+                'SK': templateSk(now),
+                'source_template_id': masterTemplateId,
+                'assigned_by': assignedBy.toAttributeValue(),
+                'sync_enabled': true,
+              },
+            ),
+          ),
+          TransactWrite(
+            put: Operation(
+              tableName: table,
+              expression: 'attribute_not_exists(PK)',
+              value: {
+                'PK': coachKey,
+                'SK': shareSk,
+                'student_template_id': now,
+                'template_name': masterTemplate.name,
+                'assigned_to': studentRow,
+                'assigned_at': now,
+              }.toAttributeValue(),
+            ),
+          ),
+        ],
+      );
+    } on TransactionCanceledException catch (e) {
+      if (e.message case String message when !message.contains('ConditionalCheckFailed')) {
+        rethrow;
+      }
+      // template already shared — return existing share record
+      final response = await _client.get(
+        tableName: table,
+        key: {
+          'PK': AttributeValue(s: coachKey),
+          'SK': AttributeValue(s: shareSk),
+        },
+      );
+
+      return TemplateShareItem.fromRow(response.item);
+    }
+
+    return TemplateShareItem(
+      studentTemplateId: now,
+      templateName: masterTemplate.name,
+      assignedTo: studentProfile,
+      assignedAt: DateTime.parse(now),
+    );
   }
 
   @override
