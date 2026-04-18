@@ -231,12 +231,10 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
       },
     );
 
-    String studentTemplateId;
-    try {
-      studentTemplateId = response.item['student_template_id'] as String;
-    } on TypeError {
-      throw NotFound(type: 'TemplateShare', id: shareId);
-    }
+    final studentTemplateId = switch (response.item['student_template_id']) {
+      String s when s.isNotEmpty => s,
+      _ => throw NotFound(type: 'TemplateShare', id: shareId),
+    };
 
     await _client.transactWrite(
       transactItems: [

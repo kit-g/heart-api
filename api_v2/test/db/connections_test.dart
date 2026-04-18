@@ -2,6 +2,7 @@
 import 'package:aws_client/dynamo_db_2012_08_10.dart' as db_api;
 import 'package:aws_client/dynamo_document.dart';
 import 'package:heart/models/connections.dart';
+import 'package:heart/models/errors.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -45,10 +46,13 @@ void main() {
         testEnv.mockClient.transactWrite(
           transactItems: argThat(
             predicate((List<TransactWrite> items) {
-              if (items.length != 2) return false;
-              final put1 = items[0].put!;
-              final put2 = items[1].put!;
-              return put1.value['PK']?.s == 'USER#$initiatorId' &&
+              // conditionCheck + 2 puts
+              if (items.length != 3) return false;
+              final conditionCheck = items[0].conditionCheck!;
+              final put1 = items[1].put!;
+              final put2 = items[2].put!;
+              return conditionCheck.value['PK']?.s == 'USER#$targetId' &&
+                  put1.value['PK']?.s == 'USER#$initiatorId' &&
                   put1.value['SK']?.s == 'CONN#COACH#FITNESS#$targetId' &&
                   put2.value['PK']?.s == 'USER#$targetId' &&
                   put2.value['SK']?.s == 'CONN#STUDENT#FITNESS#$initiatorId';
@@ -57,6 +61,31 @@ void main() {
           ),
         ),
       ).called(1);
+    });
+
+    test('createConnection throws NotFound when target user does not exist', () async {
+      when(
+        testEnv.mockClient.transactWrite(
+          transactItems: anyNamed('transactItems'),
+          clientRequestToken: anyNamed('clientRequestToken'),
+          returnConsumedCapacity: anyNamed('returnConsumedCapacity'),
+          returnItemCollectionMetrics: anyNamed('returnItemCollectionMetrics'),
+        ),
+      ).thenThrow(
+        TransactionCanceledException(
+          message: 'Transaction cancelled [ConditionalCheckFailed, None, None]',
+        ),
+      );
+
+      expect(
+        () => testEnv.db.createConnection(
+          initiatorId: initiatorId,
+          targetId: targetId,
+          role: role,
+          domain: domain,
+        ),
+        throwsA(isA<NotFound>()),
+      );
     });
 
     test('createConnection handles conflict and returns existing connection', () async {
@@ -69,8 +98,7 @@ void main() {
         ),
       ).thenThrow(
         TransactionCanceledException(
-          message:
-              'Transaction cancelled, please refer to CancellationReasons for further information [ConditionalCheckFailed, None]',
+          message: 'Transaction cancelled [None, ConditionalCheckFailed, None]',
         ),
       );
 
