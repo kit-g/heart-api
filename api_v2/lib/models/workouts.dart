@@ -2,7 +2,9 @@ import 'dart:typed_data';
 
 import 'package:heart_models/heart_models.dart';
 
-abstract interface class SetItem implements Model {
+import 'av.dart';
+
+abstract interface class SetItem implements Model, DynamoItem {
   double? get weight;
 
   int? get reps;
@@ -61,9 +63,12 @@ class _SetItem implements SetItem {
       'duration': ?duration,
     };
   }
+
+  @override
+  Map<String, dynamic> toDynamoItem() => toMap().toSnake();
 }
 
-abstract interface class ExerciseItem implements Iterable<SetItem>, Model {
+abstract interface class ExerciseItem implements Iterable<SetItem>, Model, DynamoItem {
   String get id;
 
   String get exerciseId;
@@ -75,8 +80,8 @@ abstract interface class ExerciseItem implements Iterable<SetItem>, Model {
   factory ExerciseItem.fromRow(Map row) {
     return _ExerciseItem(
       id: row['id'] as String,
-      exerciseId: row['exercise_id'] as String,
-      exerciseOrder: (row['exercise_order'] as num).toInt(),
+      exerciseId: (row['exercise_id'] ?? row['exercise']) as String,
+      exerciseOrder: ((row['exercise_order'] ?? row['order']) as num).toInt(),
       sets: (row['sets'] as List).map((e) => SetItem.fromRow(e as Map<String, dynamic>)).toList(),
     );
   }
@@ -107,6 +112,16 @@ class _ExerciseItem with Iterable<SetItem> implements ExerciseItem {
       'order': exerciseOrder,
       'sets': sets.map((e) => e.toMap()).toList(),
     };
+  }
+
+  @override
+  Map<String, dynamic> toDynamoItem() {
+    return {
+      'id': id,
+      'exercise': exerciseId,
+      'order': exerciseOrder,
+      'sets': sets.map((e) => e.toDynamoItem()).toList(),
+    }.toSnake();
   }
 
   @override
