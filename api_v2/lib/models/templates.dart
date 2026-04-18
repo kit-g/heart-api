@@ -118,6 +118,8 @@ class _TemplateItem with Iterable<ExerciseItem> implements TemplateItem {
 }
 
 abstract interface class TemplateShareItem implements Model {
+  String get id;
+
   String get studentTemplateId;
 
   String get templateName;
@@ -127,6 +129,7 @@ abstract interface class TemplateShareItem implements Model {
   DateTime get assignedAt;
 
   factory TemplateShareItem({
+    required String id,
     required String studentTemplateId,
     required String templateName,
     required Profile assignedTo,
@@ -135,9 +138,13 @@ abstract interface class TemplateShareItem implements Model {
 
   factory TemplateShareItem.fromRow(Map<String, dynamic> row) {
     return _TemplateShareItem(
+      id: switch ((row['SK'] as String).split('#')) {
+        [_, String templateId, String userId] => '$userId|$templateId',
+        _ => throw ArgumentError('Invalid template share ID'),
+      },
       studentTemplateId: row['student_template_id'] as String,
       templateName: row['template_name'] as String,
-      assignedTo: Profile.fromJson(row['student'] as Map),
+      assignedTo: Profile.fromJson(row['assigned_to'] as Map),
       assignedAt: DateTime.parse(row['assigned_at'] as String),
     );
   }
@@ -153,6 +160,8 @@ abstract interface class TemplateShareItem implements Model {
 
 class _TemplateShareItem implements TemplateShareItem {
   @override
+  final String id;
+  @override
   final String studentTemplateId;
   @override
   final String templateName;
@@ -162,6 +171,7 @@ class _TemplateShareItem implements TemplateShareItem {
   final DateTime assignedAt;
 
   const _TemplateShareItem({
+    required this.id,
     required this.studentTemplateId,
     required this.templateName,
     required this.assignedTo,
@@ -177,6 +187,7 @@ class _TemplateShareItem implements TemplateShareItem {
     DateTime? assignedAt,
   }) {
     return _TemplateShareItem(
+      id: id,
       studentTemplateId: studentTemplateId ?? this.studentTemplateId,
       templateName: templateName ?? this.templateName,
       assignedTo: assignedTo ?? this.assignedTo,
@@ -187,6 +198,7 @@ class _TemplateShareItem implements TemplateShareItem {
   @override
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'studentTemplateId': studentTemplateId,
       'templateName': templateName,
       'assignedTo': assignedTo.toMap(),

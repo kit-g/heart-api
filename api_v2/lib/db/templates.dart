@@ -95,6 +95,7 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
     }
 
     return TemplateShareItem(
+      id: '$targetUserId|$now',
       studentTemplateId: now,
       templateName: masterTemplate.name,
       assignedTo: studentProfile,
