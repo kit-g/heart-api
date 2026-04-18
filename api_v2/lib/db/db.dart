@@ -32,7 +32,27 @@ class Database extends _DatabaseBase
   }) : _client = client;
 }
 
-const _userPk = 'USER#';
-const _connectionPk = _userPk;
-const _connectionSk = 'CONN#';
-const _workoutSk = 'WORKOUT#';
+AttributeValue toDynamoType(Object? v) {
+  return switch (v) {
+    String s => AttributeValue(s: s),
+    num n => AttributeValue(n: n.toString()),
+    bool b => AttributeValue(boolValue: b),
+    null => AttributeValue(nullValue: true),
+    Uint8List bytes => AttributeValue(b: bytes),
+    Map m => AttributeValue(m: m.map((k, v) => MapEntry(k, toDynamoType(v)))),
+    List l => AttributeValue(l: l.map((v) => toDynamoType(v)).toList()),
+    _ => throw ArgumentError('Unsupported DynamoDB type: ${v.runtimeType} - $v'),
+  };
+}
+
+extension on Map<String, dynamic> {
+  Map<String, AttributeValue> toAttributeValue() {
+    return map((k, v) => MapEntry(k, toDynamoType(v)));
+  }
+}
+
+extension on DynamoItem {
+  Map<String, AttributeValue> toAttributeValue() {
+    return toDynamoItem().toAttributeValue();
+  }
+}
