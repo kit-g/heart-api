@@ -2,6 +2,7 @@ import 'package:heart/core/response.dart';
 import 'package:heart/routes/charts.dart' as charts;
 import 'package:heart/routes/connections.dart' as connections;
 import 'package:heart/routes/exercises.dart' as exercises;
+import 'package:heart/routes/templates.dart' as templates;
 import 'package:heart/routes/workouts.dart' as workouts;
 import 'package:heart/routes/misc.dart' as version;
 import 'package:relic/relic.dart';
@@ -17,6 +18,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/connections/:connectionId', .delete): connections.deleteConnection,
   ('/connections/:connectionId', .put): connections.reactToConnection,
   ('/users/:targetUserId/workouts', .get): workouts.getTargetUserWorkouts,
+  ('/users/:targetUserId/templates/:templateId', .post): templates.assignTemplateToUser,
 };
 
 const _publicRoutes = {'/version'};
