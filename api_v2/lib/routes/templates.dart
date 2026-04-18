@@ -54,3 +54,23 @@ Future<TemplateShareItem> assignTemplateToUser(final Request request) async {
     );
   }
 }
+
+Future<NoContent> deleteMyTemplate(final Request request) async {
+  await request.templatesService.deleteTemplate(
+    coachId: request.userId,
+    templateId: request.pathParameters.raw[#templateId]!,
+  );
+  throw const NoContent();
+}
+
+Future<NoContent> deleteMyTemplateShare(final Request request) async {
+  try {
+    await request.templatesService.deleteShare(
+      coachId: request.userId,
+      shareId: request.pathParameters.raw[#shareId]!,
+    );
+  } on ArgumentError catch (e) {
+    throw BadRequest(reason: e.message.toString());
+  }
+  throw const NoContent();
+}
