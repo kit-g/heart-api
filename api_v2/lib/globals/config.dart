@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:postgres/postgres.dart' hide Connection;
 import 'package:relic/relic.dart';
 
 enum Env {
@@ -18,6 +19,32 @@ enum Env {
   bool get isProd => this == prod;
 }
 
+class PostgresConfig {
+  final String host;
+  final int port;
+  final String database;
+  final String? user;
+  final String? password;
+
+  const PostgresConfig({
+    required this.host,
+    required this.port,
+    required this.database,
+    this.user,
+    this.password,
+  });
+
+  Endpoint get endpoint {
+    return Endpoint(
+      host: host,
+      port: port,
+      database: database,
+      username: user,
+      password: password,
+    );
+  }
+}
+
 abstract interface class AppConfig {
   String get firebaseProjectId;
 
@@ -26,8 +53,6 @@ abstract interface class AppConfig {
   String get logLevel;
 
   String get awsRegion;
-
-  String get workoutsTable;
 
   String? get awsProfile;
 
@@ -45,37 +70,45 @@ abstract interface class AppConfig {
 
   String get mediaDistribution;
 
+  PostgresConfig get db;
+
   factory AppConfig.fromEnv() {
-    switch (Platform.environment) {
+    final env = Platform.environment;
+    switch (env) {
       case {
             'REGION': String region,
-            'ENV': String env,
+            'ENV': String environment,
             'FIREBASE_PROJECT_ID': String firebaseProjectId,
-            'WORKOUTS_TABLE': String table,
             'MIN_APP_VERSION': String version,
             'EXERCISE_BUCKET': String exerciseBucket,
             'MEDIA_DISTRIBUTION': String mediaDistribution,
           }
-          when [region, env, firebaseProjectId, table, exerciseBucket].every((v) => v.isNotEmpty):
+          when [region, environment, firebaseProjectId, exerciseBucket].every((v) => v.isNotEmpty):
         return _EnvConfig(
-          awsProfile: Platform.environment['AWS_PROFILE'],
+          awsProfile: env['AWS_PROFILE'],
           awsRegion: region,
-          env: Env.fromString(env),
+          env: Env.fromString(environment),
           firebaseProjectId: firebaseProjectId,
-          logLevel: Platform.environment['LOG_LEVEL'] ?? 'ALL',
-          workoutsTable: table,
-          testUserId: Platform.environment['TEST_USER_ID'],
+          logLevel: env['LOG_LEVEL'] ?? 'ALL',
+          testUserId: env['TEST_USER_ID'],
           minimalAppVersion: version,
-          shouldCheckVersion: Platform.environment['SHOULD_CHECK_VERSION']?.toLowerCase() == 'true',
+          shouldCheckVersion: env['SHOULD_CHECK_VERSION']?.toLowerCase() == 'true',
           exerciseBucket: exerciseBucket,
-          supportedLocales: Platform.environment['SUPPORTED_LOCALES']?.split(',') ?? ['en'],
-          defaultLocale: Platform.environment['DEFAULT_LOCALE'] ?? 'en',
+          supportedLocales: env['SUPPORTED_LOCALES']?.split(',') ?? ['en'],
+          defaultLocale: env['DEFAULT_LOCALE'] ?? 'en',
           mediaDistribution: mediaDistribution,
+          db: PostgresConfig(
+            host: env['PG_HOST'] ?? 'localhost',
+            port: int.tryParse(env['PG_PORT'] ?? '') ?? 5432,
+            database: env['PG_DATABASE'] ?? 'heart',
+            user: env['PG_USER'],
+            password: env['PG_PASSWORD'],
+          ),
         );
       default:
         throw StateError(
           'Missing required environment variables. '
-          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, EXERCISE_BUCKET, MEDIA_DISTRIBUTION, and WORKOUTS_TABLE are set.',
+          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, EXERCISE_BUCKET, and MEDIA_DISTRIBUTION are set.',
         );
     }
   }
@@ -93,8 +126,6 @@ class _EnvConfig implements AppConfig {
   @override
   final String awsRegion;
   @override
-  final String workoutsTable;
-  @override
   final String? awsProfile;
   @override
   final String? testUserId;
@@ -110,13 +141,14 @@ class _EnvConfig implements AppConfig {
   final String defaultLocale;
   @override
   final String mediaDistribution;
+  @override
+  final PostgresConfig db;
 
   const _EnvConfig({
     required this.env,
     required this.firebaseProjectId,
     required this.logLevel,
     required this.awsRegion,
-    required this.workoutsTable,
     this.awsProfile,
     this.testUserId,
     required this.minimalAppVersion,
@@ -125,12 +157,11 @@ class _EnvConfig implements AppConfig {
     required this.supportedLocales,
     required this.defaultLocale,
     required this.mediaDistribution,
+    required this.db,
   });
 
   @override
-  String workoutImageUrl(String key) {
-    return Uri.https(mediaDistribution, key).toString();
-  }
+  String workoutImageUrl(String key) => Uri.https(mediaDistribution, key).toString();
 }
 
 final _configProperty = ContextProperty<AppConfig>('AppConfig');
