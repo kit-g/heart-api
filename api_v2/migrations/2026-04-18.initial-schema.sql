@@ -7,7 +7,6 @@ DROP TABLE IF EXISTS template_exercises CASCADE;
 DROP TABLE IF EXISTS template_shares CASCADE;
 DROP TABLE IF EXISTS templates CASCADE;
 DROP TABLE IF EXISTS chart_preferences CASCADE;
-DROP TABLE IF EXISTS connections CASCADE;
 DROP TABLE IF EXISTS exercises CASCADE;
 DROP TABLE IF EXISTS profiles CASCADE;
 
@@ -40,9 +39,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS exercises_global_name_idx ON exercises (name) 
 CREATE UNIQUE INDEX IF NOT EXISTS exercises_user_name_idx ON exercises (user_id, name) WHERE user_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS exercises_user_id_idx ON exercises (user_id);
 
+DROP TABLE IF EXISTS connections CASCADE;
 CREATE TABLE IF NOT EXISTS connections
 (
-    id             UUID          DEFAULT uuidv7() PRIMARY KEY,
     initiator_id   TEXT NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
     target_id      TEXT NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
     initiator_role TEXT NOT NULL,
@@ -50,12 +49,13 @@ CREATE TABLE IF NOT EXISTS connections
     domain         TEXT NOT NULL,
     status         TEXT NOT NULL DEFAULT 'pending',
     created_at     TIMESTAMPTZ   DEFAULT now(),
-    UNIQUE (initiator_id, target_id, domain),
+    PRIMARY KEY (initiator_id, target_id, domain),
     check ( length(domain) > 0 ),
     check ( length(status) > 0 ),
     check ( length(initiator_role) > 0 ),
     check ( length(target_role) > 0 )
 );
+CREATE INDEX idx_connections_target_id ON connections(target_id);
 
 CREATE TABLE IF NOT EXISTS workouts
 (

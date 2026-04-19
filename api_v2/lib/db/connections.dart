@@ -1,8 +1,6 @@
 part of 'db.dart';
 
 mixin _Connections on _DatabaseBase implements ConnectionsService {
-  String get table;
-
   @override
   Future<Connection> createConnection({
     required String initiatorId,
@@ -10,94 +8,22 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     required ConnectionRole role,
     required ConnectionDomain domain,
   }) async {
-    final reciprocalRole = role.reciprocal;
-    final now = DateTime.now();
-    final connection = Connection(
-      targetId: targetId,
-      role: role,
-      domain: domain,
-      status: .pending,
-      createdAt: now,
+    final result = await _pool.execute(
+      _createConnection.toSql(),
+      parameters: {
+        'initiatorId': initiatorId,
+        'targetId': targetId,
+        'initiatorRole': role.value,
+        'targetRole': role.reciprocal.value,
+        'domain': domain.value,
+      },
     );
 
-    try {
-      await _client.transactWrite(
-        transactItems: [
-          TransactWrite(
-            conditionCheck: Operation(
-              tableName: table,
-              value: {
-                'PK': AttributeValue(s: connectionPk(targetId)),
-                'SK': AttributeValue(s: connectionPk(targetId)),
-              },
-              expression: 'attribute_exists(PK)',
-            ),
-          ),
-          TransactWrite(
-            put: Operation(
-              tableName: table,
-              expression: 'attribute_not_exists(PK)',
-              value: {
-                'PK': AttributeValue(s: connectionPk(initiatorId)),
-                'SK': AttributeValue(s: connectionSk(role, domain, targetId)),
-                'target_id': AttributeValue(s: targetId),
-                'role': AttributeValue(s: role.value),
-                'domain': AttributeValue(s: domain.value),
-                'status': AttributeValue(s: connection.status.name),
-                'created_at': AttributeValue(s: now.toIso8601String()),
-              },
-            ),
-          ),
-          TransactWrite(
-            put: Operation(
-              tableName: table,
-              expression: 'attribute_not_exists(PK)',
-              value: {
-                'PK': AttributeValue(s: connectionPk(targetId)),
-                'SK': AttributeValue(s: connectionSk(reciprocalRole, domain, initiatorId)),
-                'target_id': AttributeValue(s: initiatorId),
-                'role': AttributeValue(s: reciprocalRole.value),
-                'domain': AttributeValue(s: domain.value),
-                'status': AttributeValue(s: connection.status.name),
-                'created_at': AttributeValue(s: now.toIso8601String()),
-              },
-            ),
-          ),
-        ],
-      );
-    } on TransactionCanceledException catch (e) {
-      if (e.message case String message when !message.contains('ConditionalCheckFailed')) {
-        rethrow;
-      }
-
-      final reasons = RegExp(r'\[(.+?)\]').firstMatch(e.message ?? '')?.group(1)?.split(', ') ?? [];
-      if (reasons.firstOrNull == 'ConditionalCheckFailed') {
-        throw NotFound(type: 'User', id: targetId);
-      }
-
-      // connection already exists, query
-      final response = await _client.query(
-        tableName: table,
-        keyConditionExpression: '#PK = :PK AND #SK = :SK',
-        expressionAttributeNames: {
-          '#PK': 'PK',
-          '#SK': 'SK',
-        },
-        expressionAttributeValues: {
-          ':PK': AttributeValue(s: connectionPk(initiatorId)),
-          ':SK': AttributeValue(s: connectionSk(role, domain, targetId)),
-        },
-      );
-
-      if (response.items.isEmpty) {
-        rethrow;
-      }
-
-      final row = response.items.first;
-      return Connection.fromRow(row);
+    if (result.isEmpty) {
+      throw NotFound(type: 'User', id: targetId);
     }
 
-    return connection;
+    return Connection.fromRow(result.first.toColumnMap());
   }
 
   @override

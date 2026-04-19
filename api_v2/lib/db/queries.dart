@@ -37,8 +37,8 @@ SELECT
   created_at
 FROM connections
 WHERE domain = @domain
-  AND EXISTS (SELECT 1 FROM target_exists)
-  AND NOT EXISTS (SELECT 1 FROM inserted)
+  AND exists(SELECT 1 FROM target_exists)
+  AND NOT exists(SELECT 1 FROM inserted)
   AND (
     (initiator_id = @initiatorId AND target_id = @targetId)
     OR 
