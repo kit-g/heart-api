@@ -92,3 +92,58 @@ WHERE (initiator_id, target_id, domain) IN (
   (@targetId, @initiatorId, @domain)
 )
 ''';
+
+final _listWorkouts = '''
+WITH _workouts AS (
+  SELECT id, name, started_at, completed_at, created_at
+  FROM workouts
+  WHERE user_id = @userId
+    AND (@cursor::timestamptz IS NULL OR created_at < @cursor::timestamptz)
+  ORDER BY created_at DESC
+  LIMIT @limit
+),
+_workout_exercises AS (
+  SELECT
+    we.workout_id,
+    we.id AS exercise_id_pk,
+    we.exercise_id,
+    we.exercise_order,
+    COALESCE(
+      jsonb_agg(
+        jsonb_build_object(
+          'id', es.id,
+          'weight', es.weight,
+          'reps', es.reps,
+          'duration', es.duration,
+          'distance', es.distance,
+          'completed', es.completed,
+          'set_order', es.set_order
+        ) ORDER BY es.set_order
+      ) FILTER (WHERE es.id IS NOT NULL), '[]'::jsonb
+    ) AS sets
+  FROM _workouts
+  JOIN workout_exercises we ON we.workout_id = _workouts.id
+  LEFT JOIN exercise_sets es ON es.workout_exercise_id = we.id
+  GROUP BY we.workout_id, we.id, we.exercise_id, we.exercise_order
+)
+SELECT
+  _w.id,
+  _w.name,
+  _w.started_at,
+  _w.completed_at,
+  _w.created_at,
+  COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'id', wea.exercise_id_pk,
+        'exercise_id', wea.exercise_id,
+        'exercise_order', wea.exercise_order,
+        'sets', wea.sets
+      ) ORDER BY wea.exercise_order
+    ) FILTER (WHERE wea.exercise_id_pk IS NOT NULL), '[]'::jsonb
+  ) AS exercises
+FROM _workouts _w
+LEFT JOIN _workout_exercises wea ON wea.workout_id = _w.id
+GROUP BY _w.id, _w.name, _w.started_at, _w.completed_at, _w.created_at
+ORDER BY _w.created_at DESC
+''';
