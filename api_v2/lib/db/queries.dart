@@ -45,3 +45,50 @@ WHERE domain = @domain
     (initiator_id = @targetId AND target_id = @initiatorId)
   )
 ''';
+
+final _listConnections = '''
+SELECT
+  target_id,
+  initiator_role AS role,
+  domain,
+  status,
+  created_at
+FROM connections
+WHERE initiator_id = @userId
+  AND (@role::text IS NULL OR initiator_role = @role)
+UNION ALL
+SELECT initiator_id AS target_id, target_role AS role, domain, status, created_at
+FROM connections
+WHERE target_id = @userId
+  AND (@role::text IS NULL OR target_role = @role)
+ORDER BY created_at DESC
+''';
+
+final _getConnection = '''
+SELECT
+  CASE WHEN initiator_id = @userId THEN target_id ELSE initiator_id END AS target_id,
+  CASE WHEN initiator_id = @userId THEN initiator_role ELSE target_role END AS role,
+  domain, status, created_at
+FROM connections
+WHERE domain = @domain
+  AND (
+    (initiator_id = @userId AND target_id = @targetId AND initiator_role = @role)
+    OR (initiator_id = @targetId AND target_id = @userId AND target_role = @role)
+  )
+''';
+
+final _deleteConnection = '''
+DELETE FROM connections
+WHERE (initiator_id, target_id, domain) IN (
+  (@initiatorId, @targetId, @domain),
+  (@targetId, @initiatorId, @domain)
+)
+''';
+
+final _updateConnectionStatus = '''
+UPDATE connections SET status = @newStatus
+WHERE (initiator_id, target_id, domain) IN (
+  (@initiatorId, @targetId, @domain),
+  (@targetId, @initiatorId, @domain)
+)
+''';
