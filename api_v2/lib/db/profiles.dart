@@ -9,6 +9,7 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
         'id': user.id,
         'email': user.email,
         'username': user.displayName,
+        'avatar': user.remoteAvatar,
       },
     );
   }
