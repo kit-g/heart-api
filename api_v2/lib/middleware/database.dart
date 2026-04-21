@@ -1,13 +1,24 @@
 import 'package:heart/models/connections.dart';
+import 'package:heart/models/profile.dart';
 import 'package:heart/models/templates.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
+final _profilesProperty = ContextProperty<ApiProfileService>('ApiProfileService');
 final _chatsProperty = ContextProperty<ChartPreferenceService>('ChartPreferenceService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
 final _workoutsProperty = ContextProperty<ApiWorkoutService>('ApiWorkoutService');
 final _templatesProperty = ContextProperty<ApiTemplateService>('ApiTemplateService');
+
+Middleware profilesDb({required ApiProfileService db}) {
+  return (final Handler next) {
+    return (final request) {
+      _profilesProperty[request] = db;
+      return next(request);
+    };
+  };
+}
 
 Middleware chartsDb({required ChartPreferenceService db}) {
   return (final Handler next) {
@@ -46,6 +57,10 @@ Middleware workoutsDb({required ApiWorkoutService db}) {
 }
 
 extension DatabaseContext on Request {
+  ApiProfileService get profileService => _profilesProperty.get(this);
+
+  set profileService(ApiProfileService v) => _profilesProperty[this] = v;
+
   ChartPreferenceService get chartPreferenceService => _chatsProperty.get(this);
 
   set chartPreferenceService(ChartPreferenceService v) => _chatsProperty[this] = v;
