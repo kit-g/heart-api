@@ -94,64 +94,238 @@ WHERE (initiator_id, target_id, domain) IN (
 ''';
 
 final _listWorkouts = '''
-WITH _workouts AS (
-  SELECT id, name, started_at, completed_at, created_at
-  FROM workouts
-  WHERE user_id = @userId
-    AND (@cursor::uuid IS NULL OR id < @cursor::uuid)
-  ORDER BY id DESC
-  LIMIT @limit
+SELECT 
+  id, 
+  name, 
+  started_at, 
+  completed_at, 
+  created_at, 
+  _workout_exercises(id) AS exercises
+FROM workouts
+WHERE user_id = @userId
+  AND (@cursor::uuid IS NULL OR id < @cursor::uuid)
+ORDER BY id DESC
+LIMIT @limit
+''';
+
+final _getWorkout = '''
+SELECT 
+  id, 
+  name, 
+  started_at, 
+  completed_at, 
+  created_at, 
+  _workout_exercises(id) AS exercises
+FROM workouts
+WHERE id = @workoutId::uuid AND user_id = @userId
+''';
+
+final _saveWorkout = '''
+WITH
+_order_to_name AS (
+  SELECT 
+    (ex->>'order')::int AS exercise_order, 
+    ex->>'exercise_name' AS exercise_name
+  FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
-_workout_exercises AS (
+_exercise_lookup AS (
+  SELECT DISTINCT ON (e.name) e.id AS exercise_id, e.name
+  FROM exercises e
+  JOIN _order_to_name otn ON otn.exercise_name = e.name
+  WHERE e.user_id IS NULL OR e.user_id = @userId
+  ORDER BY e.name, e.user_id NULLS LAST
+),
+_workout AS (
+  INSERT INTO workouts (user_id, name, started_at, completed_at)
+  VALUES (@userId, @name, @startedAt, @completedAt)
+  RETURNING id, name, started_at, completed_at, created_at
+),
+_inserted_exercises AS (
+  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order)
+  SELECT w.id, el.exercise_id, otn.exercise_order
+  FROM _workout w
+  CROSS JOIN _order_to_name otn
+  JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  RETURNING id, exercise_order
+),
+_sets_input AS (
   SELECT
-    we.workout_id,
-    we.id AS exercise_id_pk,
-    we.exercise_id,
-    we.exercise_order,
-    COALESCE(
-      jsonb_agg(
-        jsonb_build_object(
-          'id', es.id,
-          'weight', es.weight,
-          'reps', es.reps,
-          'duration', es.duration,
-          'distance', es.distance,
-          'completed', es.completed,
-          'started_at', es.started_at,
-          'completed_at', es.completed_at,
-          'set_order', es.set_order
-        ) ORDER BY es.set_order
-      ) FILTER (WHERE es.id IS NOT NULL), '[]'::jsonb
-    ) AS sets
-  FROM _workouts
-  JOIN workout_exercises we ON we.workout_id = _workouts.id
-  LEFT JOIN exercise_sets es ON es.workout_exercise_id = we.id
-  GROUP BY we.workout_id, we.id, we.exercise_id, we.exercise_order
-)
-SELECT
-  _w.id,
-  _w.name,
-  _w.started_at,
-  _w.completed_at,
-  _w.created_at,
-  coalesce(
+    (ex->>'order')::int AS exercise_order,
+    s                   AS set_data,
+    (t.ordinality - 1)::int AS set_order
+  FROM jsonb_array_elements(@exercises::jsonb) ex,
+  LATERAL jsonb_array_elements(ex->'sets') WITH ORDINALITY t(s, ordinality)
+),
+_inserted_sets AS (
+  INSERT INTO exercise_sets (workout_exercise_id, weight, reps, duration, distance, completed, started_at, set_order)
+  SELECT
+    ie.id,
+    (si.set_data->>'weight')::real,
+    (si.set_data->>'reps')::int,
+    (si.set_data->>'duration')::int,
+    (si.set_data->>'distance')::real,
+    coalesce((si.set_data->>'completed')::boolean, false),
+    (si.set_data->>'started_at')::timestamptz,
+    si.set_order
+  FROM _sets_input si
+  JOIN _inserted_exercises ie ON ie.exercise_order = si.exercise_order
+  RETURNING id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, set_order
+),
+_sets_json AS (
+  SELECT
+    workout_exercise_id,
     jsonb_agg(
       jsonb_build_object(
-        'id', _we.exercise_id_pk,
-        'exercise', jsonb_build_object(
-            'id', exercises.id,
-            'category', exercises.category,
-            'target', exercises.target,
-            'name', exercises.name
-        ),
-        'exercise_order', _we.exercise_order,
-        'sets', _we.sets
-      ) ORDER BY _we.exercise_order
-    ) FILTER (WHERE _we.exercise_id_pk IS NOT NULL), '[]'::jsonb
-  ) AS exercises
-FROM _workouts _w
-LEFT JOIN _workout_exercises _we ON _we.workout_id = _w.id
-INNER JOIN exercises ON exercises.id = _we.exercise_id
-GROUP BY _w.id, _w.name, _w.started_at, _w.completed_at, _w.created_at
-ORDER BY _w.id DESC
+        'id', id, 
+        'weight', weight, 
+        'reps', reps, 
+        'duration', duration,
+        'distance', distance, 
+        'completed', completed, 
+        'started_at', started_at,
+        'set_order', set_order
+      ) ORDER BY set_order
+    ) AS sets_json
+  FROM _inserted_sets
+  GROUP BY workout_exercise_id
+),
+_exercises_json AS (
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'id', ie.id,
+      'exercise', jsonb_build_object(
+        'id', el.exercise_id, 
+        'category', e.category, 
+        'target', e.target, 
+        'name', el.name
+      ),
+      'exercise_order', ie.exercise_order,
+      'sets', COALESCE(sj.sets_json, '[]'::jsonb)
+    ) ORDER BY ie.exercise_order
+  ) AS exercises_json
+  FROM _inserted_exercises ie
+  JOIN _order_to_name otn ON otn.exercise_order = ie.exercise_order
+  JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  JOIN exercises e ON e.id = el.exercise_id
+  LEFT JOIN _sets_json sj ON sj.workout_exercise_id = ie.id
+)
+SELECT 
+  w.id, 
+  w.name,
+  w.started_at, 
+  w.completed_at, 
+  w.created_at,
+  coalesce(ej.exercises_json, '[]'::jsonb) AS exercises
+FROM _workout w
+LEFT JOIN _exercises_json ej 
+  ON true
+''';
+
+final _replaceWorkout = '''
+WITH
+_order_to_name AS (
+  SELECT 
+    (ex->>'order')::int AS exercise_order, 
+    ex->>'exercise_name' AS exercise_name
+  FROM jsonb_array_elements(@exercises::jsonb) ex
+),
+_exercise_lookup AS (
+  SELECT DISTINCT ON (e.name) e.id AS exercise_id, e.name
+  FROM exercises e
+  JOIN _order_to_name otn ON otn.exercise_name = e.name
+  WHERE e.user_id IS NULL OR e.user_id = @userId
+  ORDER BY e.name, e.user_id NULLS LAST
+),
+_workout AS (
+  UPDATE workouts
+  SET name = @name, started_at = @startedAt, completed_at = @completedAt
+  WHERE id = @workoutId::uuid AND user_id = @userId
+  RETURNING id, name, started_at, completed_at, created_at
+),
+_deleted AS (
+  DELETE FROM workout_exercises
+  WHERE workout_id = (SELECT id FROM _workout)
+  RETURNING id
+),
+_inserted_exercises AS (
+  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order)
+  SELECT 
+    w.id, 
+    el.exercise_id, 
+    otn.exercise_order
+  FROM _workout w
+  CROSS JOIN _order_to_name otn
+  JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  WHERE NOT exists(SELECT 1 FROM _deleted WHERE false)
+  RETURNING id, exercise_order
+),
+_sets_input AS (
+  SELECT
+    (ex->>'order')::int AS exercise_order,
+    s AS set_data,
+    (t.ordinality - 1)::int AS set_order
+  FROM jsonb_array_elements(@exercises::jsonb) ex,
+  LATERAL jsonb_array_elements(ex->'sets') WITH ORDINALITY t(s, ordinality)
+),
+_inserted_sets AS (
+  INSERT INTO exercise_sets (workout_exercise_id, weight, reps, duration, distance, completed, started_at, set_order)
+  SELECT
+    ie.id,
+    (si.set_data->>'weight')::real,
+    (si.set_data->>'reps')::int,
+    (si.set_data->>'duration')::int,
+    (si.set_data->>'distance')::real,
+    COALESCE((si.set_data->>'completed')::boolean, false),
+    (si.set_data->>'started_at')::timestamptz,
+    si.set_order
+  FROM _sets_input si
+  JOIN _inserted_exercises ie ON ie.exercise_order = si.exercise_order
+  RETURNING id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, set_order
+),
+_sets_json AS (
+  SELECT
+    workout_exercise_id,
+    jsonb_agg(
+      jsonb_build_object(
+        'id', id, 
+        'weight', weight, 
+        'reps', reps, 
+        'duration', duration,
+        'distance', distance, 
+        'completed', completed, 
+        'started_at', started_at,
+        'set_order', set_order
+      ) ORDER BY set_order
+    ) AS sets_json
+  FROM _inserted_sets
+  GROUP BY workout_exercise_id
+),
+_exercises_json AS (
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'id', ie.id,
+      'exercise', jsonb_build_object(
+        'id', el.exercise_id, 
+        'category', e.category, 
+        'target', e.target, 
+        'name', el.name
+      ),
+      'exercise_order', ie.exercise_order,
+      'sets', coalesce(sj.sets_json, '[]'::jsonb)
+    ) ORDER BY ie.exercise_order
+  ) AS exercises_json
+  FROM _inserted_exercises ie
+  JOIN _order_to_name otn ON otn.exercise_order = ie.exercise_order
+  JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  JOIN exercises e ON e.id = el.exercise_id
+  LEFT JOIN _sets_json sj ON sj.workout_exercise_id = ie.id
+)
+SELECT w.id, w.name, w.started_at, w.completed_at, w.created_at,
+  coalesce(ej.exercises_json, '[]'::jsonb) AS exercises
+FROM _workout w
+LEFT JOIN _exercises_json ej ON true
+''';
+
+final _deleteWorkout = '''
+DELETE FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId
 ''';
