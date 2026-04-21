@@ -1,11 +1,10 @@
-import 'package:heart/models/av.dart';
 import 'package:heart_models/heart_models.dart';
 
-abstract interface class Profile implements DynamoItem, Model {
-  String get pk;
+abstract interface class ApiProfileService {
+  Future<void> upsertProfile(User user);
+}
 
-  String get sk;
-
+abstract interface class Profile implements Model {
   String? get name;
 
   String? get avatar;
@@ -14,8 +13,7 @@ abstract interface class Profile implements DynamoItem, Model {
 
   factory Profile.fromJson(Map json) {
     return _Profile(
-      pk: json['PK'],
-      sk: json['SK'],
+      id: json['id'],
       name: json['username'],
       avatar: json['avatar'],
     );
@@ -24,32 +22,17 @@ abstract interface class Profile implements DynamoItem, Model {
 
 class _Profile implements Profile {
   @override
-  final String pk;
-  @override
   final String id;
-  @override
-  final String sk;
   @override
   final String? name;
   @override
   final String? avatar;
 
-  _Profile({
-    required this.pk,
-    required this.sk,
+  const _Profile({
+    required this.id,
     required this.name,
     required this.avatar,
-  }) : id = pk.split('#').last;
-
-  @override
-  Map<String, dynamic> toDynamoItem() {
-    return {
-      'PK': pk,
-      'SK': sk,
-      'name': name,
-      'avatar': avatar,
-    };
-  }
+  });
 
   @override
   Map<String, dynamic> toMap() {
