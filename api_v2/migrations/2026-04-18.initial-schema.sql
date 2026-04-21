@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS exercise_sets CASCADE;
-DROP TABLE IF EXISTS workout_exercises CASCADE;
 DROP TABLE IF EXISTS workout_images CASCADE;
 DROP TABLE IF EXISTS workouts CASCADE;
 DROP TABLE IF EXISTS template_exercise_sets CASCADE;
@@ -7,7 +5,6 @@ DROP TABLE IF EXISTS template_exercises CASCADE;
 DROP TABLE IF EXISTS template_shares CASCADE;
 DROP TABLE IF EXISTS templates CASCADE;
 DROP TABLE IF EXISTS chart_preferences CASCADE;
-DROP TABLE IF EXISTS exercises CASCADE;
 DROP TABLE IF EXISTS profiles CASCADE;
 
 CREATE TABLE IF NOT EXISTS profiles
@@ -21,6 +18,7 @@ CREATE TABLE IF NOT EXISTS profiles
     updated_at                TIMESTAMPTZ DEFAULT now()
 );
 
+DROP TABLE IF EXISTS exercises CASCADE;
 CREATE TABLE IF NOT EXISTS exercises
 (
     id           UUID             DEFAULT uuidv7() PRIMARY KEY,
@@ -31,6 +29,7 @@ CREATE TABLE IF NOT EXISTS exercises
     asset        JSONB,
     thumbnail    JSONB,
     archived     BOOLEAN NOT NULL DEFAULT false,
+    muscles      JSONB,
     user_id      TEXT REFERENCES profiles (id) ON DELETE CASCADE,
     created_at   TIMESTAMPTZ      DEFAULT now()
 );
@@ -55,7 +54,7 @@ CREATE TABLE IF NOT EXISTS connections
     check ( length(initiator_role) > 0 ),
     check ( length(target_role) > 0 )
 );
-CREATE INDEX idx_connections_target_id ON connections(target_id);
+CREATE INDEX idx_connections_target_id ON connections (target_id);
 
 CREATE TABLE IF NOT EXISTS workouts
 (
@@ -68,15 +67,17 @@ CREATE TABLE IF NOT EXISTS workouts
     check ( length(name) >= 0 )
 );
 
+DROP TABLE IF EXISTS workout_exercises CASCADE;
 CREATE TABLE IF NOT EXISTS workout_exercises
 (
     id             UUID DEFAULT uuidv7() PRIMARY KEY,
     workout_id     UUID    NOT NULL REFERENCES workouts (id) ON DELETE CASCADE,
-    exercise_id    TEXT    NOT NULL,
+    exercise_id    UUID    NOT NULL,
     exercise_order INTEGER NOT NULL,
     check ( exercise_order >= 0 )
 );
 
+DROP TABLE IF EXISTS exercise_sets CASCADE;
 CREATE TABLE IF NOT EXISTS exercise_sets
 (
     id                  UUID    DEFAULT uuidv7() PRIMARY KEY,
