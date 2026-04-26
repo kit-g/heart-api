@@ -11,6 +11,12 @@ abstract interface class Profile implements Model {
 
   String get id;
 
+  factory Profile({
+    required String id,
+    required String name,
+    required String avatar,
+  }) = _Profile.new;
+
   factory Profile.fromJson(Map json) {
     return _Profile(
       id: json['id'],
