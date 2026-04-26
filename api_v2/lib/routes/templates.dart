@@ -4,9 +4,28 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/templates.dart';
 import 'package:heart/routes/permissions.dart';
+import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
 const _limitParam = IntQueryParam('pageSize');
+
+Future<Template> createTemplate(final Request request) async {
+  final body = await request.json();
+  return request.templatesService.createTemplate(
+    userId: request.userId,
+    body: TemplateRequest(userId: request.userId, body: body),
+  );
+}
+
+Future<Template> updateTemplate(final Request request) async {
+  final templateId = request.pathParameters.raw[#templateId]!;
+  final body = await request.json();
+  return request.templatesService.updateTemplate(
+    userId: request.userId,
+    templateId: templateId,
+    body: TemplateRequest(userId: request.userId, body: body),
+  );
+}
 
 Future<TemplateListResponse> getMyTemplates(final Request request) async {
   return request.templatesService.getTemplates(
