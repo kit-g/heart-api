@@ -329,3 +329,309 @@ LEFT JOIN _exercises_json ej ON true
 final _deleteWorkout = '''
 DELETE FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId
 ''';
+
+final _saveTemplate = '''
+WITH
+_order_to_name AS (
+  SELECT (ex->>'order')::int AS exercise_order, ex->>'exercise_name' AS exercise_name
+  FROM jsonb_array_elements(@exercises::jsonb) ex
+),
+_exercise_lookup AS (
+  SELECT DISTINCT ON (e.name) e.id, e.name, e.category, e.target
+  FROM exercises e
+  JOIN _order_to_name otn ON otn.exercise_name = e.name
+  WHERE e.user_id IS NULL OR e.user_id = @userId
+  ORDER BY e.name, e.user_id NULLS LAST
+),
+_template AS (
+  INSERT INTO templates (user_id, name, order_index)
+  VALUES (@userId, @name, @orderIndex)
+  RETURNING id, name, order_index, source_template_id, assigned_by, sync_enabled, created_at
+),
+_inserted_exercises AS (
+  INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
+  SELECT t.id, otn.exercise_name, otn.exercise_order
+  FROM _template t, _order_to_name otn
+  RETURNING id, exercise_order
+),
+_sets_input AS (
+  SELECT
+    (ex->>'order')::int AS exercise_order,
+    s AS set_data,
+    (ord.ordinality - 1)::int AS set_order
+  FROM jsonb_array_elements(@exercises::jsonb) ex,
+  LATERAL jsonb_array_elements(ex->'sets') WITH ORDINALITY ord(s, ordinality)
+),
+_inserted_sets AS (
+  INSERT INTO template_exercise_sets (template_exercise_id, weight, reps, duration, distance, set_order)
+  SELECT
+    ie.id,
+    (si.set_data->>'weight')::real,
+    (si.set_data->>'reps')::int,
+    (si.set_data->>'duration')::int,
+    (si.set_data->>'distance')::real,
+    si.set_order
+  FROM _sets_input si
+  JOIN _inserted_exercises ie ON ie.exercise_order = si.exercise_order
+  RETURNING id, template_exercise_id, weight, reps, duration, distance, set_order
+),
+_sets_json AS (
+  SELECT
+    template_exercise_id,
+    jsonb_agg(
+      jsonb_build_object(
+        'id', id, 'weight', weight, 'reps', reps,
+        'duration', duration, 'distance', distance, 'set_order', set_order
+      ) ORDER BY set_order
+    ) AS sets_json
+  FROM _inserted_sets
+  GROUP BY template_exercise_id
+),
+_exercises_json AS (
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'id', ie.id,
+      'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
+      'exercise_order', ie.exercise_order,
+      'sets', COALESCE(sj.sets_json, '[]'::jsonb)
+    ) ORDER BY ie.exercise_order
+  ) AS exercises_json
+  FROM _inserted_exercises ie
+  JOIN _order_to_name otn ON otn.exercise_order = ie.exercise_order
+  LEFT JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  LEFT JOIN _sets_json sj ON sj.template_exercise_id = ie.id
+)
+SELECT
+  t.id,
+  t.name,
+  t.order_index,
+  t.source_template_id,
+  t.assigned_by AS assigned_by_id,
+  p.username AS assigned_by_username,
+  p.avatar_url AS assigned_by_avatar,
+  t.sync_enabled,
+  t.created_at,
+  COALESCE(ej.exercises_json, '[]'::jsonb) AS exercises
+FROM _template t
+LEFT JOIN profiles p ON p.id = t.assigned_by
+LEFT JOIN _exercises_json ej ON true
+''';
+
+final _replaceTemplate = '''
+WITH
+_order_to_name AS (
+  SELECT (ex->>'order')::int AS exercise_order, ex->>'exercise_name' AS exercise_name
+  FROM jsonb_array_elements(@exercises::jsonb) ex
+),
+_exercise_lookup AS (
+  SELECT DISTINCT ON (e.name) e.id, e.name, e.category, e.target
+  FROM exercises e
+  JOIN _order_to_name otn ON otn.exercise_name = e.name
+  WHERE e.user_id IS NULL OR e.user_id = @userId
+  ORDER BY e.name, e.user_id NULLS LAST
+),
+_template AS (
+  UPDATE templates
+  SET name = @name, order_index = @orderIndex
+  WHERE id = @templateId::uuid AND user_id = @userId
+  RETURNING id, name, order_index, source_template_id, assigned_by, sync_enabled, created_at
+),
+_deleted AS (
+  DELETE FROM template_exercises WHERE template_id = (SELECT id FROM _template)
+  RETURNING id
+),
+_inserted_exercises AS (
+  INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
+  SELECT t.id, otn.exercise_name, otn.exercise_order
+  FROM _template t, _order_to_name otn
+  WHERE NOT EXISTS (SELECT 1 FROM _deleted WHERE false)
+  RETURNING id, exercise_order
+),
+_sets_input AS (
+  SELECT
+    (ex->>'order')::int AS exercise_order,
+    s AS set_data,
+    (ord.ordinality - 1)::int AS set_order
+  FROM jsonb_array_elements(@exercises::jsonb) ex,
+  LATERAL jsonb_array_elements(ex->'sets') WITH ORDINALITY ord(s, ordinality)
+),
+_inserted_sets AS (
+  INSERT INTO template_exercise_sets (template_exercise_id, weight, reps, duration, distance, set_order)
+  SELECT
+    ie.id,
+    (si.set_data->>'weight')::real,
+    (si.set_data->>'reps')::int,
+    (si.set_data->>'duration')::int,
+    (si.set_data->>'distance')::real,
+    si.set_order
+  FROM _sets_input si
+  JOIN _inserted_exercises ie ON ie.exercise_order = si.exercise_order
+  RETURNING id, template_exercise_id, weight, reps, duration, distance, set_order
+),
+_sets_json AS (
+  SELECT
+    template_exercise_id,
+    jsonb_agg(
+      jsonb_build_object(
+        'id', id, 'weight', weight, 'reps', reps,
+        'duration', duration, 'distance', distance, 'set_order', set_order
+      ) ORDER BY set_order
+    ) AS sets_json
+  FROM _inserted_sets
+  GROUP BY template_exercise_id
+),
+_exercises_json AS (
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'id', ie.id,
+      'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
+      'exercise_order', ie.exercise_order,
+      'sets', COALESCE(sj.sets_json, '[]'::jsonb)
+    ) ORDER BY ie.exercise_order
+  ) AS exercises_json
+  FROM _inserted_exercises ie
+  JOIN _order_to_name otn ON otn.exercise_order = ie.exercise_order
+  LEFT JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  LEFT JOIN _sets_json sj ON sj.template_exercise_id = ie.id
+)
+SELECT
+  t.id,
+  t.name,
+  t.order_index,
+  t.source_template_id,
+  t.assigned_by AS assigned_by_id,
+  p.username AS assigned_by_username,
+  p.avatar_url AS assigned_by_avatar,
+  t.sync_enabled,
+  t.created_at,
+  COALESCE(ej.exercises_json, '[]'::jsonb) AS exercises
+FROM _template t
+LEFT JOIN profiles p ON p.id = t.assigned_by
+LEFT JOIN _exercises_json ej ON true
+''';
+
+final _listTemplates = '''
+SELECT
+  t.id,
+  t.name,
+  t.order_index,
+  t.source_template_id,
+  t.assigned_by AS assigned_by_id,
+  p.username AS assigned_by_username,
+  p.avatar_url AS assigned_by_avatar,
+  t.sync_enabled,
+  t.created_at,
+  _template_exercises(t.id) AS exercises
+FROM templates t
+LEFT JOIN profiles p ON p.id = t.assigned_by
+WHERE t.user_id = @userId
+  AND (@cursor::uuid IS NULL OR t.id < @cursor::uuid)
+ORDER BY t.id DESC
+LIMIT @limit
+''';
+
+final _listTemplateShares = '''
+SELECT
+  ts.id AS share_uuid,
+  ts.student_id,
+  ts.master_template_id,
+  ts.student_template_id,
+  t.name AS template_name,
+  p.username AS student_username,
+  p.avatar_url AS student_avatar,
+  ts.created_at
+FROM template_shares ts
+JOIN templates t ON t.id = ts.master_template_id
+JOIN profiles p ON p.id = ts.student_id
+WHERE ts.coach_id = @userId
+  AND (@cursor::uuid IS NULL OR ts.id < @cursor::uuid)
+ORDER BY ts.id DESC
+LIMIT @limit
+''';
+
+final _shareTemplate = '''
+WITH
+_student AS (
+  SELECT id, username, avatar_url FROM profiles WHERE id = @studentId
+),
+_master AS (
+  SELECT id, name FROM templates WHERE id = @masterTemplateId::uuid AND user_id = @coachId
+),
+_existing AS (
+  SELECT student_template_id, created_at FROM template_shares
+  WHERE coach_id = @coachId AND student_id = @studentId AND master_template_id = @masterTemplateId::uuid
+),
+_new_template AS (
+  INSERT INTO templates (user_id, name, order_index, source_template_id, assigned_by, sync_enabled)
+  SELECT s.id, m.name, 0, m.id, @coachId, true
+  FROM _student s, _master m
+  WHERE NOT EXISTS (SELECT 1 FROM _existing)
+  RETURNING id
+),
+_new_exercises AS (
+  INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
+  SELECT nt.id, te.exercise_id, te.exercise_order
+  FROM _new_template nt
+  JOIN template_exercises te ON te.template_id = @masterTemplateId::uuid
+  RETURNING id, exercise_order
+),
+_new_sets AS (
+  INSERT INTO template_exercise_sets (template_exercise_id, weight, reps, duration, distance, set_order)
+  SELECT ne.id, tes.weight, tes.reps, tes.duration, tes.distance, tes.set_order
+  FROM _new_exercises ne
+  JOIN template_exercises te ON te.template_id = @masterTemplateId::uuid AND te.exercise_order = ne.exercise_order
+  JOIN template_exercise_sets tes ON tes.template_exercise_id = te.id
+  RETURNING id
+),
+_new_share AS (
+  INSERT INTO template_shares (coach_id, student_id, master_template_id, student_template_id)
+  SELECT @coachId, @studentId, @masterTemplateId::uuid, nt.id
+  FROM _new_template nt
+  WHERE NOT EXISTS (SELECT 1 FROM _new_sets WHERE false)
+  RETURNING student_template_id, created_at
+)
+SELECT
+  s.id AS student_id,
+  @masterTemplateId::uuid AS master_template_id,
+  COALESCE(ns.student_template_id, ex.student_template_id) AS student_template_id,
+  m.name AS template_name,
+  s.username AS student_username,
+  s.avatar_url AS student_avatar,
+  COALESCE(ns.created_at, ex.created_at) AS created_at
+FROM _student s
+CROSS JOIN _master m
+LEFT JOIN _new_share ns ON true
+LEFT JOIN _existing ex ON true
+''';
+
+final _deleteTemplate = '''
+WITH
+_student_templates AS (
+  SELECT student_template_id FROM template_shares
+  WHERE coach_id = @coachId AND master_template_id = @templateId::uuid
+),
+_deleted_students AS (
+  DELETE FROM templates WHERE id IN (SELECT student_template_id FROM _student_templates)
+  RETURNING id
+),
+_deleted_master AS (
+  DELETE FROM templates
+  WHERE id = @templateId::uuid AND user_id = @coachId
+    AND NOT EXISTS (SELECT 1 FROM _deleted_students WHERE false)
+  RETURNING id
+)
+SELECT id FROM _deleted_master
+''';
+
+final _deleteShare = '''
+WITH
+_deleted AS (
+  DELETE FROM templates
+  WHERE id = (
+    SELECT student_template_id FROM template_shares
+    WHERE coach_id = @coachId AND student_id = @studentId AND master_template_id = @masterTemplateId::uuid
+  )
+  RETURNING id
+)
+SELECT id FROM _deleted
+''';
