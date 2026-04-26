@@ -309,4 +309,28 @@ abstract interface class ApiWorkoutService {
     String? cursor,
     int? pageSize,
   });
+
+  Future<WorkoutItem> getWorkout({
+    required String userId,
+    required String workoutId,
+    required String Function(String) imageUrl,
+  });
+
+  Future<WorkoutItem> createWorkout({
+    required String userId,
+    required WorkoutRequest body,
+    required String Function(String) imageUrl,
+  });
+
+  Future<WorkoutItem> updateWorkout({
+    required String userId,
+    required String workoutId,
+    required WorkoutRequest body,
+    required String Function(String) imageUrl,
+  });
+
+  Future<void> deleteWorkout({
+    required String userId,
+    required String workoutId,
+  });
 }
