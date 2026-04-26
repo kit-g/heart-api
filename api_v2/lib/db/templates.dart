@@ -2,16 +2,16 @@ part of 'db.dart';
 
 mixin _Templates on _DatabaseBase implements ApiTemplateService {
   @override
-  Future<TemplateItem> createTemplate({required String userId, required TemplateRequest body}) async {
+  Future<Template> createTemplate({required String userId, required TemplateRequest body}) async {
     final rows = await _pool.execute(
       _saveTemplate.toSql(),
       parameters: body.toParams(),
     );
-    return TemplateItem.fromRow(rows.first.toColumnMap());
+    return Template.fromRow(rows.first.toColumnMap());
   }
 
   @override
-  Future<TemplateItem> updateTemplate({
+  Future<Template> updateTemplate({
     required String userId,
     required String templateId,
     required TemplateRequest body,
@@ -21,7 +21,7 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
       parameters: {'templateId': templateId, ...body.toParams()},
     );
     if (rows.isEmpty) throw NotFound(type: 'Template', id: templateId);
-    return TemplateItem.fromRow(rows.first.toColumnMap());
+    return Template.fromRow(rows.first.toColumnMap());
   }
 
   @override
@@ -35,7 +35,7 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
       parameters: {'userId': userId, 'cursor': cursor, 'limit': pageSize},
     );
     if (rows.isEmpty) return TemplateListResponse(templates: [], cursor: null);
-    final templates = rows.map((row) => TemplateItem.fromRow(row.toColumnMap())).toList();
+    final templates = rows.map((row) => Template.fromRow(row.toColumnMap())).toList();
     return TemplateListResponse(templates: templates, cursor: templates.lastOrNull?.id);
   }
 
