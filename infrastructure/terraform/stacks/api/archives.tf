@@ -1,0 +1,35 @@
+resource "null_resource" "build_dart_api" {
+  # Trigger a rebuild if the source code or Makefile changes
+  triggers = {
+    source_code_hash = join(
+      "", [
+        for f in fileset(
+          "${path.module}/../../../../api_v2", "**/*.dart"
+          ) : filebase64sha256(
+          "${path.module}/../../../../api_v2/${f}"
+        )
+      ]
+    )
+    makefile_hash = filebase64sha256("${path.module}/../../../../api_v2/Makefile")
+  }
+
+  provisioner "local-exec" {
+    working_dir = "${path.module}/../../../../api_v2"
+    command     = <<EOT
+      mkdir -p ../build/api_v2
+      dart pub get
+      dart compile exe bin/main.dart \
+        --target-os=linux \
+        --target-arch=arm64 \
+        -o ../build/api_v2/bootstrap
+    EOT
+  }
+}
+
+data "archive_file" "api" {
+  depends_on = [null_resource.build_dart_api]
+  type       = "zip"
+
+  source_file = "${path.module}/../../../../build/api_v2/bootstrap"
+  output_path = "${path.module}/../../../../build/api_v2.zip"
+}
