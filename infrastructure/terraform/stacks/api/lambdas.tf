@@ -25,9 +25,15 @@ resource "aws_lambda_function" "api" {
       FIREBASE_PROJECT_ID      = var.firebase_project_id
       LOG_LEVEL                = "ALL"
       MEDIA_DISTRIBUTION       = "https://dev.media.heart-of.me"
+      MONITORING_TOPIC         = aws_sns_topic.monitoring.name
       MIN_APP_VERSION          = "1.0.0"
       REGION                   = var.region
       SUPPORTED_LOCALES        = "en,en_CA,ru"
+      PG_DATABASE              = local.rds_creds.Database
+      PG_HOST                  = local.rds_creds.Host
+      PG_PASSWORD              = local.rds_creds.Password
+      PG_PORT                  = local.rds_creds.Port
+      PG_USER                  = local.rds_creds.User
     }
   }
 }
