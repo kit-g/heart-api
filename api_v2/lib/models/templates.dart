@@ -1,121 +1,6 @@
-import 'package:heart/models/av.dart';
-import 'package:heart/models/profile.dart';
-import 'package:heart/models/workouts.dart';
+import 'dart:convert';
+
 import 'package:heart_models/heart_models.dart';
-
-abstract interface class TemplateItem implements DynamoItem, Iterable<ExerciseItem>, Model {
-  String get id;
-
-  String get name;
-
-  int get order;
-
-  List<ExerciseItem> get exercises;
-
-  String? get sourceTemplateId;
-
-  Profile? get assignedBy;
-
-  bool? get syncEnabled;
-
-  factory TemplateItem.fromRow(Map<String, dynamic> row) {
-    final sk = row['SK'] as String;
-    return _TemplateItem(
-      id: sk.replaceFirst('TEMPLATE#', ''),
-      name: row['name'] as String,
-      order: (row['order'] as num?)?.toInt() ?? 0,
-      exercises: switch (row['exercises']) {
-        List l => l.map((each) => ExerciseItem.fromRow(each)).toList(),
-        _ => [],
-      },
-      sourceTemplateId: row['source_template_id'] as String?,
-      assignedBy: switch (row['assigned_by']) {
-        Map m => Profile.fromJson(m),
-        _ => null,
-      },
-      syncEnabled: row['sync_enabled'] as bool?,
-    );
-  }
-
-  TemplateItem copyWith({
-    String? id,
-    String? name,
-    int? order,
-    List<ExerciseItem>? exercises,
-    String? sourceTemplateId,
-    Profile? assignedBy,
-  });
-}
-
-class _TemplateItem with Iterable<ExerciseItem> implements TemplateItem {
-  @override
-  final String id;
-  @override
-  final String name;
-  @override
-  final int order;
-  @override
-  final List<ExerciseItem> exercises;
-  @override
-  final String? sourceTemplateId;
-  @override
-  final Profile? assignedBy;
-  @override
-  final bool? syncEnabled;
-
-  const _TemplateItem({
-    required this.id,
-    required this.name,
-    required this.order,
-    required this.exercises,
-    this.sourceTemplateId,
-    this.assignedBy,
-    this.syncEnabled,
-  });
-
-  @override
-  Iterator<ExerciseItem> get iterator => exercises.iterator;
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'order': order,
-      'exercises': exercises.map((ex) => ex.toMap()).toList(),
-      'sourceTemplateId': ?sourceTemplateId,
-      'assignedBy': ?assignedBy?.toMap(),
-      'syncEnabled': ?syncEnabled,
-    };
-  }
-
-  @override
-  Map<String, dynamic> toDynamoItem() {
-    return {
-      'name': name,
-      'exercises': exercises.map((ex) => ex.toDynamoItem()).toList(),
-    }.toSnake();
-  }
-
-  @override
-  TemplateItem copyWith({
-    String? id,
-    String? name,
-    int? order,
-    List<ExerciseItem>? exercises,
-    String? sourceTemplateId,
-    Profile? assignedBy,
-  }) {
-    return _TemplateItem(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      order: order ?? this.order,
-      exercises: exercises ?? this.exercises,
-      sourceTemplateId: sourceTemplateId ?? this.sourceTemplateId,
-      assignedBy: assignedBy ?? this.assignedBy,
-    );
-  }
-}
 
 abstract interface class TemplateShareItem implements Model {
   String get id;
@@ -207,36 +92,7 @@ class _TemplateShareItem implements TemplateShareItem {
   }
 }
 
-abstract interface class TemplateListResponse implements Model, Iterable<TemplateItem> {
-  List<TemplateItem> get templates;
 
-  String? get cursor;
-
-  factory TemplateListResponse({
-    required List<TemplateItem> templates,
-    required String? cursor,
-  }) = _TemplateListResponse;
-}
-
-class _TemplateListResponse with Iterable<TemplateItem> implements TemplateListResponse {
-  @override
-  final List<TemplateItem> templates;
-  @override
-  final String? cursor;
-
-  const _TemplateListResponse({required this.templates, required this.cursor});
-
-  @override
-  Iterator<TemplateItem> get iterator => templates.iterator;
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'templates': map((t) => t.toMap()).toList(),
-      'cursor': ?cursor,
-    };
-  }
-}
 
 abstract interface class TemplateShareListResponse implements Model, Iterable<TemplateShareItem> {
   List<TemplateShareItem> get shares;
@@ -270,17 +126,58 @@ class _TemplateShareListResponse with Iterable<TemplateShareItem> implements Tem
 }
 
 abstract interface class ApiTemplateService {
+  Future<Template> createTemplate({required String userId, required TemplateRequest body});
+
+  Future<Template> updateTemplate({
+    required String userId,
+    required String templateId,
+    required TemplateRequest body,
+  });
+
   Future<TemplateShareItem> shareTemplate({
     required String coachId,
     required String targetUserId,
     required String masterTemplateId,
   });
 
-  Future<TemplateListResponse> getTemplates({required String userId, String? cursor, int? pageSize});
+  Future<TemplateResponse> getTemplates({required String userId, String? cursor, int? pageSize});
 
   Future<TemplateShareListResponse> getTemplateShares({required String userId, String? cursor, int? pageSize});
 
   Future<void> deleteTemplate({required String coachId, required String templateId});
 
   Future<void> deleteShare({required String coachId, required String shareId});
+}
+
+class TemplateRequest {
+  final String userId;
+  final Map<String, dynamic> body;
+
+  TemplateRequest({required this.userId, required this.body});
+
+  List<Map> _exercises() {
+    return ((body['exercises'] as List? ?? []).cast<Map>()).indexed
+        .map(
+          (record) {
+            final (index, ex) = record;
+            final name = switch (ex['exercise']) {
+              String s => s,
+              {'name': String n} => n,
+              _ => null,
+            };
+            return {'exercise_name': name, 'order': ex['order'] ?? index, 'sets': ex['sets'] ?? []};
+          },
+        )
+        .where((e) => e['exercise_name'] != null)
+        .toList();
+  }
+
+  Map<String, dynamic> toParams() {
+    return {
+      'userId': userId,
+      'name': body['name'],
+      'orderIndex': (body['order'] as num?)?.toInt() ?? 0,
+      'exercises': jsonEncode(_exercises()),
+    };
+  }
 }
