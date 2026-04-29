@@ -22,4 +22,5 @@ module "api" {
   log_retention       = 7
   firebase_project_id = "heart-of-yours-dev"
   content_bucket      = module.content.content_bucket
+  static_bucket       = module.content.static_bucket
 }
