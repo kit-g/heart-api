@@ -41,6 +41,14 @@ variable "account_id" {
 variable "content_bucket" {
   type = object({
     bucket = string
+    arn    = string
+  })
+}
+
+variable "static_bucket" {
+  type = object({
+    bucket = string
+    arn    = string
   })
 }
 
