@@ -4,30 +4,18 @@ import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/workouts.dart';
-import 'package:heart/routes/permissions.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
 const _limitParam = IntQueryParam('pageSize');
 
 Future<WorkoutResponse> getTargetUserWorkouts(final Request request) async {
-  final workoutsDb = request.workoutsService;
-  final connectionsDb = request.connectionsService;
   final targetUserId = request.pathParameters.raw[#targetUserId]!;
-  final pageSize = request.queryParameters(_limitParam);
-  final since = request.queryParameters.raw['since'];
-
-  final allowed = await allowedByConnection(db: connectionsDb, userId: request.userId, targetUserId: targetUserId);
-
-  if (!allowed) {
-    throw const Forbidden(reason: 'You do not have permission to view these workouts.');
-  }
-
-  return workoutsDb.getWorkouts(
+  return request.workoutsService.getWorkouts(
     userId: request.userId,
     targetUserId: targetUserId,
-    pageSize: pageSize,
-    cursor: since,
+    pageSize: request.queryParameters(_limitParam),
+    cursor: request.queryParameters.raw['since'],
     imageUrl: request.config.workoutImageUrl,
   );
 }

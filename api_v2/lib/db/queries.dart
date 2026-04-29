@@ -94,18 +94,29 @@ WHERE (initiator_id, target_id, domain) IN (
 ''';
 
 final _listWorkouts = '''
-SELECT 
-  id, 
-  name, 
-  started_at, 
-  completed_at, 
-  created_at, 
-  _workout_exercises(id) AS exercises
-FROM workouts
-WHERE user_id = @userId
-  AND (@cursor::uuid IS NULL OR id < @cursor::uuid)
-ORDER BY id DESC
-LIMIT @limit
+WITH
+_auth AS (
+  SELECT (
+    @requesterId::text = @targetUserId::text
+    OR EXISTS (
+      SELECT 1 FROM connections
+      WHERE (initiator_id = @requesterId AND target_id = @targetUserId AND initiator_role IN ('COACH', 'PEER'))
+         OR (initiator_id = @targetUserId AND target_id = @requesterId AND target_role IN ('COACH', 'PEER'))
+    )
+  ) AS allowed
+),
+_workouts AS (
+  SELECT id, name, started_at, completed_at, created_at, _workout_exercises(id) AS exercises
+  FROM workouts
+  WHERE (SELECT allowed FROM _auth)
+    AND user_id = @targetUserId::uuid
+    AND (@cursor::uuid IS NULL OR id < @cursor::uuid)
+  ORDER BY id DESC
+  LIMIT @limit
+)
+SELECT id, name, started_at, completed_at, created_at, exercises, false AS forbidden FROM _workouts
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
 final _getWorkout = '''
@@ -561,11 +572,18 @@ _existing AS (
   SELECT student_template_id, created_at FROM template_shares
   WHERE coach_id = @coachId AND student_id = @studentId AND master_template_id = @masterTemplateId::uuid
 ),
+_allowed AS (
+  SELECT 1 FROM connections
+  WHERE (initiator_id = @coachId AND target_id = @studentId AND initiator_role IN ('COACH', 'PEER'))
+     OR (initiator_id = @studentId AND target_id = @coachId AND target_role IN ('COACH', 'PEER'))
+  LIMIT 1
+),
 _new_template AS (
   INSERT INTO templates (user_id, name, order_index, source_template_id, assigned_by, sync_enabled)
   SELECT s.id, m.name, 0, m.id, @coachId, true
   FROM _student s, _master m
   WHERE NOT EXISTS (SELECT 1 FROM _existing)
+    AND EXISTS (SELECT 1 FROM _allowed)
   RETURNING id
 ),
 _new_exercises AS (
@@ -597,7 +615,8 @@ SELECT
   m.name AS template_name,
   s.username AS student_username,
   s.avatar_url AS student_avatar,
-  COALESCE(ns.created_at, ex.created_at) AS created_at
+  COALESCE(ns.created_at, ex.created_at) AS created_at,
+  NOT EXISTS (SELECT 1 FROM _allowed) AND NOT EXISTS (SELECT 1 FROM _existing) AS forbidden
 FROM _student s
 CROSS JOIN _master m
 LEFT JOIN _new_share ns ON true

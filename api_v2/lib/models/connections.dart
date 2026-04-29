@@ -89,7 +89,11 @@ abstract interface class Connection implements Model {
       role: ConnectionRole.fromString(row['role'] as String),
       domain: ConnectionDomain.fromString(row['domain'] as String),
       status: ConnectionStatus.fromString(row['status'] as String),
-      createdAt: DateTime.parse(row['created_at'] as String),
+      createdAt: switch (row['created_at']) {
+        DateTime dt => dt,
+        String s => DateTime.parse(s),
+        _ => DateTime.now(),
+      },
     );
   }
 
@@ -196,6 +200,4 @@ abstract interface class ConnectionsService {
     required ConnectionRole role,
     required ConnectionDomain domain,
   });
-
-  Future<Iterable<Connection>?> queryConnections({required String initiatorId, required String targetId});
 }

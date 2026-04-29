@@ -25,7 +25,7 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
   }
 
   @override
-  Future<TemplateListResponse> getTemplates({
+  Future<TemplateResponse> getTemplates({
     required String userId,
     String? cursor,
     int? pageSize = 30,
@@ -34,9 +34,9 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
       _listTemplates.toSql(),
       parameters: {'userId': userId, 'cursor': cursor, 'limit': pageSize},
     );
-    if (rows.isEmpty) return TemplateListResponse(templates: [], cursor: null);
+    if (rows.isEmpty) return TemplateResponse(templates: [], cursor: null);
     final templates = rows.map((row) => Template.fromRow(row.toColumnMap())).toList();
-    return TemplateListResponse(templates: templates, cursor: templates.lastOrNull?.id);
+    return TemplateResponse(templates: templates, cursor: templates.lastOrNull?.id);
   }
 
   @override
@@ -50,13 +50,13 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
       parameters: {'userId': userId, 'cursor': cursor, 'limit': pageSize},
     );
     if (rows.isEmpty) return TemplateShareListResponse(shares: [], cursor: null);
-    final shares = rows.map((row) => TemplateShareItem.fromRow(row.toColumnMap())).toList();
+    final shares = rows.map((row) => TemplateShare.fromRow(row.toColumnMap())).toList();
     final nextCursor = rows.last.toColumnMap()['share_uuid']?.toString();
     return TemplateShareListResponse(shares: shares, cursor: nextCursor);
   }
 
   @override
-  Future<TemplateShareItem> shareTemplate({
+  Future<TemplateShare> shareTemplate({
     required String coachId,
     required String targetUserId,
     required String masterTemplateId,
@@ -66,7 +66,9 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
       parameters: {'coachId': coachId, 'studentId': targetUserId, 'masterTemplateId': masterTemplateId},
     );
     if (rows.isEmpty) throw NotFound(type: 'Template', id: masterTemplateId);
-    return TemplateShareItem.fromRow(rows.first.toColumnMap());
+    final row = rows.first.toColumnMap();
+    if (row['forbidden'] == true) throw const Forbidden(reason: 'You do not have permission to assign templates to this user.');
+    return TemplateShare.fromRow(row);
   }
 
   @override

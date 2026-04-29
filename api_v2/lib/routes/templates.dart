@@ -3,7 +3,6 @@ import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/templates.dart';
-import 'package:heart/routes/permissions.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -27,7 +26,7 @@ Future<Template> updateTemplate(final Request request) async {
   );
 }
 
-Future<TemplateListResponse> getMyTemplates(final Request request) async {
+Future<TemplateResponse> getMyTemplates(final Request request) async {
   return request.templatesService.getTemplates(
     userId: request.userId,
     pageSize: request.queryParameters(_limitParam),
@@ -43,9 +42,7 @@ Future<TemplateShareListResponse> getMyTemplateShares(final Request request) asy
   );
 }
 
-Future<TemplateShareItem> assignTemplateToUser(final Request request) async {
-  final templatesDb = request.templatesService;
-  final connectionsDb = request.connectionsService;
+Future<TemplateShare> assignTemplateToUser(final Request request) async {
   final userId = request.userId;
   final targetUserId = request.pathParameters.raw[#targetUserId]!;
   final templateId = request.pathParameters.raw[#templateId]!;
@@ -54,24 +51,11 @@ Future<TemplateShareItem> assignTemplateToUser(final Request request) async {
     throw const Forbidden(reason: 'You cannot assign templates to yourself.');
   }
 
-  final allowed = await allowedByConnection(db: connectionsDb, userId: request.userId, targetUserId: targetUserId);
-
-  if (!allowed) {
-    throw const Forbidden(reason: 'You do not have permission to assign templates to this user.');
-  }
-
-  try {
-    return await templatesDb.shareTemplate(
-      coachId: request.userId,
-      targetUserId: targetUserId,
-      masterTemplateId: templateId,
-    );
-  } on StateError catch (e) {
-    throw BadRequest(
-      reason: e.message,
-      payload: request.signature(),
-    );
-  }
+  return await request.templatesService.shareTemplate(
+    coachId: userId,
+    targetUserId: targetUserId,
+    masterTemplateId: templateId,
+  );
 }
 
 Future<NoContent> deleteMyTemplate(final Request request) async {
