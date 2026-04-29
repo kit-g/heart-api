@@ -1,4 +1,3 @@
-import 'package:aws_client/dynamo_document.dart';
 import 'package:aws_client/s3_2006_03_01.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/db/db.dart';
@@ -15,6 +14,7 @@ import 'package:heart/routes/index.dart';
 import 'package:heart/storage/s3.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart';
+import 'package:postgres/postgres.dart' hide Connection;
 import 'package:relic/relic.dart' hide Logger;
 
 final _logger = Logger('API');
@@ -26,8 +26,12 @@ final _awsAuth = switch (_config.awsProfile) {
   null => AwsClientCredentials.resolve(),
 };
 
-final _dynamo = DocumentClient(region: _config.awsRegion, credentials: _awsAuth);
-final _database = Database(client: _dynamo, table: _config.workoutsTable);
+final _pool = Pool.withEndpoints(
+  [_config.db.endpoint],
+  settings: const PoolSettings(maxConnectionCount: 10, applicationName: 'heart-api'),
+);
+
+final _database = Database(pool: _pool);
 final _s3 = S3(region: _config.awsRegion, credentials: _awsAuth);
 final _storage = Storage(client: _s3, exerciseBucket: _config.exerciseBucket);
 
@@ -70,12 +74,14 @@ Future<void> main() async {
     ..use('/', configuration(override: _config))
     ..use('/', authenticator(implementation: testAuth))
     ..use('/', authentication(shouldAuthenticate: isPublicRoute))
+    ..use('/accounts', profilesDb(db: _database))
+    ..use('/accounts', workoutsDb(db: _database))
+    ..use('/accounts', connectionsDb(db: _database))
+    ..use('/accounts', templatesDb(db: _database))
     ..use('/charts', chartsDb(db: _database))
     ..use('/connections', connectionsDb(db: _database))
     ..use('/exercises', exercisesDb(db: _storage))
-    ..use('/users', workoutsDb(db: _database))
-    ..use('/users', connectionsDb(db: _database))
-    ..use('/users', templatesDb(db: _database))
+    ..use('/workouts', workoutsDb(db: _database))
     ..use('/templates', templatesDb(db: _database))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 
