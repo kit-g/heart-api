@@ -2,7 +2,7 @@ part of 'db.dart';
 
 mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   @override
-  Future<WorkoutListResponse> getWorkouts({
+  Future<WorkoutResponse> getWorkouts({
     required String userId,
     required String targetUserId,
     required String Function(String) imageUrl,
@@ -13,13 +13,13 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
       _listWorkouts.toSql(),
       parameters: {'userId': targetUserId, 'cursor': cursor, 'limit': pageSize},
     );
-    if (rows.isEmpty) return WorkoutListResponse(workouts: [], cursor: null);
-    final workouts = rows.map((row) => WorkoutItem.fromRow(row.toColumnMap(), imageUrl: imageUrl)).toList();
-    return WorkoutListResponse(workouts: workouts, cursor: workouts.lastOrNull?.id);
+    if (rows.isEmpty) return WorkoutResponse(workouts: [], cursor: null);
+    final workouts = rows.map((row) => Workout.fromRow(row.toColumnMap(), imageUrl: imageUrl)).toList();
+    return WorkoutResponse(workouts: workouts, cursor: workouts.lastOrNull?.id);
   }
 
   @override
-  Future<WorkoutItem> getWorkout({
+  Future<Workout> getWorkout({
     required String userId,
     required String workoutId,
     required String Function(String) imageUrl,
@@ -29,11 +29,11 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
       parameters: {'workoutId': workoutId, 'userId': userId},
     );
     if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
-    return WorkoutItem.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
+    return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
   }
 
   @override
-  Future<WorkoutItem> createWorkout({
+  Future<Workout> createWorkout({
     required String userId,
     required WorkoutRequest body,
     required String Function(String) imageUrl,
@@ -42,11 +42,11 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
       _saveWorkout.toSql(),
       parameters: body.toParams(),
     );
-    return WorkoutItem.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
+    return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
   }
 
   @override
-  Future<WorkoutItem> updateWorkout({
+  Future<Workout> updateWorkout({
     required String userId,
     required String workoutId,
     required WorkoutRequest body,
@@ -57,7 +57,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
       parameters: {'workoutId': workoutId, ...body.toParams()},
     );
     if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
-    return WorkoutItem.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
+    return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
   }
 
   @override
