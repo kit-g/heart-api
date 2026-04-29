@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:heart_models/heart_models.dart';
 
-abstract interface class TemplateShareItem implements Model {
+abstract interface class TemplateShare implements Model {
   String get id;
 
   String get studentTemplateId;
@@ -13,28 +13,35 @@ abstract interface class TemplateShareItem implements Model {
 
   DateTime get assignedAt;
 
-  factory TemplateShareItem({
+  factory TemplateShare({
     required String id,
     required String studentTemplateId,
     required String templateName,
     required Profile assignedTo,
     required DateTime assignedAt,
-  }) = _TemplateShareItem;
+  }) = _TemplateShare;
 
-  factory TemplateShareItem.fromRow(Map<String, dynamic> row) {
-    return _TemplateShareItem(
-      id: switch ((row['SK'] as String).split('#')) {
-        [_, String templateId, String userId] => '$userId|$templateId',
-        _ => throw ArgumentError('Invalid template share ID'),
-      },
-      studentTemplateId: row['student_template_id'] as String,
+  factory TemplateShare.fromRow(Map<String, dynamic> row) {
+    final studentId = row['student_id'].toString();
+    final masterTemplateId = row['master_template_id'].toString();
+    return _TemplateShare(
+      id: '$studentId|$masterTemplateId',
+      studentTemplateId: row['student_template_id'].toString(),
       templateName: row['template_name'] as String,
-      assignedTo: Profile.fromJson(row['assigned_to'] as Map),
-      assignedAt: DateTime.parse(row['assigned_at'] as String),
+      assignedTo: Profile(
+        id: '',
+        name: '',
+        avatar: '',
+      ),
+      assignedAt: switch (row['created_at']) {
+        DateTime dt => dt,
+        String s => DateTime.parse(s),
+        _ => DateTime.now(),
+      },
     );
   }
 
-  TemplateShareItem copyWith({
+  TemplateShare copyWith({
     String? studentId,
     String? studentTemplateId,
     String? templateName,
@@ -43,7 +50,7 @@ abstract interface class TemplateShareItem implements Model {
   });
 }
 
-class _TemplateShareItem implements TemplateShareItem {
+class _TemplateShare implements TemplateShare {
   @override
   final String id;
   @override
@@ -55,7 +62,7 @@ class _TemplateShareItem implements TemplateShareItem {
   @override
   final DateTime assignedAt;
 
-  const _TemplateShareItem({
+  const _TemplateShare({
     required this.id,
     required this.studentTemplateId,
     required this.templateName,
@@ -64,14 +71,14 @@ class _TemplateShareItem implements TemplateShareItem {
   });
 
   @override
-  TemplateShareItem copyWith({
+  TemplateShare copyWith({
     String? studentId,
     String? studentTemplateId,
     String? templateName,
     Profile? assignedTo,
     DateTime? assignedAt,
   }) {
-    return _TemplateShareItem(
+    return _TemplateShare(
       id: id,
       studentTemplateId: studentTemplateId ?? this.studentTemplateId,
       templateName: templateName ?? this.templateName,
@@ -92,29 +99,27 @@ class _TemplateShareItem implements TemplateShareItem {
   }
 }
 
-
-
-abstract interface class TemplateShareListResponse implements Model, Iterable<TemplateShareItem> {
-  List<TemplateShareItem> get shares;
+abstract interface class TemplateShareListResponse implements Model, Iterable<TemplateShare> {
+  List<TemplateShare> get shares;
 
   String? get cursor;
 
   factory TemplateShareListResponse({
-    required List<TemplateShareItem> shares,
+    required List<TemplateShare> shares,
     required String? cursor,
   }) = _TemplateShareListResponse;
 }
 
-class _TemplateShareListResponse with Iterable<TemplateShareItem> implements TemplateShareListResponse {
+class _TemplateShareListResponse with Iterable<TemplateShare> implements TemplateShareListResponse {
   @override
-  final List<TemplateShareItem> shares;
+  final List<TemplateShare> shares;
   @override
   final String? cursor;
 
   const _TemplateShareListResponse({required this.shares, required this.cursor});
 
   @override
-  Iterator<TemplateShareItem> get iterator => shares.iterator;
+  Iterator<TemplateShare> get iterator => shares.iterator;
 
   @override
   Map<String, dynamic> toMap() {
@@ -134,7 +139,7 @@ abstract interface class ApiTemplateService {
     required TemplateRequest body,
   });
 
-  Future<TemplateShareItem> shareTemplate({
+  Future<TemplateShare> shareTemplate({
     required String coachId,
     required String targetUserId,
     required String masterTemplateId,
