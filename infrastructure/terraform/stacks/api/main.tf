@@ -2,6 +2,10 @@ resource "aws_scheduler_schedule_group" "accounts" {
   name = "accounts"
 }
 
+resource "aws_sns_topic" "monitoring" {
+  name = "monitoring"
+}
+
 resource "aws_api_gateway_rest_api" "api" {
   name = "heart-api"
 }
