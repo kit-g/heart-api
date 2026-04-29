@@ -1,13 +1,17 @@
 import 'package:heart/core/response.dart';
+import 'package:heart/routes/account.dart' as account;
 import 'package:heart/routes/charts.dart' as charts;
 import 'package:heart/routes/connections.dart' as connections;
 import 'package:heart/routes/exercises.dart' as exercises;
+import 'package:heart/routes/misc.dart' as version;
 import 'package:heart/routes/templates.dart' as templates;
 import 'package:heart/routes/workouts.dart' as workouts;
-import 'package:heart/routes/misc.dart' as version;
 import 'package:relic/relic.dart';
 
 final routes = <(String, Method), ModelHandler>{
+  ('/accounts', .put): account.upsertAccount,
+  ('/accounts/:targetUserId/workouts', .get): workouts.getTargetUserWorkouts,
+  ('/accounts/:targetUserId/templates/:templateId', .post): templates.assignTemplateToUser,
   ('/version', .get): version.getVersion,
   ('/charts', .get): charts.getChartPreferences,
   ('/charts', .post): charts.saveChartPreference,
@@ -18,11 +22,15 @@ final routes = <(String, Method), ModelHandler>{
   ('/connections/:connectionId', .put): connections.reactToConnection,
   ('/exercises', .get): exercises.getExercises,
   ('/templates', .get): templates.getMyTemplates,
+  ('/templates', .post): templates.createTemplate,
   ('/templates/shares', .get): templates.getMyTemplateShares,
+  ('/templates/:templateId', .put): templates.updateTemplate,
   ('/templates/:templateId', .delete): templates.deleteMyTemplate,
   ('/templates/shares/:shareId', .delete): templates.deleteMyTemplateShare,
-  ('/users/:targetUserId/workouts', .get): workouts.getTargetUserWorkouts,
-  ('/users/:targetUserId/templates/:templateId', .post): templates.assignTemplateToUser,
+  ('/workouts', .post): workouts.createWorkout,
+  ('/workouts/:workoutId', .get): workouts.getWorkout,
+  ('/workouts/:workoutId', .put): workouts.updateWorkout,
+  ('/workouts/:workoutId', .delete): workouts.deleteWorkout,
 };
 
 const _publicRoutes = {'/version'};
