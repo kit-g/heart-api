@@ -11,8 +11,11 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   }) async {
     final rows = await _pool.execute(
       _listWorkouts.toSql(),
-      parameters: {'userId': targetUserId, 'cursor': cursor, 'limit': pageSize},
+      parameters: {'requesterId': userId, 'targetUserId': targetUserId, 'cursor': cursor, 'limit': pageSize},
     );
+    if (rows.isNotEmpty && rows.first.toColumnMap()['forbidden'] == true) {
+      throw const Forbidden(reason: 'You do not have permission to view these workouts.');
+    }
     if (rows.isEmpty) return WorkoutResponse(workouts: [], cursor: null);
     final workouts = rows.map((row) => Workout.fromRow(row.toColumnMap(), imageUrl: imageUrl)).toList();
     return WorkoutResponse(workouts: workouts, cursor: workouts.lastOrNull?.id);

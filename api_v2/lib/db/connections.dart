@@ -98,22 +98,4 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       createdAt: existing.createdAt,
     );
   }
-
-  @override
-  Future<Iterable<Connection>?> queryConnections({required String initiatorId, required String targetId}) async {
-    final response = await _client.query(
-      tableName: table,
-      indexName: 'connections_by_target_user_id',
-      keyConditionExpression: '#PK = :PK AND #SK = :SK',
-      expressionAttributeNames: {
-        '#PK': 'PK',
-        '#SK': 'target_id',
-      },
-      expressionAttributeValues: {
-        ':PK': AttributeValue(s: connectionPk(initiatorId)),
-        ':SK': AttributeValue(s: targetId),
-      },
-    );
-    return response.items.map((item) => Connection.fromRow(item)).toList();
-  }
 }
