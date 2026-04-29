@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION _exercise_sets(_workout_exercise_id UUID)
 RETURNS JSONB
 LANGUAGE SQL AS
 $$
-SELECT COALESCE(
+SELECT coalesce(
   jsonb_agg(
     jsonb_build_object(
       'id',         es.id,
