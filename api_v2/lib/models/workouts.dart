@@ -74,6 +74,13 @@ abstract interface class ApiWorkoutService {
     required String Function(String) imageUrl,
   });
 
+  Future<Workout> getTargetWorkout({
+    required String requesterId,
+    required String targetUserId,
+    required String workoutId,
+    required String Function(String) imageUrl,
+  });
+
   Future<Workout> createWorkout({
     required String userId,
     required WorkoutRequest body,

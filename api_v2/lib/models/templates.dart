@@ -145,6 +145,8 @@ abstract interface class ApiTemplateService {
     required String masterTemplateId,
   });
 
+  Future<Template> getTemplate({required String userId, required String templateId});
+
   Future<TemplateResponse> getTemplates({required String userId, String? cursor, int? pageSize});
 
   Future<TemplateShareListResponse> getTemplateShares({required String userId, String? cursor, int? pageSize});

@@ -120,15 +120,34 @@ SELECT NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
 final _getWorkout = '''
-SELECT 
-  id, 
-  name, 
-  started_at, 
-  completed_at, 
-  created_at, 
+SELECT
+  id,
+  name,
+  started_at,
+  completed_at,
+  created_at,
   _workout_exercises(id) AS exercises
 FROM workouts
 WHERE id = @workoutId::uuid AND user_id = @userId
+''';
+
+final _getTargetWorkout = '''
+WITH
+_auth AS (
+  SELECT (
+    @requesterId::text = @targetUserId::text
+    OR EXISTS (
+      SELECT 1 FROM connections
+      WHERE (initiator_id = @requesterId AND target_id = @targetUserId AND initiator_role IN ('COACH', 'PEER'))
+         OR (initiator_id = @targetUserId AND target_id = @requesterId AND target_role IN ('COACH', 'PEER'))
+    )
+  ) AS allowed
+)
+SELECT id, name, started_at, completed_at, created_at, _workout_exercises(id) AS exercises, false AS forbidden
+FROM workouts
+WHERE id = @workoutId::uuid AND user_id = @targetUserId::uuid AND (SELECT allowed FROM _auth)
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
 final _saveWorkout = '''
@@ -519,6 +538,23 @@ SELECT
 FROM _template t
 LEFT JOIN profiles p ON p.id = t.assigned_by
 LEFT JOIN _exercises_json ej ON true
+''';
+
+final _getTemplate = '''
+SELECT
+  t.id,
+  t.name,
+  t.order_index,
+  t.source_template_id,
+  t.assigned_by AS assigned_by_id,
+  p.username AS assigned_by_username,
+  p.avatar_url AS assigned_by_avatar,
+  t.sync_enabled,
+  t.created_at,
+  _template_exercises(t.id) AS exercises
+FROM templates t
+LEFT JOIN profiles p ON p.id = t.assigned_by
+WHERE t.id = @templateId::uuid AND t.user_id = @userId
 ''';
 
 final _listTemplates = '''
