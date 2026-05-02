@@ -29,6 +29,17 @@ Future<Workout> getWorkout(final Request request) async {
   );
 }
 
+Future<Workout> getTargetUserWorkout(final Request request) async {
+  final targetUserId = request.pathParameters.raw[#targetUserId]!;
+  final workoutId = request.pathParameters.raw[#workoutId]!;
+  return request.workoutsService.getTargetWorkout(
+    requesterId: request.userId,
+    targetUserId: targetUserId,
+    workoutId: workoutId,
+    imageUrl: request.config.workoutImageUrl,
+  );
+}
+
 Future<Workout> createWorkout(final Request request) async {
   final body = await request.json();
   final workout = WorkoutRequest(userId: request.userId, body: body);

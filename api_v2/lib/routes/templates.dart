@@ -26,6 +26,13 @@ Future<Template> updateTemplate(final Request request) async {
   );
 }
 
+Future<Template> getMyTemplate(final Request request) async {
+  return request.templatesService.getTemplate(
+    userId: request.userId,
+    templateId: request.pathParameters.raw[#templateId]!,
+  );
+}
+
 Future<TemplateResponse> getMyTemplates(final Request request) async {
   return request.templatesService.getTemplates(
     userId: request.userId,

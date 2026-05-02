@@ -36,6 +36,24 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   }
 
   @override
+  Future<Workout> getTargetWorkout({
+    required String requesterId,
+    required String targetUserId,
+    required String workoutId,
+    required String Function(String) imageUrl,
+  }) async {
+    final rows = await _pool.execute(
+      _getTargetWorkout.toSql(),
+      parameters: {'requesterId': requesterId, 'targetUserId': targetUserId, 'workoutId': workoutId},
+    );
+    if (rows.isNotEmpty && rows.first.toColumnMap()['forbidden'] == true) {
+      throw const Forbidden(reason: 'You do not have permission to view this workout.');
+    }
+    if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
+    return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
+  }
+
+  @override
   Future<Workout> createWorkout({
     required String userId,
     required WorkoutRequest body,

@@ -30,6 +30,18 @@ Parameters:
     Default: "workouts"
   WorkoutsDatabaseArn:
     Type: String
+  PgDatabase:
+    Type: String
+    Default: "heart"
+  PgHost:
+    Type: String
+  PgPassword:
+    Type: String
+  PgPort:
+    Type: String
+    Default: "5432"
+  PgUser:
+    Type: String
 
 
 Mappings:
@@ -260,7 +272,11 @@ Resources:
           MIN_APP_VERSION: "1.0.0"
           REGION: !Ref AWS::Region
           SUPPORTED_LOCALES: "en,en_CA,ru"
-          WORKOUTS_TABLE: !Ref WorkoutsDatabaseName
+          PG_DATABASE: !Ref PgDatabase
+          PG_HOST: !Ref PgHost
+          PG_PASSWORD: !Ref PgPassword
+          PG_PORT: !Ref PgPort
+          PG_USER: !Ref PgUser
       FunctionName: "heart-api-v2"
       Layers:
         - !Sub "arn:aws:lambda:${AWS::Region}:753240598075:layer:LambdaAdapterLayerArm64:25"

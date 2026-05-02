@@ -25,6 +25,16 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
   }
 
   @override
+  Future<Template> getTemplate({required String userId, required String templateId}) async {
+    final rows = await _pool.execute(
+      _getTemplate.toSql(),
+      parameters: {'userId': userId, 'templateId': templateId},
+    );
+    if (rows.isEmpty) throw NotFound(type: 'Template', id: templateId);
+    return Template.fromRow(rows.first.toColumnMap());
+  }
+
+  @override
   Future<TemplateResponse> getTemplates({
     required String userId,
     String? cursor,

@@ -11,6 +11,7 @@ import 'package:relic/relic.dart';
 final routes = <(String, Method), ModelHandler>{
   ('/accounts', .put): account.upsertAccount,
   ('/accounts/:targetUserId/workouts', .get): workouts.getTargetUserWorkouts,
+  ('/accounts/:targetUserId/workouts/:workoutId', .get): workouts.getTargetUserWorkout,
   ('/accounts/:targetUserId/templates/:templateId', .post): templates.assignTemplateToUser,
   ('/version', .get): version.getVersion,
   ('/charts', .get): charts.getChartPreferences,
@@ -22,6 +23,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/connections/:connectionId', .put): connections.reactToConnection,
   ('/exercises', .get): exercises.getExercises,
   ('/templates', .get): templates.getMyTemplates,
+  ('/templates/:templateId', .get): templates.getMyTemplate,
   ('/templates', .post): templates.createTemplate,
   ('/templates/shares', .get): templates.getMyTemplateShares,
   ('/templates/:templateId', .put): templates.updateTemplate,
