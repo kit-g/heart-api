@@ -109,7 +109,7 @@ _workouts AS (
   SELECT id, name, started_at, completed_at, created_at, _workout_exercises(id) AS exercises
   FROM workouts
   WHERE (SELECT allowed FROM _auth)
-    AND user_id = @targetUserId::uuid
+    AND user_id = @targetUserId::text
     AND (@cursor::uuid IS NULL OR id < @cursor::uuid)
   ORDER BY id DESC
   LIMIT @limit
