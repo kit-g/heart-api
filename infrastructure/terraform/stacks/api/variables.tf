@@ -52,3 +52,19 @@ variable "static_bucket" {
   })
 }
 
+variable "database" {
+  description = "Database connection details and credentials from Supabase"
+  sensitive   = true
+  type = object({
+    id              = string
+    name            = string
+    region          = string
+    organization_id = string
+    password        = string
+    connection      = string
+    host            = string
+    user            = string
+    port            = string
+    database        = string
+  })
+}
