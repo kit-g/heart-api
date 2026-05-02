@@ -29,11 +29,11 @@ resource "aws_lambda_function" "api" {
       MIN_APP_VERSION          = "1.0.0"
       REGION                   = var.region
       SUPPORTED_LOCALES        = "en,en_CA,ru"
-      PG_DATABASE              = local.rds_creds.Database
-      PG_HOST                  = local.rds_creds.Host
-      PG_PASSWORD              = local.rds_creds.Password
-      PG_PORT                  = local.rds_creds.Port
-      PG_USER                  = local.rds_creds.User
+      PG_DATABASE              = var.database.database
+      PG_HOST                  = var.database.host
+      PG_PASSWORD              = var.database.password
+      PG_PORT                  = var.database.port
+      PG_USER                  = var.database.user
     }
   }
 }

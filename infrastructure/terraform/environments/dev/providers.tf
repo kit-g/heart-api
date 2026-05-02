@@ -10,6 +10,11 @@ terraform {
       source  = "hashicorp/archive"
       version = "2.7.1"
     }
+
+    supabase = {
+      source  = "supabase/supabase"
+      version = "1.9.0"
+    }
   }
 }
 
