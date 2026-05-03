@@ -2,6 +2,7 @@ library;
 
 import 'package:heart/models/connections.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/images.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/templates.dart';
 import 'package:heart/models/workouts.dart';
@@ -10,6 +11,7 @@ import 'package:postgres/postgres.dart' hide Connection;
 
 part 'charts.dart';
 part 'connections.dart';
+part 'images.dart';
 part 'profiles.dart';
 part 'queries.dart';
 part 'templates.dart';
@@ -20,8 +22,14 @@ abstract class _DatabaseBase {
 }
 
 class Database extends _DatabaseBase
-    with _Charts, _Connections, _Profiles, _Workouts, _Templates
-    implements ChartPreferenceService, ConnectionsService, ApiProfileService, ApiWorkoutService, ApiTemplateService {
+    with _Charts, _Connections, _Images, _Profiles, _Workouts, _Templates
+    implements
+        ChartPreferenceService,
+        ConnectionsService,
+        ApiImageDbService,
+        ApiProfileService,
+        ApiWorkoutService,
+        ApiTemplateService {
   @override
   final Pool _pool;
 
