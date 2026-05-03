@@ -7,6 +7,12 @@ abstract interface class ApiImageStorageService {
     List<(String, String)>? tags,
   });
 
+  Future<Map<String, String>> getObjectTagging(String bucket, String key);
+
+  Future<String> getObject(String bucket, String key);
+
+  Future<void> copyObject({required String fromKey, required String toKey});
+
   Future<void> deleteObject({required String key});
 }
 
