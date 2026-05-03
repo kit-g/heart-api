@@ -38,13 +38,13 @@ abstract class S3Api with Signer {
     );
   }
 
-  List<int> sign(List<int> key, String msg) => Hmac(sha256, key).convert(utf8.encode(msg)).bytes;
+  List<int> _sign(List<int> key, String msg) => Hmac(sha256, key).convert(utf8.encode(msg)).bytes;
 
   /// Builds the URL and the form fields used for a presigned S3 POST.
   /// Modeled after boto3's generate_presigned_post.
   ///
   /// https://docs.aws.amazon.com/boto3/latest/reference/services/s3/client/generate_presigned_post.html
-  Future<Map<String, dynamic>> createPresignedPost({
+  Future<({String url, Map<String, String> fields})> createPresignedPost({
     required String bucket,
     required String key,
     Map<String, String>? fields,
@@ -53,10 +53,8 @@ abstract class S3Api with Signer {
   }) async {
     final creds = await credentialsProvider.retrieve();
     final now = DateTime.now().toUtc();
-    final date =
-        '${now.year.toString().padLeft(4, '0')}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
-    final amzDate =
-        '${date}T${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}Z';
+    final date = '${now.year.pad(4)}${now.month.pad()}${now.day.pad()}';
+    final amzDate = '${date}T${now.hour.pad()}${now.minute.pad()}${now.second.pad()}Z';
     final credentialStr = '${creds.accessKeyId}/$date/$region/s3/aws4_request';
 
     final expiration = '${now.add(expiresIn).toIso8601String().split('.').first}Z';
@@ -96,17 +94,20 @@ abstract class S3Api with Signer {
     final policyBase64 = base64Encode(utf8.encode(jsonEncode(policy)));
     formFields['policy'] = policyBase64;
 
-    var signingKey = sign(utf8.encode('AWS4${creds.secretAccessKey}'), date);
-    signingKey = sign(signingKey, region);
-    signingKey = sign(signingKey, 's3');
-    signingKey = sign(signingKey, 'aws4_request');
+    var signingKey = _sign(utf8.encode('AWS4${creds.secretAccessKey}'), date);
+    signingKey = _sign(signingKey, region);
+    signingKey = _sign(signingKey, 's3');
+    signingKey = _sign(signingKey, 'aws4_request');
 
     final signature = Hmac(sha256, signingKey).convert(utf8.encode(policyBase64)).toString();
     formFields['x-amz-signature'] = signature;
 
-    return {
-      'url': 'https://$bucket.s3.$region.amazonaws.com/',
-      'fields': formFields,
-    };
+    return (url: 'https://$bucket.s3.$region.amazonaws.com/', fields: formFields);
+  }
+}
+
+extension on int {
+  String pad([int digits = 2]) {
+    return toString().padLeft(digits, '0');
   }
 }
