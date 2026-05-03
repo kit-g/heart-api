@@ -8,7 +8,9 @@ environment:
   sdk: ^3.10.4
 
 dependencies:
-  aws_client: ^0.7.1
+  aws_common: ^0.7.13
+  aws_signature_v4: ^0.6.10
+  crypto: ^3.0.6
   heart_models:
     path: /Users/kitg/apps/heart/shared/heart_models
 #    git:
