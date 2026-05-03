@@ -1,7 +1,11 @@
 import 'package:heart_models/heart_models.dart';
 
 abstract interface class ApiImageStorageService {
-  Future<PreSignedUrl> presignUpload({required String key, required String mimeType});
+  Future<PreSignedUrl> presignUpload({
+    required String key,
+    required String mimeType,
+    List<(String, String)>? tags,
+  });
 
   Future<void> deleteObject({required String key});
 }
