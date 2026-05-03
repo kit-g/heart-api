@@ -127,7 +127,14 @@ _auth AS (
   ) AS allowed
 ),
 _workouts AS (
-  SELECT id, name, started_at, completed_at, created_at, _workout_exercises(id) AS exercises
+  SELECT
+    id, name, started_at, completed_at, created_at,
+    _workout_exercises(id) AS exercises,
+    COALESCE(
+      (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
+       FROM workout_images wi WHERE wi.workout_id = workouts.id),
+      '[]'::jsonb
+    ) AS images
   FROM workouts
   WHERE (SELECT allowed FROM _auth)
     AND user_id = @targetUserId::text
@@ -135,21 +142,26 @@ _workouts AS (
   ORDER BY id DESC
   LIMIT @limit
 )
-SELECT id, name, started_at, completed_at, created_at, exercises, false AS forbidden FROM _workouts
+SELECT id, name, started_at, completed_at, created_at, exercises, images, false AS forbidden FROM _workouts
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
 final _getWorkout = '''
 SELECT
-  id,
-  name,
-  started_at,
-  completed_at,
-  created_at,
-  _workout_exercises(id) AS exercises
-FROM workouts
-WHERE id = @workoutId::uuid AND user_id = @userId
+  w.id,
+  w.name,
+  w.started_at,
+  w.completed_at,
+  w.created_at,
+  _workout_exercises(w.id) AS exercises,
+  COALESCE(
+    (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
+     FROM workout_images wi WHERE wi.workout_id = w.id),
+    '[]'::jsonb
+  ) AS images
+FROM workouts w
+WHERE w.id = @workoutId::uuid AND w.user_id = @userId
 ''';
 
 final _getTargetWorkout = '''
@@ -164,11 +176,19 @@ _auth AS (
     )
   ) AS allowed
 )
-SELECT id, name, started_at, completed_at, created_at, _workout_exercises(id) AS exercises, false AS forbidden
-FROM workouts
-WHERE id = @workoutId::uuid AND user_id = @targetUserId::uuid AND (SELECT allowed FROM _auth)
+SELECT
+  w.id, w.name, w.started_at, w.completed_at, w.created_at,
+  _workout_exercises(w.id) AS exercises,
+  COALESCE(
+    (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
+     FROM workout_images wi WHERE wi.workout_id = w.id),
+    '[]'::jsonb
+  ) AS images,
+  false AS forbidden
+FROM workouts w
+WHERE w.id = @workoutId::uuid AND w.user_id = @targetUserId::text AND (SELECT allowed FROM _auth)
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
 final _saveWorkout = '''
@@ -260,15 +280,16 @@ _exercises_json AS (
   JOIN exercises e ON e.id = el.exercise_id
   LEFT JOIN _sets_json sj ON sj.workout_exercise_id = ie.id
 )
-SELECT 
-  w.id, 
+SELECT
+  w.id,
   w.name,
-  w.started_at, 
-  w.completed_at, 
+  w.started_at,
+  w.completed_at,
   w.created_at,
-  coalesce(ej.exercises_json, '[]'::jsonb) AS exercises
+  coalesce(ej.exercises_json, '[]'::jsonb) AS exercises,
+  '[]'::jsonb AS images
 FROM _workout w
-LEFT JOIN _exercises_json ej 
+LEFT JOIN _exercises_json ej
   ON true
 ''';
 
@@ -371,8 +392,14 @@ _exercises_json AS (
   JOIN exercises e ON e.id = el.exercise_id
   LEFT JOIN _sets_json sj ON sj.workout_exercise_id = ie.id
 )
-SELECT w.id, w.name, w.started_at, w.completed_at, w.created_at,
-  coalesce(ej.exercises_json, '[]'::jsonb) AS exercises
+SELECT
+  w.id, w.name, w.started_at, w.completed_at, w.created_at,
+  coalesce(ej.exercises_json, '[]'::jsonb) AS exercises,
+  COALESCE(
+    (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
+     FROM workout_images wi WHERE wi.workout_id = w.id),
+    '[]'::jsonb
+  ) AS images
 FROM _workout w
 LEFT JOIN _exercises_json ej ON true
 ''';
