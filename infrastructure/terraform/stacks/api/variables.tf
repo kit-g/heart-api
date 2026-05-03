@@ -45,13 +45,6 @@ variable "content_bucket" {
   })
 }
 
-variable "static_bucket" {
-  type = object({
-    bucket = string
-    arn    = string
-  })
-}
-
 variable "database" {
   description = "Database connection details and credentials from Supabase"
   sensitive   = true
