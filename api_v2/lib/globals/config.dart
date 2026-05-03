@@ -3,6 +3,15 @@ import 'dart:io' show Platform;
 import 'package:postgres/postgres.dart' hide Connection;
 import 'package:relic/relic.dart';
 
+const _defaultMimeTypes = {
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/gif',
+};
+
 enum Env {
   dev,
   prod
@@ -72,6 +81,8 @@ abstract interface class AppConfig {
 
   PostgresConfig get db;
 
+  Set<String> get allowedMimeTypes;
+
   factory AppConfig.fromEnv() {
     final env = Platform.environment;
     switch (env) {
@@ -97,6 +108,7 @@ abstract interface class AppConfig {
           supportedLocales: env['SUPPORTED_LOCALES']?.split(',') ?? ['en'],
           defaultLocale: env['DEFAULT_LOCALE'] ?? 'en',
           mediaDistribution: mediaDistribution,
+          allowedMimeTypes: env['ALLOWED_MIME_TYPES']?.split(',').toSet() ?? _defaultMimeTypes,
           db: PostgresConfig(
             host: env['PG_HOST'] ?? 'localhost',
             port: int.tryParse(env['PG_PORT'] ?? '') ?? 5432,
@@ -143,6 +155,8 @@ class _EnvConfig implements AppConfig {
   final String mediaDistribution;
   @override
   final PostgresConfig db;
+  @override
+  final Set<String> allowedMimeTypes;
 
   const _EnvConfig({
     required this.env,
@@ -158,6 +172,7 @@ class _EnvConfig implements AppConfig {
     required this.defaultLocale,
     required this.mediaDistribution,
     required this.db,
+    required this.allowedMimeTypes,
   });
 
   @override
