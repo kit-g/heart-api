@@ -25,7 +25,7 @@ mixin Signer {
   /// Returns [S3ServiceConfiguration] for S3 service, otherwise returns [BaseServiceConfiguration].
   ServiceConfiguration get config {
     return switch (service) {
-      .s3 => S3ServiceConfiguration(),
+      .s3 => S3ServiceConfiguration(signPayload: false),
       _ => const BaseServiceConfiguration(),
     };
   }
@@ -33,13 +33,14 @@ mixin Signer {
   /// Sends an authenticated request to an AWS service.
   ///
   /// Signs the request using AWS Signature Version 4 and sends it to the specified endpoint.
+  /// Supports all HTTP methods including GET, PUT, POST, and DELETE. For PUT and POST requests,
+  /// the body parameter will be JSON-encoded and sent with the appropriate content type header.
   ///
   /// Parameters:
   /// - [method]: The HTTP method to use (GET, PUT, POST, DELETE, etc.).
   /// - [uri]: The target URI of an AWS service for the request.
   /// - [headers]: Optional custom headers to include in the request.
   /// - [body]: Optional request body as a map, which will be JSON-encoded.
-  /// - [credentialsProvider]: Optional override for the credentials provider.
   ///
   /// Returns the response body as a [String].
   ///
@@ -49,7 +50,6 @@ mixin Signer {
     required Uri uri,
     Map<String, String>? headers,
     Map<String, dynamic>? body,
-    AWSCredentialsProvider? credentialsProvider,
   }) async {
     final requestHeaders = <String, String>{...?headers};
 
@@ -92,13 +92,14 @@ mixin Signer {
   /// Creates a presigned URL for an AWS request (e.g., S3 GET or PUT).
   ///
   /// Generates a URL with embedded authentication information that allows temporary
-  /// access to AWS resources without requiring credentials.
+  /// access to AWS resources without requiring credentials. Commonly used for generating
+  /// download URLs (GET) and upload URLs (PUT) for S3 objects.
   ///
   /// Parameters:
-  /// - [method]: The HTTP method the presigned URL is valid for.
+  /// - [method]: The HTTP method the presigned URL is valid for (e.g., GET, PUT).
   /// - [uri]: The target resource URI.
   /// - [expiresIn]: How long the presigned URL remains valid.
-  /// - [headers]: Optional headers to include in the signature calculation.
+  /// - [headers]: Optional headers to include in the signature calculation (e.g., content-type for uploads).
   ///
   /// Returns a presigned [Uri] that can be used to access the resource.
   Future<Uri> createPresignedUrl({
@@ -121,17 +122,10 @@ mixin Signer {
   /// Parameters:
   /// - [uri]: The target URI for the GET request.
   /// - [headers]: Optional custom headers to include in the request.
-  /// - [signer]: Unused parameter (kept for compatibility).
-  /// - [credentialsProvider]: Optional override for the credentials provider.
   ///
   /// Returns the response body as a [String].
-  Future<String> get({
-    required Uri uri,
-    Map<String, String>? headers,
-    AWSSigV4Signer? signer,
-    AWSCredentialsProvider? credentialsProvider,
-  }) {
-    return _sendAwsRequest(method: .get, uri: uri, credentialsProvider: credentialsProvider);
+  Future<String> get({required Uri uri, Map<String, String>? headers}) {
+    return _sendAwsRequest(method: .get, uri: uri, headers: headers);
   }
 
   /// Sends an authenticated HTTP PUT request to the specified URI.
@@ -139,15 +133,11 @@ mixin Signer {
   /// Parameters:
   /// - [uri]: The target URI for the PUT request.
   /// - [headers]: Optional custom headers to include in the request.
-  /// - [credentialsProvider]: Optional override for the credentials provider.
+  /// - [body]: Optional request body as a map, which will be JSON-encoded.
   ///
   /// Returns the response body as a [String].
-  Future<String> put({
-    required Uri uri,
-    Map<String, String>? headers,
-    AWSCredentialsProvider? credentialsProvider,
-  }) {
-    return _sendAwsRequest(method: .put, uri: uri, credentialsProvider: credentialsProvider);
+  Future<String> put({required Uri uri, Map<String, String>? headers, Map<String, dynamic>? body}) {
+    return _sendAwsRequest(method: .put, uri: uri, headers: headers, body: body);
   }
 
   /// Sends an authenticated HTTP DELETE request to the specified URI.
@@ -155,38 +145,23 @@ mixin Signer {
   /// Parameters:
   /// - [uri]: The target URI for the DELETE request.
   /// - [headers]: Optional custom headers to include in the request.
-  /// - [credentialsProvider]: Optional override for the credentials provider.
   ///
   /// Returns the response body as a [String].
-  Future<String> delete({
-    required Uri uri,
-    Map<String, String>? headers,
-    AWSCredentialsProvider? credentialsProvider,
-  }) {
-    return _sendAwsRequest(method: .delete, uri: uri, credentialsProvider: credentialsProvider);
+  Future<String> delete({required Uri uri, Map<String, String>? headers}) {
+    return _sendAwsRequest(method: .delete, uri: uri, headers: headers);
   }
 
   /// Sends an authenticated HTTP POST request to the specified URI.
   ///
+  /// Commonly used for AWS API operations that require a request body.
+  ///
   /// Parameters:
   /// - [uri]: The target URI for the POST request.
   /// - [headers]: Optional custom headers to include in the request.
-  /// - [body]: Optional request body as a map, which will be JSON-encoded.
-  /// - [credentialsProvider]: Optional override for the credentials provider.
+  /// - [body]: Optional request body as a map, which will be JSON-encoded and sent with content-type 'application/x-amz-json-1.1'.
   ///
   /// Returns the response body as a [String].
-  Future<String> post({
-    required Uri uri,
-    Map<String, String>? headers,
-    Map<String, dynamic>? body,
-    AWSCredentialsProvider? credentialsProvider,
-  }) {
-    return _sendAwsRequest(
-      method: .post,
-      uri: uri,
-      headers: headers,
-      body: body,
-      credentialsProvider: credentialsProvider,
-    );
+  Future<String> post({required Uri uri, Map<String, String>? headers, Map<String, dynamic>? body}) {
+    return _sendAwsRequest(method: .post, uri: uri, headers: headers, body: body);
   }
 }
