@@ -83,6 +83,9 @@ abstract interface class AppConfig {
 
   Set<String> get allowedMimeTypes;
 
+  /// development flags, allows to call the /events endpoint
+  bool get allowNonHttpEvents;
+
   factory AppConfig.fromEnv() {
     final env = Platform.environment;
     switch (env) {
@@ -109,6 +112,7 @@ abstract interface class AppConfig {
           defaultLocale: env['DEFAULT_LOCALE'] ?? 'en',
           mediaDistribution: mediaDistribution,
           allowedMimeTypes: env['ALLOWED_MIME_TYPES']?.split(',').toSet() ?? _defaultMimeTypes,
+          allowNonHttpEvents: bool.tryParse(env['ALLOW_NON_HTTP_EVENTS'] ?? '', caseSensitive: false) ?? false,
           db: PostgresConfig(
             host: env['PG_HOST'] ?? 'localhost',
             port: int.tryParse(env['PG_PORT'] ?? '') ?? 5432,
@@ -157,6 +161,8 @@ class _EnvConfig implements AppConfig {
   final PostgresConfig db;
   @override
   final Set<String> allowedMimeTypes;
+  @override
+  final bool allowNonHttpEvents;
 
   const _EnvConfig({
     required this.env,
@@ -173,6 +179,7 @@ class _EnvConfig implements AppConfig {
     required this.mediaDistribution,
     required this.db,
     required this.allowedMimeTypes,
+    required this.allowNonHttpEvents,
   });
 
   @override
