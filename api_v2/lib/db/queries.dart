@@ -4,6 +4,27 @@ extension on String {
   Sql toSql() => Sql.named(this);
 }
 
+final _listGallery = '''
+SELECT id, workout_id, key
+FROM workout_images
+WHERE user_id = @userId
+  AND (@cursor::uuid IS NULL OR id < @cursor::uuid)
+ORDER BY id DESC
+LIMIT @limit
+''';
+
+final _insertImage = '''
+INSERT INTO workout_images (workout_id, user_id, key)
+VALUES (@workoutId::uuid, @userId, @key)
+RETURNING id, workout_id, key
+''';
+
+final _deleteImage = '''
+DELETE FROM workout_images
+WHERE key = @key AND user_id = @userId AND workout_id = @workoutId::uuid
+RETURNING id
+''';
+
 final _updateProfile = '''
 INSERT INTO profiles (id, email, username, avatar_url, updated_at)
 VALUES (@id, @email, @username, @avatar, now())
