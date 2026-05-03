@@ -25,7 +25,7 @@ mixin Signer {
   /// Returns [S3ServiceConfiguration] for S3 service, otherwise returns [BaseServiceConfiguration].
   ServiceConfiguration get config {
     return switch (service) {
-      .s3 => S3ServiceConfiguration(signPayload: false),
+      .s3 => S3ServiceConfiguration(),
       _ => const BaseServiceConfiguration(),
     };
   }
