@@ -8,3 +8,4 @@ import 'package:crypto/crypto.dart';
 
 part 's3.dart';
 part 'signer.dart';
+part 'sqs.dart';
