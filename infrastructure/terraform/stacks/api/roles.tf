@@ -22,7 +22,7 @@ data "aws_iam_policy_document" "sns_publish" {
 
 data "aws_iam_policy_document" "content_bucket" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "s3:ListBucket",
       "s3:GetObject",
@@ -37,6 +37,26 @@ data "aws_iam_policy_document" "content_bucket" {
   }
 }
 
+data "aws_iam_policy_document" "sqs_consume" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "sqs:ReceiveMessage",
+      "sqs:DeleteMessage",
+      "sqs:GetQueueAttributes",
+    ]
+    resources = [aws_sqs_queue.events.arn]
+  }
+}
+
+data "aws_iam_policy_document" "sqs_dlq" {
+  statement {
+    effect    = "Allow"
+    actions   = ["sqs:SendMessage"]
+    resources = [aws_sqs_queue.events_dlq.arn]
+  }
+}
+
 module "api_role" {
   source      = "../../modules/iam"
   name        = "${var.name_prefix}-function-role"
@@ -44,7 +64,9 @@ module "api_role" {
   inline_policies = {
     "scheduler_manage" = data.aws_iam_policy_document.scheduler_manage.json
     "sns_publish"      = data.aws_iam_policy_document.sns_publish.json
-    "content_bucket"      = data.aws_iam_policy_document.content_bucket.json
+    "content_bucket"   = data.aws_iam_policy_document.content_bucket.json
+    "sqs_consume"      = data.aws_iam_policy_document.sqs_consume.json
+    "sqs_dlq"          = data.aws_iam_policy_document.sqs_dlq.json
   }
   managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
 }

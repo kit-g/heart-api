@@ -34,6 +34,7 @@ resource "aws_lambda_function" "api" {
       PG_PASSWORD              = var.database.password
       PG_PORT                  = var.database.port
       PG_USER                  = var.database.user
+      EVENTS_DLQ               = aws_sqs_queue.events_dlq.url
     }
   }
 }

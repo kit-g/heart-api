@@ -65,3 +65,68 @@ resource "aws_api_gateway_stage" "v1" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   stage_name    = "v1"
 }
+
+resource "aws_sqs_queue" "events" {
+  name                       = "${var.name_prefix}-events"
+  visibility_timeout_seconds = 300
+  message_retention_seconds  = 86400
+}
+
+resource "aws_sqs_queue" "events_dlq" {
+  name                      = "${var.name_prefix}-events-dlq"
+  message_retention_seconds = 1209600
+}
+
+resource "aws_lambda_event_source_mapping" "sqs_trigger" {
+  event_source_arn = aws_sqs_queue.events.arn
+  function_name    = aws_lambda_function.api.arn
+  batch_size       = 10
+}
+
+resource "aws_cloudwatch_event_rule" "s3_image_uploads" {
+  name        = "${var.name_prefix}-s3-image-uploads"
+  description = "Capture S3 image uploads to content bucket"
+
+  event_pattern = jsonencode({
+    source      = ["aws.s3"]
+    detail-type = ["Object Created"]
+    detail = {
+      bucket = {
+        name = [var.content_bucket.bucket]
+      }
+      object = {
+        key = [
+          { prefix = "uploads/" },
+        ]
+      }
+    }
+  })
+}
+
+resource "aws_cloudwatch_event_target" "send_to_sqs" {
+  rule      = aws_cloudwatch_event_rule.s3_image_uploads.name
+  target_id = "send-to-sqs"
+  arn       = aws_sqs_queue.events.arn
+}
+
+resource "aws_sqs_queue_policy" "allow_eventbridge" {
+  queue_url = aws_sqs_queue.events.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "events.amazonaws.com"
+        }
+        Action   = "sqs:SendMessage"
+        Resource = aws_sqs_queue.events.arn
+        Condition = {
+          ArnEquals = {
+            "aws:SourceArn" = aws_cloudwatch_event_rule.s3_image_uploads.arn
+          }
+        }
+      }
+    ]
+  })
+}
