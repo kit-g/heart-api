@@ -104,6 +104,22 @@ abstract class S3Api with Signer {
 
     return (url: 'https://$bucket.s3.$region.amazonaws.com/', fields: formFields);
   }
+
+  Future<Map<String, String>> getObjectTagging(String bucket, String key) async {
+    final uri = s3Uri(bucket, key).replace(query: 'tagging');
+    final responseStr = await get(uri: uri);
+
+    final tags = <String, String>{};
+    final tagRegExp = RegExp(r'<Key>([^<]+)</Key>\s*<Value>([^<]+)</Value>');
+
+    for (final match in tagRegExp.allMatches(responseStr)) {
+      if (match.groupCount == 2) {
+        tags[match.group(1)!] = match.group(2)!;
+      }
+    }
+
+    return tags;
+  }
 }
 
 extension on int {
