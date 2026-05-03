@@ -5,6 +5,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/globals/logging.dart';
 import 'package:heart/middleware/authentication.dart';
 import 'package:heart/middleware/authenticator.dart';
+import 'package:heart/middleware/aws.dart';
 import 'package:heart/middleware/config.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
@@ -25,6 +26,8 @@ final _credentialsProvider = switch (_config.awsProfile) {
   String profile => AWSCredentialsProvider.profile(profile),
   null => const AWSCredentialsProvider.defaultChain(),
 };
+
+final _awsConfig = AwsConfig(credentialsProvider: _credentialsProvider, region: _config.awsRegion);
 
 final _pool = Pool.withEndpoints(
   [_config.db.endpoint],
@@ -92,6 +95,7 @@ Future<void> main() async {
     ..use('/templates', templatesDb(db: _database))
     ..use('/events', imageStorageDb(db: _storage))
     ..use('/events', imageDb(db: _database))
+    ..use('/events', awsConfig(config: _awsConfig))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 
   for (final MapEntry(key: (route, verb), value: handler) in routes.entries) {
