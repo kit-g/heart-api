@@ -21,10 +21,10 @@ resource "aws_lambda_function" "api" {
       AWS_LWA_PORT             = 8080
       AWS_LWA_REMOVE_BASE_PATH = "/v2"
       ENV                      = "dev"
-      EXERCISE_BUCKET          = var.content_bucket.bucket
+      CONTENT_BUCKET           = var.content_bucket.bucket
       FIREBASE_PROJECT_ID      = var.firebase_project_id
       LOG_LEVEL                = "ALL"
-      MEDIA_DISTRIBUTION       = "https://dev.media.heart-of.me"
+      MEDIA_DISTRIBUTION       = "dev.media.heart-of.me"
       MONITORING_TOPIC         = aws_sns_topic.monitoring.name
       MIN_APP_VERSION          = "1.0.0"
       REGION                   = var.region
