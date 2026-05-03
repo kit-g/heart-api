@@ -1,4 +1,5 @@
 import 'package:heart/models/connections.dart';
+import 'package:heart/models/images.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/templates.dart';
 import 'package:heart/models/workouts.dart';
@@ -6,6 +7,7 @@ import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
 final _profilesProperty = ContextProperty<ApiProfileService>('ApiProfileService');
+final _imageDbProperty = ContextProperty<ApiImageDbService>('ApiImageDbService');
 final _chatsProperty = ContextProperty<ChartPreferenceService>('ChartPreferenceService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
 final _workoutsProperty = ContextProperty<ApiWorkoutService>('ApiWorkoutService');
@@ -47,6 +49,15 @@ Middleware templatesDb({required ApiTemplateService db}) {
   };
 }
 
+Middleware imageDb({required ApiImageDbService db}) {
+  return (final Handler next) {
+    return (final request) {
+      _imageDbProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
 Middleware workoutsDb({required ApiWorkoutService db}) {
   return (final Handler next) {
     return (final request) {
@@ -68,6 +79,10 @@ extension DatabaseContext on Request {
   ConnectionsService get connectionsService => _connectionsProperty.get(this);
 
   set connectionsService(ConnectionsService v) => _connectionsProperty[this] = v;
+
+  ApiImageDbService get imageDbService => _imageDbProperty.get(this);
+
+  set imageDbService(ApiImageDbService v) => _imageDbProperty[this] = v;
 
   ApiWorkoutService get workoutsService => _workoutsProperty.get(this);
 
