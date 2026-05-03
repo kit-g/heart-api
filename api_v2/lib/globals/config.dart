@@ -62,7 +62,7 @@ abstract interface class AppConfig {
 
   bool get shouldCheckVersion;
 
-  String get exerciseBucket;
+  String get contentBucket;
 
   List<String> get supportedLocales;
 
@@ -80,10 +80,10 @@ abstract interface class AppConfig {
             'ENV': String environment,
             'FIREBASE_PROJECT_ID': String firebaseProjectId,
             'MIN_APP_VERSION': String version,
-            'EXERCISE_BUCKET': String exerciseBucket,
+            'CONTENT_BUCKET': String contentBucket,
             'MEDIA_DISTRIBUTION': String mediaDistribution,
           }
-          when [region, environment, firebaseProjectId, exerciseBucket].every((v) => v.isNotEmpty):
+          when [region, environment, firebaseProjectId, contentBucket].every((v) => v.isNotEmpty):
         return _EnvConfig(
           awsProfile: env['AWS_PROFILE'],
           awsRegion: region,
@@ -93,7 +93,7 @@ abstract interface class AppConfig {
           testUserId: env['TEST_USER_ID'],
           minimalAppVersion: version,
           shouldCheckVersion: env['SHOULD_CHECK_VERSION']?.toLowerCase() == 'true',
-          exerciseBucket: exerciseBucket,
+          contentBucket: contentBucket,
           supportedLocales: env['SUPPORTED_LOCALES']?.split(',') ?? ['en'],
           defaultLocale: env['DEFAULT_LOCALE'] ?? 'en',
           mediaDistribution: mediaDistribution,
@@ -108,7 +108,7 @@ abstract interface class AppConfig {
       default:
         throw StateError(
           'Missing required environment variables. '
-          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, EXERCISE_BUCKET, and MEDIA_DISTRIBUTION are set.',
+          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, CONTENT_BUCKET and MEDIA_DISTRIBUTION are set.',
         );
     }
   }
@@ -134,7 +134,7 @@ class _EnvConfig implements AppConfig {
   @override
   final bool shouldCheckVersion;
   @override
-  final String exerciseBucket;
+  final String contentBucket;
   @override
   final List<String> supportedLocales;
   @override
@@ -153,7 +153,7 @@ class _EnvConfig implements AppConfig {
     this.testUserId,
     required this.minimalAppVersion,
     required this.shouldCheckVersion,
-    required this.exerciseBucket,
+    required this.contentBucket,
     required this.supportedLocales,
     required this.defaultLocale,
     required this.mediaDistribution,
