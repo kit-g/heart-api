@@ -17,6 +17,7 @@ void initLogging(String level, Env env) {
     ..level = _getLevel(level)
     ..onRecord.listen(
       (record) {
+        if (record.loggerName.startsWith('AWS')) return;
         switch (env) {
           case .dev:
             record.toStdOut();

@@ -61,6 +61,8 @@ bool _shouldCheckVersion(final Request request) {
 }
 
 Future<void> main() async {
+  hierarchicalLoggingEnabled = true;
+  AWSLogger().logLevel = LogLevel.error;
   initLogging(_config.logLevel, _config.env);
 
   final testAuth = switch (_config.testUserId) {
