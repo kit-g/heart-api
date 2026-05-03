@@ -27,3 +27,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "delete_raw_uploads" {
 resource "aws_s3_bucket" "static" {
   bucket = "${var.account_id}-${var.region}-static"
 }
+
+resource "aws_s3_bucket_notification" "content_events" {
+  bucket      = aws_s3_bucket.content.id
+  eventbridge = true
+}
