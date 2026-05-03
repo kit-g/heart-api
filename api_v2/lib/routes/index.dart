@@ -2,6 +2,7 @@ import 'package:heart/core/response.dart';
 import 'package:heart/routes/account.dart' as account;
 import 'package:heart/routes/charts.dart' as charts;
 import 'package:heart/routes/connections.dart' as connections;
+import 'package:heart/routes/events.dart' as events;
 import 'package:heart/routes/exercises.dart' as exercises;
 import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
@@ -23,6 +24,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/connections/:connectionId', .delete): connections.deleteConnection,
   ('/connections/:connectionId', .put): connections.reactToConnection,
   ('/exercises', .get): exercises.getExercises,
+  ('/events', .post): events.handler,
   ('/templates', .get): templates.getMyTemplates,
   ('/templates/:templateId', .get): templates.getMyTemplate,
   ('/templates', .post): templates.createTemplate,
@@ -39,6 +41,6 @@ final routes = <(String, Method), ModelHandler>{
   ('/workouts/:workoutId/images', .delete): images.deleteWorkoutImage,
 };
 
-const _publicRoutes = {'/version'};
+const _publicRoutes = {'/version', '/events'};
 
 bool isPublicRoute(Request request) => !_publicRoutes.contains(request.url.path);
