@@ -1,4 +1,4 @@
-import 'package:aws_client/s3_2006_03_01.dart';
+import 'package:aws_common/aws_common.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/db/db.dart';
 import 'package:heart/globals/config.dart';
@@ -21,19 +21,22 @@ final _logger = Logger('API');
 
 final _config = AppConfig.fromEnv();
 
-final _awsAuth = switch (_config.awsProfile) {
-  String profile => AwsClientCredentials.fromProfileFile(profile: profile),
-  null => AwsClientCredentials.resolve(),
+final _credentialsProvider = switch (_config.awsProfile) {
+  String profile => AWSCredentialsProvider.profile(profile),
+  null => const AWSCredentialsProvider.defaultChain(),
 };
 
 final _pool = Pool.withEndpoints(
   [_config.db.endpoint],
-  settings: const PoolSettings(maxConnectionCount: 10, applicationName: 'heart-api'),
+  settings: const PoolSettings(maxConnectionCount: 1, applicationName: 'heart-api'),
 );
 
 final _database = Database(pool: _pool);
-final _s3 = S3(region: _config.awsRegion, credentials: _awsAuth);
-final _storage = Storage(client: _s3, exerciseBucket: _config.exerciseBucket);
+final _storage = Storage(
+  credentialsProvider: _credentialsProvider,
+  region: _config.awsRegion,
+  contentBucket: _config.contentBucket,
+);
 
 Handler _handler(final ModelHandler handler) {
   return (final Request request) async {
@@ -84,7 +87,11 @@ Future<void> main() async {
     ..use('/connections', connectionsDb(db: _database))
     ..use('/exercises', exercisesDb(db: _storage))
     ..use('/workouts', workoutsDb(db: _database))
+    ..use('/workouts', imageDb(db: _database))
+    ..use('/workouts', imageStorageDb(db: _storage))
     ..use('/templates', templatesDb(db: _database))
+    ..use('/events', imageStorageDb(db: _storage))
+    ..use('/events', imageDb(db: _database))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 
   for (final MapEntry(key: (route, verb), value: handler) in routes.entries) {

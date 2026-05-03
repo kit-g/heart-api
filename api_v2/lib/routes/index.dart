@@ -3,6 +3,7 @@ import 'package:heart/routes/account.dart' as account;
 import 'package:heart/routes/charts.dart' as charts;
 import 'package:heart/routes/connections.dart' as connections;
 import 'package:heart/routes/exercises.dart' as exercises;
+import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
 import 'package:heart/routes/templates.dart' as templates;
 import 'package:heart/routes/workouts.dart' as workouts;
@@ -30,9 +31,12 @@ final routes = <(String, Method), ModelHandler>{
   ('/templates/:templateId', .delete): templates.deleteMyTemplate,
   ('/templates/shares/:shareId', .delete): templates.deleteMyTemplateShare,
   ('/workouts', .post): workouts.createWorkout,
+  ('/workouts/images', .get): images.getGallery,
   ('/workouts/:workoutId', .get): workouts.getWorkout,
   ('/workouts/:workoutId', .put): workouts.updateWorkout,
   ('/workouts/:workoutId', .delete): workouts.deleteWorkout,
+  ('/workouts/:workoutId/images', .put): images.presignWorkoutImage,
+  ('/workouts/:workoutId/images', .delete): images.deleteWorkoutImage,
 };
 
 const _publicRoutes = {'/version'};
