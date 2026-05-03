@@ -79,6 +79,9 @@ abstract interface class AppConfig {
 
   String get mediaDistribution;
 
+  /// API event DLQ URL
+  String get eventsDlq;
+
   PostgresConfig get db;
 
   Set<String> get allowedMimeTypes;
@@ -96,6 +99,7 @@ abstract interface class AppConfig {
             'MIN_APP_VERSION': String version,
             'CONTENT_BUCKET': String contentBucket,
             'MEDIA_DISTRIBUTION': String mediaDistribution,
+            'EVENTS_DLQ': String dlq,
           }
           when [region, environment, firebaseProjectId, contentBucket].every((v) => v.isNotEmpty):
         return _EnvConfig(
@@ -103,6 +107,7 @@ abstract interface class AppConfig {
           awsRegion: region,
           env: Env.fromString(environment),
           firebaseProjectId: firebaseProjectId,
+          eventsDlq: dlq,
           logLevel: env['LOG_LEVEL'] ?? 'ALL',
           testUserId: env['TEST_USER_ID'],
           minimalAppVersion: version,
@@ -124,7 +129,7 @@ abstract interface class AppConfig {
       default:
         throw StateError(
           'Missing required environment variables. '
-          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, CONTENT_BUCKET and MEDIA_DISTRIBUTION are set.',
+          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, CONTENT_BUCKET, EVENTS_DLQ and MEDIA_DISTRIBUTION are set.',
         );
     }
   }
@@ -151,6 +156,8 @@ class _EnvConfig implements AppConfig {
   final bool shouldCheckVersion;
   @override
   final String contentBucket;
+  @override
+  final String eventsDlq;
   @override
   final List<String> supportedLocales;
   @override
@@ -180,6 +187,7 @@ class _EnvConfig implements AppConfig {
     required this.db,
     required this.allowedMimeTypes,
     required this.allowNonHttpEvents,
+    required this.eventsDlq,
   });
 
   @override
