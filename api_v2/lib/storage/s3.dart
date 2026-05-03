@@ -1,29 +1,34 @@
 library;
 
-import 'dart:convert';
-
-import 'package:aws_client/s3_2006_03_01.dart';
+import 'package:aws_common/aws_common.dart';
+import 'package:aws_signature_v4/aws_signature_v4.dart';
+import 'package:heart/aws/aws.dart';
+import 'package:heart_models/heart_models.dart' hide ExerciseService;
 
 import '../models/exercises.dart';
+import '../models/images.dart';
 
 part 'exercises.dart';
+part 'images.dart';
 
-abstract class _StorageBase {
-  S3 get _client;
-
-  String get exerciseBucket;
-
-  const _StorageBase();
+abstract class _StorageBase extends S3Api {
+  String get contentBucket;
 }
 
-class Storage extends _StorageBase with _Exercises implements ExerciseService {
-  @override
-  final S3 _client;
-  @override
-  final String exerciseBucket;
+class Storage extends _StorageBase with _Exercises, _Images implements ExerciseService {
+  final AWSCredentialsProvider _credentialsProvider;
 
-  const Storage({
-    required S3 client,
-    required this.exerciseBucket,
-  }) : _client = client;
+  @override
+  final String region;
+  @override
+  final String contentBucket;
+
+  Storage({
+    required AWSCredentialsProvider credentialsProvider,
+    required this.region,
+    required this.contentBucket,
+  }) : _credentialsProvider = credentialsProvider;
+
+  @override
+  AWSCredentialsProvider get credentialsProvider => _credentialsProvider;
 }
