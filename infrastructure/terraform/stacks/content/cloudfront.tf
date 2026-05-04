@@ -120,6 +120,15 @@ resource "aws_cloudfront_distribution" "media" {
     cache_policy_id        = aws_cloudfront_cache_policy.media.id
   }
 
+  ordered_cache_behavior {
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    path_pattern           = "/favicon.ico"
+    target_origin_id       = local.content_origin
+    viewer_protocol_policy = "https-only"
+    cache_policy_id        = local.caching_optimized
+  }
+
   viewer_certificate {
     ssl_support_method  = "sni-only"
     acm_certificate_arn = var.media_distribution_ssl_certificate
