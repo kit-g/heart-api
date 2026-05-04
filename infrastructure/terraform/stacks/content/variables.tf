@@ -39,6 +39,16 @@ variable "web_distribution_ssl_certificate" {
 }
 
 variable "media_distribution_aliases" {
-  type = set(string)
+  type        = set(string)
   description = "CNAMES of the media distribution"
+}
+
+variable "web_distribution_aliases" {
+  type        = set(string)
+  description = "CNAMES of the web distribution"
+}
+
+variable "firebase_auth_domain" {
+  type        = string
+  description = "DNS name of the Firebase auth app"
 }

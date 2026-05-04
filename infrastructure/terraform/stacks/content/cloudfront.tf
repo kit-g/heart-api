@@ -30,10 +30,37 @@ resource "aws_s3_bucket_policy" "content_cloudfront_access" {
   })
 }
 
+resource "aws_s3_bucket_policy" "static_cloudfront_access" {
+  bucket = aws_s3_bucket.static.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowCloudFrontServicePrincipal"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.static.arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.web.arn
+          }
+        }
+      }
+    ]
+  })
+}
+
 locals {
-  content_origin = "content-bucket"
-  # CloudFront managed cache policy ID for CachingOptimized
-  caching_optimized = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+  content_origin                = "content-bucket"
+  static_origin                 = "static-bucket"
+  firebase_origin               = "firebase-auth"
+  caching_optimized             = "658327ea-f89d-4fab-a63d-7e88639e58f6" # CloudFront managed cache policy ID 
+  caching_disabled              = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CloudFront managed cache policy ID
+  all_viewer_except_host_header = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # CloudFront managed origin request policy ID for AllViewerExceptHostHeader, needed to forward Firebase auth requests to the app, with query params
 }
 
 resource "aws_cloudfront_cache_policy" "media" {
@@ -99,6 +126,64 @@ resource "aws_cloudfront_distribution" "media" {
   }
 
   aliases = var.media_distribution_aliases
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+}
+
+resource "aws_cloudfront_distribution" "web" {
+  enabled = true
+  comment = "Heart of yours, website and app"
+
+  origin {
+    origin_access_control_id = aws_cloudfront_origin_access_control.heart.id
+    domain_name              = aws_s3_bucket.static.bucket_regional_domain_name
+    origin_id                = local.static_origin
+    origin_path              = "/site"
+  }
+
+  origin {
+    domain_name = var.firebase_auth_domain
+    origin_id   = local.firebase_origin
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  default_root_object = "index.html"
+
+  default_cache_behavior {
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = local.static_origin
+    viewer_protocol_policy = "redirect-to-https"
+    cache_policy_id        = local.caching_optimized
+  }
+
+  ordered_cache_behavior {
+    allowed_methods          = ["GET", "HEAD"]
+    cached_methods           = ["GET", "HEAD"]
+    path_pattern             = "/__/auth/*"
+    target_origin_id         = local.firebase_origin
+    viewer_protocol_policy   = "redirect-to-https"
+    compress                 = true
+    origin_request_policy_id = local.all_viewer_except_host_header
+    cache_policy_id          = local.caching_disabled
+  }
+
+  viewer_certificate {
+    ssl_support_method  = "sni-only"
+    acm_certificate_arn = var.web_distribution_ssl_certificate
+  }
+
+  aliases = var.web_distribution_aliases
 
   restrictions {
     geo_restriction {

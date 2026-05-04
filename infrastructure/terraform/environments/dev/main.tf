@@ -14,6 +14,8 @@ module "content" {
   media_distribution_ssl_certificate = "arn:aws:acm:us-east-1:583168578067:certificate/297c34bc-7a74-4cb1-82c4-71bfe0114eb7"
   media_distribution_aliases         = ["dev.media.heart-of.me"]
   web_distribution_ssl_certificate   = "arn:aws:acm:us-east-1:583168578067:certificate/2ac33117-c985-4f4d-a382-d2c8bad1766a"
+  web_distribution_aliases           = ["dev.heart-of.me", "www.dev.heart-of.me"]
+  firebase_auth_domain               = "heart-of-yours-dev.firebaseapp.com"
 }
 
 module "api" {
