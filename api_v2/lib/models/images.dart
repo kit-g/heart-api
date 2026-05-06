@@ -31,6 +31,10 @@ abstract interface class ApiImageDbService {
     required String Function(String) imageUrl,
   });
 
+  Future<List<String>> getUserImageKeys({required String userId});
+
+  Future<List<String>> getWorkoutImageKeys({required String userId, required String workoutId});
+
   Future<void> deleteImageRecord({
     required String userId,
     required String workoutId,
