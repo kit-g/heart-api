@@ -65,27 +65,18 @@ abstract class S3Api with Signer {
       {'x-amz-credential': credentialStr},
       {'x-amz-algorithm': 'AWS4-HMAC-SHA256'},
       {'x-amz-date': amzDate},
+      ...?conditions,
+      if (creds.sessionToken case String token) {'x-amz-security-token': token},
     ];
-
-    if (conditions != null) {
-      policyConditions.addAll(conditions);
-    }
 
     final formFields = <String, String>{
       'key': key,
       'x-amz-algorithm': 'AWS4-HMAC-SHA256',
       'x-amz-credential': credentialStr,
       'x-amz-date': amzDate,
+      ...?fields,
+      if (creds.sessionToken case String token) 'x-amz-security-token': token,
     };
-
-    if (fields != null) {
-      formFields.addAll(fields);
-    }
-
-    if (creds.sessionToken != null) {
-      policyConditions.add({'x-amz-security-token': creds.sessionToken!});
-      formFields['x-amz-security-token'] = creds.sessionToken!;
-    }
 
     final policy = {
       'expiration': expiration,
@@ -119,11 +110,5 @@ abstract class S3Api with Signer {
     }
 
     return tags;
-  }
-}
-
-extension on int {
-  String pad([int digits = 2]) {
-    return toString().padLeft(digits, '0');
   }
 }
