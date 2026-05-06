@@ -12,6 +12,7 @@ import 'package:relic/relic.dart';
 
 final routes = <(String, Method), ModelHandler>{
   ('/accounts', .put): account.upsertAccount,
+  ('/feedback', .post): feedback.submitFeedback,
   ('/accounts/:targetUserId/workouts', .get): workouts.getTargetUserWorkouts,
   ('/accounts/:targetUserId/workouts/:workoutId', .get): workouts.getTargetUserWorkout,
   ('/accounts/:targetUserId/templates/:templateId', .post): templates.assignTemplateToUser,
