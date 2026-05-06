@@ -25,16 +25,50 @@ WHERE key = @key AND user_id = @userId AND workout_id = @workoutId::uuid
 RETURNING id
 ''';
 
+final _getUserImageKeys = '''
+SELECT key 
+FROM workout_images 
+WHERE user_id = @userId
+''';
+
+final _getWorkoutImageKeys = '''
+SELECT key 
+FROM workout_images 
+WHERE user_id = @userId 
+  AND workout_id = @workoutId::uuid
+''';
+
 final _updateProfile = '''
 INSERT INTO profiles (id, email, username, avatar_url, updated_at)
 VALUES (@id, @email, @username, @avatar, now())
-ON CONFLICT (id) 
-DO UPDATE 
-SET 
-username = EXCLUDED.username, 
-email = EXCLUDED.email, 
-avatar_url = EXCLUDED.avatar_url, 
+ON CONFLICT (id)
+DO UPDATE
+SET
+username = EXCLUDED.username,
+email = EXCLUDED.email,
+avatar_url = EXCLUDED.avatar_url,
 updated_at = now();
+''';
+
+final _scheduleAccountDeletion = '''
+UPDATE profiles
+SET 
+  account_deletion_schedule = @schedule, 
+  scheduled_for_deletion_at = @scheduledAt
+WHERE id = @userId
+''';
+
+final _undoAccountDeletion = '''
+UPDATE profiles
+SET 
+  account_deletion_schedule = NULL, 
+  scheduled_for_deletion_at = NULL
+WHERE id = @userId
+''';
+
+final _deleteAccount = '''
+DELETE FROM profiles 
+WHERE id = @userId
 ''';
 
 final _createConnection = '''
