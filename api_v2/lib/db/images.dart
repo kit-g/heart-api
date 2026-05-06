@@ -43,6 +43,24 @@ mixin _Images on _DatabaseBase implements ApiImageDbService {
   }
 
   @override
+  Future<List<String>> getUserImageKeys({required String userId}) async {
+    final rows = await _pool.execute(
+      _getUserImageKeys.toSql(),
+      parameters: {'userId': userId},
+    );
+    return rows.map((r) => r.toColumnMap()['key'] as String).toList();
+  }
+
+  @override
+  Future<List<String>> getWorkoutImageKeys({required String userId, required String workoutId}) async {
+    final rows = await _pool.execute(
+      _getWorkoutImageKeys.toSql(),
+      parameters: {'userId': userId, 'workoutId': workoutId},
+    );
+    return rows.map((r) => r.toColumnMap()['key'] as String).toList();
+  }
+
+  @override
   Future<void> deleteImageRecord({
     required String userId,
     required String workoutId,
