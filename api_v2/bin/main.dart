@@ -82,6 +82,7 @@ Future<void> main() async {
     ..use('/', configuration(override: _config))
     ..use('/', authenticator(implementation: testAuth))
     ..use('/', authentication(shouldAuthenticate: isPublicRoute))
+    ..use('/', awsConfig(config: _awsConfig))
     ..use('/accounts', profilesDb(db: _database))
     ..use('/accounts', workoutsDb(db: _database))
     ..use('/accounts', connectionsDb(db: _database))
@@ -89,13 +90,13 @@ Future<void> main() async {
     ..use('/charts', chartsDb(db: _database))
     ..use('/connections', connectionsDb(db: _database))
     ..use('/exercises', exercisesDb(db: _storage))
+    ..use('/feedback', imageStorageDb(db: _storage))
     ..use('/workouts', workoutsDb(db: _database))
     ..use('/workouts', imageDb(db: _database))
     ..use('/workouts', imageStorageDb(db: _storage))
     ..use('/templates', templatesDb(db: _database))
     ..use('/events', imageStorageDb(db: _storage))
     ..use('/events', imageDb(db: _database))
-    ..use('/events', awsConfig(config: _awsConfig))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 
   for (final MapEntry(key: (route, verb), value: handler) in routes.entries) {
