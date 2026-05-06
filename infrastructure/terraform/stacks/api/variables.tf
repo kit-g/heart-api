@@ -61,3 +61,13 @@ variable "database" {
     database        = string
   })
 }
+
+variable "monitoring_email" {
+  description = "Email address for SNS monitoring subscription (leave empty to skip)"
+  type        = string
+}
+
+variable "account_deletion_offset_days" {
+  description = "Days until a scheduled account deletion fires"
+  type        = number
+}
