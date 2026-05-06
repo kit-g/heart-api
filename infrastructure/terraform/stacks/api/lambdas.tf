@@ -17,24 +17,29 @@ resource "aws_lambda_function" "api" {
 
   environment {
     variables = {
-      AWS_LAMBDA_EXEC_WRAPPER  = "/opt/bootstrap"
-      AWS_LWA_PORT             = 8080
-      AWS_LWA_REMOVE_BASE_PATH = "/v2"
-      ENV                      = "dev"
-      CONTENT_BUCKET           = var.content_bucket.bucket
-      FIREBASE_PROJECT_ID      = var.firebase_project_id
-      LOG_LEVEL                = "ALL"
-      MEDIA_DISTRIBUTION       = "dev.media.heart-of.me"
-      MONITORING_TOPIC         = aws_sns_topic.monitoring.name
-      MIN_APP_VERSION          = "1.0.0"
-      REGION                   = var.region
-      SUPPORTED_LOCALES        = "en,en_CA,ru"
-      PG_DATABASE              = var.database.database
-      PG_HOST                  = var.database.host
-      PG_PASSWORD              = var.database.password
-      PG_PORT                  = var.database.port
-      PG_USER                  = var.database.user
-      EVENTS_DLQ               = aws_sqs_queue.events_dlq.url
+      AWS_LAMBDA_EXEC_WRAPPER      = "/opt/bootstrap"
+      AWS_LWA_PORT                 = 8080
+      AWS_LWA_REMOVE_BASE_PATH     = "/v2"
+      ENV                          = "dev"
+      CONTENT_BUCKET               = var.content_bucket.bucket
+      FIREBASE_PROJECT_ID          = var.firebase_project_id
+      LOG_LEVEL                    = "ALL"
+      MEDIA_DISTRIBUTION           = "dev.media.heart-of.me"
+      MONITORING_TOPIC             = aws_sns_topic.monitoring.name
+      MONITORING_TOPIC_ARN         = aws_sns_topic.monitoring.arn
+      SCHEDULE_GROUP               = aws_scheduler_schedule_group.accounts.name
+      ACCOUNT_DELETION_OFFSET_DAYS = tostring(var.account_deletion_offset_days)
+      SCHEDULER_ROLE_ARN           = aws_iam_role.scheduler.arn
+      EVENTS_SQS_ARN               = aws_sqs_queue.events.arn
+      MIN_APP_VERSION              = "1.0.0"
+      REGION                       = var.region
+      SUPPORTED_LOCALES            = "en,en_CA,ru"
+      PG_DATABASE                  = var.database.database
+      PG_HOST                      = var.database.host
+      PG_PASSWORD                  = var.database.password
+      PG_PORT                      = var.database.port
+      PG_USER                      = var.database.user
+      EVENTS_DLQ                   = aws_sqs_queue.events_dlq.url
     }
   }
 }

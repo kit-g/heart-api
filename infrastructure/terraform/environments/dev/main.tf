@@ -19,13 +19,15 @@ module "content" {
 }
 
 module "api" {
-  source              = "../../stacks/api"
-  environment         = "dev"
-  region              = local.region
-  account_id          = local.account_id
-  name_prefix         = "${var.name_prefix}-api"
-  log_retention       = 7
-  firebase_project_id = "heart-of-yours-dev"
-  content_bucket      = module.content.content_bucket
-  database            = module.content.database
+  source                       = "../../stacks/api"
+  environment                  = "dev"
+  region                       = local.region
+  account_id                   = local.account_id
+  name_prefix                  = "${var.name_prefix}-api"
+  log_retention                = 7
+  firebase_project_id          = "heart-of-yours-dev"
+  content_bucket               = module.content.content_bucket
+  database                     = module.content.database
+  account_deletion_offset_days = 2
+  monitoring_email             = "info@heart-of.me"
 }
