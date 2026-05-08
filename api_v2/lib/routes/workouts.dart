@@ -2,6 +2,7 @@ import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart';
@@ -64,9 +65,16 @@ Future<Workout> updateWorkout(final Request request) async {
 
 Future<NoContent> deleteWorkout(final Request request) async {
   final workoutId = request.pathParameters.raw[#workoutId]!;
-  await request.workoutsService.deleteWorkout(
-    userId: request.userId,
+  final userId = request.userId;
+
+  final keys = await request.imageDbService.getWorkoutImageKeys(
+    userId: userId,
     workoutId: workoutId,
   );
+  for (final key in keys) {
+    await request.imageStorageService.deleteObject(key: key);
+  }
+
+  await request.workoutsService.deleteWorkout(userId: userId, workoutId: workoutId);
   throw const NoContent();
 }
