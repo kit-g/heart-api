@@ -4,6 +4,7 @@ import 'package:heart/routes/charts.dart' as charts;
 import 'package:heart/routes/connections.dart' as connections;
 import 'package:heart/routes/events.dart' as events;
 import 'package:heart/routes/exercises.dart' as exercises;
+import 'package:heart/routes/feedback.dart' as feedback;
 import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
 import 'package:heart/routes/templates.dart' as templates;
@@ -12,6 +13,7 @@ import 'package:relic/relic.dart';
 
 final routes = <(String, Method), ModelHandler>{
   ('/accounts', .put): account.upsertAccount,
+  ('/accounts', .delete): account.deleteAccount,
   ('/feedback', .post): feedback.submitFeedback,
   ('/accounts/:targetUserId/workouts', .get): workouts.getTargetUserWorkouts,
   ('/accounts/:targetUserId/workouts/:workoutId', .get): workouts.getTargetUserWorkout,

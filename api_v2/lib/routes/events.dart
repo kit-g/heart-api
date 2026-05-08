@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:heart/aws/aws.dart';
+import 'package:heart/events/account_deletion.dart';
 import 'package:heart/events/uploads.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/aws.dart';
@@ -61,6 +62,12 @@ Future<NoContent> handler(Request request) async {
                 },
               }:
                 await imageUpload(request, bucket, key, onError: onError);
+              // use case: account deletion Scheduler callback
+              case {
+                'Event': 'AccountDeletion',
+                'Payload': {'user_id': String userId},
+              }:
+                await accountDeletion(request, userId);
             }
         }
       }
