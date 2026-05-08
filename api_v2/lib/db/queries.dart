@@ -38,7 +38,7 @@ WHERE user_id = @userId
   AND workout_id = @workoutId::uuid
 ''';
 
-final _updateProfile = '''
+final _updateAccount = '''
 INSERT INTO profiles (id, email, username, avatar_url, updated_at)
 VALUES (@id, @email, @username, @avatar, now())
 ON CONFLICT (id)
@@ -47,23 +47,25 @@ SET
 username = EXCLUDED.username,
 email = EXCLUDED.email,
 avatar_url = EXCLUDED.avatar_url,
-updated_at = now();
+updated_at = now()
+RETURNING id, email, username, avatar_url, scheduled_for_deletion_at
 ''';
 
 final _scheduleAccountDeletion = '''
 UPDATE profiles
 SET 
-  account_deletion_schedule = @schedule, 
-  scheduled_for_deletion_at = @scheduledAt
+  account_deletion_schedule = coalesce(@schedule, account_deletion_schedule), 
+  scheduled_for_deletion_at = coalesce(@scheduledAt, scheduled_for_deletion_at)
 WHERE id = @userId
 ''';
 
 final _undoAccountDeletion = '''
 UPDATE profiles
-SET 
-  account_deletion_schedule = NULL, 
+SET
+  account_deletion_schedule = NULL,
   scheduled_for_deletion_at = NULL
 WHERE id = @userId
+RETURNING id, email, username, avatar_url, scheduled_for_deletion_at
 ''';
 
 final _deleteAccount = '''
