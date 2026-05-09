@@ -87,7 +87,7 @@ Future<NoContent> deleteAccount(final Request request) async {
     name: scheduleName,
     groupName: config.scheduleGroup,
     scheduleExpression: SchedulerApi.atExpression(scheduledAt),
-    targetArn: config.eventsSqsArn,
+    targetArn: config.eventsQueueArn,
     targetRoleArn: config.schedulerRoleArn,
     input: jsonEncode({
       'Event': 'AccountDeletion',

@@ -78,8 +78,31 @@ RETURNING id, email, username, avatar_url, scheduled_for_deletion_at
 ''';
 
 final _deleteAccount = '''
-DELETE FROM profiles 
+DELETE FROM profiles
 WHERE id = @userId
+''';
+
+final _listExercises = '''
+SELECT coalesce(
+  jsonb_agg(
+    jsonb_build_object(
+      'id', e.id,
+      'name', COALESCE(t.name, e.name),
+      'category', e.category,
+      'target', e.target,
+      'instructions', COALESCE(t.instructions, e.instructions),
+      'asset', e.asset,
+      'thumbnail', e.thumbnail,
+      'muscles', e.muscles,
+      'user_id', e.user_id
+    ) ORDER BY e.name
+  ),
+  '[]'::jsonb
+) AS exercises
+FROM exercises e
+LEFT JOIN exercise_translations t ON t.exercise_id = e.id AND t.locale = @locale
+WHERE (e.user_id IS NULL OR e.user_id = @userId)
+  AND NOT e.archived
 ''';
 
 final _createConnection = '''

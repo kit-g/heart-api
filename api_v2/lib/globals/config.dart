@@ -12,6 +12,20 @@ const _defaultMimeTypes = {
   'image/gif',
 };
 
+const _requiredConfig = {
+  'CONTENT_BUCKET',
+  'ENV',
+  'EVENTS_QUEUE_ARN',
+  'EVENTS_DLQ',
+  'FIREBASE_PROJECT_ID',
+  'MEDIA_DISTRIBUTION',
+  'MIN_APP_VERSION',
+  'MONITORING_TOPIC_ARN',
+  'REGION',
+  'SCHEDULE_GROUP',
+  'SCHEDULER_ROLE_ARN',
+};
+
 enum Env {
   dev,
   prod
@@ -148,10 +162,10 @@ abstract interface class AppConfig {
           ),
         );
       default:
+        final missing = _requiredConfig.where((key) => env[key] == null || env[key]!.isEmpty).toList();
         throw StateError(
-          'Missing required environment variables. '
-          'Ensure REGION, ENV, FIREBASE_PROJECT_ID, CONTENT_BUCKET, EVENTS_DLQ, MEDIA_DISTRIBUTION, '
-          'MONITORING_TOPIC_ARN, SCHEDULE_GROUP, SCHEDULER_ROLE_ARN and EVENTS_QUEUE_ARN are set.',
+          'Missing required environment variables: ${missing.join(', ')}. '
+          'Ensure all required configuration values are set.',
         );
     }
   }

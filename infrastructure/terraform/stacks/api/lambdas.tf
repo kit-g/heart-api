@@ -29,7 +29,6 @@ resource "aws_lambda_function" "api" {
       LOG_LEVEL                    = "ALL"
       MEDIA_DISTRIBUTION           = "dev.media.heart-of.me" #
       MIN_APP_VERSION              = "1.0.0"
-      MONITORING_TOPIC             = aws_sns_topic.monitoring.name
       MONITORING_TOPIC_ARN         = aws_sns_topic.monitoring.arn
       PG_DATABASE                  = var.database.database
       PG_HOST                      = var.database.host
