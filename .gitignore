@@ -27,6 +27,8 @@ vscode/
 .aws-sam/
 ignored/
 .junie/
+.ai/
+build/
 
 infrastructure/api/api.toml
 content/assets/**
