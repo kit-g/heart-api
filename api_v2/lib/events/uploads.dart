@@ -7,7 +7,6 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:relic/relic.dart';
 
-
 Future<void> imageUpload(
   final Request request,
   String bucket,

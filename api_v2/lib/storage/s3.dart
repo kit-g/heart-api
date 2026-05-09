@@ -3,19 +3,17 @@ library;
 import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:heart/aws/aws.dart';
-import 'package:heart_models/heart_models.dart' hide ExerciseService;
+import 'package:heart_models/heart_models.dart';
 
-import '../models/exercises.dart';
 import '../models/images.dart';
 
-part 'exercises.dart';
 part 'images.dart';
 
 abstract class _StorageBase extends S3Api {
   String get contentBucket;
 }
 
-class Storage extends _StorageBase with _Exercises, _Images implements ExerciseService {
+class Storage extends _StorageBase with _Images implements ApiImageStorageService {
   final AWSCredentialsProvider _credentialsProvider;
 
   @override
