@@ -42,6 +42,16 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
   }
 
   @override
+  Future<User> updateAvatarUrl({required String userId, String? avatarUrl}) async {
+    final rows = await _pool.execute(
+      _updateAvatarUrl.toSql(),
+      parameters: {'userId': userId, 'avatarUrl': avatarUrl},
+    );
+    if (rows.isEmpty) throw NotFound(type: 'Profile', id: userId);
+    return User.fromRow(rows.first.toColumnMap());
+  }
+
+  @override
   Future<void> deleteAccount({required String userId}) {
     return _pool.execute(
       _deleteAccount.toSql(),
