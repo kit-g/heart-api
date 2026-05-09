@@ -11,5 +11,7 @@ abstract interface class ApiProfileService {
 
   Future<User> undoAccountDeletion({required String userId});
 
+  Future<User> updateAvatarUrl({required String userId, String? avatarUrl});
+
   Future<void> deleteAccount({required String userId});
 }

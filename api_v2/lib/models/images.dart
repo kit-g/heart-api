@@ -74,8 +74,10 @@ class GalleryResponse with Iterable<WorkoutImage> implements Model {
   Iterator<WorkoutImage> get iterator => images.iterator;
 
   @override
-  Map<String, dynamic> toMap() => {
-    'images': map((img) => img.toRow()).toList(),
-    'cursor': ?cursor,
-  };
+  Map<String, dynamic> toMap() {
+    return {
+      'images': map((img) => img.toRow()).toList(),
+      'cursor': ?cursor,
+    };
+  }
 }
