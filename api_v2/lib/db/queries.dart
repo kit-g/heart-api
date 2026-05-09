@@ -94,15 +94,50 @@ SELECT coalesce(
       'asset', e.asset,
       'thumbnail', e.thumbnail,
       'muscles', e.muscles,
-      'user_id', e.user_id
+      'own', e.user_id IS NOT NULL,
+      'archived', e.archived
     ) ORDER BY e.name
   ),
   '[]'::jsonb
 ) AS exercises
 FROM exercises e
 LEFT JOIN exercise_translations t ON t.exercise_id = e.id AND t.locale = @locale
-WHERE (e.user_id IS NULL OR e.user_id = @userId)
-  AND NOT e.archived
+WHERE
+  CASE WHEN @owned::boolean
+    THEN e.user_id = @userId
+    ELSE e.user_id IS NULL OR e.user_id = @userId
+  END
+''';
+
+final _createExercise = '''
+INSERT INTO exercises (
+  name, 
+  category, 
+  target, 
+  instructions, 
+  user_id
+) VALUES (
+  @name, 
+  @category, 
+  @target, 
+  @instructions, 
+  @userId
+)
+RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, archived,
+          user_id IS NOT NULL AS own
+''';
+
+final _updateExercise = '''
+UPDATE exercises
+SET
+  category = coalesce(@category, category),
+  target = coalesce(@target, target),
+  instructions = coalesce(@instructions, instructions),
+  archived = coalesce(@archived, archived)
+WHERE id = @exerciseId::uuid 
+  AND user_id = @userId
+RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, archived,
+          user_id IS NOT NULL AS own
 ''';
 
 final _createConnection = '''

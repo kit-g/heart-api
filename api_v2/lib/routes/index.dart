@@ -27,6 +27,8 @@ final routes = <(String, Method), ModelHandler>{
   ('/connections/:connectionId', .delete): connections.deleteConnection,
   ('/connections/:connectionId', .put): connections.reactToConnection,
   ('/exercises', .get): exercises.getExercises,
+  ('/exercises', .post): exercises.createExercise,
+  ('/exercises/:exerciseId', .put): exercises.updateExercise,
   ('/events', .post): events.handler,
   ('/templates', .get): templates.getMyTemplates,
   ('/templates/:templateId', .get): templates.getMyTemplate,
