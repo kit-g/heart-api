@@ -4,10 +4,10 @@ data "aws_iam_policy_document" "scheduler_manage" {
     actions = [
       "scheduler:CreateSchedule",
       "scheduler:DeleteSchedule",
+      "scheduler:GetSchedule",
     ]
     resources = [
-      aws_scheduler_schedule_group.accounts.arn,
-      "${aws_scheduler_schedule_group.accounts.arn}/*",
+      "arn:aws:scheduler:${var.region}:${var.account_id}:schedule/${aws_scheduler_schedule_group.accounts.name}/*",
     ]
   }
 }
@@ -27,6 +27,7 @@ data "aws_iam_policy_document" "content_bucket" {
       "s3:ListBucket",
       "s3:GetObject",
       "s3:PutObject",
+      "s3:GetObjectTagging",
       "s3:PutObjectTagging",
       "s3:DeleteObject",
     ]

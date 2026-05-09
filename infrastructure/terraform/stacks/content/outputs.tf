@@ -7,7 +7,7 @@ output "static_bucket" {
 }
 
 locals {
-  pooler_port   = 6543
+  pooler_port   = 5432
   database_name = "heart"
 }
 
