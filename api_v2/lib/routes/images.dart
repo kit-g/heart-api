@@ -30,7 +30,7 @@ const _defaultMimeType = 'image/jpeg';
 Future<GalleryResponse> getGallery(final Request request) async {
   return request.imageDbService.getGallery(
     userId: request.userId,
-    imageUrl: request.config.workoutImageUrl,
+    imageUrl: request.config.cdnAssetUrl,
     pageSize: request.queryParameters(_limitParam),
     cursor: request.queryParameters.raw['cursor'],
   );
@@ -59,12 +59,13 @@ Future<PresignedUploadResponse> presignWorkoutImage(final Request request) async
       ('user-id', request.userId),
       ('workout-id', workoutId),
       ('image-id', imageId),
+      ('kind', 'workout-image'),
     ],
   );
 
   return PresignedUploadResponse(
     preSignedUrl: presignedUrl,
-    destinationUrl: request.config.workoutImageUrl(key),
+    destinationUrl: request.config.cdnAssetUrl(key),
     key: key,
   );
 }

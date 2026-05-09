@@ -17,7 +17,7 @@ Future<WorkoutResponse> getTargetUserWorkouts(final Request request) async {
     targetUserId: targetUserId,
     pageSize: request.queryParameters(_limitParam),
     cursor: request.queryParameters.raw['since'],
-    imageUrl: request.config.workoutImageUrl,
+    imageUrl: request.config.cdnAssetUrl,
   );
 }
 
@@ -26,7 +26,7 @@ Future<Workout> getWorkout(final Request request) async {
   return request.workoutsService.getWorkout(
     userId: request.userId,
     workoutId: workoutId,
-    imageUrl: request.config.workoutImageUrl,
+    imageUrl: request.config.cdnAssetUrl,
   );
 }
 
@@ -37,7 +37,7 @@ Future<Workout> getTargetUserWorkout(final Request request) async {
     requesterId: request.userId,
     targetUserId: targetUserId,
     workoutId: workoutId,
-    imageUrl: request.config.workoutImageUrl,
+    imageUrl: request.config.cdnAssetUrl,
   );
 }
 
@@ -47,7 +47,7 @@ Future<Workout> createWorkout(final Request request) async {
   return request.workoutsService.createWorkout(
     userId: request.userId,
     body: workout,
-    imageUrl: request.config.workoutImageUrl,
+    imageUrl: request.config.cdnAssetUrl,
   );
 }
 
@@ -59,7 +59,7 @@ Future<Workout> updateWorkout(final Request request) async {
     userId: request.userId,
     workoutId: workoutId,
     body: workout,
-    imageUrl: request.config.workoutImageUrl,
+    imageUrl: request.config.cdnAssetUrl,
   );
 }
 
