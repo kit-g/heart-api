@@ -87,6 +87,7 @@ Future<void> main() async {
     ..use('/accounts', workoutsDb(db: _database))
     ..use('/accounts', connectionsDb(db: _database))
     ..use('/accounts', templatesDb(db: _database))
+    ..use('/accounts', imageStorageDb(db: _storage))
     ..use('/charts', chartsDb(db: _database))
     ..use('/connections', connectionsDb(db: _database))
     ..use('/exercises', exercisesDb(db: _storage))
