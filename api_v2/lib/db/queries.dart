@@ -59,6 +59,15 @@ SET
 WHERE id = @userId
 ''';
 
+final _updateAvatarUrl = '''
+UPDATE profiles
+SET 
+  avatar_url = @avatarUrl, 
+  updated_at = now()
+WHERE id = @userId
+RETURNING id, email, username, avatar_url, scheduled_for_deletion_at
+''';
+
 final _undoAccountDeletion = '''
 UPDATE profiles
 SET
