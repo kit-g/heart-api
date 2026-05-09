@@ -7,3 +7,7 @@ CREATE TABLE IF NOT EXISTS exercise_translations
     instructions TEXT,
     PRIMARY KEY (exercise_id, locale)
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS exercises_user_name_idx
+    ON exercises (user_id, name)
+    WHERE user_id IS NOT NULL;
