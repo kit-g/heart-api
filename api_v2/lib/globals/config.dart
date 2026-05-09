@@ -90,7 +90,7 @@ abstract interface class AppConfig {
 
   String get schedulerRoleArn;
 
-  String get eventsSqsArn;
+  String get eventsQueueArn;
 
   PostgresConfig get db;
 
@@ -103,17 +103,17 @@ abstract interface class AppConfig {
     final env = Platform.environment;
     switch (env) {
       case {
-            'REGION': String region,
-            'ENV': String environment,
-            'FIREBASE_PROJECT_ID': String firebaseProjectId,
-            'MIN_APP_VERSION': String version,
             'CONTENT_BUCKET': String contentBucket,
-            'MEDIA_DISTRIBUTION': String mediaDistribution,
+            'ENV': String environment,
+            'EVENTS_QUEUE_ARN': String eventsSqsArn,
             'EVENTS_DLQ': String dlq,
+            'FIREBASE_PROJECT_ID': String firebaseProjectId,
+            'MEDIA_DISTRIBUTION': String mediaDistribution,
+            'MIN_APP_VERSION': String version,
             'MONITORING_TOPIC_ARN': String monitoringTopicArn,
+            'REGION': String region,
             'SCHEDULE_GROUP': String scheduleGroup,
             'SCHEDULER_ROLE_ARN': String schedulerRoleArn,
-            'EVENTS_SQS_ARN': String eventsSqsArn,
           }
           when [region, environment, firebaseProjectId, contentBucket].every((v) => v.isNotEmpty):
         return _EnvConfig(
@@ -128,7 +128,7 @@ abstract interface class AppConfig {
             days: int.tryParse(env['ACCOUNT_DELETION_OFFSET_DAYS'] ?? '') ?? 30,
           ),
           schedulerRoleArn: schedulerRoleArn,
-          eventsSqsArn: eventsSqsArn,
+          eventsQueueArn: eventsSqsArn,
           logLevel: env['LOG_LEVEL'] ?? 'ALL',
           testUserId: env['TEST_USER_ID'],
           minimalAppVersion: version,
@@ -151,7 +151,7 @@ abstract interface class AppConfig {
         throw StateError(
           'Missing required environment variables. '
           'Ensure REGION, ENV, FIREBASE_PROJECT_ID, CONTENT_BUCKET, EVENTS_DLQ, MEDIA_DISTRIBUTION, '
-          'MONITORING_TOPIC_ARN, SCHEDULE_GROUP, SCHEDULER_ROLE_ARN and EVENTS_SQS_ARN are set.',
+          'MONITORING_TOPIC_ARN, SCHEDULE_GROUP, SCHEDULER_ROLE_ARN and EVENTS_QUEUE_ARN are set.',
         );
     }
   }
@@ -189,7 +189,7 @@ class _EnvConfig implements AppConfig {
   @override
   final String schedulerRoleArn;
   @override
-  final String eventsSqsArn;
+  final String eventsQueueArn;
   @override
   final List<String> supportedLocales;
   @override
@@ -224,7 +224,7 @@ class _EnvConfig implements AppConfig {
     required this.scheduleGroup,
     required this.accountDeletionOffset,
     required this.schedulerRoleArn,
-    required this.eventsSqsArn,
+    required this.eventsQueueArn,
   });
 
   @override
