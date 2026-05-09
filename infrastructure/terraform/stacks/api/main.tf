@@ -66,15 +66,20 @@ resource "aws_api_gateway_stage" "v1" {
   stage_name    = "v1"
 }
 
+resource "aws_sqs_queue" "events_dlq" {
+  name                      = "${var.name_prefix}-events-dlq"
+  message_retention_seconds = 1209600
+}
+
 resource "aws_sqs_queue" "events" {
   name                       = "${var.name_prefix}-events"
   visibility_timeout_seconds = 300
   message_retention_seconds  = 86400
-}
 
-resource "aws_sqs_queue" "events_dlq" {
-  name                      = "${var.name_prefix}-events-dlq"
-  message_retention_seconds = 1209600
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.events_dlq.arn
+    maxReceiveCount     = 3
+  })
 }
 
 resource "aws_lambda_event_source_mapping" "sqs_trigger" {
