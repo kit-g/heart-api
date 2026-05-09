@@ -156,7 +156,7 @@ abstract interface class AppConfig {
     }
   }
 
-  String workoutImageUrl(String key);
+  String cdnAssetUrl(String key);
 }
 
 class _EnvConfig implements AppConfig {
@@ -228,7 +228,7 @@ class _EnvConfig implements AppConfig {
   });
 
   @override
-  String workoutImageUrl(String key) => Uri.https(mediaDistribution, key).toString();
+  String cdnAssetUrl(String key) => Uri.https(mediaDistribution, key).toString();
 }
 
 final _configProperty = ContextProperty<AppConfig>('AppConfig');
