@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:heart_models/heart_models.dart';
+import 'auth.dart';
+import 'misc.dart';
 
 abstract interface class TemplateShare implements Model {
   String get id;
@@ -29,9 +30,9 @@ abstract interface class TemplateShare implements Model {
       studentTemplateId: row['student_template_id'].toString(),
       templateName: row['template_name'] as String,
       assignedTo: Profile(
-        id: '',
-        name: '',
-        avatar: '',
+        id: studentId,
+        name: row['student_username'],
+        avatar: row['student_avatar'],
       ),
       assignedAt: switch (row['created_at']) {
         DateTime dt => dt,
@@ -128,32 +129,6 @@ class _TemplateShareListResponse with Iterable<TemplateShare> implements Templat
       'cursor': ?cursor,
     };
   }
-}
-
-abstract interface class ApiTemplateService {
-  Future<Template> createTemplate({required String userId, required TemplateRequest body});
-
-  Future<Template> updateTemplate({
-    required String userId,
-    required String templateId,
-    required TemplateRequest body,
-  });
-
-  Future<TemplateShare> shareTemplate({
-    required String coachId,
-    required String targetUserId,
-    required String masterTemplateId,
-  });
-
-  Future<Template> getTemplate({required String userId, required String templateId});
-
-  Future<TemplateResponse> getTemplates({required String userId, String? cursor, int? pageSize});
-
-  Future<TemplateShareListResponse> getTemplateShares({required String userId, String? cursor, int? pageSize});
-
-  Future<void> deleteTemplate({required String coachId, required String templateId});
-
-  Future<void> deleteShare({required String coachId, required String shareId});
 }
 
 class TemplateRequest {
