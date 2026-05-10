@@ -25,19 +25,15 @@ import 'package:mockito/src/dummies.dart' as _i5;
 // ignore_for_file: invalid_use_of_internal_member
 
 class _FakeMuscleTagging_0 extends _i1.SmartFake implements _i2.MuscleTagging {
-  _FakeMuscleTagging_0(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+  _FakeMuscleTagging_0(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeExercise_1 extends _i1.SmartFake implements _i2.Exercise {
-  _FakeExercise_1(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+  _FakeExercise_1(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
-class _FakeChartPreference_2 extends _i1.SmartFake
-    implements _i3.ChartPreference {
-  _FakeChartPreference_2(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+class _FakeChartPreference_2 extends _i1.SmartFake implements _i3.ChartPreference {
+  _FakeChartPreference_2(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 /// A class which mocks [WorkoutSummary].
@@ -98,19 +94,13 @@ class MockExercise extends _i1.Mock implements _i2.Exercise {
           as _i2.Target);
 
   @override
-  bool get hasInfo =>
-      (super.noSuchMethod(Invocation.getter(#hasInfo), returnValue: false)
-          as bool);
+  bool get hasInfo => (super.noSuchMethod(Invocation.getter(#hasInfo), returnValue: false) as bool);
 
   @override
-  bool get isMine =>
-      (super.noSuchMethod(Invocation.getter(#isMine), returnValue: false)
-          as bool);
+  bool get isMine => (super.noSuchMethod(Invocation.getter(#isMine), returnValue: false) as bool);
 
   @override
-  bool get isArchived =>
-      (super.noSuchMethod(Invocation.getter(#isArchived), returnValue: false)
-          as bool);
+  bool get isArchived => (super.noSuchMethod(Invocation.getter(#isArchived), returnValue: false) as bool);
 
   @override
   _i2.MuscleTagging get muscles =>

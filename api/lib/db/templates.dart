@@ -77,7 +77,9 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
     );
     if (rows.isEmpty) throw NotFound(type: 'Template', id: masterTemplateId);
     final row = rows.first.toColumnMap();
-    if (row['forbidden'] == true) throw const Forbidden(reason: 'You do not have permission to assign templates to this user.');
+    if (row['forbidden'] == true) {
+      throw const Forbidden(reason: 'You do not have permission to assign templates to this user.');
+    }
     return TemplateShare.fromRow(row);
   }
 

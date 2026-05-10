@@ -124,7 +124,7 @@ void main() {
         'muscles': {
           'primary': {
             'ids': ['chest_middle'],
-            'groups': ['chest']
+            'groups': ['chest'],
           },
         },
       };
@@ -360,7 +360,9 @@ void main() {
           instructions: 'A',
         );
         final tagging = MuscleTagging.fromJson({
-          'primary': {'ids': ['p']}
+          'primary': {
+            'ids': ['p'],
+          },
         });
         final copied = base.copyWith(
           category: Category.machine,

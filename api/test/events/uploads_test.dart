@@ -32,19 +32,26 @@ void main() {
     when(imageStorage.copyObject(fromKey: anyNamed('fromKey'), toKey: anyNamed('toKey'))).thenAnswer((_) async {});
     when(imageStorage.deleteObject(key: anyNamed('key'))).thenAnswer((_) async {});
     final dummyImage = WorkoutImage.fromJson({
-      'id': 'i', 'workoutId': 'w', 'key': '/k', 'url': 'https://cdn/k',
+      'id': 'i',
+      'workoutId': 'w',
+      'key': '/k',
+      'url': 'https://cdn/k',
     });
     final dummyUser = User(id: 'u1');
-    when(imageDb.recordImage(
-      userId: anyNamed('userId'),
-      workoutId: anyNamed('workoutId'),
-      key: anyNamed('key'),
-      imageUrl: anyNamed('imageUrl'),
-    )).thenAnswer((_) async => dummyImage);
-    when(profileService.updateAvatarUrl(
-      userId: anyNamed('userId'),
-      avatarUrl: anyNamed('avatarUrl'),
-    )).thenAnswer((_) async => dummyUser);
+    when(
+      imageDb.recordImage(
+        userId: anyNamed('userId'),
+        workoutId: anyNamed('workoutId'),
+        key: anyNamed('key'),
+        imageUrl: anyNamed('imageUrl'),
+      ),
+    ).thenAnswer((_) async => dummyImage);
+    when(
+      profileService.updateAvatarUrl(
+        userId: anyNamed('userId'),
+        avatarUrl: anyNamed('avatarUrl'),
+      ),
+    ).thenAnswer((_) async => dummyUser);
 
     request = _request()
       ..imageDbService = imageDb
@@ -58,11 +65,15 @@ void main() {
     const uploadKey = 'uploads/abc123.jpg';
 
     test('copies upload to workouts/<hash>/<imageId>.<ext>, deletes upload, records image', () async {
-      when(imageStorage.getObjectTagging(bucket, uploadKey)).thenAnswer((_) async => {
-        'user-id': 'u1',
-        'workout-id': 'w1',
-        'image-id': 'img1',
-      });
+      when(
+        imageStorage.getObjectTagging(bucket, uploadKey),
+      ).thenAnswer(
+        (_) async => {
+          'user-id': 'u1',
+          'workout-id': 'w1',
+          'image-id': 'img1',
+        },
+      );
 
       await imageUpload(request, bucket, uploadKey, onError: onError);
 
@@ -83,36 +94,48 @@ void main() {
     });
 
     test('uses .jpg as default extension when upload key has no extension', () async {
-      when(imageStorage.getObjectTagging(bucket, 'uploads/abc123')).thenAnswer((_) async => {
-        'user-id': 'u1',
-        'workout-id': 'w1',
-        'image-id': 'img1',
-      });
+      when(
+        imageStorage.getObjectTagging(bucket, 'uploads/abc123'),
+      ).thenAnswer(
+        (_) async => {
+          'user-id': 'u1',
+          'workout-id': 'w1',
+          'image-id': 'img1',
+        },
+      );
 
       await imageUpload(request, bucket, 'uploads/abc123', onError: onError);
 
-      verify(imageStorage.copyObject(
-        fromKey: 'uploads/abc123',
-        toKey: argThat(endsWith('.jpg'), named: 'toKey'),
-      )).called(1);
+      verify(
+        imageStorage.copyObject(
+          fromKey: 'uploads/abc123',
+          toKey: argThat(endsWith('.jpg'), named: 'toKey'),
+        ),
+      ).called(1);
     });
 
     test('skips when any required tag is missing', () async {
-      when(imageStorage.getObjectTagging(bucket, uploadKey)).thenAnswer((_) async => {
-        'user-id': 'u1',
-        'workout-id': 'w1',
-        // image-id missing
-      });
+      when(
+        imageStorage.getObjectTagging(bucket, uploadKey),
+      ).thenAnswer(
+        (_) async => {
+          'user-id': 'u1',
+          'workout-id': 'w1',
+          // image-id missing
+        },
+      );
 
       await imageUpload(request, bucket, uploadKey, onError: onError);
 
       verifyNever(imageStorage.copyObject(fromKey: anyNamed('fromKey'), toKey: anyNamed('toKey')));
-      verifyNever(imageDb.recordImage(
-        userId: anyNamed('userId'),
-        workoutId: anyNamed('workoutId'),
-        key: anyNamed('key'),
-        imageUrl: anyNamed('imageUrl'),
-      ));
+      verifyNever(
+        imageDb.recordImage(
+          userId: anyNamed('userId'),
+          workoutId: anyNamed('workoutId'),
+          key: anyNamed('key'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      );
       expect(errors, isEmpty);
     });
   });
@@ -122,10 +145,12 @@ void main() {
     const uploadKey = 'uploads/avatar-u1';
 
     test('copies to avatars/<userId>, deletes upload, updates avatar URL', () async {
-      when(imageStorage.getObjectTagging(bucket, uploadKey)).thenAnswer((_) async => {
-        'kind': 'avatar',
-        'user-id': 'u1',
-      });
+      when(imageStorage.getObjectTagging(bucket, uploadKey)).thenAnswer(
+        (_) async => {
+          'kind': 'avatar',
+          'user-id': 'u1',
+        },
+      );
 
       await imageUpload(request, bucket, uploadKey, onError: onError);
 
@@ -141,10 +166,14 @@ void main() {
     });
 
     test('skips when user-id is empty', () async {
-      when(imageStorage.getObjectTagging(bucket, uploadKey)).thenAnswer((_) async => {
-        'kind': 'avatar',
-        'user-id': '',
-      });
+      when(
+        imageStorage.getObjectTagging(bucket, uploadKey),
+      ).thenAnswer(
+        (_) async => {
+          'kind': 'avatar',
+          'user-id': '',
+        },
+      );
 
       await imageUpload(request, bucket, uploadKey, onError: onError);
 
