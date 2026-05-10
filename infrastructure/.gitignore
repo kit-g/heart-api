@@ -4,5 +4,5 @@
 **/terraform.tfstate.backup
 **/*.tfvars
 **/*.tfvars.json
-environments/**/backend.hcl
+app/environments/**/backend.hcl
 crash.log

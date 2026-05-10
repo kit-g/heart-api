@@ -6,38 +6,39 @@ Terraform for everything AWS + Supabase.
 
 ```
 infrastructure/
-├── stacks/
-│   ├── api/             # Lambda function, API Gateway, SQS events queue + DLQ,
-│   │                    # EventBridge S3 rule, Scheduler group, SNS monitoring topic,
-│   │                    # IAM roles, CloudWatch logs
-│   ├── cdn/             # CloudFront media + web distributions, OACs, S3 bucket policies
-│   ├── content/         # Content + static S3 buckets, lifecycle for uploads/,
-│   │                    # EventBridge bucket notification, Supabase project
-│   ├── platform/dns/    # Apex zone + email + NS delegations (not deployed yet — waits for prod)
-│   └── app/dns/         # Per-env subzone + records (not deployed yet)
-├── modules/
-│   └── iam/             # Reusable role + inline-policies wrapper
-└── environments/
-    └── dev/             # Wires the stacks for the dev account
+└── app/                       # The app's TF tier — everything that ships with releases
+    ├── stacks/
+    │   ├── api/               # Lambda function, API Gateway, SQS events queue + DLQ,
+    │   │                      # EventBridge S3 rule, Scheduler group, SNS monitoring topic,
+    │   │                      # IAM roles, CloudWatch logs
+    │   ├── cdn/               # CloudFront media + web distributions, OACs, S3 bucket policies
+    │   └── content/           # Content + static S3 buckets, lifecycle for uploads/,
+    │                          # EventBridge bucket notification, Supabase project
+    ├── modules/
+    │   └── iam/               # Reusable role + inline-policies wrapper
+    └── environments/
+        └── dev/               # Wires the stacks for the dev account
 ```
+
+The top-level `infrastructure/` directory is set up for tiered TF — `app/` holds the per-release stacks. Future tiers (e.g. `platform/` for DNS once prod exists) will sit alongside.
 
 ## Deployment
 
 ```bash
-cd infrastructure/environments/dev
+cd infrastructure/app/environments/dev
 terraform init
 terraform plan
 terraform apply
 ```
 
-The dev environment auto-builds the Lambda binary on `terraform apply` (via `null_resource.build_dart_api` in `stacks/api/archives.tf`) — no separate build step needed for infra-only applies.
+The dev environment auto-builds the Lambda binary on `terraform apply` (via `null_resource.build_dart_api` in `app/stacks/api/archives.tf`) — no separate build step needed for infra-only applies.
 
 ## Conventions
 
 ### Path references inside stacks
 
-- **Module sources between siblings**: relative paths like `../../stacks/api`. Uniform; survives directory restructures.
-- **Repo references inside a stack** (e.g. `archives.tf` reaching `api/`): `${path.module}/../../../api`. Three levels up from `infrastructure/stacks/<stack>/` is the repo root.
+- **Module sources between siblings**: relative paths like `../../stacks/api`. Uniform; survives directory restructures within the same tier.
+- **Repo references inside a stack** (e.g. `archives.tf` reaching `<repo-root>/api`): `${path.module}/../../../../api`. Four levels up from `infrastructure/app/stacks/<stack>/` is the repo root.
 
 ### Naming
 
@@ -54,7 +55,7 @@ EventBridge Scheduler distinguishes two ARN shapes that look similar but aren't 
 
 `scheduler:CreateSchedule` / `DeleteSchedule` operate on the **schedule** (second form). Scoping a policy to the schedule-group ARN won't grant access — the resource has to be `schedule/<group>/*`.
 
-Cross-service `iam:PassRole` is required when the API Lambda creates a schedule that targets SQS via the scheduler IAM role — see `stacks/api/roles.tf`.
+Cross-service `iam:PassRole` is required when the API Lambda creates a schedule that targets SQS via the scheduler IAM role — see `app/stacks/api/roles.tf`.
 
 ### ACM
 
@@ -62,12 +63,7 @@ Certificate ARNs are passed in as variables, not managed in TF. Cross-region ACM
 
 ### DNS
 
-`stacks/platform/dns/` and `stacks/app/dns/` exist as scaffolding but aren't wired in any environment yet. The DNS migration waits until a prod account exists — the current single-account dev setup doesn't need the platform/app split.
-
-When the prod account stands up:
-1. Apex zone (`heart-of.me`) lives in prod, owns email records + delegations
-2. `dev.heart-of.me` becomes a delegated subzone in the dev account
-3. Aliases rename: `dev.media.heart-of.me` → `media.dev.heart-of.me`, etc.
+DNS is intentionally not in TF yet. Waiting on a prod account to do the split: apex zone (`heart-of.me`) in prod managing email + delegations, `dev.heart-of.me` as a delegated subzone in dev. Aliases will rename (`dev.media.heart-of.me` → `media.dev.heart-of.me`, etc.) at that time.
 
 ## State
 
