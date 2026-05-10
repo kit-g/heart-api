@@ -1,4 +1,4 @@
-part of 'aws.dart';
+part of '../heart_aws.dart';
 
 const _expiresIn = Duration(minutes: 5);
 
