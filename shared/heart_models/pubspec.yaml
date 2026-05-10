@@ -1,0 +1,16 @@
+name: heart_models
+description: "Interfaces and data classes"
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  uuid: ^4.5.3
+
+dev_dependencies:
+  flutter_lints: 6.0.0
+  test: any
+  mockito: ^5.6.1
+  build_runner: ^2.10.4
