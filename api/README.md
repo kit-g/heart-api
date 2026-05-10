@@ -381,7 +381,7 @@ Cross-service `iam:PassRole` is required when the API Lambda creates a schedule 
 
 ## CI / deploy
 
-`.github/workflows/deploy-v2.yml` runs on push to `main`, `connections`, `postgres`. Pipeline:
+`.github/workflows/deploy.yml` runs on push to `main`, `connections`, `postgres`. Pipeline:
 
 1. **Lint** — `dart analyze` after `dart pub get` + `dart run build_runner build`.
 2. **Test** — `dart test` (same setup).
