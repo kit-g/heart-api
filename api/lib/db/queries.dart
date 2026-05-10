@@ -531,9 +531,11 @@ _template AS (
 ),
 _inserted_exercises AS (
   INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
-  SELECT t.id, otn.exercise_name, otn.exercise_order
-  FROM _template t, _order_to_name otn
-  RETURNING id, exercise_order
+  SELECT t.id, el.id, otn.exercise_order
+  FROM _template t
+  CROSS JOIN _order_to_name otn
+  JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  RETURNING id, exercise_id, exercise_order
 ),
 _sets_input AS (
   SELECT
@@ -578,8 +580,7 @@ _exercises_json AS (
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
   FROM _inserted_exercises ie
-  JOIN _order_to_name otn ON otn.exercise_order = ie.exercise_order
-  LEFT JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  JOIN _exercise_lookup el ON el.id = ie.exercise_id
   LEFT JOIN _sets_json sj ON sj.template_exercise_id = ie.id
 )
 SELECT
@@ -623,10 +624,12 @@ _deleted AS (
 ),
 _inserted_exercises AS (
   INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
-  SELECT t.id, otn.exercise_name, otn.exercise_order
-  FROM _template t, _order_to_name otn
+  SELECT t.id, el.id, otn.exercise_order
+  FROM _template t
+  CROSS JOIN _order_to_name otn
+  JOIN _exercise_lookup el ON el.name = otn.exercise_name
   WHERE NOT EXISTS (SELECT 1 FROM _deleted WHERE false)
-  RETURNING id, exercise_order
+  RETURNING id, exercise_id, exercise_order
 ),
 _sets_input AS (
   SELECT
@@ -671,8 +674,7 @@ _exercises_json AS (
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
   FROM _inserted_exercises ie
-  JOIN _order_to_name otn ON otn.exercise_order = ie.exercise_order
-  LEFT JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  JOIN _exercise_lookup el ON el.id = ie.exercise_id
   LEFT JOIN _sets_json sj ON sj.template_exercise_id = ie.id
 )
 SELECT
@@ -765,27 +767,73 @@ _allowed AS (
      OR (initiator_id = @studentId AND target_id = @coachId AND target_role IN ('COACH', 'PEER'))
   LIMIT 1
 ),
+_should_share AS (
+  SELECT 1
+  WHERE EXISTS (SELECT 1 FROM _master)
+    AND EXISTS (SELECT 1 FROM _allowed)
+    AND NOT EXISTS (SELECT 1 FROM _existing)
+),
+-- For each exercise the master template references, capture its full data
+-- and look up whichever exercise the student already has access to under
+-- the same name (their own custom first, otherwise the global).
+_master_exercises AS (
+  SELECT
+    te.id AS source_te_id,
+    te.exercise_order,
+    e.name, e.category, e.target, e.instructions, e.asset, e.thumbnail, e.muscles,
+    (
+      SELECT e2.id FROM exercises e2
+      WHERE e2.name = e.name
+        AND (e2.user_id IS NULL OR e2.user_id = @studentId)
+      ORDER BY e2.user_id NULLS LAST
+      LIMIT 1
+    ) AS resolved_id
+  FROM template_exercises te
+  JOIN exercises e ON e.id = te.exercise_id
+  WHERE te.template_id = @masterTemplateId::uuid
+    AND EXISTS (SELECT 1 FROM _should_share)
+),
+-- Copy any unresolved exercises into the student's library so the FK
+-- holds. DISTINCT ON dedupes if the master happened to list the same
+-- exercise twice.
+_copied_exercises AS (
+  INSERT INTO exercises (name, category, target, instructions, asset, thumbnail, muscles, user_id)
+  SELECT DISTINCT ON (name)
+    name, category, target, instructions, asset, thumbnail, muscles, @studentId
+  FROM _master_exercises
+  WHERE resolved_id IS NULL
+  RETURNING id, name
+),
+-- Final mapping of exercise_order → exercise_id the student template
+-- should reference.
+_resolved_exercises AS (
+  SELECT
+    me.exercise_order,
+    me.source_te_id,
+    coalesce(me.resolved_id, c.id) AS exercise_id
+  FROM _master_exercises me
+  LEFT JOIN _copied_exercises c ON c.name = me.name AND me.resolved_id IS NULL
+),
 _new_template AS (
   INSERT INTO templates (user_id, name, order_index, source_template_id, assigned_by, sync_enabled)
-  SELECT s.id, m.name, 0, m.id, @coachId, true
-  FROM _student s, _master m
-  WHERE NOT EXISTS (SELECT 1 FROM _existing)
-    AND EXISTS (SELECT 1 FROM _allowed)
+  SELECT @studentId, m.name, 0, m.id, @coachId, true
+  FROM _master m
+  WHERE EXISTS (SELECT 1 FROM _should_share)
   RETURNING id
 ),
 _new_exercises AS (
   INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
-  SELECT nt.id, te.exercise_id, te.exercise_order
+  SELECT nt.id, re.exercise_id, re.exercise_order
   FROM _new_template nt
-  JOIN template_exercises te ON te.template_id = @masterTemplateId::uuid
+  CROSS JOIN _resolved_exercises re
   RETURNING id, exercise_order
 ),
 _new_sets AS (
   INSERT INTO template_exercise_sets (template_exercise_id, weight, reps, duration, distance, set_order)
   SELECT ne.id, tes.weight, tes.reps, tes.duration, tes.distance, tes.set_order
   FROM _new_exercises ne
-  JOIN template_exercises te ON te.template_id = @masterTemplateId::uuid AND te.exercise_order = ne.exercise_order
-  JOIN template_exercise_sets tes ON tes.template_exercise_id = te.id
+  JOIN _resolved_exercises re ON re.exercise_order = ne.exercise_order
+  JOIN template_exercise_sets tes ON tes.template_exercise_id = re.source_te_id
   RETURNING id
 ),
 _new_share AS (
