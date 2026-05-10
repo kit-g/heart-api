@@ -53,7 +53,15 @@ jobs:
 
       - name: "Format check"
         working-directory: api
-        run: dart format --output=none --set-exit-if-changed .
+        run: |
+          # Skip generated files (mocks, build_runner output)
+          find . -name '*.dart' \
+            -not -path './.dart_tool/*' \
+            -not -name '*.mocks.dart' \
+            -not -name '*.g.dart' \
+            -not -name '*.freezed.dart' \
+            -print0 \
+            | xargs -0 dart format --output=none --set-exit-if-changed
 
       - name: "Run Analysis"
         working-directory: api
@@ -123,6 +131,7 @@ jobs:
 
       - name: "Run pgtap suite"
         working-directory: database
+        shell: bash -O globstar {0}
         run: pg_prove tests/**/*.sql --quiet
 
   build-and-deploy:
