@@ -1,164 +1,88 @@
-# Heart of Yours API
+# Heart of Yours API (v2)
 
-A fitness tracking API built with Go, designed to run on AWS Lambda.
-
-## Overview
-
-Heart of Yours API is a serverless application that provides backend services for a fitness tracking application. It allows users to manage workouts, exercise templates, and track their fitness progress.
+The second generation of the Heart of Yours API, rewritten in Dart using the [relic](https://pub.dev/packages/relic) framework. This API serves as the backend for the Heart of Yours application, providing endpoints for exercise data, chart preferences, and version management.
 
 ## Features
 
-- User account management with Firebase authentication
-- Exercise library management
-- Workout tracking and history
-- Workout template creation and management
-- File uploads for user avatars
-- API documentation with Swagger
+- **Exercise Library**: Retrieve categorized exercise data stored in S3.
+- **Chart Preferences**: Manage user-specific chart settings stored in DynamoDB.
+- **Authentication**: Firebase-based authentication for secure data access.
+- **Multi-region Support**: Configurable AWS region and environment settings.
+- **Version Checking**: Integrated minimal app version validation.
 
-## Technology Stack
+## Tech Stack
 
-- **Language**: Go 1.24+
-- **Framework**: Gin web framework
-- **Authentication**: Firebase Authentication
-- **Cloud Services**:
-  - AWS Lambda for compute
-  - Amazon DynamoDB for data storage
-  - Amazon S3 for file storage
-  - AWS EventBridge Scheduler for scheduled tasks
-  - Amazon SNS for notifications
-- **Documentation**: Swagger/OpenAPI
-- **Error Tracking**: Sentry (optional)
+- **Language**: [Dart 3.10+](https://dart.dev/)
+- **Framework**: [relic](https://pub.dev/packages/relic)
+- **Database**: AWS DynamoDB (for user data)
+- **Storage**: AWS S3 (for content like exercise library)
+- **Authentication**: Firebase / OpenID Connect
 
-## Prerequisites
+## Getting Started
 
-- Go 1.24 or higher
-- AWS CLI configured with appropriate permissions
-- Firebase project with authentication enabled
+### Prerequisites
 
-## Configuration
+- [Dart SDK](https://dart.dev/get-dart) (^3.10.4)
+- AWS Credentials (configured via environment or profile)
+- Firebase Project
 
-The application is configured using environment variables:
+### Environment Variables
 
-### Database Configuration
-- `DB_HOST` - Database host (default: "localhost")
-- `DB_PORT` - Database port (default: "5432")
-- `DB_USER` - Database user
-- `DB_PASSWORD` - Database password
-- `DB_NAME` - Database name
-- `DB_SSLMODE` - SSL mode for database connection (default: "disable")
-- `APP_NAME` - Application name (default: "heart-api")
+The application requires the following environment variables to be set:
 
-### AWS Configuration
-- `REGION` - AWS region
-- `WORKOUTS_TABLE` - DynamoDB table for workouts
-- `UPLOAD_BUCKET` - S3 bucket for file uploads
-- `MEDIA_BUCKET` - S3 bucket for media storage
-- `SCHEDULE_GROUP` - EventBridge Scheduler group
-- `BACKGROUND_FUNCTION` - ARN of the background processing Lambda function
-- `BACKGROUND_ROLE` - IAM role for the background function
-- `MONITORING_TOPIC` - SNS topic for monitoring
-- `ACCOUNT_DELETION_OFFSET` - Days before account deletion (default: 30)
+| Variable | Description | Required |
+| --- | --- | --- |
+| `REGION` | AWS Region (e.g., `us-east-1`) | Yes |
+| `ENV` | Environment (`dev` or `prod`) | Yes |
+| `FIREBASE_PROJECT_ID` | Your Firebase Project ID | Yes |
+| `WORKOUTS_TABLE` | DynamoDB table name for workouts/preferences | Yes |
+| `EXERCISE_BUCKET` | S3 bucket name for exercise content | Yes |
+| `MIN_APP_VERSION` | Minimal supported application version (e.g., `1.0.0`) | Yes |
+| `SHOULD_CHECK_VERSION` | Enable/Disable version check (`true`/`false`) | No |
+| `LOG_LEVEL` | Logging level (default: `ALL`) | No |
+| `AWS_PROFILE` | AWS profile name for credentials | No |
+| `TEST_USER_ID` | Mock user ID for local testing | No |
+| `SUPPORTED_LOCALES` | Comma-separated list of locales (default: `en`) | No |
+| `DEFAULT_LOCALE` | Default locale for the API (default: `en`) | No |
 
-### Firebase Configuration
-- `FIREBASE_CREDENTIALS` - Path to Firebase credentials JSON file
+### Running Locally
 
-### Other Configuration
-- `CORS_ORIGINS` - Comma-separated list of allowed origins for CORS (default: "*")
-- `SENTRY_DSN` - Sentry DSN for error tracking (optional)
-
-## Local Development
-
-### Setup
-
-1. Clone the repository:
+1. Install dependencies:
    ```bash
-   git clone https://github.com/your-username/heart-go.git
-   cd heart-go/api
+   dart pub get
    ```
 
-2. Install dependencies:
+2. Run the server:
    ```bash
-   go mod download
+   # Make sure to export required environment variables first
+   dart run bin/main.dart
    ```
 
-3. Set up environment variables (create a `.env` file or export them directly)
+## API Endpoints
 
-4. Run the application locally:
-   ```bash
-   go run cmd/api/main.go
-   ```
-
-The API will be available at http://localhost:8080.
-
-### Testing
-
-Run the model tests:
-```bash
-cd internal/models
-go test . -v
-```
-
-## Building for AWS Lambda
-
-To build the Lambda function:
-
-```bash
-ARTIFACTS_DIR=. make build-ApiFunction
-```
-
-This will create a binary named `bootstrap` in the current directory.
-
-To build the background processing function:
-
-```bash
-ARTIFACTS_DIR=. make build-BackgroundFunction
-```
-
-## Deployment
-
-The application is deployed to AWS Lambda using GitHub Actions. The workflow is defined in `.github/workflows/deploy.yaml`.
-
-To deploy manually:
-
-1. Build the Lambda function:
-   ```bash
-   ARTIFACTS_DIR=. make build-ApiFunction
-   ```
-
-2. Zip the binary:
-   ```bash
-   zip function.zip bootstrap
-   ```
-
-3. Update the Lambda function code:
-   ```bash
-   aws lambda update-function-code \
-     --function-name heart-api \
-     --zip-file fileb://function.zip \
-     --region ca-central-1
-   ```
-
-## API Documentation
-
-The API is documented using Swagger. When running locally, you can access the Swagger UI at:
-
-```
-http://localhost:8080/swagger/index.html
-```
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/version` | Get current API version information (Public) |
+| `GET` | `/exercises` | Get list of exercises (Authenticated) |
+| `GET` | `/charts` | Get user chart preferences (Authenticated) |
+| `POST` | `/charts` | Save/Update a chart preference (Authenticated) |
+| `DELETE` | `/charts/:id` | Delete a chart preference (Authenticated) |
 
 ## Project Structure
 
-- `cmd/` - Application entry points
-  - `api/` - API Lambda function
-  - `background/` - Background processing Lambda function
-- `docs/` - Swagger documentation
-- `internal/` - Internal packages
-  - `awsx/` - AWS service clients
-  - `config/` - Configuration management
-  - `dbx/` - Database access
-  - `firebasex/` - Firebase client
-  - `handlers/` - HTTP request handlers
-  - `middleware/` - HTTP middleware
-  - `models/` - Data models
-  - `routerx/` - HTTP router setup
+- `bin/`: Entry point of the application.
+- `lib/core/`: Core request/response handling.
+- `lib/db/`: Database interaction logic (DynamoDB).
+- `lib/globals/`: Configuration, logging, and global utilities.
+- `lib/middleware/`: Request interceptors for auth, config, and database injection.
+- `lib/models/`: Data models and DTOs.
+- `lib/routes/`: Route handlers for specific endpoints.
+- `lib/storage/`: S3 storage interaction logic.
 
+## Building for Production
+
+The project includes a `Makefile` for building a Linux arm64 binary (e.g., for AWS Lambda):
+
+```bash
+make build-ApiV2Function ARTIFACTS_DIR=./build
+```
