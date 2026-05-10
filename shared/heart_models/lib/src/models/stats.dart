@@ -126,8 +126,7 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
           ),
         );
       },
-    ).toList()
-      ..sort();
+    ).toList()..sort();
 
     final currentWeekStart = getMonday(DateTime.timestamp());
 
@@ -142,23 +141,24 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
       false => earliestParsedWeekStart,
     };
 
-    final completeWeeks = Iterable.generate(
-      // how many weeks exist between earliestWeekStart and currentWeekStart
-      currentWeekStart.difference(earliestWeekStart).inDays ~/ 7 + 1,
-      (index) => earliestWeekStart.add(Duration(days: index * 7)),
-    )
-        .map(
-          (iteration) {
-            return parsed.firstWhere(
-              (w) => w.startDate.isAtSameWeekAs(iteration),
-              orElse: () => _WeekSummary.empty(weekId: sanitizeId(iteration)),
-            );
-          },
-        )
-        .toList()
-        .reversed
-        .toList()
-      ..sort();
+    final completeWeeks =
+        Iterable.generate(
+              // how many weeks exist between earliestWeekStart and currentWeekStart
+              currentWeekStart.difference(earliestWeekStart).inDays ~/ 7 + 1,
+              (index) => earliestWeekStart.add(Duration(days: index * 7)),
+            )
+            .map(
+              (iteration) {
+                return parsed.firstWhere(
+                  (w) => w.startDate.isAtSameWeekAs(iteration),
+                  orElse: () => _WeekSummary.empty(weekId: sanitizeId(iteration)),
+                );
+              },
+            )
+            .toList()
+            .reversed
+            .toList()
+          ..sort();
 
     return _WorkoutAggregation(weeks: completeWeeks);
   }
@@ -170,7 +170,9 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
       final DateTime start = DateTime.parse(row['start']);
       final String weekId = sanitizeId(getMonday(start));
 
-      byWeek.putIfAbsent(weekId, () => []).add(
+      byWeek
+          .putIfAbsent(weekId, () => [])
+          .add(
             _WorkoutSummary(
               id: row['id'],
               name: row['name'],
@@ -185,8 +187,7 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
           workouts: entry.value,
         );
       },
-    ).toList()
-      ..sort();
+    ).toList()..sort();
 
     if (parsed.isEmpty) {
       return _WorkoutAggregation.empty();
@@ -197,18 +198,19 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
     final limit = currentWeekStart.subtract(const Duration(days: 7 * 7));
     final earliestWeekStart = earliestParsedWeekStart.isAfter(limit) ? limit : earliestParsedWeekStart;
 
-    final completeWeeks = Iterable.generate(
-      (currentWeekStart.difference(earliestWeekStart).inDays ~/ 7) + 1,
-      (index) => earliestWeekStart.add(Duration(days: index * 7)),
-    )
-        .map(
-          (weekStart) => parsed.firstWhere(
-            (w) => w.startDate.isAtSameWeekAs(weekStart),
-            orElse: () => _WeekSummary.empty(weekId: sanitizeId(weekStart)),
-          ),
-        )
-        .toList()
-      ..sort();
+    final completeWeeks =
+        Iterable.generate(
+              (currentWeekStart.difference(earliestWeekStart).inDays ~/ 7) + 1,
+              (index) => earliestWeekStart.add(Duration(days: index * 7)),
+            )
+            .map(
+              (weekStart) => parsed.firstWhere(
+                (w) => w.startDate.isAtSameWeekAs(weekStart),
+                orElse: () => _WeekSummary.empty(weekId: sanitizeId(weekStart)),
+              ),
+            )
+            .toList()
+          ..sort();
 
     return _WorkoutAggregation(weeks: completeWeeks);
   }
@@ -218,29 +220,30 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
     final currentWeekStart = getMonday(DateTime.timestamp());
     final earliestWeekStart = currentWeekStart.subtract(Duration(days: 7 * limit - 1));
 
-    final weeks = Iterable.generate(
-      currentWeekStart.difference(earliestWeekStart).inDays ~/ 7 + 1,
-      (index) => earliestWeekStart.add(Duration(days: index * 7)),
-    ).map(
-      (iteration) {
-        return _WeekSummary(
-          weekId: sanitizeId(iteration),
-          workouts: List.generate(
-            // between 2 and 6
-            2 + _random.nextInt(5),
-            (index) {
-              return _WorkoutSummary(
-                id: sanitizeId(
-                  iteration.copyWith(hour: iteration.hour + index),
+    final weeks =
+        Iterable.generate(
+            currentWeekStart.difference(earliestWeekStart).inDays ~/ 7 + 1,
+            (index) => earliestWeekStart.add(Duration(days: index * 7)),
+          ).map(
+            (iteration) {
+              return _WeekSummary(
+                weekId: sanitizeId(iteration),
+                workouts: List.generate(
+                  // between 2 and 6
+                  2 + _random.nextInt(5),
+                  (index) {
+                    return _WorkoutSummary(
+                      id: sanitizeId(
+                        iteration.copyWith(hour: iteration.hour + index),
+                      ),
+                      name: '',
+                    );
+                  },
                 ),
-                name: '',
               );
             },
-          ),
-        );
-      },
-    ).toList()
-      ..sort();
+          ).toList()
+          ..sort();
     return _WorkoutAggregation(weeks: weeks);
   }
 

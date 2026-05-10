@@ -7,7 +7,7 @@ void main() {
       final row = {
         'id': '1',
         'type': 'topSetWeight',
-        'data': '{"exerciseName": "Bench Press"}'
+        'data': '{"exerciseName": "Bench Press"}',
       };
       final pref = ChartPreference.fromRow(row);
 
@@ -20,7 +20,7 @@ void main() {
       final row = {
         'id': '2',
         'type': 'maxConsecutiveReps',
-        'data': null
+        'data': null,
       };
       final pref = ChartPreference.fromRow(row);
 

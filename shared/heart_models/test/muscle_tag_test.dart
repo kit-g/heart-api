@@ -61,7 +61,7 @@ void main() {
         'secondary': {
           'ids': ['triceps'],
           'groups': ['arms'],
-        }
+        },
       };
       final tagging = MuscleTagging.fromJson(json);
       expect(tagging.primary.ids, contains('chest_upper'));
@@ -101,28 +101,38 @@ void main() {
 
     test('toMap includes secondary only when present', () {
       final withSecondary = MuscleTagging.fromJson({
-        'primary': {'ids': ['a']},
-        'secondary': {'ids': ['b']},
+        'primary': {
+          'ids': ['a'],
+        },
+        'secondary': {
+          'ids': ['b'],
+        },
       });
       expect(withSecondary.toMap(), contains('secondary'));
 
       final withoutSecondary = MuscleTagging.fromJson({
-        'primary': {'ids': ['a']},
+        'primary': {
+          'ids': ['a'],
+        },
       });
       expect(withoutSecondary.toMap(), isNot(contains('secondary')));
     });
 
     test('isEmpty is true only when primary and secondary are empty', () {
       expect(MuscleTagging.empty().isEmpty, isTrue);
-      
+
       final onlyPrimary = MuscleTagging.fromJson({
-        'primary': {'ids': ['a']},
+        'primary': {
+          'ids': ['a'],
+        },
       });
       expect(onlyPrimary.isEmpty, isFalse);
 
       final withSecondary = MuscleTagging.fromJson({
         'primary': {},
-        'secondary': {'ids': ['b']},
+        'secondary': {
+          'ids': ['b'],
+        },
       });
       expect(withSecondary.isEmpty, isFalse);
     });

@@ -39,10 +39,14 @@ void main() {
     });
 
     test('deletes each S3 image before deleting profile', () async {
-      when(imageDb.getUserImageKeys(userId: 'u1')).thenAnswer((_) async => [
-        'workouts/abc/img1.jpg',
-        'workouts/abc/img2.jpg',
-      ]);
+      when(
+        imageDb.getUserImageKeys(userId: 'u1'),
+      ).thenAnswer(
+        (_) async => [
+          'workouts/abc/img1.jpg',
+          'workouts/abc/img2.jpg',
+        ],
+      );
       when(imageStorage.deleteObject(key: anyNamed('key'))).thenAnswer((_) async {});
       when(profileService.deleteAccount(userId: 'u1')).thenAnswer((_) async {});
 
