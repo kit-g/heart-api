@@ -10,11 +10,11 @@ resource "null_resource" "build_dart_api" {
         )
       ]
     )
-    makefile_hash = filebase64sha256("${path.module}/../../../../api_v2/Makefile")
+    makefile_hash = filebase64sha256("${path.module}/../../../../api/Makefile")
   }
 
   provisioner "local-exec" {
-    working_dir = "${path.module}/../../../../api_v2"
+    working_dir = "${path.module}/../../../../api"
     command     = <<EOT
       mkdir -p ../build/api_v2
       dart pub get

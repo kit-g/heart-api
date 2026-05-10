@@ -7,7 +7,7 @@ resource "aws_cloudfront_origin_access_control" "heart" {
 }
 
 resource "aws_s3_bucket_policy" "content_cloudfront_access" {
-  bucket = aws_s3_bucket.content.id
+  bucket = var.content_bucket.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -19,7 +19,7 @@ resource "aws_s3_bucket_policy" "content_cloudfront_access" {
           Service = "cloudfront.amazonaws.com"
         }
         Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.content.arn}/*"
+        Resource = "${var.content_bucket.arn}/*"
         Condition = {
           StringEquals = {
             "AWS:SourceArn" = aws_cloudfront_distribution.media.arn
@@ -31,7 +31,7 @@ resource "aws_s3_bucket_policy" "content_cloudfront_access" {
 }
 
 resource "aws_s3_bucket_policy" "static_cloudfront_access" {
-  bucket = aws_s3_bucket.static.id
+  bucket = var.static_bucket.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -43,7 +43,7 @@ resource "aws_s3_bucket_policy" "static_cloudfront_access" {
           Service = "cloudfront.amazonaws.com"
         }
         Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.static.arn}/*"
+        Resource = "${var.static_bucket.arn}/*"
         Condition = {
           StringEquals = {
             "AWS:SourceArn" = aws_cloudfront_distribution.web.arn
@@ -58,7 +58,8 @@ locals {
   content_origin                = "content-bucket"
   static_origin                 = "static-bucket"
   firebase_origin               = "firebase-auth"
-  caching_optimized             = "658327ea-f89d-4fab-a63d-7e88639e58f6" # CloudFront managed cache policy ID 
+  api_origin                    = "api-gateway"
+  caching_optimized             = "658327ea-f89d-4fab-a63d-7e88639e58f6" # CloudFront managed cache policy ID
   caching_disabled              = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CloudFront managed cache policy ID
   all_viewer_except_host_header = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # CloudFront managed origin request policy ID for AllViewerExceptHostHeader, needed to forward Firebase auth requests to the app, with query params
 }
@@ -95,7 +96,7 @@ resource "aws_cloudfront_distribution" "media" {
   comment = "Heart of yours, media assets"
 
   origin {
-    domain_name              = aws_s3_bucket.content.bucket_regional_domain_name
+    domain_name              = var.content_bucket.bucket_regional_domain_name
     origin_id                = local.content_origin
     origin_access_control_id = aws_cloudfront_origin_access_control.heart.id
     # empty, as per
@@ -158,14 +159,34 @@ resource "aws_cloudfront_distribution" "web" {
 
   origin {
     origin_access_control_id = aws_cloudfront_origin_access_control.heart.id
-    domain_name              = aws_s3_bucket.static.bucket_regional_domain_name
+    domain_name              = var.static_bucket.bucket_regional_domain_name
     origin_id                = local.static_origin
     origin_path              = "/site"
   }
 
   origin {
+    domain_name              = var.content_bucket.bucket_regional_domain_name
+    origin_id                = local.content_origin
+    origin_access_control_id = aws_cloudfront_origin_access_control.heart.id
+    origin_path              = "/static"
+  }
+
+  origin {
     domain_name = var.firebase_auth_domain
     origin_id   = local.firebase_origin
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  origin {
+    domain_name = var.api.domain_name
+    origin_id   = local.api_origin
+    origin_path = "/${var.api.stage_path}"
 
     custom_origin_config {
       http_port              = 80
@@ -194,6 +215,25 @@ resource "aws_cloudfront_distribution" "web" {
     compress                 = true
     origin_request_policy_id = local.all_viewer_except_host_header
     cache_policy_id          = local.caching_disabled
+  }
+
+  ordered_cache_behavior {
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    path_pattern           = "templates"
+    target_origin_id       = local.content_origin
+    viewer_protocol_policy = "https-only"
+    cache_policy_id        = local.caching_optimized
+  }
+
+  ordered_cache_behavior {
+    target_origin_id         = local.api_origin
+    path_pattern             = "/api/*"
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD"]
+    viewer_protocol_policy   = "redirect-to-https"
+    cache_policy_id          = local.caching_disabled
+    origin_request_policy_id = local.all_viewer_except_host_header
   }
 
   viewer_certificate {

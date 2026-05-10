@@ -11,8 +11,8 @@ abstract interface class Profile implements Model {
 
   factory Profile({
     required String id,
-    required String name,
-    required String avatar,
+    String? name,
+    String? avatar,
   }) = _Profile.new;
 
   factory Profile.fromJson(Map json) {
@@ -160,8 +160,8 @@ class _Profile implements Profile {
 
   const _Profile({
     required this.id,
-    required this.name,
-    required this.avatar,
+    this.name,
+    this.avatar,
   });
 
   @override
