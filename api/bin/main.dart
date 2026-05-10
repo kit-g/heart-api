@@ -1,4 +1,3 @@
-import 'package:aws_common/aws_common.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/db/db.dart';
 import 'package:heart/globals/config.dart';
@@ -13,6 +12,7 @@ import 'package:heart/middleware/version.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/routes/index.dart';
 import 'package:heart/storage/s3.dart';
+import 'package:heart_aws/heart_aws.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart';
 import 'package:postgres/postgres.dart' hide Connection;

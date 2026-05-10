@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:heart/aws/aws.dart';
 import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/aws.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart_aws/heart_aws.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mime/mime.dart';
 import 'package:relic/relic.dart';
