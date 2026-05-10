@@ -1,146 +1,76 @@
-# Heart of Yours Infrastructure
+# Infrastructure
 
-This directory contains AWS CloudFormation templates and configuration files for deploying the Heart of Yours application infrastructure.
+Terraform for everything AWS + Supabase.
 
-## Overview
-
-The infrastructure is defined using AWS CloudFormation templates and is deployed using the AWS Serverless Application Model (SAM) CLI. The infrastructure is divided into two main components:
-
-1. **API Infrastructure** - Contains resources for the Heart of Yours API, including Lambda functions, DynamoDB tables, API Gateway, and other supporting resources.
-2. **CI/CD Infrastructure** - Contains resources for continuous integration and deployment, including IAM roles for GitHub Actions.
-
-## Directory Structure
+## Layout
 
 ```
 infrastructure/
-├── api/
-│   ├── api.toml - SAM CLI configuration for API deployment
-│   └── api.yaml - CloudFormation template for API resources
-├── ci/
-│   ├── ci.toml - SAM CLI configuration for CI/CD deployment
-│   └── ci.yaml - CloudFormation template for CI/CD resources
-└── README.md - This file
+├── stacks/
+│   ├── api/             # Lambda function, API Gateway, SQS events queue + DLQ,
+│   │                    # EventBridge S3 rule, Scheduler group, SNS monitoring topic,
+│   │                    # IAM roles, CloudWatch logs
+│   ├── cdn/             # CloudFront media + web distributions, OACs, S3 bucket policies
+│   ├── content/         # Content + static S3 buckets, lifecycle for uploads/,
+│   │                    # EventBridge bucket notification, Supabase project
+│   ├── platform/dns/    # Apex zone + email + NS delegations (not deployed yet — waits for prod)
+│   └── app/dns/         # Per-env subzone + records (not deployed yet)
+├── modules/
+│   └── iam/             # Reusable role + inline-policies wrapper
+└── environments/
+    └── dev/             # Wires the stacks for the dev account
 ```
-
-## API Infrastructure (api.yaml)
-
-The API infrastructure includes the following resources:
-
-- **DynamoDB Table** - Stores workout data with TTL for scheduled deletions
-- **API Gateway** - REST API for the Heart of Yours application
-- **EventBridge Scheduler Group** - For scheduling account deletion jobs
-- **SNS Topic** - For monitoring notifications
-- **IAM Role** - For Lambda execution with permissions for various AWS services
-- **Lambda Functions**:
-  - **ApiFunction** - Handles API requests
-  - **BackgroundFunction** - Processes background jobs
-- **CloudWatch Log Group** - For API function logs
-
-### Parameters
-
-The API infrastructure template accepts the following parameters:
-
-- `DbHost` - Postgres database endpoint
-- `DbPassword` - Postgres database password
-- `DbUser` - Postgres database user
-- `Env` - Environment (dev or prod)
-- `FirebaseCredentials` - Firebase JSON key
-- `WorkoutsDatabaseName` - Name of the DynamoDB table for workouts (default: "workouts")
-
-### Environment-Specific Settings
-
-The template includes mappings for environment-specific settings:
-
-- **Dev Environment**:
-  - Account deletion offset: 2 days
-  - CORS origins: dev domains and localhost
-  - Log retention: 3 days
-  - S3 buckets: dev buckets
-  - Database deletion protection: disabled
-
-- **Prod Environment**:
-  - Account deletion offset: 30 days
-  - CORS origins: production domains
-  - Log retention: 90 days
-  - Database deletion protection: enabled
-
-## CI/CD Infrastructure (ci.yaml)
-
-The CI/CD infrastructure includes the following resources:
-
-- **IAM Role** - For GitHub Actions with permissions to:
-  - Deploy to S3 (put, list, delete objects)
-  - Create CloudFront invalidations
-  - Update Lambda function code
-
-### Parameters
-
-The CI/CD infrastructure template accepts the following parameters:
-
-- `Env` - Environment (dev or prod)
-
-### Environment-Specific Settings
-
-The template includes mappings for environment-specific settings:
-
-- **Dev Environment**:
-  - CloudFront distribution ID
-  - GitHub identity provider ARN
-  - S3 hosting bucket
-
-- **Prod Environment**:
-  - (Values to be filled in for production)
 
 ## Deployment
 
-### Prerequisites
+```bash
+cd infrastructure/environments/dev
+terraform init
+terraform plan
+terraform apply
+```
 
-- AWS CLI installed and configured
-- AWS SAM CLI installed
-- Appropriate AWS credentials with permissions to create the resources
+The dev environment auto-builds the Lambda binary on `terraform apply` (via `null_resource.build_dart_api` in `stacks/api/archives.tf`) — no separate build step needed for infra-only applies.
 
-### Deploying the API Infrastructure
+## Conventions
 
-1. Navigate to the `infrastructure/api` directory:
-   ```bash
-   cd infrastructure/api
-   ```
+### Path references inside stacks
 
-2. Deploy using the SAM CLI:
-   ```bash
-   sam deploy --config-file api.toml --config-env dev
-   ```
+- **Module sources between siblings**: relative paths like `../../stacks/api`. Uniform; survives directory restructures.
+- **Repo references inside a stack** (e.g. `archives.tf` reaching `api/`): `${path.module}/../../../api`. Three levels up from `infrastructure/stacks/<stack>/` is the repo root.
 
-   This will:
-   - Create a CloudFormation stack named "heart-api"
-   - Upload deployment artifacts to the specified S3 bucket
-   - Deploy the resources defined in api.yaml with the parameters specified in api.toml
+### Naming
 
-### Deploying the CI/CD Infrastructure
+Resources use `${var.name_prefix}-<thing>`. In dev, `name_prefix = "heart-api"` produces `heart-api-events`, `heart-api-events-dlq`, `heart-api-function-role`. Lambda function name itself is bare `heart-api`.
 
-1. Navigate to the `infrastructure/ci` directory:
-   ```bash
-   cd infrastructure/ci
-   ```
+### IAM scoping
 
-2. Deploy using the SAM CLI:
-   ```bash
-   sam deploy --config-file ci.toml --config-env dev
-   ```
+EventBridge Scheduler distinguishes two ARN shapes that look similar but aren't interchangeable:
 
-   This will:
-   - Create a CloudFormation stack named "heart-ci"
-   - Upload deployment artifacts to the specified S3 bucket
-   - Deploy the resources defined in ci.yaml with the parameters specified in ci.toml
+| What | ARN format |
+|---|---|
+| Schedule group (collection) | `arn:aws:scheduler:<region>:<account>:schedule-group/<group>` |
+| Schedule (individual) | `arn:aws:scheduler:<region>:<account>:schedule/<group>/<name>` |
 
-## Security Considerations
+`scheduler:CreateSchedule` / `DeleteSchedule` operate on the **schedule** (second form). Scoping a policy to the schedule-group ARN won't grant access — the resource has to be `schedule/<group>/*`.
 
-- Sensitive parameters like database credentials and Firebase credentials are marked with `NoEcho: true` to prevent them from being displayed in the CloudFormation console or API responses.
-- IAM roles follow the principle of least privilege, granting only the permissions necessary for the application to function.
-- Database deletion protection is enabled in the production environment to prevent accidental deletion.
+Cross-service `iam:PassRole` is required when the API Lambda creates a schedule that targets SQS via the scheduler IAM role — see `stacks/api/roles.tf`.
 
-## Maintenance
+### ACM
 
-- To update the infrastructure, modify the CloudFormation templates and redeploy using the SAM CLI.
-- To update the Lambda function code, use the GitHub Actions workflow defined in `.github/workflows/deploy.yaml`.
-- To update environment-specific settings, modify the mappings in the CloudFormation templates.
+Certificate ARNs are passed in as variables, not managed in TF. Cross-region ACM (us-east-1 for CloudFront) provider aliases are fiddly, and certs change rarely — keep them out.
+
+### DNS
+
+`stacks/platform/dns/` and `stacks/app/dns/` exist as scaffolding but aren't wired in any environment yet. The DNS migration waits until a prod account exists — the current single-account dev setup doesn't need the platform/app split.
+
+When the prod account stands up:
+1. Apex zone (`heart-of.me`) lives in prod, owns email records + delegations
+2. `dev.heart-of.me` becomes a delegated subzone in the dev account
+3. Aliases rename: `dev.media.heart-of.me` → `media.dev.heart-of.me`, etc.
+
+## State
+
+Backend is S3 (`583168578067-us-east-2-tfstate`) with DynamoDB locking (`tfstate-locks`). One state file per environment under `heart/<env>/terraform.tfstate`.
+
+`.terraform.lock.hcl` and any `*.tfvars` are gitignored.
