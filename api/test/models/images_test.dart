@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 void main() {
   group('PresignedUploadResponse', () {
     test('toMap includes url, fields, destinationUrl, key', () {
-      final response = PresignedUploadResponse(
+      final response = const PresignedUploadResponse(
         preSignedUrl: (
           url: 'https://bucket.s3.amazonaws.com/',
           fields: {'key': 'uploads/avatar-u1', 'policy': 'opaque'},
@@ -25,12 +25,12 @@ void main() {
 
   group('GalleryResponse', () {
     test('toMap includes cursor when set', () {
-      final response = GalleryResponse(images: const [], cursor: 'next');
+      final response = const GalleryResponse(images: [], cursor: 'next');
       expect(response.toMap()['cursor'], equals('next'));
     });
 
     test('toMap omits cursor when null', () {
-      final response = GalleryResponse(images: const []);
+      final response = const GalleryResponse(images: []);
       expect(response.toMap().containsKey('cursor'), isFalse);
     });
 
