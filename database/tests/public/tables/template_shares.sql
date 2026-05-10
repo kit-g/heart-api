@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(22);
+SELECT plan(23);
 
 SELECT has_table('public'::name, 'template_shares'::name);
 
@@ -32,6 +32,7 @@ SELECT col_not_null('public'::name, 'template_shares'::name, 'coach_id'::name);
 SELECT col_not_null('public'::name, 'template_shares'::name, 'student_id'::name);
 SELECT col_not_null('public'::name, 'template_shares'::name, 'master_template_id'::name);
 SELECT col_not_null('public'::name, 'template_shares'::name, 'student_template_id'::name);
+SELECT col_not_null('public'::name, 'template_shares'::name, 'created_at'::name);
 
 SELECT col_default_is('public', 'template_shares', 'id', 'uuidv7()', 'id default is uuidv7()');
 SELECT col_default_is('public', 'template_shares', 'created_at', 'now()', 'created_at default is now()');

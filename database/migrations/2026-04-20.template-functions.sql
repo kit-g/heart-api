@@ -30,10 +30,10 @@ SELECT coalesce(
     jsonb_build_object(
       'id',             te.id,
       'exercise',       jsonb_build_object(
-        'id',       ex.id,
-        'name',     ex.name,
-        'category', ex.category,
-        'target',   ex.target
+        'id',       e.id,
+        'name',     e.name,
+        'category', e.category,
+        'target',   e.target
       ),
       'exercise_order', te.exercise_order,
       'sets',           _template_exercise_sets(te.id)
@@ -42,12 +42,6 @@ SELECT coalesce(
   '[]'::jsonb
 )
 FROM template_exercises te
-LEFT JOIN LATERAL (
-  SELECT e.id, e.name, e.category, e.target
-  FROM exercises e
-  WHERE e.name = te.exercise_id
-  ORDER BY e.user_id NULLS FIRST
-  LIMIT 1
-) ex ON true
+JOIN exercises e ON e.id = te.exercise_id
 WHERE te.template_id = _template_id
 $$;

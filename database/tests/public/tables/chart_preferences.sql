@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(17);
+SELECT plan(18);
 
 SELECT has_table('public'::name, 'chart_preferences'::name);
 
@@ -29,6 +29,7 @@ SELECT col_not_null('public'::name, 'chart_preferences'::name, 'id'::name);
 SELECT col_not_null('public'::name, 'chart_preferences'::name, 'user_id'::name);
 SELECT col_not_null('public'::name, 'chart_preferences'::name, 'exercise_id'::name);
 SELECT col_not_null('public'::name, 'chart_preferences'::name, 'chart_type'::name);
+SELECT col_not_null('public'::name, 'chart_preferences'::name, 'created_at'::name);
 
 SELECT col_default_is('public', 'chart_preferences', 'id', 'uuidv7()', 'id default is uuidv7()');
 SELECT col_default_is('public', 'chart_preferences', 'created_at', 'now()', 'created_at default is now()');

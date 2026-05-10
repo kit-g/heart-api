@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(15);
+SELECT plan(16);
 
 SELECT has_table('public'::name, 'workouts'::name);
 
@@ -29,6 +29,7 @@ SELECT col_is_pk('public'::name, 'workouts'::name, 'id'::name, 'id is the primar
 
 SELECT col_not_null('public'::name, 'workouts'::name, 'id'::name);
 SELECT col_not_null('public'::name, 'workouts'::name, 'user_id'::name);
+SELECT col_not_null('public'::name, 'workouts'::name, 'created_at'::name);
 
 SELECT col_default_is('public', 'workouts', 'id', 'uuidv7()', 'id default is uuidv7()');
 SELECT col_default_is('public', 'workouts', 'created_at', 'now()', 'created_at default is now()');

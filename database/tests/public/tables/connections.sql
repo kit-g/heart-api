@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(22);
+SELECT plan(23);
 
 SELECT has_table('public'::name, 'connections'::name);
 
@@ -35,6 +35,7 @@ SELECT col_not_null('public'::name, 'connections'::name, 'initiator_role'::name)
 SELECT col_not_null('public'::name, 'connections'::name, 'target_role'::name);
 SELECT col_not_null('public'::name, 'connections'::name, 'domain'::name);
 SELECT col_not_null('public'::name, 'connections'::name, 'status'::name);
+SELECT col_not_null('public'::name, 'connections'::name, 'created_at'::name);
 
 SELECT col_default_is('public', 'connections', 'status', 'pending', 'status default is pending');
 SELECT col_default_is('public', 'connections', 'created_at', 'now()', 'created_at default is now()');
