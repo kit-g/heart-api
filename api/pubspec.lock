@@ -488,7 +488,7 @@ packages:
     source: hosted
     version: "1.2.0"
   relic_core:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: relic_core
       sha256: c2f7638d56fdf144a035d17eb8e93fb30fe53bd105fd81c31393f8be4f43ecdc
