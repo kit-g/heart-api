@@ -1,7 +1,7 @@
 COMMIT ?= $(shell git rev-parse HEAD)
 BUILD_TIME ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-build-ApiV2Function:
+build-ApiFunction:
 	dart pub get
 	dart compile exe bin/main.dart \
 		-DCOMMIT='$(COMMIT)' \
