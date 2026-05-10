@@ -2,7 +2,7 @@ name: "Deploy Dart API"
 
 on:
   push:
-    branches: [ main, connections, postgres ]
+    branches: [ main ]
     paths:
       - 'api/**'
       - 'shared/**'
