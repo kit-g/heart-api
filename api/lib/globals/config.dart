@@ -1,0 +1,254 @@
+import 'dart:io' show Platform;
+
+import 'package:postgres/postgres.dart' hide Connection;
+import 'package:relic/relic.dart';
+
+const _defaultMimeTypes = {
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/gif',
+};
+
+const _requiredConfig = {
+  'CONTENT_BUCKET',
+  'ENV',
+  'EVENTS_QUEUE_ARN',
+  'EVENTS_DLQ',
+  'FIREBASE_PROJECT_ID',
+  'MEDIA_DISTRIBUTION',
+  'MIN_APP_VERSION',
+  'MONITORING_TOPIC_ARN',
+  'REGION',
+  'SCHEDULE_GROUP',
+  'SCHEDULER_ROLE_ARN',
+};
+
+enum Env {
+  dev,
+  prod
+  ;
+
+  factory Env.fromString(String? v) {
+    return switch (v) {
+      'dev' || 'd' || 'development' => dev,
+      'prod' || 'p' || 'production' => prod,
+      _ => throw UnimplementedError('Valid environments are: ${Env.values}'),
+    };
+  }
+
+  bool get isProd => this == prod;
+}
+
+class PostgresConfig {
+  final String host;
+  final int port;
+  final String database;
+  final String? user;
+  final String? password;
+
+  const PostgresConfig({
+    required this.host,
+    required this.port,
+    required this.database,
+    this.user,
+    this.password,
+  });
+
+  Endpoint get endpoint {
+    return Endpoint(
+      host: host,
+      port: port,
+      database: database,
+      username: user,
+      password: password,
+    );
+  }
+}
+
+abstract interface class AppConfig {
+  String get firebaseProjectId;
+
+  Env get env;
+
+  String get logLevel;
+
+  String get awsRegion;
+
+  String? get awsProfile;
+
+  String? get testUserId;
+
+  String get minimalAppVersion;
+
+  bool get shouldCheckVersion;
+
+  String get contentBucket;
+
+  List<String> get supportedLocales;
+
+  String get defaultLocale;
+
+  String get mediaDistribution;
+
+  /// API event DLQ URL
+  String get eventsDlq;
+
+  String get monitoringTopicArn;
+
+  String get scheduleGroup;
+
+  Duration get accountDeletionOffset;
+
+  String get schedulerRoleArn;
+
+  String get eventsQueueArn;
+
+  PostgresConfig get db;
+
+  Set<String> get allowedMimeTypes;
+
+  /// development flags, allows to call the /events endpoint
+  bool get allowNonHttpEvents;
+
+  factory AppConfig.fromEnv() {
+    final env = Platform.environment;
+    switch (env) {
+      case {
+            'CONTENT_BUCKET': String contentBucket,
+            'ENV': String environment,
+            'EVENTS_QUEUE_ARN': String eventsSqsArn,
+            'EVENTS_DLQ': String dlq,
+            'FIREBASE_PROJECT_ID': String firebaseProjectId,
+            'MEDIA_DISTRIBUTION': String mediaDistribution,
+            'MIN_APP_VERSION': String version,
+            'MONITORING_TOPIC_ARN': String monitoringTopicArn,
+            'REGION': String region,
+            'SCHEDULE_GROUP': String scheduleGroup,
+            'SCHEDULER_ROLE_ARN': String schedulerRoleArn,
+          }
+          when [region, environment, firebaseProjectId, contentBucket].every((v) => v.isNotEmpty):
+        return _EnvConfig(
+          awsProfile: env['AWS_PROFILE'],
+          awsRegion: region,
+          env: Env.fromString(environment),
+          firebaseProjectId: firebaseProjectId,
+          eventsDlq: dlq,
+          monitoringTopicArn: monitoringTopicArn,
+          scheduleGroup: scheduleGroup,
+          accountDeletionOffset: Duration(
+            days: int.tryParse(env['ACCOUNT_DELETION_OFFSET_DAYS'] ?? '') ?? 30,
+          ),
+          schedulerRoleArn: schedulerRoleArn,
+          eventsQueueArn: eventsSqsArn,
+          logLevel: env['LOG_LEVEL'] ?? 'ALL',
+          testUserId: env['TEST_USER_ID'],
+          minimalAppVersion: version,
+          shouldCheckVersion: env['SHOULD_CHECK_VERSION']?.toLowerCase() == 'true',
+          contentBucket: contentBucket,
+          supportedLocales: env['SUPPORTED_LOCALES']?.split(',') ?? ['en'],
+          defaultLocale: env['DEFAULT_LOCALE'] ?? 'en',
+          mediaDistribution: mediaDistribution,
+          allowedMimeTypes: env['ALLOWED_MIME_TYPES']?.split(',').toSet() ?? _defaultMimeTypes,
+          allowNonHttpEvents: bool.tryParse(env['ALLOW_NON_HTTP_EVENTS'] ?? '', caseSensitive: false) ?? false,
+          db: PostgresConfig(
+            host: env['PG_HOST'] ?? 'localhost',
+            port: int.tryParse(env['PG_PORT'] ?? '') ?? 5432,
+            database: env['PG_DATABASE'] ?? 'heart',
+            user: env['PG_USER'],
+            password: env['PG_PASSWORD'],
+          ),
+        );
+      default:
+        final missing = _requiredConfig.where((key) => env[key] == null || env[key]!.isEmpty).toList();
+        throw StateError(
+          'Missing required environment variables: ${missing.join(', ')}. '
+          'Ensure all required configuration values are set.',
+        );
+    }
+  }
+
+  String cdnAssetUrl(String key);
+}
+
+class _EnvConfig implements AppConfig {
+  @override
+  final Env env;
+  @override
+  final String firebaseProjectId;
+  @override
+  final String logLevel;
+  @override
+  final String awsRegion;
+  @override
+  final String? awsProfile;
+  @override
+  final String? testUserId;
+  @override
+  final String minimalAppVersion;
+  @override
+  final bool shouldCheckVersion;
+  @override
+  final String contentBucket;
+  @override
+  final String eventsDlq;
+  @override
+  final String monitoringTopicArn;
+  @override
+  final String scheduleGroup;
+  @override
+  final Duration accountDeletionOffset;
+  @override
+  final String schedulerRoleArn;
+  @override
+  final String eventsQueueArn;
+  @override
+  final List<String> supportedLocales;
+  @override
+  final String defaultLocale;
+  @override
+  final String mediaDistribution;
+  @override
+  final PostgresConfig db;
+  @override
+  final Set<String> allowedMimeTypes;
+  @override
+  final bool allowNonHttpEvents;
+
+  const _EnvConfig({
+    required this.env,
+    required this.firebaseProjectId,
+    required this.logLevel,
+    required this.awsRegion,
+    this.awsProfile,
+    this.testUserId,
+    required this.minimalAppVersion,
+    required this.shouldCheckVersion,
+    required this.contentBucket,
+    required this.supportedLocales,
+    required this.defaultLocale,
+    required this.mediaDistribution,
+    required this.db,
+    required this.allowedMimeTypes,
+    required this.allowNonHttpEvents,
+    required this.eventsDlq,
+    required this.monitoringTopicArn,
+    required this.scheduleGroup,
+    required this.accountDeletionOffset,
+    required this.schedulerRoleArn,
+    required this.eventsQueueArn,
+  });
+
+  @override
+  String cdnAssetUrl(String key) => Uri.https(mediaDistribution, key).toString();
+}
+
+final _configProperty = ContextProperty<AppConfig>('AppConfig');
+
+extension RequestConfig on Request {
+  AppConfig get config => _configProperty.get(this);
+
+  set config(AppConfig c) => _configProperty[this] = c;
+}
