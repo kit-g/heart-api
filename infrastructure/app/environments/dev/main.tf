@@ -38,3 +38,15 @@ module "cdn" {
   static_bucket                      = module.content.static_bucket
   api                                = module.api.api
 }
+
+module "monitoring" {
+  source                = "../../stacks/monitoring"
+  name_prefix           = "${var.name_prefix}-api"
+  region                = local.region
+  function_name         = module.api.function_name
+  api_gateway_name      = module.api.api_gateway_name
+  events_queue_name     = module.api.events_queue_name
+  events_dlq_name       = module.api.events_dlq_name
+  web_distribution_id   = module.cdn.web_distribution.id
+  media_distribution_id = module.cdn.media_distribution.id
+}
