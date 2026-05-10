@@ -26,7 +26,7 @@ permissions:
 
 env:
   AWS_REGION: "us-east-2"
-  AWS_ROLE: "arn:aws:iam::583168578067:role/HeartGitHubActionsDeployRole"
+  AWS_ROLE: "arn:aws:iam::583168578067:role/heart-github-actions-deploy-role"
   FUNCTION_NAME: "heart-api"
   API: "https://c90as24l23.execute-api.us-east-2.amazonaws.com/v1"
   PG_VERSION: "16"
