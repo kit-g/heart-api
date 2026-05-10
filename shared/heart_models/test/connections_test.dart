@@ -1,4 +1,4 @@
-import 'package:heart/models/connections.dart';
+import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 void main() {
