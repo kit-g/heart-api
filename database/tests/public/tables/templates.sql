@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(21);
+SELECT plan(22);
 
 SELECT has_table('public'::name, 'templates'::name);
 
@@ -34,6 +34,7 @@ SELECT col_is_pk('public'::name, 'templates'::name, 'id'::name, 'id is the prima
 SELECT col_not_null('public'::name, 'templates'::name, 'id'::name);
 SELECT col_not_null('public'::name, 'templates'::name, 'user_id'::name);
 SELECT col_not_null('public'::name, 'templates'::name, 'order_index'::name);
+SELECT col_not_null('public'::name, 'templates'::name, 'created_at'::name);
 
 SELECT col_default_is('public', 'templates', 'id', 'uuidv7()', 'id default is uuidv7()');
 SELECT col_default_is('public', 'templates', 'order_index', '0', 'order_index default is 0');

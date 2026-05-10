@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(29);
+SELECT plan(30);
 
 SELECT has_table('public'::name, 'exercises'::name);
 
@@ -42,6 +42,7 @@ SELECT col_not_null('public'::name, 'exercises'::name, 'name'::name);
 SELECT col_not_null('public'::name, 'exercises'::name, 'category'::name);
 SELECT col_not_null('public'::name, 'exercises'::name, 'target'::name);
 SELECT col_not_null('public'::name, 'exercises'::name, 'archived'::name);
+SELECT col_not_null('public'::name, 'exercises'::name, 'created_at'::name);
 
 SELECT col_default_is('public', 'exercises', 'id', 'uuidv7()', 'id default is uuidv7()');
 SELECT col_default_is('public', 'exercises', 'archived', 'false', 'archived default is false');

@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(20);
+SELECT plan(21);
 
 SELECT has_table('public'::name, 'exercise_sets'::name);
 
@@ -38,6 +38,7 @@ SELECT col_is_pk('public'::name, 'exercise_sets'::name, 'id'::name, 'id is the p
 SELECT col_not_null('public'::name, 'exercise_sets'::name, 'id'::name);
 SELECT col_not_null('public'::name, 'exercise_sets'::name, 'workout_exercise_id'::name);
 SELECT col_not_null('public'::name, 'exercise_sets'::name, 'set_order'::name);
+SELECT col_not_null('public'::name, 'exercise_sets'::name, 'completed'::name);
 
 SELECT col_default_is('public', 'exercise_sets', 'id', 'uuidv7()', 'id default is uuidv7()');
 SELECT col_default_is('public', 'exercise_sets', 'completed', 'false', 'completed default is false');
