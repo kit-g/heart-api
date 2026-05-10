@@ -1,4 +1,4 @@
-
+// ignore_for_file: avoid_dynamic_calls
 import 'dart:convert';
 
 import 'package:heart/models/workouts.dart';
@@ -41,8 +41,18 @@ void main() {
         userId: 'u1',
         body: {
           'exercises': [
-            {'exercise': 'Bench Press (Barbell)', 'order': 0, 'sets': [{'reps': 5}]},
-            {'exercise': {'name': 'Squat (Barbell)'}, 'order': 1, 'sets': []},
+            {
+              'exercise': 'Bench Press (Barbell)',
+              'order': 0,
+              'sets': [
+                {'reps': 5},
+              ],
+            },
+            {
+              'exercise': {'name': 'Squat (Barbell)'},
+              'order': 1,
+              'sets': [],
+            },
           ],
         },
       );
@@ -52,7 +62,9 @@ void main() {
       expect(exercises[0], {
         'exercise_name': 'Bench Press (Barbell)',
         'order': 0,
-        'sets': [{'reps': 5}],
+        'sets': [
+          {'reps': 5},
+        ],
       });
       expect(exercises[1]['exercise_name'], 'Squat (Barbell)');
     });
