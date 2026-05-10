@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:heart/aws/aws.dart';
 import 'package:heart/events/account_deletion.dart';
 import 'package:heart/events/uploads.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/aws.dart';
+import 'package:heart_aws/heart_aws.dart';
 import 'package:relic/relic.dart';
 
 import '../core/request.dart';

@@ -1,10 +1,9 @@
 import 'dart:convert';
 
-import 'package:aws_common/aws_common.dart';
-import 'package:crypto/crypto.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
+import 'package:heart_aws/heart_aws.dart';
 import 'package:relic/relic.dart';
 
 Future<void> imageUpload(

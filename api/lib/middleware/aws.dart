@@ -1,4 +1,4 @@
-import 'package:aws_common/aws_common.dart';
+import 'package:heart_aws/heart_aws.dart';
 import 'package:relic/relic.dart';
 
 class AwsConfig {
