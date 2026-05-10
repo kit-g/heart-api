@@ -6,6 +6,17 @@ on:
     paths:
       - 'api/**'
       - 'shared/**'
+      - 'database/**'
+      - 'scripts/apply_migrations.sh'
+      - 'scripts/db_tests.sh'
+      - '.github/workflows/deploy-api.yml'
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'shared/**'
+      - 'database/**'
+      - 'scripts/apply_migrations.sh'
+      - 'scripts/db_tests.sh'
       - '.github/workflows/deploy-api.yml'
   workflow_dispatch:
 
@@ -18,6 +29,11 @@ env:
   AWS_ROLE: "arn:aws:iam::583168578067:role/HeartGitHubActionsDeployRole"
   FUNCTION_NAME: "heart-api"
   API: "https://c90as24l23.execute-api.us-east-2.amazonaws.com/v1"
+  PG_VERSION: "16"
+
+concurrency:
+  group: api-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   lint:
@@ -25,7 +41,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
       - uses: dart-lang/setup-dart@v1
 
       - name: "Install dependencies"
@@ -35,41 +50,106 @@ jobs:
       - name: "Generate Mocks"
         working-directory: api
         run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: "Format check"
+        working-directory: api
+        run: dart format --output=none --set-exit-if-changed .
 
       - name: "Run Analysis"
         working-directory: api
         run: dart analyze
 
-  test:
-    name: "Unit Tests"
+  dart-test:
+    name: "Dart Tests (${{ matrix.package }})"
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [ api, shared/heart_aws, shared/heart_models ]
     steps:
       - uses: actions/checkout@v6
-
       - uses: dart-lang/setup-dart@v1
 
       - name: "Install dependencies"
-        working-directory: api
+        working-directory: ${{ matrix.package }}
         run: dart pub get
 
       - name: "Generate Mocks"
-        working-directory: api
+        if: matrix.package == 'api'
+        working-directory: ${{ matrix.package }}
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: "Run Tests"
-        working-directory: api
+        working-directory: ${{ matrix.package }}
         run: dart test
+
+  db-test:
+    name: "Database Tests"
+    runs-on: ubuntu-latest
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: heart
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: "Add PGDG apt repository"
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/pgdg.gpg
+          sudo apt-get update
+
+      - name: "Install Postgres ${{ env.PG_VERSION }} + pgtap + pg_prove"
+        run: |
+          sudo apt-get install -y \
+            postgresql-${{ env.PG_VERSION }} \
+            postgresql-${{ env.PG_VERSION }}-pgtap \
+            pgtap
+
+      - name: "Start Postgres + create test DB"
+        run: |
+          sudo pg_ctlcluster ${{ env.PG_VERSION }} main start
+          sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$PGPASSWORD'"
+          sudo -u postgres createdb $PGDATABASE
+          sudo -u postgres psql -d $PGDATABASE -c "CREATE EXTENSION pgtap"
+
+      - name: "Apply migrations"
+        run: ./scripts/apply_migrations.sh
+
+      - name: "Load test helpers"
+        run: psql -v ON_ERROR_STOP=1 --quiet -f database/test_utils/helpers.sql
+
+      - name: "Run pgtap suite"
+        working-directory: database
+        run: pg_prove tests/**/*.sql --quiet
 
   build-and-deploy:
     name: "Build & Deploy"
     runs-on: ubuntu-latest
-    needs: [ lint, test ]
+    needs: [ lint, dart-test, db-test ]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v6
 
       - name: "Export commit SHA"
         id: commit
         run: echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: "Install psql + jq"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client jq
+
+      - name: "Apply migrations to Supabase"
+        run: ./scripts/apply_migrations.sh
 
       - uses: dart-lang/setup-dart@v1
 
@@ -80,18 +160,18 @@ jobs:
           COMMIT=${{ steps.commit.outputs.commit }} ARTIFACTS_DIR=. make build-ApiFunction
           zip function.zip bootstrap
 
-      - name: "Configure AWS Credentials"
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ env.AWS_ROLE }}
-          aws-region: ${{ env.AWS_REGION }}
-
       - name: "Update Lambda Function Code"
         run: |
           aws lambda update-function-code \
             --function-name ${{ env.FUNCTION_NAME }} \
             --zip-file fileb://api/function.zip \
             --region ${{ env.AWS_REGION }} > /dev/null
+
+      - name: "Wait for Lambda update"
+        run: |
+          aws lambda wait function-updated \
+            --function-name ${{ env.FUNCTION_NAME }} \
+            --region ${{ env.AWS_REGION }}
 
     outputs:
       commit: ${{ steps.commit.outputs.commit }}
@@ -107,7 +187,7 @@ jobs:
         run: |
           echo "Expecting commit: $EXPECTED_COMMIT"
 
-          response=$(curl -s $API/version)
+          response=$(curl -fsS $API/version)
           echo "Response: $response"
 
           deployed_commit=$(echo "$response" | jq -r .commit)
