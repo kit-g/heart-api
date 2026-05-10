@@ -1,4 +1,4 @@
-part of 'aws.dart';
+part of '../heart_aws.dart';
 
 extension on int {
   String pad([int digits = 2]) {

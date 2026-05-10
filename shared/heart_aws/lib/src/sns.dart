@@ -1,4 +1,4 @@
-part of 'aws.dart';
+part of '../heart_aws.dart';
 
 abstract class SnsApi with Signer {
   SnsApi();

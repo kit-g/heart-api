@@ -1,4 +1,4 @@
-part of 'aws.dart';
+part of '../heart_aws.dart';
 
 /// A mixin that provides AWS Signature Version 4 signing capabilities for HTTP requests.
 ///
