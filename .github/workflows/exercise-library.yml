@@ -60,13 +60,6 @@ jobs:
       - name: "Install dependencies"
         run: pip install pyyaml boto3 'psycopg[binary]'
 
-      - name: "Debug OIDC token (sub claim)"
-        run: |
-          IDTOKEN=$(curl -sH "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
-          echo "sub = $(echo "$IDTOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq -r .sub)"
-          echo "aud = $(echo "$IDTOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq -r .aud)"
-
       - name: "Configure AWS Credentials"
         uses: aws-actions/configure-aws-credentials@v4
         with:
