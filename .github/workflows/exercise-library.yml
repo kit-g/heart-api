@@ -1,4 +1,4 @@
-name: "Generate Exercise library"
+name: "Sync Exercise library"
 
 on:
   workflow_dispatch:
@@ -10,9 +10,18 @@ on:
       AWS_ROLE:
         required: true
         type: string
-      EXERCISE_BUCKET:
+      CONTENT_BUCKET:
         required: true
         type: string
+        description: "S3 bucket holding processed exercise assets (exercises/exercises/<name>/...)"
+      SECRETS_BUCKET:
+        required: true
+        type: string
+        description: "S3 bucket holding secrets/supabase.json"
+      DISTRIBUTION_URL:
+        required: true
+        type: string
+        description: "CloudFront distribution that fronts the content bucket; used to build asset links"
 
   workflow_call:
     inputs:
@@ -23,25 +32,22 @@ on:
       AWS_ROLE:
         required: true
         type: string
-      EXERCISE_BUCKET:
+      CONTENT_BUCKET:
         required: true
         type: string
-        description: "S3 bucket for exercise assets"
-      ASSET_BUCKET:
+      SECRETS_BUCKET:
         required: true
         type: string
-        description: "S3 bucket for exercise images"
       DISTRIBUTION_URL:
         required: true
         type: string
-        description: "CloudFront distribution for exercise assets"
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  generate-library:
+  sync-library:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -52,12 +58,14 @@ jobs:
           python-version: '3.13'
 
       - name: "Install dependencies"
-        run: |
-          pip install pyyaml boto3
+        run: pip install pyyaml boto3 'psycopg[binary]'
 
-      - name: "Install dependencies"
+      - name: "Debug OIDC token (sub claim)"
         run: |
-          pip install pyyaml
+          IDTOKEN=$(curl -sH "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+          echo "sub = $(echo "$IDTOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq -r .sub)"
+          echo "aud = $(echo "$IDTOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq -r .aud)"
 
       - name: "Configure AWS Credentials"
         uses: aws-actions/configure-aws-credentials@v4
@@ -65,14 +73,9 @@ jobs:
           role-to-assume: ${{ inputs.AWS_ROLE }}
           aws-region: ${{ inputs.AWS_REGION }}
 
-      - name: "Generate localization files"
+      - name: "Sync exercise library to Postgres"
         env:
-          BUCKET: ${{ inputs.ASSET_BUCKET }}
+          CONTENT_BUCKET: ${{ inputs.CONTENT_BUCKET }}
+          SECRETS_BUCKET: ${{ inputs.SECRETS_BUCKET }}
           BASE_URL: ${{ inputs.DISTRIBUTION_URL }}
-        run: |
-          cd scripts
-          python library_locales.py
-
-      - name: "Sync to S3"
-        run: |
-          aws s3 sync scripts/dist/ s3://${{ inputs.EXERCISE_BUCKET }}/library/ --delete
+        run: python scripts/library_locales.py
