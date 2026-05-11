@@ -24,3 +24,12 @@ provider "aws" {
   }
 }
 
+data "aws_s3_object" "supabase_creds" {
+  bucket = module.content.static_bucket.bucket
+  key    = "secrets/supabase.json"
+}
+
+provider "supabase" {
+  access_token = jsondecode(data.aws_s3_object.supabase_creds.body).api_token
+}
+
