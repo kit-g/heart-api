@@ -6,21 +6,25 @@ Terraform for everything AWS + Supabase.
 
 ```
 infrastructure/
-└── app/                       # The app's TF tier — everything that ships with releases
-    ├── stacks/
-    │   ├── api/               # Lambda function, API Gateway, SQS events queue + DLQ,
-    │   │                      # EventBridge S3 rule, Scheduler group, SNS monitoring topic,
-    │   │                      # IAM roles, CloudWatch logs
-    │   ├── cdn/               # CloudFront media + web distributions, OACs, S3 bucket policies
-    │   └── content/           # Content + static S3 buckets, lifecycle for uploads/,
-    │                          # EventBridge bucket notification, Supabase project
-    ├── modules/
-    │   └── iam/               # Reusable role + inline-policies wrapper
+├── app/                       # The app's TF tier — everything that ships with releases
+│   ├── stacks/
+│   │   ├── api/               # Lambda function, API Gateway, SQS events queue + DLQ,
+│   │   │                      # EventBridge S3 rule, Scheduler group, SNS monitoring topic,
+│   │   │                      # IAM roles, CloudWatch logs
+│   │   ├── cdn/               # CloudFront media + web distributions, OACs, S3 bucket policies
+│   │   ├── content/           # Content + static S3 buckets, lifecycle for uploads/,
+│   │   │                      # EventBridge bucket notification, Supabase project
+│   │   └── monitoring/        # CloudWatch dashboard wiring api+cdn+sqs metrics
+│   ├── modules/
+│   │   └── iam/               # Reusable role + inline-policies wrapper
+│   └── environments/
+│       └── dev/               # Wires the stacks for the dev account
+├── dns/                       # Route53 zone + records (single env, dev account hosts apex)
+└── global/                    # Per-account once-only resources (OIDC provider + deploy role)
+    ├── stack/
     └── environments/
-        └── dev/               # Wires the stacks for the dev account
+        └── dev/
 ```
-
-The top-level `infrastructure/` directory is set up for tiered TF — `app/` holds the per-release stacks. Future tiers (e.g. `platform/` for DNS once prod exists) will sit alongside.
 
 ## Deployment
 
@@ -48,10 +52,10 @@ Resources use `${var.name_prefix}-<thing>`. In dev, `name_prefix = "heart-api"` 
 
 EventBridge Scheduler distinguishes two ARN shapes that look similar but aren't interchangeable:
 
-| What | ARN format |
-|---|---|
-| Schedule group (collection) | `arn:aws:scheduler:<region>:<account>:schedule-group/<group>` |
-| Schedule (individual) | `arn:aws:scheduler:<region>:<account>:schedule/<group>/<name>` |
+| What                        | ARN format                                                     |
+|-----------------------------|----------------------------------------------------------------|
+| Schedule group (collection) | `arn:aws:scheduler:<region>:<account>:schedule-group/<group>`  |
+| Schedule (individual)       | `arn:aws:scheduler:<region>:<account>:schedule/<group>/<name>` |
 
 `scheduler:CreateSchedule` / `DeleteSchedule` operate on the **schedule** (second form). Scoping a policy to the schedule-group ARN won't grant access — the resource has to be `schedule/<group>/*`.
 
@@ -63,10 +67,10 @@ Certificate ARNs are passed in as variables, not managed in TF. Cross-region ACM
 
 ### DNS
 
-DNS is intentionally not in TF yet. Waiting on a prod account to do the split: apex zone (`heart-of.me`) in prod managing email + delegations, `dev.heart-of.me` as a delegated subzone in dev. Aliases will rename (`dev.media.heart-of.me` → `media.dev.heart-of.me`, etc.) at that time.
+DNS lives in `infrastructure/dns/` as a single env (dev account hosts the apex zone). When prod exists, the split will be: apex zone in prod managing email + delegations, `dev.heart-of.me` as a delegated subzone in dev.
 
 ## State
 
-Backend is S3 (`583168578067-us-east-2-tfstate`) with DynamoDB locking (`tfstate-locks`). One state file per environment under `heart/<env>/terraform.tfstate`.
+Backend is S3 (`583168578067-ca-central-1-tfstate`) with DynamoDB locking (`tfstate-locks`). One state file per stack/env: `heart/<stack>/terraform.tfstate` (e.g. `heart/dev/terraform.tfstate`, `heart/dns/terraform.tfstate`, `heart/global/terraform.tfstate`).
 
 `.terraform.lock.hcl` and any `*.tfvars` are gitignored.

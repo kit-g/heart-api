@@ -5,7 +5,7 @@
 #   - If PGHOST is already set, uses the existing PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE.
 #     (CI db-test job sets these for the ephemeral local Postgres.)
 #   - Otherwise, fetches Supabase credentials from
-#     s3://583168578067-us-east-2-static/secrets/supabase.json and points psql at them.
+#     s3://583168578067-ca-central-1-static/secrets/supabase.json and points psql at them.
 #
 # Tracking: a `_schema_migrations` table is created idempotently. Each migration
 # applied within a transaction along with its tracking row, so it's all-or-nothing.
@@ -19,7 +19,7 @@ if [ -z "${PGHOST:-}" ]; then
   CREDS_FILE="${CREDS_FILE:-/tmp/supabase.json}"
   if [ ! -f "$CREDS_FILE" ]; then
     echo ">> Fetching Supabase credentials from S3"
-    aws s3 cp "s3://583168578067-us-east-2-static/secrets/supabase.json" "$CREDS_FILE" >/dev/null
+    aws s3 cp "s3://583168578067-ca-central-1-static/secrets/supabase.json" "$CREDS_FILE" >/dev/null
   fi
   export PGHOST="$(jq -r .host "$CREDS_FILE")"
   export PGPORT="$(jq -r .port "$CREDS_FILE")"
