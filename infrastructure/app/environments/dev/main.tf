@@ -3,8 +3,9 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {
-  account_id = data.aws_caller_identity.current.account_id
-  region     = data.aws_region.current.region
+  account_id          = data.aws_caller_identity.current.account_id
+  region              = data.aws_region.current.region
+  firebase_project_id = "heart-of-yours-dev"
 }
 
 module "content" {
@@ -20,7 +21,7 @@ module "api" {
   account_id                   = local.account_id
   name_prefix                  = "${var.name_prefix}-api"
   log_retention                = 7
-  firebase_project_id          = "heart-of-yours-dev"
+  firebase_project_id          = local.firebase_project_id
   content_bucket               = module.content.content_bucket
   database                     = module.content.database
   account_deletion_offset_days = 2
