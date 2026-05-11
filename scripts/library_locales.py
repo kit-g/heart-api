@@ -1,40 +1,59 @@
+"""
+Sync the exercise library from content/exercise_library.yml to Postgres.
+
+Reads:
+  - Source YAML: ../content/exercise_library.yml
+  - Asset listing: s3://CONTENT_BUCKET/exercises/exercises/<name>/{asset,thumbnail}.<ext>
+  - Supabase creds: s3://SECRETS_BUCKET/secrets/supabase.json
+
+Writes:
+  - exercises (global, user_id IS NULL) — fallback locale fields, asset, thumbnail, muscles
+  - exercise_translations — one row per non-fallback locale that has its own name/instructions
+  - Archives any global exercise not in the source YAML.
+
+Env:
+  CONTENT_BUCKET     content bucket holding processed exercise assets
+  SECRETS_BUCKET     static bucket holding secrets/supabase.json
+  BASE_URL           public CloudFront base for asset links
+"""
+
+import json
+import os
+import sys
 from dataclasses import dataclass
-from typing import Self, Callable
+from typing import Callable, Self
 
 import boto3
+import psycopg
 import yaml
+from psycopg.types.json import Json
 
 s3 = boto3.client('s3')
 
+ASSET_PREFIX = 'exercises/exercises/'  # processed assets live here
 
-def list_assets(bucket: str, prefix: str) -> list[str]:
+
+def list_assets(bucket: str) -> list[str]:
     paginator = s3.get_paginator('list_objects_v2')
-    iterator = paginator.paginate(Bucket=bucket, Prefix=prefix)
-    return [item['Key'] for page in iterator for item in page['Contents']]
+    return [
+        item['Key']
+        for page in paginator.paginate(Bucket=bucket, Prefix=ASSET_PREFIX)
+        for item in page.get('Contents', [])
+    ]
 
 
-def sort_assets(assets: list[str], make_link: Callable[[str], str]) -> dict:
-    by_name = {}
-    for asset in assets:
-        match asset.split('/'):
-            case ['exercises', name, asset_type]:
-                if name not in by_name:
-                    by_name[name] = {}
-                if asset_type.startswith('asset'):
-                    by_name[name]['asset'] = {
-                        'link': make_link(asset),
-                        'width': None,  # for now
-                        'height': None,
-                    }
-                if asset_type.startswith('thumbnail'):
-                    by_name[name]['thumbnail'] = {
-                        'link': make_link(asset),
-                        'width': None,  # for now
-                        'height': None,
-                    }
-            case _:
-                raise ValueError(asset)
-
+def sort_assets(keys: list[str], make_link: Callable[[str], str]) -> dict:
+    by_name: dict[str, dict] = {}
+    for key in keys:
+        parts = key.split('/')
+        # expect: exercises/exercises/<name>/<asset_type>.<ext>
+        if len(parts) != 4:
+            continue
+        _, _, name, filename = parts
+        if filename.startswith('asset'):
+            by_name.setdefault(name, {})['asset'] = {'link': make_link(key)}
+        elif filename.startswith('thumbnail'):
+            by_name.setdefault(name, {})['thumbnail'] = {'link': make_link(key)}
     return by_name
 
 
@@ -45,16 +64,10 @@ class MuscleRole:
 
     @classmethod
     def parse(cls, source: dict) -> Self:
-        return cls(
-            groups=source.get('groups', []),
-            ids=source.get('ids', []),
-        )
+        return cls(groups=source.get('groups', []), ids=source.get('ids', []))
 
     def to_dict(self) -> dict:
-        return {
-            'groups': self.groups,
-            'ids': self.ids,
-        }
+        return {'groups': self.groups, 'ids': self.ids}
 
 
 @dataclass
@@ -72,36 +85,25 @@ class Muscles:
         )
 
     def to_dict(self) -> dict:
-        return {
-            'primary': self.primary.to_dict(),
-            'secondary': self.secondary.to_dict(),
-        }
+        return {'primary': self.primary.to_dict(), 'secondary': self.secondary.to_dict()}
 
 
 @dataclass
 class ExerciseLocalization:
-    localization_name: str
     exercise_name: str
     instructions: str | None
     fallback_to: str | None
 
     @classmethod
-    def parse(cls, source: dict, name: str) -> Self:
+    def parse(cls, source: dict) -> Self:
         return cls(
-            localization_name=name,
-            exercise_name=source['name'],
+            exercise_name=source.get('name'),
             instructions=source.get('instructions'),
             fallback_to=source.get('fallback_to'),
         )
 
-    def __post_init__(self):
-        assert self.fallback_to or (self.instructions and self.exercise_name)
-
-    def to_dict(self) -> dict:
-        return {
-            'name': self.exercise_name,
-            **{'instructions': self.instructions if self.instructions else {}},
-        }
+    def is_concrete(self) -> bool:
+        return self.fallback_to is None and self.exercise_name is not None
 
 
 @dataclass
@@ -111,7 +113,7 @@ class Exercise:
     target: str
     muscles: Muscles | None
     localizations: dict[str, ExerciseLocalization]
-    fallback: str | None
+    fallback: str
 
     @classmethod
     def parse(cls, source: dict, name: str, global_fallback: str) -> Self:
@@ -121,40 +123,17 @@ class Exercise:
             target=source['target'],
             muscles=Muscles.parse(source.get('muscles')),
             localizations={
-                key: ExerciseLocalization.parse(value, key)
-                for key, value in source.get('i18n', {}).items()
+                locale: ExerciseLocalization.parse(loc)
+                for locale, loc in source.get('i18n', {}).items()
             },
             fallback=source.get('fallback') or global_fallback,
         )
 
-    def localize(self, locale: str, get_asset: Callable[[str], dict]) -> dict:
-        """
-        Resolves the localization for a specific locale.
-        Returns a dictionary compatible with the app's Exercise.fromJson constructor.
-        """
-        # determine the primary localization entry
-        loc = self.localizations.get(locale)
-
-        # resolve 'fallback_to' chain if it exists (e.g., en_CA -> en)
-        if loc and loc.fallback_to:
-            loc = self.localizations.get(loc.fallback_to)
-
-        # if no locale match or alias found, use the default fallback (e.g., 'en')
-        if not loc:
-            loc = self.localizations.get(self.fallback)
-
-        asset = get_asset(self.name) or {}
-
-        # if even the fallback is missing, we use the internal key as a last resort name
-        return {
-            'name': loc.exercise_name if loc else self.name,
-            'category': self.category,
-            'target': self.target,
-            'muscles': self.muscles.to_dict() if self.muscles else None,
-            'instructions': loc.instructions if loc else None,
-            'asset': asset.get('asset'),
-            'thumbnail': asset.get('thumbnail'),
-        }
+    def fallback_localization(self) -> ExerciseLocalization:
+        loc = self.localizations.get(self.fallback)
+        if loc is None or not loc.is_concrete():
+            raise ValueError(f'exercise {self.name!r}: fallback locale {self.fallback!r} missing concrete localization')
+        return loc
 
 
 @dataclass
@@ -170,54 +149,114 @@ class Library:
         return cls(
             version=source['version'],
             locales=source['locales'],
+            fallback_to=fallback_to,
             exercises={
                 key: Exercise.parse(ex, key, global_fallback=fallback_to)
                 for key, ex in source['exercises'].items()
             },
-            fallback_to=fallback_to,
         )
 
-    def __post_init__(self):
-        assert self.fallback_to, 'Fallback localization is required'
 
-    def __getitem__(self, item):
-        return self.exercises[item]
-
-    def json_for_locale(self, locale: str, get_asset: Callable[[str], dict]) -> list[dict]:
-        """
-        Generates the full list of exercises for a specific locale.
-        """
-        return [
-            ex.localize(locale, get_asset=get_asset)
-            for ex in self.exercises.values()
-        ]
+def fetch_db_creds(secrets_bucket: str) -> dict:
+    obj = s3.get_object(Bucket=secrets_bucket, Key='secrets/supabase.json')
+    return json.loads(obj['Body'].read())
 
 
 def get_source() -> dict:
-    with open('../content/exercise_library.yml', 'r') as f:
+    here = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(here, '..', 'content', 'exercise_library.yml'), 'r') as f:
         return yaml.safe_load(f)
 
 
+UPSERT_EXERCISE = '''
+INSERT INTO exercises (name, category, target, instructions, asset, thumbnail, muscles, archived)
+VALUES (%s, %s, %s, %s, %s, %s, %s, false)
+ON CONFLICT (name) WHERE user_id IS NULL
+DO UPDATE SET
+    category = EXCLUDED.category,
+    target = EXCLUDED.target,
+    instructions = EXCLUDED.instructions,
+    asset = EXCLUDED.asset,
+    thumbnail = EXCLUDED.thumbnail,
+    muscles = EXCLUDED.muscles,
+    archived = false
+RETURNING id
+'''
+
+UPSERT_TRANSLATION = '''
+INSERT INTO exercise_translations (exercise_id, locale, name, instructions)
+VALUES (%s, %s, %s, %s)
+ON CONFLICT (exercise_id, locale)
+DO UPDATE SET name = EXCLUDED.name, instructions = EXCLUDED.instructions
+'''
+
+ARCHIVE_MISSING = '''
+UPDATE exercises
+SET archived = true
+WHERE user_id IS NULL AND name <> ALL(%s) AND archived = false
+'''
+
+
+def sync(library: Library, sorted_assets: dict, conn: psycopg.Connection) -> tuple[int, int, int]:
+    upserted = 0
+    translations = 0
+    with conn.cursor() as cur:
+        for name, exercise in library.exercises.items():
+            asset = sorted_assets.get(name) or {}
+            fallback = exercise.fallback_localization()
+
+            cur.execute(UPSERT_EXERCISE, (
+                name,
+                exercise.category,
+                exercise.target,
+                fallback.instructions,
+                Json(asset.get('asset')) if asset.get('asset') else None,
+                Json(asset.get('thumbnail')) if asset.get('thumbnail') else None,
+                Json(exercise.muscles.to_dict()) if exercise.muscles else None,
+            ))
+            exercise_id = cur.fetchone()[0]
+            upserted += 1
+
+            for locale, loc in exercise.localizations.items():
+                if locale == exercise.fallback or not loc.is_concrete():
+                    continue
+                cur.execute(UPSERT_TRANSLATION, (exercise_id, locale, loc.exercise_name, loc.instructions))
+                translations += 1
+
+        cur.execute(ARCHIVE_MISSING, (list(library.exercises.keys()),))
+        archived = cur.rowcount
+    return upserted, translations, archived
+
+
+def main():
+    content_bucket = os.environ['CONTENT_BUCKET']
+    secrets_bucket = os.environ['SECRETS_BUCKET']
+    base_url = os.environ['BASE_URL']
+
+    print(f'>> Reading source')
+    library = Library.parse(get_source())
+
+    print(f'>> Listing assets in s3://{content_bucket}/{ASSET_PREFIX}')
+    keys = list_assets(content_bucket)
+    sorted_assets = sort_assets(keys, make_link=lambda k: f'{base_url}/{k}')
+    print(f'   {len(sorted_assets)} exercises have assets')
+
+    print(f'>> Fetching DB credentials from s3://{secrets_bucket}/secrets/supabase.json')
+    creds = fetch_db_creds(secrets_bucket)
+
+    print(f'>> Connecting to {creds["host"]}:{creds["port"]}')
+    with psycopg.connect(
+        host=creds['host'],
+        port=int(creds['port']),
+        user=creds['user'],
+        password=creds['password'],
+        dbname=creds.get('database', 'heart'),
+        sslmode='require',
+    ) as conn:
+        upserted, translations, archived = sync(library, sorted_assets, conn)
+
+    print(f'>> Done: {upserted} exercises upserted, {translations} translations, {archived} archived')
+
+
 if __name__ == '__main__':
-    import json
-    import os
-
-    _bucket = os.environ['BUCKET']
-    _base_url = os.environ['BASE_URL']
-
-    raw = get_source()
-    library = Library.parse(raw)
-
-    all_assets = list_assets(bucket=_bucket, prefix='exercises')
-    sorted_assets = sort_assets(all_assets, make_link=lambda asset: f'{_base_url}/{asset}')
-
-    output_dir = 'dist'
-    os.makedirs(output_dir, exist_ok=True)
-
-    for each in library.locales:
-        localized = library.json_for_locale(each, get_asset=lambda name: sorted_assets.get(name))
-
-        with open(f'{output_dir}/exercises_{each.lower()}.json', 'w', encoding='utf-8') as f:
-            json.dump({'exercises': localized}, f, ensure_ascii=False, indent=2)
-
-        print(f'Generated {output_dir}/exercises_{each}.json')
+    main()

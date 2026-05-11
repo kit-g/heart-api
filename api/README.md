@@ -334,7 +334,7 @@ dart test
 dart analyze
 
 # run the server locally (needs env vars — see globals/config.dart for required set)
-ENV=dev REGION=us-east-2 FIREBASE_PROJECT_ID=heart-of-yours-dev \
+ENV=dev REGION=ca-central-1 FIREBASE_PROJECT_ID=heart-of-yours-dev \
   CONTENT_BUCKET=... MEDIA_DISTRIBUTION=... ... \
   ALLOW_NON_HTTP_EVENTS=true \
   dart run bin/main.dart
