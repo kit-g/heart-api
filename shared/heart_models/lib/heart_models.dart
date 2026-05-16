@@ -18,6 +18,7 @@ export 'src/models/workout.dart';
 export 'src/services/accounts.dart';
 export 'src/services/charts.dart';
 export 'src/services/config.dart';
+export 'src/services/devices.dart';
 export 'src/services/exercises.dart';
 export 'src/services/feedback.dart';
 export 'src/services/previous.dart';
