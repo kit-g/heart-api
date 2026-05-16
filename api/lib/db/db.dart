@@ -1,5 +1,7 @@
 library;
 
+import 'dart:convert';
+
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:heart/models/images.dart';
@@ -10,6 +12,7 @@ import 'package:postgres/postgres.dart' hide Connection;
 
 part 'charts.dart';
 part 'connections.dart';
+part 'devices.dart';
 part 'exercises.dart';
 part 'images.dart';
 part 'profiles.dart';
@@ -22,10 +25,11 @@ abstract class _DatabaseBase {
 }
 
 class Database extends _DatabaseBase
-    with _Charts, _Connections, _Exercises, _Images, _Profiles, _Workouts, _Templates
+    with _Charts, _Connections, _Devices, _Exercises, _Images, _Profiles, _Workouts, _Templates
     implements
         ChartPreferenceService,
         ConnectionsService,
+        DeviceService,
         ExerciseService,
         ApiImageDbService,
         ApiProfileService,

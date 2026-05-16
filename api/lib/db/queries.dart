@@ -889,3 +889,22 @@ _deleted AS (
 )
 SELECT id FROM _deleted
 ''';
+
+final _upsertDevice = '''
+INSERT INTO device_tokens (profile_id, platform, token, settings, last_seen_at)
+VALUES (@profileId, @platform, @token, @settings::jsonb, now())
+ON CONFLICT (token)
+DO UPDATE SET
+  profile_id   = EXCLUDED.profile_id,
+  platform     = EXCLUDED.platform,
+  settings     = EXCLUDED.settings,
+  last_seen_at = now()
+''';
+
+final _listDeviceTokens = '''
+SELECT token FROM device_tokens WHERE profile_id = @profileId
+''';
+
+final _deleteDeviceToken = '''
+DELETE FROM device_tokens WHERE token = @token
+''';
