@@ -1,6 +1,7 @@
 import 'package:heart/core/response.dart';
 import 'package:heart/routes/account.dart' as account;
 import 'package:heart/routes/charts.dart' as charts;
+import 'package:heart/routes/comments.dart' as comments;
 import 'package:heart/routes/connections.dart' as connections;
 import 'package:heart/routes/devices.dart' as devices;
 import 'package:heart/routes/events.dart' as events;
@@ -23,6 +24,10 @@ final routes = <(String, Method), ModelHandler>{
   ('/charts', .get): charts.getChartPreferences,
   ('/charts', .post): charts.saveChartPreference,
   ('/charts/:preferenceId', .delete): charts.deleteChartPreference,
+  ('/comments', .get): comments.listComments,
+  ('/comments', .post): comments.createComment,
+  ('/comments/:commentId', .put): comments.editComment,
+  ('/comments/:commentId', .delete): comments.deleteComment,
   ('/connections', .get): connections.getConnections,
   ('/connections', .post): connections.createConnection,
   ('/connections/:connectionId', .delete): connections.deleteConnection,
