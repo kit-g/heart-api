@@ -1,0 +1,15 @@
+[project]
+name = "firebase"
+version = "0.1.0"
+description = "Firebase microservice — push notifications and Auth user lifecycle"
+requires-python = ">=3.14"
+dependencies = [
+    "firebase-admin>=7.4.0",
+]
+
+[tool.uv]
+# Application, not a library — uv won't try to wheel-install this into the
+# venv. Source lives at firebase/firebase/*.py with flat imports
+# (`from events import ...`) so the same files work unchanged inside the
+# Lambda zip. See the parent `firebase/README.md` for layout rationale.
+package = false
