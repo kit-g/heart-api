@@ -6,25 +6,8 @@ import 'package:heart/models/errors.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:relic/relic.dart';
 
-String _getLocale(
-  final List<LanguageQuality>? requestLocales,
-  final List<String> supportedLocales,
-  String defaultLocale,
-) {
-  if (requestLocales == null) return defaultLocale;
-  if (requestLocales.isEmpty) return defaultLocale;
-  final sorted = List.of(requestLocales)..sort((one, two) => (two.quality ?? 0).compareTo(one.quality ?? 0));
-  return sorted
-      .map((l) => l.language.replaceAll('-', '_'))
-      .firstWhere(supportedLocales.contains, orElse: () => defaultLocale);
-}
-
 Future<ExerciseResponse> getExercises(final Request request) async {
-  final locale = _getLocale(
-    request.headers.acceptLanguage?.languages,
-    request.config.supportedLocales,
-    request.config.defaultLocale,
-  );
+  final locale = request.locale(request.config.supportedLocales, request.config.defaultLocale);
   final owned = request.queryParameters.raw['owned'] == 'true';
   final response = await request.exerciseService.getExercises(
     request.userId,
