@@ -25,6 +25,7 @@ resource "aws_lambda_function" "api" {
       ENV                          = "dev"
       EVENTS_QUEUE_ARN             = aws_sqs_queue.events.arn
       EVENTS_DLQ                   = aws_sqs_queue.events_dlq.url
+      FIREBASE_EVENTS_QUEUE_URL    = var.firebase_events_queue.url
       FIREBASE_PROJECT_ID          = var.firebase_project_id
       LOG_LEVEL                    = "ALL"
       MEDIA_DISTRIBUTION           = "dev.media.heart-of.me" #
