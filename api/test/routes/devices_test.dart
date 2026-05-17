@@ -1,3 +1,4 @@
+import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
@@ -13,27 +14,33 @@ import '../mocks.mocks.dart';
 void main() {
   group('registerDevice', () {
     late MockDeviceService deviceService;
+    late MockAppConfig config;
     late Request request;
 
     setUp(() {
       deviceService = MockDeviceService();
+      config = MockAppConfig();
+      when(config.supportedLocales).thenReturn(['en', 'en_CA', 'ru']);
+      when(config.defaultLocale).thenReturn('en');
       when(
         deviceService.registerDevice(
           profileId: anyNamed('profileId'),
           platform: anyNamed('platform'),
           token: anyNamed('token'),
+          locale: anyNamed('locale'),
           settings: anyNamed('settings'),
         ),
       ).thenAnswer((_) async {});
     });
 
-    Request build(Map<String, dynamic> body) {
-      return jsonRequest(path: '/devices', body: body)
+    Request build(Map<String, dynamic> body, {Map<String, String> headers = const {}}) {
+      return jsonRequest(path: '/devices', body: body, extraHeaders: headers)
         ..user = User(id: 'u1')
+        ..config = config
         ..deviceService = deviceService;
     }
 
-    test('upserts on valid payload', () async {
+    test('upserts on valid payload, locale defaults when no Accept-Language', () async {
       request = build({
         'platform': 'ios',
         'token': 'tok-123',
@@ -48,13 +55,17 @@ void main() {
           profileId: 'u1',
           platform: DevicePlatform.ios,
           token: 'tok-123',
+          locale: 'en',
           settings: {'authorized': true, 'badge': 'enabled'},
         ),
       ).called(1);
     });
 
-    test('defaults settings to empty map when absent', () async {
-      request = build({'platform': 'android', 'token': 'tok-abc'});
+    test('honors Accept-Language when set', () async {
+      request = build(
+        {'platform': 'android', 'token': 'tok-abc'},
+        headers: {'accept-language': 'ru,en;q=0.8'},
+      );
 
       expect(() => registerDevice(request), throwsA(isA<NoContent>()));
 
@@ -64,6 +75,27 @@ void main() {
           profileId: 'u1',
           platform: DevicePlatform.android,
           token: 'tok-abc',
+          locale: 'ru',
+          settings: const <String, dynamic>{},
+        ),
+      ).called(1);
+    });
+
+    test('falls back to default for unsupported Accept-Language', () async {
+      request = build(
+        {'platform': 'web', 'token': 'tok-2'},
+        headers: {'accept-language': 'fr'},
+      );
+
+      expect(() => registerDevice(request), throwsA(isA<NoContent>()));
+
+      await pumpEventQueue();
+      verify(
+        deviceService.registerDevice(
+          profileId: 'u1',
+          platform: DevicePlatform.web,
+          token: 'tok-2',
+          locale: 'en',
           settings: const <String, dynamic>{},
         ),
       ).called(1);
@@ -77,6 +109,7 @@ void main() {
           profileId: anyNamed('profileId'),
           platform: anyNamed('platform'),
           token: anyNamed('token'),
+          locale: anyNamed('locale'),
           settings: anyNamed('settings'),
         ),
       );
