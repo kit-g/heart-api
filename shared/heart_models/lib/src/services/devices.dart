@@ -9,7 +9,7 @@ enum DevicePlatform {
   const DevicePlatform(this.value);
 
   factory DevicePlatform.fromString(String v) {
-    return switch (v) {
+    return switch (v.toLowerCase()) {
       'ios' => ios,
       'android' => android,
       'web' => web,
