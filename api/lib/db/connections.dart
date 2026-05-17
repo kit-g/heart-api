@@ -98,4 +98,13 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       createdAt: existing.createdAt,
     );
   }
+
+  @override
+  Future<bool> areConnected({required String userA, required String userB}) async {
+    final result = await _pool.execute(
+      _areConnected.toSql(),
+      parameters: {'userA': userA, 'userB': userB},
+    );
+    return result.isNotEmpty;
+  }
 }
