@@ -11,6 +11,7 @@ import 'package:heart_models/heart_models.dart' hide WorkoutService, TemplateSer
 import 'package:postgres/postgres.dart' hide Connection;
 
 part 'charts.dart';
+part 'comments.dart';
 part 'connections.dart';
 part 'devices.dart';
 part 'exercises.dart';
@@ -25,9 +26,10 @@ abstract class _DatabaseBase {
 }
 
 class Database extends _DatabaseBase
-    with _Charts, _Connections, _Devices, _Exercises, _Images, _Profiles, _Workouts, _Templates
+    with _Charts, _Comments, _Connections, _Devices, _Exercises, _Images, _Profiles, _Workouts, _Templates
     implements
         ChartPreferenceService,
+        CommentService,
         ConnectionsService,
         DeviceService,
         ExerciseService,
