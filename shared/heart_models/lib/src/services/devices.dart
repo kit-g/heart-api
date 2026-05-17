@@ -18,15 +18,22 @@ enum DevicePlatform {
   }
 }
 
+/// One registered device token + the locale to render notification copy in.
+typedef DeviceToken = ({String token, String locale});
+
 abstract interface class DeviceService {
   Future<void> registerDevice({
     required String profileId,
     required DevicePlatform platform,
     required String token,
+    required String locale,
     required Map<String, dynamic> settings,
   });
 
-  Future<Iterable<String>> tokensFor(String profileId);
+  /// All FCM tokens registered for [profileId], each paired with the locale
+  /// that device asked for (BCP-47 underscore form, e.g. `en_CA`).
+  /// Used by the API events consumer to render per-locale push copy.
+  Future<Iterable<DeviceToken>> tokensWithLocale(String profileId);
 
   Future<void> deleteToken(String token);
 }
