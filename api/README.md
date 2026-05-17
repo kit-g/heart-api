@@ -49,15 +49,16 @@ shared/
 
 ## Writing a route
 
-A route is `Future<Model?> Function(Request)`. Pull inputs off `request`, call services, return a `Model` (or throw an `ApiException`).
+A route is `Future<Model?> Function(Request)`. Decode inputs into a typed dataclass (FastAPI-style — see [`lib/inputs/README.md`](lib/inputs/README.md)), call services, return a `Model` (or throw an `ApiException`).
 
 ```dart
-Future<Workout> getWorkout(final Request request) async {
-  final workoutId = request.pathParameters.raw[#workoutId]!;
-  return request.workoutsService.getWorkout(
-    userId: request.userId,
-    workoutId: workoutId,
-    imageUrl: request.config.cdnAssetUrl,
+Future<Comment> createComment(final Request req) async {
+  final input = await CommentCreateIn.fromRequest(req);
+  return req.commentService.createComment(
+    authorId: req.userId,
+    targetType: input.targetType,
+    targetId: input.targetId,
+    body: input.body,
   );
 }
 ```
