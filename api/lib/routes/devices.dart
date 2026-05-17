@@ -11,6 +11,7 @@ Future<Model> registerDevice(final Request req) async {
     profileId: req.userId,
     platform: input.platform,
     token: input.token,
+    locale: input.locale,
     settings: input.settings,
   );
   throw const NoContent();
