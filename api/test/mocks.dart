@@ -15,6 +15,8 @@ import 'package:mockito/annotations.dart';
   ApiTemplateService,
   ExerciseService,
   ChartPreferenceService,
+  CommentService,
   ConnectionsService,
+  DeviceService,
 ])
 void main() {}
