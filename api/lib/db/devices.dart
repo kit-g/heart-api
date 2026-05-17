@@ -22,7 +22,7 @@ mixin _Devices on _DatabaseBase implements DeviceService {
   }
 
   @override
-  Future<Iterable<DeviceTokenForPush>> tokensWithLocale(String profileId) async {
+  Future<Iterable<DeviceToken>> tokensWithLocale(String profileId) async {
     final result = await _pool.execute(
       _listDeviceTokensWithLocale.toSql(),
       parameters: {'profileId': profileId},
