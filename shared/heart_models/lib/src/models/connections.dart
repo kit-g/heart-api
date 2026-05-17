@@ -200,4 +200,8 @@ abstract interface class ConnectionsService {
     required ConnectionRole role,
     required ConnectionDomain domain,
   });
+
+  /// True if there is any active connection between the two users in any
+  /// direction or domain. Used for permission checks (e.g. commenting).
+  Future<bool> areConnected({required String userA, required String userB});
 }
