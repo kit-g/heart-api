@@ -1,7 +1,7 @@
 [project]
 name = "heart-go"
 version = "0.1.0"
-description = "Add your description here"
+description = "Heart monorepo workspace root. Per-service deps live in the member pyprojects."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -9,13 +9,26 @@ dependencies = [
     "pillow>=12.1.1",
 ]
 
+[tool.uv.workspace]
+members = ["firebase"]
+
 [dependency-groups]
 dev = [
     "urllib3>=2.6.3", # security override
-    "cryptography>=46.0.5", # security override
+    "cryptography>=46.0.7", # security override
     "wheel>=0.46.2", # security override
     "werkzeug>=3.1.6", # security override
     "flask>=3.1.3", # security override
     "aws-sam-cli>=1.148.0",
     "pyyaml>=6.0.3",
+    "pytest>=8.3",
+    "pytest-mock>=3.14",
 ]
+
+[tool.pytest.ini_options]
+# Flat-import-style: each service ships its modules as if they live at the
+# Lambda zip root, so the imports in source code (`from events import ...`)
+# work both inside the Lambda runtime and in pytest. Add each service's
+# source dir to pythonpath as you onboard it.
+pythonpath = ["firebase/firebase"]
+testpaths = ["firebase/tests"]
