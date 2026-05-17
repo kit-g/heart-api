@@ -51,6 +51,12 @@ Handler _handler(final ModelHandler handler) {
     } on ApiException catch (e) {
       _logger.warning('API exception:', e);
       return JsonResponse(e.statusCode, body: e);
+    } on TypeError catch (e) {
+      _logger.warning('Malformed request (TypeError):', e);
+      return JsonResponse(400, body: BadRequest(reason: 'malformed request: ${e.toString()}'));
+    } on FormatException catch (e) {
+      _logger.warning('Malformed request (FormatException):', e);
+      return JsonResponse(400, body: BadRequest(reason: 'malformed request: ${e.message}'));
     } on UnimplementedError catch (e) {
       _logger.warning('API exception:', e.message);
       return JsonResponse.notImplemented(body: NotImplemented(reason: e.message ?? 'Not implemented'));
@@ -90,6 +96,8 @@ Future<void> main() async {
     ..use('/accounts', imageStorageDb(db: _storage))
     ..use('/charts', chartsDb(db: _database))
     ..use('/connections', connectionsDb(db: _database))
+    ..use('/comments', commentsDb(db: _database))
+    ..use('/comments', connectionsDb(db: _database))
     ..use('/devices', devicesDb(db: _database))
     ..use('/exercises', exercisesDb(db: _database))
     ..use('/feedback', imageStorageDb(db: _storage))

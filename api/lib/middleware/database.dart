@@ -7,6 +7,7 @@ import 'package:relic/relic.dart';
 final _profilesProperty = ContextProperty<ApiProfileService>('ApiProfileService');
 final _imageDbProperty = ContextProperty<ApiImageDbService>('ApiImageDbService');
 final _chatsProperty = ContextProperty<ChartPreferenceService>('ChartPreferenceService');
+final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
 final _devicesProperty = ContextProperty<DeviceService>('DeviceService');
 final _workoutsProperty = ContextProperty<ApiWorkoutService>('ApiWorkoutService');
@@ -43,6 +44,15 @@ Middleware devicesDb({required DeviceService db}) {
   return (final Handler next) {
     return (final request) {
       _devicesProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
+Middleware commentsDb({required CommentService db}) {
+  return (final Handler next) {
+    return (final request) {
+      _commentsProperty[request] = db;
       return next(request);
     };
   };
@@ -91,6 +101,10 @@ extension DatabaseContext on Request {
   DeviceService get deviceService => _devicesProperty.get(this);
 
   set deviceService(DeviceService v) => _devicesProperty[this] = v;
+
+  CommentService get commentService => _commentsProperty.get(this);
+
+  set commentService(CommentService v) => _commentsProperty[this] = v;
 
   ApiImageDbService get imageDbService => _imageDbProperty.get(this);
 
