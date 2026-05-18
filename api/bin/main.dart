@@ -7,6 +7,7 @@ import 'package:heart/middleware/authenticator.dart';
 import 'package:heart/middleware/aws.dart';
 import 'package:heart/middleware/config.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/middleware/events.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/middleware/version.dart';
 import 'package:heart/models/errors.dart';
@@ -39,6 +40,10 @@ final _storage = Storage(
   credentialsProvider: _credentialsProvider,
   region: _config.awsRegion,
   contentBucket: _config.contentBucket,
+);
+
+final _events = SqsEventPublisher(
+  Sqs(credentialsProvider: _credentialsProvider, region: _config.awsRegion),
 );
 
 Handler _handler(final ModelHandler handler) {
@@ -98,6 +103,7 @@ Future<void> main() async {
     ..use('/connections', connectionsDb(db: _database))
     ..use('/comments', commentsDb(db: _database))
     ..use('/comments', connectionsDb(db: _database))
+    ..use('/comments', events(publisher: _events))
     ..use('/devices', devicesDb(db: _database))
     ..use('/exercises', exercisesDb(db: _database))
     ..use('/feedback', imageStorageDb(db: _storage))
@@ -107,6 +113,9 @@ Future<void> main() async {
     ..use('/templates', templatesDb(db: _database))
     ..use('/events', imageStorageDb(db: _storage))
     ..use('/events', imageDb(db: _database))
+    ..use('/events', profilesDb(db: _database))
+    ..use('/events', devicesDb(db: _database))
+    ..use('/events', events(publisher: _events))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 
   for (final MapEntry(key: (route, verb), value: handler) in routes.entries) {
