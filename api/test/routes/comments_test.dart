@@ -1,5 +1,7 @@
+import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/middleware/events.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/routes/comments.dart';
 import 'package:heart_models/heart_models.dart';
@@ -32,17 +34,29 @@ Comment _fakeComment({
 void main() {
   late MockCommentService commentService;
   late MockConnectionsService connections;
+  late MockEventPublisher publisher;
+  late MockAppConfig config;
 
   setUp(() {
     commentService = MockCommentService();
     connections = MockConnectionsService();
+    publisher = MockEventPublisher();
+    config = MockAppConfig();
+    when(config.eventsQueueUrl).thenReturn('https://sqs.test/heart-api-events');
+    when(config.firebaseEventsQueueUrl).thenReturn('https://sqs.test/heart-firebase-events');
+    when(config.defaultLocale).thenReturn('en');
+    when(
+      publisher.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')),
+    ).thenAnswer((_) async {});
   });
 
   Request wire(Request req) {
     return req
-      ..user = User(id: _meId)
+      ..user = User(id: _meId, displayName: 'Sarah')
+      ..config = config
       ..commentService = commentService
-      ..connectionsService = connections;
+      ..connectionsService = connections
+      ..events = publisher;
   }
 
   group('createComment', () {
@@ -69,7 +83,7 @@ void main() {
       ).thenAnswer((_) async => _fakeComment());
     });
 
-    test('allows the target owner to comment without a connection check', () async {
+    test('owner comments on own content: no connection check, no notification enqueue', () async {
       when(
         commentService.ownerOfTarget(
           targetType: anyNamed('targetType'),
@@ -89,9 +103,10 @@ void main() {
           body: 'nice',
         ),
       ).called(1);
+      verifyNever(publisher.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
     });
 
-    test('allows a connected user to comment', () async {
+    test('connected user comments: enqueues comment.created with snippet + authorName', () async {
       when(
         connections.areConnected(userA: _meId, userB: _ownerId),
       ).thenAnswer((_) async => true);
@@ -108,6 +123,19 @@ void main() {
           body: 'nice',
         ),
       ).called(1);
+
+      final captured = verify(
+        publisher.publish(
+          queueUrl: 'https://sqs.test/heart-api-events',
+          message: captureAnyNamed('message'),
+        ),
+      ).captured.single as Map<String, dynamic>;
+      expect(captured['type'], 'comment.created');
+      expect(captured['ownerId'], _ownerId);
+      expect(captured['authorId'], _meId);
+      expect(captured['authorName'], 'Sarah');
+      expect(captured['targetType'], 'workout');
+      expect(captured['body'], 'nice');
     });
 
     test('rejects a non-connected, non-owner user', () async {

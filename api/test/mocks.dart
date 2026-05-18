@@ -1,4 +1,5 @@
 import 'package:heart/globals/config.dart';
+import 'package:heart/middleware/events.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/profile.dart';
@@ -18,5 +19,6 @@ import 'package:mockito/annotations.dart';
   CommentService,
   ConnectionsService,
   DeviceService,
+  EventPublisher,
 ])
 void main() {}
