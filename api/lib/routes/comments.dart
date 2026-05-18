@@ -1,20 +1,43 @@
+import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/middleware/events.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/pagination.dart';
+import 'package:heart/notifications/renderer.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
 Future<Comment> createComment(final Request req) async {
   final input = await CommentCreateIn.fromRequest(req);
-  await _assertCanAccessTarget(req, targetType: input.targetType, targetId: input.targetId);
-  return req.commentService.createComment(
+  final ownerId = await _assertCanAccessTarget(req, targetType: input.targetType, targetId: input.targetId);
+  final comment = await req.commentService.createComment(
     authorId: req.userId,
     targetType: input.targetType,
     targetId: input.targetId,
     body: input.body,
   );
+
+  // Skip self-notification — you don't push to yourself for commenting on
+  // your own content.
+  if (req.userId != ownerId) {
+    await req.events.publish(
+      queueUrl: req.config.eventsQueueUrl,
+      message: {
+        'type': 'comment.created',
+        'commentId': comment.id,
+        'authorId': req.userId,
+        'authorName': req.user.displayName ?? 'Someone',
+        'ownerId': ownerId,
+        'targetType': input.targetType.value,
+        'targetId': input.targetId,
+        'body': snippetize(input.body),
+      },
+    );
+  }
+
+  return comment;
 }
 
 Future<Model> listComments(final Request req) async {
@@ -47,9 +70,10 @@ Future<Model> deleteCommentById(final Request req, final String commentId) async
   throw const NoContent();
 }
 
-/// Ensures the caller can read/write comments on the given target: they're
-/// either the owner of the underlying workout, or connected to that owner.
-Future<void> _assertCanAccessTarget(
+/// Ensures the caller can read/write comments on the given target. Returns
+/// the resolved owner user id (the workout author) so the caller can use it
+/// for downstream side-effects (e.g. building a notification event).
+Future<String> _assertCanAccessTarget(
   Request req, {
   required CommentTarget targetType,
   required String targetId,
@@ -59,7 +83,7 @@ Future<void> _assertCanAccessTarget(
     targetId: targetId,
   );
   if (ownerId == null) throw NotFound(type: targetType.value, id: targetId);
-  if (ownerId == req.userId) return;
+  if (ownerId == req.userId) return ownerId;
   final connected = await req.connectionsService.areConnected(
     userA: req.userId,
     userB: ownerId,
@@ -67,4 +91,5 @@ Future<void> _assertCanAccessTarget(
   if (!connected) {
     throw const Forbidden(reason: 'not connected to the owner of this content');
   }
+  return ownerId;
 }
