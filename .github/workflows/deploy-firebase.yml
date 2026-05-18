@@ -101,6 +101,8 @@ jobs:
           uv pip install \
             --no-cache-dir \
             --target pkg/ \
+            --python-platform aarch64-manylinux2014 \
+            --python-version 3.12 \
             --requirements requirements.txt
 
       - name: "Copy service source into package"
