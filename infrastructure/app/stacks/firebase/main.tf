@@ -27,6 +27,7 @@ resource "aws_lambda_function" "firebase" {
   handler          = var.handler
   filename         = data.archive_file.placeholder.output_path
   source_code_hash = data.archive_file.placeholder.output_base64sha256
+  architectures    = ["arm64"]
   memory_size      = 512
   timeout          = 30
   depends_on       = [aws_cloudwatch_log_group.firebase]
