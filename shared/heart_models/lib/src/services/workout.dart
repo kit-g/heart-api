@@ -1,4 +1,3 @@
-import '../models/exercise.dart';
 import '../models/exercise_set.dart';
 import '../models/misc.dart';
 import '../models/workout.dart';
@@ -14,7 +13,7 @@ abstract interface class WorkoutService implements GalleryService {
 
   Future<void> finishWorkout(Workout workout, String userId);
 
-  Future<void> startExercise(String workoutId, WorkoutExercise exercise);
+  Future<void> startExercise(String workoutId);
 
   Future<void> removeExercise(WorkoutExercise exercise);
 
@@ -28,13 +27,13 @@ abstract interface class WorkoutService implements GalleryService {
 
   Future<void> markSetAsIncomplete(ExerciseSet set);
 
-  Future<Workout?> getActiveWorkout(String? userId, ExerciseLookup lookup);
+  Future<Workout?> getActiveWorkout(String? userId);
 
-  Future<Workout?> getWorkout(String? userId, String workoutId, ExerciseLookup lookup);
+  Future<Workout?> getWorkout(String? userId, String workoutId);
 
   Future<void> storeWorkoutHistory(Iterable<Workout> history, String userId);
 
-  Future<Iterable<Workout>?> getWorkoutHistory(String userId, ExerciseLookup lookup);
+  Future<Iterable<Workout>?> getWorkoutHistory(String userId);
 
   Future<void> updateWorkout({required String workoutId, String? name, Iterable<WorkoutImage>? images});
 }
