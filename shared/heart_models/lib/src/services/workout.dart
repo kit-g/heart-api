@@ -13,7 +13,7 @@ abstract interface class WorkoutService implements GalleryService {
 
   Future<void> finishWorkout(Workout workout, String userId);
 
-  Future<void> startExercise(String workoutId);
+  Future<void> startExercise(String workoutId, WorkoutExercise exercise);
 
   Future<void> removeExercise(WorkoutExercise exercise);
 
