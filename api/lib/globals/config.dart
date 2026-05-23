@@ -28,8 +28,7 @@ const _requiredConfig = {
 
 enum Env {
   dev,
-  prod
-  ;
+  prod;
 
   factory Env.fromString(String? v) {
     return switch (v) {
