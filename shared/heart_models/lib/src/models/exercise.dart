@@ -413,7 +413,6 @@ class _Exercise implements Exercise {
 }
 
 typedef ExerciseId = String;
-typedef ExerciseLookup = Exercise? Function(ExerciseId);
 typedef Asset = ({String link, int? width, int? height});
 
 extension on String {
