@@ -297,9 +297,10 @@ SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allow
 final _saveWorkout = '''
 WITH
 _order_to_name AS (
-  SELECT 
-    (ex->>'order')::int AS exercise_order, 
-    ex->>'exercise_name' AS exercise_name
+  SELECT
+    (ex->>'order')::int AS exercise_order,
+    ex->>'exercise_name' AS exercise_name,
+    ex->>'unit_system' AS unit_system
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -315,12 +316,12 @@ _workout AS (
   RETURNING id, name, started_at, completed_at, created_at
 ),
 _inserted_exercises AS (
-  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order)
-  SELECT w.id, el.exercise_id, otn.exercise_order
+  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, unit_system)
+  SELECT w.id, el.exercise_id, otn.exercise_order, otn.unit_system
   FROM _workout w
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
-  RETURNING id, exercise_order
+  RETURNING id, exercise_order, unit_system
 ),
 _sets_input AS (
   SELECT
@@ -368,12 +369,13 @@ _exercises_json AS (
     jsonb_build_object(
       'id', ie.id,
       'exercise', jsonb_build_object(
-        'id', el.exercise_id, 
-        'category', e.category, 
-        'target', e.target, 
+        'id', el.exercise_id,
+        'category', e.category,
+        'target', e.target,
         'name', el.name
       ),
       'exercise_order', ie.exercise_order,
+      'unit_system', ie.unit_system,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -399,9 +401,10 @@ LEFT JOIN _exercises_json ej
 final _replaceWorkout = '''
 WITH
 _order_to_name AS (
-  SELECT 
-    (ex->>'order')::int AS exercise_order, 
-    ex->>'exercise_name' AS exercise_name
+  SELECT
+    (ex->>'order')::int AS exercise_order,
+    ex->>'exercise_name' AS exercise_name,
+    ex->>'unit_system' AS unit_system
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -423,16 +426,17 @@ _deleted AS (
   RETURNING id
 ),
 _inserted_exercises AS (
-  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order)
-  SELECT 
-    w.id, 
-    el.exercise_id, 
-    otn.exercise_order
+  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, unit_system)
+  SELECT
+    w.id,
+    el.exercise_id,
+    otn.exercise_order,
+    otn.unit_system
   FROM _workout w
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
   WHERE NOT exists(SELECT 1 FROM _deleted WHERE false)
-  RETURNING id, exercise_order
+  RETURNING id, exercise_order, unit_system
 ),
 _sets_input AS (
   SELECT
@@ -480,12 +484,13 @@ _exercises_json AS (
     jsonb_build_object(
       'id', ie.id,
       'exercise', jsonb_build_object(
-        'id', el.exercise_id, 
-        'category', e.category, 
-        'target', e.target, 
+        'id', el.exercise_id,
+        'category', e.category,
+        'target', e.target,
         'name', el.name
       ),
       'exercise_order', ie.exercise_order,
+      'unit_system', ie.unit_system,
       'sets', coalesce(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -514,7 +519,10 @@ DELETE FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId
 final _saveTemplate = '''
 WITH
 _order_to_name AS (
-  SELECT (ex->>'order')::int AS exercise_order, ex->>'exercise_name' AS exercise_name
+  SELECT
+    (ex->>'order')::int AS exercise_order,
+    ex->>'exercise_name' AS exercise_name,
+    ex->>'unit_system' AS unit_system
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -530,12 +538,12 @@ _template AS (
   RETURNING id, name, order_index, source_template_id, assigned_by, sync_enabled, created_at
 ),
 _inserted_exercises AS (
-  INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
-  SELECT t.id, el.id, otn.exercise_order
+  INSERT INTO template_exercises (template_id, exercise_id, exercise_order, unit_system)
+  SELECT t.id, el.id, otn.exercise_order, otn.unit_system
   FROM _template t
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
-  RETURNING id, exercise_id, exercise_order
+  RETURNING id, exercise_id, exercise_order, unit_system
 ),
 _sets_input AS (
   SELECT
@@ -576,6 +584,7 @@ _exercises_json AS (
       'id', ie.id,
       'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
       'exercise_order', ie.exercise_order,
+      'unit_system', ie.unit_system,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -602,7 +611,10 @@ LEFT JOIN _exercises_json ej ON true
 final _replaceTemplate = '''
 WITH
 _order_to_name AS (
-  SELECT (ex->>'order')::int AS exercise_order, ex->>'exercise_name' AS exercise_name
+  SELECT
+    (ex->>'order')::int AS exercise_order,
+    ex->>'exercise_name' AS exercise_name,
+    ex->>'unit_system' AS unit_system
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -623,13 +635,13 @@ _deleted AS (
   RETURNING id
 ),
 _inserted_exercises AS (
-  INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
-  SELECT t.id, el.id, otn.exercise_order
+  INSERT INTO template_exercises (template_id, exercise_id, exercise_order, unit_system)
+  SELECT t.id, el.id, otn.exercise_order, otn.unit_system
   FROM _template t
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
   WHERE NOT EXISTS (SELECT 1 FROM _deleted WHERE false)
-  RETURNING id, exercise_id, exercise_order
+  RETURNING id, exercise_id, exercise_order, unit_system
 ),
 _sets_input AS (
   SELECT
@@ -670,6 +682,7 @@ _exercises_json AS (
       'id', ie.id,
       'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
       'exercise_order', ie.exercise_order,
+      'unit_system', ie.unit_system,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
