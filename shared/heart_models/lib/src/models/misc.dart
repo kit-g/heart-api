@@ -17,8 +17,8 @@ abstract interface class Storable {
 }
 
 enum MeasurementUnit {
-  imperial('Imperial'),
-  metric('Metric')
+  imperial('imperial'),
+  metric('metric')
   ;
 
   final String name;
@@ -27,8 +27,8 @@ enum MeasurementUnit {
 
   factory MeasurementUnit.fromString(String v) {
     return switch (v) {
-      'Imperial' => MeasurementUnit.imperial,
-      'Metric' => MeasurementUnit.metric,
+      'imperial' => .imperial,
+      'metric' => .metric,
       _ => throw ArgumentError(v),
     };
   }

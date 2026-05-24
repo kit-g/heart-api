@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(15);
+SELECT plan(16);
 
 SELECT has_table('public'::name, 'workout_exercises'::name);
 
@@ -11,7 +11,8 @@ SELECT columns_are(
                    'id',
                    'workout_id',
                    'exercise_id',
-                   'exercise_order'
+                   'exercise_order',
+                   'unit_system'
                    ]
        );
 
@@ -19,6 +20,7 @@ SELECT col_type_is('public'::name, 'workout_exercises'::name, 'id'::name, 'uuid'
 SELECT col_type_is('public'::name, 'workout_exercises'::name, 'workout_id'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'workout_exercises'::name, 'exercise_id'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'workout_exercises'::name, 'exercise_order'::name, 'integer'::name);
+SELECT col_type_is('public'::name, 'workout_exercises'::name, 'unit_system'::name, 'text'::name);
 
 SELECT has_pk('public'::name, 'workout_exercises'::name, 'workout_exercises has a primary key');
 SELECT col_is_pk('public'::name, 'workout_exercises'::name, 'id'::name, 'id is the primary key');

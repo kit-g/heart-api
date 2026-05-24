@@ -147,7 +147,12 @@ class TemplateRequest {
               {'name': String n} => n,
               _ => null,
             };
-            return {'exercise_name': name, 'order': ex['order'] ?? index, 'sets': ex['sets'] ?? []};
+            return {
+              'exercise_name': name,
+              'order': ex['order'] ?? index,
+              'unit_system': ex['unitSystem'],
+              'sets': ex['sets'] ?? [],
+            };
           },
         )
         .where((e) => e['exercise_name'] != null)

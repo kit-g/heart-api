@@ -32,3 +32,7 @@ build/
 
 infrastructure/api/api.toml
 content/assets/**
+
+**/.DS_Store
+
+*.pyc

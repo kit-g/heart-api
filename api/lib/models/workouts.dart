@@ -67,7 +67,12 @@ class WorkoutRequest {
               {'name': String n} => n,
               _ => null,
             };
-            return {'exercise_name': name, 'order': ex['order'], 'sets': ex['sets'] ?? []};
+            return {
+              'exercise_name': name,
+              'order': ex['order'],
+              'unit_system': ex['unitSystem'],
+              'sets': ex['sets'] ?? [],
+            };
           },
         )
         .where((e) => e['exercise_name'] != null)
