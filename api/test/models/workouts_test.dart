@@ -62,6 +62,7 @@ void main() {
       expect(exercises[0], {
         'exercise_name': 'Bench Press (Barbell)',
         'order': 0,
+        'unit_system': null,
         'sets': [
           {'reps': 5},
         ],

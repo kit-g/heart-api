@@ -132,7 +132,10 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
     final exercises = <WorkoutExercise>[];
     for (final each in this) {
       if (each.isNotEmpty) {
-        final exercise = WorkoutExercise(starter: each.first.copy());
+        final exercise = WorkoutExercise(
+          starter: each.first.copy(),
+          unitSystem: each.unitSystem,
+        );
 
         for (final (index, set) in each.skip(1).indexed) {
           final start = DateTime.timestamp().add(Duration(milliseconds: 2 * index));

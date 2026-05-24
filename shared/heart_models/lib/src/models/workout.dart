@@ -21,6 +21,12 @@ abstract interface class WorkoutExercise
 
   set order(int? v);
 
+  /// Override for the measurement unit used to log this exercise.
+  /// `null` means "follow the device default".
+  MeasurementUnit? get unitSystem;
+
+  set unitSystem(MeasurementUnit? v);
+
   void add(ExerciseSet set);
 
   bool remove(ExerciseSet set);
@@ -30,11 +36,12 @@ abstract interface class WorkoutExercise
   /// whether at least one set was marked as done
   bool get isStarted;
 
-  factory WorkoutExercise({required ExerciseSet starter}) {
+  factory WorkoutExercise({required ExerciseSet starter, MeasurementUnit? unitSystem}) {
     return _WorkoutExercise._(
       id: uuidV7(),
       starter: starter,
       exercise: starter.exercise,
+      unitSystem: unitSystem,
     );
   }
 
@@ -48,6 +55,10 @@ abstract interface class WorkoutExercise
       },
       id: json['id'],
       order: json['exercise_order'] ?? json['order'],
+      unitSystem: switch (json['unitSystem'] ?? json['unit_system']) {
+        String s => MeasurementUnit.fromString(s),
+        _ => null,
+      },
     );
   }
 }
@@ -174,11 +185,15 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
   @override
   int? order;
 
+  @override
+  MeasurementUnit? unitSystem;
+
   _WorkoutExercise._({
     ExerciseSet? starter,
     DateTime? start,
     required this.id,
     this.order,
+    this.unitSystem,
     required Exercise exercise,
     List<ExerciseSet>? sets,
   }) : _exercise = exercise,
@@ -228,6 +243,7 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
       'id': id,
       'exercise': ?firstOrNull?.exercise.toMap(),
       'start': start.toIso8601String(),
+      'unitSystem': ?unitSystem?.name,
       'sets': [
         for (final each in this) each.toMap(),
       ],
@@ -524,7 +540,10 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
 
     for (final each in this) {
       if (each.isNotEmpty) {
-        final exercise = WorkoutExercise(starter: each.first.copy());
+        final exercise = WorkoutExercise(
+          starter: each.first.copy(),
+          unitSystem: each.unitSystem,
+        );
 
         for (final (index, set) in each.skip(1).indexed) {
           final start = DateTime.timestamp().add(Duration(milliseconds: 2 * index));
