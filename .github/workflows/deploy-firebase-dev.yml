@@ -1,0 +1,37 @@
+name: "Deploy Firebase Service, dev"
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches: [ main, comments ]
+    paths:
+      - 'firebase/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/deploy-firebase.yml'
+      - '.github/workflows/deploy-firebase-dev.yml'
+  pull_request:
+    paths:
+      - 'firebase/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/deploy-firebase.yml'
+      - '.github/workflows/deploy-firebase-dev.yml'
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: firebase-dev-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  dev:
+    uses: ./.github/workflows/deploy-firebase.yml
+    with:
+      AWS_ROLE: 'arn:aws:iam::583168578067:role/heart-github-actions-deploy-role'
+      AWS_REGION: 'ca-central-1'
+      FUNCTION_NAME: 'heart-firebase'
+      SECRETS_BUCKET: '583168578067-ca-central-1-static'
+      FIREBASE_CRED_KEY: 'secrets/dev/firebase/firebase.json'

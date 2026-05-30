@@ -20,10 +20,10 @@ class Storage extends _StorageBase with _Images implements ApiImageStorageServic
   final String contentBucket;
 
   Storage({
-    required AWSCredentialsProvider credentialsProvider,
+    required this._credentialsProvider,
     required this.region,
     required this.contentBucket,
-  }) : _credentialsProvider = credentialsProvider;
+  });
 
   @override
   AWSCredentialsProvider get credentialsProvider => _credentialsProvider;

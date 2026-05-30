@@ -1,4 +1,6 @@
+import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/middleware/events.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:relic/relic.dart';
 
@@ -12,5 +14,12 @@ Future<void> accountDeletion(Request request, String userId) async {
 
   // Deleting the profile cascades to workouts, templates, workout_images, etc.
   await request.profileService.deleteAccount(userId: userId);
-  // TODO: delete Firebase user (requires Firebase Admin credentials)
+
+  // Fan out to the firebase service for the FB Auth user delete. We do this
+  // last so the local cleanup is durable even if FB is unreachable — SQS will
+  // retry the firebase delete independently.
+  await request.events.publish(
+    queueUrl: request.config.firebaseEventsQueueUrl,
+    message: {'type': 'account.delete', 'uid': userId},
+  );
 }

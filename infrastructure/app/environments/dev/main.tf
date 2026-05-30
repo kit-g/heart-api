@@ -14,6 +14,14 @@ module "content" {
   account_id = local.account_id
 }
 
+module "firebase" {
+  source        = "../../stacks/firebase"
+  name_prefix   = "${var.name_prefix}-firebase"
+  runtime       = var.python_runtime
+  handler       = var.lambda_handler
+  log_retention = 7
+}
+
 module "api" {
   source                       = "../../stacks/api"
   environment                  = "dev"
@@ -22,6 +30,7 @@ module "api" {
   name_prefix                  = "${var.name_prefix}-api"
   log_retention                = 7
   firebase_project_id          = local.firebase_project_id
+  firebase_events_queue        = module.firebase.events_queue
   content_bucket               = module.content.content_bucket
   database                     = module.content.database
   account_deletion_offset_days = 2

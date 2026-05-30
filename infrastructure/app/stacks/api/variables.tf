@@ -71,3 +71,12 @@ variable "account_deletion_offset_days" {
   description = "Days until a scheduled account deletion fires"
   type        = number
 }
+
+variable "firebase_events_queue" {
+  description = "Firebase microservice SQS queue"
+  type = object({
+    arn  = string
+    url  = string
+    name = string
+  })
+}

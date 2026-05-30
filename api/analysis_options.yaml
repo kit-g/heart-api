@@ -17,3 +17,4 @@ linter:
     avoid_dynamic_calls: true
     prefer_single_quotes: true
     avoid_print: true
+    use_null_aware_elements: true
