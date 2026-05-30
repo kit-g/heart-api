@@ -80,3 +80,8 @@ variable "firebase_events_queue" {
     name = string
   })
 }
+
+variable "media_distribution" {
+  description = "Custom domain name for media CF distribution"
+  type = string
+}

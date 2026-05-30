@@ -35,6 +35,7 @@ module "api" {
   database                     = module.content.database
   account_deletion_offset_days = 2
   monitoring_email             = "info@heart-of.me"
+  media_distribution           = "dev.media.heart-of.me"
 }
 
 module "cdn" {
