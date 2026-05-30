@@ -28,7 +28,9 @@ resource "aws_route53_record" "apex_txt" {
   ttl     = 14400
   records = [
     "v=spf1 include:spf.improvmx.com ~all",
+    "v=spf1 include:_spf.firebasemail.com ~all",
     "google-site-verification=r5-Cw1hkYWb3xDhuBaLOv_dNujEY3h-w512B0KtSUSk",
+    "firebase=${var.firebase_prod_project_id}"
   ]
 }
 
