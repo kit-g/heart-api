@@ -3,8 +3,7 @@ import 'package:heart_models/heart_models.dart';
 enum ConnectionRole {
   coach,
   student,
-  peer
-  ;
+  peer;
 
   String get value => name.toUpperCase();
 
@@ -25,8 +24,7 @@ enum ConnectionDomain {
   fitness,
   swimming,
   running,
-  general
-  ;
+  general;
 
   String get value => name.toLowerCase();
 
@@ -41,8 +39,7 @@ enum ConnectionStatus {
   declined,
   severed,
   blocked,
-  paused
-  ;
+  paused;
 
   factory ConnectionStatus.fromString(String val) {
     return values.firstWhere((e) => e.name == val.toLowerCase(), orElse: () => pending);
@@ -200,4 +197,8 @@ abstract interface class ConnectionsService {
     required ConnectionRole role,
     required ConnectionDomain domain,
   });
+
+  /// True if there is any active connection between the two users in any
+  /// direction or domain. Used for permission checks (e.g. commenting).
+  Future<bool> areConnected({required String userA, required String userB});
 }

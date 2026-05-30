@@ -14,3 +14,15 @@ variable "name_prefix" {
   type        = string
   default     = "heart"
 }
+
+variable "python_runtime" {
+  description = "AWS Lambda runtime for every Python service in this env."
+  type        = string
+  default     = "python3.14"
+}
+
+variable "lambda_handler" {
+  description = "Lambda entrypoint convention shared across services: file `app.py`, function `handler`."
+  type        = string
+  default     = "app.handler"
+}

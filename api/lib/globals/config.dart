@@ -16,7 +16,9 @@ const _requiredConfig = {
   'CONTENT_BUCKET',
   'ENV',
   'EVENTS_QUEUE_ARN',
+  'EVENTS_QUEUE_URL',
   'EVENTS_DLQ',
+  'FIREBASE_EVENTS_QUEUE_URL',
   'FIREBASE_PROJECT_ID',
   'MEDIA_DISTRIBUTION',
   'MIN_APP_VERSION',
@@ -105,6 +107,10 @@ abstract interface class AppConfig {
 
   String get eventsQueueArn;
 
+  String get eventsQueueUrl;
+
+  String get firebaseEventsQueueUrl;
+
   PostgresConfig get db;
 
   Set<String> get allowedMimeTypes;
@@ -119,7 +125,9 @@ abstract interface class AppConfig {
             'CONTENT_BUCKET': String contentBucket,
             'ENV': String environment,
             'EVENTS_QUEUE_ARN': String eventsSqsArn,
+            'EVENTS_QUEUE_URL': String eventsQueueUrl,
             'EVENTS_DLQ': String dlq,
+            'FIREBASE_EVENTS_QUEUE_URL': String firebaseEventsQueueUrl,
             'FIREBASE_PROJECT_ID': String firebaseProjectId,
             'MEDIA_DISTRIBUTION': String mediaDistribution,
             'MIN_APP_VERSION': String version,
@@ -142,6 +150,8 @@ abstract interface class AppConfig {
           ),
           schedulerRoleArn: schedulerRoleArn,
           eventsQueueArn: eventsSqsArn,
+          eventsQueueUrl: eventsQueueUrl,
+          firebaseEventsQueueUrl: firebaseEventsQueueUrl,
           logLevel: env['LOG_LEVEL'] ?? 'ALL',
           testUserId: env['TEST_USER_ID'],
           minimalAppVersion: version,
@@ -204,6 +214,10 @@ class _EnvConfig implements AppConfig {
   @override
   final String eventsQueueArn;
   @override
+  final String eventsQueueUrl;
+  @override
+  final String firebaseEventsQueueUrl;
+  @override
   final List<String> supportedLocales;
   @override
   final String defaultLocale;
@@ -238,6 +252,8 @@ class _EnvConfig implements AppConfig {
     required this.accountDeletionOffset,
     required this.schedulerRoleArn,
     required this.eventsQueueArn,
+    required this.eventsQueueUrl,
+    required this.firebaseEventsQueueUrl,
   });
 
   @override

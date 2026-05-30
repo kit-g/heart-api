@@ -58,6 +58,22 @@ data "aws_iam_policy_document" "sqs_dlq" {
   }
 }
 
+data "aws_iam_policy_document" "events_queue_send" {
+  statement {
+    effect    = "Allow"
+    actions   = ["sqs:SendMessage"]
+    resources = [aws_sqs_queue.events.arn]
+  }
+}
+
+data "aws_iam_policy_document" "firebase_queue_send" {
+  statement {
+    effect    = "Allow"
+    actions   = ["sqs:SendMessage"]
+    resources = [var.firebase_events_queue.arn]
+  }
+}
+
 data "aws_iam_policy_document" "pass_scheduler_role" {
   statement {
     sid     = "PassSchedulerRole"
@@ -76,6 +92,8 @@ module "api_role" {
     "content_bucket"     = data.aws_iam_policy_document.content_bucket.json
     "sqs_consume"        = data.aws_iam_policy_document.sqs_consume.json
     "sqs_dlq"            = data.aws_iam_policy_document.sqs_dlq.json
+    "events_queue_send"  = data.aws_iam_policy_document.events_queue_send.json
+    "firebase_queue_send" = data.aws_iam_policy_document.firebase_queue_send.json
     "pass_scheduler_role" = data.aws_iam_policy_document.pass_scheduler_role.json
   }
   managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]

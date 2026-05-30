@@ -7,7 +7,7 @@ import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:crypto/crypto.dart';
 
 export 'package:aws_common/aws_common.dart';
-export 'package:aws_signature_v4/aws_signature_v4.dart';
+export 'package:aws_signature_v4/aws_signature_v4.dart' hide zSigningTest;
 export 'package:crypto/crypto.dart';
 
 part 'src/s3.dart';
