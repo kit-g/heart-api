@@ -13,8 +13,7 @@ enum Category implements ExerciseFilter {
   duration('Duration'),
   machine('Machine'),
   dumbbell('Dumbbell'),
-  barbell('Barbell')
-  ;
+  barbell('Barbell');
 
   @override
   final String value;
@@ -57,8 +56,7 @@ enum Target implements ExerciseFilter {
   other('Other'),
   olympic('Olympic'),
   fullBody('Full Body'),
-  cardio('Cardio')
-  ;
+  cardio('Cardio');
 
   @override
   final String value;

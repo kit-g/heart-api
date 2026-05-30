@@ -59,12 +59,14 @@ void main() {
 
     await commentNotification(request, event());
 
-    final captured = verify(
-      publisher.publish(
-        queueUrl: 'https://sqs.test/heart-firebase-events',
-        message: captureAnyNamed('message'),
-      ),
-    ).captured.single as Map<String, dynamic>;
+    final captured =
+        verify(
+              publisher.publish(
+                queueUrl: 'https://sqs.test/heart-firebase-events',
+                message: captureAnyNamed('message'),
+              ),
+            ).captured.single
+            as Map<String, dynamic>;
     expect(captured['type'], 'push.notification');
     expect(captured['tokens'], ['t-en-1', 't-en-2']);
     expect(captured['title'], 'Sarah: new comment on your workout');
@@ -96,8 +98,7 @@ void main() {
     expect(captured, hasLength(2));
 
     final byTitle = {
-      for (final m in captured.cast<Map<String, dynamic>>())
-        m['title'] as String: m['tokens'],
+      for (final m in captured.cast<Map<String, dynamic>>()) m['title'] as String: m['tokens'],
     };
     expect(byTitle['Sarah: new comment on your workout'], ['t-en']);
     expect(byTitle['Sarah: новый комментарий к вашей тренировке'], ['t-ru-1', 't-ru-2']);
