@@ -4,15 +4,23 @@ variable "apex_domain" {
   description = "The apex domain managed in this account."
 }
 
-variable "web_distribution_domain_name" {
+variable "dev_web_distribution_domain_name" {
   type        = string
-  default     = "d1pfa4npfjx633.cloudfront.net"
   description = "Domain name of the web CloudFront distribution. Update when the distribution is recreated."
 }
 
-variable "media_distribution_domain_name" {
+variable "prod_web_distribution_domain_name" {
   type        = string
-  default     = "d3h38bni0fkad4.cloudfront.net"
+  description = "Domain name of the web CloudFront distribution. Update when the distribution is recreated."
+}
+
+variable "dev_media_distribution_domain_name" {
+  type        = string
+  description = "Domain name of the media CloudFront distribution. Update when the distribution is recreated."
+}
+
+variable "prod_media_distribution_domain_name" {
+  type        = string
   description = "Domain name of the media CloudFront distribution. Update when the distribution is recreated."
 }
 
@@ -22,8 +30,11 @@ variable "communications_email" {
 }
 
 variable "firebase_dev_project_id" {
-  type    = string
-  default = "heart-of-yours-dev"
+  type = string
+}
+
+variable "firebase_prod_project_id" {
+  type = string
 }
 
 # Fixed AWS-wide CloudFront alias zone — same for all distributions.

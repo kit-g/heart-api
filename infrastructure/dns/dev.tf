@@ -1,15 +1,10 @@
-# Records under dev.heart-of.me. They live in the apex zone today; once a
-# prod account exists they'll move into a delegated dev.heart-of.me subzone.
-
-# ------ Web aliases ------
-
 resource "aws_route53_record" "dev_web" {
   zone_id = aws_route53_zone.apex.id
   name    = "dev.${var.apex_domain}"
   type    = "A"
 
   alias {
-    name                   = var.web_distribution_domain_name
+    name                   = var.dev_web_distribution_domain_name
     zone_id                = local.cloudfront_zone_id
     evaluate_target_health = false
   }
@@ -21,7 +16,7 @@ resource "aws_route53_record" "dev_www" {
   type    = "A"
 
   alias {
-    name                   = var.web_distribution_domain_name
+    name                   = var.dev_web_distribution_domain_name
     zone_id                = local.cloudfront_zone_id
     evaluate_target_health = false
   }
@@ -33,14 +28,13 @@ resource "aws_route53_record" "dev_media" {
   type    = "A"
 
   alias {
-    name                   = var.media_distribution_domain_name
+    name                   = var.dev_media_distribution_domain_name
     zone_id                = local.cloudfront_zone_id
     evaluate_target_health = false
   }
 }
 
-# ------ Firebase email DKIM + SPF + project verification ------
-
+# region: Firebase email DKIM + SPF + project verification
 resource "aws_route53_record" "dev_dkim_1" {
   zone_id = aws_route53_zone.apex.id
   name    = "firebase1._domainkey.dev.${var.apex_domain}"
@@ -67,3 +61,4 @@ resource "aws_route53_record" "dev_txt" {
     "firebase=${var.firebase_dev_project_id}",
   ]
 }
+# endregion
