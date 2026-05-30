@@ -17,8 +17,7 @@ Future<User> authenticate(String firebaseId, String authToken) async {
   final cred = client.createCredential(idToken: authToken);
   final validations = await cred.validateToken().toList();
   if (validations.isNotEmpty) throw AuthenticationError();
-  final claims = cred.idToken.claims;
-  return claims.toUser();
+  return cred.idToken.claims.toUser();
 }
 
 extension on OpenIdClaims {

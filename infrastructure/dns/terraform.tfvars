@@ -1,0 +1,6 @@
+dev_web_distribution_domain_name    = "d1pfa4npfjx633.cloudfront.net"
+dev_media_distribution_domain_name  = "d3h38bni0fkad4.cloudfront.net"
+prod_media_distribution_domain_name = "du2rzaik0l8gr.cloudfront.net"
+prod_web_distribution_domain_name   = "d1owc73xlyegzt.cloudfront.net"
+firebase_dev_project_id             = "heart-of-yours-dev"
+firebase_prod_project_id            = "heart-of-yours"
