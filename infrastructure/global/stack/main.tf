@@ -1,12 +1,10 @@
 locals {
-  account_id = data.aws_caller_identity.this.account_id
-  region     = data.aws_region.this.region
-
+  account_id        = data.aws_caller_identity.this.account_id
+  region            = data.aws_region.this.region
   static_bucket_arn = "arn:aws:s3:::${var.static_bucket}"
   bucket_arns       = [for b in var.buckets : "arn:aws:s3:::${b}"]
   bucket_objects    = [for b in var.buckets : "arn:aws:s3:::${b}/*"]
 }
-
 
 resource "aws_iam_openid_connect_provider" "github" {
   url            = "https://token.actions.githubusercontent.com"

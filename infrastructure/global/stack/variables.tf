@@ -25,5 +25,13 @@ variable "web_distribution_id" {
   description = "Web CloudFront distribution; invalidations target this."
 }
 
+variable "firebase_project_config" {
+  description = "Firebase GCP project"
+  type = object({
+    project_id = string
+    region     = string
+  })
+}
+
 data "aws_caller_identity" "this" {}
 data "aws_region" "this" {}
