@@ -124,12 +124,14 @@ void main() {
         ),
       ).called(1);
 
-      final captured = verify(
-        publisher.publish(
-          queueUrl: 'https://sqs.test/heart-api-events',
-          message: captureAnyNamed('message'),
-        ),
-      ).captured.single as Map<String, dynamic>;
+      final captured =
+          verify(
+                publisher.publish(
+                  queueUrl: 'https://sqs.test/heart-api-events',
+                  message: captureAnyNamed('message'),
+                ),
+              ).captured.single
+              as Map<String, dynamic>;
       expect(captured['type'], 'comment.created');
       expect(captured['ownerId'], _ownerId);
       expect(captured['authorId'], _meId);
@@ -180,10 +182,12 @@ void main() {
     });
 
     test('rejects unknown targetType', () async {
-      final req = wire(jsonRequest(
-        path: '/comments',
-        body: {'targetType': 'set', 'targetId': _workoutId, 'body': 'x'},
-      ));
+      final req = wire(
+        jsonRequest(
+          path: '/comments',
+          body: {'targetType': 'set', 'targetId': _workoutId, 'body': 'x'},
+        ),
+      );
       await expectLater(createComment(req), throwsA(isA<BadRequest>()));
     });
   });
@@ -207,11 +211,13 @@ void main() {
     });
 
     test('returns comments for the owner without a cursor when no next page', () async {
-      final req = wire(jsonRequest(
-        method: Method.get,
-        path: '/comments',
-        query: {'targetType': 'workout', 'targetId': _workoutId},
-      ));
+      final req = wire(
+        jsonRequest(
+          method: Method.get,
+          path: '/comments',
+          query: {'targetType': 'workout', 'targetId': _workoutId},
+        ),
+      );
       final result = await listComments(req);
       expect(result.toMap()['comments'], hasLength(1));
       expect(result.toMap().containsKey('cursor'), isFalse);
@@ -226,31 +232,43 @@ void main() {
           limit: anyNamed('limit'),
         ),
       ).thenAnswer(
-        (_) async => Page(items: [_fakeComment(id: 'c-1'), _fakeComment(id: 'c-2')], hasMore: true),
+        (_) async => Page(
+          items: [
+            _fakeComment(id: 'c-1'),
+            _fakeComment(id: 'c-2'),
+          ],
+          hasMore: true,
+        ),
       );
 
-      final req = wire(jsonRequest(
-        method: Method.get,
-        path: '/comments',
-        query: {'targetType': 'workout', 'targetId': _workoutId},
-      ));
+      final req = wire(
+        jsonRequest(
+          method: Method.get,
+          path: '/comments',
+          query: {'targetType': 'workout', 'targetId': _workoutId},
+        ),
+      );
       final result = await listComments(req);
       expect(result.toMap()['cursor'], 'c-2');
     });
 
     test('clamps limit to the max', () async {
-      final req = wire(jsonRequest(
-        method: Method.get,
-        path: '/comments',
-        query: {'targetType': 'workout', 'targetId': _workoutId, 'limit': '999'},
-      ));
+      final req = wire(
+        jsonRequest(
+          method: Method.get,
+          path: '/comments',
+          query: {'targetType': 'workout', 'targetId': _workoutId, 'limit': '999'},
+        ),
+      );
       await listComments(req);
-      verify(commentService.listComments(
-        targetType: CommentTarget.workout,
-        targetId: _workoutId,
-        cursor: null,
-        limit: 50,
-      )).called(1);
+      verify(
+        commentService.listComments(
+          targetType: CommentTarget.workout,
+          targetId: _workoutId,
+          cursor: null,
+          limit: 50,
+        ),
+      ).called(1);
     });
 
     test('Forbidden when neither owner nor connected', () async {
@@ -264,11 +282,13 @@ void main() {
         connections.areConnected(userA: _meId, userB: _ownerId),
       ).thenAnswer((_) async => false);
 
-      final req = wire(jsonRequest(
-        method: Method.get,
-        path: '/comments',
-        query: {'targetType': 'workout', 'targetId': _workoutId},
-      ));
+      final req = wire(
+        jsonRequest(
+          method: Method.get,
+          path: '/comments',
+          query: {'targetType': 'workout', 'targetId': _workoutId},
+        ),
+      );
       await expectLater(listComments(req), throwsA(isA<Forbidden>()));
     });
   });
