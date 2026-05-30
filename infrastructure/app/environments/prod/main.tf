@@ -3,9 +3,8 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {
-  account_id          = data.aws_caller_identity.current.account_id
-  region              = data.aws_region.current.region
-  firebase_project_id = "heart-of-yours-dev"
+  account_id = data.aws_caller_identity.current.account_id
+  region     = data.aws_region.current.region
 }
 
 module "content" {
@@ -24,27 +23,27 @@ module "firebase" {
 
 module "api" {
   source                       = "../../stacks/api"
-  environment                  = "dev"
+  environment                  = "prod"
   region                       = local.region
   account_id                   = local.account_id
   name_prefix                  = "${var.name_prefix}-api"
-  log_retention                = 7
-  firebase_project_id          = local.firebase_project_id
+  log_retention                = 30
+  firebase_project_id          = var.firebase_project_id
   firebase_events_queue        = module.firebase.events_queue
   content_bucket               = module.content.content_bucket
   database                     = module.content.database
-  account_deletion_offset_days = 2
+  account_deletion_offset_days = 30
   monitoring_email             = "info@heart-of.me"
-  media_distribution           = "dev.media.heart-of.me"
+  media_distribution           = "media.heart-of.me"
 }
 
 module "cdn" {
   source                             = "../../stacks/cdn"
-  media_distribution_ssl_certificate = "arn:aws:acm:us-east-1:583168578067:certificate/297c34bc-7a74-4cb1-82c4-71bfe0114eb7"
-  media_distribution_aliases         = ["dev.media.heart-of.me"]
-  web_distribution_ssl_certificate   = "arn:aws:acm:us-east-1:583168578067:certificate/2ac33117-c985-4f4d-a382-d2c8bad1766a"
-  web_distribution_aliases           = ["dev.heart-of.me", "www.dev.heart-of.me"]
-  firebase_auth_domain               = "heart-of-yours-dev.firebaseapp.com"
+  media_distribution_ssl_certificate = "arn:aws:acm:us-east-1:922419543441:certificate/a91ae5f9-d156-465b-9ea4-d3564a7175d6"
+  media_distribution_aliases         = ["media.heart-of.me"]
+  web_distribution_ssl_certificate   = "arn:aws:acm:us-east-1:922419543441:certificate/60a653e8-c734-4d9a-bd92-747e9f4e994a"
+  web_distribution_aliases           = ["heart-of.me", "www.heart-of.me"]
+  firebase_auth_domain               = "heart-of.me"
   content_bucket                     = module.content.content_bucket
   static_bucket                      = module.content.static_bucket
   api                                = module.api.api
