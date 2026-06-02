@@ -1,39 +1,58 @@
 name: "Deploy Dart API"
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'api/**'
-      - 'shared/**'
-      - 'database/**'
-      - 'scripts/apply_migrations.sh'
-      - 'scripts/db_tests.sh'
-      - '.github/workflows/deploy-api.yml'
-  pull_request:
-    paths:
-      - 'api/**'
-      - 'shared/**'
-      - 'database/**'
-      - 'scripts/apply_migrations.sh'
-      - 'scripts/db_tests.sh'
-      - '.github/workflows/deploy-api.yml'
   workflow_dispatch:
+    inputs:
+      AWS_REGION:
+        required: true
+        type: string
+      AWS_ROLE:
+        required: true
+        type: string
+      FUNCTION_NAME:
+        required: true
+        type: string
+        description: "Lambda function to update"
+      API:
+        required: true
+        type: string
+        description: "API Gateway base URL, used by the smoke test"
+      SECRETS_BUCKET:
+        required: true
+        type: string
+        description: "S3 bucket holding the Supabase credentials"
+      SUPABASE_CRED_KEY:
+        required: true
+        type: string
+        description: "S3 key for supabase.json; points migrations at the target database"
+
+  workflow_call:
+    inputs:
+      AWS_REGION:
+        required: true
+        type: string
+      AWS_ROLE:
+        required: true
+        type: string
+      FUNCTION_NAME:
+        required: true
+        type: string
+      API:
+        required: true
+        type: string
+      SECRETS_BUCKET:
+        required: true
+        type: string
+      SUPABASE_CRED_KEY:
+        required: true
+        type: string
 
 permissions:
   id-token: write
   contents: read
 
 env:
-  AWS_REGION: "ca-central-1"
-  AWS_ROLE: "arn:aws:iam::583168578067:role/heart-github-actions-deploy-role"
-  FUNCTION_NAME: "heart-api"
-  API: "https://1y5vu7awze.execute-api.ca-central-1.amazonaws.com/v1"
   PG_VERSION: "16"
-
-concurrency:
-  group: api-${{ github.ref }}
-  cancel-in-progress: false
 
 jobs:
   lint:
@@ -138,7 +157,9 @@ jobs:
     name: "Build & Deploy"
     runs-on: ubuntu-latest
     needs: [ lint, dart-test, db-test ]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Skip deploy on PRs; only ship on push/manual. (For workflow_call the
+    # event name reflects the caller's trigger.)
+    if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v6
 
@@ -149,13 +170,19 @@ jobs:
       - name: "Configure AWS Credentials"
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ env.AWS_ROLE }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ inputs.AWS_ROLE }}
+          aws-region: ${{ inputs.AWS_REGION }}
 
       - name: "Install psql + jq"
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client jq
+
+      - name: "Fetch Supabase credentials"
+        run: |
+          aws s3 cp \
+            "s3://${{ inputs.SECRETS_BUCKET }}/${{ inputs.SUPABASE_CRED_KEY }}" \
+            /tmp/supabase.json
 
       - name: "Apply migrations to Supabase"
         run: ./scripts/apply_migrations.sh
@@ -172,15 +199,15 @@ jobs:
       - name: "Update Lambda Function Code"
         run: |
           aws lambda update-function-code \
-            --function-name ${{ env.FUNCTION_NAME }} \
+            --function-name ${{ inputs.FUNCTION_NAME }} \
             --zip-file fileb://api/function.zip \
-            --region ${{ env.AWS_REGION }} > /dev/null
+            --region ${{ inputs.AWS_REGION }} > /dev/null
 
       - name: "Wait for Lambda update"
         run: |
           aws lambda wait function-updated \
-            --function-name ${{ env.FUNCTION_NAME }} \
-            --region ${{ env.AWS_REGION }}
+            --function-name ${{ inputs.FUNCTION_NAME }} \
+            --region ${{ inputs.AWS_REGION }}
 
     outputs:
       commit: ${{ steps.commit.outputs.commit }}
@@ -190,6 +217,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ build-and-deploy ]
     env:
+      API: ${{ inputs.API }}
       EXPECTED_COMMIT: ${{ needs.build-and-deploy.outputs.commit }}
     steps:
       - name: "Check /version endpoint"

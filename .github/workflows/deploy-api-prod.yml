@@ -1,0 +1,33 @@
+name: "Deploy Dart API, prod"
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches: [ prod-env ]
+    paths:
+      - 'api/**'
+      - 'shared/**'
+      - 'database/**'
+      - 'scripts/apply_migrations.sh'
+      - 'scripts/db_tests.sh'
+      - '.github/workflows/deploy-api.yml'
+      - '.github/workflows/deploy-api-prod.yml'
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: api-prod-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prod:
+    uses: ./.github/workflows/deploy-api.yml
+    with:
+      AWS_ROLE: 'arn:aws:iam::922419543441:role/heart-github-actions-deploy-role'
+      AWS_REGION: 'ca-central-1'
+      FUNCTION_NAME: 'heart-api'
+      API: 'https://1y5vu7awze.execute-api.ca-central-1.amazonaws.com/v1'
+      SECRETS_BUCKET: '922419543441-ca-central-1-static'
+      SUPABASE_CRED_KEY: 'secrets/supabase.json'
