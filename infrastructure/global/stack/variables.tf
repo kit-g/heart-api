@@ -28,8 +28,11 @@ variable "web_distribution_id" {
 variable "firebase_project_config" {
   description = "Firebase GCP project"
   type = object({
-    project_id = string
-    region     = string
+    project_id       = string
+    region           = string
+    ios_bundle_id    = string
+    appstore_team_id = string
+    android_app_id   = string
   })
 }
 
