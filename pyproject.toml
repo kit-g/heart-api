@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [tool.uv.workspace]
-members = ["firebase"]
+members = ["firebase", "assets"]
 
 [dependency-groups]
 dev = [
@@ -28,7 +28,13 @@ dev = [
 [tool.pytest.ini_options]
 # Flat-import-style: each service ships its modules as if they live at the
 # Lambda zip root, so the imports in source code (`from events import ...`)
-# work both inside the Lambda runtime and in pytest. Add each service's
-# source dir to pythonpath as you onboard it.
+# work both inside the Lambda runtime and in pytest.
+#
+# Services share module names (`app`, `events`), so they CANNOT share one
+# pythonpath in a single pytest process — `import events` would be ambiguous.
+# This default config runs the firebase suite; each other service runs scoped
+# in its own process, replacing pythonpath:
+#   uv run pytest assets/tests -o pythonpath=assets/assets
+# (see assets/README.md). Its CI workflow does the same.
 pythonpath = ["firebase/firebase"]
 testpaths = ["firebase/tests"]
