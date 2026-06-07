@@ -3,24 +3,26 @@ Sync the exercise library from content/exercise_library.yml to Postgres.
 
 Reads:
   - Source YAML: ../content/exercise_library.yml
-  - Asset listing: s3://CONTENT_BUCKET/exercises/exercises/<name>/{asset,thumbnail}.<ext>
   - Supabase creds: s3://SECRETS_BUCKET/secrets/supabase.json
 
 Writes:
-  - exercises (global, user_id IS NULL) — fallback locale fields, asset, thumbnail, muscles
+  - exercises (global, user_id IS NULL) — fallback locale fields, muscles
   - exercise_translations — one row per non-fallback locale that has its own name/instructions
   - Archives any global exercise not in the source YAML.
 
+The exercises.asset / .thumbnail columns are NOT touched here — the assets
+pipeline (S3 exercise-uploads/ -> heart-assets Lambda -> API /events) is the
+sole writer of those, link + dimensions included. This script must never
+write them, or it would clobber the pipeline's rows with nulls.
+
 Env:
-  CONTENT_BUCKET     content bucket holding processed exercise assets
   SECRETS_BUCKET     static bucket holding secrets/supabase.json
-  BASE_URL           public CloudFront base for asset links
 """
 
 import json
 import os
 from dataclasses import dataclass
-from typing import Callable, Self
+from typing import Self
 
 import boto3
 import psycopg
@@ -28,32 +30,6 @@ import yaml
 from psycopg.types.json import Json
 
 s3 = boto3.client('s3')
-
-ASSET_PREFIX = 'exercises/exercises/'  # processed assets live here
-
-
-def list_assets(bucket: str) -> list[str]:
-    paginator = s3.get_paginator('list_objects_v2')
-    return [
-        item['Key']
-        for page in paginator.paginate(Bucket=bucket, Prefix=ASSET_PREFIX)
-        for item in page.get('Contents', [])
-    ]
-
-
-def sort_assets(keys: list[str], make_link: Callable[[str], str]) -> dict:
-    by_name: dict[str, dict] = {}
-    for key in keys:
-        parts = key.split('/')
-        # expect: exercises/exercises/<name>/<asset_type>.<ext>
-        if len(parts) != 4:
-            continue
-        _, _, name, filename = parts
-        if filename.startswith('asset'):
-            by_name.setdefault(name, {})['asset'] = {'link': make_link(key)}
-        elif filename.startswith('thumbnail'):
-            by_name.setdefault(name, {})['thumbnail'] = {'link': make_link(key)}
-    return by_name
 
 
 @dataclass
@@ -168,15 +144,13 @@ def get_source() -> dict:
 
 
 UPSERT_EXERCISE = '''
-INSERT INTO exercises (name, category, target, instructions, asset, thumbnail, muscles, archived)
-VALUES (%s, %s, %s, %s, %s, %s, %s, false)
+INSERT INTO exercises (name, category, target, instructions, muscles, archived)
+VALUES (%s, %s, %s, %s, %s, false)
 ON CONFLICT (name) WHERE user_id IS NULL
 DO UPDATE SET
     category = EXCLUDED.category,
     target = EXCLUDED.target,
     instructions = EXCLUDED.instructions,
-    asset = EXCLUDED.asset,
-    thumbnail = EXCLUDED.thumbnail,
     muscles = EXCLUDED.muscles,
     archived = false
 RETURNING id
@@ -196,12 +170,11 @@ WHERE user_id IS NULL AND name <> ALL(%s) AND archived = false
 '''
 
 
-def sync(library: Library, sorted_assets: dict, conn: psycopg.Connection) -> tuple[int, int, int]:
+def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
     upserted = 0
     translations = 0
     with conn.cursor() as cur:
         for name, exercise in library.exercises.items():
-            asset = sorted_assets.get(name) or {}
             fallback = exercise.fallback_localization()
 
             cur.execute(UPSERT_EXERCISE, (
@@ -209,8 +182,6 @@ def sync(library: Library, sorted_assets: dict, conn: psycopg.Connection) -> tup
                 exercise.category,
                 exercise.target,
                 fallback.instructions,
-                Json(asset.get('asset')) if asset.get('asset') else None,
-                Json(asset.get('thumbnail')) if asset.get('thumbnail') else None,
                 Json(exercise.muscles.to_dict()) if exercise.muscles else None,
             ))
             exercise_id = cur.fetchone()[0]
@@ -228,17 +199,10 @@ def sync(library: Library, sorted_assets: dict, conn: psycopg.Connection) -> tup
 
 
 def main():
-    content_bucket = os.environ['CONTENT_BUCKET']
     secrets_bucket = os.environ['SECRETS_BUCKET']
-    base_url = os.environ['BASE_URL']
 
     print(f'>> Reading source')
     library = Library.parse(get_source())
-
-    print(f'>> Listing assets in s3://{content_bucket}/{ASSET_PREFIX}')
-    keys = list_assets(content_bucket)
-    sorted_assets = sort_assets(keys, make_link=lambda k: f'{base_url}/{k}')
-    print(f'   {len(sorted_assets)} exercises have assets')
 
     print(f'>> Fetching DB credentials from s3://{secrets_bucket}/secrets/supabase.json')
     creds = fetch_db_creds(secrets_bucket)
@@ -252,7 +216,7 @@ def main():
         dbname=creds.get('database', 'heart'),
         sslmode='require',
     ) as conn:
-        upserted, translations, archived = sync(library, sorted_assets, conn)
+        upserted, translations, archived = sync(library, conn)
 
     print(f'>> Done: {upserted} exercises upserted, {translations} translations, {archived} archived')
 
