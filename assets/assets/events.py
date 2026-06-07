@@ -23,19 +23,16 @@ class ObjectCreated:
             key=str(detail['object']['key']),
         )
 
+    @classmethod
+    def from_eb_rule(cls, body: dict) -> Self:
+        match body:
+            case {
+                'detail-type': 'Object Created',
+                'source': 'aws.s3',
+            }:
+                return cls.from_dict(body)
+            case _:
+                raise ValueError(f'unexpected event: {body.get('detail-type')!r}')
+
 
 Event = ObjectCreated
-
-
-def parse_event(body: dict[str, Any]) -> Event:
-    """
-    Returns a typed event for [body]. Raises ValueError on unknown shape.
-    """
-    match body:
-        case {
-            'detail-type': 'Object Created', 
-            'source': 'aws.s3',
-        }:
-            return ObjectCreated.from_dict(body)
-        case _:
-            raise ValueError(f'unexpected event: {body.get('detail-type')!r}')
