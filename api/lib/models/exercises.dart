@@ -19,6 +19,16 @@ abstract interface class ExerciseService {
     String? instructions,
     bool? archived,
   });
+
+  /// Persists processed media onto the global exercise (user_id IS NULL) named
+  /// [name]. Both [asset] and [thumbnail] are `{link, width, height}` blobs
+  /// rendered by the assets pipeline. Throws [NotFound] if no such global
+  /// exercise exists (e.g. the library hasn't been synced yet).
+  Future<void> setExerciseMedia({
+    required String name,
+    required Map<String, dynamic> asset,
+    required Map<String, dynamic> thumbnail,
+  });
 }
 
 abstract interface class ExerciseResponse implements Model {

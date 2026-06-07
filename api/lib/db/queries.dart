@@ -140,6 +140,16 @@ RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, a
           user_id IS NOT NULL AS own
 ''';
 
+final _setExerciseMedia = '''
+UPDATE exercises
+SET
+  asset = @asset::jsonb,
+  thumbnail = @thumbnail::jsonb
+WHERE name = @name 
+  AND user_id IS NULL
+RETURNING id
+''';
+
 final _createConnection = '''
 WITH target_exists AS (
   SELECT 1 FROM profiles WHERE id = @targetId
