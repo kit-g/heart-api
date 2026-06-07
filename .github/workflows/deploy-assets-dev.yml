@@ -1,0 +1,35 @@
+name: "Deploy Assets Service, dev"
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches: [ main ]
+    paths:
+      - 'assets/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/deploy-assets.yml'
+      - '.github/workflows/deploy-assets-dev.yml'
+  pull_request:
+    paths:
+      - 'assets/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/deploy-assets.yml'
+      - '.github/workflows/deploy-assets-dev.yml'
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: assets-dev-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  dev:
+    uses: ./.github/workflows/deploy-assets.yml
+    with:
+      AWS_ROLE: 'arn:aws:iam::583168578067:role/heart-github-actions-deploy-role'
+      AWS_REGION: 'ca-central-1'
+      FUNCTION_NAME: 'heart-assets'
