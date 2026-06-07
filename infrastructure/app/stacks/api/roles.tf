@@ -76,8 +76,8 @@ data "aws_iam_policy_document" "firebase_queue_send" {
 
 data "aws_iam_policy_document" "pass_scheduler_role" {
   statement {
-    sid     = "PassSchedulerRole"
-    actions = ["iam:PassRole"]
+    sid       = "PassSchedulerRole"
+    actions   = ["iam:PassRole"]
     resources = [aws_iam_role.scheduler.arn]
   }
 }
@@ -87,12 +87,12 @@ module "api_role" {
   name        = "${var.name_prefix}-function-role"
   description = "API function lambda role"
   inline_policies = {
-    "scheduler_manage"   = data.aws_iam_policy_document.scheduler_manage.json
-    "sns_publish"        = data.aws_iam_policy_document.sns_publish.json
-    "content_bucket"     = data.aws_iam_policy_document.content_bucket.json
-    "sqs_consume"        = data.aws_iam_policy_document.sqs_consume.json
-    "sqs_dlq"            = data.aws_iam_policy_document.sqs_dlq.json
-    "events_queue_send"  = data.aws_iam_policy_document.events_queue_send.json
+    "scheduler_manage"    = data.aws_iam_policy_document.scheduler_manage.json
+    "sns_publish"         = data.aws_iam_policy_document.sns_publish.json
+    "content_bucket"      = data.aws_iam_policy_document.content_bucket.json
+    "sqs_consume"         = data.aws_iam_policy_document.sqs_consume.json
+    "sqs_dlq"             = data.aws_iam_policy_document.sqs_dlq.json
+    "events_queue_send"   = data.aws_iam_policy_document.events_queue_send.json
     "firebase_queue_send" = data.aws_iam_policy_document.firebase_queue_send.json
     "pass_scheduler_role" = data.aws_iam_policy_document.pass_scheduler_role.json
   }

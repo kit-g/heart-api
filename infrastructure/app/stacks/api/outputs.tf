@@ -17,6 +17,14 @@ output "events_queue_name" {
   value = aws_sqs_queue.events.name
 }
 
+output "events_queue" {
+  value = {
+    arn  = aws_sqs_queue.events.arn
+    url  = aws_sqs_queue.events.url
+    name = aws_sqs_queue.events.name
+  }
+}
+
 output "events_dlq_name" {
   value = aws_sqs_queue.events_dlq.name
 }
