@@ -10,18 +10,10 @@ on:
       AWS_ROLE:
         required: true
         type: string
-      CONTENT_BUCKET:
-        required: true
-        type: string
-        description: "S3 bucket holding processed exercise assets (exercises/exercises/<name>/...)"
       SECRETS_BUCKET:
         required: true
         type: string
         description: "S3 bucket holding secrets/supabase.json"
-      DISTRIBUTION_URL:
-        required: true
-        type: string
-        description: "CloudFront distribution that fronts the content bucket; used to build asset links"
 
   workflow_call:
     inputs:
@@ -32,13 +24,7 @@ on:
       AWS_ROLE:
         required: true
         type: string
-      CONTENT_BUCKET:
-        required: true
-        type: string
       SECRETS_BUCKET:
-        required: true
-        type: string
-      DISTRIBUTION_URL:
         required: true
         type: string
 
@@ -68,7 +54,5 @@ jobs:
 
       - name: "Sync exercise library to Postgres"
         env:
-          CONTENT_BUCKET: ${{ inputs.CONTENT_BUCKET }}
           SECRETS_BUCKET: ${{ inputs.SECRETS_BUCKET }}
-          BASE_URL: ${{ inputs.DISTRIBUTION_URL }}
         run: python scripts/library_locales.py
