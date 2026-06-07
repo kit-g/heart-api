@@ -1,8 +1,6 @@
 import pytest
 from events import ObjectCreated
 
-from assets.assets.events import ObjectCreated
-
 
 def _object_created(key: str = 'exercise-uploads/Bicycle Crunch.gif') -> dict:
     return {
