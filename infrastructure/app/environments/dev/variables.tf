@@ -26,3 +26,8 @@ variable "lambda_handler" {
   type        = string
   default     = "app.handler"
 }
+
+variable "log_retention" {
+  type        = number
+  description = "How many days will keep logs"
+}
