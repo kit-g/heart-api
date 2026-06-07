@@ -4,7 +4,7 @@
 # from clobbering CI updates.
 data "archive_file" "placeholder" {
   type        = "zip"
-  output_path = "${path.module}/placeholder.zip"
+  output_path = "${path.module}/../../../../build/firebase.zip"
 
   source {
     content  = "def handler(event, context):\n    return {'batchItemFailures': []}\n"
