@@ -31,3 +31,8 @@ variable "firebase_project_id" {
   type        = string
   description = "Firebase project ID"
 }
+
+variable "log_retention" {
+  type        = number
+  description = "How many days will keep logs"
+}

@@ -19,7 +19,7 @@ module "firebase" {
   name_prefix   = "${var.name_prefix}-firebase"
   runtime       = var.python_runtime
   handler       = var.lambda_handler
-  log_retention = 7
+  log_retention = var.log_retention
 }
 
 module "api" {
@@ -28,7 +28,7 @@ module "api" {
   region                       = local.region
   account_id                   = local.account_id
   name_prefix                  = "${var.name_prefix}-api"
-  log_retention                = 7
+  log_retention                = var.log_retention
   firebase_project_id          = local.firebase_project_id
   firebase_events_queue        = module.firebase.events_queue
   content_bucket               = module.content.content_bucket
@@ -36,6 +36,16 @@ module "api" {
   account_deletion_offset_days = 2
   monitoring_email             = "info@heart-of.me"
   media_distribution           = "dev.media.heart-of.me"
+}
+
+module "assets" {
+  source           = "../../stacks/assets"
+  name_prefix      = "${var.name_prefix}-assets"
+  runtime          = "python3.12" # Pillow wheels don't run on Lambda > 3.12
+  handler          = var.lambda_handler
+  log_retention    = 7
+  content_bucket   = module.content.content_bucket
+  api_events_queue = module.api.events_queue
 }
 
 module "cdn" {
