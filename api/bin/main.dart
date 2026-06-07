@@ -115,6 +115,7 @@ Future<void> main() async {
     ..use('/events', imageDb(db: _database))
     ..use('/events', profilesDb(db: _database))
     ..use('/events', devicesDb(db: _database))
+    ..use('/events', exercisesDb(db: _database))
     ..use('/events', events(publisher: _events))
     ..fallback = respondWith((_) => JsonResponse.notFound());
 

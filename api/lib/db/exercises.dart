@@ -54,4 +54,21 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
     if (rows.isEmpty) throw NotFound(type: 'Exercise', id: exerciseId);
     return rows.first.toColumnMap();
   }
+
+  @override
+  Future<void> setExerciseMedia({
+    required String name,
+    required Map<String, dynamic> asset,
+    required Map<String, dynamic> thumbnail,
+  }) async {
+    final rows = await _pool.execute(
+      _setExerciseMedia.toSql(),
+      parameters: {
+        'name': name,
+        'asset': jsonEncode(asset),
+        'thumbnail': jsonEncode(thumbnail),
+      },
+    );
+    if (rows.isEmpty) throw NotFound(type: 'Exercise', id: name);
+  }
 }

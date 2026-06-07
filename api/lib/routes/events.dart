@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:heart/events/account_deletion.dart';
 import 'package:heart/events/comment_notification.dart';
+import 'package:heart/events/exercise_asset.dart';
 import 'package:heart/events/uploads.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/aws.dart';
@@ -72,6 +73,10 @@ Future<NoContent> handler(Request request) async {
               // use case: a new comment was created — render & enqueue push
               case {'type': 'comment.created'}:
                 await commentNotification(request, event);
+              // use case: the assets pipeline finished processing an exercise
+              // upload — persist its link + dimensions onto the exercise row
+              case {'type': 'exercise.asset.processed'}:
+                await exerciseAssetProcessed(request, event);
             }
         }
       }
