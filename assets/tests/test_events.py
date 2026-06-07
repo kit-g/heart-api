@@ -1,6 +1,7 @@
 import pytest
+from events import ObjectCreated
 
-from events import ObjectCreated, parse_event
+from assets.assets.events import ObjectCreated
 
 
 def _object_created(key: str = 'exercise-uploads/Bicycle Crunch.gif') -> dict:
@@ -17,15 +18,15 @@ def _object_created(key: str = 'exercise-uploads/Bicycle Crunch.gif') -> dict:
 
 class TestParseObjectCreated:
     def test_extracts_bucket_and_key(self):
-        evt = parse_event(_object_created())
+        evt = ObjectCreated.from_eb_rule(_object_created())
         assert isinstance(evt, ObjectCreated)
         assert evt.bucket == 'heart-content'
         assert evt.key == 'exercise-uploads/Bicycle Crunch.gif'
 
     def test_rejects_unknown_detail_type(self):
         with pytest.raises(ValueError):
-            parse_event({'detail-type': 'Object Deleted', 'source': 'aws.s3', 'detail': {}})
+            ObjectCreated.from_eb_rule({'detail-type': 'Object Deleted', 'source': 'aws.s3', 'detail': {}})
 
     def test_rejects_non_s3_source(self):
         with pytest.raises(ValueError):
-            parse_event({'detail-type': 'Object Created', 'source': 'aws.other', 'detail': {}})
+            ObjectCreated.from_eb_rule({'detail-type': 'Object Created', 'source': 'aws.other', 'detail': {}})
