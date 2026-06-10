@@ -9,7 +9,7 @@ locals {
 
 
 resource "supabase_project" "heart" {
-  name              = "Heart"
+  name              = var.supabase_project.name
   organization_id   = local.supabase_creds.org_id
   database_password = local.supabase_creds.password
   region            = local.supabase_creds.region

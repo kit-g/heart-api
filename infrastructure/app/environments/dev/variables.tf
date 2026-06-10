@@ -1,12 +1,6 @@
 variable "tags" {
   description = "Common tags to apply to all resources"
   type        = map(string)
-  default = {
-    Project               = "heart"
-    Environment           = "dev"
-    Owner                 = "heart"
-    AppManagerCFNStackKey = "heart"
-  }
 }
 
 variable "name_prefix" {
@@ -30,4 +24,9 @@ variable "lambda_handler" {
 variable "log_retention" {
   type        = number
   description = "How many days will keep logs"
+}
+
+variable "firebase_project_id" {
+  type        = string
+  description = "Firebase project ID"
 }

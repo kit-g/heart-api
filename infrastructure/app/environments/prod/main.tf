@@ -8,9 +8,10 @@ locals {
 }
 
 module "content" {
-  source     = "../../stacks/content"
-  region     = local.region
-  account_id = local.account_id
+  source           = "../../stacks/content"
+  region           = local.region
+  account_id       = local.account_id
+  supabase_project = { name = "Heart" }
 }
 
 module "firebase" {

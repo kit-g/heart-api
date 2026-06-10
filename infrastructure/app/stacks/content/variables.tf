@@ -17,3 +17,9 @@ variable "account_id" {
     error_message = "Account ID must be a 12-digit number."
   }
 }
+
+variable "supabase_project" {
+  type = object({
+    name = string
+  })
+}
