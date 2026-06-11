@@ -9,5 +9,6 @@ module "deploy_role" {
     ios_bundle_id    = "me.heart-of.ios"
     appstore_team_id = "DFX2JYT8BM"
     android_app_id   = "me.heart.android"
+    android_sha_256  = []
   }
 }
