@@ -41,11 +41,12 @@ resource "google_firebase_apple_app" "ios" {
 }
 
 resource "google_firebase_android_app" "android" {
-  provider     = google-beta
-  project      = var.firebase_project_config.project_id
-  display_name = "Heart Android App"
-  package_name = var.firebase_project_config.android_app_id
-  depends_on   = [google_firebase_project.default]
+  provider      = google-beta
+  project       = var.firebase_project_config.project_id
+  display_name  = "Heart Android App"
+  package_name  = var.firebase_project_config.android_app_id
+  depends_on    = [google_firebase_project.default]
+  sha256_hashes = var.firebase_project_config.android_sha_256
 }
 
 data "google_firebase_apple_app_config" "ios" {
