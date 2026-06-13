@@ -7,6 +7,7 @@ module "deploy_role" {
     project_id       = "heart-of-yours"
     region           = "us-central1"
     ios_bundle_id    = "me.heart-of.ios"
+    appstore_app_id  = "6777837444"
     appstore_team_id = "DFX2JYT8BM"
     android_app_id   = "me.heart.android"
     android_sha_256  = []

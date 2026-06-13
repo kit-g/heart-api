@@ -37,6 +37,7 @@ resource "google_firebase_apple_app" "ios" {
   display_name = "Heart iOS App"
   bundle_id    = var.firebase_project_config.ios_bundle_id
   team_id      = var.firebase_project_config.appstore_team_id
+  app_store_id = var.firebase_project_config.appstore_app_id
   depends_on   = [google_firebase_project.default]
 }
 
