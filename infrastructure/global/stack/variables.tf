@@ -32,6 +32,7 @@ variable "firebase_project_config" {
     region           = string
     ios_bundle_id    = string
     appstore_team_id = string
+    appstore_app_id  = string
     android_app_id   = string
     android_sha_256  = list(string)
   })
