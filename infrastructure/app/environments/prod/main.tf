@@ -54,7 +54,7 @@ module "cdn" {
   media_distribution_aliases         = ["media.heart-of.me"]
   web_distribution_ssl_certificate   = "arn:aws:acm:us-east-1:922419543441:certificate/60a653e8-c734-4d9a-bd92-747e9f4e994a"
   web_distribution_aliases           = ["heart-of.me", "www.heart-of.me"]
-  firebase_auth_domain               = "heart-of.me"
+  firebase_auth_domain               = "heart-of-yours.firebaseapp.com"
   content_bucket                     = module.content.content_bucket
   static_bucket                      = module.content.static_bucket
   api                                = module.api.api
