@@ -36,7 +36,7 @@ void main() {
         jsonRequest(
           method: Method.post,
           path: '/exercise-preferences',
-          body: {'exercise_id': _exerciseId, 'unit_system': 'imperial'},
+          body: {'exerciseId': _exerciseId, 'unitSystem': 'imperial'},
         ),
       );
 
@@ -49,12 +49,12 @@ void main() {
       expect(captured.unitSystem, MeasurementUnit.imperial);
     });
 
-    test('rejects an invalid unit_system with BadRequest', () {
+    test('rejects an invalid unitSystem with BadRequest', () {
       final req = wire(
         jsonRequest(
           method: Method.post,
           path: '/exercise-preferences',
-          body: {'exercise_id': _exerciseId, 'unit_system': 'furlongs'},
+          body: {'exerciseId': _exerciseId, 'unitSystem': 'furlongs'},
         ),
       );
 
@@ -62,12 +62,12 @@ void main() {
       verifyNever(service.saveUnitPreference(any, any));
     });
 
-    test('rejects a missing exercise_id with BadRequest', () {
+    test('rejects a missing exerciseId with BadRequest', () {
       final req = wire(
         jsonRequest(
           method: Method.post,
           path: '/exercise-preferences',
-          body: {'unit_system': 'metric'},
+          body: {'unitSystem': 'metric'},
         ),
       );
 
