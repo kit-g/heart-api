@@ -214,6 +214,10 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
 
   MuscleTagging get muscles;
 
+  /// The requesting user's preferred display unit for this exercise.
+  /// `null` falls back to the user's global setting.
+  MeasurementUnit? get unitSystem;
+
   factory Exercise.fromJson(Map json) = _Exercise.fromJson;
 
   factory Exercise({
@@ -247,6 +251,7 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
     String? instructions,
     bool? isArchived,
     MuscleTagging? tags,
+    MeasurementUnit? unitSystem,
   });
 }
 
@@ -271,6 +276,8 @@ class _Exercise implements Exercise {
   final bool isArchived;
   @override
   final MuscleTagging muscles;
+  @override
+  final MeasurementUnit? unitSystem;
 
   const _Exercise({
     this.id,
@@ -283,6 +290,7 @@ class _Exercise implements Exercise {
     this.isMine = false,
     this.isArchived = false,
     required this.muscles,
+    this.unitSystem,
   });
 
   factory _Exercise.fromJson(Map json) {
@@ -317,6 +325,10 @@ class _Exercise implements Exercise {
         _ => false, // local
       },
       muscles: MuscleTagging.fromJson(json['muscles'] ?? {}),
+      unitSystem: switch (json['unit_system'] ?? json['unitSystem']) {
+        String s => MeasurementUnit.fromString(s),
+        _ => null,
+      },
     );
   }
 
@@ -340,6 +352,7 @@ class _Exercise implements Exercise {
       'own': isMine ? 1 : 0,
       'archived': isArchived ? 1 : 0,
       if (!muscles.isEmpty) 'muscles': muscles.toMap(),
+      'unitSystem': ?unitSystem?.name,
     };
   }
 
@@ -394,6 +407,7 @@ class _Exercise implements Exercise {
     String? instructions,
     bool? isArchived,
     MuscleTagging? tags,
+    MeasurementUnit? unitSystem,
   }) {
     return _Exercise(
       id: id,
@@ -406,6 +420,7 @@ class _Exercise implements Exercise {
       instructions: instructions ?? this.instructions,
       isArchived: isArchived ?? this.isArchived,
       muscles: tags ?? muscles,
+      unitSystem: unitSystem ?? this.unitSystem,
     );
   }
 }

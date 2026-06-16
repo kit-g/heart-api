@@ -150,7 +150,6 @@ class TemplateRequest {
             return {
               'exercise_name': name,
               'order': ex['order'] ?? index,
-              'unit_system': ex['unitSystem'],
               'sets': ex['sets'] ?? [],
             };
           },

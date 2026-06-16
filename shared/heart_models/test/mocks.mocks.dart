@@ -5,6 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:heart_models/src/models/charts.dart' as _i3;
 import 'package:heart_models/src/models/exercise.dart' as _i2;
+import 'package:heart_models/src/models/misc.dart' as _i6;
 import 'package:heart_models/src/models/stats.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i5;
@@ -131,6 +132,7 @@ class MockExercise extends _i1.Mock implements _i2.Exercise {
     String? instructions,
     bool? isArchived,
     _i2.MuscleTagging? tags,
+    _i6.MeasurementUnit? unitSystem,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#copyWith, [], {
@@ -142,6 +144,7 @@ class MockExercise extends _i1.Mock implements _i2.Exercise {
               #instructions: instructions,
               #isArchived: isArchived,
               #tags: tags,
+              #unitSystem: unitSystem,
             }),
             returnValue: _FakeExercise_1(
               this,
@@ -154,6 +157,7 @@ class MockExercise extends _i1.Mock implements _i2.Exercise {
                 #instructions: instructions,
                 #isArchived: isArchived,
                 #tags: tags,
+                #unitSystem: unitSystem,
               }),
             ),
           )
