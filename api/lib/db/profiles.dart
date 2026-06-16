@@ -10,6 +10,7 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
         'email': user.email,
         'username': user.displayName,
         'avatar': user.remoteAvatar,
+        'settings': jsonEncode(user.settings.toMap()),
       },
     );
     return User.fromRow(rows.first.toColumnMap());

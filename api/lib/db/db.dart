@@ -14,6 +14,7 @@ part 'charts.dart';
 part 'comments.dart';
 part 'connections.dart';
 part 'devices.dart';
+part 'exercise_preferences.dart';
 part 'exercises.dart';
 part 'images.dart';
 part 'profiles.dart';
@@ -26,9 +27,20 @@ abstract class _DatabaseBase {
 }
 
 class Database extends _DatabaseBase
-    with _Charts, _Comments, _Connections, _Devices, _Exercises, _Images, _Profiles, _Workouts, _Templates
+    with
+        _Charts,
+        _Comments,
+        _Connections,
+        _Devices,
+        _ExercisePreferences,
+        _Exercises,
+        _Images,
+        _Profiles,
+        _Workouts,
+        _Templates
     implements
         ChartPreferenceService,
+        ExercisePreferenceService,
         CommentService,
         ConnectionsService,
         DeviceService,
