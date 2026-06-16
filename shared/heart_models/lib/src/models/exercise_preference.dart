@@ -13,20 +13,20 @@ abstract interface class ExercisePreference implements Model {
     required MeasurementUnit unitSystem,
   }) = _ExercisePreference;
 
-  /// Parses the snake_cased `{exercise_id, unit_system}` row/body.
+  /// Parses the `{exerciseId, unitSystem}` request body (camelCase JSON).
   /// Throws [ArgumentError] (→ 400) on a missing id or an invalid unit.
-  factory ExercisePreference.fromRow(Map row) {
-    return switch (row) {
+  factory ExercisePreference.fromJson(Map json) {
+    return switch (json) {
       {
-        'exercise_id': final String id,
-        'unit_system': final String unit,
+        'exerciseId': final String id,
+        'unitSystem': final String unit,
       }
           when id.isNotEmpty =>
         _ExercisePreference(
           exerciseId: id,
           unitSystem: MeasurementUnit.fromString(unit),
         ),
-      _ => throw ArgumentError.value(row, 'row', 'invalid exercise preference'),
+      _ => throw ArgumentError.value(json, 'json', 'invalid exercise preference'),
     };
   }
 }
