@@ -4,7 +4,7 @@ extension on String {
   Sql toSql() => Sql.named(this);
 }
 
-final _listGallery = '''
+const _listGallery = '''
 SELECT id, workout_id, key
 FROM workout_images
 WHERE user_id = @userId
@@ -13,45 +13,46 @@ ORDER BY id DESC
 LIMIT @limit
 ''';
 
-final _insertImage = '''
+const _insertImage = '''
 INSERT INTO workout_images (workout_id, user_id, key)
 VALUES (@workoutId::uuid, @userId, @key)
 RETURNING id, workout_id, key
 ''';
 
-final _deleteImage = '''
+const _deleteImage = '''
 DELETE FROM workout_images
 WHERE key = @key AND user_id = @userId AND workout_id = @workoutId::uuid
 RETURNING id
 ''';
 
-final _getUserImageKeys = '''
+const _getUserImageKeys = '''
 SELECT key 
 FROM workout_images 
 WHERE user_id = @userId
 ''';
 
-final _getWorkoutImageKeys = '''
+const _getWorkoutImageKeys = '''
 SELECT key 
 FROM workout_images 
 WHERE user_id = @userId 
   AND workout_id = @workoutId::uuid
 ''';
 
-final _updateAccount = '''
-INSERT INTO profiles (id, email, username, avatar_url, updated_at)
-VALUES (@id, @email, @username, @avatar, now())
+const _updateAccount = '''
+INSERT INTO profiles (id, email, username, avatar_url, settings, updated_at)
+VALUES (@id, @email, @username, @avatar, @settings::jsonb, now())
 ON CONFLICT (id)
 DO UPDATE
 SET
 username = EXCLUDED.username,
 email = EXCLUDED.email,
 avatar_url = EXCLUDED.avatar_url,
+settings = EXCLUDED.settings,
 updated_at = now()
-RETURNING id, email, username, avatar_url, scheduled_for_deletion_at
+RETURNING id, email, username, avatar_url, scheduled_for_deletion_at, settings
 ''';
 
-final _scheduleAccountDeletion = '''
+const _scheduleAccountDeletion = '''
 UPDATE profiles
 SET 
   account_deletion_schedule = coalesce(@schedule, account_deletion_schedule), 
@@ -59,30 +60,30 @@ SET
 WHERE id = @userId
 ''';
 
-final _updateAvatarUrl = '''
+const _updateAvatarUrl = '''
 UPDATE profiles
 SET 
   avatar_url = @avatarUrl, 
   updated_at = now()
 WHERE id = @userId
-RETURNING id, email, username, avatar_url, scheduled_for_deletion_at
+RETURNING id, email, username, avatar_url, scheduled_for_deletion_at, settings
 ''';
 
-final _undoAccountDeletion = '''
+const _undoAccountDeletion = '''
 UPDATE profiles
 SET
   account_deletion_schedule = NULL,
   scheduled_for_deletion_at = NULL
 WHERE id = @userId
-RETURNING id, email, username, avatar_url, scheduled_for_deletion_at
+RETURNING id, email, username, avatar_url, scheduled_for_deletion_at, settings
 ''';
 
-final _deleteAccount = '''
+const _deleteAccount = '''
 DELETE FROM profiles
 WHERE id = @userId
 ''';
 
-final _listExercises = '''
+const _listExercises = '''
 SELECT coalesce(
   jsonb_agg(
     jsonb_build_object(
@@ -95,13 +96,15 @@ SELECT coalesce(
       'thumbnail', e.thumbnail,
       'muscles', e.muscles,
       'own', e.user_id IS NOT NULL,
-      'archived', e.archived
+      'archived', e.archived,
+      'unit_system', ep.unit_system
     ) ORDER BY e.name
   ),
   '[]'::jsonb
 ) AS exercises
 FROM exercises e
 LEFT JOIN exercise_translations t ON t.exercise_id = e.id AND t.locale = @locale
+LEFT JOIN exercise_preferences ep ON ep.exercise_id = e.id AND ep.user_id = @userId
 WHERE
   CASE WHEN @owned::boolean
     THEN e.user_id = @userId
@@ -109,7 +112,7 @@ WHERE
   END
 ''';
 
-final _createExercise = '''
+const _createExercise = '''
 INSERT INTO exercises (
   name, 
   category, 
@@ -127,7 +130,7 @@ RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, a
           user_id IS NOT NULL AS own
 ''';
 
-final _updateExercise = '''
+const _updateExercise = '''
 UPDATE exercises
 SET
   category = coalesce(@category, category),
@@ -140,7 +143,7 @@ RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, a
           user_id IS NOT NULL AS own
 ''';
 
-final _setExerciseMedia = '''
+const _setExerciseMedia = '''
 UPDATE exercises
 SET
   asset = @asset::jsonb,
@@ -150,7 +153,7 @@ WHERE name = @name
 RETURNING id
 ''';
 
-final _createConnection = '''
+const _createConnection = '''
 WITH target_exists AS (
   SELECT 1 FROM profiles WHERE id = @targetId
 ),
@@ -180,7 +183,7 @@ WHERE domain = @domain
   )
 ''';
 
-final _listConnections = '''
+const _listConnections = '''
 SELECT
   target_id,
   initiator_role AS role,
@@ -198,7 +201,7 @@ WHERE target_id = @userId
 ORDER BY created_at DESC
 ''';
 
-final _getConnection = '''
+const _getConnection = '''
 SELECT
   CASE WHEN initiator_id = @userId THEN target_id ELSE initiator_id END AS target_id,
   CASE WHEN initiator_id = @userId THEN initiator_role ELSE target_role END AS role,
@@ -211,7 +214,7 @@ WHERE domain = @domain
   )
 ''';
 
-final _deleteConnection = '''
+const _deleteConnection = '''
 DELETE FROM connections
 WHERE (initiator_id, target_id, domain) IN (
   (@initiatorId, @targetId, @domain),
@@ -219,7 +222,7 @@ WHERE (initiator_id, target_id, domain) IN (
 )
 ''';
 
-final _updateConnectionStatus = '''
+const _updateConnectionStatus = '''
 UPDATE connections SET status = @newStatus
 WHERE (initiator_id, target_id, domain) IN (
   (@initiatorId, @targetId, @domain),
@@ -227,7 +230,7 @@ WHERE (initiator_id, target_id, domain) IN (
 )
 ''';
 
-final _listWorkouts = '''
+const _listWorkouts = '''
 WITH
 _auth AS (
   SELECT (
@@ -260,7 +263,7 @@ UNION ALL
 SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
-final _getWorkout = '''
+const _getWorkout = '''
 SELECT
   w.id,
   w.name,
@@ -277,7 +280,7 @@ FROM workouts w
 WHERE w.id = @workoutId::uuid AND w.user_id = @userId
 ''';
 
-final _getTargetWorkout = '''
+const _getTargetWorkout = '''
 WITH
 _auth AS (
   SELECT (
@@ -304,13 +307,12 @@ UNION ALL
 SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
-final _saveWorkout = '''
+const _saveWorkout = '''
 WITH
 _order_to_name AS (
   SELECT
     (ex->>'order')::int AS exercise_order,
-    ex->>'exercise_name' AS exercise_name,
-    ex->>'unit_system' AS unit_system
+    ex->>'exercise_name' AS exercise_name
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -326,12 +328,12 @@ _workout AS (
   RETURNING id, name, started_at, completed_at, created_at
 ),
 _inserted_exercises AS (
-  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, unit_system)
-  SELECT w.id, el.exercise_id, otn.exercise_order, otn.unit_system
+  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order)
+  SELECT w.id, el.exercise_id, otn.exercise_order
   FROM _workout w
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
-  RETURNING id, exercise_order, unit_system
+  RETURNING id, exercise_order
 ),
 _sets_input AS (
   SELECT
@@ -385,7 +387,6 @@ _exercises_json AS (
         'name', el.name
       ),
       'exercise_order', ie.exercise_order,
-      'unit_system', ie.unit_system,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -408,13 +409,12 @@ LEFT JOIN _exercises_json ej
   ON true
 ''';
 
-final _replaceWorkout = '''
+const _replaceWorkout = '''
 WITH
 _order_to_name AS (
   SELECT
     (ex->>'order')::int AS exercise_order,
-    ex->>'exercise_name' AS exercise_name,
-    ex->>'unit_system' AS unit_system
+    ex->>'exercise_name' AS exercise_name
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -436,17 +436,16 @@ _deleted AS (
   RETURNING id
 ),
 _inserted_exercises AS (
-  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, unit_system)
+  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order)
   SELECT
     w.id,
     el.exercise_id,
-    otn.exercise_order,
-    otn.unit_system
+    otn.exercise_order
   FROM _workout w
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
   WHERE NOT exists(SELECT 1 FROM _deleted WHERE false)
-  RETURNING id, exercise_order, unit_system
+  RETURNING id, exercise_order
 ),
 _sets_input AS (
   SELECT
@@ -500,7 +499,6 @@ _exercises_json AS (
         'name', el.name
       ),
       'exercise_order', ie.exercise_order,
-      'unit_system', ie.unit_system,
       'sets', coalesce(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -522,17 +520,16 @@ FROM _workout w
 LEFT JOIN _exercises_json ej ON true
 ''';
 
-final _deleteWorkout = '''
+const _deleteWorkout = '''
 DELETE FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId
 ''';
 
-final _saveTemplate = '''
+const _saveTemplate = '''
 WITH
 _order_to_name AS (
   SELECT
     (ex->>'order')::int AS exercise_order,
-    ex->>'exercise_name' AS exercise_name,
-    ex->>'unit_system' AS unit_system
+    ex->>'exercise_name' AS exercise_name
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -548,12 +545,12 @@ _template AS (
   RETURNING id, name, order_index, source_template_id, assigned_by, sync_enabled, created_at
 ),
 _inserted_exercises AS (
-  INSERT INTO template_exercises (template_id, exercise_id, exercise_order, unit_system)
-  SELECT t.id, el.id, otn.exercise_order, otn.unit_system
+  INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
+  SELECT t.id, el.id, otn.exercise_order
   FROM _template t
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
-  RETURNING id, exercise_id, exercise_order, unit_system
+  RETURNING id, exercise_id, exercise_order
 ),
 _sets_input AS (
   SELECT
@@ -594,7 +591,6 @@ _exercises_json AS (
       'id', ie.id,
       'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
       'exercise_order', ie.exercise_order,
-      'unit_system', ie.unit_system,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -618,13 +614,12 @@ LEFT JOIN profiles p ON p.id = t.assigned_by
 LEFT JOIN _exercises_json ej ON true
 ''';
 
-final _replaceTemplate = '''
+const _replaceTemplate = '''
 WITH
 _order_to_name AS (
   SELECT
     (ex->>'order')::int AS exercise_order,
-    ex->>'exercise_name' AS exercise_name,
-    ex->>'unit_system' AS unit_system
+    ex->>'exercise_name' AS exercise_name
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -645,13 +640,13 @@ _deleted AS (
   RETURNING id
 ),
 _inserted_exercises AS (
-  INSERT INTO template_exercises (template_id, exercise_id, exercise_order, unit_system)
-  SELECT t.id, el.id, otn.exercise_order, otn.unit_system
+  INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
+  SELECT t.id, el.id, otn.exercise_order
   FROM _template t
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
   WHERE NOT EXISTS (SELECT 1 FROM _deleted WHERE false)
-  RETURNING id, exercise_id, exercise_order, unit_system
+  RETURNING id, exercise_id, exercise_order
 ),
 _sets_input AS (
   SELECT
@@ -692,7 +687,6 @@ _exercises_json AS (
       'id', ie.id,
       'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
       'exercise_order', ie.exercise_order,
-      'unit_system', ie.unit_system,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -716,7 +710,7 @@ LEFT JOIN profiles p ON p.id = t.assigned_by
 LEFT JOIN _exercises_json ej ON true
 ''';
 
-final _getTemplate = '''
+const _getTemplate = '''
 SELECT
   t.id,
   t.name,
@@ -733,7 +727,7 @@ LEFT JOIN profiles p ON p.id = t.assigned_by
 WHERE t.id = @templateId::uuid AND t.user_id = @userId
 ''';
 
-final _listTemplates = '''
+const _listTemplates = '''
 SELECT
   t.id,
   t.name,
@@ -753,7 +747,7 @@ ORDER BY t.id DESC
 LIMIT @limit
 ''';
 
-final _listTemplateShares = '''
+const _listTemplateShares = '''
 SELECT
   ts.id AS share_uuid,
   ts.student_id,
@@ -772,7 +766,7 @@ ORDER BY ts.id DESC
 LIMIT @limit
 ''';
 
-final _shareTemplate = '''
+const _shareTemplate = '''
 WITH
 _student AS (
   SELECT id, username, avatar_url FROM profiles WHERE id = @studentId
@@ -827,7 +821,7 @@ _copied_exercises AS (
   WHERE resolved_id IS NULL
   RETURNING id, name
 ),
--- Final mapping of exercise_order → exercise_id the student template
+-- const mapping of exercise_order → exercise_id the student template
 -- should reference.
 _resolved_exercises AS (
   SELECT
@@ -881,7 +875,7 @@ LEFT JOIN _new_share ns ON true
 LEFT JOIN _existing ex ON true
 ''';
 
-final _deleteTemplate = '''
+const _deleteTemplate = '''
 WITH
 _student_templates AS (
   SELECT student_template_id FROM template_shares
@@ -900,7 +894,7 @@ _deleted_master AS (
 SELECT id FROM _deleted_master
 ''';
 
-final _deleteShare = '''
+const _deleteShare = '''
 WITH
 _deleted AS (
   DELETE FROM templates
@@ -913,7 +907,7 @@ _deleted AS (
 SELECT id FROM _deleted
 ''';
 
-final _areConnected = '''
+const _areConnected = '''
 SELECT 1 FROM connections
 WHERE status = 'active'
   AND (
@@ -924,7 +918,7 @@ WHERE status = 'active'
 LIMIT 1
 ''';
 
-final _resolveCommentTargetOwner = '''
+const _resolveCommentTargetOwner = '''
 SELECT user_id FROM workouts
 WHERE id = (CASE @targetType
   WHEN 'workout' THEN @targetId::uuid
@@ -938,7 +932,7 @@ WHERE id = (CASE @targetType
 END)
 ''';
 
-final _insertComment = '''
+const _insertComment = '''
 INSERT INTO comments (author_id, body, workout_id, workout_exercise_id, exercise_set_id, workout_image_id)
 VALUES (
   @authorId,
@@ -963,7 +957,7 @@ RETURNING
   END AS target_type
 ''';
 
-final _listComments = '''
+const _listComments = '''
 SELECT
   id,
   author_id,
@@ -990,7 +984,7 @@ ORDER BY id DESC
 LIMIT @limit
 ''';
 
-final _updateComment = '''
+const _updateComment = '''
 UPDATE comments
 SET body = @body, edited_at = now()
 WHERE id = @commentId::uuid AND author_id = @authorId
@@ -1009,13 +1003,13 @@ RETURNING
   END AS target_type
 ''';
 
-final _deleteComment = '''
+const _deleteComment = '''
 DELETE FROM comments
 WHERE id = @commentId::uuid AND author_id = @authorId
 RETURNING id
 ''';
 
-final _upsertDevice = '''
+const _upsertDevice = '''
 INSERT INTO device_tokens (profile_id, platform, token, locale, settings, last_seen_at)
 VALUES (@profileId, @platform, @token, @locale, @settings::jsonb, now())
 ON CONFLICT (token)
@@ -1027,10 +1021,52 @@ DO UPDATE SET
   last_seen_at = now()
 ''';
 
-final _listDeviceTokensWithLocale = '''
+const _listDeviceTokensWithLocale = '''
 SELECT token, locale FROM device_tokens WHERE profile_id = @profileId
 ''';
 
-final _deleteDeviceToken = '''
+const _deleteDeviceToken = '''
 DELETE FROM device_tokens WHERE token = @token
+''';
+
+const _saveUnitPreference = '''
+INSERT INTO exercise_preferences (user_id, exercise_id, unit_system)
+VALUES (@userId, @exerciseId::uuid, @unitSystem)
+ON CONFLICT (user_id, exercise_id)
+DO 
+  UPDATE SET unit_system = @unitSystem
+''';
+
+const _deleteUnitPreference = '''
+UPDATE exercise_preferences 
+SET unit_system = NULL 
+WHERE exercise_id = @id::uuid 
+  AND user_id = @userId
+''';
+
+const _getChartPreferences = '''
+SELECT 
+  exercise_id AS id, 
+  chart_type AS type
+FROM exercise_preferences 
+WHERE user_id = @userId 
+  AND chart_type IS NOT NULL 
+ORDER BY created_at DESC
+;
+''';
+
+const _saveChartPreference = '''
+INSERT INTO exercise_preferences (user_id, exercise_id, chart_type)
+VALUES (@userId, @exerciseId::uuid, @chartType)
+ON CONFLICT (user_id, exercise_id)
+DO 
+  UPDATE SET chart_type = @chartType
+''';
+
+const _deleteChartPreference = '''
+UPDATE exercise_preferences 
+SET chart_type = NULL 
+WHERE exercise_id = @id::uuid 
+  AND user_id = @userId
+  ;
 ''';
