@@ -10,7 +10,7 @@ Future<ExercisePreference> saveExercisePreference(final Request req) async {
   try {
     final service = req.exercisePreferenceService;
     final body = await req.json();
-    final input = ExercisePreference.fromRow(body);
+    final input = ExercisePreference.fromJson(body);
     return service.saveUnitPreference(input, req.userId);
   } on ArgumentError catch (e) {
     throw BadRequest(reason: e.toString());
