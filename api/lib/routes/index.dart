@@ -5,6 +5,7 @@ import 'package:heart/routes/comments.dart' as comments;
 import 'package:heart/routes/connections.dart' as connections;
 import 'package:heart/routes/devices.dart' as devices;
 import 'package:heart/routes/events.dart' as events;
+import 'package:heart/routes/exercise_preferences.dart' as exercise_preferences;
 import 'package:heart/routes/exercises.dart' as exercises;
 import 'package:heart/routes/feedback.dart' as feedback;
 import 'package:heart/routes/images.dart' as images;
@@ -36,6 +37,8 @@ final routes = <(String, Method), ModelHandler>{
   ('/exercises', .get): exercises.getExercises,
   ('/exercises', .post): exercises.createExercise,
   ('/exercises/:exerciseId', .put): exercises.updateExercise,
+  ('/exercise-preferences', .post): exercise_preferences.saveExercisePreference,
+  ('/exercise-preferences/:exerciseId', .delete): exercise_preferences.deleteExercisePreference,
   ('/events', .post): events.handler,
   ('/templates', .get): templates.getMyTemplates,
   ('/templates/:templateId', .get): templates.getMyTemplate,

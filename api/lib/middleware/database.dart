@@ -7,6 +7,7 @@ import 'package:relic/relic.dart';
 final _profilesProperty = ContextProperty<ApiProfileService>('ApiProfileService');
 final _imageDbProperty = ContextProperty<ApiImageDbService>('ApiImageDbService');
 final _chatsProperty = ContextProperty<ChartPreferenceService>('ChartPreferenceService');
+final _exercisePrefsProperty = ContextProperty<ExercisePreferenceService>('ExercisePreferenceService');
 final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
 final _devicesProperty = ContextProperty<DeviceService>('DeviceService');
@@ -26,6 +27,15 @@ Middleware chartsDb({required ChartPreferenceService db}) {
   return (final Handler next) {
     return (final request) {
       _chatsProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
+Middleware exercisePreferencesDb({required ExercisePreferenceService db}) {
+  return (final Handler next) {
+    return (final request) {
+      _exercisePrefsProperty[request] = db;
       return next(request);
     };
   };
@@ -93,6 +103,10 @@ extension DatabaseContext on Request {
   ChartPreferenceService get chartPreferenceService => _chatsProperty.get(this);
 
   set chartPreferenceService(ChartPreferenceService v) => _chatsProperty[this] = v;
+
+  ExercisePreferenceService get exercisePreferenceService => _exercisePrefsProperty.get(this);
+
+  set exercisePreferenceService(ExercisePreferenceService v) => _exercisePrefsProperty[this] = v;
 
   ConnectionsService get connectionsService => _connectionsProperty.get(this);
 
