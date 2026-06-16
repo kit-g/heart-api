@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'misc.dart';
+import 'settings.dart';
 
 abstract interface class Profile implements Model {
   String? get name;
@@ -36,6 +38,8 @@ abstract interface class User implements Model, Profile {
 
   DateTime? get scheduledForDeletionAt;
 
+  Settings get settings;
+
   String? remoteAvatar;
 
   Uint8List? localAvatar;
@@ -47,6 +51,7 @@ abstract interface class User implements Model, Profile {
     required String id,
     DateTime? createdAt,
     DateTime? scheduledForDeletionAt,
+    Settings? settings,
   }) {
     return _User(
       displayName: displayName,
@@ -55,10 +60,11 @@ abstract interface class User implements Model, Profile {
       id: id,
       createdAt: createdAt,
       scheduledForDeletionAt: scheduledForDeletionAt,
+      settings: settings ?? const Settings(),
     );
   }
 
-  User copyWith({String? displayName, String? email});
+  User copyWith({String? displayName, String? email, Settings? settings});
 
   factory User.fromJson(Map json) {
     return User(
@@ -76,6 +82,7 @@ abstract interface class User implements Model, Profile {
         String s => DateTime.tryParse(s),
         _ => null,
       },
+      settings: Settings.fromJson(json['settings'] as Map?),
     );
   }
 
@@ -86,6 +93,13 @@ abstract interface class User implements Model, Profile {
       displayName: row['username'],
       avatar: row['avatar_url'],
       scheduledForDeletionAt: row['scheduled_for_deletion_at'],
+      settings: Settings.fromJson(
+        switch (row['settings']) {
+          String raw => jsonDecode(raw) as Map,
+          Map m => m,
+          _ => null,
+        },
+      ),
     );
   }
 }
@@ -104,6 +118,8 @@ class _User implements User {
   @override
   final DateTime? scheduledForDeletionAt;
   @override
+  final Settings settings;
+  @override
   Uint8List? localAvatar;
 
   _User({
@@ -113,6 +129,7 @@ class _User implements User {
     required this.id,
     required this.createdAt,
     this.scheduledForDeletionAt,
+    this.settings = const Settings(),
   });
 
   @override
@@ -129,17 +146,20 @@ class _User implements User {
       'avatar': ?remoteAvatar,
       'createdAt': ?createdAt?.toIso8601String(),
       'scheduledForDeletionAt': ?scheduledForDeletionAt?.toIso8601String(),
+      'settings': settings.toMap(),
     };
   }
 
   @override
-  User copyWith({String? displayName, String? email}) {
+  User copyWith({String? displayName, String? email, Settings? settings}) {
     return _User(
       displayName: displayName ?? this.displayName,
       email: email ?? this.email,
       remoteAvatar: remoteAvatar,
       id: id,
       createdAt: createdAt,
+      scheduledForDeletionAt: scheduledForDeletionAt,
+      settings: settings ?? this.settings,
     );
   }
 
