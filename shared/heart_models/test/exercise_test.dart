@@ -116,6 +116,18 @@ void main() {
       expect(e.muscles.isEmpty, isTrue);
 
       expect(e.toMap(), {...baseJson, 'own': 0, 'archived': 0});
+      expect(e.unitSystem, isNull);
+    });
+
+    test('fromJson parses unit_system and toMap round-trips it', () {
+      // fromJson reads the snake_cased API/SQL key; toMap emits camelCase JSON
+      final e = Exercise.fromJson({...baseJson, 'unit_system': 'imperial'});
+      expect(e.unitSystem, MeasurementUnit.imperial);
+      expect(e.toMap()['unitSystem'], 'imperial');
+
+      // also tolerates a camelCase source key, and omits it when absent
+      expect(Exercise.fromJson({...baseJson, 'unitSystem': 'metric'}).unitSystem, MeasurementUnit.metric);
+      expect(Exercise.fromJson(baseJson).toMap().containsKey('unitSystem'), isFalse);
     });
 
     test('fromJson with muscles, toMap includes it', () {

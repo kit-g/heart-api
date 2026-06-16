@@ -134,7 +134,6 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       if (each.isNotEmpty) {
         final exercise = WorkoutExercise(
           starter: each.first.copy(),
-          unitSystem: each.unitSystem,
         );
 
         for (final (index, set) in each.skip(1).indexed) {
