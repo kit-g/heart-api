@@ -4,12 +4,7 @@ mixin _Charts on _DatabaseBase implements ChartPreferenceService {
   @override
   Future<Iterable<ChartPreference>> getPreferences(String userId) async {
     final result = await _pool.execute(
-      Sql.named(
-        '''
-      SELECT exercise_id AS id, chart_type AS type 
-      FROM chart_preferences WHERE user_id = @userId ORDER BY created_at DESC;
-      ''',
-      ),
+      _getChartPreferences.toSql(),
       parameters: {'userId': userId},
     );
     return result.map((row) => ChartPreference.fromRow(row.toColumnMap()));
@@ -18,14 +13,7 @@ mixin _Charts on _DatabaseBase implements ChartPreferenceService {
   @override
   Future<ChartPreference> saveChartPreference(ChartPreference preference, String userId) async {
     await _pool.execute(
-      Sql.named(
-        '''
-      INSERT INTO chart_preferences (user_id, exercise_id, chart_type) 
-      VALUES (@userId, @exerciseId, @chartType) 
-      ON CONFLICT (user_id, exercise_id) 
-      DO UPDATE SET chart_type = @chartType
-      ''',
-      ),
+      _saveChartPreference.toSql(),
       parameters: {
         'userId': userId,
         'exerciseId': preference.id!,
@@ -38,7 +26,7 @@ mixin _Charts on _DatabaseBase implements ChartPreferenceService {
   @override
   Future<void> deleteChartPreference(String preferenceId, String userId) async {
     await _pool.execute(
-      Sql.named('DELETE FROM chart_preferences WHERE exercise_id = @id AND user_id = @userId'),
+      _deleteChartPreference.toSql(),
       parameters: {'id': preferenceId, 'userId': userId},
     );
   }
