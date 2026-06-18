@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import '../models/act.dart';
 import '../models/charts.dart';
 import '../models/exercise.dart';
+import '../models/misc.dart';
 
 abstract interface class ExerciseHistoryService {
   Future<List<(num, DateTime)>> getRepsHistory(String userId, Exercise exercise, {int? limit});
@@ -31,6 +32,10 @@ abstract interface class ExerciseService implements ExerciseHistoryService, Exer
   Future<Iterable<ExerciseAct>> getExerciseHistory(String userId, Exercise exercise, {int? pageSize, String? anchor});
 
   Future<Map?> getRecord(String userId, Exercise exercise);
+
+  /// Sets (or clears, when [unit] is null) the locally-cached per-exercise unit
+  /// preference. Needed for clearing, which storeExercises can't express.
+  Future<void> setExerciseUnit(String name, MeasurementUnit? unit);
 }
 
 abstract interface class RemoteExerciseService {
@@ -41,6 +46,10 @@ abstract interface class RemoteExerciseService {
   Future<Exercise> makeExercise(Exercise exercise);
 
   Future<Exercise> editExercise(Exercise exercise);
+
+  Future<void> saveUnitPreference(String exerciseId, MeasurementUnit unit);
+
+  Future<void> deleteUnitPreference(String exerciseId);
 }
 
 class FakeExerciseHistoryService implements ExerciseHistoryService {
