@@ -34,8 +34,11 @@ abstract interface class ExerciseService implements ExerciseHistoryService, Exer
   Future<Map?> getRecord(String userId, Exercise exercise);
 
   /// Sets (or clears, when [unit] is null) the locally-cached per-exercise unit
-  /// preference. Needed for clearing, which storeExercises can't express.
-  Future<void> setExerciseUnit(String name, MeasurementUnit? unit);
+  /// preference for [userId]. Scoped per user (multitenant), like [setRestTimer].
+  Future<void> setExerciseUnit({required String exerciseName, required String userId, required MeasurementUnit? unit});
+
+  /// Collects all per-exercise unit preferences for [userId].
+  Future<Map<String, MeasurementUnit>> getExerciseUnits(String userId);
 }
 
 abstract interface class RemoteExerciseService {
