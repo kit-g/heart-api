@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS exercise_preferences
     exercise_id UUID        NOT NULL REFERENCES exercises (id) ON DELETE CASCADE,
     chart_type  TEXT,
     unit_system TEXT CHECK (unit_system IS NULL OR unit_system IN ('imperial', 'metric')),
+    rest_timer  INTEGER CHECK (rest_timer IS NULL OR rest_timer > 0),
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (user_id, exercise_id)
 );
@@ -22,6 +23,8 @@ COMMENT ON COLUMN exercise_preferences.chart_type IS
     'Preferred chart type for this exercise; NULL when unset';
 COMMENT ON COLUMN exercise_preferences.unit_system IS
     'Preferred measurement unit for this exercise; NULL falls back to the user global setting';
+COMMENT ON COLUMN exercise_preferences.rest_timer IS
+    'Preferred rest timer (seconds) for this exercise';
 
 -- Retire the dormant per-workout/per-template unit_system overrides (replaced by
 -- exercise_preferences + the global profiles.settings default).
@@ -82,7 +85,9 @@ WHERE te.template_id = _template_id
 $$;
 
 -- Global per-user settings (unit-system default, theme mode, accent color, future toggles).
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS settings JSONB NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE profiles
+    DROP COLUMN IF EXISTS settings,
+    ADD COLUMN IF NOT EXISTS settings JSONB NOT NULL DEFAULT '{}'::jsonb;
 
 COMMENT ON COLUMN profiles.settings IS
     'Global per-user preferences blob (unit-system default, theme mode, accent color, etc.)';

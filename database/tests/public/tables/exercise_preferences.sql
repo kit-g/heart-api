@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(19);
+SELECT plan(20);
 
 SELECT has_table('public'::name, 'exercise_preferences'::name);
 
@@ -13,6 +13,7 @@ SELECT columns_are(
                    'exercise_id',
                    'chart_type',
                    'unit_system',
+                   'rest_timer',
                    'created_at'
                    ]
        );
@@ -22,6 +23,7 @@ SELECT col_type_is('public'::name, 'exercise_preferences'::name, 'user_id'::name
 SELECT col_type_is('public'::name, 'exercise_preferences'::name, 'exercise_id'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'exercise_preferences'::name, 'chart_type'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'exercise_preferences'::name, 'unit_system'::name, 'text'::name);
+SELECT col_type_is('public'::name, 'exercise_preferences'::name, 'rest_timer'::name, 'integer'::name);
 SELECT col_type_is('public'::name, 'exercise_preferences'::name, 'created_at'::name, 'timestamp with time zone'::name);
 
 SELECT has_pk('public'::name, 'exercise_preferences'::name, 'exercise_preferences has a primary key');
