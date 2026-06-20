@@ -3,15 +3,7 @@ name: "Deploy Dart API, prod"
 on:
   workflow_dispatch: { }
   push:
-    branches: [ prod-env ]
-    paths:
-      - 'api/**'
-      - 'shared/**'
-      - 'database/**'
-      - 'scripts/apply_migrations.sh'
-      - 'scripts/db_tests.sh'
-      - '.github/workflows/deploy-api.yml'
-      - '.github/workflows/deploy-api-prod.yml'
+    tags: [ 'v*' ]
 
 permissions:
   id-token: write
