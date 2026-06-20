@@ -30,3 +30,9 @@ variable "firebase_project_id" {
   type        = string
   description = "Firebase project ID"
 }
+
+variable "events_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable the SQS->Lambda event source mappings across all services. Set false to stop idle pollers from consuming SQS requests."
+}

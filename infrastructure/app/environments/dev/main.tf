@@ -15,11 +15,12 @@ module "content" {
 }
 
 module "firebase" {
-  source        = "../../stacks/firebase"
-  name_prefix   = "${var.name_prefix}-firebase"
-  runtime       = var.python_runtime
-  handler       = var.lambda_handler
-  log_retention = var.log_retention
+  source         = "../../stacks/firebase"
+  name_prefix    = "${var.name_prefix}-firebase"
+  runtime        = var.python_runtime
+  handler        = var.lambda_handler
+  log_retention  = var.log_retention
+  events_enabled = var.events_enabled
 }
 
 module "api" {
@@ -36,6 +37,7 @@ module "api" {
   account_deletion_offset_days = 2
   monitoring_email             = "info@heart-of.me"
   media_distribution           = "dev.media.heart-of.me"
+  events_enabled               = var.events_enabled
 }
 
 module "assets" {
@@ -46,6 +48,7 @@ module "assets" {
   log_retention    = 7
   content_bucket   = module.content.content_bucket
   api_events_queue = module.api.events_queue
+  events_enabled   = var.events_enabled
 }
 
 module "cdn" {
