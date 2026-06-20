@@ -13,6 +13,12 @@ variable "log_retention" {
   type        = number
 }
 
+variable "events_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable the SQS->Lambda event source mapping. Set false to stop idle pollers from consuming SQS requests (e.g. in dev)."
+}
+
 variable "firebase_project_id" {
   type        = string
   description = "Firebase project ID, used for authentication etc."

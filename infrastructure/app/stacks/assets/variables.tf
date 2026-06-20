@@ -19,6 +19,12 @@ variable "log_retention" {
   description = "Lambda log retention in days."
 }
 
+variable "events_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable the SQS->Lambda event source mapping. Set false to stop idle pollers from consuming SQS requests (e.g. in dev)."
+}
+
 variable "content_bucket" {
   description = "Content bucket: raw uploads land under exercise-uploads/, processed assets are written under exercises/."
   type = object({
