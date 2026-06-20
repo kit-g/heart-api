@@ -49,6 +49,7 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   function_name           = aws_lambda_function.assets.arn
   batch_size              = 10
   function_response_types = ["ReportBatchItemFailures"]
+  enabled                 = var.events_enabled
 }
 
 # Raw exercise uploads (content bucket, exercise-uploads/ prefix) -> EventBridge

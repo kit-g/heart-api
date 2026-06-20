@@ -50,4 +50,5 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   function_name           = aws_lambda_function.firebase.arn
   batch_size              = 10
   function_response_types = ["ReportBatchItemFailures"]
+  enabled                 = var.events_enabled
 }
