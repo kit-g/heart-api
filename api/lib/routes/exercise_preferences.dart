@@ -11,17 +11,27 @@ Future<ExercisePreference> saveExercisePreference(final Request req) async {
     final service = req.exercisePreferenceService;
     final body = await req.json();
     final input = ExercisePreference.fromJson(body);
-    return service.saveUnitPreference(input, req.userId);
+    return service.savePreference(input, req.userId);
   } on ArgumentError catch (e) {
     throw BadRequest(reason: e.toString());
   }
 }
 
-Future<Model> deleteExercisePreference(final Request req) =>
-    deleteExercisePreferenceById(req, req.rawPathParameters[#exerciseId]!);
+Future<Model> deleteExercisePreference(final Request req) {
+  try {
+    final field = ExercisePreferenceField.fromString(req.queryParameters.raw['pref']);
+    return deleteExercisePreferenceById(req, req.rawPathParameters[#exerciseId]!, field);
+  } on ArgumentError catch (e) {
+    throw BadRequest(reason: e.toString());
+  }
+}
 
-Future<Model> deleteExercisePreferenceById(final Request req, final String exerciseId) async {
+Future<Model> deleteExercisePreferenceById(
+  final Request req,
+  final String exerciseId,
+  final ExercisePreferenceField field,
+) async {
   final service = req.exercisePreferenceService;
-  await service.deleteUnitPreference(exerciseId, req.userId);
+  await service.clearPreference(exerciseId, req.userId, field);
   throw const NoContent();
 }
