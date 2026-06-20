@@ -91,6 +91,7 @@ void main() {
 
   group('_Exercise model', () {
     const baseJson = {
+      'id': '1',
       'category': 'Weighted Body Weight',
       'name': 'Bench Press',
       'target': 'Chest',
@@ -128,6 +129,17 @@ void main() {
       // also tolerates a camelCase source key, and omits it when absent
       expect(Exercise.fromJson({...baseJson, 'unitSystem': 'metric'}).unitSystem, MeasurementUnit.metric);
       expect(Exercise.fromJson(baseJson).toMap().containsKey('unitSystem'), isFalse);
+    });
+
+    test('fromJson parses rest_timer and toMap round-trips it', () {
+      final e = Exercise.fromJson({...baseJson, 'rest_timer': 90});
+      expect(e.restTimer, 90);
+      expect(e.toMap()['restTimer'], 90);
+
+      // tolerates camelCase source key, null when absent
+      expect(Exercise.fromJson({...baseJson, 'restTimer': 120}).restTimer, 120);
+      expect(Exercise.fromJson(baseJson).restTimer, isNull);
+      expect(Exercise.fromJson(baseJson).toMap().containsKey('restTimer'), isFalse);
     });
 
     test('fromJson with muscles, toMap includes it', () {
