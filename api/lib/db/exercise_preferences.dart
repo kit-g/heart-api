@@ -2,22 +2,27 @@ part of 'db.dart';
 
 mixin _ExercisePreferences on _DatabaseBase implements ExercisePreferenceService {
   @override
-  Future<ExercisePreference> saveUnitPreference(ExercisePreference preference, String userId) async {
+  Future<ExercisePreference> savePreference(ExercisePreference preference, String userId) async {
     await _pool.execute(
-      _saveUnitPreference.toSql(),
+      _saveExercisePreference.toSql(),
       parameters: {
         'userId': userId,
         'exerciseId': preference.exerciseId,
-        'unitSystem': preference.unitSystem.name,
+        'unitSystem': preference.unitSystem?.name,
+        'restTimer': preference.restTimer,
       },
     );
     return preference;
   }
 
   @override
-  Future<void> deleteUnitPreference(String exerciseId, String userId) async {
+  Future<void> clearPreference(String exerciseId, String userId, ExercisePreferenceField field) async {
+    final query = switch (field) {
+      .unitSystem => _clearUnitPreference,
+      .restTimer => _clearRestTimer,
+    };
     await _pool.execute(
-      _deleteUnitPreference.toSql(),
+      query.toSql(),
       parameters: {'id': exerciseId, 'userId': userId},
     );
   }

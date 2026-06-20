@@ -97,7 +97,8 @@ SELECT coalesce(
       'muscles', e.muscles,
       'own', e.user_id IS NOT NULL,
       'archived', e.archived,
-      'unit_system', ep.unit_system
+      'unit_system', ep.unit_system,
+      'rest_timer', ep.rest_timer
     ) ORDER BY e.name
   ),
   '[]'::jsonb
@@ -1029,18 +1030,26 @@ const _deleteDeviceToken = '''
 DELETE FROM device_tokens WHERE token = @token
 ''';
 
-const _saveUnitPreference = '''
-INSERT INTO exercise_preferences (user_id, exercise_id, unit_system)
-VALUES (@userId, @exerciseId::uuid, @unitSystem)
+const _saveExercisePreference = '''
+INSERT INTO exercise_preferences (user_id, exercise_id, unit_system, rest_timer)
+VALUES (@userId, @exerciseId::uuid, @unitSystem::text, @restTimer::integer)
 ON CONFLICT (user_id, exercise_id)
-DO 
-  UPDATE SET unit_system = @unitSystem
+DO UPDATE SET
+  unit_system = COALESCE(EXCLUDED.unit_system, exercise_preferences.unit_system),
+  rest_timer  = COALESCE(EXCLUDED.rest_timer, exercise_preferences.rest_timer)
 ''';
 
-const _deleteUnitPreference = '''
-UPDATE exercise_preferences 
-SET unit_system = NULL 
-WHERE exercise_id = @id::uuid 
+const _clearUnitPreference = '''
+UPDATE exercise_preferences
+SET unit_system = NULL
+WHERE exercise_id = @id::uuid
+  AND user_id = @userId
+''';
+
+const _clearRestTimer = '''
+UPDATE exercise_preferences
+SET rest_timer = NULL
+WHERE exercise_id = @id::uuid
   AND user_id = @userId
 ''';
 
