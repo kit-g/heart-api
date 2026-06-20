@@ -218,6 +218,9 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
   /// `null` falls back to the user's global setting.
   MeasurementUnit? get unitSystem;
 
+  /// The requesting user's preferred rest timer (seconds) for this exercise.
+  int? get restTimer;
+
   factory Exercise.fromJson(Map json) = _Exercise.fromJson;
 
   factory Exercise({
@@ -278,6 +281,8 @@ class _Exercise implements Exercise {
   final MuscleTagging muscles;
   @override
   final MeasurementUnit? unitSystem;
+  @override
+  final int? restTimer;
 
   const _Exercise({
     this.id,
@@ -291,6 +296,7 @@ class _Exercise implements Exercise {
     this.isArchived = false,
     required this.muscles,
     this.unitSystem,
+    this.restTimer,
   });
 
   factory _Exercise.fromJson(Map json) {
@@ -329,12 +335,17 @@ class _Exercise implements Exercise {
         String s => MeasurementUnit.fromString(s),
         _ => null,
       },
+      restTimer: switch (json['rest_timer'] ?? json['restTimer']) {
+        int s => s,
+        _ => null,
+      },
     );
   }
 
   @override
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'category': category.value,
       'name': name,
       'target': target.value,
@@ -353,6 +364,7 @@ class _Exercise implements Exercise {
       'archived': isArchived ? 1 : 0,
       if (!muscles.isEmpty) 'muscles': muscles.toMap(),
       'unitSystem': ?unitSystem?.name,
+      'restTimer': ?restTimer,
     };
   }
 
@@ -408,6 +420,7 @@ class _Exercise implements Exercise {
     bool? isArchived,
     MuscleTagging? tags,
     MeasurementUnit? unitSystem,
+    int? restTimer,
   }) {
     return _Exercise(
       id: id,
@@ -421,6 +434,7 @@ class _Exercise implements Exercise {
       isArchived: isArchived ?? this.isArchived,
       muscles: tags ?? muscles,
       unitSystem: unitSystem ?? this.unitSystem,
+      restTimer: restTimer ?? this.restTimer,
     );
   }
 }
