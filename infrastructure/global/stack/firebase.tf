@@ -48,6 +48,7 @@ resource "google_firebase_android_app" "android" {
   package_name  = var.firebase_project_config.android_app_id
   depends_on    = [google_firebase_project.default]
   sha256_hashes = var.firebase_project_config.android_sha_256
+  sha1_hashes   = var.firebase_project_config.android_sha_1
 }
 
 data "google_firebase_apple_app_config" "ios" {

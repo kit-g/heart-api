@@ -12,11 +12,19 @@ module "deploy_role" {
     android_app_id   = "me.heart.android.dev"
     android_sha_256 = [
       # debug
-      "35:F7:BF:0F:A2:30:4C:F9:1A:52:BA:05:49:2E:07:67:53:80:BC:E9:F0:46:55:CA:2F:DE:76:79:C2:56:34:2D",
+      "35f7bf0fa2304cf91a52ba05492e07675380bce9f04655ca2fde7679c256342d",
       # Play's app signing key
-      "46:C5:6B:EE:A8:A0:B6:8A:A6:AD:03:FF:FF:7D:A9:28:2D:5C:D4:71:13:16:D6:FA:A8:D0:F1:26:8C:20:3D:8E",
+      "46c56beea8a0b68aa6ad03ffff7da9282d5cd4711316d6faa8d0f1268c203d8e",
       # upload key
-      "74:AA:10:0A:FD:70:F7:65:FC:FF:70:D0:F4:9B:BE:B6:18:0A:53:68:CC:1F:61:83:05:CF:5E:65:9C:BA:AA:95",
+      "74aa100afd70f765fcff70d0f49bbeb6180a5368cc1f618305cf5e659cbaaa95",
+    ]
+    android_sha_1 = [
+      # debug
+      "1079f4aba98d3f8e78ab86780d86ed497d99794b",
+      # Play's app signing key
+      "1c54878c2b8ac0fc1858b849b8bd2d516655c9e6",
+      # upload key
+      "81d25bcb97f1903b82b3f0d523721b519ea4652d"
     ]
   }
 }
