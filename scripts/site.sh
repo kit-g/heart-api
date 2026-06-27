@@ -9,6 +9,10 @@ aws s3 cp "site/.well-known/$ENV/apple-app-site-association" \
   "s3://$BUCKET/site/.well-known/apple-app-site-association" \
   --content-type application/json --profile "$PROFILE"
 
+aws s3 cp "site/.well-known/$ENV/assetlinks.json" \
+  "s3://$BUCKET/site/.well-known/assetlinks.json" \
+  --content-type application/json --profile "$PROFILE"
+
 aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" \
   --paths "/*" \
   --profile "$PROFILE" \
