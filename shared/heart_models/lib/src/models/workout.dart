@@ -81,6 +81,12 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
 
   Map<String, WorkoutImage>? get images;
 
+  /// Whether this workout has been confirmed saved on the server. A locally
+  /// finished workout starts `false` and flips to `true` once the API save
+  /// succeeds; workouts read from the server are `true`. Drives retry of
+  /// workouts stranded by a failed network save.
+  bool get synced;
+
   factory Workout({String? name}) {
     return _Workout._(
       id: uuidV7(),
@@ -122,6 +128,8 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
         },
         _ => null,
       },
+      // a workout read from the server's own store is, by definition, synced
+      synced: true,
     );
   }
 
@@ -364,6 +372,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   @override
   DateTime? end;
 
+  @override
+  final bool synced;
+
   _Workout._({
     required this.start,
     this.name,
@@ -371,6 +382,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
     List<WorkoutExercise>? exercises,
     this.end,
     Map<String, WorkoutImage>? images,
+    this.synced = false,
   }) : _sets = exercises ?? <WorkoutExercise>[],
        images = SplayTreeMap.from(images ?? {});
 
@@ -390,6 +402,12 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
           l.map<WorkoutImage>((each) => WorkoutImage.fromJson(each)),
         ),
         _ => null,
+      },
+      // Local rows carry synced as an int (0/1). Server responses omit the
+      // field entirely — a workout the server returned is synced by definition.
+      synced: switch (json['synced']) {
+        null => true,
+        final value => value == 1 || value == true,
       },
     );
   }

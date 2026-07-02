@@ -628,6 +628,67 @@ void main() {
           expect(unnamedWorkout.toString(), startsWith('Workout on'));
         },
       );
+
+      group(
+        'synced flag',
+        () {
+          test(
+            'a locally created workout starts unsynced',
+            () {
+              expect(Workout(name: 'Fresh').synced, isFalse);
+              expect(Workout.fromExercises([workoutExercise], name: 'Fresh').synced, isFalse);
+            },
+          );
+
+          test(
+            'a workout read from a server row is synced',
+            () {
+              final workout = Workout.fromRow(
+                {
+                  'id': 'workout-row',
+                  'name': 'Server Workout',
+                  'started_at': '2025-01-21T12:00:00Z',
+                  'completed_at': '2025-01-21T13:00:00Z',
+                  'exercises': [],
+                },
+                imageUrl: (key) => 'https://example.com/$key',
+              );
+
+              expect(workout.synced, isTrue);
+            },
+          );
+
+          test(
+            'fromJson treats an absent synced field as synced (server response)',
+            () {
+              final workout = Workout.fromJson({
+                'id': 'workout-123',
+                'name': 'Server Workout',
+                'start': '2025-01-21T12:00:00Z',
+              });
+
+              expect(workout.synced, isTrue);
+            },
+          );
+
+          test(
+            'fromJson maps the int form (0/1) of local rows',
+            () {
+              Workout fromSynced(Object? value) => Workout.fromJson({
+                'id': 'workout-123',
+                'name': 'Local Workout',
+                'start': '2025-01-21T12:00:00Z',
+                'synced': value,
+              });
+
+              expect(fromSynced(1).synced, isTrue);
+              expect(fromSynced(0).synced, isFalse);
+              expect(fromSynced(true).synced, isTrue);
+              expect(fromSynced(false).synced, isFalse);
+            },
+          );
+        },
+      );
     },
   );
 
