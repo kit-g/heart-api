@@ -4,7 +4,7 @@
     "details": [
       {
         "appID": "DFX2JYT8BM.me.heart-of.ios",
-        "paths": [ "*" ]
+        "paths": [ "NOT /__/auth/*", "*" ]
       }
     ]
   }
