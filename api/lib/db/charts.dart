@@ -30,4 +30,9 @@ mixin _Charts on _DatabaseBase implements ChartPreferenceService {
       parameters: {'id': preferenceId, 'userId': userId},
     );
   }
+
+  @override
+  Future<void> saveChartOrder(Iterable<String> orderedIds, String userId) {
+    throw UnimplementedError();
+  }
 }
