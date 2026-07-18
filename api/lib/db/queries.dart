@@ -1074,8 +1074,69 @@ DO
 
 const _deleteChartPreference = '''
 UPDATE exercise_preferences 
-SET chart_type = NULL 
-WHERE exercise_id = @id::uuid 
+SET chart_type = NULL
+WHERE exercise_id = @id::uuid
   AND user_id = @userId
   ;
+''';
+
+const _listGoals = '''
+SELECT id, metric, exercise_id, cadence, stages, archived, created_at
+FROM goals
+WHERE user_id = @userId
+  AND NOT archived
+ORDER BY created_at
+''';
+
+const _createGoal = '''
+INSERT INTO goals (user_id, metric, exercise_id, cadence, stages)
+VALUES (@userId, @metric::text, @exerciseId::uuid, @cadence::text, @stages::jsonb)
+RETURNING id, metric, exercise_id, cadence, stages, archived, created_at
+''';
+
+const _updateGoal = '''
+UPDATE goals
+SET metric      = @metric::text,
+    exercise_id = @exerciseId::uuid,
+    cadence     = @cadence::text,
+    stages      = @stages::jsonb,
+    archived    = @archived::boolean
+WHERE id = @id::uuid
+  AND user_id = @userId
+RETURNING id, metric, exercise_id, cadence, stages, archived, created_at
+''';
+
+const _deleteGoal = '''
+DELETE FROM goals
+WHERE id = @id::uuid
+  AND user_id = @userId
+''';
+
+// Addresses the stage by its id, never by array position, so a reordered ladder
+// still resolves. The EXISTS guard is load-bearing: without it an unknown stage id
+// makes the path subquery NULL and jsonb_set raises "path element at position 1 is
+// null" — a 500. With it, no match means no rows, and the route turns that into 404.
+const _markStageAchieved = '''
+UPDATE goals
+SET stages = jsonb_set(
+        stages,
+        ARRAY[(
+            SELECT (ordinality - 1)::text
+            FROM jsonb_array_elements(stages) WITH ORDINALITY AS s(stage, ordinality)
+            WHERE stage ->> 'id' = @stageId
+        )],
+        (
+            SELECT stage || jsonb_build_object('achievedAt', @achievedAt::text)
+            FROM jsonb_array_elements(stages) AS stage
+            WHERE stage ->> 'id' = @stageId
+        )
+    )
+WHERE id = @goalId::uuid
+  AND user_id = @userId
+  AND EXISTS (
+      SELECT 1
+      FROM jsonb_array_elements(stages) AS stage
+      WHERE stage ->> 'id' = @stageId
+  )
+RETURNING id, metric, exercise_id, cadence, stages, archived, created_at
 ''';

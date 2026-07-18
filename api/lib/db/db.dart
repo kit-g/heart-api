@@ -16,6 +16,7 @@ part 'connections.dart';
 part 'devices.dart';
 part 'exercise_preferences.dart';
 part 'exercises.dart';
+part 'goals.dart';
 part 'images.dart';
 part 'profiles.dart';
 part 'queries.dart';
@@ -34,6 +35,7 @@ class Database extends _DatabaseBase
         _Devices,
         _ExercisePreferences,
         _Exercises,
+        _Goals,
         _Images,
         _Profiles,
         _Workouts,
@@ -45,6 +47,7 @@ class Database extends _DatabaseBase
         ConnectionsService,
         DeviceService,
         ExerciseService,
+        GoalService,
         ApiImageDbService,
         ApiProfileService,
         ApiWorkoutService,
