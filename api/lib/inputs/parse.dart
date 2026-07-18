@@ -31,6 +31,50 @@ extension on Map<String, dynamic> {
       _ => throw BadRequest(reason: '$field must be an object'),
     };
   }
+
+  /// Required number, optionally bounded below by [min] (exclusive).
+  num number(String field, {num? exclusiveMin}) {
+    return switch (this[field]) {
+      num n when exclusiveMin == null || n > exclusiveMin => n,
+      _ => throw BadRequest(reason: _numberMsg(field, exclusiveMin: exclusiveMin)),
+    };
+  }
+
+  /// Optional bool. Returns [orElse] when absent.
+  bool boolean(String field, {bool orElse = false}) {
+    return switch (this[field]) {
+      null => orElse,
+      bool b => b,
+      _ => throw BadRequest(reason: '$field must be a boolean'),
+    };
+  }
+
+  /// Required ISO-8601 date or timestamp.
+  DateTime timestamp(String field) {
+    return switch (dateOrNull(field)) {
+      DateTime d => d,
+      null => throw BadRequest(reason: '$field is required'),
+    };
+  }
+
+  /// Optional ISO-8601 date (`2026-12-25`) or timestamp. Absent stays absent.
+  DateTime? dateOrNull(String field) {
+    return switch (this[field]) {
+      null => null,
+      String s => DateTime.tryParse(s) ?? (throw BadRequest(reason: '$field must be an ISO-8601 date')),
+      _ => throw BadRequest(reason: '$field must be an ISO-8601 date'),
+    };
+  }
+
+  /// Required non-empty list of objects.
+  List<Map<String, dynamic>> objects(String field) {
+    return switch (this[field]) {
+      List l when l.isNotEmpty && l.every((each) => each is Map) => [
+        for (final each in l) (each as Map).cast<String, dynamic>(),
+      ],
+      _ => throw BadRequest(reason: '$field must be a non-empty array of objects'),
+    };
+  }
 }
 
 extension on Map<String, String> {
@@ -80,6 +124,10 @@ String _stringMsg(String field, {int? maxLength}) {
   return maxLength == null
       ? '$field must be a non-empty string'
       : '$field must be a non-empty string (max $maxLength chars)';
+}
+
+String _numberMsg(String field, {num? exclusiveMin}) {
+  return exclusiveMin == null ? '$field must be a number' : '$field must be a number greater than $exclusiveMin';
 }
 
 extension on int {
