@@ -107,6 +107,7 @@ Future<void> main() async {
     ..use('/comments', events(publisher: _events))
     ..use('/devices', devicesDb(db: _database))
     ..use('/exercises', exercisesDb(db: _database))
+    ..use('/goals', goalsDb(db: _database))
     ..use('/feedback', imageStorageDb(db: _storage))
     ..use('/workouts', workoutsDb(db: _database))
     ..use('/workouts', imageDb(db: _database))
