@@ -8,6 +8,7 @@ final _profilesProperty = ContextProperty<ApiProfileService>('ApiProfileService'
 final _imageDbProperty = ContextProperty<ApiImageDbService>('ApiImageDbService');
 final _chatsProperty = ContextProperty<ChartPreferenceService>('ChartPreferenceService');
 final _exercisePrefsProperty = ContextProperty<ExercisePreferenceService>('ExercisePreferenceService');
+final _goalsProperty = ContextProperty<GoalService>('GoalService');
 final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
 final _devicesProperty = ContextProperty<DeviceService>('DeviceService');
@@ -36,6 +37,15 @@ Middleware exercisePreferencesDb({required ExercisePreferenceService db}) {
   return (final Handler next) {
     return (final request) {
       _exercisePrefsProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
+Middleware goalsDb({required GoalService db}) {
+  return (final Handler next) {
+    return (final request) {
+      _goalsProperty[request] = db;
       return next(request);
     };
   };
@@ -107,6 +117,10 @@ extension DatabaseContext on Request {
   ExercisePreferenceService get exercisePreferenceService => _exercisePrefsProperty.get(this);
 
   set exercisePreferenceService(ExercisePreferenceService v) => _exercisePrefsProperty[this] = v;
+
+  GoalService get goalService => _goalsProperty.get(this);
+
+  set goalService(GoalService v) => _goalsProperty[this] = v;
 
   ConnectionsService get connectionsService => _connectionsProperty.get(this);
 
