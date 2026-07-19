@@ -35,34 +35,42 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
   }
 
   @override
-  Future<TemplateResponse> getTemplates({
+  Future<Page<Template>> getTemplates({
     required String userId,
     String? cursor,
-    int? pageSize = 30,
+    int limit = 30,
   }) async {
+    // Fetch one extra row so hasMore is authoritative without a second query.
     final rows = await _pool.execute(
       _listTemplates.toSql(),
-      parameters: {'userId': userId, 'cursor': cursor, 'limit': pageSize},
+      parameters: {'userId': userId, 'cursor': cursor, 'limit': limit + 1},
     );
-    if (rows.isEmpty) return TemplateResponse(templates: [], cursor: null);
     final templates = rows.map((row) => Template.fromRow(row.toColumnMap())).toList();
-    return TemplateResponse(templates: templates, cursor: templates.lastOrNull?.id);
+    final hasMore = templates.length > limit;
+    return Page(items: hasMore ? templates.sublist(0, limit) : templates, hasMore: hasMore);
   }
 
   @override
-  Future<TemplateShareListResponse> getTemplateShares({
+  Future<Page<TemplateShare>> getTemplateShares({
     required String userId,
     String? cursor,
-    int? pageSize = 30,
+    int limit = 30,
   }) async {
+    // Fetch one extra row so hasMore is authoritative without a second query.
     final rows = await _pool.execute(
       _listTemplateShares.toSql(),
-      parameters: {'userId': userId, 'cursor': cursor, 'limit': pageSize},
+      parameters: {'userId': userId, 'cursor': cursor, 'limit': limit + 1},
     );
-    if (rows.isEmpty) return TemplateShareListResponse(shares: [], cursor: null);
     final shares = rows.map((row) => TemplateShare.fromRow(row.toColumnMap())).toList();
-    final nextCursor = rows.last.toColumnMap()['share_uuid']?.toString();
-    return TemplateShareListResponse(shares: shares, cursor: nextCursor);
+    final hasMore = shares.length > limit;
+    // A share's cursor is its internal `share_uuid`, which isn't part of the
+    // serialized model, so pass it explicitly rather than deriving it downstream.
+    final nextCursor = hasMore ? rows[limit - 1].toColumnMap()['share_uuid']?.toString() : null;
+    return Page(
+      items: hasMore ? shares.sublist(0, limit) : shares,
+      hasMore: hasMore,
+      cursor: nextCursor,
+    );
   }
 
   @override
