@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:heart_models/heart_models.dart';
 
 abstract interface class ApiWorkoutService {
-  Future<WorkoutResponse> getWorkouts({
+  Future<Page<Workout>> getWorkouts({
     required String userId,
     required String targetUserId,
     required String Function(String) imageUrl,
     String? cursor,
-    int? pageSize,
+    int limit,
   });
 
   Future<Workout> getWorkout({
