@@ -189,33 +189,3 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
   }
 }
 
-abstract interface class TemplateResponse implements Model, Iterable<Template> {
-  List<Template> get templates;
-
-  String? get cursor;
-
-  factory TemplateResponse({
-    required List<Template> templates,
-    required String? cursor,
-  }) = _TemplateResponse;
-}
-
-class _TemplateResponse with Iterable<Template> implements TemplateResponse {
-  @override
-  final List<Template> templates;
-  @override
-  final String? cursor;
-
-  const _TemplateResponse({required this.templates, required this.cursor});
-
-  @override
-  Iterator<Template> get iterator => templates.iterator;
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'templates': map((t) => t.toMap()).toList(),
-      'cursor': ?cursor,
-    };
-  }
-}

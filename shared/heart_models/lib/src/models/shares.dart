@@ -100,37 +100,6 @@ class _TemplateShare implements TemplateShare {
   }
 }
 
-abstract interface class TemplateShareListResponse implements Model, Iterable<TemplateShare> {
-  List<TemplateShare> get shares;
-
-  String? get cursor;
-
-  factory TemplateShareListResponse({
-    required List<TemplateShare> shares,
-    required String? cursor,
-  }) = _TemplateShareListResponse;
-}
-
-class _TemplateShareListResponse with Iterable<TemplateShare> implements TemplateShareListResponse {
-  @override
-  final List<TemplateShare> shares;
-  @override
-  final String? cursor;
-
-  const _TemplateShareListResponse({required this.shares, required this.cursor});
-
-  @override
-  Iterator<TemplateShare> get iterator => shares.iterator;
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'shares': map((s) => s.toMap()).toList(),
-      'cursor': ?cursor,
-    };
-  }
-}
-
 class TemplateRequest {
   final String userId;
   final Map<String, dynamic> body;
