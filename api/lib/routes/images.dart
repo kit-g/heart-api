@@ -3,16 +3,16 @@ import 'dart:convert';
 import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
+import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/images.dart';
+import 'package:heart/models/pagination.dart';
 import 'package:heart_aws/heart_aws.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mime/mime.dart';
 import 'package:relic/relic.dart';
-
-const _limitParam = IntQueryParam('pageSize');
 
 const _defaultMimeType = 'image/jpeg';
 
@@ -27,13 +27,15 @@ const _defaultMimeType = 'image/jpeg';
   return ('workouts/$hash/$imageId.$ext', ext);
 }
 
-Future<GalleryResponse> getGallery(final Request request) async {
-  return request.imageDbService.getGallery(
+Future<Paginated<WorkoutImage>> getGallery(final Request request) async {
+  final query = PageQuery.fromRequest(request, defaultLimit: 20);
+  final page = await request.imageDbService.getGallery(
     userId: request.userId,
     imageUrl: request.config.cdnAssetUrl,
-    pageSize: request.queryParameters(_limitParam),
-    cursor: request.queryParameters.raw['cursor'],
+    limit: query.limit,
+    cursor: query.cursor,
   );
+  return Paginated<WorkoutImage>.from(page, itemsKey: 'images', cursorOf: (i) => i.id);
 }
 
 Future<PresignedUploadResponse> presignWorkoutImage(final Request request) async {
