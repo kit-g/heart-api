@@ -17,11 +17,11 @@ abstract interface class ApiImageStorageService {
 }
 
 abstract interface class ApiImageDbService {
-  Future<GalleryResponse> getGallery({
+  Future<Page<WorkoutImage>> getGallery({
     required String userId,
     required String Function(String) imageUrl,
     String? cursor,
-    int? pageSize,
+    int limit,
   });
 
   Future<WorkoutImage> recordImage({
@@ -60,24 +60,6 @@ class PresignedUploadResponse implements Model {
       'destinationUrl': destinationUrl,
       'key': key,
       'fields': preSignedUrl.fields,
-    };
-  }
-}
-
-class GalleryResponse with Iterable<WorkoutImage> implements Model {
-  final List<WorkoutImage> images;
-  final String? cursor;
-
-  const GalleryResponse({required this.images, this.cursor});
-
-  @override
-  Iterator<WorkoutImage> get iterator => images.iterator;
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'images': map((img) => img.toRow()).toList(),
-      'cursor': ?cursor,
     };
   }
 }
