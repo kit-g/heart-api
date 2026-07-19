@@ -9,4 +9,5 @@ import 'package:relic/relic.dart';
 part 'comments.dart';
 part 'devices.dart';
 part 'goals.dart';
+part 'pagination.dart';
 part 'parse.dart';
