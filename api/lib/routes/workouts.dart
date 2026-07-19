@@ -1,24 +1,28 @@
 import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
+import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/pagination.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-const _limitParam = IntQueryParam('pageSize');
+Future<Paginated<Workout>> getTargetUserWorkouts(final Request request) =>
+    getTargetUserWorkoutsFor(request, request.rawPathParameters[#targetUserId]!);
 
-Future<WorkoutResponse> getTargetUserWorkouts(final Request request) async {
-  final targetUserId = request.pathParameters.raw[#targetUserId]!;
-  return request.workoutsService.getWorkouts(
+Future<Paginated<Workout>> getTargetUserWorkoutsFor(final Request request, final String targetUserId) async {
+  final query = PageQuery.fromRequest(request);
+  final page = await request.workoutsService.getWorkouts(
     userId: request.userId,
     targetUserId: targetUserId,
-    pageSize: request.queryParameters(_limitParam),
-    cursor: request.queryParameters.raw['since'],
+    limit: query.limit,
+    cursor: query.cursor,
     imageUrl: request.config.cdnAssetUrl,
   );
+  return Paginated<Workout>.from(page, itemsKey: 'workouts', cursorOf: (w) => w.id);
 }
 
 Future<Workout> getWorkout(final Request request) async {
