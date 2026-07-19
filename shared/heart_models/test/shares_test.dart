@@ -6,6 +6,7 @@ void main() {
     final assignedAt = DateTime.utc(2025, 1, 1, 12, 0, 0);
 
     final row = {
+      'id': 'share-uuid-1',
       'student_id': 'student_id',
       'master_template_id': 'master_id',
       'student_template_id': 'student_template_id',
@@ -18,7 +19,7 @@ void main() {
     test('fromRow parses all fields', () {
       final item = TemplateShare.fromRow(row);
 
-      expect(item.id, equals('student_id|master_id'));
+      expect(item.id, equals('share-uuid-1'));
       expect(item.studentTemplateId, equals('student_template_id'));
       expect(item.templateName, equals('Push Day'));
       expect(item.assignedTo.id, equals('student_id'));
@@ -39,14 +40,14 @@ void main() {
     test('direct constructor creates item', () {
       final profile = Profile.fromJson({'id': 'student_id', 'username': 'Student Name', 'avatar': null});
       final item = TemplateShare(
-        id: 'student_id|template_id',
+        id: 'share-uuid-2',
         studentTemplateId: 'ts_1',
         templateName: 'Push Day',
         assignedTo: profile,
         assignedAt: assignedAt,
       );
 
-      expect(item.id, equals('student_id|template_id'));
+      expect(item.id, equals('share-uuid-2'));
       expect(item.assignedTo.name, equals('Student Name'));
     });
 

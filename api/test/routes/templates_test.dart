@@ -81,17 +81,17 @@ void main() {
       ).thenAnswer((_) async => page);
     }
 
-    test('emits the service-supplied share_uuid cursor when there is a next page', () async {
-      stub(Page(items: [_fakeShare('a|b')], hasMore: true, cursor: 'share-uuid-9'));
+    test('emits the last share id as cursor when there is a next page', () async {
+      stub(Page(items: [_fakeShare('share-1'), _fakeShare('share-2')], hasMore: true));
 
       final result = await getMyTemplateShares(getReq('/templates/shares'));
 
-      expect(result.toMap()['shares'], hasLength(1));
-      expect(result.toMap()['cursor'], 'share-uuid-9');
+      expect(result.toMap()['shares'], hasLength(2));
+      expect(result.toMap()['cursor'], 'share-2');
     });
 
-    test('omits cursor when the list is exhausted, even if one was supplied', () async {
-      stub(Page(items: [_fakeShare('a|b')], hasMore: false, cursor: 'share-uuid-9'));
+    test('omits cursor when the list is exhausted', () async {
+      stub(Page(items: [_fakeShare('share-1')], hasMore: false));
 
       final result = await getMyTemplateShares(getReq('/templates/shares'));
 

@@ -24,9 +24,8 @@ abstract interface class TemplateShare implements Model {
 
   factory TemplateShare.fromRow(Map<String, dynamic> row) {
     final studentId = row['student_id'].toString();
-    final masterTemplateId = row['master_template_id'].toString();
     return _TemplateShare(
-      id: '$studentId|$masterTemplateId',
+      id: row['id'].toString(),
       studentTemplateId: row['student_template_id'].toString(),
       templateName: row['template_name'] as String,
       assignedTo: Profile(
