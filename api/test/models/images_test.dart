@@ -1,4 +1,5 @@
 import 'package:heart/models/images.dart';
+import 'package:heart/models/pagination.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
@@ -23,25 +24,29 @@ void main() {
     });
   });
 
-  group('GalleryResponse', () {
-    test('toMap includes cursor when set', () {
-      final response = const GalleryResponse(images: [], cursor: 'next');
-      expect(response.toMap()['cursor'], equals('next'));
+  group('gallery Paginated<WorkoutImage>', () {
+    WorkoutImage image(String id) => WorkoutImage.fromJson({
+      'id': id,
+      'workoutId': 'w_1',
+      'key': '/workouts/abc/$id.jpg',
+      'url': 'https://cdn/workouts/abc/$id.jpg',
     });
 
-    test('toMap omits cursor when null', () {
-      final response = const GalleryResponse(images: []);
+    Paginated<WorkoutImage> gallery(Page<WorkoutImage> page) =>
+        Paginated<WorkoutImage>.from(page, itemsKey: 'images', cursorOf: (i) => i.id);
+
+    test('emits the last id as cursor when there is a next page', () {
+      final response = gallery(Page(items: [image('img_1'), image('img_2')], hasMore: true));
+      expect(response.toMap()['cursor'], equals('img_2'));
+    });
+
+    test('omits cursor when the list is exhausted', () {
+      final response = gallery(Page(items: [image('img_1')], hasMore: false));
       expect(response.toMap().containsKey('cursor'), isFalse);
     });
 
-    test('toMap serializes images via toRow()', () {
-      final image = WorkoutImage.fromJson({
-        'id': 'img_1',
-        'workoutId': 'w_1',
-        'key': '/workouts/abc/img_1.jpg',
-        'url': 'https://cdn/workouts/abc/img_1.jpg',
-      });
-      final response = GalleryResponse(images: [image]);
+    test('serializes images via toMap()', () {
+      final response = gallery(Page(items: [image('img_1')], hasMore: false));
 
       final images = response.toMap()['images'] as List;
       expect(images, hasLength(1));
@@ -50,13 +55,7 @@ void main() {
     });
 
     test('iterates over its images', () {
-      final image = WorkoutImage.fromJson({
-        'id': 'img_1',
-        'workoutId': 'w_1',
-        'key': '/k',
-        'url': 'https://cdn/k',
-      });
-      final response = GalleryResponse(images: [image]);
+      final response = gallery(Page(items: [image('img_1')], hasMore: false));
 
       expect(response.toList(), hasLength(1));
       expect(response.first.id, 'img_1');
