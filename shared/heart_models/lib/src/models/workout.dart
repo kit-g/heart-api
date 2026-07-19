@@ -266,7 +266,7 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
   bool get isCompleted => every((set) => set.isCompleted);
 }
 
-abstract interface class WorkoutImage implements Comparable<WorkoutImage>, Media, Storable {
+abstract interface class WorkoutImage implements Comparable<WorkoutImage>, Media, Storable, Model {
   String get workoutId;
 
   String get key;
@@ -335,6 +335,9 @@ class _WorkoutImage implements WorkoutImage {
       'key': key,
     };
   }
+
+  @override
+  Map<String, dynamic> toMap() => toRow();
 
   @override
   int compareTo(WorkoutImage other) {
@@ -636,38 +639,4 @@ class _ProgressGalleryResponse with Iterable<WorkoutImage> implements ProgressGa
 
   @override
   Iterator<WorkoutImage> get iterator => images.iterator;
-}
-
-abstract interface class WorkoutResponse implements Model, Iterable<Workout> {
-  List<Workout> get workouts;
-
-  String? get cursor;
-
-  factory WorkoutResponse({
-    required final List<Workout> workouts,
-    required final String? cursor,
-  }) = _WorkoutResponse.new;
-}
-
-class _WorkoutResponse with Iterable<Workout> implements WorkoutResponse {
-  @override
-  final List<Workout> workouts;
-  @override
-  final String? cursor;
-
-  const _WorkoutResponse({
-    required this.workouts,
-    required this.cursor,
-  });
-
-  @override
-  Iterator<Workout> get iterator => workouts.iterator;
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'workouts': map((w) => w.toMap()).toList(),
-      'cursor': cursor,
-    };
-  }
 }
