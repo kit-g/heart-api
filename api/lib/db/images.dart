@@ -2,17 +2,17 @@ part of 'db.dart';
 
 mixin _Images on _DatabaseBase implements ApiImageDbService {
   @override
-  Future<GalleryResponse> getGallery({
+  Future<Page<WorkoutImage>> getGallery({
     required String userId,
     required String Function(String) imageUrl,
     String? cursor,
-    int? pageSize = 20,
+    int limit = 20,
   }) async {
+    // Fetch one extra row so hasMore is authoritative without a second query.
     final rows = await _pool.execute(
       _listGallery.toSql(),
-      parameters: {'userId': userId, 'cursor': cursor, 'limit': pageSize},
+      parameters: {'userId': userId, 'cursor': cursor, 'limit': limit + 1},
     );
-    if (rows.isEmpty) return const GalleryResponse(images: []);
     final images = rows.map(
       (row) {
         final m = row.toColumnMap();
@@ -20,10 +20,8 @@ mixin _Images on _DatabaseBase implements ApiImageDbService {
         return WorkoutImage.fromRow(imageUrl(key), m);
       },
     ).toList();
-    return GalleryResponse(
-      images: images,
-      cursor: rows.last.toColumnMap()['id']?.toString(),
-    );
+    final hasMore = images.length > limit;
+    return Page(items: hasMore ? images.sublist(0, limit) : images, hasMore: hasMore);
   }
 
   @override

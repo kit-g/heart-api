@@ -2,23 +2,24 @@ part of 'db.dart';
 
 mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   @override
-  Future<WorkoutResponse> getWorkouts({
+  Future<Page<Workout>> getWorkouts({
     required String userId,
     required String targetUserId,
     required String Function(String) imageUrl,
     String? cursor,
-    int? pageSize = 30,
+    int limit = 30,
   }) async {
+    // Fetch one extra row so hasMore is authoritative without a second query.
     final rows = await _pool.execute(
       _listWorkouts.toSql(),
-      parameters: {'requesterId': userId, 'targetUserId': targetUserId, 'cursor': cursor, 'limit': pageSize},
+      parameters: {'requesterId': userId, 'targetUserId': targetUserId, 'cursor': cursor, 'limit': limit + 1},
     );
     if (rows.isNotEmpty && rows.first.toColumnMap()['forbidden'] == true) {
       throw const Forbidden(reason: 'You do not have permission to view these workouts.');
     }
-    if (rows.isEmpty) return WorkoutResponse(workouts: [], cursor: null);
     final workouts = rows.map((row) => Workout.fromRow(row.toColumnMap(), imageUrl: imageUrl)).toList();
-    return WorkoutResponse(workouts: workouts, cursor: workouts.lastOrNull?.id);
+    final hasMore = workouts.length > limit;
+    return Page(items: hasMore ? workouts.sublist(0, limit) : workouts, hasMore: hasMore);
   }
 
   @override
