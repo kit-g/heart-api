@@ -11,20 +11,17 @@ class Paginated<T extends Model> with Iterable<T> implements Model {
 
   const Paginated({required this.items, required this.itemsKey, this.cursor});
 
-  /// Builds a [Paginated] from a service [Page]. The next-page cursor is only
-  /// emitted when `page.hasMore` is true. Its value is [Page.cursor] when the
-  /// service supplied one explicitly (the ordering key isn't a serialized item
-  /// field), otherwise it's derived from the last item via [cursorOf].
+  /// Builds a [Paginated] from a service [Page]. [cursorOf] extracts the
+  /// cursor value from the last item when `page.hasMore` is true.
   factory Paginated.from(
     Page<T> page, {
     required String itemsKey,
-    String Function(T)? cursorOf,
+    required String Function(T) cursorOf,
   }) {
-    final hasNext = page.hasMore && page.items.isNotEmpty;
     return Paginated(
       items: page,
       itemsKey: itemsKey,
-      cursor: hasNext ? (page.cursor ?? cursorOf?.call(page.items.last)) : null,
+      cursor: page.hasMore && page.items.isNotEmpty ? cursorOf(page.items.last) : null,
     );
   }
 

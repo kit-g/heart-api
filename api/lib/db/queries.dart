@@ -750,7 +750,7 @@ LIMIT @limit
 
 const _listTemplateShares = '''
 SELECT
-  ts.id AS share_uuid,
+  ts.id AS id,
   ts.student_id,
   ts.master_template_id,
   ts.student_template_id,
@@ -770,14 +770,22 @@ LIMIT @limit
 const _shareTemplate = '''
 WITH
 _student AS (
-  SELECT id, username, avatar_url FROM profiles WHERE id = @studentId
+  SELECT id, username, avatar_url 
+  FROM profiles 
+  WHERE id = @studentId
 ),
 _master AS (
-  SELECT id, name FROM templates WHERE id = @masterTemplateId::uuid AND user_id = @coachId
+  SELECT id, name 
+  FROM templates 
+  WHERE id = @masterTemplateId::uuid 
+    AND user_id = @coachId
 ),
 _existing AS (
-  SELECT student_template_id, created_at FROM template_shares
-  WHERE coach_id = @coachId AND student_id = @studentId AND master_template_id = @masterTemplateId::uuid
+  SELECT id, student_template_id, created_at 
+  FROM template_shares
+  WHERE coach_id = @coachId 
+    AND student_id = @studentId 
+    AND master_template_id = @masterTemplateId::uuid
 ),
 _allowed AS (
   SELECT 1 FROM connections
@@ -859,9 +867,10 @@ _new_share AS (
   SELECT @coachId, @studentId, @masterTemplateId::uuid, nt.id
   FROM _new_template nt
   WHERE NOT EXISTS (SELECT 1 FROM _new_sets WHERE false)
-  RETURNING student_template_id, created_at
+  RETURNING id, student_template_id, created_at
 )
 SELECT
+  COALESCE(ns.id, ex.id) AS id,
   s.id AS student_id,
   @masterTemplateId::uuid AS master_template_id,
   COALESCE(ns.student_template_id, ex.student_template_id) AS student_template_id,
@@ -901,7 +910,7 @@ _deleted AS (
   DELETE FROM templates
   WHERE id = (
     SELECT student_template_id FROM template_shares
-    WHERE coach_id = @coachId AND student_id = @studentId AND master_template_id = @masterTemplateId::uuid
+    WHERE id = @shareId::uuid AND coach_id = @coachId
   )
   RETURNING id
 )

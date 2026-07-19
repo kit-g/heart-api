@@ -63,14 +63,7 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
     );
     final shares = rows.map((row) => TemplateShare.fromRow(row.toColumnMap())).toList();
     final hasMore = shares.length > limit;
-    // A share's cursor is its internal `share_uuid`, which isn't part of the
-    // serialized model, so pass it explicitly rather than deriving it downstream.
-    final nextCursor = hasMore ? rows[limit - 1].toColumnMap()['share_uuid']?.toString() : null;
-    return Page(
-      items: hasMore ? shares.sublist(0, limit) : shares,
-      hasMore: hasMore,
-      cursor: nextCursor,
-    );
+    return Page(items: hasMore ? shares.sublist(0, limit) : shares, hasMore: hasMore);
   }
 
   @override
@@ -101,11 +94,9 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
 
   @override
   Future<void> deleteShare({required String coachId, required String shareId}) async {
-    final parts = shareId.split('|');
-    if (parts.length != 2) throw ArgumentError('Invalid share ID: $shareId');
     final rows = await _pool.execute(
       _deleteShare.toSql(),
-      parameters: {'coachId': coachId, 'studentId': parts[0], 'masterTemplateId': parts[1]},
+      parameters: {'coachId': coachId, 'shareId': shareId},
     );
     if (rows.isEmpty) throw NotFound(type: 'TemplateShare', id: shareId);
   }

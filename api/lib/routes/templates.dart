@@ -49,9 +49,7 @@ Future<Paginated<TemplateShare>> getMyTemplateShares(final Request request) asyn
     limit: query.limit,
     cursor: query.cursor,
   );
-  // The share cursor is supplied explicitly by the service (Page.cursor); it
-  // isn't a field on TemplateShare, so no cursorOf here.
-  return Paginated<TemplateShare>.from(page, itemsKey: 'shares');
+  return Paginated<TemplateShare>.from(page, itemsKey: 'shares', cursorOf: (s) => s.id);
 }
 
 Future<TemplateShare> assignTemplateToUser(final Request request) async {
@@ -79,13 +77,9 @@ Future<NoContent> deleteMyTemplate(final Request request) async {
 }
 
 Future<NoContent> deleteMyTemplateShare(final Request request) async {
-  try {
-    await request.templatesService.deleteShare(
-      coachId: request.userId,
-      shareId: request.pathParameters.raw[#shareId]!,
-    );
-  } on ArgumentError catch (e) {
-    throw BadRequest(reason: e.message.toString());
-  }
+  await request.templatesService.deleteShare(
+    coachId: request.userId,
+    shareId: request.pathParameters.raw[#shareId]!,
+  );
   throw const NoContent();
 }
