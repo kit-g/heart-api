@@ -1,3 +1,4 @@
+import '../models/pagination.dart';
 import '../models/shares.dart';
 import '../models/template.dart';
 
@@ -18,9 +19,9 @@ abstract interface class ApiTemplateService {
 
   Future<Template> getTemplate({required String userId, required String templateId});
 
-  Future<TemplateResponse> getTemplates({required String userId, String? cursor, int? pageSize});
+  Future<Page<Template>> getTemplates({required String userId, String? cursor, int limit});
 
-  Future<TemplateShareListResponse> getTemplateShares({required String userId, String? cursor, int? pageSize});
+  Future<Page<TemplateShare>> getTemplateShares({required String userId, String? cursor, int limit});
 
   Future<void> deleteTemplate({required String coachId, required String templateId});
 
