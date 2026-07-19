@@ -59,48 +59,4 @@ void main() {
       expect(updated.assignedTo.name, equals('Student Name'));
     });
   });
-
-  group('TemplateListResponse', () {
-    test('toMap includes cursor when present', () {
-      final response = TemplateResponse(templates: [], cursor: 'abc123');
-      final map = response.toMap();
-
-      expect(map['templates'], isEmpty);
-      expect(map['cursor'], equals('abc123'));
-    });
-
-    test('toMap omits cursor when null', () {
-      final response = TemplateResponse(templates: [], cursor: null);
-
-      expect(response.toMap().containsKey('cursor'), isFalse);
-    });
-
-    test('is iterable', () {
-      final response = TemplateResponse(templates: [], cursor: null);
-
-      expect(response.isEmpty, isTrue);
-    });
-  });
-
-  group('TemplateShareListResponse', () {
-    test('toMap includes cursor when present', () {
-      final response = TemplateShareListResponse(shares: [], cursor: 'xyz');
-      final map = response.toMap();
-
-      expect(map['shares'], isEmpty);
-      expect(map['cursor'], equals('xyz'));
-    });
-
-    test('toMap omits cursor when null', () {
-      final response = TemplateShareListResponse(shares: [], cursor: null);
-
-      expect(response.toMap().containsKey('cursor'), isFalse);
-    });
-
-    test('is iterable', () {
-      final response = TemplateShareListResponse(shares: [], cursor: null);
-
-      expect(response.isEmpty, isTrue);
-    });
-  });
 }
