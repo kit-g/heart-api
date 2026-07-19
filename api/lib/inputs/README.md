@@ -129,6 +129,8 @@ return Paginated<Comment>.from(page, itemsKey: 'comments', cursorOf: (c) => c.id
 
 Critically, `cursor` is **only included in the response body when `hasMore` is true**. Clients don't have to make a wasted round trip to discover the list is exhausted.
 
+Every list endpoint takes the same query shape — `?cursor=<opaque>&limit=N` — parsed and bounds-checked by `PageQuery.fromRequest(req)` (see `pagination.dart`). `cursorOf` derives the next cursor from the last item's id, which works whenever the ordering key is a serialized field. When it isn't (template shares order by an internal `share_uuid`), the service sets `Page.cursor` explicitly and the route drops `cursorOf`; `Paginated.from` prefers the explicit value.
+
 ## Adding a new endpoint
 
 1. Add a `<Verb><Noun>In` (or `…Query`) class in the matching `lib/inputs/<domain>.dart`.
