@@ -25,6 +25,8 @@ The migration runner applies `database/migrations/*.sql` in filename sort order,
 
 ## pgtap test
 
+pgtap covers **schema and signatures** (tables, columns, types, PKs, FKs, function shapes) — it does **not** test query behavior. The SQL the API actually runs lives in `api/lib/db/queries.dart`; its behavior is covered by `db`-tagged Dart integration tests (see the `add-endpoint` skill), not here.
+
 Add `database/tests/<schema>/tables/<table>.sql` (or `functions/` for functions). Structure:
 
 ```sql
