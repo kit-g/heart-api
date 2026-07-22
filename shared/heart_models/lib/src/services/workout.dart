@@ -36,6 +36,14 @@ abstract interface class WorkoutService implements GalleryService {
   Future<Iterable<Workout>?> getWorkoutHistory(String userId);
 
   Future<void> updateWorkout({required String workoutId, String? name, Iterable<WorkoutImage>? images});
+
+  /// Persists the display order of a workout's exercises. [orderedIds] are
+  /// [WorkoutExercise.id]s in the order they should be read back.
+  ///
+  /// The active workout is only pushed to the server once it's finished, so a
+  /// reorder mid-workout has nowhere else to live — without this it survives
+  /// only in memory.
+  Future<void> saveExerciseOrder(Iterable<String> orderedIds, String workoutId);
 }
 
 abstract interface class RemoteWorkoutService implements FileUploadService, GalleryService {
