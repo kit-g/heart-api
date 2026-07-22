@@ -12,7 +12,8 @@ The API wires a route across ~8 files. Miss one and it fails late (compile error
 - **snake_case** for DB rows (`fromRow`, SQL columns). **camelCase** for JSON (`toMap`, input parsing). Don't mix.
 - Route handlers are `Future<Model> Function(Request)`. Pull inputs via a typed input class, call a service, return a `Model`. No `req.json()` parsing inside handlers.
 - Control flow is throws: `throw NoContent()` → 204, `BadRequest`/`Forbidden`/`NotFound` → status. `_handler` in `bin/main.dart` already maps `TypeError`/`FormatException` → 400.
-- List responses use `Paginated<T>.from(page, ...)` — never emit a bare `cursor`. Service returns `Page<T>` (fetch `limit + 1` for authoritative `hasMore`).
+- List responses use `Paginated<T>.from(page, ...)` — never emit a bare `cursor`. Service returns `Page<T>` (fetch `limit + 1` for authoritative `hasMore`). The cursor is the last item's `id`; keep the keyset ORDER BY on that same `id` so `cursorOf: (x) => x.id` is correct.
+- Query behavior is covered by `db`-tagged **integration tests** against real Postgres — not by route tests (which mock the service) nor pgtap (schema/signatures only). Any non-trivial SQL you write is otherwise untested.
 
 ## Steps
 
@@ -34,13 +35,16 @@ The API wires a route across ~8 files. Miss one and it fails late (compile error
 
 9. **Mocks** — if you added a service interface, add it to `@GenerateMocks` in `api/test/mocks.dart`, then **`cd api && dart run build_runner build --delete-conflicting-outputs`**. Skipping this is the #1 silent miss.
 
-10. **Test** — `api/test/routes/<domain>_test.dart` using `jsonRequest(...)`/`bareRequest(...)` from `test/helpers/request.dart`. Wire mocks onto the request via the context setters. Assert throws with `expect(() => handler(req), throwsA(isA<NoContent>()))` etc.
+10. **Route test** — `api/test/routes/<domain>_test.dart` using `jsonRequest(...)`/`bareRequest(...)` from `test/helpers/request.dart`. Wire mocks onto the request via the context setters. Assert throws with `expect(() => handler(req), throwsA(isA<NoContent>()))` etc. This mocks the service, so it proves the handler wiring — **not** the SQL.
 
-11. **Verify** — `cd api && dart analyze && dart test`. Both must be clean.
+11. **DB integration test** (whenever you add or change a query — required for anything non-trivial: CTEs, pagination, cursor logic, multi-table writes) — `api/test/db/<domain>_db_test.dart`, tagged `@Tags(['db'])`, extending `DatabaseTestBase` (`test/db/db_test_utility.dart`, which connects via `PG*` env vars). Seed prerequisites with raw SQL, call the real `db.<method>(...)`, assert on the returned model / `Page` (`hasMore`, and the next-page cursor by paginating with a `limit` and passing the returned cursor back). Clean up in `tearDownAll` — deleting the seeded profiles cascades to everything owned. `dart_test.yaml` skips the `db` tag so the default (DB-less) `dart test` stays green.
+
+12. **Verify** — `cd api && dart analyze && dart test` (both clean), then the DB tests against a local `heart` DB with migrations applied: `dart test --run-skipped -t db test/db`. CI runs the unit tests in the `dart-test` job and the DB tests in `db-test`.
 
 ## Self-check before declaring done
 
 - [ ] `dart analyze` clean, `dart test` green
+- [ ] new/changed query has a `db`-tagged integration test, passing via `dart test --run-skipped -t db test/db`
 - [ ] new service (if any) is in `mocks.dart` AND build_runner re-run
 - [ ] `db.dart` got all three edits (part / with / implements)
 - [ ] `database.dart` got all three edits (property / middleware / extension)
