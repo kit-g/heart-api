@@ -153,6 +153,19 @@ jobs:
         shell: bash -O globstar {0}
         run: pg_prove tests/**/*.sql --quiet
 
+      - uses: dart-lang/setup-dart@v1
+
+      - name: "Install Dart dependencies"
+        working-directory: api
+        run: dart pub get
+
+      # `db`-tagged tests exercise the real query strings against Postgres; they
+      # are skipped by the default `dart test` job (which has no database).
+      # Targeting test/db avoids compiling the mock-dependent suites.
+      - name: "Run Dart DB integration tests"
+        working-directory: api
+        run: dart test --run-skipped -t db test/db
+
   build-and-deploy:
     name: "Build & Deploy"
     runs-on: ubuntu-latest

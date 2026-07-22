@@ -25,7 +25,7 @@ abstract class DatabaseTestBase {
       settings: const PoolSettings(
         maxConnectionCount: 5,
         applicationName: 'heart-test',
-        sslMode: SslMode.disable,
+        sslMode: .disable,
       ),
     );
     db = Database(pool: pool);
