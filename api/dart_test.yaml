@@ -1,0 +1,7 @@
+# Integration tests tagged `db` hit a live Postgres and are skipped by the
+# default `dart test` run (CI's dart-test job has no database). Run them against
+# a local `heart` DB with:
+#   dart test --run-skipped -t db
+tags:
+  db:
+    skip: "requires a local Postgres 'heart' DB; run with: dart test --run-skipped -t db"
