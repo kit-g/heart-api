@@ -37,6 +37,18 @@ abstract interface class ApiWorkoutService {
     required String Function(String) imageUrl,
   });
 
+  /// Partial update of a workout the user owns — sets only the provided fields
+  /// (name/start/end), leaving its exercises intact. A null argument leaves that
+  /// field unchanged.
+  Future<Workout> patchWorkout({
+    required String userId,
+    required String workoutId,
+    required String Function(String) imageUrl,
+    String? name,
+    DateTime? start,
+    DateTime? end,
+  });
+
   Future<void> deleteWorkout({
     required String userId,
     required String workoutId,
