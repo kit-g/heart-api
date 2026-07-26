@@ -521,8 +521,44 @@ FROM _workout w
 LEFT JOIN _exercises_json ej ON true
 ''';
 
+const _patchWorkout = '''
+WITH _updated AS (
+  UPDATE workouts
+  SET
+    name = coalesce(@name::TEXT, name),
+    started_at = coalesce(@startedAt::TIMESTAMPTZ, started_at),
+    completed_at = coalesce(@completedAt::TIMESTAMPTZ, completed_at)
+  WHERE id = @workoutId::uuid AND user_id = @userId
+  RETURNING id, name, started_at, completed_at, created_at
+)
+SELECT
+  u.id, 
+  u.name, 
+  u.started_at, 
+  u.completed_at, 
+  u.created_at,
+  _workout_exercises(u.id) AS exercises,
+  coalesce(
+    (
+      SELECT jsonb_agg(
+        jsonb_build_object(
+          'id', wi.id,
+          'key', wi.key, 
+          'workout_id', wi.workout_id
+        ) 
+        ORDER BY wi.id DESC
+      )
+     FROM workout_images wi WHERE wi.workout_id = u.id
+    ),
+    '[]'::jsonb
+  ) AS images
+FROM _updated u
+''';
+
 const _deleteWorkout = '''
-DELETE FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId
+DELETE FROM workouts 
+WHERE id = @workoutId::uuid 
+  AND user_id = @userId
 ''';
 
 const _saveTemplate = '''

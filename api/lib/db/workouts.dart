@@ -83,6 +83,29 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   }
 
   @override
+  Future<Workout> patchWorkout({
+    required String userId,
+    required String workoutId,
+    required String Function(String) imageUrl,
+    String? name,
+    DateTime? start,
+    DateTime? end,
+  }) async {
+    final rows = await _pool.execute(
+      _patchWorkout.toSql(),
+      parameters: {
+        'workoutId': workoutId,
+        'userId': userId,
+        'name': name,
+        'startedAt': start,
+        'completedAt': end,
+      },
+    );
+    if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
+    return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
+  }
+
+  @override
   Future<void> deleteWorkout({required String userId, required String workoutId}) async {
     await _pool.execute(
       _deleteWorkout.toSql(),
