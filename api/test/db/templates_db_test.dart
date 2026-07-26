@@ -1,150 +1,166 @@
 @Tags(['db'])
 library;
 
-import 'package:postgres/postgres.dart' hide Connection;
+import 'package:heart/models/errors.dart';
+import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
 
-/// Exercises the real template-share query strings against a live Postgres,
-/// covering the parts reworked for cursor pagination: share creation (incl. the
-/// idempotent `COALESCE(ns.id, ex.id)` path), `limit + 1` list pagination keyed
-/// on the share id, and delete-by-uuid.
+/// Full integration coverage of the `ApiTemplateService` query strings against a
+/// live Postgres: template CRUD, plus the sharing flow reworked for cursor
+/// pagination (idempotent share create, `limit + 1` list keyed on the share id,
+/// delete-by-uuid).
 ///
-/// Tagged `db` — skipped by the default `dart test` run (see `dart_test.yaml`),
-/// which has no database. Run explicitly against a local `heart` DB with:
+/// Tagged `db` — skipped by the default `dart test`. Run with:
 ///   dart test --run-skipped -t db
 void main() {
-  final harness = _Harness();
+  final h = _Harness();
 
-  // Unique per run so repeated local runs don't collide on the UNIQUE
-  // (coach_id, master_template_id, student_id) constraint.
-  final suffix = DateTime.now().microsecondsSinceEpoch.toString();
-  final coachId = 'itest-coach-$suffix';
-  final studentId = 'itest-student-$suffix';
-  late String masterA;
-  late String masterB;
-  final createdExercises = <String>[];
+  late String coachId; // owns templates; shares to student
+  late String studentId;
+  late String strangerId;
+  late String listOwnerId; // isolated, for getTemplates pagination
 
-  Future<void> exec(String sql, [Map<String, dynamic> params = const {}]) async {
-    await harness.pool.execute(Sql.named(sql), parameters: params);
-  }
+  TemplateRequest tReq(String userId, String name) =>
+      TemplateRequest(userId: userId, body: {'name': name, 'order': 0, 'exercises': const []});
 
-  Future<String> seedMasterTemplate(String name) async {
-    final rows = await harness.pool.execute(
-      Sql.named('INSERT INTO templates (user_id, name, order_index) VALUES (@u, @n, 0) RETURNING id'),
-      parameters: {'u': coachId, 'n': name},
+  /// A coach-owned master template with one exercise + set, ready to share.
+  Future<String> seedMasterTemplate() async {
+    final templateId = await h.insertId(
+      'INSERT INTO templates (user_id, name, order_index) VALUES (@u, @n, 0) RETURNING id',
+      {'u': coachId, 'n': h.uniqueName('Master')},
     );
-    final templateId = rows.first.toColumnMap()['id'].toString();
-
-    final exRows = await harness.pool.execute(
-      Sql.named('INSERT INTO exercises (name, category, target) VALUES (@n, @c, @t) RETURNING id'),
-      parameters: {'n': 'ITest Ex $name $suffix', 'c': 'Barbell', 't': 'Chest'},
+    final exerciseId = await h.seedGlobalExercise();
+    final teId = await h.insertId(
+      'INSERT INTO template_exercises (template_id, exercise_id, exercise_order) VALUES (@t, @e, 0) RETURNING id',
+      {'t': templateId, 'e': exerciseId},
     );
-    final exerciseId = exRows.first.toColumnMap()['id'].toString();
-    createdExercises.add(exerciseId);
-
-    final teRows = await harness.pool.execute(
-      Sql.named(
-        'INSERT INTO template_exercises (template_id, exercise_id, exercise_order) '
-        'VALUES (@t, @e, 0) RETURNING id',
-      ),
-      parameters: {'t': templateId, 'e': exerciseId},
-    );
-    final teId = teRows.first.toColumnMap()['id'].toString();
-
-    await exec(
-      'INSERT INTO template_exercise_sets (template_exercise_id, weight, reps, set_order) '
-      'VALUES (@te, 100, 5, 0)',
+    await h.exec(
+      'INSERT INTO template_exercise_sets (template_exercise_id, weight, reps, set_order) VALUES (@te, 100, 5, 0)',
       {'te': teId},
     );
     return templateId;
   }
 
   setUpAll(() async {
-    await harness.setupDatabase();
-    await exec('INSERT INTO profiles (id, username, email) VALUES (@id, @u, @e)', {
-      'id': coachId,
-      'u': 'coach_$suffix',
-      'e': 'coach_$suffix@test.local',
+    await h.setupDatabase();
+    coachId = await h.seedProfile();
+    studentId = await h.seedProfile();
+    strangerId = await h.seedProfile();
+    listOwnerId = await h.seedProfile();
+    await h.seedConnection(initiator: coachId, target: studentId, role: 'COACH');
+  });
+
+  tearDownAll(h.teardownDatabase);
+
+  group('template CRUD', () {
+    test('createTemplate persists and getTemplate reads it back', () async {
+      final created = await h.db.createTemplate(userId: coachId, body: tReq(coachId, 'Leg day'));
+      expect(created.name, 'Leg day');
+
+      final fetched = await h.db.getTemplate(userId: coachId, templateId: created.id);
+      expect(fetched.id, created.id);
+      expect(fetched.name, 'Leg day');
     });
-    await exec('INSERT INTO profiles (id, username, email) VALUES (@id, @u, @e)', {
-      'id': studentId,
-      'u': 'student_$suffix',
-      'e': 'student_$suffix@test.local',
+
+    test('getTemplate is owner-scoped (NotFound for another user)', () async {
+      final created = await h.db.createTemplate(userId: coachId, body: tReq(coachId, 'Private'));
+      await expectLater(
+        h.db.getTemplate(userId: strangerId, templateId: created.id),
+        throwsA(isA<NotFound>()),
+      );
     });
-    await exec(
-      'INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status) '
-      "VALUES (@c, @s, 'COACH', 'ATHLETE', 'fitness', 'active')",
-      {'c': coachId, 's': studentId},
-    );
-    masterA = await seedMasterTemplate('Master A');
-    masterB = await seedMasterTemplate('Master B');
-  });
 
-  tearDownAll(() async {
-    // profiles cascade to templates/shares/connections/copied exercises.
-    await exec('DELETE FROM profiles WHERE id = ANY(@ids)', {
-      'ids': [coachId, studentId],
+    test('getTemplates lists an isolated owner newest-first with limit+1 pagination', () async {
+      final t1 = await h.db.createTemplate(userId: listOwnerId, body: tReq(listOwnerId, 'T1'));
+      final t2 = await h.db.createTemplate(userId: listOwnerId, body: tReq(listOwnerId, 'T2'));
+
+      final page1 = await h.db.getTemplates(userId: listOwnerId, limit: 1);
+      expect(page1.items, hasLength(1));
+      expect(page1.hasMore, isTrue);
+      expect(page1.items.single.id, t2.id); // uuidv7 → newest first
+
+      final page2 = await h.db.getTemplates(userId: listOwnerId, cursor: page1.items.single.id, limit: 1);
+      expect(page2.items.single.id, t1.id);
+      expect(page2.hasMore, isFalse);
     });
-    // Global master exercises (user_id NULL) have no owner to cascade from.
-    for (final id in createdExercises) {
-      await exec('DELETE FROM exercises WHERE id = @id::uuid', {'id': id});
-    }
-    await harness.teardownDatabase();
+
+    test('updateTemplate renames an owned template', () async {
+      final created = await h.db.createTemplate(userId: coachId, body: tReq(coachId, 'Before'));
+      final updated = await h.db.updateTemplate(userId: coachId, templateId: created.id, body: tReq(coachId, 'After'));
+      expect(updated.id, created.id);
+      expect(updated.name, 'After');
+    });
+
+    test('updateTemplate on a template you do not own throws NotFound', () async {
+      final created = await h.db.createTemplate(userId: coachId, body: tReq(coachId, 'Mine'));
+      await expectLater(
+        h.db.updateTemplate(userId: strangerId, templateId: created.id, body: tReq(strangerId, 'Yours')),
+        throwsA(isA<NotFound>()),
+      );
+    });
+
+    test('deleteTemplate removes an owned template', () async {
+      final created = await h.db.createTemplate(userId: coachId, body: tReq(coachId, 'Temp'));
+      await h.db.deleteTemplate(coachId: coachId, templateId: created.id);
+      await expectLater(
+        h.db.getTemplate(userId: coachId, templateId: created.id),
+        throwsA(isA<NotFound>()),
+      );
+    });
   });
 
-  test('shareTemplate returns the share uuid and is idempotent', () async {
-    final first = await harness.db.shareTemplate(
-      coachId: coachId,
-      targetUserId: studentId,
-      masterTemplateId: masterA,
-    );
-    expect(first.id, isNotEmpty);
-    expect(first.id, contains('-')); // looks like a uuid, not the old composite
+  group('template shares', () {
+    test('shareTemplate returns the share uuid and is idempotent', () async {
+      final master = await seedMasterTemplate();
 
-    // Second call hits the `_existing` branch — COALESCE must surface ex.id.
-    final again = await harness.db.shareTemplate(
-      coachId: coachId,
-      targetUserId: studentId,
-      masterTemplateId: masterA,
-    );
-    expect(again.id, equals(first.id));
-  });
+      final first = await h.db.shareTemplate(coachId: coachId, targetUserId: studentId, masterTemplateId: master);
+      expect(first.id, isNotEmpty);
+      expect(first.id, contains('-')); // a uuid, not the old composite
 
-  test('getTemplateShares paginates with limit+1 and walks by share id', () async {
-    // masterA already shared above; add masterB so the coach has two shares.
-    final shareB = await harness.db.shareTemplate(
-      coachId: coachId,
-      targetUserId: studentId,
-      masterTemplateId: masterB,
-    );
+      // Second call hits the `_existing` branch — COALESCE must surface ex.id.
+      final again = await h.db.shareTemplate(coachId: coachId, targetUserId: studentId, masterTemplateId: master);
+      expect(again.id, equals(first.id));
+    });
 
-    final firstPage = await harness.db.getTemplateShares(userId: coachId, limit: 1);
-    expect(firstPage.items, hasLength(1));
-    expect(firstPage.hasMore, isTrue);
-    // uuidv7 ids sort chronologically; the newer share (B) comes first.
-    expect(firstPage.items.single.id, equals(shareB.id));
+    test('getTemplateShares paginates with limit+1 and walks by share id', () async {
+      // A fresh coach so the share list is isolated from other cases.
+      final coach = await h.seedProfile();
+      final student = await h.seedProfile();
+      await h.seedConnection(initiator: coach, target: student, role: 'COACH');
+      final mA = await h.insertId(
+        'INSERT INTO templates (user_id, name, order_index) VALUES (@u, @n, 0) RETURNING id',
+        {'u': coach, 'n': h.uniqueName('MA')},
+      );
+      final mB = await h.insertId(
+        'INSERT INTO templates (user_id, name, order_index) VALUES (@u, @n, 0) RETURNING id',
+        {'u': coach, 'n': h.uniqueName('MB')},
+      );
 
-    final secondPage = await harness.db.getTemplateShares(
-      userId: coachId,
-      cursor: firstPage.items.single.id,
-      limit: 1,
-    );
-    expect(secondPage.items, hasLength(1));
-    expect(secondPage.hasMore, isFalse);
-    expect(secondPage.items.single.id, isNot(equals(shareB.id)));
-  });
+      await h.db.shareTemplate(coachId: coach, targetUserId: student, masterTemplateId: mA);
+      final shareB = await h.db.shareTemplate(coachId: coach, targetUserId: student, masterTemplateId: mB);
 
-  test('deleteShare removes the share by its uuid', () async {
-    final before = await harness.db.getTemplateShares(userId: coachId, limit: 50);
-    final target = before.items.first;
+      final firstPage = await h.db.getTemplateShares(userId: coach, limit: 1);
+      expect(firstPage.items, hasLength(1));
+      expect(firstPage.hasMore, isTrue);
+      expect(firstPage.items.single.id, equals(shareB.id)); // newest first
 
-    await harness.db.deleteShare(coachId: coachId, shareId: target.id);
+      final secondPage = await h.db.getTemplateShares(userId: coach, cursor: firstPage.items.single.id, limit: 1);
+      expect(secondPage.items, hasLength(1));
+      expect(secondPage.hasMore, isFalse);
+      expect(secondPage.items.single.id, isNot(equals(shareB.id)));
+    });
 
-    final after = await harness.db.getTemplateShares(userId: coachId, limit: 50);
-    expect(after.items.map((s) => s.id), isNot(contains(target.id)));
-    expect(after.items, hasLength(before.items.length - 1));
+    test('deleteShare removes the share by its uuid', () async {
+      final master = await seedMasterTemplate();
+      final share = await h.db.shareTemplate(coachId: coachId, targetUserId: studentId, masterTemplateId: master);
+
+      await h.db.deleteShare(coachId: coachId, shareId: share.id);
+
+      final after = await h.db.getTemplateShares(userId: coachId, limit: 50);
+      expect(after.items.map((s) => s.id), isNot(contains(share.id)));
+    });
   });
 }
 
