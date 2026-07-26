@@ -67,6 +67,22 @@ Future<Workout> updateWorkout(final Request request) async {
   );
 }
 
+Future<Workout> patchWorkout(final Request request) {
+  return patchWorkoutById(request, request.rawPathParameters[#workoutId]!);
+}
+
+Future<Workout> patchWorkoutById(final Request request, final String workoutId) async {
+  final input = await WorkoutPatchIn.fromRequest(request);
+  return request.workoutsService.patchWorkout(
+    userId: request.userId,
+    workoutId: workoutId,
+    name: input.name,
+    start: input.start,
+    end: input.end,
+    imageUrl: request.config.cdnAssetUrl,
+  );
+}
+
 Future<NoContent> deleteWorkout(final Request request) async {
   final workoutId = request.pathParameters.raw[#workoutId]!;
   final userId = request.userId;
