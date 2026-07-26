@@ -57,6 +57,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/workouts/images', .get): images.getGallery,
   ('/workouts/:workoutId', .get): workouts.getWorkout,
   ('/workouts/:workoutId', .put): workouts.updateWorkout,
+  ('/workouts/:workoutId', .patch): workouts.patchWorkout,
   ('/workouts/:workoutId', .delete): workouts.deleteWorkout,
   ('/workouts/:workoutId/images', .put): images.presignWorkoutImage,
   ('/workouts/:workoutId/images', .delete): images.deleteWorkoutImage,
