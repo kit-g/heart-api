@@ -46,6 +46,7 @@ module "assets" {
   log_retention    = var.log_retention
   content_bucket   = module.content.content_bucket
   api_events_queue = module.api.events_queue
+  events_enabled   = false
 }
 
 module "cdn" {
