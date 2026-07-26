@@ -123,4 +123,108 @@ void main() {
       );
     });
   });
+
+  group('patchWorkoutById', () {
+    void stubPatch() {
+      when(
+        workouts.patchWorkout(
+          userId: anyNamed('userId'),
+          workoutId: anyNamed('workoutId'),
+          name: anyNamed('name'),
+          start: anyNamed('start'),
+          end: anyNamed('end'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).thenAnswer((_) async => _fakeWorkout('w-1'));
+    }
+
+    Request patchReq(Map<String, dynamic> body) =>
+        wire(jsonRequest(method: Method.patch, path: '/workouts/w-1', body: body));
+
+    test('passes the provided fields through to the service', () async {
+      stubPatch();
+      const startIso = '2026-07-20T18:00:00Z';
+      const endIso = '2026-07-20T19:05:00Z';
+
+      final out = await patchWorkoutById(
+        patchReq({'name': 'Evening push', 'start': startIso, 'end': endIso}),
+        'w-1',
+      );
+
+      expect(out.id, 'w-1');
+      verify(
+        workouts.patchWorkout(
+          userId: argThat(equals(_meId), named: 'userId'),
+          workoutId: argThat(equals('w-1'), named: 'workoutId'),
+          name: argThat(equals('Evening push'), named: 'name'),
+          start: argThat(equals(DateTime.parse(startIso)), named: 'start'),
+          end: argThat(equals(DateTime.parse(endIso)), named: 'end'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).called(1);
+    });
+
+    test('omitted fields arrive as null (left unchanged)', () async {
+      stubPatch();
+
+      await patchWorkoutById(patchReq({'start': '2026-07-20T18:00:00Z'}), 'w-1');
+
+      verify(
+        workouts.patchWorkout(
+          userId: argThat(equals(_meId), named: 'userId'),
+          workoutId: argThat(equals('w-1'), named: 'workoutId'),
+          name: argThat(isNull, named: 'name'),
+          start: argThat(equals(DateTime.parse('2026-07-20T18:00:00Z')), named: 'start'),
+          end: argThat(isNull, named: 'end'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).called(1);
+    });
+
+    test('rejects an empty body (no fields to change)', () async {
+      await expectLater(patchWorkoutById(patchReq({}), 'w-1'), throwsA(isA<BadRequest>()));
+      verifyNever(
+        workouts.patchWorkout(
+          userId: anyNamed('userId'),
+          workoutId: anyNamed('workoutId'),
+          name: anyNamed('name'),
+          start: anyNamed('start'),
+          end: anyNamed('end'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      );
+    });
+
+    test('rejects end before start', () async {
+      await expectLater(
+        patchWorkoutById(
+          patchReq({'start': '2026-07-20T19:00:00Z', 'end': '2026-07-20T18:00:00Z'}),
+          'w-1',
+        ),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
+    test('rejects a blank name', () async {
+      await expectLater(patchWorkoutById(patchReq({'name': ''}), 'w-1'), throwsA(isA<BadRequest>()));
+    });
+
+    test('propagates NotFound for a workout the user does not own', () async {
+      when(
+        workouts.patchWorkout(
+          userId: anyNamed('userId'),
+          workoutId: anyNamed('workoutId'),
+          name: anyNamed('name'),
+          start: anyNamed('start'),
+          end: anyNamed('end'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).thenThrow(const NotFound(type: 'Workout', id: 'w-1'));
+
+      await expectLater(
+        patchWorkoutById(patchReq({'name': 'x'}), 'w-1'),
+        throwsA(isA<NotFound>()),
+      );
+    });
+  });
 }
