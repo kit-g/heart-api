@@ -111,7 +111,7 @@ jobs:
         run: dart test
 
   db-test:
-    name: "Database Tests"
+    name: "Database Tests & Coverage"
     runs-on: ubuntu-latest
     env:
       PGHOST: localhost
@@ -159,12 +159,25 @@ jobs:
         working-directory: api
         run: dart pub get
 
-      # `db`-tagged tests exercise the real query strings against Postgres; they
-      # are skipped by the default `dart test` job (which has no database).
-      # Targeting test/db avoids compiling the mock-dependent suites.
-      - name: "Run Dart DB integration tests"
+      - name: "Generate mocks"
         working-directory: api
-        run: dart test --run-skipped -t db test/db
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # Runs the FULL api suite — unit + `db`-tagged (unskipped via --run-skipped)
+      # — against the Postgres provisioned above, so coverage reflects the code
+      # the DB integration tests exercise. This subsumes the db-only run.
+      - name: "Run tests with coverage"
+        working-directory: api
+        run: dart test --coverage=coverage --run-skipped
+
+      - name: "Enforce coverage floor"
+        working-directory: api
+        run: |
+          dart pub global activate coverage
+          dart pub global run coverage:format_coverage \
+            --lcov --in=coverage --out=coverage/lcov.info \
+            --report-on=lib --packages=.dart_tool/package_config.json
+          dart run tool/check_coverage.dart 60
 
   build-and-deploy:
     name: "Build & Deploy"
