@@ -1,0 +1,787 @@
+{
+  "templates": [
+    {
+      "id": "3b790e9f-98da-44f6-bb5d-53044635da6c",
+      "name": "Push Day",
+      "order": 0,
+      "exercises": [
+        {
+          "id": "7be6fc4e-ecc4-413c-8fae-9bc876043496",
+          "exercise": {
+            "name": "Bench Press (Barbell)",
+            "category": "Barbell",
+            "target": "Chest"
+          },
+          "exercise_order": 0,
+          "sets": [
+            {
+              "id": "04627d15-ba25-4cf8-959e-c65a7673c1b6",
+              "completed": false,
+              "reps": 5,
+              "weight": 135
+            },
+            {
+              "id": "c6bcd158-525d-4936-ba44-147f68ccc9e6",
+              "completed": false,
+              "reps": 5,
+              "weight": 135
+            },
+            {
+              "id": "eb84f65f-372a-4848-9c9f-c1a82e82b23b",
+              "completed": false,
+              "reps": 5,
+              "weight": 135
+            }
+          ]
+        },
+        {
+          "id": "ba562a46-fd39-4746-a636-87628618758f",
+          "exercise": {
+            "name": "Overhead Press (Barbell)",
+            "category": "Barbell",
+            "target": "Shoulders"
+          },
+          "exercise_order": 1,
+          "sets": [
+            {
+              "id": "983c7e59-1d76-4259-ae08-896b85c86d34",
+              "completed": false,
+              "reps": 5,
+              "weight": 95
+            },
+            {
+              "id": "70ee8733-aeb2-4324-82ed-a096203c897a",
+              "completed": false,
+              "reps": 5,
+              "weight": 95
+            },
+            {
+              "id": "758fc718-9b19-40db-a7a7-03d2b0c8138b",
+              "completed": false,
+              "reps": 5,
+              "weight": 95
+            }
+          ]
+        },
+        {
+          "id": "8186ce21-955e-4fef-9a0d-93a8daaf4039",
+          "exercise": {
+            "name": "Incline Bench Press (Dumbbell)",
+            "category": "Dumbbell",
+            "target": "Chest"
+          },
+          "exercise_order": 2,
+          "sets": [
+            {
+              "id": "e358bc95-943e-4b51-812a-d852cd7a09f5",
+              "completed": false,
+              "reps": 10,
+              "weight": 50
+            },
+            {
+              "id": "7610afb6-7ed1-42d5-a884-4b1709025323",
+              "completed": false,
+              "reps": 10,
+              "weight": 50
+            },
+            {
+              "id": "30a43242-8d98-40ff-8301-66e9bfb278d2",
+              "completed": false,
+              "reps": 10,
+              "weight": 50
+            }
+          ]
+        },
+        {
+          "id": "6526e63b-75d8-4528-ab12-0791457de6ba",
+          "exercise": {
+            "name": "Lateral Raise (Dumbbell)",
+            "category": "Dumbbell",
+            "target": "Shoulders"
+          },
+          "exercise_order": 3,
+          "sets": [
+            {
+              "id": "b45fe309-25a0-4ea5-a70f-57e651c04af1",
+              "completed": false,
+              "reps": 12,
+              "weight": 15
+            },
+            {
+              "id": "03d0e9c1-a728-483e-b1ca-e44f9fae2eee",
+              "completed": false,
+              "reps": 12,
+              "weight": 15
+            },
+            {
+              "id": "a6d66680-b613-4135-a881-c5cbda573767",
+              "completed": false,
+              "reps": 12,
+              "weight": 15
+            }
+          ]
+        },
+        {
+          "id": "d138b34b-0947-4a82-ba4e-10c0ce216709",
+          "exercise": {
+            "name": "Triceps Pushdown (Cable - Straight Bar)",
+            "category": "Machine",
+            "target": "Arms"
+          },
+          "exercise_order": 4,
+          "sets": [
+            {
+              "id": "f55bf8ec-8d61-4b8b-9778-7cbf5fb5f879",
+              "completed": false,
+              "reps": 12,
+              "weight": 50
+            },
+            {
+              "id": "f1eb89bf-5af9-4adf-af28-bb95fd1c04d4",
+              "completed": false,
+              "reps": 12,
+              "weight": 50
+            },
+            {
+              "id": "cd2c180e-229a-438c-9f25-d823288c2d0a",
+              "completed": false,
+              "reps": 12,
+              "weight": 50
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "8711d3f3-3030-41a7-a1d0-4de13a142ba5",
+      "name": "Pull Day",
+      "order": 1,
+      "exercises": [
+        {
+          "id": "32daa298-6e40-4aa4-9789-931c52c647a8",
+          "exercise": {
+            "name": "Deadlift (Barbell)",
+            "category": "Barbell",
+            "target": "Back"
+          },
+          "exercise_order": 0,
+          "sets": [
+            {
+              "id": "187dc7b3-33f3-42ce-a882-21b904c5a7bd",
+              "completed": false,
+              "reps": 5,
+              "weight": 225
+            },
+            {
+              "id": "7eacddd6-6c81-4163-8fd4-cdb00733477f",
+              "completed": false,
+              "reps": 5,
+              "weight": 225
+            },
+            {
+              "id": "b5e897f2-6945-4396-ac50-ddc1951e1d58",
+              "completed": false,
+              "reps": 5,
+              "weight": 225
+            }
+          ]
+        },
+        {
+          "id": "d9effecd-7eb6-4902-b231-44590f17dbe5",
+          "exercise": {
+            "name": "Pull Up",
+            "category": "Weighted Body Weight",
+            "target": "Back"
+          },
+          "exercise_order": 1,
+          "sets": [
+            {
+              "id": "57a3e1cf-81bf-468d-a527-4e2f8bb143bc",
+              "completed": false,
+              "reps": 8,
+              "weight": 0
+            },
+            {
+              "id": "5b5f814a-def5-472e-a487-19e0b982bca1",
+              "completed": false,
+              "reps": 8,
+              "weight": 0
+            },
+            {
+              "id": "d9d0ec6b-052e-4992-8ddc-c0bb2c0bf4a9",
+              "completed": false,
+              "reps": 8,
+              "weight": 0
+            }
+          ]
+        },
+        {
+          "id": "2a4a6147-ecf5-410a-ab9e-57423a468885",
+          "exercise": {
+            "name": "Bent Over Row (Barbell)",
+            "category": "Barbell",
+            "target": "Back"
+          },
+          "exercise_order": 2,
+          "sets": [
+            {
+              "id": "654a3ea5-8563-41e7-96ee-3e86c509bd73",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            },
+            {
+              "id": "421e1c89-e497-49de-ba44-6797164ea74d",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            },
+            {
+              "id": "9b592830-ae44-466f-bf76-548c649b6ab0",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            }
+          ]
+        },
+        {
+          "id": "dfb95175-1a8d-424d-b612-f518e108c7ab",
+          "exercise": {
+            "name": "Lat Pulldown (Cable)",
+            "category": "Machine",
+            "target": "Back"
+          },
+          "exercise_order": 3,
+          "sets": [
+            {
+              "id": "29ce48eb-7c7b-4c60-828f-cf5a3095d88a",
+              "completed": false,
+              "reps": 10,
+              "weight": 120
+            },
+            {
+              "id": "7cf3ca94-0a96-4e59-8df1-fb0cb9371da8",
+              "completed": false,
+              "reps": 10,
+              "weight": 120
+            },
+            {
+              "id": "5a40c9fc-314e-4076-af48-f946cd0725f7",
+              "completed": false,
+              "reps": 10,
+              "weight": 120
+            }
+          ]
+        },
+        {
+          "id": "21c2e584-d315-4255-832d-7c0d896e95a5",
+          "exercise": {
+            "name": "Bicep Curl (Dumbbell)",
+            "category": "Dumbbell",
+            "target": "Arms"
+          },
+          "exercise_order": 4,
+          "sets": [
+            {
+              "id": "e4d82ad0-1c8d-4fdd-8cd9-e23b134640b4",
+              "completed": false,
+              "reps": 10,
+              "weight": 25
+            },
+            {
+              "id": "a4276f8d-5ac4-41d2-8240-286977d458d2",
+              "completed": false,
+              "reps": 10,
+              "weight": 25
+            },
+            {
+              "id": "bf7a9e39-1c22-4308-81e7-29a35d6c7010",
+              "completed": false,
+              "reps": 10,
+              "weight": 25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "78d84f4d-abde-45bc-a592-b85006d33451",
+      "name": "Leg Day",
+      "order": 2,
+      "exercises": [
+        {
+          "id": "6b9e87e9-c1d7-4823-a720-5b19205d0313",
+          "exercise": {
+            "name": "Squat (Barbell)",
+            "category": "Barbell",
+            "target": "Legs"
+          },
+          "exercise_order": 0,
+          "sets": [
+            {
+              "id": "be450a47-fc4c-42d8-9dd7-f654ace2b67a",
+              "completed": false,
+              "reps": 5,
+              "weight": 185
+            },
+            {
+              "id": "da5c59b9-a321-457d-93e6-44b46b721e50",
+              "completed": false,
+              "reps": 5,
+              "weight": 185
+            },
+            {
+              "id": "a86c05df-a3fd-4e2e-8ae9-3c5eaca9cfeb",
+              "completed": false,
+              "reps": 5,
+              "weight": 185
+            }
+          ]
+        },
+        {
+          "id": "a08c3370-b58b-4573-9e4e-972d9ef1ee21",
+          "exercise": {
+            "name": "Romanian Deadlift (Barbell)",
+            "category": "Barbell",
+            "target": "Back"
+          },
+          "exercise_order": 1,
+          "sets": [
+            {
+              "id": "7a266d50-4fb4-42c7-a782-fa538fef1cac",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            },
+            {
+              "id": "e097c704-29ea-4e95-b3a4-71b711727e62",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            },
+            {
+              "id": "a3898b13-f2c2-49ae-86b7-9388de0aed50",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            }
+          ]
+        },
+        {
+          "id": "1f107eed-a1d5-4b93-a428-d7d8ad00a9e5",
+          "exercise": {
+            "name": "Leg Press",
+            "category": "Machine",
+            "target": "Legs"
+          },
+          "exercise_order": 2,
+          "sets": [
+            {
+              "id": "b9758180-8fd9-4ddb-87e8-13abe2d7b90c",
+              "completed": false,
+              "reps": 10,
+              "weight": 360
+            },
+            {
+              "id": "a84a0778-1795-489a-b25c-6db350728adb",
+              "completed": false,
+              "reps": 10,
+              "weight": 360
+            },
+            {
+              "id": "c010f915-190e-4c47-a5a7-4e74319b817e",
+              "completed": false,
+              "reps": 10,
+              "weight": 360
+            }
+          ]
+        },
+        {
+          "id": "d1aad953-958d-4a6b-8e46-4d1e0339f7c0",
+          "exercise": {
+            "name": "Leg Extension (Machine)",
+            "category": "Machine",
+            "target": "Legs"
+          },
+          "exercise_order": 3,
+          "sets": [
+            {
+              "id": "56805c48-058e-4e3d-8d17-1cb14a088348",
+              "completed": false,
+              "reps": 12,
+              "weight": 100
+            },
+            {
+              "id": "fab0de40-f845-4902-800a-0112bedff988",
+              "completed": false,
+              "reps": 12,
+              "weight": 100
+            },
+            {
+              "id": "840ff9b3-5587-4873-abe6-9f0ef0372caa",
+              "completed": false,
+              "reps": 12,
+              "weight": 100
+            }
+          ]
+        },
+        {
+          "id": "c5b4e713-08f1-4445-8b9b-b5ed221b266b",
+          "exercise": {
+            "name": "Lying Leg Curl (Machine)",
+            "category": "Machine",
+            "target": "Legs"
+          },
+          "exercise_order": 4,
+          "sets": [
+            {
+              "id": "9848e6ee-9005-4144-894c-1d621b0ab579",
+              "completed": false,
+              "reps": 12,
+              "weight": 80
+            },
+            {
+              "id": "f1f8883b-878e-492d-977c-2f5dd7cc2b4b",
+              "completed": false,
+              "reps": 12,
+              "weight": 80
+            },
+            {
+              "id": "b3622c93-5145-4654-807a-01996f5e5f3a",
+              "completed": false,
+              "reps": 12,
+              "weight": 80
+            }
+          ]
+        },
+        {
+          "id": "be77a8ce-c3b9-40c9-97c8-4fdc0399c4f1",
+          "exercise": {
+            "name": "Plank",
+            "category": "Duration",
+            "target": "Core"
+          },
+          "exercise_order": 5,
+          "sets": [
+            {
+              "id": "762e253c-6915-47b4-998c-17525fc1ef58",
+              "completed": false,
+              "duration": 60
+            },
+            {
+              "id": "232b5e54-b737-430e-91de-0f5c306b87ee",
+              "completed": false,
+              "duration": 60
+            },
+            {
+              "id": "4c5a45f1-a58f-4d7c-a01c-d4c325c22795",
+              "completed": false,
+              "duration": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "60b309af-c48d-440b-86c4-ccb674c3c491",
+      "name": "Upper Body",
+      "order": 3,
+      "exercises": [
+        {
+          "id": "dd88ae3a-effa-4d43-8b18-5f41b257f41c",
+          "exercise": {
+            "name": "Bench Press (Barbell)",
+            "category": "Barbell",
+            "target": "Chest"
+          },
+          "exercise_order": 0,
+          "sets": [
+            {
+              "id": "edb117f1-ad6a-4ce0-bb86-4d107fabd3b2",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            },
+            {
+              "id": "b360348c-4449-4610-b1fe-b801a4b6b9da",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            },
+            {
+              "id": "c935a0cb-157d-4e30-a5ac-fb5f1b72feac",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            }
+          ]
+        },
+        {
+          "id": "2778d595-25fd-4222-951f-5b8c58023d46",
+          "exercise": {
+            "name": "Bent Over Row (Barbell)",
+            "category": "Barbell",
+            "target": "Back"
+          },
+          "exercise_order": 1,
+          "sets": [
+            {
+              "id": "604107da-9b59-4599-ae86-cc35697669b3",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            },
+            {
+              "id": "16f7d1e2-f63c-41ed-9113-7e83dd5dada9",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            },
+            {
+              "id": "dcf482a7-a4bb-4f60-b590-2351fca40aaf",
+              "completed": false,
+              "reps": 8,
+              "weight": 135
+            }
+          ]
+        },
+        {
+          "id": "b5247850-8265-49fc-9f96-f93033870ec0",
+          "exercise": {
+            "name": "Overhead Press (Barbell)",
+            "category": "Barbell",
+            "target": "Shoulders"
+          },
+          "exercise_order": 2,
+          "sets": [
+            {
+              "id": "0e565725-0560-4750-a3ba-2840eaff0799",
+              "completed": false,
+              "reps": 8,
+              "weight": 95
+            },
+            {
+              "id": "361d191d-572a-424e-ab69-fcc19cca4332",
+              "completed": false,
+              "reps": 8,
+              "weight": 95
+            },
+            {
+              "id": "ea75ba2e-fe77-4129-b4dd-f5555e637fdb",
+              "completed": false,
+              "reps": 8,
+              "weight": 95
+            }
+          ]
+        },
+        {
+          "id": "a15b3b53-8905-4e23-8252-dcfe1d2676b1",
+          "exercise": {
+            "name": "Lat Pulldown (Cable)",
+            "category": "Machine",
+            "target": "Back"
+          },
+          "exercise_order": 3,
+          "sets": [
+            {
+              "id": "57a529c2-8173-4c7d-abf3-9df86940b99e",
+              "completed": false,
+              "reps": 10,
+              "weight": 120
+            },
+            {
+              "id": "bc3a9f69-9c84-4bb3-aa44-33c63d84329f",
+              "completed": false,
+              "reps": 10,
+              "weight": 120
+            },
+            {
+              "id": "25080716-08bb-414c-8a4f-39d1a3af32c6",
+              "completed": false,
+              "reps": 10,
+              "weight": 120
+            }
+          ]
+        },
+        {
+          "id": "417e322a-2867-488c-8f79-277e919f1367",
+          "exercise": {
+            "name": "Bicep Curl (Dumbbell)",
+            "category": "Dumbbell",
+            "target": "Arms"
+          },
+          "exercise_order": 4,
+          "sets": [
+            {
+              "id": "e6c88a13-0e96-4a18-a00a-8ccb6dc21278",
+              "completed": false,
+              "reps": 10,
+              "weight": 25
+            },
+            {
+              "id": "203dd932-6816-499a-9bcd-fbc4538ac32b",
+              "completed": false,
+              "reps": 10,
+              "weight": 25
+            },
+            {
+              "id": "04a77f96-0cb0-471d-a16f-7c4c87abc841",
+              "completed": false,
+              "reps": 10,
+              "weight": 25
+            }
+          ]
+        },
+        {
+          "id": "23909cbd-306b-4535-8834-d39d2cf2b4d3",
+          "exercise": {
+            "name": "Triceps Pushdown (Cable - Straight Bar)",
+            "category": "Machine",
+            "target": "Arms"
+          },
+          "exercise_order": 5,
+          "sets": [
+            {
+              "id": "1b7fa169-bc4f-4df5-854a-5d1f205a374f",
+              "completed": false,
+              "reps": 12,
+              "weight": 50
+            },
+            {
+              "id": "9c07f4a8-6d0d-4b8b-a779-db97b6fbfd15",
+              "completed": false,
+              "reps": 12,
+              "weight": 50
+            },
+            {
+              "id": "3b688c03-150a-4324-a188-742b628ae3f8",
+              "completed": false,
+              "reps": 12,
+              "weight": 50
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6014111d-4df9-4467-b8a2-48533fa723ef",
+      "name": "Full Body Beginner",
+      "order": 4,
+      "exercises": [
+        {
+          "id": "c6f9e33e-02da-47ce-89af-56fbd2f53b11",
+          "exercise": {
+            "name": "Squat (Barbell)",
+            "category": "Barbell",
+            "target": "Legs"
+          },
+          "exercise_order": 0,
+          "sets": [
+            {
+              "id": "d669e896-9736-4a1a-9e4f-643d4e3936d8",
+              "completed": false,
+              "reps": 5,
+              "weight": 95
+            },
+            {
+              "id": "cbe2d261-d988-4cf2-9321-738151f3d66a",
+              "completed": false,
+              "reps": 5,
+              "weight": 95
+            },
+            {
+              "id": "771a6459-6d52-4c39-a558-481ba72195c0",
+              "completed": false,
+              "reps": 5,
+              "weight": 95
+            }
+          ]
+        },
+        {
+          "id": "396e1029-66bc-4de0-870d-c1e4e56aa6d1",
+          "exercise": {
+            "name": "Bench Press (Barbell)",
+            "category": "Barbell",
+            "target": "Chest"
+          },
+          "exercise_order": 1,
+          "sets": [
+            {
+              "id": "554e2d7e-aa30-4802-aed0-680a0c45893e",
+              "completed": false,
+              "reps": 5,
+              "weight": 95
+            },
+            {
+              "id": "d0ec1b60-1b0c-4577-8228-2141d71a9ac2",
+              "completed": false,
+              "reps": 5,
+              "weight": 95
+            },
+            {
+              "id": "061601fb-25f0-4a2f-8081-06504525c2cc",
+              "completed": false,
+              "reps": 5,
+              "weight": 95
+            }
+          ]
+        },
+        {
+          "id": "cb085cac-3a4c-464c-bf4f-b234fdc5483b",
+          "exercise": {
+            "name": "Bent Over Row (Barbell)",
+            "category": "Barbell",
+            "target": "Back"
+          },
+          "exercise_order": 2,
+          "sets": [
+            {
+              "id": "67aac938-1397-47d8-803e-2d333bc50f93",
+              "completed": false,
+              "reps": 5,
+              "weight": 65
+            },
+            {
+              "id": "49f98acd-91c6-44d9-8d03-325972bdcfc4",
+              "completed": false,
+              "reps": 5,
+              "weight": 65
+            },
+            {
+              "id": "247aa79e-a6e0-40d3-9ee1-35285fd60395",
+              "completed": false,
+              "reps": 5,
+              "weight": 65
+            }
+          ]
+        },
+        {
+          "id": "bf741abd-83b5-4780-97cd-2fc72e54b270",
+          "exercise": {
+            "name": "Plank",
+            "category": "Duration",
+            "target": "Core"
+          },
+          "exercise_order": 3,
+          "sets": [
+            {
+              "id": "5d096247-aae1-4f1b-88fb-9b12a90f013d",
+              "completed": false,
+              "duration": 30
+            },
+            {
+              "id": "526c32a4-94cd-4b93-8d07-3ddf3391514e",
+              "completed": false,
+              "duration": 30
+            },
+            {
+              "id": "53f3c2be-dd2a-4e0d-84bf-d3e171419ece",
+              "completed": false,
+              "duration": 30
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
