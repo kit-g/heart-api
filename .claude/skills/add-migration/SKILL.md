@@ -1,6 +1,6 @@
 ---
 name: add-migration
-description: Add a database migration and its pgtap test to database/. Use whenever creating or altering a table/function/index. Encodes the file-naming, house SQL style, snake_case rule, and the pgtap plan(N) gotchas. Triggers: "add a migration", "new table", "alter table", "add a column", "new DB function".
+description: Add a database migration and its pgtap test to database/. Use whenever creating or altering a table/function/index. Encodes the file-naming, house SQL style, snake_case rule, the two pgtap test forms (tables use plan(N); functions use test__*/runtests()), and why editing an already-applied migration silently does nothing. Triggers: "add a migration", "new table", "alter table", "add a column", "new DB function".
 ---
 
 # Adding a migration + pgtap test
@@ -10,6 +10,21 @@ The migration runner applies `database/migrations/*.sql` in filename sort order,
 ## Naming
 
 `database/migrations/YYYY-MM-DD.short-name.sql` — date-prefixed (sorts chronologically = apply order), kebab-case slug. Use today's date. If two migrations share a date, the slug breaks the tie alphabetically — name them so the intended order holds.
+
+### Editing an already-applied migration is a silent no-op
+
+`_schema_migrations` is keyed on **filename**. `apply_migrations.sh` skips any file already recorded there — so if you edit a migration that has been applied, nothing runs and the runner still prints success. You then "verify" against a schema that never got your change.
+
+Before editing an existing migration file, check:
+
+```bash
+psql -d heart -tAc "SELECT 1 FROM _schema_migrations WHERE filename = '<file>.sql'"
+```
+
+- **Empty** → not applied here, safe to edit freely (still unsafe if it shipped to a deployed env).
+- **Non-empty** → do NOT edit it. Write a new migration. If it is unshipped and you want to consolidate, reset first (below).
+
+Renaming a migration file is the same hazard in reverse: the new name is unrecorded, so it re-runs. That is fine only if the body is idempotent.
 
 ## House style (match existing migrations)
 
@@ -25,9 +40,18 @@ The migration runner applies `database/migrations/*.sql` in filename sort order,
 
 ## pgtap test
 
-pgtap covers **schema and signatures** (tables, columns, types, PKs, FKs, function shapes) — it does **not** test query behavior. The SQL the API actually runs lives in `api/lib/db/queries.dart`; its behavior is covered by `db`-tagged Dart integration tests (see the `add-endpoint` skill), not here.
+pgtap covers **schema, signatures, and the behavior of database-side functions and triggers**. It does **not** cover the SQL the API runs — that lives in `api/lib/db/queries.dart` and is covered by `db`-tagged Dart integration tests (see the `add-endpoint` skill).
 
-Add `database/tests/<schema>/tables/<table>.sql` (or `functions/` for functions). Structure:
+There are **two forms**, chosen by what you are testing. They are not interchangeable — the table form is a flat script with an explicit plan; the function form is pgtap's xUnit runner with no plan at all. Pick by directory:
+
+| you added                        | file                                         | form                     |
+|----------------------------------|----------------------------------------------|--------------------------|
+| table, column, index, constraint | `database/tests/<schema>/tables/<table>.sql` | flat + `plan(N)`         |
+| function or trigger              | `database/tests/<schema>/functions/<fn>.sql` | `test__*` + `runtests()` |
+
+---
+
+### Tables — flat assertions with `plan(N)`
 
 ```sql
 BEGIN;
@@ -39,30 +63,140 @@ SELECT has_pk(...); SELECT col_is_pk(...);
 SELECT col_not_null(...);   -- one per NOT NULL column
 SELECT col_default_is('public', '<table>', '<col>', '<rendered-default>', '<desc>');
 SELECT fk_ok('public', '<table>', '<fk_col>', 'public', '<parent>', 'id');  -- one per FK
+SELECT has_index(...); SELECT index_is_unique(...);
 SELECT * FROM finish();
 ROLLBACK;
 ```
 
-### plan(N) gotcha — the thing that bites
+**`plan(N)` must equal the exact count of `SELECT`-assertion calls.** Count them after writing, don't estimate. `columns_are` is ONE assertion regardless of column count; each `col_type_is`/`col_not_null`/`fk_ok`/`has_index` is one each. If `pg_prove` says "looks like you planned N but ran M", fix the number — don't add filler assertions to reach it.
 
-`plan(N)` must equal the **exact** count of `SELECT`-assertion calls. Count them after writing, don't estimate. `columns_are` is ONE assertion regardless of column count. Each `col_type_is`/`col_not_null`/`fk_ok` is one each. If `pg_prove` says "looks like you planned N but ran M", fix the number, don't add filler.
+When you add a column to an existing table, three things change in its test: the `columns_are` array, a new `col_type_is`, and `plan(N)`. Adding an index adds a `has_index` and another to the plan.
 
-### Other gotchas
+Assertion-specific notes:
 
 - `col_default_is` wants the **rendered** default exactly as Postgres stores it: `uuidv7()`, `now()`, `'en'` (text), `'{}'::jsonb`. When unsure, check an existing table's test or query `information_schema.columns`.
 - `col_type_is` type names: `uuid`, `text`, `integer`, `boolean`, `jsonb`, `timestamp with time zone` (not `timestamptz`), `real`.
+
+---
+
+### Functions and triggers — `test__*` + `runtests()`
+
+No `plan(N)`. Each test is a named function returning `SETOF TEXT`, one `RETURN NEXT` per assertion; `runtests()` discovers every `test__*` in the transaction and counts them for you. Group related assertions into one test function with a descriptive name — the name is what `pg_prove` reports.
+
+```sql
+BEGIN;
+
+CREATE OR REPLACE FUNCTION test__<fn>_signature() RETURNS SETOF TEXT AS
+$$
+BEGIN
+    RETURN NEXT has_function('public'::name, '<fn>'::name, ARRAY ['jsonb']);
+    RETURN NEXT function_returns('public'::name, '<fn>'::name, ARRAY ['jsonb'], 'jsonb');
+    RETURN NEXT function_lang_is('public'::name, '<fn>'::name, ARRAY ['jsonb'], 'sql'::name);
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__<fn>_does_the_thing() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id TEXT;
+    _w_id    UUID;
+BEGIN
+    _user_id := create_test_profile();
+
+    -- precondition: nothing exists yet for what this test is about to create
+    RETURN NEXT is((SELECT count(*) FROM workouts WHERE user_id = _user_id), 0::bigint, 'no workouts yet');
+
+    _w_id := create_test_workout(_user_id => _user_id, _name => 'archive me');
+    RETURN NEXT is((SELECT count(*) FROM archive.deleted_workouts WHERE id = _w_id), 0::bigint, 'not archived yet');
+
+    DELETE FROM workouts WHERE id = _w_id;
+
+    RETURN NEXT is((SELECT count(*) FROM archive.deleted_workouts WHERE id = _w_id), 1::bigint, 'archived on delete');
+    RETURN NEXT ok((SELECT deleted_at FROM archive.deleted_workouts WHERE id = _w_id) IS NOT NULL, 'deleted_at set');
+END
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM runtests();
+
+ROLLBACK;
+```
+
+#### Assert the table is empty before creating entities in it
+
+A test that seeds rows and then counts them is only meaningful from a known-empty start. Without the precondition, leftover data turns a real failure into a confusing off-by-N — or masks one entirely — and the message you get is "expected 1, have 383" rather than "the database was dirty".
+
+**Scope the emptiness assertion to what this test is about to create**, not to the whole table. A bare `count(*) FROM <table>` only holds on a fresh CI database: `archive.deleted_workouts` carries 382 rows on a working dev box, and `exercises` holds the whole synced library. Assert on the slice you own:
+
+```sql
+-- good: the slice this test creates
+RETURN NEXT is((SELECT count(*) FROM workouts WHERE user_id = _user_id), 0::bigint, 'no workouts yet');
+RETURN NEXT is((SELECT count(*) FROM archive.deleted_workouts WHERE id = _w_id), 0::bigint, 'not archived yet');
+
+-- bad: passes in CI, fails on any dev machine with history
+RETURN NEXT is((SELECT count(*) FROM archive.deleted_workouts), 0::bigint, 'archive starts empty');
+```
+
+Seed the owning row first (`create_test_profile()`), then assert emptiness scoped by its id, then create. One assertion per table the test writes into.
+
+#### Signature assertions
+
+`has_function` / `function_returns` / `function_lang_is` take an **optional argument-type array**, and the two forms are not interchangeable:
+
+```sql
+-- function WITH arguments: pass the type array, so an overload or a changed
+-- signature is actually caught rather than matching on name alone
+RETURN NEXT has_function('public'::name, '_workout_exercises'::name, ARRAY ['uuid']);
+RETURN NEXT function_returns('public'::name, '_workout_exercises'::name, ARRAY ['uuid'], 'jsonb');
+RETURN NEXT function_lang_is('public'::name, '_workout_exercises'::name, ARRAY ['uuid'], 'sql'::name);
+
+-- zero-arg function: OMIT the array entirely. `ARRAY[]::name[]` does NOT match
+-- and the assertion fails with "function does not exist".
+RETURN NEXT has_function('public'::name, 'uuidv7'::name);
+RETURN NEXT function_returns('public'::name, 'uuidv7'::name, 'uuid');
+```
+
+`function_lang_is` wants the language as stored: `sql`, `plpgsql`.
+
+#### Other notes
+
+- Seed via `database/test_utils/helpers.sql` — `create_test_profile`, `create_test_exercise`, `create_test_workout`, `create_test_workout_exercise`, `create_test_exercise_set`, `create_test_template`, `create_test_template_exercise`, `create_test_template_set`. Read the signatures there rather than guessing parameter order; most have defaults and are best called with named args (`_user_id =>`).
+- Group related assertions into one `test__*` function with a descriptive name — the function name is what `pg_prove` reports on failure.
+- The whole file is wrapped in `BEGIN … ROLLBACK`, so both the seeded rows and the `test__*` functions themselves are discarded.
 
 ## Verify
 
 Run the DB test suite (needs local Postgres + pgtap):
 
 ```bash
-./scripts/apply_migrations.sh        # applies your new migration
-psql -f database/test_utils/helpers.sql
-cd database && pg_prove tests/**/*.sql   # zsh expands ** natively; CI uses bash -O globstar
+PGHOST=localhost PGDATABASE=heart ./scripts/apply_migrations.sh   # applies your new migration
+psql -d heart -f database/test_utils/helpers.sql
+cd database && pg_prove -d heart tests/**/*.sql   # zsh expands ** natively; CI uses bash -O globstar
 ```
 
-Or the convenience wrapper if present: `./scripts/db_tests.sh`.
+Set `PGHOST` or the script falls back to fetching Supabase credentials from S3 and pointing at the **shared** database. Or use the convenience wrapper if present: `./scripts/db_tests.sh`.
+
+### Reset — proving it applies from scratch
+
+Running the file with `psql -f` proves the SQL parses; it does not prove the migration *applies*, because the runner may skip it (see the naming section). To verify for real, drop what it creates, clear its tracking row, and re-run the runner:
+
+```bash
+psql -d heart --set ON_ERROR_STOP=1 -c "
+  DELETE FROM _schema_migrations WHERE filename = '<file>.sql';
+  DROP FUNCTION IF EXISTS <fn>(<argtypes>);
+  ALTER TABLE <table> DROP COLUMN IF EXISTS <col>;   -- or DROP TABLE for a new table
+"
+PGHOST=localhost PGDATABASE=heart ./scripts/apply_migrations.sh   # expect ">> Applying <file>.sql"
+```
+
+Then confirm the objects exist — don't infer it from the runner's exit code:
+
+```bash
+psql -d heart -tAc "SELECT column_name FROM information_schema.columns WHERE table_name='<t>' AND column_name='<c>'"
+psql -d heart -tAc "SELECT proname FROM pg_proc WHERE proname = '<fn>'"
+psql -d heart -tAc "SELECT indexname FROM pg_indexes WHERE indexname = '<idx>'"
+```
+
+Dropping a column discards data. On a dev box that means re-running whatever populates it (e.g. `scripts/library_locales.py` for the exercise library) afterwards.
 
 ## If the table is read/written by the API
 

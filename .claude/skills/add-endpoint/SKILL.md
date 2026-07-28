@@ -10,6 +10,9 @@ The API wires a route across ~8 files. Miss one and it fails late (compile error
 ## Conventions that are non-negotiable
 
 - **snake_case** for DB rows (`fromRow`, SQL columns). **camelCase** for JSON (`toMap`, input parsing). Don't mix.
+  - The snake_case half governs **column names only** — *not* the contents of a `jsonb` blob. Blobs are stored camelCase (`profiles.settings`, `goals.stages`, `exercises.movement`), so a query can ship the column straight to the client and the model needs only `fromJson`/`toMap` — no `Storable`/`fromRow`/`toRow` pair, which would be an identical no-op.
+  - Whatever *writes* the blob emits camelCase. Converting per-read instead is recomputing a constant; a generic recursive `_camel(jsonb)` measured ~20 ms on a full-library read (~85% of the query), and a hand-enumerated `jsonb_build_object` silently drops keys added later.
+  - When a write-side script and a Dart model share a blob contract, pin it with a test on **both** sides. A key mismatch never throws — it reads as the field's default, so the failure is silent and wrong rather than loud.
 - Route handlers are `Future<Model> Function(Request)`. Pull inputs via a typed input class, call a service, return a `Model`. No `req.json()` parsing inside handlers.
 - Control flow is throws: `throw NoContent()` → 204, `BadRequest`/`Forbidden`/`NotFound` → status. `_handler` in `bin/main.dart` already maps `TypeError`/`FormatException` → 400.
 - List responses use `Paginated<T>.from(page, ...)` — never emit a bare `cursor`. Service returns `Page<T>` (fetch `limit + 1` for authoritative `hasMore`). The cursor is the last item's `id`; keep the keyset ORDER BY on that same `id` so `cursorOf: (x) => x.id` is correct.
@@ -38,6 +41,14 @@ The API wires a route across ~8 files. Miss one and it fails late (compile error
 10. **Route test** — `api/test/routes/<domain>_test.dart` using `jsonRequest(...)`/`bareRequest(...)` from `test/helpers/request.dart`. Wire mocks onto the request via the context setters. Assert throws with `expect(() => handler(req), throwsA(isA<NoContent>()))` etc. This mocks the service, so it proves the handler wiring — **not** the SQL.
 
 11. **DB integration test** (whenever you add or change a query — required for anything non-trivial: CTEs, pagination, cursor logic, multi-table writes) — `api/test/db/<domain>_db_test.dart`, tagged `@Tags(['db'])`, extending `DatabaseTestBase` (`test/db/db_test_utility.dart`, which connects via `PG*` env vars). Seed prerequisites with raw SQL, call the real `db.<method>(...)`, assert on the returned model / `Page` (`hasMore`, and the next-page cursor by paginating with a `limit` and passing the returned cursor back). Clean up in `tearDownAll` — deleting the seeded profiles cascades to everything owned. `dart_test.yaml` skips the `db` tag so the default (DB-less) `dart test` stays green.
+
+    **The cascade teardown breaks on user-owned exercises.** `template_exercises.exercise_id` (and `workout_exercises.exercise_id`) is **RESTRICT**, not CASCADE. Deleting a seeded profile cascades to its templates *and* its exercises, and if a `template_exercises` row still references one, the whole `tearDownAll` throws — failing the run after every test passed. Every existing test dodges this by seeding **global** exercises (`seedGlobalExercise`, `user_id IS NULL`), which are deleted separately after the profiles, so the trap stays invisible until you seed a user-owned one. If your case needs a user-owned exercise in a template (e.g. exercising a copy-on-share branch), delete the templates yourself at the end of the test:
+
+    ```dart
+    await h.exec('DELETE FROM templates WHERE user_id = ANY(@ids)', {'ids': [coach, student]});
+    ```
+
+    Related: a **global** exercise resolves by name for the target user rather than being copied, so a test aiming at a copy-into-library branch must seed the source as **coach-owned** or the branch never runs and the assertion silently tests nothing.
 
 12. **Verify** — `cd api && dart analyze && dart test` (both clean), then the DB tests against a local `heart` DB with migrations applied: `dart test --run-skipped -t db test/db`. CI runs the unit tests in the `dart-test` job and the DB tests in `db-test`.
 
