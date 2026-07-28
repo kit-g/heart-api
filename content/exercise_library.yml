@@ -1,10 +1,18 @@
 version: "2026-02-07"
-locales: [ en, en_CA, ru ]
+locales: [en, en_CA, ru]
 fallback_to_default: en
 exercises:
   "Ab Wheel":
     category: Weighted Body Weight
     target: Core
+    movement:
+      groups:
+        - core_bracing
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Ab Wheel"
@@ -72,6 +80,14 @@ exercises:
   "Bicycle Crunch":
     category: Weighted Body Weight
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Bicycle Crunch"
@@ -135,6 +151,14 @@ exercises:
   "Cable Crunch":
     category: Machine
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Cable Crunch"
@@ -198,6 +222,14 @@ exercises:
   "Cable Twist":
     category: Machine
     target: Core
+    movement:
+      groups:
+        - trunk_lateral_rotation
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Cable Twist"
@@ -259,6 +291,14 @@ exercises:
   "Cross Body Crunch":
     category: Weighted Body Weight
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Cross Body Crunch"
@@ -320,6 +360,14 @@ exercises:
   "Crunch":
     category: Weighted Body Weight
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Crunch"
@@ -379,6 +427,14 @@ exercises:
   "Crunch (Machine)":
     category: Machine
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Crunch (Machine)"
@@ -438,6 +494,14 @@ exercises:
   "Crunch (Stability Ball)":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Crunch (Stability Ball)"
@@ -497,6 +561,14 @@ exercises:
   "Decline Crunch":
     category: Weighted Body Weight
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Decline Crunch"
@@ -556,6 +628,14 @@ exercises:
   "Flat Knee Raise":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - hip_flexion_hanging
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Flat Knee Raise"
@@ -618,6 +698,14 @@ exercises:
   "Flat Leg Raise":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - hip_flexion_hanging
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Flat Leg Raise"
@@ -681,6 +769,14 @@ exercises:
   "Hanging Knee Raise":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - hip_flexion_hanging
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Hanging Knee Raise"
@@ -743,6 +839,14 @@ exercises:
   "Hanging Leg Raise":
     category: Weighted Body Weight
     target: Core
+    movement:
+      groups:
+        - hip_flexion_hanging
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Hanging Leg Raise"
@@ -806,6 +910,14 @@ exercises:
   "Jackknife Sit Up":
     category: Weighted Body Weight
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Jackknife Sit Up"
@@ -866,6 +978,14 @@ exercises:
   "Knee Raise (Captain's Chair)":
     category: Weighted Body Weight
     target: Core
+    movement:
+      groups:
+        - hip_flexion_hanging
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Knee Raise (Captain's Chair)"
@@ -928,6 +1048,14 @@ exercises:
   "Knees to Elbows":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - hip_flexion_hanging
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Knees to Elbows"
@@ -989,6 +1117,14 @@ exercises:
   "Oblique Crunch":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Oblique Crunch"
@@ -1050,6 +1186,14 @@ exercises:
   "Plank":
     category: Duration
     target: Core
+    movement:
+      groups:
+        - core_bracing
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Plank"
@@ -1110,6 +1254,14 @@ exercises:
   "Reverse Crunch":
     category: Weighted Body Weight
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Reverse Crunch"
@@ -1172,6 +1324,14 @@ exercises:
   "Reverse Plank":
     category: Duration
     target: Core
+    movement:
+      groups:
+        - core_bracing
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Reverse Plank"
@@ -1234,6 +1394,14 @@ exercises:
   "Russian Twist":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - trunk_lateral_rotation
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Russian Twist"
@@ -1296,6 +1464,14 @@ exercises:
   "Flutter Kick":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - hip_flexion_hanging
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Flutter Kick"
@@ -1358,6 +1534,14 @@ exercises:
   "Side Bend (Cable)":
     category: Machine
     target: Core
+    movement:
+      groups:
+        - trunk_lateral_rotation
+      axial_load: low
+      stability: supported
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Side Bend (Cable)"
@@ -1416,6 +1600,14 @@ exercises:
   "Side Bend (Band)":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - trunk_lateral_rotation
+      axial_load: low
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Side Bend (Band)"
@@ -1474,6 +1666,14 @@ exercises:
   "Side Bend (Dumbbell)":
     category: Dumbbell
     target: Core
+    movement:
+      groups:
+        - trunk_lateral_rotation
+      axial_load: low
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Side Bend (Dumbbell)"
@@ -1532,6 +1732,14 @@ exercises:
   "Side Plank":
     category: Duration
     target: Core
+    movement:
+      groups:
+        - core_bracing
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Side Plank"
@@ -1593,6 +1801,14 @@ exercises:
   "Sit Up":
     category: Weighted Body Weight
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Sit Up"
@@ -1656,6 +1872,14 @@ exercises:
   "Superman":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - spinal_extension
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Superman"
@@ -1714,6 +1938,14 @@ exercises:
   "Toes To Bar":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - hip_flexion_hanging
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Toes To Bar"
@@ -1774,6 +2006,14 @@ exercises:
   "Torso Rotation (Machine)":
     category: Machine
     target: Core
+    movement:
+      groups:
+        - trunk_lateral_rotation
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Torso Rotation (Machine)"
@@ -1834,6 +2074,14 @@ exercises:
   "V Up":
     category: Reps Only
     target: Core
+    movement:
+      groups:
+        - trunk_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "V Up"
@@ -1898,6 +2146,14 @@ exercises:
   "Bench Dip":
     category: Weighted Body Weight
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Bench Dip"
@@ -1963,6 +2219,14 @@ exercises:
   "Bench Press - Close Grip (Barbell)":
     category: Barbell
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Bench Press - Close Grip (Barbell)"
@@ -2027,6 +2291,14 @@ exercises:
   "Bicep Curl (Barbell)":
     category: Barbell
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Bicep Curl (Barbell)"
@@ -2090,6 +2362,14 @@ exercises:
   "Bicep Curl (Cable)":
     category: Machine
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Bicep Curl (Cable)"
@@ -2153,6 +2433,14 @@ exercises:
   "Bicep Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Bicep Curl (Dumbbell)"
@@ -2216,6 +2504,14 @@ exercises:
   "Bicep Curl (Machine)":
     category: Machine
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Bicep Curl (Machine)"
@@ -2279,6 +2575,14 @@ exercises:
   "Cable Kickback":
     category: Machine
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: supported
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Cable Kickback"
@@ -2342,6 +2646,14 @@ exercises:
   "Concentration Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: supported
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Concentration Curl (Dumbbell)"
@@ -2405,6 +2717,14 @@ exercises:
   "Hammer Curl (Band)":
     category: Weighted Body Weight
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Hammer Curl (Band)"
@@ -2465,6 +2785,14 @@ exercises:
   "Hammer Curl (Cable)":
     category: Machine
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Hammer Curl (Cable)"
@@ -2525,6 +2853,14 @@ exercises:
   "Incline Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Incline Curl (Dumbbell)"
@@ -2582,6 +2918,14 @@ exercises:
   "Hammer Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Hammer Curl (Dumbbell)"
@@ -2642,6 +2986,14 @@ exercises:
   "Preacher Curl (Barbell)":
     category: Barbell
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Preacher Curl (Barbell)"
@@ -2705,6 +3057,14 @@ exercises:
   "Preacher Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Preacher Curl (Dumbbell)"
@@ -2767,6 +3127,14 @@ exercises:
   "Heart Pump":
     category: Dumbbell
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Heart Pump"
@@ -2829,6 +3197,14 @@ exercises:
   "Preacher Curl (Machine)":
     category: Machine
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Preacher Curl (Machine)"
@@ -2891,6 +3267,14 @@ exercises:
   "Reverse Curl (Band)":
     category: Reps Only
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Reverse Curl (Band)"
@@ -2951,6 +3335,14 @@ exercises:
   "Reverse Curl (Barbell)":
     category: Barbell
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Reverse Curl (Barbell)"
@@ -3011,6 +3403,14 @@ exercises:
   "Reverse Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Reverse Curl (Dumbbell)"
@@ -3071,6 +3471,14 @@ exercises:
   "Reverse Grip Concentration Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    movement:
+      groups:
+        - elbow_flexion
+      axial_load: none
+      stability: supported
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Reverse Grip Concentration Curl (Dumbbell)"
@@ -3133,6 +3541,14 @@ exercises:
   "Seated Palms Up Wrist Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
+    movement:
+      groups:
+        - forearm
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Seated Palms Up Wrist Curl (Dumbbell)"
@@ -3192,6 +3608,14 @@ exercises:
   "Skullcrusher (Barbell)":
     category: Barbell
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Skullcrusher (Barbell)"
@@ -3253,6 +3677,14 @@ exercises:
   "Skullcrusher (Dumbbell)":
     category: Dumbbell
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Skullcrusher (Dumbbell)"
@@ -3314,6 +3746,14 @@ exercises:
   "Triceps Dip":
     category: Weighted Body Weight
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Triceps Dip"
@@ -3378,6 +3818,14 @@ exercises:
   "Triceps Dip (Assisted)":
     category: Machine
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Triceps Dip (Assisted)"
@@ -3442,6 +3890,14 @@ exercises:
   "Triceps Extension":
     category: Barbell
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Triceps Extension"
@@ -3503,6 +3959,14 @@ exercises:
   "Triceps Extension (Barbell)":
     category: Barbell
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Triceps Extension (Barbell)"
@@ -3564,6 +4028,14 @@ exercises:
   "Triceps Extension (Cable)":
     category: Machine
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Triceps Extension (Cable)"
@@ -3625,6 +4097,14 @@ exercises:
   "Triceps Extension (Dumbbell)":
     category: Dumbbell
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Triceps Extension (Dumbbell)"
@@ -3686,6 +4166,14 @@ exercises:
   "Triceps Extension (Machine)":
     category: Machine
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Triceps Extension (Machine)"
@@ -3747,6 +4235,14 @@ exercises:
   "Triceps Pushdown (Cable - Straight Bar)":
     category: Machine
     target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Triceps Pushdown (Cable - Straight Bar)"
@@ -3808,6 +4304,14 @@ exercises:
   "Upright Row (Cable)":
     category: Machine
     target: Arms
+    movement:
+      groups:
+        - upright_row
+      axial_load: moderate
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Upright Row (Cable)"
@@ -3870,6 +4374,14 @@ exercises:
   "Wrist Roller":
     category: Machine
     target: Arms
+    movement:
+      groups:
+        - forearm
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Wrist Roller"
@@ -3926,6 +4438,14 @@ exercises:
   "Back Extension":
     category: Weighted Body Weight
     target: Back
+    movement:
+      groups:
+        - spinal_extension
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Back Extension"
@@ -3985,6 +4505,14 @@ exercises:
   "Back Extension (Machine)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - spinal_extension
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Back Extension (Machine)"
@@ -4044,6 +4572,14 @@ exercises:
   "Bent Over One Arm Row (Dumbbell)":
     category: Dumbbell
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Bent Over One Arm Row (Dumbbell)"
@@ -4106,6 +4642,14 @@ exercises:
   "Bent Over Row (Band)":
     category: Weighted Body Weight
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Bent Over Row (Band)"
@@ -4168,6 +4712,14 @@ exercises:
   "Bent Over Row (Barbell)":
     category: Barbell
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Bent Over Row (Barbell)"
@@ -4230,6 +4782,14 @@ exercises:
   "Bent Over Row (Dumbbell)":
     category: Dumbbell
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Bent Over Row (Dumbbell)"
@@ -4292,6 +4852,14 @@ exercises:
   "Bent Over Row - Underhand (Barbell)":
     category: Barbell
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Bent Over Row - Underhand (Barbell)"
@@ -4354,6 +4922,14 @@ exercises:
   "Chin Up":
     category: Weighted Body Weight
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Chin Up"
@@ -4419,6 +4995,14 @@ exercises:
   "Chin Up (Assisted)":
     category: Assisted Body Weight
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Chin Up (Assisted)"
@@ -4484,6 +5068,14 @@ exercises:
   "Deadlift (Barbell)":
     category: Barbell
     target: Back
+    movement:
+      groups:
+        - deadlift_floor
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Deadlift (Barbell)"
@@ -4545,6 +5137,14 @@ exercises:
   "Good Morning (Barbell)":
     category: Barbell
     target: Back
+    movement:
+      groups:
+        - hip_hinge_stifflegged
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Good Morning (Barbell)"
@@ -4604,6 +5204,14 @@ exercises:
   "Incline Row (Dumbbell)":
     category: Dumbbell
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: moderate
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Incline Row (Dumbbell)"
@@ -4666,6 +5274,14 @@ exercises:
   "Inverted Row (Bodyweight)":
     category: Reps Only
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Inverted Row (Bodyweight)"
@@ -4728,6 +5344,14 @@ exercises:
   "Iso-Lateral Row (Machine)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: low
+      stability: machine
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Iso-Lateral Row (Machine)"
@@ -4790,6 +5414,14 @@ exercises:
   "Kipping Pull Up":
     category: Reps Only
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: high
+      skill: high
     i18n:
       en:
         name: "Kipping Pull Up"
@@ -4849,6 +5481,14 @@ exercises:
   "Kneeling Pulldown (Band)":
     category: Weighted Body Weight
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Kneeling Pulldown (Band)"
@@ -4909,6 +5549,14 @@ exercises:
   "Lat Pulldown (Cable)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lat Pulldown (Cable)"
@@ -4969,6 +5617,14 @@ exercises:
   "Lat Pulldown (Machine)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lat Pulldown (Machine)"
@@ -5029,6 +5685,14 @@ exercises:
   "Lat Pulldown (Single Arm)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: machine
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lat Pulldown (Single Arm)"
@@ -5089,6 +5753,14 @@ exercises:
   "Lat Pulldown - Underhand (Band)":
     category: Weighted Body Weight
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lat Pulldown - Underhand (Band)"
@@ -5149,6 +5821,14 @@ exercises:
   "Lat Pulldown - Underhand (Cable)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lat Pulldown - Underhand (Cable)"
@@ -5209,6 +5889,14 @@ exercises:
   "Lat Pulldown - Wide Grip (Cable)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lat Pulldown - Wide Grip (Cable)"
@@ -5269,6 +5957,14 @@ exercises:
   "Pendlay Row (Barbell)":
     category: Barbell
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Pendlay Row (Barbell)"
@@ -5331,6 +6027,14 @@ exercises:
   "Pull Up":
     category: Weighted Body Weight
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Pull Up"
@@ -5391,6 +6095,14 @@ exercises:
   "Pull Up (Assisted)":
     category: Assisted Body Weight
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Pull Up (Assisted)"
@@ -5451,6 +6163,14 @@ exercises:
   "Pull Up (Band)":
     category: Assisted Body Weight
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Pull Up (Band)"
@@ -5511,6 +6231,14 @@ exercises:
   "Rack Pull (Barbell)":
     category: Barbell
     target: Back
+    movement:
+      groups:
+        - deadlift_floor
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Rack Pull (Barbell)"
@@ -5570,6 +6298,14 @@ exercises:
   "Romanian Deadlift (Barbell)":
     category: Barbell
     target: Back
+    movement:
+      groups:
+        - hip_hinge_stifflegged
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Romanian Deadlift (Barbell)"
@@ -5629,6 +6365,14 @@ exercises:
   "Seated Row (Cable)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Seated Row (Cable)"
@@ -5690,6 +6434,14 @@ exercises:
   "Seated Row (Machine)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Seated Row (Machine)"
@@ -5752,6 +6504,14 @@ exercises:
   "Seated Wide-Grip Row (Cable)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Seated Wide-Grip Row (Cable)"
@@ -5814,6 +6574,14 @@ exercises:
   "Shrug (Machine)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - shrug
+      axial_load: moderate
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Shrug (Machine)"
@@ -5871,6 +6639,14 @@ exercises:
   "Shrug (Smith Machine)":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - shrug
+      axial_load: moderate
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Shrug (Smith Machine)"
@@ -5928,6 +6704,14 @@ exercises:
   "Stiff Leg Deadlift (Barbell)":
     category: Barbell
     target: Back
+    movement:
+      groups:
+        - hip_hinge_stifflegged
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Stiff Leg Deadlift (Barbell)"
@@ -5987,6 +6771,14 @@ exercises:
   "Sumo Deadlift (Barbell)":
     category: Barbell
     target: Back
+    movement:
+      groups:
+        - deadlift_floor
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Sumo Deadlift (Barbell)"
@@ -6049,6 +6841,14 @@ exercises:
   "T Bar Row":
     category: Machine
     target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: moderate
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "T Bar Row"
@@ -6111,6 +6911,14 @@ exercises:
   "Upright Row (Barbell)":
     category: Barbell
     target: Back
+    movement:
+      groups:
+        - upright_row
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Upright Row (Barbell)"
@@ -6173,6 +6981,14 @@ exercises:
   "Wide Pull Up":
     category: Weighted Body Weight
     target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Wide Pull Up"
@@ -6233,6 +7049,14 @@ exercises:
   "Around the World":
     category: Dumbbell
     target: Chest
+    movement:
+      groups:
+        - chest_fly
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Around the World"
@@ -6289,6 +7113,14 @@ exercises:
   "Bench Press (Barbell)":
     category: Barbell
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Bench Press (Barbell)"
@@ -6355,6 +7187,14 @@ exercises:
   "Bench Press (Cable)":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Bench Press (Cable)"
@@ -6421,6 +7261,14 @@ exercises:
   "Bench Press (Dumbbell)":
     category: Dumbbell
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Bench Press (Dumbbell)"
@@ -6487,6 +7335,14 @@ exercises:
   "Bench Press (Smith Machine)":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Bench Press (Smith Machine)"
@@ -6553,6 +7409,14 @@ exercises:
   "Bench Press - Wide Grip (Barbell)":
     category: Barbell
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Bench Press - Wide Grip (Barbell)"
@@ -6619,6 +7483,14 @@ exercises:
   "Cable Crossover":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - chest_fly
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Cable Crossover"
@@ -6679,6 +7551,14 @@ exercises:
   "Chest Dip":
     category: Weighted Body Weight
     target: Chest
+    movement:
+      groups:
+        - chest_dip
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Chest Dip"
@@ -6744,6 +7624,14 @@ exercises:
   "Chest Dip (Assisted)":
     category: Assisted Body Weight
     target: Chest
+    movement:
+      groups:
+        - chest_dip
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Chest Dip (Assisted)"
@@ -6809,6 +7697,14 @@ exercises:
   "Chest Fly":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - chest_fly
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Chest Fly"
@@ -6869,6 +7765,14 @@ exercises:
   "Chest Fly (Band)":
     category: Weighted Body Weight
     target: Chest
+    movement:
+      groups:
+        - chest_fly
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Chest Fly (Band)"
@@ -6929,6 +7833,14 @@ exercises:
   "Chest Fly (Dumbbell)":
     category: Dumbbell
     target: Chest
+    movement:
+      groups:
+        - chest_fly
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Chest Fly (Dumbbell)"
@@ -6989,6 +7901,14 @@ exercises:
   "Chest Press (Band)":
     category: Weighted Body Weight
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Chest Press (Band)"
@@ -7055,6 +7975,14 @@ exercises:
   "Chest Press (Machine)":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Chest Press (Machine)"
@@ -7121,6 +8049,14 @@ exercises:
   "Decline Bench Press (Barbell)":
     category: Barbell
     target: Chest
+    movement:
+      groups:
+        - decline_press
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Decline Bench Press (Barbell)"
@@ -7187,6 +8123,14 @@ exercises:
   "Decline Bench Press (Dumbbell)":
     category: Dumbbell
     target: Chest
+    movement:
+      groups:
+        - decline_press
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Decline Bench Press (Dumbbell)"
@@ -7253,6 +8197,14 @@ exercises:
   "Decline Bench Press (Smith Machine)":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - decline_press
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Decline Bench Press (Smith Machine)"
@@ -7319,6 +8271,14 @@ exercises:
   "Floor Press (Barbell)":
     category: Barbell
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Floor Press (Barbell)"
@@ -7385,6 +8345,14 @@ exercises:
   "Incline Bench Press (Barbell)":
     category: Barbell
     target: Chest
+    movement:
+      groups:
+        - incline_press
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Incline Bench Press (Barbell)"
@@ -7450,6 +8418,14 @@ exercises:
   "Incline Bench Press (Cable)":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - incline_press
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Incline Bench Press (Cable)"
@@ -7516,6 +8492,14 @@ exercises:
   "Incline Bench Press (Dumbbell)":
     category: Dumbbell
     target: Chest
+    movement:
+      groups:
+        - incline_press
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Incline Bench Press (Dumbbell)"
@@ -7582,6 +8566,14 @@ exercises:
   "Incline Bench Press (Smith Machine)":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - incline_press
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Incline Bench Press (Smith Machine)"
@@ -7648,6 +8640,14 @@ exercises:
   "Incline Chest Fly (Dumbbell)":
     category: Dumbbell
     target: Chest
+    movement:
+      groups:
+        - chest_fly
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Incline Chest Fly (Dumbbell)"
@@ -7708,6 +8708,14 @@ exercises:
   "Incline Chest Press (Machine)":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - incline_press
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Incline Chest Press (Machine)"
@@ -7774,6 +8782,14 @@ exercises:
   "Iso-Lateral Chest Press (Machine)":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: machine
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Iso-Lateral Chest Press (Machine)"
@@ -7840,6 +8856,14 @@ exercises:
   "Pec Deck (Machine)":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - chest_fly
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Pec Deck (Machine)"
@@ -7900,6 +8924,14 @@ exercises:
   "Pullover (Dumbbell)":
     category: Dumbbell
     target: Chest
+    movement:
+      groups:
+        - pullover
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Pullover (Dumbbell)"
@@ -7959,6 +8991,14 @@ exercises:
   "Pullover (Machine)":
     category: Machine
     target: Chest
+    movement:
+      groups:
+        - pullover
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Pullover (Machine)"
@@ -8018,6 +9058,14 @@ exercises:
   "Push Up":
     category: Weighted Body Weight
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Push Up"
@@ -8079,6 +9127,14 @@ exercises:
   "Push Up (Band)":
     category: Weighted Body Weight
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Push Up (Band)"
@@ -8140,6 +9196,14 @@ exercises:
   "Push Up (Knees)":
     category: Reps Only
     target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Push Up (Knees)"
@@ -8201,6 +9265,14 @@ exercises:
   "Box Jump":
     category: Reps Only
     target: Legs
+    movement:
+      groups:
+        - plyometric_lower
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "Box Jump"
@@ -8260,6 +9332,14 @@ exercises:
   "Box Squat (Barbell)":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Box Squat (Barbell)"
@@ -8321,6 +9401,14 @@ exercises:
   "Bulgarian Split Squat":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: high
+      stability: free
+      unilateral: true
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Bulgarian Split Squat"
@@ -8381,6 +9469,14 @@ exercises:
   "Cable Pull Through":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - hip_hinge_stifflegged
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Cable Pull Through"
@@ -8440,6 +9536,14 @@ exercises:
   "Calf Press on Leg Press":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - calf_raise
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Calf Press on Leg Press"
@@ -8500,6 +9604,14 @@ exercises:
   "Calf Press on Seated Leg Press":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - calf_raise
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Calf Press on Seated Leg Press"
@@ -8560,6 +9672,14 @@ exercises:
   "Deadlift (Band)":
     category: Weighted Body Weight
     target: Legs
+    movement:
+      groups:
+        - deadlift_floor
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Deadlift (Band)"
@@ -8621,6 +9741,14 @@ exercises:
   "Deadlift (Dumbbell)":
     category: Dumbbell
     target: Legs
+    movement:
+      groups:
+        - deadlift_floor
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Deadlift (Dumbbell)"
@@ -8682,6 +9810,14 @@ exercises:
   "Deadlift (Smith Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - deadlift_floor
+      axial_load: high
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Deadlift (Smith Machine)"
@@ -8743,6 +9879,14 @@ exercises:
   "Deficit Deadlift (Barbell)":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - deadlift_floor
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Deficit Deadlift (Barbell)"
@@ -8804,6 +9948,14 @@ exercises:
   "Front Squat (Barbell)":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Front Squat (Barbell)"
@@ -8865,6 +10017,14 @@ exercises:
   "Glute Ham Raise":
     category: Weighted Body Weight
     target: Legs
+    movement:
+      groups:
+        - knee_flexion
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Glute Ham Raise"
@@ -8921,6 +10081,14 @@ exercises:
   "Glute Kickback (Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - glute_isolation
+      axial_load: none
+      stability: machine
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Glute Kickback (Machine)"
@@ -8977,8 +10145,16 @@ exercises:
         groups:
           - hamstrings
   "Goblet Squat (Kettlebell)":
-    category: Machine
+    category: Dumbbell
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Goblet Squat (Kettlebell)"
@@ -9039,6 +10215,14 @@ exercises:
   "Hack Squat":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: moderate
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Hack Squat"
@@ -9099,6 +10283,14 @@ exercises:
   "Hack Squat (Barbell)":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Hack Squat (Barbell)"
@@ -9160,6 +10352,14 @@ exercises:
   "High Knee Skips":
     category: Reps Only
     target: Legs
+    movement:
+      groups:
+        - plyometric_lower
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "High Knee Skips"
@@ -9214,6 +10414,14 @@ exercises:
   "Hip Abductor (Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - hip_abduction
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Hip Abductor (Machine)"
@@ -9273,6 +10481,14 @@ exercises:
   "Hip Adductor (Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - hip_adduction
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Hip Adductor (Machine)"
@@ -9329,6 +10545,14 @@ exercises:
   "Hip Thrust (Barbell)":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - hip_extension_bridge
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Hip Thrust (Barbell)"
@@ -9387,6 +10611,14 @@ exercises:
   "Hip Thrust (Bodyweight)":
     category: Reps Only
     target: Legs
+    movement:
+      groups:
+        - hip_extension_bridge
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Hip Thrust (Bodyweight)"
@@ -9445,6 +10677,14 @@ exercises:
   "Donkey Kick (Smith Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - glute_isolation
+      axial_load: none
+      stability: machine
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Donkey Kick (Smith Machine)"
@@ -9503,6 +10743,14 @@ exercises:
   "Donkey Kick":
     category: Weighted Body Weight
     target: Legs
+    movement:
+      groups:
+        - glute_isolation
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Donkey Kick"
@@ -9561,6 +10809,14 @@ exercises:
   "Fire Hydrant":
     category: Weighted Body Weight
     target: Legs
+    movement:
+      groups:
+        - glute_isolation
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Fire Hydrant"
@@ -9619,6 +10875,14 @@ exercises:
   "Jump Squat":
     category: Reps Only
     target: Legs
+    movement:
+      groups:
+        - plyometric_lower
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "Jump Squat"
@@ -9678,6 +10942,14 @@ exercises:
   "Lateral Box Jump":
     category: Reps Only
     target: Legs
+    movement:
+      groups:
+        - plyometric_lower
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "Lateral Box Jump"
@@ -9737,6 +11009,14 @@ exercises:
   "Leg Extension (Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - knee_extension
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Leg Extension (Machine)"
@@ -9798,6 +11078,14 @@ exercises:
   "Leg Press":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Leg Press"
@@ -9858,6 +11146,14 @@ exercises:
   "Lunge (Barbell)":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: high
+      stability: free
+      unilateral: true
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Lunge (Barbell)"
@@ -9918,6 +11214,14 @@ exercises:
   "Lunge (Bodyweight)":
     category: Reps Only
     target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lunge (Bodyweight)"
@@ -9977,6 +11281,14 @@ exercises:
   "Lunge (Dumbbell)":
     category: Dumbbell
     target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lunge (Dumbbell)"
@@ -10036,6 +11348,14 @@ exercises:
   "Step-Back Lunge":
     category: Dumbbell
     target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Step-Back Lunge"
@@ -10094,6 +11414,14 @@ exercises:
   "Lying Leg Curl (Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - knee_flexion
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lying Leg Curl (Machine)"
@@ -10150,6 +11478,14 @@ exercises:
   "Mountain Climber":
     category: Reps Only
     target: Legs
+    movement:
+      groups:
+        - full_body_conditioning
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "Mountain Climber"
@@ -10208,6 +11544,14 @@ exercises:
   "Pistol Squat":
     category: Weighted Body Weight
     target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Pistol Squat"
@@ -10267,6 +11611,14 @@ exercises:
   "Romanian Deadlift (Dumbbell)":
     category: Dumbbell
     target: Legs
+    movement:
+      groups:
+        - hip_hinge_stifflegged
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Romanian Deadlift (Dumbbell)"
@@ -10325,6 +11677,14 @@ exercises:
   "Seated Calf Raise (Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - calf_raise
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Seated Calf Raise (Machine)"
@@ -10382,6 +11742,14 @@ exercises:
   "Seated Calf Raise (Plate Loaded)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - calf_raise
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Seated Calf Raise (Plate Loaded)"
@@ -10439,6 +11807,14 @@ exercises:
   "Seated Leg Curl (Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - knee_flexion
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Seated Leg Curl (Machine)"
@@ -10495,6 +11871,14 @@ exercises:
   "Seated Leg Press (Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Seated Leg Press (Machine)"
@@ -10555,6 +11939,14 @@ exercises:
   "Single Leg Bridge":
     category: Weighted Body Weight
     target: Legs
+    movement:
+      groups:
+        - hip_extension_bridge
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Single Leg Bridge"
@@ -10613,6 +12005,14 @@ exercises:
   "Squat (Band)":
     category: Weighted Body Weight
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Squat (Band)"
@@ -10672,6 +12072,14 @@ exercises:
   "Squat (Barbell)":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Squat (Barbell)"
@@ -10733,6 +12141,14 @@ exercises:
   "Squat (Bodyweight)":
     category: Weighted Body Weight
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Squat (Bodyweight)"
@@ -10792,6 +12208,14 @@ exercises:
   "Squat (Dumbbell)":
     category: Dumbbell
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Squat (Dumbbell)"
@@ -10851,6 +12275,14 @@ exercises:
   "Squat (Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: moderate
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Squat (Machine)"
@@ -10911,6 +12343,14 @@ exercises:
   "Squat (Smith Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: moderate
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Squat (Smith Machine)"
@@ -10971,6 +12411,14 @@ exercises:
   "Standing Calf Raise (Barbell)":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - calf_raise
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Standing Calf Raise (Barbell)"
@@ -11028,6 +12476,14 @@ exercises:
   "Standing Calf Raise (Bodyweight)":
     category: Reps Only
     target: Legs
+    movement:
+      groups:
+        - calf_raise
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Standing Calf Raise (Bodyweight)"
@@ -11085,6 +12541,14 @@ exercises:
   "Standing Calf Raise (Dumbbell)":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - calf_raise
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Standing Calf Raise (Dumbbell)"
@@ -11142,6 +12606,14 @@ exercises:
   "Standing Calf Raise (Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - calf_raise
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Standing Calf Raise (Machine)"
@@ -11199,6 +12671,14 @@ exercises:
   "Standing Calf Raise (Smith Machine)":
     category: Machine
     target: Legs
+    movement:
+      groups:
+        - calf_raise
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Standing Calf Raise (Smith Machine)"
@@ -11256,6 +12736,14 @@ exercises:
   "Step-up (Bodyweight)":
     category: Reps Only
     target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Step-up (Bodyweight)"
@@ -11315,6 +12803,14 @@ exercises:
   "Step-up (Barbell)":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: high
+      stability: free
+      unilateral: true
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Step-up (Barbell)"
@@ -11374,6 +12870,14 @@ exercises:
   "Step-up (Dumbbell)":
     category: Dumbbell
     target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Step-up (Dumbbell)"
@@ -11433,6 +12937,14 @@ exercises:
   "Straight Leg Deadlift (Band)":
     category: Weighted Body Weight
     target: Legs
+    movement:
+      groups:
+        - hip_hinge_stifflegged
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Straight Leg Deadlift (Band)"
@@ -11491,6 +13003,14 @@ exercises:
   "Stiff Leg Deadlift (Dumbbell)":
     category: Dumbbell
     target: Legs
+    movement:
+      groups:
+        - hip_hinge_stifflegged
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Stiff Leg Deadlift (Dumbbell)"
@@ -11549,6 +13069,14 @@ exercises:
   "Curtsey Lunges (Barbell)":
     category: Dumbbell
     target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Curtsey Lunges (Barbell)"
@@ -11607,6 +13135,14 @@ exercises:
   "Deficit Squat":
     category: Dumbbell
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Deficit Squat"
@@ -11666,6 +13202,14 @@ exercises:
   "Trap Bar Deadlift":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - deadlift_floor
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Trap Bar Deadlift"
@@ -11727,6 +13271,14 @@ exercises:
   "Zercher Squat (Barbell)":
     category: Barbell
     target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Zercher Squat (Barbell)"
@@ -11788,6 +13340,14 @@ exercises:
   "Arnold Press (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Arnold Press (Dumbbell)"
@@ -11855,6 +13415,14 @@ exercises:
   "Halo":
     category: Dumbbell
     target: Shoulders
+    movement:
+      groups:
+        - mobility
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Halo"
@@ -11912,6 +13480,14 @@ exercises:
   "Handstand Push Up":
     category: Weighted Body Weight
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Handstand Push Up"
@@ -11973,6 +13549,14 @@ exercises:
   "Face Pull (Cable)":
     category: Machine
     target: Shoulders
+    movement:
+      groups:
+        - rear_delt
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Face Pull (Cable)"
@@ -12032,6 +13616,14 @@ exercises:
   "Front Raise (Band)":
     category: Weighted Body Weight
     target: Shoulders
+    movement:
+      groups:
+        - front_raise
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Front Raise (Band)"
@@ -12089,6 +13681,14 @@ exercises:
   "Front Raise (Barbell)":
     category: Barbell
     target: Shoulders
+    movement:
+      groups:
+        - front_raise
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Front Raise (Barbell)"
@@ -12146,6 +13746,14 @@ exercises:
   "Front Raise (Cable)":
     category: Machine
     target: Shoulders
+    movement:
+      groups:
+        - front_raise
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Front Raise (Cable)"
@@ -12203,6 +13811,14 @@ exercises:
   "Front Raise (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    movement:
+      groups:
+        - front_raise
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Front Raise (Dumbbell)"
@@ -12260,6 +13876,14 @@ exercises:
   "Front Raise (Plate)":
     category: Machine
     target: Shoulders
+    movement:
+      groups:
+        - front_raise
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Front Raise (Plate)"
@@ -12317,6 +13941,14 @@ exercises:
   "Lateral Raise (Band)":
     category: Weighted Body Weight
     target: Shoulders
+    movement:
+      groups:
+        - lateral_raise
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lateral Raise (Band)"
@@ -12374,6 +14006,14 @@ exercises:
   "Lateral Raise (Cable)":
     category: Machine
     target: Shoulders
+    movement:
+      groups:
+        - lateral_raise
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lateral Raise (Cable)"
@@ -12431,6 +14071,14 @@ exercises:
   "Lateral Raise (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    movement:
+      groups:
+        - lateral_raise
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lateral Raise (Dumbbell)"
@@ -12488,6 +14136,14 @@ exercises:
   "Lateral Raise (Machine)":
     category: Machine
     target: Shoulders
+    movement:
+      groups:
+        - lateral_raise
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Lateral Raise (Machine)"
@@ -12545,6 +14201,14 @@ exercises:
   "Overhead Press (Barbell)":
     category: Barbell
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Overhead Press (Barbell)"
@@ -12612,6 +14276,14 @@ exercises:
   "Overhead Press (Cable)":
     category: Machine
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: moderate
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Overhead Press (Cable)"
@@ -12678,6 +14350,14 @@ exercises:
   "Overhead Press (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Overhead Press (Dumbbell)"
@@ -12744,6 +14424,14 @@ exercises:
   "Overhead Press (Smith Machine)":
     category: Machine
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: moderate
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Overhead Press (Smith Machine)"
@@ -12810,6 +14498,14 @@ exercises:
   "Push Press":
     category: Barbell
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Push Press"
@@ -12876,6 +14572,14 @@ exercises:
   "Reverse Fly (Cable)":
     category: Machine
     target: Shoulders
+    movement:
+      groups:
+        - rear_delt
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Reverse Fly (Cable)"
@@ -12935,6 +14639,14 @@ exercises:
   "Reverse Fly (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    movement:
+      groups:
+        - rear_delt
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Reverse Fly (Dumbbell)"
@@ -12994,6 +14706,14 @@ exercises:
   "Reverse Fly (Machine)":
     category: Machine
     target: Shoulders
+    movement:
+      groups:
+        - rear_delt
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Reverse Fly (Machine)"
@@ -13053,6 +14773,14 @@ exercises:
   "Seated Overhead Press (Barbell)":
     category: Barbell
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Seated Overhead Press (Barbell)"
@@ -13120,6 +14848,14 @@ exercises:
   "Seated Overhead Press (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Seated Overhead Press (Dumbbell)"
@@ -13186,6 +14922,14 @@ exercises:
   "Shoulder Press (Machine)":
     category: Machine
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Shoulder Press (Machine)"
@@ -13252,6 +14996,14 @@ exercises:
   "Shoulder Press (Plate Loaded)":
     category: Machine
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Shoulder Press (Plate Loaded)"
@@ -13318,6 +15070,14 @@ exercises:
   "Shrug (Barbell)":
     category: Barbell
     target: Shoulders
+    movement:
+      groups:
+        - shrug
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Shrug (Barbell)"
@@ -13375,6 +15135,14 @@ exercises:
   "Shrug (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    movement:
+      groups:
+        - shrug
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Shrug (Dumbbell)"
@@ -13432,6 +15200,14 @@ exercises:
   "Strict Military Press (Barbell)":
     category: Barbell
     target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Strict Military Press (Barbell)"
@@ -13499,6 +15275,14 @@ exercises:
   "Upright Row (Dumbbell)":
     category: Dumbbell
     target: Shoulders
+    movement:
+      groups:
+        - upright_row
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Upright Row (Dumbbell)"
@@ -13560,6 +15344,14 @@ exercises:
   "Stretching":
     category: Duration
     target: Other
+    movement:
+      groups:
+        - mobility
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Stretching"
@@ -13614,6 +15406,14 @@ exercises:
   "Clean (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Clean (Barbell)"
@@ -13678,6 +15478,14 @@ exercises:
   "Clean and Jerk (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Clean and Jerk (Barbell)"
@@ -13741,6 +15549,14 @@ exercises:
   "Deadlift High Pull (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - deadlift_floor
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Deadlift High Pull (Barbell)"
@@ -13802,6 +15618,14 @@ exercises:
   "Hang Clean (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Hang Clean (Barbell)"
@@ -13866,6 +15690,14 @@ exercises:
   "Hang Snatch (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Hang Snatch (Barbell)"
@@ -13930,6 +15762,14 @@ exercises:
   "Jump Shrug (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - shrug
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Jump Shrug (Barbell)"
@@ -13987,6 +15827,14 @@ exercises:
   "Overhead Squat (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Overhead Squat (Barbell)"
@@ -14048,6 +15896,14 @@ exercises:
   "Power Clean":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Power Clean"
@@ -14112,6 +15968,14 @@ exercises:
   "Power Snatch (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Power Snatch (Barbell)"
@@ -14176,6 +16040,14 @@ exercises:
   "Press Under (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Press Under (Barbell)"
@@ -14230,6 +16102,14 @@ exercises:
   "Snatch (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Snatch (Barbell)"
@@ -14294,6 +16174,14 @@ exercises:
   "Snatch Pull (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Snatch Pull (Barbell)"
@@ -14358,6 +16246,14 @@ exercises:
   "Split Jerk (Barbell)":
     category: Barbell
     target: Olympic
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Split Jerk (Barbell)"
@@ -14420,8 +16316,16 @@ exercises:
           - core
           - hamstrings
   "Ball Slams":
-    category: Machine
+    category: Dumbbell
     target: Full Body
+    movement:
+      groups:
+        - full_body_conditioning
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "Ball Slams"
@@ -14481,6 +16385,14 @@ exercises:
   "Burpee":
     category: Reps Only
     target: Full Body
+    movement:
+      groups:
+        - full_body_conditioning
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "Burpee"
@@ -14540,6 +16452,14 @@ exercises:
   "Jumping Jack":
     category: Reps Only
     target: Full Body
+    movement:
+      groups:
+        - full_body_conditioning
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "Jumping Jack"
@@ -14594,8 +16514,16 @@ exercises:
         groups:
           - shoulders
   "Kettlebell Swing":
-    category: Machine
+    category: Dumbbell
     target: Full Body
+    movement:
+      groups:
+        - hip_hinge_stifflegged
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Kettlebell Swing"
@@ -14655,8 +16583,16 @@ exercises:
           - core
           - shoulders
   "Kettlebell Turkish Get Up":
-    category: Machine
+    category: Dumbbell
     target: Full Body
+    movement:
+      groups:
+        - full_body_conditioning
+      axial_load: low
+      stability: free
+      unilateral: true
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Kettlebell Turkish Get Up"
@@ -14718,6 +16654,14 @@ exercises:
   "Muscle Up":
     category: Weighted Body Weight
     target: Full Body
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
     i18n:
       en:
         name: "Muscle Up"
@@ -14780,6 +16724,15 @@ exercises:
   "Squat Row (Band)":
     category: Reps Only
     target: Full Body
+    movement:
+      groups:
+        - full_body_conditioning
+        - horizontal_row
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Squat Row (Band)"
@@ -14842,6 +16795,15 @@ exercises:
   "Sumo Deadlift High Pull (Barbell)":
     category: Barbell
     target: Full Body
+    movement:
+      groups:
+        - deadlift_floor
+        - upright_row
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Sumo Deadlift High Pull (Barbell)"
@@ -14904,6 +16866,15 @@ exercises:
   "Thruster (Barbell)":
     category: Barbell
     target: Full Body
+    movement:
+      groups:
+        - squat_bilateral
+        - vertical_press
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Thruster (Barbell)"
@@ -14961,8 +16932,17 @@ exercises:
           - core
           - glutes
   "Thruster (Kettlebell)":
-    category: Machine
+    category: Dumbbell
     target: Full Body
+    movement:
+      groups:
+        - squat_bilateral
+        - vertical_press
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
     i18n:
       en:
         name: "Thruster (Kettlebell)"
@@ -15022,6 +17002,14 @@ exercises:
   "Aerobics":
     category: Duration
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
     i18n:
       en:
         name: "Aerobics"
@@ -15039,6 +17027,14 @@ exercises:
   "Battle Ropes":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
     i18n:
       en:
         name: "Battle Ropes"
@@ -15099,6 +17095,14 @@ exercises:
   "Climbing":
     category: Duration
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
     i18n:
       en:
         name: "Climbing"
@@ -15158,6 +17162,14 @@ exercises:
   "Cycling":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Cycling"
@@ -15182,6 +17194,14 @@ exercises:
   "Cycling (Indoor)":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Cycling (Indoor)"
@@ -15206,6 +17226,14 @@ exercises:
   "Elliptical Machine":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Elliptical Machine"
@@ -15265,6 +17293,14 @@ exercises:
   "Hiking":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
     i18n:
       en:
         name: "Hiking"
@@ -15289,6 +17325,14 @@ exercises:
   "Jump Rope":
     category: Reps Only
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "Jump Rope"
@@ -15348,6 +17392,14 @@ exercises:
   "Rowing (Machine)":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Rowing (Machine)"
@@ -15410,13 +17462,21 @@ exercises:
   "Running":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "Running"
         instructions: |
           ## Overview
           Running is a high-impact cardiovascular exercise that primarily targets the legs and cardiovascular system. It builds endurance, burns calories efficiently, strengthens bones, and provides mental health benefits while requiring minimal equipment.
-          
+
           ## How to Perform
           ### 1. Safety 
           - Get properly fitted running shoes
@@ -15434,13 +17494,21 @@ exercises:
   "Running (Treadmill)":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "Running (Treadmill)"
         instructions: |
           ## Overview
           Treadmill running is a cardiovascular exercise that targets the legs and cardiovascular system in a controlled environment. It provides the benefits of running with adjustable pace, incline, and climate control while reducing some variables of outdoor running.
-          
+
           ## How to Perform
           ### 1. Safety 
           - Always use the safety clip
@@ -15458,6 +17526,14 @@ exercises:
   "Skating":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
     i18n:
       en:
         name: "Skating"
@@ -15517,6 +17593,14 @@ exercises:
   "Skiing":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
     i18n:
       en:
         name: "Skiing"
@@ -15541,6 +17625,14 @@ exercises:
   "Snowboarding":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
     i18n:
       en:
         name: "Snowboarding"
@@ -15565,6 +17657,14 @@ exercises:
   "Swimming":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Swimming"
@@ -15591,6 +17691,14 @@ exercises:
   "Walking":
     category: Cardio
     target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
     i18n:
       en:
         name: "Walking"
@@ -15608,13 +17716,21 @@ exercises:
   "Yoga":
     category: Duration
     target: Cardio
+    movement:
+      groups:
+        - mobility
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
     i18n:
       en:
         name: "Yoga"
         instructions: |
           ## Overview
           Yoga is a mind-body practice that targets flexibility, strength, balance, and mental well-being. It combines physical postures, breathing techniques, and meditation to improve overall fitness, reduce stress, and enhance body awareness and control.
-          
+
           ## How to Perform
           ### 1. Safety 
           - Learn from qualified yoga instructors
