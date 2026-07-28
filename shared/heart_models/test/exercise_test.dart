@@ -89,6 +89,223 @@ void main() {
     });
   });
 
+  group('AxialLoad.fromString', () {
+    for (final v in AxialLoad.values) {
+      test('parses ${v.value} and round-trips through toString', () {
+        expect(AxialLoad.fromString(v.value), v);
+        expect(v.toString(), v.value);
+      });
+    }
+
+    for (final raw in ['Nope', '', 'High', 'crushing']) {
+      test('throws on $raw', () {
+        expect(() => AxialLoad.fromString(raw), throwsA(isA<ArgumentError>()));
+      });
+    }
+  });
+
+  group('AxialLoad ordering', () {
+    test('is declared ascending, which is what makes atMost meaningful', () {
+      expect(AxialLoad.values, <AxialLoad>[.none, .low, .moderate, .high]);
+    });
+
+    // the "protect my back" filter: nothing heavier than moderate
+    for (final (load, expected) in <(AxialLoad, bool)>[
+      (.none, true),
+      (.low, true),
+      (.moderate, true),
+      (.high, false),
+    ]) {
+      test('${load.value}.atMost(moderate) -> $expected', () {
+        expect(load.atMost(AxialLoad.moderate), expected);
+      });
+    }
+  });
+
+  group('Stability.fromString', () {
+    for (final v in Stability.values) {
+      test('parses ${v.value} and round-trips through toString', () {
+        expect(Stability.fromString(v.value), v);
+        expect(v.toString(), v.value);
+      });
+    }
+
+    for (final raw in ['Nope', '', 'Machine']) {
+      test('throws on $raw', () {
+        expect(() => Stability.fromString(raw), throwsA(isA<ArgumentError>()));
+      });
+    }
+  });
+
+  group('Impact.fromString', () {
+    for (final v in Impact.values) {
+      test('parses ${v.value} and round-trips through toString', () {
+        expect(Impact.fromString(v.value), v);
+        expect(v.toString(), v.value);
+      });
+    }
+
+    for (final raw in ['Nope', '', 'moderate']) {
+      test('throws on $raw', () {
+        expect(() => Impact.fromString(raw), throwsA(isA<ArgumentError>()));
+      });
+    }
+  });
+
+  group('SkillLevel.fromString', () {
+    for (final v in SkillLevel.values) {
+      test('parses ${v.value} and round-trips through toString', () {
+        expect(SkillLevel.fromString(v.value), v);
+        expect(v.toString(), v.value);
+      });
+    }
+
+    for (final raw in ['Nope', '', 'expert']) {
+      test('throws on $raw', () {
+        expect(() => SkillLevel.fromString(raw), throwsA(isA<ArgumentError>()));
+      });
+    }
+  });
+
+  group('Movement wire form (camelCase)', () {
+    const json = {
+      'groups': ['squat_bilateral'],
+      'axialLoad': 'moderate',
+      'stability': 'machine',
+      'unilateral': false,
+      'impact': 'none',
+      'skill': 'low',
+    };
+
+    test('fromJson parses every field', () {
+      final m = Movement.fromJson(json);
+      expect(m.groups, ['squat_bilateral']);
+      expect(m.axialLoad, AxialLoad.moderate);
+      expect(m.stability, Stability.machine);
+      expect(m.unilateral, isFalse);
+      expect(m.impact, Impact.none);
+      expect(m.skill, SkillLevel.low);
+      expect(m.isEmpty, isFalse);
+    });
+
+    test('toMap emits camelCase and round-trips', () {
+      expect(Movement.fromJson(json).toMap(), json);
+      expect(Movement.fromJson(Movement.fromJson(json).toMap()).toMap(), json);
+    });
+
+    test('does not read the snake_cased storage key', () {
+      // fromRow's job; silently accepting both would blur the two conventions
+      expect(Movement.fromJson({'axial_load': 'high'}).axialLoad, AxialLoad.none);
+    });
+  });
+
+  group('Movement storage form (snake_case)', () {
+    const row = {
+      'groups': ['squat_bilateral'],
+      'axial_load': 'moderate',
+      'stability': 'machine',
+      'unilateral': false,
+      'impact': 'none',
+      'skill': 'low',
+    };
+
+    test('fromRow parses every field', () {
+      final m = Movement.fromRow(row);
+      expect(m.groups, ['squat_bilateral']);
+      expect(m.axialLoad, AxialLoad.moderate);
+      expect(m.stability, Stability.machine);
+      expect(m.unilateral, isFalse);
+      expect(m.impact, Impact.none);
+      expect(m.skill, SkillLevel.low);
+    });
+
+    test('toRow emits snake_case and round-trips', () {
+      expect(Movement.fromRow(row).toRow(), row);
+      expect(Movement.fromRow(Movement.fromRow(row).toRow()).toRow(), row);
+    });
+
+    test('fromRow matches the blob library_locales.py writes', () {
+      // the YAML/jsonb shape, verbatim
+      final m = Movement.fromRow({
+        'groups': ['squat_bilateral'],
+        'axial_load': 'high',
+        'stability': 'free',
+        'unilateral': false,
+        'impact': 'none',
+        'skill': 'moderate',
+      });
+      expect(m.axialLoad, AxialLoad.high);
+      expect(m.skill, SkillLevel.moderate);
+    });
+
+    for (final (raw, expected) in <(Object, bool)>[
+      (true, true),
+      (false, false),
+      (1, true), // sqlite
+      (0, false),
+    ]) {
+      test('unilateral accepts $raw -> $expected', () {
+        expect(Movement.fromRow({'unilateral': raw}).unilateral, expected);
+      });
+    }
+  });
+
+  group('Movement defaults and validation', () {
+    for (final (label, parse, axialKey) in <(String, Movement Function(Map), String)>[
+      ('fromJson', Movement.fromJson, 'axialLoad'),
+      ('fromRow', Movement.fromRow, 'axial_load'),
+    ]) {
+      test('$label falls back to the schema defaults for absent keys', () {
+        final m = parse({
+          'groups': ['mobility'],
+        });
+        expect(m.axialLoad, AxialLoad.none);
+        expect(m.stability, Stability.free);
+        expect(m.unilateral, isFalse);
+        expect(m.impact, Impact.none);
+        expect(m.skill, SkillLevel.low);
+      });
+
+      // Silently reading a bad axial load as "unloaded" would hand a lifter
+      // avoiding spinal load exactly the exercise they are avoiding.
+      test('$label throws on a present but unrecognised value', () {
+        expect(() => parse({axialKey: 'crushing'}), throwsA(isA<ArgumentError>()));
+      });
+    }
+
+    test('empty() has no groups and is isEmpty', () {
+      final m = Movement.empty();
+      expect(m.groups, isEmpty);
+      expect(m.isEmpty, isTrue);
+    });
+  });
+
+  group('Movement.sharesPatternWith', () {
+    final squat = Movement.fromJson({
+      'groups': ['squat_bilateral'],
+    });
+    final thruster = Movement.fromJson({
+      'groups': ['squat_bilateral', 'vertical_press'],
+    });
+    final curl = Movement.fromJson({
+      'groups': ['elbow_flexion'],
+    });
+
+    for (final (label, a, b, expected) in <(String, Movement, Movement, bool)>[
+      ('same single group', squat, squat, true),
+      ('overlapping multi-group', squat, thruster, true),
+      ('overlapping multi-group, reversed', thruster, squat, true),
+      ('disjoint groups', squat, curl, false),
+      // an unannotated exercise offers and accepts no substitutions
+      ('annotated vs empty', squat, Movement.empty(), false),
+      ('empty vs annotated', Movement.empty(), squat, false),
+    ]) {
+      test('$label -> $expected', () {
+        expect(a.sharesPatternWith(b), expected);
+      });
+    }
+  });
+
   group('_Exercise model', () {
     const baseJson = {
       'id': '1',
@@ -140,6 +357,36 @@ void main() {
       expect(Exercise.fromJson({...baseJson, 'restTimer': 120}).restTimer, 120);
       expect(Exercise.fromJson(baseJson).restTimer, isNull);
       expect(Exercise.fromJson(baseJson).toMap().containsKey('restTimer'), isFalse);
+    });
+
+    test('fromJson with movement, toMap includes it', () {
+      final json = {
+        ...baseJson,
+        'movement': {
+          'groups': ['horizontal_press'],
+          'axialLoad': 'none',
+          'stability': 'supported',
+          'unilateral': false,
+          'impact': 'none',
+          'skill': 'moderate',
+        },
+      };
+      final e = Exercise.fromJson(json);
+      expect(e.movement.isEmpty, isFalse);
+      expect(e.movement.groups, contains('horizontal_press'));
+      expect(e.movement.axialLoad, AxialLoad.none);
+      expect(e.movement.skill, SkillLevel.moderate);
+
+      expect(e.toMap()['movement'], json['movement']);
+    });
+
+    test('movement defaults to empty and is omitted from toMap', () {
+      final e = Exercise.fromJson(baseJson);
+      expect(e.movement.isEmpty, isTrue);
+      expect(e.toMap().containsKey('movement'), isFalse);
+
+      final created = Exercise(name: 'Test', category: Category.barbell, target: Target.chest);
+      expect(created.movement.isEmpty, isTrue);
     });
 
     test('fromJson with muscles, toMap includes it', () {
@@ -388,6 +635,10 @@ void main() {
             'ids': ['p'],
           },
         });
+        final movement = Movement.fromJson({
+          'groups': ['squat_bilateral'],
+          'axialLoad': 'high',
+        });
         final copied = base.copyWith(
           category: Category.machine,
           target: Target.back,
@@ -396,6 +647,7 @@ void main() {
           asset: (link: 'a', width: 10, height: 20),
           thumbnail: (link: 't', width: 1, height: 2),
           tags: tagging,
+          movement: movement,
         );
 
         expect(copied.name, 'X');
@@ -407,6 +659,8 @@ void main() {
         expect(copied.thumbnail?.link, 't');
         expect(copied.instructions, 'A', reason: 'not overridden');
         expect(copied.muscles, tagging);
+        expect(copied.movement, movement);
+        expect(base.copyWith(isMine: true).movement, base.movement, reason: 'preserved');
       });
     });
   });
