@@ -117,7 +117,8 @@ void main() {
   group('movement', () {
     /// The blob exactly as scripts/library_locales.py writes it — camelCase, so
     /// storage and wire are the same shape and reads ship it verbatim.
-    const stored = '{"groups": ["squat_bilateral"], "axialLoad": "high", '
+    const stored =
+        '{"groups": ["squat_bilateral"], "axialLoad": "high", '
         '"stability": "free", "unilateral": false, "impact": "none", "skill": "moderate"}';
 
     Future<void> setMovement(String exerciseId) => h.exec(

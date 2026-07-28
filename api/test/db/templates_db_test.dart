@@ -170,7 +170,8 @@ void main() {
           'c': 'Barbell',
           't': 'Legs',
           'u': coach,
-          'm': '{"groups": ["squat_bilateral"], "axialLoad": "high", "stability": "free", '
+          'm':
+              '{"groups": ["squat_bilateral"], "axialLoad": "high", "stability": "free", '
               '"unilateral": false, "impact": "none", "skill": "moderate"}',
         },
       );
