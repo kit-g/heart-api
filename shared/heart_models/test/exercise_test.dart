@@ -167,7 +167,9 @@ void main() {
     }
   });
 
-  group('Movement wire form (camelCase)', () {
+  group('Movement', () {
+    // Storage and wire are the same shape: scripts/library_locales.py writes
+    // exercises.movement camelCased, so read paths ship the blob verbatim.
     const json = {
       'groups': ['squat_bilateral'],
       'axialLoad': 'moderate',
@@ -193,42 +195,12 @@ void main() {
       expect(Movement.fromJson(Movement.fromJson(json).toMap()).toMap(), json);
     });
 
-    test('does not read the snake_cased storage key', () {
-      // fromRow's job; silently accepting both would blur the two conventions
-      expect(Movement.fromJson({'axial_load': 'high'}).axialLoad, AxialLoad.none);
-    });
-  });
-
-  group('Movement storage form (snake_case)', () {
-    const row = {
-      'groups': ['squat_bilateral'],
-      'axial_load': 'moderate',
-      'stability': 'machine',
-      'unilateral': false,
-      'impact': 'none',
-      'skill': 'low',
-    };
-
-    test('fromRow parses every field', () {
-      final m = Movement.fromRow(row);
-      expect(m.groups, ['squat_bilateral']);
-      expect(m.axialLoad, AxialLoad.moderate);
-      expect(m.stability, Stability.machine);
-      expect(m.unilateral, isFalse);
-      expect(m.impact, Impact.none);
-      expect(m.skill, SkillLevel.low);
-    });
-
-    test('toRow emits snake_case and round-trips', () {
-      expect(Movement.fromRow(row).toRow(), row);
-      expect(Movement.fromRow(Movement.fromRow(row).toRow()).toRow(), row);
-    });
-
-    test('fromRow matches the blob library_locales.py writes', () {
-      // the YAML/jsonb shape, verbatim
-      final m = Movement.fromRow({
+    test('the sync script blob parses as-is', () {
+      // Pins the contract with Movement.to_dict() in scripts/library_locales.py.
+      // A key mismatch there does not fail loudly — it reads as the default.
+      final m = Movement.fromJson({
         'groups': ['squat_bilateral'],
-        'axial_load': 'high',
+        'axialLoad': 'high',
         'stability': 'free',
         'unilateral': false,
         'impact': 'none',
@@ -238,40 +210,39 @@ void main() {
       expect(m.skill, SkillLevel.moderate);
     });
 
+    test('a snake_cased key is not read', () {
+      // The library used to store snake_case. Nothing should still emit it, and
+      // quietly accepting it would hide a sync script that regressed.
+      expect(Movement.fromJson({'axial_load': 'high'}).axialLoad, AxialLoad.none);
+    });
+
     for (final (raw, expected) in <(Object, bool)>[
       (true, true),
       (false, false),
-      (1, true), // sqlite
+      (1, true), // sqlite, if the blob is ever flattened
       (0, false),
     ]) {
       test('unilateral accepts $raw -> $expected', () {
-        expect(Movement.fromRow({'unilateral': raw}).unilateral, expected);
+        expect(Movement.fromJson({'unilateral': raw}).unilateral, expected);
       });
     }
-  });
 
-  group('Movement defaults and validation', () {
-    for (final (label, parse, axialKey) in <(String, Movement Function(Map), String)>[
-      ('fromJson', Movement.fromJson, 'axialLoad'),
-      ('fromRow', Movement.fromRow, 'axial_load'),
-    ]) {
-      test('$label falls back to the schema defaults for absent keys', () {
-        final m = parse({
-          'groups': ['mobility'],
-        });
-        expect(m.axialLoad, AxialLoad.none);
-        expect(m.stability, Stability.free);
-        expect(m.unilateral, isFalse);
-        expect(m.impact, Impact.none);
-        expect(m.skill, SkillLevel.low);
+    test('falls back to the schema defaults for absent keys', () {
+      final m = Movement.fromJson({
+        'groups': ['mobility'],
       });
+      expect(m.axialLoad, AxialLoad.none);
+      expect(m.stability, Stability.free);
+      expect(m.unilateral, isFalse);
+      expect(m.impact, Impact.none);
+      expect(m.skill, SkillLevel.low);
+    });
 
-      // Silently reading a bad axial load as "unloaded" would hand a lifter
-      // avoiding spinal load exactly the exercise they are avoiding.
-      test('$label throws on a present but unrecognised value', () {
-        expect(() => parse({axialKey: 'crushing'}), throwsA(isA<ArgumentError>()));
-      });
-    }
+    // Silently reading a bad axial load as "unloaded" would hand a lifter
+    // avoiding spinal load exactly the exercise they are avoiding.
+    test('throws on a present but unrecognised value', () {
+      expect(() => Movement.fromJson({'axialLoad': 'crushing'}), throwsA(isA<ArgumentError>()));
+    });
 
     test('empty() has no groups and is isEmpty', () {
       final m = Movement.empty();
