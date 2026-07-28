@@ -6,7 +6,7 @@ Reads:
   - Supabase creds: s3://SECRETS_BUCKET/secrets/supabase.json
 
 Writes:
-  - exercises (global, user_id IS NULL) — fallback locale fields, muscles
+  - exercises (global, user_id IS NULL) — fallback locale fields, muscles, movement
   - exercise_translations — one row per non-fallback locale that has its own name/instructions
   - Archives any global exercise not in the source YAML.
 
@@ -64,6 +64,41 @@ class Muscles:
 
 
 @dataclass
+class Movement:
+    """Movement pattern + load attributes; exercises sharing a group are swappable."""
+
+    groups: list[str]
+    axial_load: str
+    stability: str
+    unilateral: bool
+    impact: str
+    skill: str
+
+    @classmethod
+    def parse(cls, source: dict | None) -> Self | None:
+        if source is None:
+            return None
+        return cls(
+            groups=source.get('groups', []),
+            axial_load=source.get('axial_load', 'none'),
+            stability=source.get('stability', 'free'),
+            unilateral=source.get('unilateral', False),
+            impact=source.get('impact', 'none'),
+            skill=source.get('skill', 'low'),
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            'groups': self.groups,
+            'axial_load': self.axial_load,
+            'stability': self.stability,
+            'unilateral': self.unilateral,
+            'impact': self.impact,
+            'skill': self.skill,
+        }
+
+
+@dataclass
 class ExerciseLocalization:
     exercise_name: str
     instructions: str | None
@@ -87,6 +122,7 @@ class Exercise:
     category: str
     target: str
     muscles: Muscles | None
+    movement: Movement | None
     localizations: dict[str, ExerciseLocalization]
     fallback: str
 
@@ -97,6 +133,7 @@ class Exercise:
             category=source['category'],
             target=source['target'],
             muscles=Muscles.parse(source.get('muscles')),
+            movement=Movement.parse(source.get('movement')),
             localizations={
                 locale: ExerciseLocalization.parse(loc)
                 for locale, loc in source.get('i18n', {}).items()
@@ -144,14 +181,15 @@ def get_source() -> dict:
 
 
 UPSERT_EXERCISE = '''
-INSERT INTO exercises (name, category, target, instructions, muscles, archived)
-VALUES (%s, %s, %s, %s, %s, false)
+INSERT INTO exercises (name, category, target, instructions, muscles, movement, archived)
+VALUES (%s, %s, %s, %s, %s, %s, false)
 ON CONFLICT (name) WHERE user_id IS NULL
 DO UPDATE SET
     category = EXCLUDED.category,
     target = EXCLUDED.target,
     instructions = EXCLUDED.instructions,
     muscles = EXCLUDED.muscles,
+    movement = EXCLUDED.movement,
     archived = false
 RETURNING id
 '''
@@ -183,6 +221,7 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
                 exercise.target,
                 fallback.instructions,
                 Json(exercise.muscles.to_dict()) if exercise.muscles else None,
+                Json(exercise.movement.to_dict()) if exercise.movement else None,
             ))
             exercise_id = cur.fetchone()[0]
             upserted += 1
