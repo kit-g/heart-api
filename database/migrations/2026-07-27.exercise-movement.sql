@@ -5,7 +5,7 @@
 -- that is what lets a client offer a substitution ("swap the barbell squat for
 -- a hack squat"). The remaining keys are objective properties of the movement,
 -- never recommendations, so the client can rank or exclude candidates itself
--- (a lifter protecting their back drops axial_load = 'high'). Keep it that way:
+-- (a lifter protecting their back drops axialLoad = 'high'). Keep it that way:
 -- the moment a preference becomes a column, every new one costs a re-annotation
 -- of the whole library.
 
@@ -13,7 +13,7 @@ ALTER TABLE exercises
     ADD COLUMN IF NOT EXISTS movement JSONB;
 
 COMMENT ON COLUMN exercises.movement IS
-    'Movement pattern and load attributes: {groups, axial_load, stability, unilateral, impact, skill}. NULL when the library offers no substitute for the exercise';
+    'Movement pattern and load attributes: {groups, axialLoad, stability, unilateral, impact, skill}. NULL when the library offers no substitute for the exercise';
 
 -- Substitution lookup is "exercises sharing any of these groups", i.e. the jsonb
 -- ?| operator against the groups array. Must be default jsonb_ops: jsonb_path_ops
