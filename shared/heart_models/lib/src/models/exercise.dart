@@ -98,6 +98,281 @@ enum Target implements ExerciseFilter {
   String toString() => value;
 }
 
+/// Compressive load carried by the spine.
+///
+/// Declared in ascending order so [index] comparisons are meaningful — that is
+/// what makes "nothing heavier than moderate" expressible as [atMost].
+enum AxialLoad {
+  none('none'),
+  low('low'),
+  moderate('moderate'),
+  high('high');
+
+  final String value;
+
+  const AxialLoad(this.value);
+
+  factory AxialLoad.fromString(String v) {
+    return switch (v) {
+      'none' => none,
+      'low' => low,
+      'moderate' => moderate,
+      'high' => high,
+      _ => throw ArgumentError('Invalid value for AxialLoad: $v'),
+    };
+  }
+
+  /// True when this load is no heavier than [limit].
+  bool atMost(AxialLoad limit) => index <= limit.index;
+
+  @override
+  String toString() => value;
+}
+
+/// How much the movement path is constrained.
+enum Stability {
+  free('free'),
+  supported('supported'),
+  machine('machine');
+
+  final String value;
+
+  const Stability(this.value);
+
+  factory Stability.fromString(String v) {
+    return switch (v) {
+      'free' => free,
+      'supported' => supported,
+      'machine' => machine,
+      _ => throw ArgumentError('Invalid value for Stability: $v'),
+    };
+  }
+
+  @override
+  String toString() => value;
+}
+
+/// Joint loading from ground contact or ballistic deceleration.
+enum Impact {
+  none('none'),
+  low('low'),
+  high('high');
+
+  final String value;
+
+  const Impact(this.value);
+
+  factory Impact.fromString(String v) {
+    return switch (v) {
+      'none' => none,
+      'low' => low,
+      'high' => high,
+      _ => throw ArgumentError('Invalid value for Impact: $v'),
+    };
+  }
+
+  bool atMost(Impact limit) => index <= limit.index;
+
+  @override
+  String toString() => value;
+}
+
+/// Technical demand before the movement can be loaded safely.
+enum SkillLevel {
+  low('low'),
+  moderate('moderate'),
+  high('high');
+
+  final String value;
+
+  const SkillLevel(this.value);
+
+  factory SkillLevel.fromString(String v) {
+    return switch (v) {
+      'low' => low,
+      'moderate' => moderate,
+      'high' => high,
+      _ => throw ArgumentError('Invalid value for SkillLevel: $v'),
+    };
+  }
+
+  bool atMost(SkillLevel limit) => index <= limit.index;
+
+  @override
+  String toString() => value;
+}
+
+/// Movement pattern and objective load attributes for an exercise.
+///
+/// Two exercises are mutually replaceable when they share a [groups] entry —
+/// see [sharesPatternWith]. Everything else here is a fact about the movement,
+/// never a recommendation: a lifter protecting their back filters on
+/// [AxialLoad], and the library stays free of per-concern policy flags.
+///
+/// [groups] is deliberately untyped. The vocabulary is enumerated in
+/// `content/exercise_library_schema.json`, so content can add a pattern without
+/// waiting on an app release.
+///
+/// The `exercises.movement` jsonb is stored snake_cased, so a query that passes
+/// the column straight through to the client must camelCase it (or the client
+/// must read it with [Movement.fromRow]) — [Movement.fromJson] will not, and
+/// every attribute would quietly read as its default.
+abstract interface class Movement implements Storable, Model {
+  Iterable<String> get groups;
+
+  AxialLoad get axialLoad;
+
+  Stability get stability;
+
+  bool get unilateral;
+
+  Impact get impact;
+
+  SkillLevel get skill;
+
+  bool get isEmpty;
+
+  /// True when [other] trains at least one of the same movement patterns, and
+  /// so is a candidate substitution.
+  bool sharesPatternWith(Movement other);
+
+  factory Movement.fromJson(Map json) = _Movement.fromJson;
+
+  factory Movement.fromRow(Map row) = _Movement.fromRow;
+
+  factory Movement.empty() {
+    return const _Movement(
+      groups: [],
+      axialLoad: .none,
+      stability: .free,
+      unilateral: false,
+      impact: .none,
+      skill: .low,
+    );
+  }
+}
+
+class _Movement implements Movement {
+  @override
+  final List<String> groups;
+  @override
+  final AxialLoad axialLoad;
+  @override
+  final Stability stability;
+  @override
+  final bool unilateral;
+  @override
+  final Impact impact;
+  @override
+  final SkillLevel skill;
+
+  const _Movement({
+    required this.groups,
+    required this.axialLoad,
+    required this.stability,
+    required this.unilateral,
+    required this.impact,
+    required this.skill,
+  });
+
+  /// Wire shape (camelCase). Absent keys fall back to the schema defaults; a
+  /// present but unrecognised value throws, so bad content fails loudly instead
+  /// of silently reading as "unloaded".
+  factory _Movement.fromJson(Map json) {
+    return _Movement(
+      groups: _groups(json['groups']),
+      axialLoad: switch (json['axialLoad']) {
+        String s => AxialLoad.fromString(s),
+        _ => .none,
+      },
+      stability: switch (json['stability']) {
+        String s => Stability.fromString(s),
+        _ => .free,
+      },
+      unilateral: switch (json['unilateral']) {
+        bool b => b,
+        _ => false,
+      },
+      impact: switch (json['impact']) {
+        String s => Impact.fromString(s),
+        _ => .none,
+      },
+      skill: switch (json['skill']) {
+        String s => SkillLevel.fromString(s),
+        _ => .low,
+      },
+    );
+  }
+
+  /// Storage shape (snake_case) — the `exercises.movement` jsonb blob, written
+  /// verbatim from `content/exercise_library.yml` by scripts/library_locales.py.
+  factory _Movement.fromRow(Map row) {
+    return _Movement(
+      groups: _groups(row['groups']),
+      axialLoad: switch (row['axial_load']) {
+        String s => AxialLoad.fromString(s),
+        _ => .none,
+      },
+      stability: switch (row['stability']) {
+        String s => Stability.fromString(s),
+        _ => .free,
+      },
+      unilateral: switch (row['unilateral']) {
+        bool b => b, // postgres
+        1 => true, // sqlite
+        _ => false,
+      },
+      impact: switch (row['impact']) {
+        String s => Impact.fromString(s),
+        _ => .none,
+      },
+      skill: switch (row['skill']) {
+        String s => SkillLevel.fromString(s),
+        _ => .low,
+      },
+    );
+  }
+
+  static List<String> _groups(Object? source) {
+    return switch (source) {
+      List l => l.cast<String>(),
+      _ => [],
+    };
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'groups': groups,
+      'axialLoad': axialLoad.value,
+      'stability': stability.value,
+      'unilateral': unilateral,
+      'impact': impact.value,
+      'skill': skill.value,
+    };
+  }
+
+  @override
+  Map<String, dynamic> toRow() {
+    return {
+      'groups': groups,
+      'axial_load': axialLoad.value,
+      'stability': stability.value,
+      'unilateral': unilateral,
+      'impact': impact.value,
+      'skill': skill.value,
+    };
+  }
+
+  @override
+  bool get isEmpty => groups.isEmpty;
+
+  @override
+  bool sharesPatternWith(Movement other) {
+    return groups.any(other.groups.contains);
+  }
+}
+
 abstract interface class MuscleTag implements Model {
   Iterable<String>? get ids;
 
@@ -214,6 +489,10 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
 
   MuscleTagging get muscles;
 
+  /// Movement pattern and load attributes. Empty when the library offers no
+  /// substitute for this exercise (and for user-created exercises).
+  Movement get movement;
+
   /// The requesting user's preferred display unit for this exercise.
   /// `null` falls back to the user's global setting.
   MeasurementUnit? get unitSystem;
@@ -230,6 +509,7 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
     String? instructions,
     bool? isMine,
     MuscleTagging? tags,
+    Movement? movement,
   }) {
     assert(name.isNotEmpty, 'Cannot have an empty name');
     return _Exercise(
@@ -240,6 +520,7 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
       instructions: instructions,
       isMine: isMine ?? false,
       muscles: tags ?? MuscleTagging.empty(),
+      movement: movement ?? Movement.empty(),
     );
   }
 
@@ -254,6 +535,7 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
     String? instructions,
     bool? isArchived,
     MuscleTagging? tags,
+    Movement? movement,
     MeasurementUnit? unitSystem,
   });
 }
@@ -280,6 +562,8 @@ class _Exercise implements Exercise {
   @override
   final MuscleTagging muscles;
   @override
+  final Movement movement;
+  @override
   final MeasurementUnit? unitSystem;
   @override
   final int? restTimer;
@@ -295,6 +579,7 @@ class _Exercise implements Exercise {
     this.isMine = false,
     this.isArchived = false,
     required this.muscles,
+    required this.movement,
     this.unitSystem,
     this.restTimer,
   });
@@ -331,6 +616,7 @@ class _Exercise implements Exercise {
         _ => false, // local
       },
       muscles: MuscleTagging.fromJson(json['muscles'] ?? {}),
+      movement: Movement.fromJson(json['movement'] ?? {}),
       unitSystem: switch (json['unit_system'] ?? json['unitSystem']) {
         String s => MeasurementUnit.fromString(s),
         _ => null,
@@ -363,6 +649,7 @@ class _Exercise implements Exercise {
       'own': isMine ? 1 : 0,
       'archived': isArchived ? 1 : 0,
       if (!muscles.isEmpty) 'muscles': muscles.toMap(),
+      if (!movement.isEmpty) 'movement': movement.toMap(),
       'unitSystem': ?unitSystem?.name,
       'restTimer': ?restTimer,
     };
@@ -419,6 +706,7 @@ class _Exercise implements Exercise {
     String? instructions,
     bool? isArchived,
     MuscleTagging? tags,
+    Movement? movement,
     MeasurementUnit? unitSystem,
     int? restTimer,
   }) {
@@ -433,6 +721,7 @@ class _Exercise implements Exercise {
       instructions: instructions ?? this.instructions,
       isArchived: isArchived ?? this.isArchived,
       muscles: tags ?? muscles,
+      movement: movement ?? this.movement,
       unitSystem: unitSystem ?? this.unitSystem,
       restTimer: restTimer ?? this.restTimer,
     );
