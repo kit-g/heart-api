@@ -114,6 +114,72 @@ void main() {
     });
   });
 
+  group('movement', () {
+    /// The blob exactly as scripts/library_locales.py writes it — camelCase, so
+    /// storage and wire are the same shape and reads ship it verbatim.
+    const stored = '{"groups": ["squat_bilateral"], "axialLoad": "high", '
+        '"stability": "free", "unilateral": false, "impact": "none", "skill": "moderate"}';
+
+    Future<void> setMovement(String exerciseId) => h.exec(
+      'UPDATE exercises SET movement = @m::jsonb WHERE id = @id::uuid',
+      {'m': stored, 'id': exerciseId},
+    );
+
+    test('getExercises ships the blob through in its wire form', () async {
+      final id = await h.seedGlobalExercise();
+      await setMovement(id);
+
+      final row = findEx((await h.db.getExercises(ownerId))['exercises'] as List, id);
+      final movement = row!['movement'] as Map<String, dynamic>;
+
+      expect(movement['groups'], ['squat_bilateral']);
+      expect(movement['axialLoad'], 'high');
+      expect(movement['stability'], 'free');
+      expect(movement['unilateral'], isFalse);
+      expect(movement['impact'], 'none');
+      expect(movement['skill'], 'moderate');
+
+      // Movement.fromJson reads camelCase only, so a snake_cased key reaching
+      // the client would read as axialLoad = none and offer the lifter exactly
+      // the high-compression exercise they filtered out.
+      expect(movement.containsKey('axial_load'), isFalse);
+    });
+
+    test('getExercises returns null for an exercise with no substitutes', () async {
+      final id = await h.seedGlobalExercise();
+      final row = findEx((await h.db.getExercises(ownerId))['exercises'] as List, id);
+      expect(row!['movement'], isNull);
+    });
+
+    test('createExercise returns a null movement for a user-made exercise', () async {
+      final row = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('NoMovement'),
+        category: 'Barbell',
+        target: 'Chest',
+      );
+      expect(row.containsKey('movement'), isTrue);
+      expect(row['movement'], isNull);
+    });
+
+    test('updateExercise returns the movement rather than dropping it', () async {
+      final created = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('KeepsMovement'),
+        category: 'Barbell',
+        target: 'Legs',
+      );
+      final id = created['id'].toString();
+      await setMovement(id);
+
+      // A patch unrelated to movement must still round-trip it, or the client
+      // would overwrite its cached copy with an empty Movement.
+      final updated = await h.db.updateExercise(userId: ownerId, exerciseId: id, target: 'Back');
+      expect(updated['target'], 'Back');
+      expect((updated['movement'] as Map)['axialLoad'], 'high');
+    });
+  });
+
   group('createExercise', () {
     test('persists a user-owned exercise and returns it flagged own', () async {
       final name = h.uniqueName('Create');
