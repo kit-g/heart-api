@@ -57,6 +57,11 @@ abstract interface class RemoteWorkoutService implements FileUploadService, Gall
 
   Future<Workout> editWorkout(Workout updated);
 
+  /// Partially updates a workout's [name], [start] and/or [end] via `PATCH`,
+  /// returning the server's updated copy. At least one field must be provided,
+  /// and [name] must be non-empty when given.
+  Future<Workout> patchWorkout(String workoutId, {DateTime? start, DateTime? end, String? name});
+
   Future<bool> deleteWorkout(String workoutId);
 
   Future<(({String url, Map<String, String> fields})?, String?)> getWorkoutUploadLink(

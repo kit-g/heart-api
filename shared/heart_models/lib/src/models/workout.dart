@@ -71,7 +71,7 @@ abstract interface class HasExercises {
 abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid implements HasExercises, Model {
   String get id;
 
-  DateTime get start;
+  abstract DateTime start;
 
   abstract String? name;
 
@@ -364,7 +364,7 @@ class _WorkoutImage implements WorkoutImage {
 class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   final List<WorkoutExercise> _sets;
   @override
-  final DateTime start;
+  DateTime start;
   @override
   final String id;
   @override
