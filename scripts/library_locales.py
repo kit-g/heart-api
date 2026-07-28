@@ -65,7 +65,19 @@ class Muscles:
 
 @dataclass
 class Movement:
-    """Movement pattern + load attributes; exercises sharing a group are swappable."""
+    """Movement pattern + load attributes; exercises sharing a group are swappable.
+
+    Parsed from the snake_cased YAML (that vocabulary is the content schema's own)
+    and written to Postgres camelCased, so the blob is already in its API wire form
+    and every read path can ship the column verbatim. Converting here rather than
+    per-read is the whole point: this data is static content that changes only when
+    the sync runs, so camelCasing it on every library read recomputed a constant
+    (measured at ~20ms per full-library query, ~85% of it).
+
+    exercises.movement is therefore camelCase in the database. That matches
+    profiles.settings, which the client writes camelCased for the same reason: the
+    snake_case convention governs column names, not the contents of a jsonb blob.
+    """
 
     groups: list[str]
     axial_load: str
@@ -88,9 +100,12 @@ class Movement:
         )
 
     def to_dict(self) -> dict:
+        """The camelCased wire/storage form. Keys must match Movement.fromJson in
+        shared/heart_models — a mismatch does not fail loudly, it silently reads
+        as the field's default."""
         return {
             'groups': self.groups,
-            'axial_load': self.axial_load,
+            'axialLoad': self.axial_load,
             'stability': self.stability,
             'unilateral': self.unilateral,
             'impact': self.impact,
