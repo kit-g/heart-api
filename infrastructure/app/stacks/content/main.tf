@@ -22,6 +22,22 @@ resource "aws_s3_bucket_lifecycle_configuration" "delete_raw_uploads" {
 
     expiration { days = 1 }
   }
+
+  # Raw exercise GIFs are redundant once the assets Lambda has copied them to
+  # exercises/<name>/. Keep them a week — long enough to re-fire the pipeline
+  # (e.g. after a bad deploy) before they auto-clean.
+  rule {
+    id     = "expire-exercise-uploads"
+    status = "Enabled"
+
+    filter {
+      prefix = "exercise-uploads/"
+    }
+
+    expiration {
+      days = 7
+    }
+  }
 }
 
 resource "aws_s3_bucket" "static" {
