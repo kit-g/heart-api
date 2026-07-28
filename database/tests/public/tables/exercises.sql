@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(30);
+SELECT plan(32);
 
 SELECT has_table('public'::name, 'exercises'::name);
 
@@ -17,6 +17,7 @@ SELECT columns_are(
                    'thumbnail',
                    'archived',
                    'muscles',
+                   'movement',
                    'user_id',
                    'created_at'
                    ]
@@ -31,6 +32,7 @@ SELECT col_type_is('public'::name, 'exercises'::name, 'asset'::name, 'jsonb'::na
 SELECT col_type_is('public'::name, 'exercises'::name, 'thumbnail'::name, 'jsonb'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'archived'::name, 'boolean'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'muscles'::name, 'jsonb'::name);
+SELECT col_type_is('public'::name, 'exercises'::name, 'movement'::name, 'jsonb'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'user_id'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'created_at'::name, 'timestamp with time zone'::name);
 
@@ -53,6 +55,7 @@ SELECT fk_ok('public', 'exercises', 'user_id', 'public', 'profiles', 'id');
 SELECT has_index('public'::name, 'exercises'::name, 'exercises_global_name_idx'::name);
 SELECT has_index('public'::name, 'exercises'::name, 'exercises_user_name_idx'::name);
 SELECT has_index('public'::name, 'exercises'::name, 'exercises_user_id_idx'::name);
+SELECT has_index('public'::name, 'exercises'::name, 'exercises_movement_groups_idx'::name);
 
 SELECT index_is_unique('public'::name, 'exercises'::name, 'exercises_global_name_idx'::name);
 SELECT index_is_unique('public'::name, 'exercises'::name, 'exercises_user_name_idx'::name);
