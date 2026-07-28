@@ -213,11 +213,11 @@ enum SkillLevel {
 /// `content/exercise_library_schema.json`, so content can add a pattern without
 /// waiting on an app release.
 ///
-/// The `exercises.movement` jsonb is stored snake_cased, so a query that passes
-/// the column straight through to the client must camelCase it (or the client
-/// must read it with [Movement.fromRow]) — [Movement.fromJson] will not, and
-/// every attribute would quietly read as its default.
-abstract interface class Movement implements Storable, Model {
+/// Only [fromJson]/[toMap] exist, with no row pair: the snake_case convention
+/// governs column names, not the contents of a jsonb blob, so
+/// `exercises.movement` is stored camelCased by scripts/library_locales.py and
+/// read paths ship it verbatim. Storage and wire are the same shape.
+abstract interface class Movement implements Model {
   Iterable<String> get groups;
 
   AxialLoad get axialLoad;
@@ -237,8 +237,6 @@ abstract interface class Movement implements Storable, Model {
   bool sharesPatternWith(Movement other);
 
   factory Movement.fromJson(Map json) = _Movement.fromJson;
-
-  factory Movement.fromRow(Map row) = _Movement.fromRow;
 
   factory Movement.empty() {
     return const _Movement(
@@ -275,12 +273,15 @@ class _Movement implements Movement {
     required this.skill,
   });
 
-  /// Wire shape (camelCase). Absent keys fall back to the schema defaults; a
-  /// present but unrecognised value throws, so bad content fails loudly instead
-  /// of silently reading as "unloaded".
+  /// Absent keys fall back to the schema defaults; a present but unrecognised
+  /// value throws, so bad content fails loudly instead of silently reading as
+  /// "unloaded".
   factory _Movement.fromJson(Map json) {
     return _Movement(
-      groups: _groups(json['groups']),
+      groups: switch (json['groups']) {
+        List l => l.cast<String>(),
+        _ => [],
+      },
       axialLoad: switch (json['axialLoad']) {
         String s => AxialLoad.fromString(s),
         _ => .none,
@@ -291,6 +292,7 @@ class _Movement implements Movement {
       },
       unilateral: switch (json['unilateral']) {
         bool b => b,
+        1 => true, // sqlite, if the blob is ever flattened
         _ => false,
       },
       impact: switch (json['impact']) {
@@ -304,59 +306,11 @@ class _Movement implements Movement {
     );
   }
 
-  /// Storage shape (snake_case) — the `exercises.movement` jsonb blob, written
-  /// verbatim from `content/exercise_library.yml` by scripts/library_locales.py.
-  factory _Movement.fromRow(Map row) {
-    return _Movement(
-      groups: _groups(row['groups']),
-      axialLoad: switch (row['axial_load']) {
-        String s => AxialLoad.fromString(s),
-        _ => .none,
-      },
-      stability: switch (row['stability']) {
-        String s => Stability.fromString(s),
-        _ => .free,
-      },
-      unilateral: switch (row['unilateral']) {
-        bool b => b, // postgres
-        1 => true, // sqlite
-        _ => false,
-      },
-      impact: switch (row['impact']) {
-        String s => Impact.fromString(s),
-        _ => .none,
-      },
-      skill: switch (row['skill']) {
-        String s => SkillLevel.fromString(s),
-        _ => .low,
-      },
-    );
-  }
-
-  static List<String> _groups(Object? source) {
-    return switch (source) {
-      List l => l.cast<String>(),
-      _ => [],
-    };
-  }
-
   @override
   Map<String, dynamic> toMap() {
     return {
       'groups': groups,
       'axialLoad': axialLoad.value,
-      'stability': stability.value,
-      'unilateral': unilateral,
-      'impact': impact.value,
-      'skill': skill.value,
-    };
-  }
-
-  @override
-  Map<String, dynamic> toRow() {
-    return {
-      'groups': groups,
-      'axial_load': axialLoad.value,
       'stability': stability.value,
       'unilateral': unilateral,
       'impact': impact.value,
