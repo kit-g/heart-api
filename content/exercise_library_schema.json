@@ -86,12 +86,123 @@
         "media": {
           "$ref": "#/$defs/media"
         },
+        "movement": {
+          "$ref": "#/$defs/movement"
+        },
         "muscles": {
           "$ref": "#/$defs/muscles"
         },
         "i18n": {
           "$ref": "#/$defs/i18nMap"
         }
+      }
+    },
+    "movement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "groups"
+      ],
+      "properties": {
+        "groups": {
+          "$ref": "#/$defs/movementGroupList"
+        },
+        "axial_load": {
+          "type": "string",
+          "enum": [
+            "none",
+            "low",
+            "moderate",
+            "high"
+          ],
+          "default": "none",
+          "description": "Compressive load carried by the spine. Objective attribute, not a recommendation: a client filtering for 'easy on the back' queries this, so never replace it with a policy flag."
+        },
+        "stability": {
+          "type": "string",
+          "enum": [
+            "free",
+            "supported",
+            "machine"
+          ],
+          "default": "free",
+          "description": "How much the movement path is constrained. free = unsupported free weight or bodyweight; supported = torso braced by a bench/pad or resistance guided by a cable; machine = fixed path."
+        },
+        "unilateral": {
+          "type": "boolean",
+          "default": false,
+          "description": "True when one limb works at a time, including alternating movements."
+        },
+        "impact": {
+          "type": "string",
+          "enum": [
+            "none",
+            "low",
+            "high"
+          ],
+          "default": "none",
+          "description": "Joint impact from ground contact or ballistic deceleration."
+        },
+        "skill": {
+          "type": "string",
+          "enum": [
+            "low",
+            "moderate",
+            "high"
+          ],
+          "default": "low",
+          "description": "Technical demand before the movement can be loaded safely."
+        }
+      },
+      "description": "Movement pattern and objective load attributes. Two exercises are mutually replaceable when they share a groups entry; the remaining fields let a client rank or exclude substitutes (e.g. avoid axial_load: high). Optional: exercises with no substitute in the library may omit it."
+    },
+    "movementGroupList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Movement patterns this exercise belongs to, most representative first. Deliberately coarser than category and finer than target. Nearly all exercises have exactly one; a few (Thruster) genuinely span two.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "calf_raise",
+          "cardio_steady",
+          "chest_dip",
+          "chest_fly",
+          "core_bracing",
+          "deadlift_floor",
+          "decline_press",
+          "elbow_extension",
+          "elbow_flexion",
+          "forearm",
+          "front_raise",
+          "full_body_conditioning",
+          "glute_isolation",
+          "hip_abduction",
+          "hip_adduction",
+          "hip_extension_bridge",
+          "hip_flexion_hanging",
+          "hip_hinge_stifflegged",
+          "horizontal_press",
+          "horizontal_row",
+          "incline_press",
+          "knee_extension",
+          "knee_flexion",
+          "lateral_raise",
+          "lunge_split",
+          "mobility",
+          "olympic_lift",
+          "plyometric_lower",
+          "pullover",
+          "rear_delt",
+          "shrug",
+          "spinal_extension",
+          "squat_bilateral",
+          "trunk_flexion",
+          "trunk_lateral_rotation",
+          "upright_row",
+          "vertical_press",
+          "vertical_pull"
+        ]
       }
     },
     "media": {
