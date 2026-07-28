@@ -188,4 +188,3 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       ..add(exercise);
   }
 }
-
