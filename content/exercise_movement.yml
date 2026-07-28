@@ -1,0 +1,2120 @@
+# Movement patterns and load attributes, keyed by exercise name.
+# Exercises sharing a `groups` entry are mutually replaceable.
+# Seeded by scripts/movement_seed.py; hand edits here are preserved.
+# Fold into content/exercise_library.yml with scripts/movement_merge.py.
+"Ab Wheel":
+  groups:
+    - core_bracing
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Bicycle Crunch":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Cable Crunch":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Cable Twist":
+  groups:
+    - trunk_lateral_rotation
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Cross Body Crunch":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Crunch":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Crunch (Machine)":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Crunch (Stability Ball)":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Decline Crunch":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Flat Knee Raise":
+  groups:
+    - hip_flexion_hanging
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Flat Leg Raise":
+  groups:
+    - hip_flexion_hanging
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Hanging Knee Raise":
+  groups:
+    - hip_flexion_hanging
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Hanging Leg Raise":
+  groups:
+    - hip_flexion_hanging
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Jackknife Sit Up":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Knee Raise (Captain's Chair)":
+  groups:
+    - hip_flexion_hanging
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Knees to Elbows":
+  groups:
+    - hip_flexion_hanging
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Oblique Crunch":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Plank":
+  groups:
+    - core_bracing
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Reverse Crunch":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Reverse Plank":
+  groups:
+    - core_bracing
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Russian Twist":
+  groups:
+    - trunk_lateral_rotation
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Flutter Kick":
+  groups:
+    - hip_flexion_hanging
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Side Bend (Cable)":
+  groups:
+    - trunk_lateral_rotation
+  axial_load: low
+  stability: supported
+  unilateral: true
+  impact: none
+  skill: low
+"Side Bend (Band)":
+  groups:
+    - trunk_lateral_rotation
+  axial_load: low
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Side Bend (Dumbbell)":
+  groups:
+    - trunk_lateral_rotation
+  axial_load: low
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Side Plank":
+  groups:
+    - core_bracing
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Sit Up":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Superman":
+  groups:
+    - spinal_extension
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Toes To Bar":
+  groups:
+    - hip_flexion_hanging
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Torso Rotation (Machine)":
+  groups:
+    - trunk_lateral_rotation
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"V Up":
+  groups:
+    - trunk_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Bench Dip":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: moderate
+"Bench Press - Close Grip (Barbell)":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: moderate
+"Bicep Curl (Barbell)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Bicep Curl (Cable)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Bicep Curl (Dumbbell)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Bicep Curl (Machine)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Cable Kickback":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: supported
+  unilateral: true
+  impact: none
+  skill: low
+"Concentration Curl (Dumbbell)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: supported
+  unilateral: true
+  impact: none
+  skill: low
+"Hammer Curl (Band)":
+  groups:
+    - elbow_flexion
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Hammer Curl (Cable)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Incline Curl (Dumbbell)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Hammer Curl (Dumbbell)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Preacher Curl (Barbell)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: moderate
+"Preacher Curl (Dumbbell)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Heart Pump":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Preacher Curl (Machine)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Reverse Curl (Band)":
+  groups:
+    - elbow_flexion
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Reverse Curl (Barbell)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Reverse Curl (Dumbbell)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Reverse Grip Concentration Curl (Dumbbell)":
+  groups:
+    - elbow_flexion
+  axial_load: none
+  stability: supported
+  unilateral: true
+  impact: none
+  skill: low
+"Seated Palms Up Wrist Curl (Dumbbell)":
+  groups:
+    - forearm
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Skullcrusher (Barbell)":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Skullcrusher (Dumbbell)":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Triceps Dip":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Triceps Dip (Assisted)":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Triceps Extension":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Triceps Extension (Barbell)":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Triceps Extension (Cable)":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Triceps Extension (Dumbbell)":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Triceps Extension (Machine)":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Triceps Pushdown (Cable - Straight Bar)":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Upright Row (Cable)":
+  groups:
+    - upright_row
+  axial_load: moderate
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Wrist Roller":
+  groups:
+    - forearm
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Back Extension":
+  groups:
+    - spinal_extension
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Back Extension (Machine)":
+  groups:
+    - spinal_extension
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Bent Over One Arm Row (Dumbbell)":
+  groups:
+    - horizontal_row
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Bent Over Row (Band)":
+  groups:
+    - horizontal_row
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Bent Over Row (Barbell)":
+  groups:
+    - horizontal_row
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Bent Over Row (Dumbbell)":
+  groups:
+    - horizontal_row
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Bent Over Row - Underhand (Barbell)":
+  groups:
+    - horizontal_row
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Chin Up":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Chin Up (Assisted)":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: moderate
+"Deadlift (Barbell)":
+  groups:
+    - deadlift_floor
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Good Morning (Barbell)":
+  groups:
+    - hip_hinge_stifflegged
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Incline Row (Dumbbell)":
+  groups:
+    - horizontal_row
+  axial_load: moderate
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Inverted Row (Bodyweight)":
+  groups:
+    - horizontal_row
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Iso-Lateral Row (Machine)":
+  groups:
+    - horizontal_row
+  axial_load: low
+  stability: machine
+  unilateral: true
+  impact: none
+  skill: low
+"Kipping Pull Up":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: high
+  skill: high
+"Kneeling Pulldown (Band)":
+  groups:
+    - vertical_pull
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Lat Pulldown (Cable)":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Lat Pulldown (Machine)":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Lat Pulldown (Single Arm)":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: machine
+  unilateral: true
+  impact: none
+  skill: low
+"Lat Pulldown - Underhand (Band)":
+  groups:
+    - vertical_pull
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Lat Pulldown - Underhand (Cable)":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Lat Pulldown - Wide Grip (Cable)":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Pendlay Row (Barbell)":
+  groups:
+    - horizontal_row
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Pull Up":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Pull Up (Assisted)":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: moderate
+"Pull Up (Band)":
+  groups:
+    - vertical_pull
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Rack Pull (Barbell)":
+  groups:
+    - deadlift_floor
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Romanian Deadlift (Barbell)":
+  groups:
+    - hip_hinge_stifflegged
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Seated Row (Cable)":
+  groups:
+    - horizontal_row
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Seated Row (Machine)":
+  groups:
+    - horizontal_row
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Seated Wide-Grip Row (Cable)":
+  groups:
+    - horizontal_row
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Shrug (Machine)":
+  groups:
+    - shrug
+  axial_load: moderate
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Shrug (Smith Machine)":
+  groups:
+    - shrug
+  axial_load: moderate
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Stiff Leg Deadlift (Barbell)":
+  groups:
+    - hip_hinge_stifflegged
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Sumo Deadlift (Barbell)":
+  groups:
+    - deadlift_floor
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"T Bar Row":
+  groups:
+    - horizontal_row
+  axial_load: moderate
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Upright Row (Barbell)":
+  groups:
+    - upright_row
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Wide Pull Up":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Around the World":
+  groups:
+    - chest_fly
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Bench Press (Barbell)":
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: moderate
+"Bench Press (Cable)":
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Bench Press (Dumbbell)":
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Bench Press (Smith Machine)":
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Bench Press - Wide Grip (Barbell)":
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: moderate
+"Cable Crossover":
+  groups:
+    - chest_fly
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Chest Dip":
+  groups:
+    - chest_dip
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Chest Dip (Assisted)":
+  groups:
+    - chest_dip
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Chest Fly":
+  groups:
+    - chest_fly
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Chest Fly (Band)":
+  groups:
+    - chest_fly
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Chest Fly (Dumbbell)":
+  groups:
+    - chest_fly
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Chest Press (Band)":
+  groups:
+    - horizontal_press
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Chest Press (Machine)":
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Decline Bench Press (Barbell)":
+  groups:
+    - decline_press
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: moderate
+"Decline Bench Press (Dumbbell)":
+  groups:
+    - decline_press
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Decline Bench Press (Smith Machine)":
+  groups:
+    - decline_press
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Floor Press (Barbell)":
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Incline Bench Press (Barbell)":
+  groups:
+    - incline_press
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: moderate
+"Incline Bench Press (Cable)":
+  groups:
+    - incline_press
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Incline Bench Press (Dumbbell)":
+  groups:
+    - incline_press
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Incline Bench Press (Smith Machine)":
+  groups:
+    - incline_press
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Incline Chest Fly (Dumbbell)":
+  groups:
+    - chest_fly
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Incline Chest Press (Machine)":
+  groups:
+    - incline_press
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Iso-Lateral Chest Press (Machine)":
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: machine
+  unilateral: true
+  impact: none
+  skill: low
+"Pec Deck (Machine)":
+  groups:
+    - chest_fly
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Pullover (Dumbbell)":
+  groups:
+    - pullover
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Pullover (Machine)":
+  groups:
+    - pullover
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Push Up":
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Push Up (Band)":
+  groups:
+    - horizontal_press
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Push Up (Knees)":
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Box Jump":
+  groups:
+    - plyometric_lower
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Box Squat (Barbell)":
+  groups:
+    - squat_bilateral
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Bulgarian Split Squat":
+  groups:
+    - lunge_split
+  axial_load: high
+  stability: free
+  unilateral: true
+  impact: none
+  skill: moderate
+"Cable Pull Through":
+  groups:
+    - hip_hinge_stifflegged
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Calf Press on Leg Press":
+  groups:
+    - calf_raise
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Calf Press on Seated Leg Press":
+  groups:
+    - calf_raise
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Deadlift (Band)":
+  groups:
+    - deadlift_floor
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Deadlift (Dumbbell)":
+  groups:
+    - deadlift_floor
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Deadlift (Smith Machine)":
+  groups:
+    - deadlift_floor
+  axial_load: high
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: moderate
+"Deficit Deadlift (Barbell)":
+  groups:
+    - deadlift_floor
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Front Squat (Barbell)":
+  groups:
+    - squat_bilateral
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Glute Ham Raise":
+  groups:
+    - knee_flexion
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Glute Kickback (Machine)":
+  groups:
+    - glute_isolation
+  axial_load: none
+  stability: machine
+  unilateral: true
+  impact: none
+  skill: low
+"Goblet Squat (Kettlebell)":
+  groups:
+    - squat_bilateral
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Hack Squat":
+  groups:
+    - squat_bilateral
+  axial_load: moderate
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Hack Squat (Barbell)":
+  groups:
+    - squat_bilateral
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"High Knee Skips":
+  groups:
+    - plyometric_lower
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Hip Abductor (Machine)":
+  groups:
+    - hip_abduction
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Hip Adductor (Machine)":
+  groups:
+    - hip_adduction
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Hip Thrust (Barbell)":
+  groups:
+    - hip_extension_bridge
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Hip Thrust (Bodyweight)":
+  groups:
+    - hip_extension_bridge
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Donkey Kick (Smith Machine)":
+  groups:
+    - glute_isolation
+  axial_load: none
+  stability: machine
+  unilateral: true
+  impact: none
+  skill: low
+"Donkey Kick":
+  groups:
+    - glute_isolation
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Fire Hydrant":
+  groups:
+    - glute_isolation
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Jump Squat":
+  groups:
+    - plyometric_lower
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Lateral Box Jump":
+  groups:
+    - plyometric_lower
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Leg Extension (Machine)":
+  groups:
+    - knee_extension
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Leg Press":
+  groups:
+    - squat_bilateral
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Lunge (Barbell)":
+  groups:
+    - lunge_split
+  axial_load: high
+  stability: free
+  unilateral: true
+  impact: none
+  skill: moderate
+"Lunge (Bodyweight)":
+  groups:
+    - lunge_split
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Lunge (Dumbbell)":
+  groups:
+    - lunge_split
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Step-Back Lunge":
+  groups:
+    - lunge_split
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Lying Leg Curl (Machine)":
+  groups:
+    - knee_flexion
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Mountain Climber":
+  groups:
+    - full_body_conditioning
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Pistol Squat":
+  groups:
+    - lunge_split
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: none
+  skill: high
+"Romanian Deadlift (Dumbbell)":
+  groups:
+    - hip_hinge_stifflegged
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Seated Calf Raise (Machine)":
+  groups:
+    - calf_raise
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Seated Calf Raise (Plate Loaded)":
+  groups:
+    - calf_raise
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Seated Leg Curl (Machine)":
+  groups:
+    - knee_flexion
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Seated Leg Press (Machine)":
+  groups:
+    - squat_bilateral
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Single Leg Bridge":
+  groups:
+    - hip_extension_bridge
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Squat (Band)":
+  groups:
+    - squat_bilateral
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Squat (Barbell)":
+  groups:
+    - squat_bilateral
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Squat (Bodyweight)":
+  groups:
+    - squat_bilateral
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Squat (Dumbbell)":
+  groups:
+    - squat_bilateral
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Squat (Machine)":
+  groups:
+    - squat_bilateral
+  axial_load: moderate
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Squat (Smith Machine)":
+  groups:
+    - squat_bilateral
+  axial_load: moderate
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Standing Calf Raise (Barbell)":
+  groups:
+    - calf_raise
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Standing Calf Raise (Bodyweight)":
+  groups:
+    - calf_raise
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Standing Calf Raise (Dumbbell)":
+  groups:
+    - calf_raise
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Standing Calf Raise (Machine)":
+  groups:
+    - calf_raise
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Standing Calf Raise (Smith Machine)":
+  groups:
+    - calf_raise
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Step-up (Bodyweight)":
+  groups:
+    - lunge_split
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Step-up (Barbell)":
+  groups:
+    - lunge_split
+  axial_load: high
+  stability: free
+  unilateral: true
+  impact: none
+  skill: moderate
+"Step-up (Dumbbell)":
+  groups:
+    - lunge_split
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Straight Leg Deadlift (Band)":
+  groups:
+    - hip_hinge_stifflegged
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Stiff Leg Deadlift (Dumbbell)":
+  groups:
+    - hip_hinge_stifflegged
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Curtsey Lunges (Barbell)":
+  groups:
+    - lunge_split
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: none
+  skill: moderate
+"Deficit Squat":
+  groups:
+    - squat_bilateral
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Trap Bar Deadlift":
+  groups:
+    - deadlift_floor
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Zercher Squat (Barbell)":
+  groups:
+    - squat_bilateral
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Arnold Press (Dumbbell)":
+  groups:
+    - vertical_press
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Halo":
+  groups:
+    - mobility
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+"Handstand Push Up":
+  groups:
+    - vertical_press
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Face Pull (Cable)":
+  groups:
+    - rear_delt
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Front Raise (Band)":
+  groups:
+    - front_raise
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Front Raise (Barbell)":
+  groups:
+    - front_raise
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Front Raise (Cable)":
+  groups:
+    - front_raise
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Front Raise (Dumbbell)":
+  groups:
+    - front_raise
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Front Raise (Plate)":
+  groups:
+    - front_raise
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Lateral Raise (Band)":
+  groups:
+    - lateral_raise
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Lateral Raise (Cable)":
+  groups:
+    - lateral_raise
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Lateral Raise (Dumbbell)":
+  groups:
+    - lateral_raise
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Lateral Raise (Machine)":
+  groups:
+    - lateral_raise
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Overhead Press (Barbell)":
+  groups:
+    - vertical_press
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Overhead Press (Cable)":
+  groups:
+    - vertical_press
+  axial_load: moderate
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Overhead Press (Dumbbell)":
+  groups:
+    - vertical_press
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Overhead Press (Smith Machine)":
+  groups:
+    - vertical_press
+  axial_load: moderate
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Push Press":
+  groups:
+    - vertical_press
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Reverse Fly (Cable)":
+  groups:
+    - rear_delt
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Reverse Fly (Dumbbell)":
+  groups:
+    - rear_delt
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Reverse Fly (Machine)":
+  groups:
+    - rear_delt
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Seated Overhead Press (Barbell)":
+  groups:
+    - vertical_press
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: moderate
+"Seated Overhead Press (Dumbbell)":
+  groups:
+    - vertical_press
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+"Shoulder Press (Machine)":
+  groups:
+    - vertical_press
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Shoulder Press (Plate Loaded)":
+  groups:
+    - vertical_press
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Shrug (Barbell)":
+  groups:
+    - shrug
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Shrug (Dumbbell)":
+  groups:
+    - shrug
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Strict Military Press (Barbell)":
+  groups:
+    - vertical_press
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Upright Row (Dumbbell)":
+  groups:
+    - upright_row
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Stretching":
+  groups:
+    - mobility
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Clean (Barbell)":
+  groups:
+    - olympic_lift
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Clean and Jerk (Barbell)":
+  groups:
+    - olympic_lift
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Deadlift High Pull (Barbell)":
+  groups:
+    - deadlift_floor
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Hang Clean (Barbell)":
+  groups:
+    - olympic_lift
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Hang Snatch (Barbell)":
+  groups:
+    - olympic_lift
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Jump Shrug (Barbell)":
+  groups:
+    - shrug
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Overhead Squat (Barbell)":
+  groups:
+    - squat_bilateral
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Power Clean":
+  groups:
+    - olympic_lift
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Power Snatch (Barbell)":
+  groups:
+    - olympic_lift
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Press Under (Barbell)":
+  groups:
+    - olympic_lift
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Snatch (Barbell)":
+  groups:
+    - olympic_lift
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Snatch Pull (Barbell)":
+  groups:
+    - olympic_lift
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Split Jerk (Barbell)":
+  groups:
+    - olympic_lift
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Ball Slams":
+  groups:
+    - full_body_conditioning
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Burpee":
+  groups:
+    - full_body_conditioning
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Jumping Jack":
+  groups:
+    - full_body_conditioning
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Kettlebell Swing":
+  groups:
+    - hip_hinge_stifflegged
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Kettlebell Turkish Get Up":
+  groups:
+    - full_body_conditioning
+  axial_load: low
+  stability: free
+  unilateral: true
+  impact: none
+  skill: high
+"Muscle Up":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+"Squat Row (Band)":
+  groups:
+    - full_body_conditioning
+    - horizontal_row
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Sumo Deadlift High Pull (Barbell)":
+  groups:
+    - deadlift_floor
+    - upright_row
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Thruster (Barbell)":
+  groups:
+    - squat_bilateral
+    - vertical_press
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Thruster (Kettlebell)":
+  groups:
+    - squat_bilateral
+    - vertical_press
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+"Aerobics":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+"Battle Ropes":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+"Climbing":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+"Cycling":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Cycling (Indoor)":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Elliptical Machine":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Hiking":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+"Jump Rope":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Rowing (Machine)":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Running":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Running (Treadmill)":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Skating":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+"Skiing":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+"Snowboarding":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+"Swimming":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Walking":
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+"Yoga":
+  groups:
+    - mobility
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
