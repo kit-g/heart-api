@@ -95,6 +95,7 @@ SELECT coalesce(
       'asset', e.asset,
       'thumbnail', e.thumbnail,
       'muscles', e.muscles,
+      'movement', e.movement,
       'own', e.user_id IS NOT NULL,
       'archived', e.archived,
       'unit_system', ep.unit_system,
@@ -127,7 +128,7 @@ INSERT INTO exercises (
   @instructions, 
   @userId
 )
-RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, archived,
+RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, archived,
           user_id IS NOT NULL AS own
 ''';
 
@@ -140,7 +141,7 @@ SET
   archived = coalesce(@archived, archived)
 WHERE id = @exerciseId::uuid 
   AND user_id = @userId
-RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, archived,
+RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, archived,
           user_id IS NOT NULL AS own
 ''';
 
@@ -842,7 +843,7 @@ _master_exercises AS (
   SELECT
     te.id AS source_te_id,
     te.exercise_order,
-    e.name, e.category, e.target, e.instructions, e.asset, e.thumbnail, e.muscles,
+    e.name, e.category, e.target, e.instructions, e.asset, e.thumbnail, e.muscles, e.movement,
     (
       SELECT e2.id FROM exercises e2
       WHERE e2.name = e.name
@@ -859,9 +860,9 @@ _master_exercises AS (
 -- holds. DISTINCT ON dedupes if the master happened to list the same
 -- exercise twice.
 _copied_exercises AS (
-  INSERT INTO exercises (name, category, target, instructions, asset, thumbnail, muscles, user_id)
+  INSERT INTO exercises (name, category, target, instructions, asset, thumbnail, muscles, movement, user_id)
   SELECT DISTINCT ON (name)
-    name, category, target, instructions, asset, thumbnail, muscles, @studentId
+    name, category, target, instructions, asset, thumbnail, muscles, movement, @studentId
   FROM _master_exercises
   WHERE resolved_id IS NULL
   RETURNING id, name
