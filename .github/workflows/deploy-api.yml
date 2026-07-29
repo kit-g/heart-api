@@ -177,7 +177,7 @@ jobs:
           dart pub global run coverage:format_coverage \
             --lcov --in=coverage --out=coverage/lcov.info \
             --report-on=lib --packages=.dart_tool/package_config.json
-          dart run tool/check_coverage.dart 60
+          dart run tool/check_coverage.dart 75
 
   build-and-deploy:
     name: "Build & Deploy"
