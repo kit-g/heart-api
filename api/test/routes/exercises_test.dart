@@ -22,8 +22,9 @@ void main() {
 
   group('GET /exercises', () {
     test('returns the library and threads userId + owned flag to the service', () async {
-      when(app.db.getExercises(any, locale: anyNamed('locale'), owned: anyNamed('owned')))
-          .thenAnswer((_) async => {'squat': <String, dynamic>{}});
+      when(
+        app.db.getExercises(any, locale: anyNamed('locale'), owned: anyNamed('owned')),
+      ).thenAnswer((_) async => {'squat': <String, dynamic>{}});
 
       final res = await app.send('GET', '/exercises?owned=true');
       expect(res.status, 200);
@@ -32,8 +33,9 @@ void main() {
     });
 
     test('defaults owned to false when the query flag is absent', () async {
-      when(app.db.getExercises(any, locale: anyNamed('locale'), owned: anyNamed('owned')))
-          .thenAnswer((_) async => <String, dynamic>{});
+      when(
+        app.db.getExercises(any, locale: anyNamed('locale'), owned: anyNamed('owned')),
+      ).thenAnswer((_) async => <String, dynamic>{});
 
       await app.send('GET', '/exercises');
       verify(app.db.getExercises('u1', locale: 'en', owned: false)).called(1);
@@ -52,33 +54,41 @@ void main() {
         ),
       ).thenAnswer((_) async => {'id': 'e1', 'name': 'Squat'});
 
-      final res = await app.send('POST', '/exercises', body: {
-        'name': 'Squat',
-        'category': 'legs',
-        'target': 'quads',
-      });
+      final res = await app.send(
+        'POST',
+        '/exercises',
+        body: {
+          'name': 'Squat',
+          'category': 'legs',
+          'target': 'quads',
+        },
+      );
       expect(res.status, 200);
       expect(jsonDecode(res.body), containsPair('name', 'Squat'));
-      verify(app.db.createExercise(
-        userId: 'u1',
-        name: 'Squat',
-        category: 'legs',
-        target: 'quads',
-        instructions: null,
-      )).called(1);
+      verify(
+        app.db.createExercise(
+          userId: 'u1',
+          name: 'Squat',
+          category: 'legs',
+          target: 'quads',
+          instructions: null,
+        ),
+      ).called(1);
     });
 
     test('rejects a missing name / category / target with 400', () async {
       expect((await app.send('POST', '/exercises', body: {'category': 'legs', 'target': 'quads'})).status, 400);
       expect((await app.send('POST', '/exercises', body: {'name': 'Squat', 'target': 'quads'})).status, 400);
       expect((await app.send('POST', '/exercises', body: {'name': 'Squat', 'category': 'legs'})).status, 400);
-      verifyNever(app.db.createExercise(
-        userId: anyNamed('userId'),
-        name: anyNamed('name'),
-        category: anyNamed('category'),
-        target: anyNamed('target'),
-        instructions: anyNamed('instructions'),
-      ));
+      verifyNever(
+        app.db.createExercise(
+          userId: anyNamed('userId'),
+          name: anyNamed('name'),
+          category: anyNamed('category'),
+          target: anyNamed('target'),
+          instructions: anyNamed('instructions'),
+        ),
+      );
     });
   });
 
@@ -97,14 +107,16 @@ void main() {
 
       final res = await app.send('PUT', '/exercises/e1', body: {'archived': true});
       expect(res.status, 200);
-      verify(app.db.updateExercise(
-        userId: 'u1',
-        exerciseId: 'e1',
-        category: null,
-        target: null,
-        instructions: null,
-        archived: true,
-      )).called(1);
+      verify(
+        app.db.updateExercise(
+          userId: 'u1',
+          exerciseId: 'e1',
+          category: null,
+          target: null,
+          instructions: null,
+          archived: true,
+        ),
+      ).called(1);
     });
   });
 }

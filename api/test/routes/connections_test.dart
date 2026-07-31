@@ -16,17 +16,16 @@ void main() {
   tearDown(() => app.stop());
 
   Connection sample() => Connection(
-        targetId: 't1',
-        role: ConnectionRole.coach,
-        domain: ConnectionDomain.fitness,
-        status: ConnectionStatus.pending,
-        createdAt: DateTime.utc(2026, 1, 1),
-      );
+    targetId: 't1',
+    role: ConnectionRole.coach,
+    domain: ConnectionDomain.fitness,
+    status: ConnectionStatus.pending,
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
 
   group('GET /connections', () {
     test('lists connections and applies a role filter from the query', () async {
-      when(app.db.getConnections(any, roleFilter: anyNamed('roleFilter')))
-          .thenAnswer((_) async => [sample()]);
+      when(app.db.getConnections(any, roleFilter: anyNamed('roleFilter'))).thenAnswer((_) async => [sample()]);
 
       final res = await app.send('GET', '/connections?role=COACH');
       expect(res.status, 200);
@@ -53,38 +52,48 @@ void main() {
         ),
       ).thenAnswer((_) async => sample());
 
-      final res = await app.send('POST', '/connections', body: {
-        'targetId': 't1',
-        'role': 'COACH',
-        'domain': 'fitness',
-      });
+      final res = await app.send(
+        'POST',
+        '/connections',
+        body: {
+          'targetId': 't1',
+          'role': 'COACH',
+          'domain': 'fitness',
+        },
+      );
       expect(res.status, 200);
-      verify(app.db.createConnection(
-        initiatorId: 'u1',
-        targetId: 't1',
-        role: ConnectionRole.coach,
-        domain: ConnectionDomain.fitness,
-      )).called(1);
+      verify(
+        app.db.createConnection(
+          initiatorId: 'u1',
+          targetId: 't1',
+          role: ConnectionRole.coach,
+          domain: ConnectionDomain.fitness,
+        ),
+      ).called(1);
     });
   });
 
   group('DELETE /connections/:connectionId', () {
     test('parses the composite id and deletes (204)', () async {
-      when(app.db.deleteConnection(
-        initiatorId: anyNamed('initiatorId'),
-        targetId: anyNamed('targetId'),
-        role: anyNamed('role'),
-        domain: anyNamed('domain'),
-      )).thenAnswer((_) async {});
+      when(
+        app.db.deleteConnection(
+          initiatorId: anyNamed('initiatorId'),
+          targetId: anyNamed('targetId'),
+          role: anyNamed('role'),
+          domain: anyNamed('domain'),
+        ),
+      ).thenAnswer((_) async {});
 
       final res = await app.send('DELETE', '/connections/t1%7CCOACH%7Cfitness');
       expect(res.status, 204);
-      verify(app.db.deleteConnection(
-        initiatorId: 'u1',
-        targetId: 't1',
-        role: ConnectionRole.coach,
-        domain: ConnectionDomain.fitness,
-      )).called(1);
+      verify(
+        app.db.deleteConnection(
+          initiatorId: 'u1',
+          targetId: 't1',
+          role: ConnectionRole.coach,
+          domain: ConnectionDomain.fitness,
+        ),
+      ).called(1);
     });
 
     test('rejects a malformed id with 400', () async {
@@ -94,23 +103,27 @@ void main() {
 
   group('PUT /connections/:connectionId', () {
     test('changes status from the body', () async {
-      when(app.db.changeConnectionStatus(
-        initiatorId: anyNamed('initiatorId'),
-        targetId: anyNamed('targetId'),
-        role: anyNamed('role'),
-        domain: anyNamed('domain'),
-        newStatus: anyNamed('newStatus'),
-      )).thenAnswer((_) async => sample());
+      when(
+        app.db.changeConnectionStatus(
+          initiatorId: anyNamed('initiatorId'),
+          targetId: anyNamed('targetId'),
+          role: anyNamed('role'),
+          domain: anyNamed('domain'),
+          newStatus: anyNamed('newStatus'),
+        ),
+      ).thenAnswer((_) async => sample());
 
       final res = await app.send('PUT', '/connections/t1%7CCOACH%7Cfitness', body: {'status': 'active'});
       expect(res.status, 200);
-      verify(app.db.changeConnectionStatus(
-        initiatorId: 'u1',
-        targetId: 't1',
-        role: ConnectionRole.coach,
-        domain: ConnectionDomain.fitness,
-        newStatus: ConnectionStatus.active,
-      )).called(1);
+      verify(
+        app.db.changeConnectionStatus(
+          initiatorId: 'u1',
+          targetId: 't1',
+          role: ConnectionRole.coach,
+          domain: ConnectionDomain.fitness,
+          newStatus: ConnectionStatus.active,
+        ),
+      ).called(1);
     });
 
     test('rejects a missing status with 400', () async {
@@ -122,13 +135,15 @@ void main() {
     });
 
     test('maps an illegal status transition (StateError) to 400', () async {
-      when(app.db.changeConnectionStatus(
-        initiatorId: anyNamed('initiatorId'),
-        targetId: anyNamed('targetId'),
-        role: anyNamed('role'),
-        domain: anyNamed('domain'),
-        newStatus: anyNamed('newStatus'),
-      )).thenThrow(StateError('cannot transition'));
+      when(
+        app.db.changeConnectionStatus(
+          initiatorId: anyNamed('initiatorId'),
+          targetId: anyNamed('targetId'),
+          role: anyNamed('role'),
+          domain: anyNamed('domain'),
+          newStatus: anyNamed('newStatus'),
+        ),
+      ).thenThrow(StateError('cannot transition'));
 
       final res = await app.send('PUT', '/connections/t1%7CCOACH%7Cfitness', body: {'status': 'active'});
       expect(res.status, 400);

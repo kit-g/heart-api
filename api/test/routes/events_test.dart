@@ -30,11 +30,13 @@ void main() {
   test('dispatches an exercise.asset.processed record onto the exercise service (204)', () async {
     when(app.config.allowNonHttpEvents).thenReturn(true);
     when(app.config.cdnAssetUrl(any)).thenReturn('https://cdn.example/asset');
-    when(app.db.setExerciseMedia(
-      name: anyNamed('name'),
-      asset: anyNamed('asset'),
-      thumbnail: anyNamed('thumbnail'),
-    )).thenAnswer((_) async {});
+    when(
+      app.db.setExerciseMedia(
+        name: anyNamed('name'),
+        asset: anyNamed('asset'),
+        thumbnail: anyNamed('thumbnail'),
+      ),
+    ).thenAnswer((_) async {});
 
     final record = jsonEncode({
       'type': 'exercise.asset.processed',
@@ -43,16 +45,22 @@ void main() {
       'thumbnail': {'key': 'exercises/squat/thumb.gif', 'width': 100, 'height': 75},
     });
 
-    final res = await app.send('POST', '/events', body: {
-      'Records': [
-        {'body': record},
-      ],
-    });
+    final res = await app.send(
+      'POST',
+      '/events',
+      body: {
+        'Records': [
+          {'body': record},
+        ],
+      },
+    );
     expect(res.status, 204);
-    verify(app.db.setExerciseMedia(
-      name: 'Squat',
-      asset: anyNamed('asset'),
-      thumbnail: anyNamed('thumbnail'),
-    )).called(1);
+    verify(
+      app.db.setExerciseMedia(
+        name: 'Squat',
+        asset: anyNamed('asset'),
+        thumbnail: anyNamed('thumbnail'),
+      ),
+    ).called(1);
   });
 }
