@@ -33,8 +33,9 @@ void main() {
   group('PUT /accounts (removeAvatar)', () {
     test('deletes the avatar object and clears the stored url', () async {
       when(app.storage.deleteObject(key: anyNamed('key'))).thenAnswer((_) async {});
-      when(app.db.updateAvatarUrl(userId: anyNamed('userId'), avatarUrl: anyNamed('avatarUrl')))
-          .thenAnswer((_) async => User(id: 'u1'));
+      when(
+        app.db.updateAvatarUrl(userId: anyNamed('userId'), avatarUrl: anyNamed('avatarUrl')),
+      ).thenAnswer((_) async => User(id: 'u1'));
 
       final res = await app.send('PUT', '/accounts', body: {'action': 'removeAvatar'});
       expect(res.status, 200);
