@@ -20,6 +20,7 @@ part 'goals.dart';
 part 'images.dart';
 part 'profiles.dart';
 part 'queries.dart';
+part 'template_folders.dart';
 part 'templates.dart';
 part 'workouts.dart';
 
@@ -39,7 +40,8 @@ class Database extends _DatabaseBase
         _Images,
         _Profiles,
         _Workouts,
-        _Templates
+        _Templates,
+        _TemplateFolders
     implements
         ChartPreferenceService,
         ExercisePreferenceService,
@@ -51,7 +53,8 @@ class Database extends _DatabaseBase
         ApiImageDbService,
         ApiProfileService,
         ApiWorkoutService,
-        ApiTemplateService {
+        ApiTemplateService,
+        ApiTemplateFolderService {
   @override
   final Pool _pool;
 
