@@ -86,18 +86,21 @@ abstract class DatabaseTestBase {
   /// service under test) so it gets the same cascade cleanup in teardown.
   void trackProfile(String id) => _seededProfiles.add(id);
 
-  /// Connects two profiles (default: peers) so connection-gated queries allow
-  /// [initiator] to act on [target].
+  /// Connects two profiles (default: active peers) so connection-gated queries
+  /// allow [initiator] to act on [target]. Pass [status] to seed a connection
+  /// that exists but is not live — `pending`, `severed`, `blocked` — which the
+  /// gates must refuse.
   Future<void> seedConnection({
     required String initiator,
     required String target,
     String role = 'PEER',
     String domain = 'fitness',
+    String status = 'active',
   }) async {
     await exec(
       'INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status) '
-      "VALUES (@i, @t, @r, @r, @d, 'active') ON CONFLICT DO NOTHING",
-      {'i': initiator, 't': target, 'r': role, 'd': domain},
+      'VALUES (@i, @t, @r, @r, @d, @s) ON CONFLICT DO NOTHING',
+      {'i': initiator, 't': target, 'r': role, 'd': domain, 's': status},
     );
   }
 
