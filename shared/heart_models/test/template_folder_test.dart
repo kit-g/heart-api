@@ -21,9 +21,21 @@ void main() {
       expect(folder.createdAt, createdAt);
     });
 
-    test('fromRow defaults the count when the query did not compute one', () {
+    test('fromRow leaves the count null when the query did not compute one', () {
       final folder = TemplateFolder.fromRow({'id': 'folder-1', 'name': 'Push', 'order_index': 0});
-      expect(folder.templateCount, 0);
+      expect(folder.templateCount, isNull, reason: 'reporting 0 would be a lie, not a default');
+      expect(folder.toMap().containsKey('templateCount'), isFalse);
+    });
+
+    test('a folder with no templates counts 0, distinct from an uncounted one', () {
+      final counted = TemplateFolder.fromRow({
+        'id': 'folder-1',
+        'name': 'Push',
+        'order_index': 0,
+        'template_count': 0,
+      });
+      expect(counted.templateCount, 0);
+      expect(counted.toMap()['templateCount'], 0);
     });
 
     test('toMap emits camelCase for the wire', () {
