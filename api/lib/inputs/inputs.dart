@@ -11,4 +11,5 @@ part 'devices.dart';
 part 'goals.dart';
 part 'pagination.dart';
 part 'parse.dart';
+part 'template_folders.dart';
 part 'workouts.dart';
