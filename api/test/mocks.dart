@@ -18,6 +18,7 @@ import 'package:mockito/annotations.dart';
   ApiImageStorageService,
   ApiWorkoutService,
   ApiTemplateService,
+  ApiTemplateFolderService,
   ExerciseService,
   ChartPreferenceService,
   ExercisePreferenceService,
