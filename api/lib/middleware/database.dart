@@ -14,6 +14,7 @@ final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsSer
 final _devicesProperty = ContextProperty<DeviceService>('DeviceService');
 final _workoutsProperty = ContextProperty<ApiWorkoutService>('ApiWorkoutService');
 final _templatesProperty = ContextProperty<ApiTemplateService>('ApiTemplateService');
+final _templateFoldersProperty = ContextProperty<ApiTemplateFolderService>('ApiTemplateFolderService');
 
 Middleware profilesDb({required ApiProfileService db}) {
   return (final Handler next) {
@@ -87,6 +88,15 @@ Middleware templatesDb({required ApiTemplateService db}) {
   };
 }
 
+Middleware templateFoldersDb({required ApiTemplateFolderService db}) {
+  return (final Handler next) {
+    return (final request) {
+      _templateFoldersProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
 Middleware imageDb({required ApiImageDbService db}) {
   return (final Handler next) {
     return (final request) {
@@ -145,4 +155,8 @@ extension DatabaseContext on Request {
   ApiTemplateService get templatesService => _templatesProperty.get(this);
 
   set templatesService(ApiTemplateService v) => _templatesProperty[this] = v;
+
+  ApiTemplateFolderService get templateFolderService => _templateFoldersProperty.get(this);
+
+  set templateFolderService(ApiTemplateFolderService v) => _templateFoldersProperty[this] = v;
 }

@@ -33,11 +33,13 @@ Future<Template> getMyTemplate(final Request request) async {
 }
 
 Future<Paginated<Template>> getMyTemplates(final Request request) async {
-  final query = PageQuery.fromRequest(request);
+  final query = TemplateListQuery.fromRequest(request);
   final page = await request.templatesService.getTemplates(
     userId: request.userId,
-    limit: query.limit,
-    cursor: query.cursor,
+    limit: query.page.limit,
+    cursor: query.page.cursor,
+    folderId: query.folderId,
+    unfiledOnly: query.unfiledOnly,
   );
   return Paginated<Template>.from(page, itemsKey: 'templates', cursorOf: (t) => t.id);
 }

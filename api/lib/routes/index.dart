@@ -11,6 +11,7 @@ import 'package:heart/routes/feedback.dart' as feedback;
 import 'package:heart/routes/goals.dart' as goals;
 import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
+import 'package:heart/routes/template_folders.dart' as folders;
 import 'package:heart/routes/templates.dart' as templates;
 import 'package:heart/routes/workouts.dart' as workouts;
 import 'package:relic/relic.dart';
@@ -22,6 +23,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/accounts/:targetUserId/workouts', .get): workouts.getTargetUserWorkouts,
   ('/accounts/:targetUserId/workouts/:workoutId', .get): workouts.getTargetUserWorkout,
   ('/accounts/:targetUserId/templates/:templateId', .post): templates.assignTemplateToUser,
+  ('/accounts/:targetUserId/folders/:folderId', .post): folders.assignFolderToUser,
   ('/version', .get): version.getVersion,
   ('/charts', .get): charts.getChartPreferences,
   ('/charts', .post): charts.saveChartPreference,
@@ -46,6 +48,10 @@ final routes = <(String, Method), ModelHandler>{
   ('/goals/:goalId', .delete): goals.deleteGoal,
   ('/goals/:goalId/stages/:stageId', .put): goals.markStageAchieved,
   ('/events', .post): events.handler,
+  ('/template-folders', .get): folders.getMyFolders,
+  ('/template-folders', .post): folders.createFolder,
+  ('/template-folders/:folderId', .put): folders.updateFolder,
+  ('/template-folders/:folderId', .delete): folders.deleteFolder,
   ('/templates', .get): templates.getMyTemplates,
   ('/templates/:templateId', .get): templates.getMyTemplate,
   ('/templates', .post): templates.createTemplate,
