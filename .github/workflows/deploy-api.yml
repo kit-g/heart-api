@@ -52,7 +52,7 @@ permissions:
   contents: read
 
 env:
-  PG_VERSION: "16"
+  PG_VERSION: "17.6"
 
 jobs:
   lint:
