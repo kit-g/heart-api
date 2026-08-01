@@ -47,6 +47,8 @@ void main() {
             'name': 'Push',
             'order_index': 0,
             'folder_id': 'folder-1',
+            'folder_name': 'Push block',
+            'folder_order': 2,
             'source_template_id': 'master-1',
             'assigned_by_id': 'coach-1',
             'assigned_by_username': 'Coach',
@@ -54,6 +56,9 @@ void main() {
             'sync_enabled': true,
           });
 
+          expect(template.folder?.name, 'Push block');
+          expect(template.folder?.order, 2);
+          // folderId stays available as the grouping key, derived from the object.
           expect(template.folderId, 'folder-1');
           expect(template.sourceTemplateId, 'master-1');
           expect(template.isAssigned, isTrue);
@@ -71,11 +76,15 @@ void main() {
             'name': 'Push',
             'order_index': 1,
             'folder_id': 'folder-1',
+            'folder_name': 'Push block',
             'assigned_by_id': 'coach-1',
             'assigned_by_username': 'Coach',
           });
 
-          expect(template.toMap()['folderId'], 'folder-1');
+          expect((template.toMap()['folder'] as Map)['id'], 'folder-1');
+          expect((template.toMap()['folder'] as Map)['name'], 'Push block');
+          // The nested copy is not the one that counts — that is the folder list.
+          expect((template.toMap()['folder'] as Map).containsKey('templateCount'), isFalse);
           expect((template.toMap()['assignedBy'] as Map)['id'], 'coach-1');
           // The app spreads toRow() into an INSERT; an extra key breaks it.
           expect(template.toRow().keys, unorderedEquals(['id', 'name', 'order_in_parent']));
@@ -87,7 +96,7 @@ void main() {
         () {
           final map = Template.empty(id: 'template_10', order: 0).toMap();
 
-          expect(map.containsKey('folderId'), isFalse);
+          expect(map.containsKey('folder'), isFalse);
           expect(map.containsKey('assignedBy'), isFalse);
           expect(map.containsKey('sourceTemplateId'), isFalse);
           expect(map.containsKey('syncEnabled'), isFalse);
@@ -99,6 +108,7 @@ void main() {
         () {
           final template = Template.fromJson({'id': 'template_11', 'order': 0, 'name': 'Legacy'});
 
+          expect(template.folder, isNull);
           expect(template.folderId, isNull);
           expect(template.isAssigned, isFalse);
         },

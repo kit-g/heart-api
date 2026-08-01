@@ -4,6 +4,7 @@ import 'auth.dart';
 import 'exercise.dart';
 import 'exercise_set.dart';
 import 'misc.dart';
+import 'template_folder.dart';
 import 'uuid.dart';
 import 'workout.dart';
 
@@ -18,8 +19,16 @@ abstract interface class Template
 
   int get order;
 
-  /// The [TemplateFolder] the owner filed this under, or null when unfiled.
-  /// Folders are flat, so this is the whole of a template's placement.
+  /// The folder the owner filed this under, or null when unfiled. Folders are
+  /// flat, so this is the whole of a template's placement.
+  ///
+  /// Nested rather than a bare id so that rendering a list of templates needs no
+  /// second request — the same call `assignedBy` makes. The nested copy has no
+  /// [TemplateFolder.templateCount]; only `GET /template-folders` counts, and it
+  /// is also the only way to see a folder that happens to be empty.
+  TemplateFolder? get folder;
+
+  /// Shorthand for `folder?.id` — the grouping key, and what a write sends back.
   String? get folderId;
 
   /// The coach's master template this one was copied from, when it arrived by
@@ -39,12 +48,12 @@ abstract interface class Template
 
   Workout toWorkout();
 
-  factory Template.empty({required String id, required int order, String? folderId}) {
+  factory Template.empty({required String id, required int order, TemplateFolder? folder}) {
     return _Template(
       exercises: [],
       id: id,
       order: order,
-      folderId: folderId,
+      folder: folder,
       local: true,
     );
   }
@@ -58,7 +67,10 @@ abstract interface class Template
       id: json['id'].toString(),
       order: json['order'],
       name: json['name'],
-      folderId: json['folderId']?.toString(),
+      folder: switch (json['folder']) {
+        final Map m => TemplateFolder.fromJson(m),
+        _ => null,
+      },
       sourceTemplateId: json['sourceTemplateId']?.toString(),
       assignedBy: switch (json['assignedBy']) {
         final Map m => Profile.fromJson(m),
@@ -69,17 +81,19 @@ abstract interface class Template
     );
   }
 
-  factory Template.fromWorkout(String id, Workout workout, int order, {String? folderId}) {
+  factory Template.fromWorkout(String id, Workout workout, int order, {TemplateFolder? folder}) {
     return _Template(
       exercises: workout.toList(),
       id: id,
       order: order,
       name: workout.name,
-      folderId: folderId,
+      folder: folder,
       local: true,
     );
   }
 
+  /// The folder arrives as the flat `folder_*` columns of the `LEFT JOIN` in
+  /// `_listTemplates` and friends — null across the board when unfiled.
   factory Template.fromRow(Map<String, dynamic> row) {
     return _Template(
       id: row['id'].toString(),
@@ -90,7 +104,15 @@ abstract interface class Template
         _ => [],
       },
       local: false,
-      folderId: row['folder_id']?.toString(),
+      folder: switch (row['folder_id']) {
+        null => null,
+        final id => TemplateFolder(
+          id: id.toString(),
+          name: row['folder_name'] as String? ?? '',
+          order: (row['folder_order'] as num?)?.toInt() ?? 0,
+          createdAt: row['folder_created_at'] as DateTime?,
+        ),
+      },
       sourceTemplateId: row['source_template_id']?.toString(),
       assignedBy: switch (row['assigned_by_id']) {
         final String id => Profile(
@@ -115,7 +137,7 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
   @override
   final bool local;
   @override
-  final String? folderId;
+  final TemplateFolder? folder;
   @override
   final String? sourceTemplateId;
   @override
@@ -131,11 +153,14 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
     required this.id,
     required this.order,
     required this.local,
-    this.folderId,
+    this.folder,
     this.sourceTemplateId,
     this.assignedBy,
     this.syncEnabled,
   }) : _exercises = exercises;
+
+  @override
+  String? get folderId => folder?.id;
 
   @override
   bool get isAssigned => assignedBy != null;
@@ -200,7 +225,7 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       'id': id,
       'name': name,
       'order': order,
-      'folderId': ?folderId,
+      'folder': ?folder?.toMap(),
       'sourceTemplateId': ?sourceTemplateId,
       'assignedBy': ?assignedBy?.toMap(),
       'syncEnabled': ?syncEnabled,

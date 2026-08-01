@@ -21,7 +21,10 @@ abstract interface class TemplateFolder implements Model, Comparable<TemplateFol
 
   /// How many of the owner's templates are filed here. Read-only — the server
   /// counts it on read; nothing writes it.
-  int get templateCount;
+  ///
+  /// Null when nobody counted: the folder list computes it, but the copy nested
+  /// inside a [Template] does not, and reporting 0 there would be a lie.
+  int? get templateCount;
 
   DateTime? get createdAt;
 
@@ -29,7 +32,7 @@ abstract interface class TemplateFolder implements Model, Comparable<TemplateFol
     String? id,
     required String name,
     int order,
-    int templateCount,
+    int? templateCount,
     DateTime? createdAt,
   }) = _TemplateFolder;
 
@@ -47,7 +50,7 @@ abstract interface class TemplateFolder implements Model, Comparable<TemplateFol
       },
       templateCount: switch (json['templateCount']) {
         final num c => c.toInt(),
-        _ => 0,
+        _ => null,
       },
       createdAt: switch (json['createdAt']) {
         final DateTime d => d,
@@ -57,14 +60,14 @@ abstract interface class TemplateFolder implements Model, Comparable<TemplateFol
     );
   }
 
-  /// Database row shape — snake_case column names. `template_count` is present
-  /// only on the list query; it reads as 0 elsewhere.
+  /// Database row shape — snake_case column names. `template_count` is computed
+  /// only by the folder-list query; elsewhere it stays null.
   factory TemplateFolder.fromRow(Map<String, dynamic> row) {
     return _TemplateFolder(
       id: row['id'].toString(),
       name: row['name'] as String,
       order: (row['order_index'] as num?)?.toInt() ?? 0,
-      templateCount: (row['template_count'] as num?)?.toInt() ?? 0,
+      templateCount: (row['template_count'] as num?)?.toInt(),
       createdAt: switch (row['created_at']) {
         final DateTime d => d,
         final String s => DateTime.parse(s),
@@ -84,7 +87,7 @@ class _TemplateFolder implements TemplateFolder {
   @override
   final int order;
   @override
-  final int templateCount;
+  final int? templateCount;
   @override
   final DateTime? createdAt;
 
@@ -92,7 +95,7 @@ class _TemplateFolder implements TemplateFolder {
     this.id,
     required this.name,
     this.order = 0,
-    this.templateCount = 0,
+    this.templateCount,
     this.createdAt,
   });
 
@@ -125,7 +128,7 @@ class _TemplateFolder implements TemplateFolder {
       'id': ?id,
       'name': name,
       'order': order,
-      'templateCount': templateCount,
+      'templateCount': ?templateCount,
       'createdAt': ?createdAt?.toUtc().toIso8601String(),
     };
   }
