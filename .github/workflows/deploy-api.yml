@@ -137,7 +137,9 @@ jobs:
 
       - name: "Start Postgres + create test DB"
         run: |
+          sudo systemctl stop postgresql || true
           sudo pg_createcluster ${{ env.PG_VERSION }} main || true
+          sudo sed -i -e 's/^port =.*/port = 5432/' /etc/postgresql/${{ env.PG_VERSION }}/main/postgresql.conf
           sudo pg_ctlcluster ${{ env.PG_VERSION }} main start
           sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$PGPASSWORD'"
           sudo -u postgres createdb $PGDATABASE
