@@ -15,6 +15,7 @@ Template _fakeTemplate(String id) => Template.empty(id: id, order: 0);
 
 TemplateShare _fakeShare(String id) => TemplateShare(
   id: id,
+  masterTemplateId: 'm-$id',
   studentTemplateId: 'ts-$id',
   templateName: 'Push',
   assignedTo: Profile.fromJson({'id': 's1', 'username': 'Stu', 'avatar': null}),
@@ -36,7 +37,13 @@ void main() {
   group('getMyTemplates', () {
     void stub(Page<Template> page) {
       when(
-        templates.getTemplates(userId: anyNamed('userId'), cursor: anyNamed('cursor'), limit: anyNamed('limit')),
+        templates.getTemplates(
+          userId: anyNamed('userId'),
+          cursor: anyNamed('cursor'),
+          limit: anyNamed('limit'),
+          folderId: anyNamed('folderId'),
+          unfiledOnly: anyNamed('unfiledOnly'),
+        ),
       ).thenAnswer((_) async => page);
     }
 
@@ -62,7 +69,9 @@ void main() {
 
       await getMyTemplates(getReq('/templates', query: {'limit': '999', 'cursor': 't-9'}));
 
-      verify(templates.getTemplates(userId: _meId, cursor: 't-9', limit: 100)).called(1);
+      verify(
+        templates.getTemplates(userId: _meId, cursor: 't-9', limit: 100, folderId: null, unfiledOnly: false),
+      ).called(1);
     });
 
     test('defaults to a limit of 30 with no cursor when unspecified', () async {
@@ -70,7 +79,73 @@ void main() {
 
       await getMyTemplates(getReq('/templates'));
 
-      verify(templates.getTemplates(userId: _meId, cursor: null, limit: 30)).called(1);
+      verify(
+        templates.getTemplates(userId: _meId, cursor: null, limit: 30, folderId: null, unfiledOnly: false),
+      ).called(1);
+    });
+
+    test('no folder param lists every template, filed or not', () async {
+      stub(const Page(items: [], hasMore: false));
+
+      await getMyTemplates(getReq('/templates'));
+
+      verify(
+        templates.getTemplates(
+          userId: _meId,
+          cursor: anyNamed('cursor'),
+          limit: anyNamed('limit'),
+          folderId: null,
+          unfiledOnly: false,
+        ),
+      ).called(1);
+    });
+
+    test('folder=<id> narrows the listing to that folder', () async {
+      stub(const Page(items: [], hasMore: false));
+
+      await getMyTemplates(getReq('/templates', query: {'folder': 'f-1'}));
+
+      verify(
+        templates.getTemplates(
+          userId: _meId,
+          cursor: anyNamed('cursor'),
+          limit: anyNamed('limit'),
+          folderId: 'f-1',
+          unfiledOnly: false,
+        ),
+      ).called(1);
+    });
+
+    test('folder=none narrows the listing to the unfiled ones', () async {
+      stub(const Page(items: [], hasMore: false));
+
+      await getMyTemplates(getReq('/templates', query: {'folder': 'none'}));
+
+      verify(
+        templates.getTemplates(
+          userId: _meId,
+          cursor: anyNamed('cursor'),
+          limit: anyNamed('limit'),
+          folderId: null,
+          unfiledOnly: true,
+        ),
+      ).called(1);
+    });
+
+    test('an empty folder param is treated as absent', () async {
+      stub(const Page(items: [], hasMore: false));
+
+      await getMyTemplates(getReq('/templates', query: {'folder': ''}));
+
+      verify(
+        templates.getTemplates(
+          userId: _meId,
+          cursor: anyNamed('cursor'),
+          limit: anyNamed('limit'),
+          folderId: null,
+          unfiledOnly: false,
+        ),
+      ).called(1);
     });
   });
 
