@@ -7,6 +7,9 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
       _saveTemplate.toSql(),
       parameters: body.toParams(),
     );
+    // The insert selects no row when `folderId` names a folder the user does not
+    // own — the only way a create can come back empty.
+    if (rows.isEmpty) throw NotFound(type: 'TemplateFolder', id: body.folderId ?? '');
     return Template.fromRow(rows.first.toColumnMap());
   }
 
@@ -18,7 +21,7 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
   }) async {
     final rows = await _pool.execute(
       _replaceTemplate.toSql(),
-      parameters: {'templateId': templateId, ...body.toParams()},
+      parameters: {'templateId': templateId, 'movesFolder': body.movesFolder, ...body.toParams()},
     );
     if (rows.isEmpty) throw NotFound(type: 'Template', id: templateId);
     return Template.fromRow(rows.first.toColumnMap());
@@ -39,11 +42,19 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
     required String userId,
     String? cursor,
     int limit = 30,
+    String? folderId,
+    bool unfiledOnly = false,
   }) async {
     // Fetch one extra row so hasMore is authoritative without a second query.
     final rows = await _pool.execute(
       _listTemplates.toSql(),
-      parameters: {'userId': userId, 'cursor': cursor, 'limit': limit + 1},
+      parameters: {
+        'userId': userId,
+        'cursor': cursor,
+        'limit': limit + 1,
+        'folderId': folderId,
+        'unfiledOnly': unfiledOnly,
+      },
     );
     final templates = rows.map((row) => Template.fromRow(row.toColumnMap())).toList();
     final hasMore = templates.length > limit;
@@ -72,16 +83,45 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
     required String targetUserId,
     required String masterTemplateId,
   }) async {
-    final rows = await _pool.execute(
-      _shareTemplate.toSql(),
-      parameters: {'coachId': coachId, 'studentId': targetUserId, 'masterTemplateId': masterTemplateId},
+    final shares = await _shareMasters(
+      coachId: coachId,
+      targetUserId: targetUserId,
+      masterTemplateIds: [masterTemplateId],
     );
-    if (rows.isEmpty) throw NotFound(type: 'Template', id: masterTemplateId);
-    final row = rows.first.toColumnMap();
-    if (row['forbidden'] == true) {
+    if (shares.isEmpty) throw NotFound(type: 'Template', id: masterTemplateId);
+    return shares.first;
+  }
+
+  /// The shared body of both assignment endpoints. Pass [masterTemplateIds] to
+  /// assign specific templates or [folderId] to assign everything in a folder;
+  /// the statement resolves whichever is supplied.
+  ///
+  /// Returns empty when nothing matched — an unknown student, an unknown or
+  /// empty folder, or template ids that are not the coach's. Callers decide
+  /// which of those it was, because only they know what was asked for.
+  Future<List<TemplateShare>> _shareMasters({
+    required String coachId,
+    required String targetUserId,
+    List<String> masterTemplateIds = const [],
+    String? folderId,
+  }) async {
+    final rows = await _pool.execute(
+      _shareTemplates.toSql(),
+      parameters: {
+        'coachId': coachId,
+        'studentId': targetUserId,
+        'masterTemplateIds': masterTemplateIds,
+        'folderId': folderId,
+      },
+    );
+    if (rows.isEmpty) return const [];
+
+    final maps = rows.map((row) => row.toColumnMap()).toList();
+    // The gate is per (coach, student), so every row carries the same verdict.
+    if (maps.first['forbidden'] == true) {
       throw const Forbidden(reason: 'You do not have permission to assign templates to this user.');
     }
-    return TemplateShare.fromRow(row);
+    return maps.map(TemplateShare.fromRow).toList();
   }
 
   @override
