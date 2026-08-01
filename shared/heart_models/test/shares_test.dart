@@ -20,6 +20,7 @@ void main() {
       final item = TemplateShare.fromRow(row);
 
       expect(item.id, equals('share-uuid-1'));
+      expect(item.masterTemplateId, equals('master_id'));
       expect(item.studentTemplateId, equals('student_template_id'));
       expect(item.templateName, equals('Push Day'));
       expect(item.assignedTo.id, equals('student_id'));
@@ -31,6 +32,7 @@ void main() {
       final item = TemplateShare.fromRow(row);
       final map = item.toMap();
 
+      expect(map['masterTemplateId'], equals('master_id'));
       expect(map['studentTemplateId'], equals('student_template_id'));
       expect(map['templateName'], equals('Push Day'));
       expect(map['assignedAt'], equals(assignedAt.toIso8601String()));
@@ -41,6 +43,7 @@ void main() {
       final profile = Profile.fromJson({'id': 'student_id', 'username': 'Student Name', 'avatar': null});
       final item = TemplateShare(
         id: 'share-uuid-2',
+        masterTemplateId: 'master_id',
         studentTemplateId: 'ts_1',
         templateName: 'Push Day',
         assignedTo: profile,
