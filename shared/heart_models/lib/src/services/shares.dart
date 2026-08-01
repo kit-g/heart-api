@@ -19,7 +19,15 @@ abstract interface class ApiTemplateService {
 
   Future<Template> getTemplate({required String userId, required String templateId});
 
-  Future<Page<Template>> getTemplates({required String userId, String? cursor, int limit});
+  /// Pass [folderId] to list one folder's contents, or [unfiledOnly] to list the
+  /// templates in no folder at all. Neither lists everything the user owns.
+  Future<Page<Template>> getTemplates({
+    required String userId,
+    String? cursor,
+    int limit,
+    String? folderId,
+    bool unfiledOnly,
+  });
 
   Future<Page<TemplateShare>> getTemplateShares({required String userId, String? cursor, int limit});
 

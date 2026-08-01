@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'auth.dart';
 import 'exercise.dart';
 import 'exercise_set.dart';
 import 'misc.dart';
@@ -17,13 +18,33 @@ abstract interface class Template
 
   int get order;
 
+  /// The [TemplateFolder] the owner filed this under, or null when unfiled.
+  /// Folders are flat, so this is the whole of a template's placement.
+  String? get folderId;
+
+  /// The coach's master template this one was copied from, when it arrived by
+  /// assignment. Null for a template the owner wrote themselves.
+  String? get sourceTemplateId;
+
+  /// Who assigned this template, when it arrived by assignment. Null for the
+  /// owner's own work — which is how the app tells the two apart.
+  Profile? get assignedBy;
+
+  /// Whether later edits to the master should flow down. Null on templates that
+  /// were never assigned.
+  bool? get syncEnabled;
+
+  /// True when this template came from a coach rather than being written here.
+  bool get isAssigned;
+
   Workout toWorkout();
 
-  factory Template.empty({required String id, required int order}) {
+  factory Template.empty({required String id, required int order, String? folderId}) {
     return _Template(
       exercises: [],
       id: id,
       order: order,
+      folderId: folderId,
       local: true,
     );
   }
@@ -37,16 +58,24 @@ abstract interface class Template
       id: json['id'].toString(),
       order: json['order'],
       name: json['name'],
+      folderId: json['folderId']?.toString(),
+      sourceTemplateId: json['sourceTemplateId']?.toString(),
+      assignedBy: switch (json['assignedBy']) {
+        final Map m => Profile.fromJson(m),
+        _ => null,
+      },
+      syncEnabled: json['syncEnabled'] as bool?,
       local: false,
     );
   }
 
-  factory Template.fromWorkout(String id, Workout workout, int order) {
+  factory Template.fromWorkout(String id, Workout workout, int order, {String? folderId}) {
     return _Template(
       exercises: workout.toList(),
       id: id,
       order: order,
       name: workout.name,
+      folderId: folderId,
       local: true,
     );
   }
@@ -61,15 +90,17 @@ abstract interface class Template
         _ => [],
       },
       local: false,
-      // sourceTemplateId: row['source_template_id']?.toString(),
-      // assignedBy: switch (row['assigned_by_id']) {
-      //   String id => Profile.fromJson({
-      //     'username': row['assigned_by_username'],
-      //     'avatar': row['assigned_by_avatar'],
-      //   }),
-      //   _ => null,
-      // },
-      // syncEnabled: row['sync_enabled'] as bool?,
+      folderId: row['folder_id']?.toString(),
+      sourceTemplateId: row['source_template_id']?.toString(),
+      assignedBy: switch (row['assigned_by_id']) {
+        final String id => Profile(
+          id: id,
+          name: row['assigned_by_username'] as String?,
+          avatar: row['assigned_by_avatar'] as String?,
+        ),
+        _ => null,
+      },
+      syncEnabled: row['sync_enabled'] as bool?,
     );
   }
 }
@@ -83,6 +114,14 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
   int order;
   @override
   final bool local;
+  @override
+  final String? folderId;
+  @override
+  final String? sourceTemplateId;
+  @override
+  final Profile? assignedBy;
+  @override
+  final bool? syncEnabled;
 
   final List<WorkoutExercise> _exercises;
 
@@ -92,7 +131,14 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
     required this.id,
     required this.order,
     required this.local,
+    this.folderId,
+    this.sourceTemplateId,
+    this.assignedBy,
+    this.syncEnabled,
   }) : _exercises = exercises;
+
+  @override
+  bool get isAssigned => assignedBy != null;
 
   @override
   Iterator<WorkoutExercise> get iterator => _exercises.iterator;
@@ -154,12 +200,20 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       'id': id,
       'name': name,
       'order': order,
+      'folderId': ?folderId,
+      'sourceTemplateId': ?sourceTemplateId,
+      'assignedBy': ?assignedBy?.toMap(),
+      'syncEnabled': ?syncEnabled,
       'exercises': [
         for (final exercise in this) exercise.toMap(),
       ],
     };
   }
 
+  /// Deliberately narrower than [toMap]: the app spreads this straight into a
+  /// SQLite insert (`heart_db` `_Templates.storeTemplates`), so every key here
+  /// must be a column in the app's local `templates` table. Adding one without
+  /// an app-side migration breaks writes at runtime, not at compile time.
   @override
   Map<String, dynamic> toRow() {
     return {
