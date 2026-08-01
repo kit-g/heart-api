@@ -564,6 +564,10 @@ WHERE id = @workoutId::uuid
 
 const _saveTemplate = '''
 WITH
+_folder AS (
+  SELECT id FROM template_folders
+  WHERE id = @folderId::uuid AND user_id = @userId
+),
 _order_to_name AS (
   SELECT
     (ex->>'order')::int AS exercise_order,
@@ -577,10 +581,13 @@ _exercise_lookup AS (
   WHERE e.user_id IS NULL OR e.user_id = @userId
   ORDER BY e.name, e.user_id NULLS LAST
 ),
+-- A folder the user does not own resolves to no row, so the INSERT selects
+-- nothing and the mixin reports NotFound rather than silently unfiling.
 _template AS (
-  INSERT INTO templates (user_id, name, order_index)
-  VALUES (@userId, @name, @orderIndex)
-  RETURNING id, name, order_index, source_template_id, assigned_by, sync_enabled, created_at
+  INSERT INTO templates (user_id, name, order_index, folder_id)
+  SELECT @userId, @name, @orderIndex, (SELECT id FROM _folder)
+  WHERE @folderId::uuid IS NULL OR EXISTS (SELECT 1 FROM _folder)
+  RETURNING id, name, order_index, folder_id, source_template_id, assigned_by, sync_enabled, created_at
 ),
 _inserted_exercises AS (
   INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
@@ -640,6 +647,10 @@ SELECT
   t.id,
   t.name,
   t.order_index,
+  t.folder_id,
+  f.name AS folder_name,
+  f.order_index AS folder_order,
+  f.created_at AS folder_created_at,
   t.source_template_id,
   t.assigned_by AS assigned_by_id,
   p.username AS assigned_by_username,
@@ -648,12 +659,17 @@ SELECT
   t.created_at,
   COALESCE(ej.exercises_json, '[]'::jsonb) AS exercises
 FROM _template t
+LEFT JOIN template_folders f ON f.id = t.folder_id
 LEFT JOIN profiles p ON p.id = t.assigned_by
 LEFT JOIN _exercises_json ej ON true
 ''';
 
 const _replaceTemplate = '''
 WITH
+_folder AS (
+  SELECT id FROM template_folders
+  WHERE id = @folderId::uuid AND user_id = @userId
+),
 _order_to_name AS (
   SELECT
     (ex->>'order')::int AS exercise_order,
@@ -667,11 +683,17 @@ _exercise_lookup AS (
   WHERE e.user_id IS NULL OR e.user_id = @userId
   ORDER BY e.name, e.user_id NULLS LAST
 ),
+-- @movesFolder distinguishes "the body said nothing about folderId" (leave it
+-- where it is) from "the body said folderId: null" (unfile it). A folderId the
+-- user does not own matches no row, so the update reports NotFound.
 _template AS (
   UPDATE templates
-  SET name = @name, order_index = @orderIndex
+  SET name = @name,
+      order_index = @orderIndex,
+      folder_id = CASE WHEN @movesFolder::boolean THEN (SELECT id FROM _folder) ELSE folder_id END
   WHERE id = @templateId::uuid AND user_id = @userId
-  RETURNING id, name, order_index, source_template_id, assigned_by, sync_enabled, created_at
+    AND (NOT @movesFolder::boolean OR @folderId::uuid IS NULL OR EXISTS (SELECT 1 FROM _folder))
+  RETURNING id, name, order_index, folder_id, source_template_id, assigned_by, sync_enabled, created_at
 ),
 _deleted AS (
   DELETE FROM template_exercises WHERE template_id = (SELECT id FROM _template)
@@ -736,6 +758,10 @@ SELECT
   t.id,
   t.name,
   t.order_index,
+  t.folder_id,
+  f.name AS folder_name,
+  f.order_index AS folder_order,
+  f.created_at AS folder_created_at,
   t.source_template_id,
   t.assigned_by AS assigned_by_id,
   p.username AS assigned_by_username,
@@ -744,6 +770,7 @@ SELECT
   t.created_at,
   COALESCE(ej.exercises_json, '[]'::jsonb) AS exercises
 FROM _template t
+LEFT JOIN template_folders f ON f.id = t.folder_id
 LEFT JOIN profiles p ON p.id = t.assigned_by
 LEFT JOIN _exercises_json ej ON true
 ''';
@@ -753,6 +780,10 @@ SELECT
   t.id,
   t.name,
   t.order_index,
+  t.folder_id,
+  f.name AS folder_name,
+  f.order_index AS folder_order,
+  f.created_at AS folder_created_at,
   t.source_template_id,
   t.assigned_by AS assigned_by_id,
   p.username AS assigned_by_username,
@@ -761,15 +792,23 @@ SELECT
   t.created_at,
   _template_exercises(t.id) AS exercises
 FROM templates t
+LEFT JOIN template_folders f ON f.id = t.folder_id
 LEFT JOIN profiles p ON p.id = t.assigned_by
 WHERE t.id = @templateId::uuid AND t.user_id = @userId
 ''';
 
+/// Keyset-paginated on `id DESC` (uuidv7, so newest first). The two folder
+/// predicates are mutually exclusive in practice: @folderId narrows to one
+/// folder, @unfiledOnly to the templates in none; neither set means everything.
 const _listTemplates = '''
 SELECT
   t.id,
   t.name,
   t.order_index,
+  t.folder_id,
+  f.name AS folder_name,
+  f.order_index AS folder_order,
+  f.created_at AS folder_created_at,
   t.source_template_id,
   t.assigned_by AS assigned_by_id,
   p.username AS assigned_by_username,
@@ -778,9 +817,12 @@ SELECT
   t.created_at,
   _template_exercises(t.id) AS exercises
 FROM templates t
+LEFT JOIN template_folders f ON f.id = t.folder_id
 LEFT JOIN profiles p ON p.id = t.assigned_by
 WHERE t.user_id = @userId
   AND (@cursor::uuid IS NULL OR t.id < @cursor::uuid)
+  AND (@folderId::uuid IS NULL OR t.folder_id = @folderId::uuid)
+  AND (NOT @unfiledOnly::boolean OR t.folder_id IS NULL)
 ORDER BY t.id DESC
 LIMIT @limit
 ''';
@@ -804,43 +846,71 @@ ORDER BY ts.id DESC
 LIMIT @limit
 ''';
 
-const _shareTemplate = '''
+/// Assigns one or more of a coach's master templates to a student.
+///
+/// Two endpoints share this statement: assigning a single template (its id goes
+/// in `@masterTemplateIds`) and assigning a whole folder (`@folderId`, and every
+/// template filed there goes). `@folderId` wins when both are supplied.
+///
+/// Assignment **copies** rather than references — the student gets their own
+/// templates, their own exercises and sets, and copies of any exercise their
+/// library was missing — so nothing the coach edits later mutates a plan the
+/// student is mid-way through. Idempotent per master: one already shared with
+/// this student returns its existing share untouched, which is what makes
+/// re-assigning a folder after adding one template to it safe.
+///
+/// Returns one row per master, plus a `forbidden` flag — the permission check is
+/// per (coach, student), so it is the same on every row.
+const _shareTemplates = '''
 WITH
 _student AS (
-  SELECT id, username, avatar_url 
-  FROM profiles 
+  SELECT id, username, avatar_url
+  FROM profiles
   WHERE id = @studentId
 ),
 _master AS (
-  SELECT id, name 
-  FROM templates 
-  WHERE id = @masterTemplateId::uuid 
-    AND user_id = @coachId
+  SELECT id, name
+  FROM templates
+  WHERE user_id = @coachId
+    AND CASE
+          WHEN @folderId::uuid IS NOT NULL THEN folder_id = @folderId::uuid
+          ELSE id = ANY (@masterTemplateIds::uuid[])
+        END
 ),
 _existing AS (
-  SELECT id, student_template_id, created_at 
+  SELECT id, master_template_id, student_template_id, created_at
   FROM template_shares
-  WHERE coach_id = @coachId 
-    AND student_id = @studentId 
-    AND master_template_id = @masterTemplateId::uuid
+  WHERE coach_id = @coachId
+    AND student_id = @studentId
+    AND master_template_id IN (SELECT id FROM _master)
 ),
+-- The connection has to be live. A pending request, a declined one, or a
+-- severed or blocked relationship is not a licence to push templates into
+-- someone's library — matching `_areConnected`, which has always required this.
 _allowed AS (
   SELECT 1 FROM connections
-  WHERE (initiator_id = @coachId AND target_id = @studentId AND initiator_role IN ('COACH', 'PEER'))
-     OR (initiator_id = @studentId AND target_id = @coachId AND target_role IN ('COACH', 'PEER'))
+  WHERE status = 'active'
+    AND (
+      (initiator_id = @coachId AND target_id = @studentId AND initiator_role IN ('COACH', 'PEER'))
+      OR
+      (initiator_id = @studentId AND target_id = @coachId AND target_role IN ('COACH', 'PEER'))
+    )
   LIMIT 1
 ),
-_should_share AS (
-  SELECT 1
-  WHERE EXISTS (SELECT 1 FROM _master)
-    AND EXISTS (SELECT 1 FROM _allowed)
-    AND NOT EXISTS (SELECT 1 FROM _existing)
+-- Decided per master rather than per call: assigning a folder where three of
+-- five templates already went must still send the other two.
+_to_share AS (
+  SELECT m.id, m.name
+  FROM _master m
+  WHERE EXISTS (SELECT 1 FROM _allowed)
+    AND NOT EXISTS (SELECT 1 FROM _existing e WHERE e.master_template_id = m.id)
 ),
--- For each exercise the master template references, capture its full data
--- and look up whichever exercise the student already has access to under
--- the same name (their own custom first, otherwise the global).
+-- For each exercise the masters reference, capture its full data and look up
+-- whichever exercise the student already has access to under the same name
+-- (their own custom first, otherwise the global).
 _master_exercises AS (
   SELECT
+    te.template_id AS master_id,
     te.id AS source_te_id,
     te.exercise_order,
     e.name, e.category, e.target, e.instructions, e.asset, e.thumbnail, e.muscles, e.movement,
@@ -853,12 +923,10 @@ _master_exercises AS (
     ) AS resolved_id
   FROM template_exercises te
   JOIN exercises e ON e.id = te.exercise_id
-  WHERE te.template_id = @masterTemplateId::uuid
-    AND EXISTS (SELECT 1 FROM _should_share)
+  WHERE te.template_id IN (SELECT id FROM _to_share)
 ),
--- Copy any unresolved exercises into the student's library so the FK
--- holds. DISTINCT ON dedupes if the master happened to list the same
--- exercise twice.
+-- Copy any unresolved exercises into the student's library so the FK holds.
+-- DISTINCT ON dedupes across masters that name the same missing exercise.
 _copied_exercises AS (
   INSERT INTO exercises (name, category, target, instructions, asset, thumbnail, muscles, movement, user_id)
   SELECT DISTINCT ON (name)
@@ -867,59 +935,63 @@ _copied_exercises AS (
   WHERE resolved_id IS NULL
   RETURNING id, name
 ),
--- const mapping of exercise_order → exercise_id the student template
+-- The mapping of (master, exercise_order) → the exercise_id the student's copy
 -- should reference.
 _resolved_exercises AS (
   SELECT
+    me.master_id,
     me.exercise_order,
     me.source_te_id,
     coalesce(me.resolved_id, c.id) AS exercise_id
   FROM _master_exercises me
   LEFT JOIN _copied_exercises c ON c.name = me.name AND me.resolved_id IS NULL
 ),
+-- The student's copies land unfiled — folder_id defaults to NULL. The coach's
+-- filing is the coach's business; the student organises their own library.
 _new_template AS (
   INSERT INTO templates (user_id, name, order_index, source_template_id, assigned_by, sync_enabled)
-  SELECT @studentId, m.name, 0, m.id, @coachId, true
-  FROM _master m
-  WHERE EXISTS (SELECT 1 FROM _should_share)
-  RETURNING id
+  SELECT @studentId, s.name, 0, s.id, @coachId, true
+  FROM _to_share s
+  RETURNING id, source_template_id
 ),
 _new_exercises AS (
   INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
   SELECT nt.id, re.exercise_id, re.exercise_order
   FROM _new_template nt
-  CROSS JOIN _resolved_exercises re
-  RETURNING id, exercise_order
+  JOIN _resolved_exercises re ON re.master_id = nt.source_template_id
+  RETURNING id, template_id, exercise_order
 ),
 _new_sets AS (
   INSERT INTO template_exercise_sets (template_exercise_id, weight, reps, duration, distance, set_order)
   SELECT ne.id, tes.weight, tes.reps, tes.duration, tes.distance, tes.set_order
   FROM _new_exercises ne
-  JOIN _resolved_exercises re ON re.exercise_order = ne.exercise_order
+  JOIN _new_template nt ON nt.id = ne.template_id
+  JOIN _resolved_exercises re
+    ON re.master_id = nt.source_template_id AND re.exercise_order = ne.exercise_order
   JOIN template_exercise_sets tes ON tes.template_exercise_id = re.source_te_id
   RETURNING id
 ),
 _new_share AS (
   INSERT INTO template_shares (coach_id, student_id, master_template_id, student_template_id)
-  SELECT @coachId, @studentId, @masterTemplateId::uuid, nt.id
+  SELECT @coachId, @studentId, nt.source_template_id, nt.id
   FROM _new_template nt
-  WHERE NOT EXISTS (SELECT 1 FROM _new_sets WHERE false)
-  RETURNING id, student_template_id, created_at
+  RETURNING id, master_template_id, student_template_id, created_at
 )
 SELECT
   COALESCE(ns.id, ex.id) AS id,
   s.id AS student_id,
-  @masterTemplateId::uuid AS master_template_id,
+  m.id AS master_template_id,
   COALESCE(ns.student_template_id, ex.student_template_id) AS student_template_id,
   m.name AS template_name,
   s.username AS student_username,
   s.avatar_url AS student_avatar,
   COALESCE(ns.created_at, ex.created_at) AS created_at,
-  NOT EXISTS (SELECT 1 FROM _allowed) AND NOT EXISTS (SELECT 1 FROM _existing) AS forbidden
+  NOT EXISTS (SELECT 1 FROM _allowed) AS forbidden
 FROM _student s
 CROSS JOIN _master m
-LEFT JOIN _new_share ns ON true
-LEFT JOIN _existing ex ON true
+LEFT JOIN _new_share ns ON ns.master_template_id = m.id
+LEFT JOIN _existing ex ON ex.master_template_id = m.id
+ORDER BY m.id
 ''';
 
 const _deleteTemplate = '''
@@ -952,6 +1024,81 @@ _deleted AS (
   RETURNING id
 )
 SELECT id FROM _deleted
+''';
+
+const _listTemplateFolders = '''
+SELECT
+  f.id,
+  f.name,
+  f.order_index,
+  f.created_at,
+  count(t.id) AS template_count
+FROM template_folders f
+LEFT JOIN templates t ON t.folder_id = f.id
+WHERE f.user_id = @userId
+GROUP BY f.id
+ORDER BY f.order_index, lower(f.name)
+''';
+
+/// `ON CONFLICT DO NOTHING` on the case-insensitive unique index turns a
+/// duplicate name into zero rows instead of a 23505 the route would surface as a
+/// 500. The owner always exists (they are authenticated), so no rows can only
+/// mean the name is taken.
+const _createTemplateFolder = '''
+INSERT INTO template_folders (user_id, name, order_index)
+VALUES (@userId, @name, @orderIndex)
+ON CONFLICT (user_id, lower(name)) DO NOTHING
+RETURNING id, name, order_index, created_at, 0 AS template_count
+''';
+
+/// Three outcomes, told apart without a second round trip: no rows (the folder
+/// is not the caller's), one row with `name_taken` (the rename would collide),
+/// one row with the folder (renamed).
+const _updateTemplateFolder = '''
+WITH
+_target AS (
+  SELECT id FROM template_folders
+  WHERE id = @folderId::uuid AND user_id = @userId
+),
+_conflict AS (
+  SELECT 1 FROM template_folders
+  WHERE user_id = @userId
+    AND lower(name) = lower(@name)
+    AND id <> @folderId::uuid
+),
+_updated AS (
+  UPDATE template_folders
+  SET name = @name, order_index = @orderIndex
+  WHERE id = (SELECT id FROM _target)
+    AND NOT EXISTS (SELECT 1 FROM _conflict)
+  RETURNING id, name, order_index, created_at
+)
+SELECT
+  t.id,
+  u.name,
+  u.order_index,
+  u.created_at,
+  (SELECT count(*) FROM templates WHERE folder_id = t.id) AS template_count,
+  EXISTS (SELECT 1 FROM _conflict) AS name_taken
+FROM _target t
+LEFT JOIN _updated u ON u.id = t.id
+''';
+
+/// The templates inside survive — `templates_folder_fk` is `ON DELETE SET NULL
+/// (folder_id)`, so they come back unfiled rather than being destroyed.
+const _deleteTemplateFolder = '''
+DELETE FROM template_folders
+WHERE id = @folderId::uuid AND user_id = @userId
+RETURNING id
+''';
+
+/// Runs only when a folder assignment shared nothing, to tell the three causes
+/// apart: an unknown folder, an unknown student, or a folder that is simply
+/// empty. One row, always.
+const _diagnoseEmptyFolderShare = '''
+SELECT
+  EXISTS (SELECT 1 FROM template_folders WHERE id = @folderId::uuid AND user_id = @coachId) AS folder_exists,
+  EXISTS (SELECT 1 FROM profiles WHERE id = @studentId) AS student_exists
 ''';
 
 const _areConnected = '''
