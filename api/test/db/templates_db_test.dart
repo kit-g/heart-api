@@ -204,6 +204,32 @@ void main() {
       });
     });
 
+    test('shareTemplate reports the master it came from', () async {
+      final master = await seedMasterTemplate();
+      final share = await h.db.shareTemplate(coachId: coachId, targetUserId: studentId, masterTemplateId: master);
+      expect(share.masterTemplateId, master);
+    });
+
+    // The permission gate used to check only that a connection row existed, so
+    // anyone who had ever sent a request — or been blocked — could push
+    // templates into the other person's library.
+    for (final status in ['pending', 'declined', 'severed', 'blocked', 'paused']) {
+      test('a $status connection is not permission to assign', () async {
+        final coach = await h.seedProfile();
+        final student = await h.seedProfile();
+        await h.seedConnection(initiator: coach, target: student, role: 'COACH', status: status);
+        final master = await h.insertId(
+          'INSERT INTO templates (user_id, name, order_index) VALUES (@u, @n, 0) RETURNING id',
+          {'u': coach, 'n': h.uniqueName('Gated')},
+        );
+
+        await expectLater(
+          h.db.shareTemplate(coachId: coach, targetUserId: student, masterTemplateId: master),
+          throwsA(isA<Forbidden>()),
+        );
+      });
+    }
+
     test('deleteShare removes the share by its uuid', () async {
       final master = await seedMasterTemplate();
       final share = await h.db.shareTemplate(coachId: coachId, targetUserId: studentId, masterTemplateId: master);
