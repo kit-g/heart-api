@@ -5,9 +5,9 @@
 -- shorthand for sharing every template in it, and the student's copies land unfoldered for them to
 -- file themselves.
 --
--- Unlike most tables here this one does NOT lead with DROP: it hangs a column off the live
--- `templates` table, so the migration is written to be re-runnable without discarding anyone's
--- filing.
+-- Re-runnable like the rest: the column is dropped and re-added, and the FK dropped and re-added,
+-- so applying this twice lands in the same place. Re-running discards filing, as a drop always
+-- does — fine in dev, and the runner never re-applies a recorded migration anyway.
 
 CREATE TABLE IF NOT EXISTS template_folders
 (
