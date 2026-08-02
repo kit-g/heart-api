@@ -8,6 +8,7 @@ import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
 part 'comments.dart';
+part 'connections.dart';
 part 'devices.dart';
 part 'goals.dart';
 part 'pagination.dart';
