@@ -131,6 +131,8 @@ Critically, `cursor` is **only included in the response body when `hasMore` is t
 
 Every list endpoint takes the same query shape — `?cursor=<opaque>&limit=N` — parsed and bounds-checked by `PageQuery.fromRequest(req)` (see `pagination.dart`). `cursorOf` derives the next cursor from the last item's `id`. This relies on the keyset ordering key being the item's serialized `id`, so list queries order by the same `id` they return.
 
+That holds for every list ordered by creation (uuidv7 is chronological). A list the user has **arranged** cannot use it: the sort key is `order`, which isn't unique, so the id has to ride along as a tie-break and the cursor must carry both. `OrderedCursor` in `heart_models` is that pair, serialized `<order>:<id>` and still opaque to clients; `TemplateListQuery` parses it and `getMyTemplates` emits it via `cursorOf`. Templates are the only such list today — reach for it if you add another, rather than paginating a user-ordered list on id and quietly ignoring their arrangement.
+
 ## Adding a new endpoint
 
 1. Add a `<Verb><Noun>In` (or `…Query`) class in the matching `lib/inputs/<domain>.dart`.
