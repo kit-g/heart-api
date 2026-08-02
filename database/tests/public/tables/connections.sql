@@ -87,14 +87,15 @@ SELECT throws_ok(
                'an unknown role is rejected'
        );
 
-SELECT throws_ok(
+-- Domain is deliberately unconstrained — it is a partition label the code never branches on, and
+-- ConnectionDomain.fromString is what keeps unknown values out on the way in. Adding an activity
+-- should not need a migration.
+SELECT lives_ok(
                $$
                INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain)
-               VALUES ('conn-a', 'conn-b', 'PEER', 'PEER', 'yoga')
+               VALUES ('conn-a', 'conn-b', 'PEER', 'PEER', 'cycling')
                $$,
-               '23514',
-               NULL,
-               'an unknown domain is rejected'
+               'a new domain needs no schema change'
        );
 
 SELECT throws_ok(
