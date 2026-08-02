@@ -7,8 +7,13 @@ void main() {
       expect(ConnectionRole.fromString('COACH'), equals(ConnectionRole.coach));
       expect(ConnectionRole.fromString('student'), equals(ConnectionRole.student));
       expect(ConnectionRole.fromString('PeEr'), equals(ConnectionRole.peer));
-      // Fallback
-      expect(ConnectionRole.fromString('unknown'), equals(ConnectionRole.peer));
+    });
+
+    // It used to fall back to peer, so asking to be someone's coach and typo'ing
+    // it produced a peer connection and a 200.
+    test('fromString throws on an unknown role rather than defaulting', () {
+      expect(() => ConnectionRole.fromString('unknown'), throwsArgumentError);
+      expect(() => ConnectionRole.fromString(''), throwsArgumentError);
     });
 
     test('reciprocal returns the opposite role', () {
@@ -24,8 +29,10 @@ void main() {
       expect(ConnectionDomain.fromString('SWIMMING'), equals(ConnectionDomain.swimming));
       expect(ConnectionDomain.fromString('RuNnInG'), equals(ConnectionDomain.running));
       expect(ConnectionDomain.fromString('general'), equals(ConnectionDomain.general));
-      // Fallback
-      expect(ConnectionDomain.fromString('unknown'), equals(ConnectionDomain.general));
+    });
+
+    test('fromString throws on an unknown domain rather than defaulting', () {
+      expect(() => ConnectionDomain.fromString('unknown'), throwsArgumentError);
     });
   });
 
@@ -34,8 +41,23 @@ void main() {
       expect(ConnectionStatus.fromString('pending'), equals(ConnectionStatus.pending));
       expect(ConnectionStatus.fromString('ACTIVE'), equals(ConnectionStatus.active));
       expect(ConnectionStatus.fromString('blocked'), equals(ConnectionStatus.blocked));
-      // Fallback
-      expect(ConnectionStatus.fromString('unknown'), equals(ConnectionStatus.pending));
+    });
+
+    test('fromString throws on an unknown status rather than defaulting', () {
+      expect(() => ConnectionStatus.fromString('unknown'), throwsArgumentError);
+    });
+
+    test('accepting and declining are the target\'s alone', () {
+      expect(ConnectionStatus.active.isTheTargetsAlone, isTrue);
+      expect(ConnectionStatus.declined.isTheTargetsAlone, isTrue);
+      for (final other in [
+        ConnectionStatus.pending,
+        ConnectionStatus.paused,
+        ConnectionStatus.severed,
+        ConnectionStatus.blocked,
+      ]) {
+        expect(other.isTheTargetsAlone, isFalse, reason: '${other.name} is either party\'s to make');
+      }
     });
 
     test('canTransitionTo enforces valid state changes', () {
