@@ -67,11 +67,13 @@ COMMENT ON CONSTRAINT templates_folder_fk ON templates IS
     'A template can only be filed into a folder belonging to the same user';
 
 
+-- Connections.
+--
 -- The table had no vocabulary constraints at all — `CHECK (length(status) > 0)` and nothing more —
--- so the only thing keeping role/domain/status inside their enums was Dart, and Dart was coercing
--- unknown values rather than rejecting them (a typo'd role silently became PEER). It also had no
--- record of *who* set the current status, which meant a block could not be told from any other
--- status: the blocked party could lift it themselves.
+-- so the only thing keeping role/status inside their enums was Dart, and Dart was coercing unknown
+-- values rather than rejecting them (a typo'd role silently became PEER). It also had no record of
+-- *who* set the current status, which meant a block could not be told from any other status: the
+-- blocked party could lift it themselves.
 
 -- A self-connection is meaningless and nothing ever guarded against one. Clear any before the
 -- constraint lands.
@@ -94,10 +96,19 @@ ALTER TABLE connections
     DROP CONSTRAINT IF EXISTS connections_status_check,
     DROP CONSTRAINT IF EXISTS connections_no_self_check;
 
+-- Roles and statuses are constrained; domain deliberately is not.
+--
+-- The code *branches* on role and status — reciprocal role mapping, the transition table, the
+-- IN ('COACH', 'PEER') gate lists, every `status = 'active'` check — so those vocabularies are load
+-- bearing and adding a value to either means touching code regardless. Pinning them here is free.
+--
+-- Domain is an opaque partition key. Not one gate filters on it; it exists so the same pair can hold
+-- separate relationships for separate activities. Adding "cycling" is a product decision, and a
+-- CHECK would turn it into a schema migration for no protection the input layer does not already
+-- give: ConnectionDomain.fromString rejects unknown values before they reach the column.
 ALTER TABLE connections
     ADD CONSTRAINT connections_initiator_role_check CHECK (initiator_role IN ('COACH', 'STUDENT', 'PEER')),
     ADD CONSTRAINT connections_target_role_check CHECK (target_role IN ('COACH', 'STUDENT', 'PEER')),
-    ADD CONSTRAINT connections_domain_check CHECK (domain IN ('fitness', 'swimming', 'running', 'general')),
     ADD CONSTRAINT connections_status_check
         CHECK (status IN ('pending', 'active', 'declined', 'severed', 'blocked', 'paused')),
     ADD CONSTRAINT connections_no_self_check CHECK (initiator_id <> target_id);
