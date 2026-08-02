@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(25);
+SELECT plan(26);
 
 SELECT has_table('public'::name, 'templates'::name);
 
@@ -52,6 +52,8 @@ SELECT fk_ok(
        );
 
 SELECT has_index('public'::name, 'templates'::name, 'templates_folder_id_idx'::name);
+-- keyset support for _listTemplates: ORDER BY (order_index, id) scoped to one owner
+SELECT has_index('public'::name, 'templates'::name, 'templates_user_order_idx'::name);
 
 SELECT * FROM finish();
 
