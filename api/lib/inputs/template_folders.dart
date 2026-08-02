@@ -38,31 +38,6 @@ class TemplateFolderUpdateIn {
   TemplateFolder get folder => TemplateFolder(name: name, order: order);
 }
 
-/// `GET /templates?cursor=&limit=&folder=` — the existing page query plus an
-/// optional folder filter.
-///
-/// `folder=<uuid>` lists that folder; the literal `folder=none` lists the
-/// templates in no folder at all. Omitting it lists everything the user owns,
-/// which is what the app has always received.
-class TemplateListQuery {
-  static const unfiled = 'none';
-
-  final PageQuery page;
-  final String? folderId;
-  final bool unfiledOnly;
-
-  const TemplateListQuery._({required this.page, required this.folderId, required this.unfiledOnly});
-
-  static TemplateListQuery fromRequest(Request req) {
-    final folder = req.url.queryParameters.stringOrNull('folder');
-    return TemplateListQuery._(
-      page: PageQuery.fromRequest(req),
-      folderId: folder == unfiled ? null : folder,
-      unfiledOnly: folder == unfiled,
-    );
-  }
-}
-
 extension on Map<String, dynamic> {
   /// Folder names are trimmed here rather than in the database so that what the
   /// uniqueness index sees is what the user will be shown.
