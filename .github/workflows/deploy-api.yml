@@ -106,9 +106,31 @@ jobs:
         working-directory: ${{ matrix.package }}
         run: dart run build_runner build --delete-conflicting-outputs
 
+      # `shared/heart_models` → `shared-heart_models`: artifact names and report
+      # filenames cannot hold a slash, and the suite stays identifiable.
+      - name: "Derive report name"
+        run: echo "REPORT_NAME=${PACKAGE//\//-}" >> "$GITHUB_ENV"
+        env:
+          PACKAGE: ${{ matrix.package }}
+
+      # `--reporter=github` puts failures inline on the PR diff; the file
+      # reporter is what the test-summary job aggregates.
       - name: "Run Tests"
         working-directory: ${{ matrix.package }}
-        run: dart test
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/test-reports"
+          dart test \
+            --reporter=github \
+            --file-reporter="json:$GITHUB_WORKSPACE/test-reports/${REPORT_NAME}.json"
+
+      - name: "Upload test report"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-${{ env.REPORT_NAME }}
+          path: test-reports/
+          if-no-files-found: ignore
+          retention-days: 7
 
   db-test:
     name: "Database Tests & Coverage"
@@ -151,10 +173,15 @@ jobs:
       - name: "Load test helpers"
         run: psql -v ON_ERROR_STOP=1 --quiet -f database/test_utils/helpers.sql
 
+      # tee, so a failure still reaches the summary: pipefail keeps pg_prove's
+      # exit status rather than tee's.
       - name: "Run pgtap suite"
         working-directory: database
         shell: bash -O globstar {0}
-        run: pg_prove tests/**/*.sql --quiet
+        run: |
+          set -o pipefail
+          mkdir -p "$GITHUB_WORKSPACE/test-reports"
+          pg_prove tests/**/*.sql --quiet | tee "$GITHUB_WORKSPACE/test-reports/pgtap.tap"
 
       - uses: dart-lang/setup-dart@v1
 
@@ -171,16 +198,57 @@ jobs:
       # the DB integration tests exercise. This subsumes the db-only run.
       - name: "Run tests with coverage"
         working-directory: api
-        run: dart test --coverage=coverage --run-skipped
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/test-reports"
+          dart test \
+            --coverage=coverage \
+            --run-skipped \
+            --reporter=github \
+            --file-reporter="json:$GITHUB_WORKSPACE/test-reports/api-with-db.json"
 
       - name: "Enforce coverage floor"
         working-directory: api
         run: |
+          set -o pipefail
           dart pub global activate coverage
           dart pub global run coverage:format_coverage \
             --lcov --in=coverage --out=coverage/lcov.info \
             --report-on=lib --packages=.dart_tool/package_config.json
-          dart run tool/check_coverage.dart 75
+          dart run tool/check_coverage.dart 75 | tee "$GITHUB_WORKSPACE/test-reports/coverage.txt"
+
+      - name: "Upload test report"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-database
+          path: test-reports/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  test-summary:
+    name: "Test Summary"
+    runs-on: ubuntu-latest
+    needs: [ dart-test, db-test ]
+    # The point of the summary is the runs that went wrong, so it must not be
+    # skipped when a test job fails.
+    if: always()
+    steps:
+      - uses: actions/checkout@v6
+
+      # A cancelled or skipped test job leaves nothing to download; the summary
+      # says so rather than failing and adding a second red X to the run.
+      - name: "Collect reports"
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-report-*
+          path: test-reports
+          merge-multiple: true
+
+      - name: "Render summary"
+        run: |
+          python3 scripts/test_summary.py test-reports test-reports/coverage.txt \
+            >> "$GITHUB_STEP_SUMMARY"
 
 
   build-and-deploy:
