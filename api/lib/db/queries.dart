@@ -797,9 +797,14 @@ LEFT JOIN profiles p ON p.id = t.assigned_by
 WHERE t.id = @templateId::uuid AND t.user_id = @userId
 ''';
 
-/// Keyset-paginated on `id DESC` (uuidv7, so newest first). The two folder
-/// predicates are mutually exclusive in practice: @folderId narrows to one
-/// folder, @unfiledOnly to the templates in none; neither set means everything.
+/// Keyset-paginated on `(order_index, id)` ascending — the owner's arrangement,
+/// with the id as tie-break because `order_index` is not unique. That pair is
+/// also `Template.compareTo`'s ordering, so the app receives the list already in
+/// the order its own model would sort it into. Backed by `templates_user_order_idx`.
+///
+/// The two folder predicates are mutually exclusive in practice: @folderId
+/// narrows to one folder, @unfiledOnly to the templates in none; neither set
+/// means everything.
 const _listTemplates = '''
 SELECT
   t.id,
@@ -820,10 +825,10 @@ FROM templates t
 LEFT JOIN template_folders f ON f.id = t.folder_id
 LEFT JOIN profiles p ON p.id = t.assigned_by
 WHERE t.user_id = @userId
-  AND (@cursor::uuid IS NULL OR t.id < @cursor::uuid)
+  AND (@cursorId::uuid IS NULL OR (t.order_index, t.id) > (@cursorOrder::int, @cursorId::uuid))
   AND (@folderId::uuid IS NULL OR t.folder_id = @folderId::uuid)
   AND (NOT @unfiledOnly::boolean OR t.folder_id IS NULL)
-ORDER BY t.id DESC
+ORDER BY t.order_index, t.id
 LIMIT @limit
 ''';
 
