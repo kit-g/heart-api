@@ -34,14 +34,14 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
 
   @override
   Future<Connection?> getConnection({
-    required String initiatorId,
+    required String actorId,
     required String targetId,
     required ConnectionRole role,
     required ConnectionDomain domain,
   }) async {
     final result = await _pool.execute(
       _getConnection.toSql(),
-      parameters: {'userId': initiatorId, 'targetId': targetId, 'role': role.value, 'domain': domain.value},
+      parameters: {'userId': actorId, 'targetId': targetId, 'role': role.value, 'domain': domain.value},
     );
     if (result.isEmpty) return null;
     return Connection.fromRow(result.first.toColumnMap());
@@ -49,27 +49,34 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
 
   @override
   Future<void> deleteConnection({
-    required String initiatorId,
+    required String actorId,
     required String targetId,
     required ConnectionRole role,
     required ConnectionDomain domain,
-  }) {
-    return _pool.execute(
+  }) async {
+    final result = await _pool.execute(
       _deleteConnection.toSql(),
-      parameters: {'initiatorId': initiatorId, 'targetId': targetId, 'domain': domain.value},
+      parameters: {'actorId': actorId, 'targetId': targetId, 'domain': domain.value},
     );
+
+    final row = result.first.toColumnMap();
+    // Nothing there is a no-op, as it always has been. Something there that did
+    // not go is the block guard refusing.
+    if (row['existed'] == true && row['deleted'] != true) {
+      throw const Forbidden(reason: 'You cannot remove a connection that blocks you.');
+    }
   }
 
   @override
   Future<Connection> changeConnectionStatus({
-    required String initiatorId,
+    required String actorId,
     required String targetId,
     required ConnectionRole role,
     required ConnectionDomain domain,
     required ConnectionStatus newStatus,
   }) async {
     final existing = await getConnection(
-      initiatorId: initiatorId,
+      actorId: actorId,
       targetId: targetId,
       role: role,
       domain: domain,
@@ -80,15 +87,23 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       throw StateError('Cannot transition from ${existing.status.name} to ${newStatus.name}');
     }
 
-    await _pool.execute(
+    // The transition is legal in the abstract; whether it is *this* caller's to
+    // make, and whether the status is still what we just read, are settled by
+    // the UPDATE's own WHERE so neither can be raced past.
+    final updated = await _pool.execute(
       _updateConnectionStatus.toSql(),
       parameters: {
-        'initiatorId': initiatorId,
+        'actorId': actorId,
         'targetId': targetId,
         'domain': domain.value,
         'newStatus': newStatus.name,
+        'expectedStatus': existing.status.name,
       },
     );
+
+    if (updated.isEmpty) {
+      throw Forbidden(reason: _refusal(existing.status, newStatus));
+    }
 
     return Connection(
       targetId: existing.targetId,
@@ -97,6 +112,19 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       status: newStatus,
       createdAt: existing.createdAt,
     );
+  }
+
+  /// The UPDATE matched nothing. The legality and existence checks already
+  /// passed, so it is one of the actor rules — or, rarely, someone else moved
+  /// the status between the read and the write.
+  static String _refusal(ConnectionStatus from, ConnectionStatus to) {
+    if (from == .pending && to.isTheTargetsAlone) {
+      return 'Only the person you sent this request to can ${to == ConnectionStatus.active ? 'accept' : 'decline'} it.';
+    }
+    if (from == .blocked) {
+      return 'Only the person who blocked can lift a block.';
+    }
+    return 'This connection changed while you were acting on it. Fetch it again.';
   }
 
   @override

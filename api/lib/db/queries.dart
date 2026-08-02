@@ -160,8 +160,8 @@ WITH target_exists AS (
   SELECT 1 FROM profiles WHERE id = @targetId
 ),
 inserted AS (
-  INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain)
-  SELECT @initiatorId, @targetId, @initiatorRole, @targetRole, @domain
+  INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status_by)
+  SELECT @initiatorId, @targetId, @initiatorRole, @targetRole, @domain, @initiatorId
   WHERE exists(SELECT 1 FROM target_exists)
   ON CONFLICT (initiator_id, target_id, domain) DO NOTHING
   RETURNING target_id, initiator_role AS "role", domain, status, created_at
@@ -216,20 +216,54 @@ WHERE domain = @domain
   )
 ''';
 
+/// Severing is either party's call — except while a block stands, when only the
+/// blocker may remove the row. Without that, blocking someone is undone by the
+/// person you blocked, since a hard delete makes them re-requestable.
+///
+/// Returns one row either way: `existed` separates "already gone" (a no-op, as
+/// it has always been) from `deleted` false, which is a refusal.
 const _deleteConnection = '''
-DELETE FROM connections
-WHERE (initiator_id, target_id, domain) IN (
-  (@initiatorId, @targetId, @domain),
-  (@targetId, @initiatorId, @domain)
+WITH
+_pair AS (
+  SELECT status, status_by FROM connections
+  WHERE (initiator_id, target_id, domain) IN (
+    (@actorId, @targetId, @domain),
+    (@targetId, @actorId, @domain)
+  )
+),
+_deleted AS (
+  DELETE FROM connections
+  WHERE (initiator_id, target_id, domain) IN (
+    (@actorId, @targetId, @domain),
+    (@targetId, @actorId, @domain)
+  )
+  AND EXISTS (SELECT 1 FROM _pair WHERE status <> 'blocked' OR status_by = @actorId)
+  RETURNING 1
 )
+SELECT
+  EXISTS (SELECT 1 FROM _deleted) AS deleted,
+  EXISTS (SELECT 1 FROM _pair) AS existed
 ''';
 
+/// The two rules that turn on *which* side is asking, enforced here rather than
+/// in Dart so they cannot be raced past:
+///
+/// - accepting or declining a request belongs to the person who received it; the
+///   author of a pending request must not be able to approve their own.
+/// - only whoever set a block may lift it.
+///
+/// `@expectedStatus` makes the write optimistic-locked against the status the
+/// caller read, so a concurrent change loses rather than silently overwriting.
 const _updateConnectionStatus = '''
-UPDATE connections SET status = @newStatus
+UPDATE connections SET status = @newStatus, status_by = @actorId
 WHERE (initiator_id, target_id, domain) IN (
-  (@initiatorId, @targetId, @domain),
-  (@targetId, @initiatorId, @domain)
+  (@actorId, @targetId, @domain),
+  (@targetId, @actorId, @domain)
 )
+AND status = @expectedStatus
+AND (@newStatus NOT IN ('active', 'declined') OR status <> 'pending' OR initiator_id <> @actorId)
+AND (status <> 'blocked' OR status_by = @actorId)
+RETURNING status
 ''';
 
 const _listWorkouts = '''
@@ -238,9 +272,15 @@ _auth AS (
   SELECT (
     @requesterId::text = @targetUserId::text
     OR EXISTS (
+      -- status matters: a pending request the other person has never seen, or a
+      -- declined/severed/blocked one, is not permission to read their history.
       SELECT 1 FROM connections
-      WHERE (initiator_id = @requesterId AND target_id = @targetUserId AND initiator_role IN ('COACH', 'PEER'))
-         OR (initiator_id = @targetUserId AND target_id = @requesterId AND target_role IN ('COACH', 'PEER'))
+      WHERE status = 'active'
+        AND (
+          (initiator_id = @requesterId AND target_id = @targetUserId AND initiator_role IN ('COACH', 'PEER'))
+          OR
+          (initiator_id = @targetUserId AND target_id = @requesterId AND target_role IN ('COACH', 'PEER'))
+        )
     )
   ) AS allowed
 ),
@@ -288,9 +328,15 @@ _auth AS (
   SELECT (
     @requesterId::text = @targetUserId::text
     OR EXISTS (
+      -- status matters: a pending request the other person has never seen, or a
+      -- declined/severed/blocked one, is not permission to read their history.
       SELECT 1 FROM connections
-      WHERE (initiator_id = @requesterId AND target_id = @targetUserId AND initiator_role IN ('COACH', 'PEER'))
-         OR (initiator_id = @targetUserId AND target_id = @requesterId AND target_role IN ('COACH', 'PEER'))
+      WHERE status = 'active'
+        AND (
+          (initiator_id = @requesterId AND target_id = @targetUserId AND initiator_role IN ('COACH', 'PEER'))
+          OR
+          (initiator_id = @targetUserId AND target_id = @requesterId AND target_role IN ('COACH', 'PEER'))
+        )
     )
   ) AS allowed
 )
