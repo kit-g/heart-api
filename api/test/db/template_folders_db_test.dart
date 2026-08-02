@@ -23,12 +23,9 @@ void main() {
   TemplateRequest tReq(String userId, String name, {Object? folderId = _absent}) {
     return TemplateRequest(
       userId: userId,
-      body: {
-        'name': name,
-        'order': 0,
-        'exercises': const [],
-        if (folderId != _absent) 'folderId': folderId,
-      },
+      name: name,
+      folderId: folderId == _absent ? null : folderId as String?,
+      movesFolder: folderId != _absent,
     );
   }
 
@@ -448,20 +445,16 @@ void main() {
         userId: coachId,
         body: TemplateRequest(
           userId: coachId,
-          body: {
-            'name': name,
-            'order': 0,
-            'folderId': folder.id,
-            'exercises': [
-              {
-                'exercise': exerciseName.first.toColumnMap()['name'],
-                'order': 0,
-                'sets': [
-                  {'weight': 60, 'reps': 5},
-                ],
-              },
-            ],
-          },
+          name: name,
+          folderId: folder.id,
+          movesFolder: true,
+          exercises: [
+            TemplateExerciseRequest(
+              exerciseName: exerciseName.first.toColumnMap()['name'] as String,
+              order: 0,
+              sets: const [TemplateSetRequest(weight: 60, reps: 5)],
+            ),
+          ],
         ),
       );
     }
