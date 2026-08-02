@@ -40,7 +40,7 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
   @override
   Future<Page<Template>> getTemplates({
     required String userId,
-    String? cursor,
+    OrderedCursor? cursor,
     int limit = 30,
     String? folderId,
     bool unfiledOnly = false,
@@ -50,7 +50,8 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
       _listTemplates.toSql(),
       parameters: {
         'userId': userId,
-        'cursor': cursor,
+        'cursorOrder': cursor?.order,
+        'cursorId': cursor?.id,
         'limit': limit + 1,
         'folderId': folderId,
         'unfiledOnly': unfiledOnly,
