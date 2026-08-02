@@ -71,13 +71,46 @@ void main() {
         ),
       ).called(1);
     });
+
+    test('rejects connecting to yourself with 400', () async {
+      final res = await app.send(
+        'POST',
+        '/connections',
+        body: {'targetId': 'u1', 'role': 'PEER', 'domain': 'fitness'},
+      );
+      expect(res.status, 400);
+    });
+
+    // These used to be coerced — a typo'd role quietly produced a peer
+    // connection and a 200.
+    test('rejects an unknown role with 400', () async {
+      final res = await app.send(
+        'POST',
+        '/connections',
+        body: {'targetId': 't1', 'role': 'SENSEI', 'domain': 'fitness'},
+      );
+      expect(res.status, 400);
+    });
+
+    test('rejects an unknown domain with 400', () async {
+      final res = await app.send(
+        'POST',
+        '/connections',
+        body: {'targetId': 't1', 'role': 'PEER', 'domain': 'yoga'},
+      );
+      expect(res.status, 400);
+    });
+
+    test('rejects a missing targetId with 400', () async {
+      expect((await app.send('POST', '/connections', body: {'role': 'PEER', 'domain': 'fitness'})).status, 400);
+    });
   });
 
   group('DELETE /connections/:connectionId', () {
     test('parses the composite id and deletes (204)', () async {
       when(
         app.db.deleteConnection(
-          initiatorId: anyNamed('initiatorId'),
+          actorId: anyNamed('actorId'),
           targetId: anyNamed('targetId'),
           role: anyNamed('role'),
           domain: anyNamed('domain'),
@@ -88,7 +121,7 @@ void main() {
       expect(res.status, 204);
       verify(
         app.db.deleteConnection(
-          initiatorId: 'u1',
+          actorId: 'u1',
           targetId: 't1',
           role: ConnectionRole.coach,
           domain: ConnectionDomain.fitness,
@@ -105,7 +138,7 @@ void main() {
     test('changes status from the body', () async {
       when(
         app.db.changeConnectionStatus(
-          initiatorId: anyNamed('initiatorId'),
+          actorId: anyNamed('actorId'),
           targetId: anyNamed('targetId'),
           role: anyNamed('role'),
           domain: anyNamed('domain'),
@@ -117,7 +150,7 @@ void main() {
       expect(res.status, 200);
       verify(
         app.db.changeConnectionStatus(
-          initiatorId: 'u1',
+          actorId: 'u1',
           targetId: 't1',
           role: ConnectionRole.coach,
           domain: ConnectionDomain.fitness,
@@ -130,6 +163,11 @@ void main() {
       expect((await app.send('PUT', '/connections/t1%7CCOACH%7Cfitness', body: {})).status, 400);
     });
 
+    test('rejects an unknown status with 400 instead of reading it as pending', () async {
+      final res = await app.send('PUT', '/connections/t1%7CCOACH%7Cfitness', body: {'status': 'nonsense'});
+      expect(res.status, 400);
+    });
+
     test('rejects a malformed connection id with 400', () async {
       expect((await app.send('PUT', '/connections/bogus', body: {'status': 'active'})).status, 400);
     });
@@ -137,7 +175,7 @@ void main() {
     test('maps an illegal status transition (StateError) to 400', () async {
       when(
         app.db.changeConnectionStatus(
-          initiatorId: anyNamed('initiatorId'),
+          actorId: anyNamed('actorId'),
           targetId: anyNamed('targetId'),
           role: anyNamed('role'),
           domain: anyNamed('domain'),
