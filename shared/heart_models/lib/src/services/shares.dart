@@ -19,11 +19,14 @@ abstract interface class ApiTemplateService {
 
   Future<Template> getTemplate({required String userId, required String templateId});
 
+  /// Ordered by the owner's arrangement — `(order, id)` ascending, which is
+  /// [Template.compareTo]'s ordering — and paged on the same pair.
+  ///
   /// Pass [folderId] to list one folder's contents, or [unfiledOnly] to list the
   /// templates in no folder at all. Neither lists everything the user owns.
   Future<Page<Template>> getTemplates({
     required String userId,
-    String? cursor,
+    OrderedCursor? cursor,
     int limit,
     String? folderId,
     bool unfiledOnly,

@@ -1,7 +1,61 @@
+import 'dart:convert';
+
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('TemplateRequest', () {
+    List<dynamic> exercisesOf(TemplateRequest request) {
+      return jsonDecode(request.toParams()['exercises'] as String) as List;
+    }
+
+    test('toParams maps onto the names _saveTemplate binds', () {
+      final params = const TemplateRequest(userId: 'u1', name: 'Push', order: 2, folderId: 'f-1').toParams();
+
+      expect(params['userId'], 'u1');
+      expect(params['name'], 'Push');
+      expect(params['orderIndex'], 2);
+      expect(params['folderId'], 'f-1');
+      // movesFolder is update-only and bound separately; including it here makes
+      // the driver reject the create statement as having a superfluous variable.
+      expect(params.containsKey('movesFolder'), isFalse);
+    });
+
+    test('an empty template encodes an empty exercise array, not null', () {
+      expect(const TemplateRequest(userId: 'u1').toParams()['exercises'], '[]');
+    });
+
+    test('exercises encode with the snake_case keys the jsonb is read by', () {
+      final request = const TemplateRequest(
+        userId: 'u1',
+        exercises: [
+          TemplateExerciseRequest(
+            exerciseName: 'Bench Press',
+            order: 0,
+            sets: [TemplateSetRequest(weight: 60, reps: 5)],
+          ),
+        ],
+      );
+
+      final encoded = exercisesOf(request).single as Map;
+      expect(encoded['exercise_name'], 'Bench Press');
+      expect(encoded['order'], 0);
+      expect((encoded['sets'] as List).single, {'weight': 60, 'reps': 5});
+    });
+
+    test('a set omits the measures it does not have', () {
+      final request = const TemplateRequest(
+        userId: 'u1',
+        exercises: [
+          TemplateExerciseRequest(exerciseName: 'Plank', order: 0, sets: [TemplateSetRequest(duration: 60)]),
+        ],
+      );
+
+      final set = ((exercisesOf(request).single as Map)['sets'] as List).single as Map;
+      expect(set, {'duration': 60});
+    });
+  });
+
   group('TemplateShare', () {
     final assignedAt = DateTime.utc(2025, 1, 1, 12, 0, 0);
 
