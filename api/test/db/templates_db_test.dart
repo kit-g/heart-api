@@ -22,8 +22,8 @@ void main() {
   late String strangerId;
   late String listOwnerId; // isolated, for getTemplates pagination
 
-  TemplateRequest tReq(String userId, String name) =>
-      TemplateRequest(userId: userId, body: {'name': name, 'order': 0, 'exercises': const []});
+  TemplateRequest tReq(String userId, String name, {int order = 0}) =>
+      TemplateRequest(userId: userId, name: name, order: order);
 
   /// A coach-owned master template with one exercise + set, ready to share.
   Future<String> seedMasterTemplate() async {
@@ -72,18 +72,44 @@ void main() {
       );
     });
 
-    test('getTemplates lists an isolated owner newest-first with limit+1 pagination', () async {
-      final t1 = await h.db.createTemplate(userId: listOwnerId, body: tReq(listOwnerId, 'T1'));
-      final t2 = await h.db.createTemplate(userId: listOwnerId, body: tReq(listOwnerId, 'T2'));
+    test('getTemplates walks the owner\'s arrangement with limit+1 pagination', () async {
+      // Deliberately out of creation order: the third one created sits first.
+      final t1 = await h.db.createTemplate(userId: listOwnerId, body: tReq(listOwnerId, 'T1', order: 1));
+      final t2 = await h.db.createTemplate(userId: listOwnerId, body: tReq(listOwnerId, 'T2', order: 2));
+      final t0 = await h.db.createTemplate(userId: listOwnerId, body: tReq(listOwnerId, 'T0', order: 0));
 
       final page1 = await h.db.getTemplates(userId: listOwnerId, limit: 1);
       expect(page1.items, hasLength(1));
       expect(page1.hasMore, isTrue);
-      expect(page1.items.single.id, t2.id); // uuidv7 → newest first
+      expect(page1.items.single.id, t0.id, reason: 'order_index wins over creation order');
 
-      final page2 = await h.db.getTemplates(userId: listOwnerId, cursor: page1.items.single.id, limit: 1);
+      OrderedCursor after(Template t) => OrderedCursor(order: t.order, id: t.id);
+
+      final page2 = await h.db.getTemplates(userId: listOwnerId, cursor: after(page1.items.single), limit: 1);
       expect(page2.items.single.id, t1.id);
-      expect(page2.hasMore, isFalse);
+      expect(page2.hasMore, isTrue);
+
+      final page3 = await h.db.getTemplates(userId: listOwnerId, cursor: after(page2.items.single), limit: 1);
+      expect(page3.items.single.id, t2.id);
+      expect(page3.hasMore, isFalse);
+    });
+
+    test('templates sharing an order_index page by id without repeating or skipping', () async {
+      final owner = await h.seedProfile();
+      final created = [
+        for (var i = 0; i < 5; i++) await h.db.createTemplate(userId: owner, body: tReq(owner, 'Tied $i')),
+      ];
+
+      final walked = <String>[];
+      OrderedCursor? cursor;
+      do {
+        final page = await h.db.getTemplates(userId: owner, cursor: cursor, limit: 2);
+        walked.addAll(page.items.map((t) => t.id));
+        cursor = page.hasMore ? OrderedCursor(order: page.items.last.order, id: page.items.last.id) : null;
+      } while (cursor != null);
+
+      // All at order 0, so the id tie-break has to carry the whole walk.
+      expect(walked, created.map((t) => t.id).toList());
     });
 
     test('updateTemplate renames an owned template', () async {

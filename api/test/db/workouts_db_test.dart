@@ -125,6 +125,18 @@ void main() {
       );
     });
 
+    test('a requester whose connection is merely pending is Forbidden', () async {
+      final owner = await h.seedProfile();
+      final asker = await h.seedProfile();
+      final id = await h.seedWorkout(userId: owner);
+      await h.seedConnection(initiator: asker, target: owner, role: 'COACH', status: 'pending');
+
+      await expectLater(
+        h.db.getTargetWorkout(requesterId: asker, targetUserId: owner, workoutId: id, imageUrl: imageUrl),
+        throwsA(isA<Forbidden>()),
+      );
+    });
+
     test('a connected requester gets NotFound for a missing workout', () async {
       await expectLater(
         h.db.getTargetWorkout(
@@ -176,6 +188,23 @@ void main() {
         throwsA(isA<Forbidden>()),
       );
     });
+
+    // The gate used to check only that a connection row existed with the right
+    // role, so an unanswered request — or one that had been declined, severed or
+    // blocked — read as permission to browse someone's whole history.
+    for (final status in ['pending', 'declined', 'severed', 'blocked', 'paused']) {
+      test('a requester whose connection is $status is Forbidden', () async {
+        final owner = await h.seedProfile();
+        final asker = await h.seedProfile();
+        await h.seedWorkout(userId: owner);
+        await h.seedConnection(initiator: asker, target: owner, role: 'COACH', status: status);
+
+        await expectLater(
+          h.db.getWorkouts(userId: asker, targetUserId: owner, limit: 10, imageUrl: imageUrl),
+          throwsA(isA<Forbidden>()),
+        );
+      });
+    }
   });
 
   group('updateWorkout', () {
