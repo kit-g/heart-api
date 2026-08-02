@@ -118,48 +118,86 @@ class _TemplateShare implements TemplateShare {
   }
 }
 
+/// One set inside a [TemplateExerciseRequest]. Every measure is optional — a
+/// bodyweight set has no weight, a timed hold has no reps.
+class TemplateSetRequest {
+  final num? weight;
+  final num? reps;
+  final num? duration;
+  final num? distance;
+
+  const TemplateSetRequest({this.weight, this.reps, this.duration, this.distance});
+
+  /// Keys match what `_saveTemplate` reads out of the `@exercises` jsonb.
+  Map<String, dynamic> toJson() {
+    return {
+      'weight': ?weight,
+      'reps': ?reps,
+      'duration': ?duration,
+      'distance': ?distance,
+    };
+  }
+}
+
+/// One exercise in a template body. The exercise is addressed **by name**, not
+/// by id: the same name resolves to the caller's own custom exercise if they
+/// have one and the global otherwise, which is what lets an assigned template
+/// land on the student's own variants.
+class TemplateExerciseRequest {
+  final String exerciseName;
+  final int order;
+  final List<TemplateSetRequest> sets;
+
+  const TemplateExerciseRequest({
+    required this.exerciseName,
+    required this.order,
+    this.sets = const [],
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'exercise_name': exerciseName,
+      'order': order,
+      'sets': sets.map((s) => s.toJson()).toList(),
+    };
+  }
+}
+
+/// A validated template write, ready for `_saveTemplate` / `_replaceTemplate`.
+///
+/// Typed rather than a raw body map: HTTP shape-checking belongs in the API's
+/// input layer (`api/lib/inputs/templates.dart`), which is what builds this.
 class TemplateRequest {
   final String userId;
-  final Map<String, dynamic> body;
+  final String? name;
+  final int order;
 
-  TemplateRequest({required this.userId, required this.body});
+  /// The folder to file the template under. On an update this is only consulted
+  /// when [movesFolder] is true; null with [movesFolder] set means "unfile".
+  final String? folderId;
 
-  List<Map> _exercises() {
-    return ((body['exercises'] as List? ?? []).cast<Map>()).indexed
-        .map(
-          (record) {
-            final (index, ex) = record;
-            final name = switch (ex['exercise']) {
-              String s => s,
-              {'name': String n} => n,
-              _ => null,
-            };
-            return {
-              'exercise_name': name,
-              'order': ex['order'] ?? index,
-              'sets': ex['sets'] ?? [],
-            };
-          },
-        )
-        .where((e) => e['exercise_name'] != null)
-        .toList();
-  }
-
-  /// The folder to file the template under. Absent leaves the template where it
-  /// is on an update and unfiled on a create; an explicit null unfiles it.
-  String? get folderId => body['folderId']?.toString();
-
-  /// Whether the body spoke about filing at all. Only an update cares — see
+  /// Whether the request spoke about filing at all. Only an update cares — see
   /// `_replaceTemplate`, which leaves `folder_id` alone when this is false.
-  bool get movesFolder => body.containsKey('folderId');
+  final bool movesFolder;
+
+  final List<TemplateExerciseRequest> exercises;
+
+  const TemplateRequest({
+    required this.userId,
+    this.name,
+    this.order = 0,
+    this.folderId,
+    this.movesFolder = false,
+    this.exercises = const [],
+  });
 
   Map<String, dynamic> toParams() {
     return {
       'userId': userId,
-      'name': body['name'],
-      'orderIndex': (body['order'] as num?)?.toInt() ?? 0,
+      'name': name,
+      'orderIndex': order,
       'folderId': folderId,
-      'exercises': jsonEncode(_exercises()),
+      'exercises': jsonEncode(exercises.map((e) => e.toJson()).toList()),
     };
   }
 }
