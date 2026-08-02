@@ -1,5 +1,6 @@
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/models/errors.dart';
 import 'package:heart/routes/templates.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -11,7 +12,7 @@ import '../mocks.mocks.dart';
 
 const _meId = 'u1';
 
-Template _fakeTemplate(String id) => Template.empty(id: id, order: 0);
+Template _fakeTemplate(String id, {int order = 0}) => Template.empty(id: id, order: order);
 
 TemplateShare _fakeShare(String id) => TemplateShare(
   id: id,
@@ -56,22 +57,64 @@ void main() {
       expect(result.toMap().containsKey('cursor'), isFalse);
     });
 
-    test('emits the last template id as cursor when there is a next page', () async {
-      stub(Page(items: [_fakeTemplate('t-1'), _fakeTemplate('t-2')], hasMore: true));
+    test('emits the last template\'s order and id as cursor when there is a next page', () async {
+      stub(Page(items: [_fakeTemplate('t-1'), _fakeTemplate('t-2', order: 4)], hasMore: true));
 
       final result = await getMyTemplates(getReq('/templates'));
 
-      expect(result.toMap()['cursor'], 't-2');
+      // Both halves matter: the listing walks (order, id), not id alone.
+      expect(result.toMap()['cursor'], '4:t-2');
     });
 
     test('clamps limit to the max and passes the cursor through', () async {
       stub(const Page(items: [], hasMore: false));
 
-      await getMyTemplates(getReq('/templates', query: {'limit': '999', 'cursor': 't-9'}));
+      await getMyTemplates(getReq('/templates', query: {'limit': '999', 'cursor': '3:t-9'}));
 
-      verify(
-        templates.getTemplates(userId: _meId, cursor: 't-9', limit: 100, folderId: null, unfiledOnly: false),
-      ).called(1);
+      final sent =
+          verify(
+                templates.getTemplates(
+                  userId: _meId,
+                  cursor: captureAnyNamed('cursor'),
+                  limit: 100,
+                  folderId: null,
+                  unfiledOnly: false,
+                ),
+              ).captured.single
+              as OrderedCursor;
+      expect(sent.order, 3);
+      expect(sent.id, 't-9');
+    });
+
+    test('rejects a cursor the client made up', () async {
+      stub(const Page(items: [], hasMore: false));
+
+      await expectLater(
+        getMyTemplates(getReq('/templates', query: {'cursor': 'not-a-cursor'})),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
+    test('a cursor round-trips through the wire form it emitted', () async {
+      stub(Page(items: [_fakeTemplate('t-1', order: 7)], hasMore: true));
+      final emitted = (await getMyTemplates(getReq('/templates'))).toMap()['cursor'] as String;
+
+      stub(const Page(items: [], hasMore: false));
+      await getMyTemplates(getReq('/templates', query: {'cursor': emitted}));
+
+      final sent =
+          verify(
+                templates.getTemplates(
+                  userId: _meId,
+                  cursor: captureAnyNamed('cursor'),
+                  limit: anyNamed('limit'),
+                  folderId: anyNamed('folderId'),
+                  unfiledOnly: anyNamed('unfiledOnly'),
+                ),
+              ).captured.last
+              as OrderedCursor;
+      expect(sent.order, 7);
+      expect(sent.id, 't-1');
     });
 
     test('defaults to a limit of 30 with no cursor when unspecified', () async {
