@@ -60,7 +60,7 @@ void main() {
 
       // The target reads the reciprocal role.
       final fromStudent = await h.db.getConnection(
-        initiatorId: student,
+        actorId: student,
         targetId: coach,
         role: ConnectionRole.student,
         domain: ConnectionDomain.fitness,
@@ -171,7 +171,7 @@ void main() {
       );
 
       final c = await h.db.getConnection(
-        initiatorId: a,
+        actorId: a,
         targetId: b,
         role: ConnectionRole.peer,
         domain: ConnectionDomain.fitness,
@@ -184,7 +184,7 @@ void main() {
     test('returns null when no connection matches', () async {
       final (a, b) = await pair(); // never connected
       final c = await h.db.getConnection(
-        initiatorId: a,
+        actorId: a,
         targetId: b,
         role: ConnectionRole.peer,
         domain: ConnectionDomain.fitness,
@@ -203,7 +203,7 @@ void main() {
 
       // Stored initiator_role is COACH, so a PEER lookup finds nothing.
       final c = await h.db.getConnection(
-        initiatorId: coach,
+        actorId: coach,
         targetId: student,
         role: ConnectionRole.peer,
         domain: ConnectionDomain.fitness,
@@ -223,7 +223,7 @@ void main() {
       );
 
       await h.db.deleteConnection(
-        initiatorId: a,
+        actorId: a,
         targetId: b,
         role: ConnectionRole.peer,
         domain: ConnectionDomain.fitness,
@@ -231,7 +231,7 @@ void main() {
 
       expect(
         await h.db.getConnection(
-          initiatorId: a,
+          actorId: a,
           targetId: b,
           role: ConnectionRole.peer,
           domain: ConnectionDomain.fitness,
@@ -253,7 +253,7 @@ void main() {
 
       // Delete addressed from the target's perspective still clears the pair.
       await h.db.deleteConnection(
-        initiatorId: b,
+        actorId: b,
         targetId: a,
         role: ConnectionRole.peer,
         domain: ConnectionDomain.fitness,
@@ -264,17 +264,105 @@ void main() {
     test('is a no-op when there is no connection', () async {
       final (a, b) = await pair();
       await h.db.deleteConnection(
-        initiatorId: a,
+        actorId: a,
         targetId: b,
         role: ConnectionRole.peer,
         domain: ConnectionDomain.fitness,
       );
       expect(await h.db.getConnections(a), isEmpty);
     });
+
+    // A hard delete makes the pair re-requestable, so letting the blocked party
+    // delete the row is letting them unblock themselves.
+    test('the blocked party cannot delete the block away', () async {
+      final (blocker, blocked) = await pair();
+      await h.seedConnection(initiator: blocked, target: blocker);
+      await h.db.changeConnectionStatus(
+        actorId: blocker,
+        targetId: blocked,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+        newStatus: ConnectionStatus.blocked,
+      );
+
+      await expectLater(
+        h.db.deleteConnection(
+          actorId: blocked,
+          targetId: blocker,
+          role: ConnectionRole.peer,
+          domain: ConnectionDomain.fitness,
+        ),
+        throwsA(isA<Forbidden>()),
+      );
+      expect(await h.db.getConnections(blocker), hasLength(1));
+    });
+
+    test('the blocker can still delete their own block', () async {
+      final (blocker, blocked) = await pair();
+      await h.seedConnection(initiator: blocked, target: blocker);
+      await h.db.changeConnectionStatus(
+        actorId: blocker,
+        targetId: blocked,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+        newStatus: ConnectionStatus.blocked,
+      );
+
+      await h.db.deleteConnection(
+        actorId: blocker,
+        targetId: blocked,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+      );
+      expect(await h.db.getConnections(blocker), isEmpty);
+    });
   });
 
-  group('changeConnectionStatus', () {
-    test('transitions a pending connection to active and persists it', () async {
+  group('vocabulary guards', () {
+    test('a self-connection is rejected by connections_no_self_check', () async {
+      final a = await h.seedProfile();
+      await expectLater(
+        h.db.createConnection(
+          initiatorId: a,
+          targetId: a,
+          role: ConnectionRole.coach,
+          domain: ConnectionDomain.fitness,
+        ),
+        // Named rather than `anything`, so a different failure cannot pass this.
+        throwsA(predicate((e) => '$e'.contains('connections_no_self_check'))),
+      );
+    });
+
+    for (final (label, parse) in <(String, void Function())>[
+      ('role', () => ConnectionRole.fromString('sensei')),
+      ('domain', () => ConnectionDomain.fromString('yoga')),
+      ('status', () => ConnectionStatus.fromString('nonsense')),
+    ]) {
+      test('an unknown $label throws instead of coercing to a default', () {
+        expect(parse, throwsArgumentError);
+      });
+    }
+
+    // Deliberately unconstrained in the schema: domain is a partition label the
+    // code never branches on, so adding an activity should not need a migration.
+    // The enum is what keeps unknown values out on the way in.
+    test('the database accepts a domain the enum does not yet know', () async {
+      final (a, b) = await pair();
+      await h.exec(
+        'INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain) '
+        "VALUES (@a, @b, 'PEER', 'PEER', 'cycling')",
+        {'a': a, 'b': b},
+      );
+      final count = await h.exec(
+        "SELECT 1 FROM connections WHERE initiator_id = @a AND domain = 'cycling'",
+        {'a': a},
+      );
+      expect(count, hasLength(1));
+    });
+  });
+
+  group('status_by', () {
+    test('creating a connection records the initiator as having set it', () async {
       final (a, b) = await pair();
       await h.db.createConnection(
         initiatorId: a,
@@ -283,9 +371,45 @@ void main() {
         domain: ConnectionDomain.fitness,
       );
 
-      final updated = await h.db.changeConnectionStatus(
+      final rows = await h.exec('SELECT status_by FROM connections WHERE initiator_id = @a', {'a': a});
+      expect(rows.first.toColumnMap()['status_by'], a);
+    });
+
+    test('a status change records who made it', () async {
+      final (a, b) = await pair();
+      await h.db.createConnection(
         initiatorId: a,
         targetId: b,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+      );
+      await h.db.changeConnectionStatus(
+        actorId: b,
+        targetId: a,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+        newStatus: ConnectionStatus.active,
+      );
+
+      final rows = await h.exec('SELECT status_by FROM connections WHERE initiator_id = @a', {'a': a});
+      expect(rows.first.toColumnMap()['status_by'], b, reason: 'b accepted, so b set the status');
+    });
+  });
+
+  group('changeConnectionStatus', () {
+    test('the person who received the request can accept it', () async {
+      final (a, b) = await pair();
+      await h.db.createConnection(
+        initiatorId: a,
+        targetId: b,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+      );
+
+      // `b` received it, so `b` accepts. From b's side `a` is the target.
+      final updated = await h.db.changeConnectionStatus(
+        actorId: b,
+        targetId: a,
         role: ConnectionRole.peer,
         domain: ConnectionDomain.fitness,
         newStatus: ConnectionStatus.active,
@@ -294,7 +418,7 @@ void main() {
 
       // Persisted, and now visible as an active connection.
       final reread = await h.db.getConnection(
-        initiatorId: a,
+        actorId: a,
         targetId: b,
         role: ConnectionRole.peer,
         domain: ConnectionDomain.fitness,
@@ -303,11 +427,132 @@ void main() {
       expect(await h.db.areConnected(userA: a, userB: b), isTrue);
     });
 
+    // Before this guard, whoever sent a request could turn it active themselves —
+    // which, with the workouts gate, meant a stranger reading your history.
+    for (final outcome in [ConnectionStatus.active, ConnectionStatus.declined]) {
+      test('the author of a request cannot ${outcome.name} it themselves', () async {
+        final (a, b) = await pair();
+        await h.db.createConnection(
+          initiatorId: a,
+          targetId: b,
+          role: ConnectionRole.peer,
+          domain: ConnectionDomain.fitness,
+        );
+
+        await expectLater(
+          h.db.changeConnectionStatus(
+            actorId: a,
+            targetId: b,
+            role: ConnectionRole.peer,
+            domain: ConnectionDomain.fitness,
+            newStatus: outcome,
+          ),
+          throwsA(isA<Forbidden>()),
+        );
+
+        expect(await h.db.areConnected(userA: a, userB: b), isFalse);
+      });
+    }
+
+    test('either party may pause an active connection', () async {
+      final (a, b) = await pair();
+      await h.seedConnection(initiator: a, target: b);
+
+      final paused = await h.db.changeConnectionStatus(
+        actorId: a,
+        targetId: b,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+        newStatus: ConnectionStatus.paused,
+      );
+      expect(paused.status, ConnectionStatus.paused);
+
+      // …and either party may resume it, including the one who did not pause.
+      final resumed = await h.db.changeConnectionStatus(
+        actorId: b,
+        targetId: a,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+        newStatus: ConnectionStatus.active,
+      );
+      expect(resumed.status, ConnectionStatus.active);
+    });
+
+    test('only the person who blocked can lift the block', () async {
+      final (blocker, blocked) = await pair();
+      await h.seedConnection(initiator: blocked, target: blocker);
+      await h.db.changeConnectionStatus(
+        actorId: blocker,
+        targetId: blocked,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+        newStatus: ConnectionStatus.blocked,
+      );
+
+      await expectLater(
+        h.db.changeConnectionStatus(
+          actorId: blocked,
+          targetId: blocker,
+          role: ConnectionRole.peer,
+          domain: ConnectionDomain.fitness,
+          newStatus: ConnectionStatus.severed,
+        ),
+        throwsA(isA<Forbidden>()),
+      );
+
+      final lifted = await h.db.changeConnectionStatus(
+        actorId: blocker,
+        targetId: blocked,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+        newStatus: ConnectionStatus.severed,
+      );
+      expect(lifted.status, ConnectionStatus.severed);
+    });
+
+    // `changeConnectionStatus` reads the status, then writes. Without the
+    // `AND status = @expectedStatus` clause on the UPDATE, two callers that both
+    // read `pending` would both go on to write, and both would report success.
+    // The invariant holds under any interleaving: exactly one attempt wins.
+    test('concurrent transitions cannot both win', () async {
+      final (a, b) = await pair();
+      await h.db.createConnection(
+        initiatorId: a,
+        targetId: b,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+      );
+
+      final outcomes = await Future.wait([
+        for (var i = 0; i < 8; i++)
+          h.db
+              .changeConnectionStatus(
+                actorId: b,
+                targetId: a,
+                role: ConnectionRole.peer,
+                domain: ConnectionDomain.fitness,
+                newStatus: ConnectionStatus.active,
+              )
+              .then((_) => true)
+              .onError((_, _) => false),
+      ]);
+
+      expect(outcomes.where((won) => won), hasLength(1));
+
+      final settled = await h.db.getConnection(
+        actorId: a,
+        targetId: b,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
+      );
+      expect(settled?.status, ConnectionStatus.active);
+    });
+
     test('throws StateError when there is no connection to update', () async {
       final (a, b) = await pair();
       await expectLater(
         h.db.changeConnectionStatus(
-          initiatorId: a,
+          actorId: a,
           targetId: b,
           role: ConnectionRole.peer,
           domain: ConnectionDomain.fitness,
@@ -328,7 +573,7 @@ void main() {
 
       await expectLater(
         h.db.changeConnectionStatus(
-          initiatorId: a,
+          actorId: a,
           targetId: b,
           role: ConnectionRole.peer,
           domain: ConnectionDomain.fitness,
@@ -339,7 +584,7 @@ void main() {
 
       // Left untouched.
       final unchanged = await h.db.getConnection(
-        initiatorId: a,
+        actorId: a,
         targetId: b,
         role: ConnectionRole.peer,
         domain: ConnectionDomain.fitness,
