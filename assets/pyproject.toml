@@ -8,7 +8,7 @@ description = "Assets pipeline — processes exercise media uploads into asset +
 # where Pillow is fine.
 requires-python = ">=3.12"
 dependencies = [
-    "pillow>=12.1.1",
+    "pillow>=12.3.0",
     "boto3>=1.42.9",
 ]
 
