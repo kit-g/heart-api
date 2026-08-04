@@ -9,6 +9,7 @@ import 'package:heart/middleware/aws.dart';
 import 'package:heart/middleware/config.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/events.dart';
+import 'package:heart/middleware/logging.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/middleware/version.dart';
 import 'package:heart/routes/index.dart';
@@ -41,7 +42,7 @@ RelicApp buildApp({
   }
 
   final app = RelicApp()
-    ..use('/', logRequests())
+    ..use('/', requestLogging())
     ..use('/', version(minimal: config.minimalAppVersion, shouldCheckVersion: shouldCheckVersion))
     ..use('/', configuration(override: config))
     ..use('/', authenticator(implementation: auth))
