@@ -1,13 +1,17 @@
+import 'dart:async';
+
 import 'package:heart/core/response.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/firebase.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/authentication.dart';
+import 'package:heart/middleware/logging.dart';
 import 'package:heart/middleware/version.dart';
 import 'package:heart/routes/index.dart';
 import 'package:heart_models/heart_models.dart';
+import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
-import 'package:relic/relic.dart';
+import 'package:relic/relic.dart' hide Logger;
 import 'package:test/test.dart';
 
 import '../helpers/request.dart';
@@ -88,6 +92,47 @@ void main() {
 
     test('skips the check when not required', () async {
       expect(await _status(gate(check: false), withVersion('0.0.1')), 200);
+    });
+  });
+
+  group('requestLogging', () {
+    late List<LogRecord> records;
+    late StreamSubscription<LogRecord> subscription;
+
+    setUp(() {
+      records = [];
+      Logger.root.level = Level.ALL;
+      subscription = Logger.root.onRecord.listen(records.add);
+    });
+
+    tearDown(() async => subscription.cancel());
+
+    test('logs exactly one record per request', () async {
+      await requestLogging()(_next)(bareRequest(path: '/workouts'));
+      expect(records, hasLength(1));
+    });
+
+    test('logs elapsed time, method, status and path — and no timestamp of its own', () async {
+      await requestLogging()(_next)(bareRequest(method: Method.post, path: '/workouts'));
+
+      // initLogging stamps every record with `time`; a second one in the
+      // message would be duplicated bytes in CloudWatch.
+      expect(records.single.message, matches(RegExp(r'^\d+\.\d+ms POST \[200\] /workouts$')));
+    });
+
+    test('includes the query string', () async {
+      await requestLogging()(_next)(bareRequest(path: '/workouts', query: {'limit': '10'}));
+      expect(records.single.message, endsWith('/workouts?limit=10'));
+    });
+
+    test('logs the failure and rethrows when the handler throws', () async {
+      Never boom(Request _) => throw StateError('boom');
+      final handler = requestLogging()(boom);
+
+      await expectLater(handler(bareRequest(path: '/workouts')), throwsStateError);
+      expect(records.single.level, Level.SEVERE);
+      expect(records.single.message, contains('[ERROR] /workouts'));
+      expect(records.single.error, isStateError);
     });
   });
 
