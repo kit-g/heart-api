@@ -231,7 +231,10 @@ abstract interface class Goal implements Model {
         final other => throw ArgumentError.value(other, 'cadence', 'invalid cadence'),
       },
       stages: _stages(json['stages']),
-      archived: json['archived'] == true,
+      archived: switch (json['archived']) {
+        1 || true => true,
+        _ => false,
+      },
       createdAt: switch (json['createdAt']) {
         final String c => DateTime.parse(c),
         _ => null,
@@ -251,7 +254,10 @@ abstract interface class Goal implements Model {
         final other => throw ArgumentError.value(other, 'cadence', 'invalid cadence'),
       },
       stages: _stages(row['stages']),
-      archived: row['archived'] == true,
+      archived: switch (row['archived']) {
+        1 || true => true,
+        _ => false,
+      },
       createdAt: switch (row['created_at']) {
         final DateTime c => c,
         final String c => DateTime.parse(c),
