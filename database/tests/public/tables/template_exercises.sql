@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(15);
+SELECT plan(16);
 
 SELECT has_table('public'::name, 'template_exercises'::name);
 
@@ -32,6 +32,8 @@ SELECT col_default_is('public', 'template_exercises', 'id', 'uuidv7()', 'id defa
 
 SELECT fk_ok('public', 'template_exercises', 'template_id', 'public', 'templates', 'id');
 SELECT fk_ok('public', 'template_exercises', 'exercise_id', 'public', 'exercises', 'id');
+
+SELECT has_index('public'::name, 'template_exercises'::name, 'template_exercises_template_id_idx'::name);
 
 SELECT * FROM finish();
 

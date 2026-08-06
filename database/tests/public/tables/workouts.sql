@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(16);
+SELECT plan(17);
 
 SELECT has_table('public'::name, 'workouts'::name);
 
@@ -35,6 +35,8 @@ SELECT col_default_is('public', 'workouts', 'id', 'uuidv7()', 'id default is uui
 SELECT col_default_is('public', 'workouts', 'created_at', 'now()', 'created_at default is now()');
 
 SELECT fk_ok('public', 'workouts', 'user_id', 'public', 'profiles', 'id');
+
+SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_id_idx'::name);
 
 SELECT *
 FROM finish();
