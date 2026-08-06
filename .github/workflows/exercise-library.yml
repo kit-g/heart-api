@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: astral-sh/setup-uv@v9
+      - uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
 
@@ -58,7 +58,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: astral-sh/setup-uv@v9
+      # No floating v9 major tag exists upstream; pin the exact release.
+      - uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
 
