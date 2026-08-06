@@ -274,6 +274,32 @@ abstract interface class Goal implements Model {
     };
   }
 
+  /// The same goal with its rungs in the order they come due.
+  ///
+  /// A ladder is a sequence in *time*: the rung you are working toward is the
+  /// one that falls next, whatever its number. Ordering by target instead put
+  /// "16 km by August" after "12 km by December", which reads backwards.
+  ///
+  /// Targets are deliberately not constrained. A ladder that descends is a real
+  /// intention — strong enough, light enough, and no further — so nothing here
+  /// insists they climb.
+  ///
+  /// A rung with no deadline sorts last: it is the open-ended one, not the
+  /// imminent one. Ties keep the order they were given.
+  static Goal inDeadlineOrder(Goal goal) {
+    if (goal.stages.length < 2) return goal;
+    final stages = [...goal.stages]
+      ..sort(
+        (a, b) => switch ((a.dueOn, b.dueOn)) {
+          (final DateTime x, final DateTime y) => x.compareTo(y),
+          (null, null) => 0,
+          (null, _) => 1,
+          (_, null) => -1,
+        },
+      );
+    return goal.copyWith(stages: stages);
+  }
+
   Goal copyWith({
     String? id,
     GoalMetric? metric,

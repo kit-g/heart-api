@@ -122,4 +122,43 @@ void main() {
       expect(goal.isComplete, isFalse);
     });
   });
+
+  group('inDeadlineOrder', () {
+    test('orders rungs by due date, not by target', () {
+      final goal = Goal(
+        metric: GoalMetric.cardioDistance,
+        exerciseId: 'e-1',
+        stages: [
+          GoalStage(id: 'aug', target: 16, dueOn: DateTime(2026, 8)),
+          GoalStage(id: 'dec', target: 12, dueOn: DateTime(2026, 12)),
+        ],
+      );
+
+      // "16 by August" comes due before "12 by December" — timeline, not magnitude.
+      expect(Goal.inDeadlineOrder(goal).stages.map((s) => s.id), ['aug', 'dec']);
+    });
+
+    test('a rung with no deadline sorts last', () {
+      final goal = Goal(
+        metric: GoalMetric.topSetWeight,
+        exerciseId: 'e-1',
+        stages: [
+          GoalStage(id: 'someday', target: 200),
+          GoalStage(id: 'christmas', target: 140, dueOn: DateTime(2026, 12, 25)),
+        ],
+      );
+
+      expect(Goal.inDeadlineOrder(goal).stages.map((s) => s.id), ['christmas', 'someday']);
+    });
+
+    test('leaves a single-rung goal untouched', () {
+      final goal = Goal(
+        metric: GoalMetric.workouts,
+        cadence: GoalCadence.week,
+        stages: [GoalStage(id: 's-1', target: 3)],
+      );
+
+      expect(identical(Goal.inDeadlineOrder(goal), goal), isTrue);
+    });
+  });
 }
