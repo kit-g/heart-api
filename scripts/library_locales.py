@@ -29,7 +29,11 @@ import psycopg
 import yaml
 from psycopg.types.json import Json
 
-s3 = boto3.client('s3')
+# A truncated or half-edited YAML must not archive the whole library: the sync
+# aborts (rolling the transaction back) when it would archive more than this
+# many exercises in one run. A deliberate mass-archive raises the cap via env:
+#   MAX_ARCHIVED=100 python scripts/library_locales.py
+MAX_ARCHIVED_DEFAULT = 10
 
 
 @dataclass
@@ -185,6 +189,9 @@ class Library:
 
 
 def fetch_db_creds(secrets_bucket: str) -> dict:
+    # Client construction needs AWS config (region/credentials), so it must not
+    # happen at import time — validate_library.py imports this module without any.
+    s3 = boto3.client('s3')
     obj = s3.get_object(Bucket=secrets_bucket, Key='secrets/supabase.json')
     return json.loads(obj['Body'].read())
 
@@ -249,6 +256,14 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
 
         cur.execute(ARCHIVE_MISSING, (list(library.exercises.keys()),))
         archived = cur.rowcount
+
+        max_archived = int(os.environ.get('MAX_ARCHIVED', MAX_ARCHIVED_DEFAULT))
+        if archived > max_archived:
+            raise RuntimeError(
+                f'sync would archive {archived} exercises (cap: {max_archived}) — '
+                f'usually a truncated or half-edited exercise_library.yml. '
+                f'If intended, re-run with MAX_ARCHIVED={archived}.'
+            )
     return upserted, translations, archived
 
 

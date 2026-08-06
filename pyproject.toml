@@ -23,6 +23,12 @@ dev = [
     "pyyaml>=6.0.3",
     "pytest>=8.3",
     "pytest-mock>=3.14",
+    # scripts/ deps: library sync + validation, movement seed/merge. Declared
+    # here so CI runs them from the lockfile instead of unpinned `pip install`s
+    # (ruamel.yaml was previously reachable only as a transitive of aws-sam-cli).
+    "psycopg[binary]>=3.2",
+    "jsonschema>=4.25",
+    "ruamel-yaml>=0.18",
 ]
 
 [tool.pytest.ini_options]
