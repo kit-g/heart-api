@@ -121,18 +121,7 @@ void _validate({
   if (cadence != null && stages.length > 1) {
     throw BadRequest(reason: 'a recurring goal has a single standing target, not a ladder of ${stages.length}');
   }
-  _assertLadderClimbs(metric, stages);
-}
-
-/// A ladder that goes backwards is a client bug, not a goal. Pace is the one metric
-/// where progress means going down, so its ladder descends.
-void _assertLadderClimbs(GoalMetric metric, List<GoalStage> stages) {
-  for (var i = 1; i < stages.length; i++) {
-    final (previous, current) = (stages[i - 1].target, stages[i].target);
-    final climbs = metric.lowerIsBetter ? current < previous : current > previous;
-    if (!climbs) {
-      final direction = metric.lowerIsBetter ? 'decrease' : 'increase';
-      throw BadRequest(reason: 'stage targets must $direction along the ladder: $previous then $current');
-    }
-  }
+  // Ladder targets are deliberately unconstrained in direction: a descending bench
+  // ladder (deload, then rebuild) or a zig-zagging date-ordered plan are real goals,
+  // not client bugs. The only per-target rule is target > 0, enforced when parsing.
 }
