@@ -19,7 +19,7 @@ void main() {
   late Request request;
   late List<Object> errors;
 
-  void onError(Object error, [StackTrace? st]) => errors.add(error);
+  Future<void> onError(Object error, [StackTrace? st]) async => errors.add(error);
 
   setUp(() {
     imageDb = MockApiImageDbService();
