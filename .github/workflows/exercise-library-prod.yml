@@ -1,19 +1,20 @@
 name: "Sync Exercise library, prod"
 
+# Prod syncs ship on release tags (same gate as deploy-api-prod), not on every
+# push to main — dev soaks content changes first.
 on:
   workflow_dispatch: { }
   push:
-    branches: [ main ]
-    paths:
-      - content/exercise_library.yml
-      - content/exercise_library_schema.json
-      - scripts/library_locales.py
-      - .github/workflows/exercise-library.yml
-      - .github/workflows/exercise-library-prod.yml
+    tags: [ 'v*' ]
 
 permissions:
   id-token: write
   contents: read
+
+# Two quick tag pushes must not run concurrent syncs against the same database.
+concurrency:
+  group: exercise-library-prod
+  cancel-in-progress: false
 
 jobs:
   prod:

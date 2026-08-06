@@ -2,18 +2,36 @@ name: "Sync Exercise library, dev"
 
 on:
   workflow_dispatch: { }
+  # On pull requests only the validate job runs; the reusable workflow gates
+  # sync-library on `github.event_name != 'pull_request'`.
+  pull_request:
+    branches: [ main ]
+    paths:
+      - content/exercise_library.yml
+      - content/exercise_library_schema.json
+      - scripts/library_locales.py
+      - scripts/validate_library.py
+      - .github/workflows/exercise-library.yml
+      - .github/workflows/exercise-library-dev.yml
   push:
     branches: [ main ]
     paths:
       - content/exercise_library.yml
       - content/exercise_library_schema.json
       - scripts/library_locales.py
+      - scripts/validate_library.py
       - .github/workflows/exercise-library.yml
       - .github/workflows/exercise-library-dev.yml
 
 permissions:
   id-token: write
   contents: read
+
+# Two quick merges must not run concurrent syncs against the same database.
+# Validate-only PR runs are superseded by each new push.
+concurrency:
+  group: exercise-library-dev-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   dev:
