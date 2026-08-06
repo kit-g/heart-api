@@ -2,6 +2,18 @@ name: "Deploy Dart API, dev"
 
 on:
   workflow_dispatch: { }
+  # On pull requests the reusable workflow runs lint + tests only;
+  # its build-and-deploy job is gated on `github.event_name != 'pull_request'`.
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'api/**'
+      - 'shared/**'
+      - 'database/**'
+      - 'scripts/apply_migrations.sh'
+      - 'scripts/db_tests.sh'
+      - '.github/workflows/deploy-api.yml'
+      - '.github/workflows/deploy-api-dev.yml'
   push:
     branches: [ main ]
     paths:
@@ -17,9 +29,10 @@ permissions:
   id-token: write
   contents: read
 
+# Test-only PR runs are superseded by each new push; deploys never are.
 concurrency:
   group: api-dev-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   dev:
