@@ -10,7 +10,7 @@ Future<void> imageUpload(
   final Request request,
   String bucket,
   String uploadKey, {
-  required void Function(Object error, [StackTrace? st]) onError,
+  required Future<void> Function(Object error, [StackTrace? st]) onError,
 }) async {
   Future<void> copyImage(String destinationKey) async {
     await request.imageStorageService.copyObject(fromKey: uploadKey, toKey: destinationKey);
@@ -53,6 +53,6 @@ Future<void> imageUpload(
         );
     }
   } on AWSHttpException catch (e, st) {
-    onError(e, st);
+    await onError(e, st);
   }
 }
