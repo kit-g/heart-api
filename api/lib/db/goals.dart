@@ -22,6 +22,12 @@ mixin _Goals on _DatabaseBase implements GoalService {
         'stages': _encodeStages(goal.stages),
       },
     );
+    // No row means the insert's cap guard fired — the user is already at the limit.
+    if (result.isEmpty) {
+      throw const BadRequest(
+        reason: 'you can have at most $_maxActiveGoals active goals; archive or delete one first',
+      );
+    }
     return Goal.fromRow(result.first.toColumnMap());
   }
 

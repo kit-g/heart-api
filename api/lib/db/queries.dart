@@ -1332,9 +1332,18 @@ WHERE user_id = @userId
 ORDER BY created_at
 ''';
 
-const _createGoal = '''
+/// A user keeps a bounded number of live goals — enough for every sensible plan,
+/// low enough that the unpaginated list stays cheap and no one can flood the table.
+const _maxActiveGoals = 50;
+
+// The cap is enforced in the INSERT, not read-then-write in Dart, so two concurrent
+// creates can't both pass a stale count and land a 51st. A full table returns no row,
+// which the db layer turns into a 400.
+const _createGoal =
+    '''
 INSERT INTO goals (user_id, metric, exercise_id, cadence, stages)
-VALUES (@userId, @metric::text, @exerciseId::uuid, @cadence::text, @stages::jsonb)
+SELECT @userId, @metric::text, @exerciseId::uuid, @cadence::text, @stages::jsonb
+WHERE (SELECT count(*) FROM goals WHERE user_id = @userId AND NOT archived) < $_maxActiveGoals
 RETURNING id, metric, exercise_id, cadence, stages, archived, created_at
 ''';
 
