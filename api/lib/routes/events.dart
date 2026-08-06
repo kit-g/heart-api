@@ -34,8 +34,11 @@ Future<NoContent> handler(Request request) async {
     region: request.awsConfig.region,
   );
 
-  void onError(Object error, [StackTrace? st]) {
-    sqs.sendJsonMessage(
+  // Awaited by the handlers it is passed to: the Lambda runtime may freeze
+  // as soon as the response is returned, so an un-awaited DLQ write can be
+  // dropped silently.
+  Future<String> onError(Object error, [StackTrace? st]) async {
+    return sqs.sendJsonMessage(
       queueUrl: request.config.eventsDlq,
       message: {
         'error': error.toString(),
