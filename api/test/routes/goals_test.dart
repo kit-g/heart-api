@@ -126,42 +126,20 @@ void main() {
       await expectLater(() => createGoal(req), throwsA(isA<BadRequest>()));
     });
 
-    test('rejects a ladder that goes backwards', () async {
+    test('accepts a ladder whose later milestone is weaker', () async {
+      // A deload ladder — strong by spring, ease off through a lighter block — is a
+      // real plan, not a client bug, so the server no longer insists targets climb.
       final req = createRequest({
         'metric': 'topSetWeight',
         'exerciseId': _exerciseId,
         'stages': [
-          {'target': 140},
-          {'target': 100},
-        ],
-      });
-
-      await expectLater(() => createGoal(req), throwsA(isA<BadRequest>()));
-    });
-
-    test('a pace ladder descends instead', () async {
-      final req = createRequest({
-        'metric': 'averagePace',
-        'exerciseId': _exerciseId,
-        'stages': [
-          {'target': 300},
-          {'target': 270},
+          {'target': 140, 'dueOn': '2026-04-01'},
+          {'target': 100, 'dueOn': '2026-09-01'},
         ],
       });
 
       final goal = await createGoal(req);
-      expect(goal.stages.map((s) => s.target), [300, 270]);
-
-      final climbing = createRequest({
-        'metric': 'averagePace',
-        'exerciseId': _exerciseId,
-        'stages': [
-          {'target': 270},
-          {'target': 300},
-        ],
-      });
-
-      await expectLater(() => createGoal(climbing), throwsA(isA<BadRequest>()));
+      expect(goal.stages.map((s) => s.target), [140, 100]);
     });
 
     test('rejects a non-positive target', () async {
