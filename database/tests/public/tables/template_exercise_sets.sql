@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(16);
+SELECT plan(17);
 
 SELECT has_table('public'::name, 'template_exercise_sets'::name);
 
@@ -36,6 +36,8 @@ SELECT col_not_null('public'::name, 'template_exercise_sets'::name, 'set_order':
 SELECT col_default_is('public', 'template_exercise_sets', 'id', 'uuidv7()', 'id default is uuidv7()');
 
 SELECT fk_ok('public', 'template_exercise_sets', 'template_exercise_id', 'public', 'template_exercises', 'id');
+
+SELECT has_index('public'::name, 'template_exercise_sets'::name, 'template_exercise_sets_template_exercise_id_idx'::name);
 
 SELECT * FROM finish();
 
