@@ -1,5 +1,4 @@
 import pytest
-
 from events import AccountDelete, PushNotification, parse_event
 
 

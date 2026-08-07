@@ -1,0 +1,51 @@
+name: "Python checks"
+
+# Lint + scripts tests for all Python in the repo. The deploy workflows run
+# each service's own pytest suite; this covers what they don't: ruff across
+# everything, and scripts/ (which no deploy workflow watches).
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'firebase/**'
+      - 'assets/**'
+      - 'scripts/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/python-checks.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'firebase/**'
+      - 'assets/**'
+      - 'scripts/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/python-checks.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-checks-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # No floating v9 major tag exists upstream; pin the exact release.
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          enable-cache: true
+
+      - name: "Sync workspace"
+        run: uv sync --all-packages --frozen
+
+      - name: "Ruff"
+        run: uv run ruff check firebase assets scripts
+
+      - name: "Scripts tests"
+        run: uv run pytest scripts/tests -o pythonpath=scripts

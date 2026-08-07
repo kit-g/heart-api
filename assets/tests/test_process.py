@@ -1,7 +1,6 @@
 import io
 
 from PIL import Image
-
 from process import (
     asset_ext,
     content_type,

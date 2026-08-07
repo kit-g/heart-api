@@ -35,4 +35,9 @@ content/assets/**
 
 **/.DS_Store
 
+# Python
 *.pyc
+__pycache__/
+.venv/
+.pytest_cache/
+.ruff_cache/

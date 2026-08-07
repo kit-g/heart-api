@@ -4,10 +4,9 @@ FCM with the pre-baked payload."""
 
 import logging
 
-from firebase_admin import messaging
-
 from creds import ensure_initialized
 from events import PushNotification
+from firebase_admin import messaging
 
 log = logging.getLogger(__name__)
 

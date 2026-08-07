@@ -198,7 +198,7 @@ def fetch_db_creds(secrets_bucket: str) -> dict:
 
 def get_source() -> dict:
     here = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(here, '..', 'content', 'exercise_library.yml'), 'r') as f:
+    with open(os.path.join(here, '..', 'content', 'exercise_library.yml')) as f:
         return yaml.safe_load(f)
 
 
@@ -270,7 +270,7 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
 def main():
     secrets_bucket = os.environ['SECRETS_BUCKET']
 
-    print(f'>> Reading source')
+    print('>> Reading source')
     library = Library.parse(get_source())
 
     print(f'>> Fetching DB credentials from s3://{secrets_bucket}/secrets/supabase.json')
