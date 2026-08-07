@@ -1,8 +1,8 @@
 import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
+import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/s3.dart';
-import 'package:heart/models/errors.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:relic/relic.dart';
 
@@ -18,42 +18,28 @@ Future<ExerciseResponse> getExercises(final Request request) async {
 }
 
 Future<ExerciseModel> createExercise(final Request request) async {
-  final body = await request.json();
-  final name = (body['name'] as String?)?.trim();
-  final category = body['category'] as String?;
-  final target = body['target'] as String?;
-
-  if (name == null || name.isEmpty) {
-    throw const BadRequest(reason: 'name is required');
-  }
-  if (category == null || category.isEmpty) {
-    throw const BadRequest(reason: 'category is required');
-  }
-  if (target == null || target.isEmpty) {
-    throw const BadRequest(reason: 'target is required');
-  }
-
+  final input = await ExerciseCreateIn.fromRequest(request);
   final row = await request.exerciseService.createExercise(
     userId: request.userId,
-    name: name,
-    category: category,
-    target: target,
-    instructions: body['instructions'] as String?,
+    name: input.name,
+    category: input.category,
+    target: input.target,
+    instructions: input.instructions,
   );
   return ExerciseModel(row);
 }
 
 Future<ExerciseModel> updateExercise(final Request request) async {
   final exerciseId = request.pathParameters.raw[#exerciseId]!;
-  final body = await request.json();
+  final input = await ExerciseUpdateIn.fromRequest(request);
 
   final row = await request.exerciseService.updateExercise(
     userId: request.userId,
     exerciseId: exerciseId,
-    category: body['category'] as String?,
-    target: body['target'] as String?,
-    instructions: body['instructions'] as String?,
-    archived: body['archived'] as bool?,
+    category: input.category,
+    target: input.target,
+    instructions: input.instructions,
+    archived: input.archived,
   );
   return ExerciseModel(row);
 }

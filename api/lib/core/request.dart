@@ -2,11 +2,14 @@ import 'dart:convert';
 
 import 'package:relic/relic.dart';
 
+import '../models/errors.dart';
+
 extension JsonBody on Request {
   Future<Map<String, dynamic>> json() {
     return switch (body.bodyType) {
       BodyType(:MimeType mimeType) when mimeType == .json => readAsString().then((v) => jsonDecode(v)),
-      _ => throw UnimplementedError('Could not decode JSON request body'),
+      // a client mistake, not a missing server feature: 415, not 501
+      _ => throw const UnsupportedMediaType(reason: 'expected an application/json request body'),
     };
   }
 
