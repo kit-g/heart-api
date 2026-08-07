@@ -11,31 +11,37 @@ infrastructure/
 │   │   ├── api/               # Lambda function, API Gateway, SQS events queue + DLQ,
 │   │   │                      # EventBridge S3 rule, Scheduler group, SNS monitoring topic,
 │   │   │                      # IAM roles, CloudWatch logs
+│   │   ├── assets/            # Assets-pipeline Lambda + its queue/trigger wiring
 │   │   ├── cdn/               # CloudFront media + web distributions, OACs, S3 bucket policies
 │   │   ├── content/           # Content + static S3 buckets, lifecycle for uploads/,
 │   │   │                      # EventBridge bucket notification, Supabase project
+│   │   ├── firebase/          # Firebase-service Lambda + its queue/trigger wiring
 │   │   └── monitoring/        # CloudWatch dashboard wiring api+cdn+sqs metrics
 │   ├── modules/
-│   │   └── iam/               # Reusable role + inline-policies wrapper
+│   │   └── iam/               # Reusable role + inline-policies wrapper (native tests in tests/)
 │   └── environments/
-│       └── dev/               # Wires the stacks for the dev account
+│       ├── dev/               # Wires the stacks for the dev account
+│       └── prod/              # Same, prod account
 ├── dns/                       # Route53 zone + records (single env, dev account hosts apex)
 └── global/                    # Per-account once-only resources (OIDC provider + deploy role)
     ├── stack/
     └── environments/
-        └── dev/
+        ├── dev/
+        └── prod/
 ```
+
+`modules/iam/tests/` and `stacks/content/tests/` hold native `terraform test` (`.tftest.hcl`) suites.
 
 ## Deployment
 
 ```bash
-cd infrastructure/app/environments/dev
+cd infrastructure/app/environments/dev    # or environments/prod
 terraform init
 terraform plan
 terraform apply
 ```
 
-The dev environment auto-builds the Lambda binary on `terraform apply` (via `null_resource.build_dart_api` in `app/stacks/api/archives.tf`) — no separate build step needed for infra-only applies.
+The environment auto-builds the Lambda binary on `terraform apply` (via `null_resource.build_dart_api` in `app/stacks/api/archives.tf`) — no separate build step needed for infra-only applies. Note the caveat: CI is the normal ship path for function *code* (`aws lambda update-function-code` in the deploy workflows), so an infra apply after a CI deploy replaces the function with a locally-built binary of whatever is checked out.
 
 ## Conventions
 
@@ -71,6 +77,6 @@ DNS lives in `infrastructure/dns/` as a single env (dev account hosts the apex z
 
 ## State
 
-Backend is S3 (`583168578067-ca-central-1-tfstate`) with DynamoDB locking (`tfstate-locks`). One state file per stack/env: `heart/<stack>/terraform.tfstate` (e.g. `heart/dev/terraform.tfstate`, `heart/dns/terraform.tfstate`, `heart/global/terraform.tfstate`).
+Backend is S3 (`583168578067-ca-central-1-tfstate`) with DynamoDB locking (`tfstate-locks`). One state file per stack/env: `heart/<env-or-stack>/terraform.tfstate` (e.g. `heart/dev/terraform.tfstate`, `heart/prod/terraform.tfstate`, `heart/dns/terraform.tfstate`, `heart/global/terraform.tfstate`).
 
 `.terraform.lock.hcl` and any `*.tfvars` are gitignored.
