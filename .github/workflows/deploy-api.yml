@@ -170,18 +170,14 @@ jobs:
       - name: "Apply migrations"
         run: ./scripts/apply_migrations.sh
 
-      - name: "Load test helpers"
-        run: psql -v ON_ERROR_STOP=1 --quiet -f database/test_utils/helpers.sql
-
-      # tee, so a failure still reaches the summary: pipefail keeps pg_prove's
-      # exit status rather than tee's.
+      # The same script the docs point developers at, so CI can't drift from
+      # the local flow. tee, so a failure still reaches the summary: pipefail
+      # keeps the script's exit status rather than tee's.
       - name: "Run pgtap suite"
-        working-directory: database
-        shell: bash -O globstar {0}
         run: |
           set -o pipefail
           mkdir -p "$GITHUB_WORKSPACE/test-reports"
-          pg_prove tests/**/*.sql --quiet | tee "$GITHUB_WORKSPACE/test-reports/pgtap.tap"
+          ./scripts/db_tests.sh | tee "$GITHUB_WORKSPACE/test-reports/pgtap.tap"
 
       - uses: dart-lang/setup-dart@v1
 
