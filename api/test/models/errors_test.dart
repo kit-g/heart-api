@@ -61,6 +61,19 @@ void main() {
     });
   });
 
+  group('UnsupportedMediaType', () {
+    test('statusCode is 415', () {
+      expect(const UnsupportedMediaType(reason: 'json only').statusCode, 415);
+    });
+
+    test('toMap exposes reason', () {
+      expect(const UnsupportedMediaType(reason: 'json only').toMap(), {
+        'error': 'unsupported media type',
+        'reason': 'json only',
+      });
+    });
+  });
+
   group('NoContent', () {
     test('statusCode is 204', () {
       expect(const NoContent().statusCode, 204);
