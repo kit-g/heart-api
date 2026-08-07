@@ -42,7 +42,7 @@ void main() {
       ('non-string', 42),
     ]) {
       test('rejects a $label name', () async {
-        await expectLater(parse({if (name != null) 'name': name}), throwsA(isA<BadRequest>()));
+        await expectLater(parse({'name': ?name}), throwsA(isA<BadRequest>()));
       });
     }
 
