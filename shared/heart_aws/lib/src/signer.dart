@@ -18,7 +18,11 @@ mixin Signer {
   late final _signer = AWSSigV4Signer(credentialsProvider: credentialsProvider);
 
   /// The credential scope defining the region and service for signing requests.
-  late final _scope = AWSCredentialScope(region: region, service: service);
+  ///
+  /// Built per request: the scope captures the signing timestamp (`X-Amz-Date`)
+  /// at construction, and AWS rejects signatures older than ~15 minutes — a
+  /// `late final` here breaks every long-lived client instance.
+  AWSCredentialScope get _scope => AWSCredentialScope(region: region, service: service);
 
   /// Returns the service-specific configuration for request signing.
   ///
@@ -60,7 +64,7 @@ mixin Signer {
         AWSHeaders.contentType,
         () => 'application/x-amz-json-1.1',
       );
-      bytes = json.encode(body).codeUnits;
+      bytes = utf8.encode(json.encode(body));
     }
 
     final request = AWSHttpRequest(
