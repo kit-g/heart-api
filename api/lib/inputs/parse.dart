@@ -12,6 +12,25 @@ extension on Map<String, dynamic> {
     };
   }
 
+  /// Optional string. Absent stays null; present must be non-empty and
+  /// within [maxLength].
+  String? stringOrNull(String field, {int? maxLength}) {
+    return switch (this[field]) {
+      null => null,
+      String s when s.isNotEmpty && (maxLength == null || s.length <= maxLength) => s,
+      _ => throw BadRequest(reason: _stringMsg(field, maxLength: maxLength)),
+    };
+  }
+
+  /// Optional bool. Absent stays null.
+  bool? booleanOrNull(String field) {
+    return switch (this[field]) {
+      null => null,
+      bool b => b,
+      _ => throw BadRequest(reason: '$field must be a boolean'),
+    };
+  }
+
   /// Parses the value as a string then runs [parser]; any throw from [parser]
   /// becomes a 400 with a helpful message.
   T parsed<T>(String field, T Function(String) parser) {
