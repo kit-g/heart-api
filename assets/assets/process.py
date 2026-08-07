@@ -13,6 +13,7 @@ from dataclasses import dataclass
 
 from PIL import Image
 
+SOURCE_PREFIX = 'exercise-uploads/'
 DEST_PREFIX = 'exercises/'
 THUMBNAIL_NAME = 'thumbnail.jpg'
 THUMBNAIL_MAX_EDGE = 320  # longest edge, px

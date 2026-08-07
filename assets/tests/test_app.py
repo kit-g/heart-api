@@ -1,9 +1,8 @@
 import io
 import json
 
-from PIL import Image
-
 import app
+from PIL import Image
 
 
 def _png(size=(600, 400)) -> bytes:
@@ -66,3 +65,22 @@ class TestHandler:
         _wire(mocker, monkeypatch)
         event = {'Records': [{'messageId': 'm1', 'body': 'not json'}]}
         assert app.handler(event, None) == {'batchItemFailures': [{'itemIdentifier': 'm1'}]}
+
+    def test_object_outside_source_prefix_is_consumed_untouched(self, mocker, monkeypatch):
+        s3, sqs = _wire(mocker, monkeypatch)
+
+        result = app.handler(_sqs_event('exercises/Bicycle Crunch/asset.gif'), None)
+
+        assert result == {'batchItemFailures': []}
+        s3.get_object.assert_not_called()
+        s3.put_object.assert_not_called()
+        sqs.send_message.assert_not_called()
+
+    def test_non_image_upload_is_consumed_not_retried(self, mocker, monkeypatch):
+        s3, sqs = _wire(mocker, monkeypatch, source_bytes=b'\x00\x00\x00\x18ftypmp42 not an image')
+
+        result = app.handler(_sqs_event('exercise-uploads/Squat.mp4'), None)
+
+        assert result == {'batchItemFailures': []}
+        s3.put_object.assert_not_called()
+        sqs.send_message.assert_not_called()

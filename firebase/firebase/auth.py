@@ -2,9 +2,8 @@
 
 import logging
 
-from firebase_admin import auth
-
 from creds import ensure_initialized
+from firebase_admin import auth
 
 log = logging.getLogger(__name__)
 

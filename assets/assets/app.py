@@ -18,9 +18,9 @@ import os
 from typing import Any
 
 import boto3
-
 from events import Event, ObjectCreated
-from process import asset_ext, content_type, dest_keys, exercise_name, render
+from PIL import UnidentifiedImageError
+from process import SOURCE_PREFIX, asset_ext, content_type, dest_keys, exercise_name, render
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -63,11 +63,23 @@ def _dispatch(event: Event) -> None:
 
 
 def _upload(bucket: str, key: str) -> None:
+    if not key.startswith(SOURCE_PREFIX):
+        # A mis-scoped trigger rule must not feed our own writes back into the
+        # pipeline (exercises/ -> exercises/exercises/ -> ...). Consume, don't fail.
+        log.warning('ignoring object outside %s: %s', SOURCE_PREFIX, key)
+        return
+
     name = exercise_name(key)
     ext = asset_ext(key)
 
     data = _client('s3').get_object(Bucket=bucket, Key=key)['Body'].read()
-    media = render(data)
+    try:
+        media = render(data)
+    except UnidentifiedImageError:
+        # Not an image (video, corrupt upload): retrying can never succeed, so
+        # consume the message instead of cycling it through SQS to the DLQ.
+        log.warning('skipping non-image upload %s (%d bytes)', key, len(data))
+        return
     asset_key, thumb_key = dest_keys(name, ext)
 
     s3 = _client('s3')

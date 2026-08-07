@@ -16,7 +16,6 @@ import os
 import sys
 
 import jsonschema
-
 from library_locales import Library, get_source
 
 HERE = os.path.dirname(os.path.abspath(__file__))

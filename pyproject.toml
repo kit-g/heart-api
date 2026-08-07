@@ -25,7 +25,20 @@ dev = [
     "psycopg[binary]>=3.2",
     "jsonschema>=4.25",
     "ruamel-yaml>=0.18",
+    "ruff>=0.14",
 ]
+
+[tool.ruff]
+# One config for CLI, CI, and the IDE plugin — keep it here, not in ruff.toml.
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+# E/W pycodestyle, F pyflakes, I import order, UP modernize, B bugbear, SIM simplify
+select = ["E", "W", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.format]
+quote-style = "single"
 
 [tool.pytest.ini_options]
 # Flat-import-style: each service ships its modules as if they live at the
