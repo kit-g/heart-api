@@ -235,7 +235,7 @@ jobs:
       # says so rather than failing and adding a second red X to the run.
       - name: "Collect reports"
         continue-on-error: true
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: test-report-*
           path: test-reports
