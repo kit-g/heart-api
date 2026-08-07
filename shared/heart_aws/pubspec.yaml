@@ -1,6 +1,7 @@
 name: heart_aws
-description: A starting point for Dart libraries or applications.
+description: "Hand-rolled AWS clients: SigV4 signing, S3 presigned POST, SQS, SNS, Scheduler"
 version: 1.0.0
+publish_to: none
 
 environment:
   sdk: ^3.11.4
