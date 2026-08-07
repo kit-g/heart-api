@@ -101,7 +101,8 @@ abstract class S3Api with Signer {
     final responseStr = await get(uri: uri);
 
     final tags = <String, String>{};
-    final tagRegExp = RegExp(r'<Key>([^<]+)</Key>\s*<Value>([^<]+)</Value>');
+    // `[^<]*` on the value: a tag with an empty value is still a tag
+    final tagRegExp = RegExp(r'<Key>([^<]+)</Key>\s*<Value>([^<]*)</Value>');
 
     for (final match in tagRegExp.allMatches(responseStr)) {
       if (match.groupCount == 2) {
