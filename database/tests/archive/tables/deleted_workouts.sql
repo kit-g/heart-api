@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(16);
+SELECT plan(18);
 
 SELECT has_schema('archive'::name);
 SELECT has_table('archive'::name, 'deleted_workouts'::name);
@@ -33,7 +33,10 @@ SELECT has_pk('archive'::name, 'deleted_workouts'::name, 'deleted_workouts has a
 SELECT col_is_pk('archive'::name, 'deleted_workouts'::name, 'id'::name, 'id is the primary key');
 
 SELECT col_not_null('archive'::name, 'deleted_workouts'::name, 'user_id'::name);
+SELECT col_not_null('archive'::name, 'deleted_workouts'::name, 'created_at'::name);
 SELECT col_not_null('archive'::name, 'deleted_workouts'::name, 'deleted_at'::name);
+
+SELECT has_index('archive'::name, 'deleted_workouts'::name, 'deleted_workouts_user_id_deleted_at_idx'::name);
 
 SELECT col_default_is('archive', 'deleted_workouts', 'deleted_at', 'now()', 'deleted_at default is now()');
 

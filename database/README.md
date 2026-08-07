@@ -33,7 +33,7 @@ Forward-only. Naming: `YYYY-MM-DD.<title>.sql`. Applied in lexical order — the
 - **`forbidden` sentinel** for read endpoints with auth checks: empty result = 404, single row with `forbidden = true` = 403, otherwise the data. See `_listWorkouts` / `_getTargetWorkout` in `api/lib/db/queries.dart` for the canonical shape.
 - **`COALESCE` for partial updates**: `SET col = coalesce(@col, col)` — pass null for fields you want unchanged.
 - **`BEFORE DELETE` triggers for snapshots**: cascade-deleted rows are still visible at trigger time. `_archive_workout` uses this to copy workout JSON into `archive.deleted_workouts` before the cascade fires.
-- **NOT NULL on every `created_at` / `updated_at`** with a `DEFAULT now()` — defaults shouldn't be defeated by an explicit-null insert.
+- **Timestamps, where present, are `NOT NULL DEFAULT now()`** — defaults shouldn't be defeated by an explicit-null insert. Owner-level tables carry `created_at`; child rows that live and die with their parent (`workout_exercises`, `exercise_sets`, `template_exercises`, `template_exercise_sets`, `exercise_translations`) carry no timestamps of their own. Only `profiles` has `updated_at`, and nothing maintains it yet — don't read it as a change marker.
 
 ### Running
 
@@ -92,11 +92,14 @@ The helpers are `CREATE OR REPLACE` so re-loads are idempotent.
 ### Running
 
 ```bash
-# Loads helpers, then runs pg_prove against tests/**/*.sql
-DB_PASSWORD=… DB_HOST_URL=… DB_USER=… DB_HOST_PORT=… scripts/db_tests.sh
+# Loads helpers, then runs pg_prove against tests/**/*.sql.
+# Env: the IDE run-config vars (DB_HOST_URL, DB_HOST_PORT, DB_USER, DB_PASSWORD)
+# win when set; otherwise the standard PG* vars, defaulting to localhost/heart.
+# The suite seeds and mutates data — never point it at the shared Supabase instance.
+scripts/db_tests.sh
 ```
 
-CI runs the same suite against an ephemeral Postgres provisioned on the runner — see `.github/workflows/deploy-api.yml` (`db-test` job).
+CI runs the exact same script against an ephemeral Postgres provisioned on the runner — see `.github/workflows/deploy-api.yml` (`db-test` job).
 
 ### Adding a table
 

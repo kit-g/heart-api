@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(23);
+SELECT plan(26);
 
 SELECT has_table('public'::name, 'template_shares'::name);
 
@@ -43,6 +43,10 @@ SELECT fk_ok('public', 'template_shares', 'master_template_id', 'public', 'templ
 SELECT fk_ok('public', 'template_shares', 'student_template_id', 'public', 'templates', 'id');
 
 SELECT col_is_unique('public'::name, 'template_shares'::name, ARRAY ['coach_id', 'master_template_id', 'student_id']);
+
+SELECT has_index('public'::name, 'template_shares'::name, 'template_shares_student_id_idx'::name);
+SELECT has_index('public'::name, 'template_shares'::name, 'template_shares_master_template_id_idx'::name);
+SELECT has_index('public'::name, 'template_shares'::name, 'template_shares_student_template_id_idx'::name);
 
 SELECT * FROM finish();
 
