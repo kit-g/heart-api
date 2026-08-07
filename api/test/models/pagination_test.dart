@@ -22,7 +22,7 @@ void main() {
     });
 
     test('omits the cursor when the page is empty, even with hasMore set', () {
-      final response = paginated(Page(items: const [], hasMore: true));
+      final response = paginated(const Page(items: [], hasMore: true));
       expect(response.cursor, isNull);
       expect(response.toMap(), isNot(contains('cursor')));
     });
