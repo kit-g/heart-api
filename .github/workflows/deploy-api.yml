@@ -59,7 +59,7 @@ jobs:
     name: "Lint Dart Code"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
 
       - name: "Install dependencies"
@@ -94,7 +94,7 @@ jobs:
       matrix:
         package: [ api, shared/heart_aws, shared/heart_models ]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
 
       - name: "Install dependencies"
@@ -142,7 +142,7 @@ jobs:
       PGPASSWORD: postgres
       PGDATABASE: heart
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: "Add PGDG apt repository"
         run: |
@@ -229,7 +229,7 @@ jobs:
     # skipped when a test job fails.
     if: always()
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # A cancelled or skipped test job leaves nothing to download; the summary
       # says so rather than failing and adding a second red X to the run.
@@ -255,7 +255,7 @@ jobs:
     # event name reflects the caller's trigger.)
     if: github.event_name != 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: "Export commit SHA"
         id: commit

@@ -37,7 +37,7 @@ jobs:
     name: "Validate library content"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: astral-sh/setup-uv@v9.0.0
         with:
@@ -56,7 +56,7 @@ jobs:
     # workflow_call the event name reflects the caller's trigger.)
     if: github.event_name != 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # No floating v9 major tag exists upstream; pin the exact release.
       - uses: astral-sh/setup-uv@v9.0.0
