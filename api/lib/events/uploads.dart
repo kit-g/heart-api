@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
+import 'package:heart/storage/keys.dart';
 import 'package:heart_aws/heart_aws.dart';
 import 'package:relic/relic.dart';
 
@@ -29,8 +28,7 @@ Future<void> imageUpload(
           }
           when [userId, workoutId, imageId].every((attr) => attr.isNotEmpty):
         final ext = uploadKey.contains('.') ? uploadKey.split('.').last : 'jpg';
-        final hash = sha256.convert(utf8.encode('$userId:$workoutId')).toString().substring(0, 16);
-        final destKey = 'workouts/$hash/$imageId.$ext';
+        final destKey = workoutImageKey(userId: userId, workoutId: workoutId, imageId: imageId, ext: ext);
         await copyImage(destKey);
         await request.imageDbService.recordImage(
           userId: userId,

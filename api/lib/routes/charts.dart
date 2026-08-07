@@ -1,5 +1,5 @@
-import 'package:heart/core/request.dart';
 import 'package:heart/globals/globals.dart';
+import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/charts.dart';
 import 'package:heart_models/heart_models.dart';
@@ -14,14 +14,8 @@ Future<ChartPreferenceResponse> getChartPreferences(final Request req) async {
 }
 
 Future<ChartPreference> saveChartPreference(final Request req) async {
-  try {
-    final service = req.chartPreferenceService;
-    final body = await req.json();
-    final input = ChartPreference.fromRow(body);
-    return service.saveChartPreference(input, req.userId);
-  } on ArgumentError catch (e) {
-    throw BadRequest(reason: e.toString());
-  }
+  final input = await ChartPreferenceSaveIn.fromRequest(req);
+  return req.chartPreferenceService.saveChartPreference(input.preference, req.userId);
 }
 
 Future<Model> deleteChartPreference(final Request req) async {

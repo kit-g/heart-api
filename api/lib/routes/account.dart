@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
+import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/aws.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
@@ -12,14 +12,12 @@ import 'package:heart_aws/heart_aws.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-const _defaultAvatarMimeType = 'image/jpeg';
-
 Future<Model> upsertAccount(final Request request) async {
-  final body = await request.json();
+  final input = await AccountUpsertIn.fromRequest(request);
 
-  switch (body) {
+  switch (input) {
     // cancellation of the account deletion schedule
-    case {'action': 'undoAccountDeletion'}:
+    case UndoAccountDeletionIn():
       final userId = request.userId;
       final scheduler = Scheduler(
         credentialsProvider: request.awsConfig.credentialsProvider,
@@ -34,12 +32,8 @@ Future<Model> upsertAccount(final Request request) async {
 
     // returns a presigned POST URL; the avatar lands at avatars/{userId}
     // via the /events handler after upload
-    case {'action': 'uploadAvatar'}:
+    case UploadAvatarIn(:final mimeType):
       final userId = request.userId;
-      final mimeType = (body['mimeType'] as String?) ?? _defaultAvatarMimeType;
-      if (!request.config.allowedMimeTypes.contains(mimeType)) {
-        throw BadRequest(reason: 'Unsupported image type: $mimeType');
-      }
       final destKey = 'avatars/$userId';
       final presigned = await request.imageStorageService.presignUpload(
         key: 'uploads/avatar-$userId',
@@ -55,19 +49,17 @@ Future<Model> upsertAccount(final Request request) async {
         key: destKey,
       );
 
-    case {'action': 'removeAvatar'}:
+    case RemoveAvatarIn():
       final userId = request.userId;
       await request.imageStorageService.deleteObject(key: 'avatars/$userId');
       return request.profileService.updateAvatarUrl(userId: userId, avatarUrl: null);
 
     // request from the user
-    default:
-      final user = request.user;
-      final requestUser = User.fromJson(body);
-      if (user.id != requestUser.id) {
+    case ProfileUpsertIn(:final user):
+      if (request.user.id != user.id) {
         throw const Forbidden(reason: 'You can only modify your own profile');
       }
-      return request.profileService.upsertProfile(requestUser);
+      return request.profileService.upsertProfile(user);
   }
 }
 
