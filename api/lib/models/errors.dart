@@ -82,6 +82,26 @@ class Forbidden implements ApiException {
   }
 }
 
+class UnsupportedMediaType implements ApiException {
+  final String reason;
+
+  const UnsupportedMediaType({required this.reason});
+
+  @override
+  int get statusCode => 415;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'error': 'unsupported media type',
+      'reason': reason,
+    };
+  }
+
+  @override
+  String toString() => '$runtimeType: $reason';
+}
+
 class NotImplemented implements ApiException {
   final String reason;
 
