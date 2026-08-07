@@ -112,6 +112,16 @@ abstract interface class ChartPreference implements Storable, Model {
     );
   }
 
+  /// Builds a preference from already-validated parts (e.g. a typed API
+  /// input). [ChartPreference.fromRow] remains the DB-row parser.
+  factory ChartPreference.create({
+    String? id,
+    required ChartPreferenceType type,
+    Map<String, dynamic>? data,
+  }) {
+    return _ChartPreference(id: id, type: type, data: data);
+  }
+
   factory ChartPreference.exercise(String exerciseName, ChartPreferenceType type) {
     return _ChartPreference(
       id: null,
