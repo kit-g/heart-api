@@ -60,6 +60,10 @@ void main() {
     expect(await status((_) async => throw const FormatException('nope')), 400);
   });
 
+  test('UnsupportedMediaType becomes 415', () async {
+    expect(await status((_) async => throw const UnsupportedMediaType(reason: 'json only')), 415);
+  });
+
   test('UnimplementedError becomes 501', () async {
     expect(await status((_) async => throw UnimplementedError('later')), 501);
   });
