@@ -8,12 +8,12 @@ terraform {
 
     archive = {
       source  = "hashicorp/archive"
-      version = "2.7.1"
+      version = "2.8.0"
     }
 
     supabase = {
       source  = "supabase/supabase"
-      version = "1.9.0"
+      version = "1.10.1"
     }
   }
 }
