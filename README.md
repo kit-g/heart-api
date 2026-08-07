@@ -14,10 +14,16 @@ heart-go/
 │   ├── migrations/            # Forward-only SQL migrations
 │   ├── tests/                 # pgtap suite — public/{tables,functions}, archive/...
 │   └── test_utils/            # Test helpers (builders + JSON validators)
-├── infrastructure/            # Terraform stacks (api, cdn, content, modules/iam) + environments/dev
-├── content/                   # Exercise library YAML + sample templates JSON, synced to CDN
-├── scripts/                   # Migration runner, db test runner, library generator
-└── .github/workflows/         # CI: deploy-api, exercise-library
+├── firebase/                  # Python Lambda: FCM push + Firebase auth cleanup (uv workspace member)
+├── assets/                    # Python Lambda: exercise media processing pipeline (uv workspace member)
+├── infrastructure/            # Terraform stacks (api, assets, cdn, content, firebase, monitoring)
+│                              # + environments/{dev,prod} — see infrastructure/README.md
+├── content/                   # Exercise library YAML + schema + sample templates JSON, synced to CDN
+├── scripts/                   # Migration runner, db test runner, library sync/validation
+├── site/                      # Static marketing/legal pages
+├── docs/                      # Dated design docs
+└── .github/workflows/         # CI: deploy-api, deploy-assets, deploy-firebase, exercise-library
+                               # (each split into a reusable workflow + dev/prod wrappers)
 ```
 
 Per-component docs:
@@ -35,9 +41,10 @@ Per-component docs:
 | Auth                 | Firebase OIDC token verification                                                             |
 | Async                | EventBridge S3-rules → SQS → `/events` (Lambda routes events back to itself)                 |
 | Scheduled jobs       | EventBridge Scheduler → SQS → `/events`                                                      |
+| Side services        | Python 3.13 Lambdas in a uv workspace: `firebase/` (push, auth cleanup), `assets/` (media)   |
 | IaC                  | Terraform (with Supabase provider)                                                           |
 | CI/CD                | GitHub Actions, OIDC role for AWS                                                            |
-| Tests                | Dart `test` + mockito for app code, pgtap for the database                                   |
+| Tests                | Dart `test` + mockito for app code, pgtap for the database, pytest for the Python services   |
 
 ## Local development
 
@@ -47,24 +54,39 @@ cd api && dart pub get && dart test
 cd shared/heart_aws && dart pub get && dart test
 cd shared/heart_models && dart pub get && dart test
 
-# Database (requires local Postgres + pgtap)
-DB_PASSWORD=... DB_HOST_URL=localhost DB_USER=... DB_HOST_PORT=5432 \
-  scripts/db_tests.sh
+# Database (requires local Postgres + pgtap; defaults to localhost/heart,
+# or set the PG* / DB_* env vars — see database/README.md)
+scripts/db_tests.sh
+
+# Python services
+uv sync --all-packages
+uv run pytest                                        # firebase suite
+uv run pytest assets/tests -o pythonpath=assets/assets  # assets suite
 ```
 
 The api package can be run locally against any Postgres + AWS profile — see [api/README.md](api/README.md#local-development).
 
 ## Deployment
 
-`main` branch pushes trigger `.github/workflows/deploy-api.yml`:
+Every workflow family is a reusable workflow plus thin `-dev` / `-prod` wrappers. Dev ships from
+`main` pushes. Prod: api and exercise-library ship from `v*` tags; assets and firebase prod
+deploys are currently manual (`workflow_dispatch`). Pull requests run the test jobs only — the
+deploy jobs are gated on the event type.
+
+`deploy-api.yml` (api/shared/database changes):
 
 1. Lint, format check, analyze
 2. Dart tests across all three packages
-3. Database tests (ephemeral Postgres + pgtap)
+3. Database tests: ephemeral Postgres + pgtap via `scripts/db_tests.sh`, then the full api suite
+   (including `db`-tagged integration tests) with a coverage floor
 4. Apply unapplied migrations to Supabase
 5. Build Lambda binary, update function, smoke-test `/version`
 
-Content changes (`content/**`) trigger `exercise-library-dev.yml` which regenerates the localized exercise library and uploads it + the sample templates to the CDN bucket.
+`deploy-firebase.yml` / `deploy-assets.yml` (Python changes): pytest, then package and update the
+function code.
+
+`exercise-library.yml` (content changes): validate the library YAML against its JSON schema plus
+the sync parser, then sync exercises + translations to Postgres (guarded against mass-archiving).
 
 ## Conventions
 
