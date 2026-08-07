@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(31);
+SELECT plan(32);
 
 SELECT has_table('public'::name, 'connections'::name);
 
@@ -47,8 +47,9 @@ SELECT fk_ok('public', 'connections', 'target_id', 'public', 'profiles', 'id');
 
 SELECT fk_ok('public', 'connections', 'status_by', 'public', 'profiles', 'id');
 
-SELECT has_index('public'::name, 'connections'::name, 'idx_connections_target_id'::name);
+SELECT has_index('public'::name, 'connections'::name, 'connections_target_id_idx'::name);
 SELECT has_index('public'::name, 'connections'::name, 'connections_status_idx'::name);
+SELECT has_index('public'::name, 'connections'::name, 'connections_status_by_idx'::name);
 
 -- fixtures for the vocabulary assertions below
 DO
