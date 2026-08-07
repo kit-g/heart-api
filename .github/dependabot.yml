@@ -1,0 +1,44 @@
+# Weekly for app-facing dependency ecosystems, monthly for infra pins.
+# Minor/patch updates are grouped into one PR per ecosystem to keep noise low;
+# majors stay individual so breaking changes get their own review.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        update-types: [ minor, patch ]
+
+  - package-ecosystem: pub
+    directories:
+      - /api
+      - /shared/heart_aws
+      - /shared/heart_models
+    schedule:
+      interval: weekly
+    groups:
+      pub-minor-patch:
+        update-types: [ minor, patch ]
+
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      python-minor-patch:
+        update-types: [ minor, patch ]
+
+  - package-ecosystem: terraform
+    directories:
+      - /infrastructure/app/environments/dev
+      - /infrastructure/app/environments/prod
+      - /infrastructure/dns
+      - /infrastructure/global/environments/dev
+      - /infrastructure/global/environments/prod
+    schedule:
+      interval: monthly
+    groups:
+      terraform-providers:
+        update-types: [ minor, patch ]
