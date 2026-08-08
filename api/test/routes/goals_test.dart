@@ -11,6 +11,7 @@ import '../helpers/request.dart';
 import '../mocks.mocks.dart';
 
 const _meId = 'u1';
+const _otherId = 'u2';
 const _goalId = '019def00-0000-7000-8000-000000000010';
 const _stageId = '019def00-0000-7000-8000-000000000011';
 const _exerciseId = '019def00-0000-7000-8000-000000000001';
@@ -172,9 +173,9 @@ void main() {
     });
   });
 
-  group('getGoals', () {
-    test('returns the requesting user\'s goals', () async {
-      when(service.getGoals(_meId)).thenAnswer(
+  group('getTargetUserGoals', () {
+    test("returns a target user's goals when the requester may see them", () async {
+      when(service.getTargetUserGoals(requesterId: _meId, targetUserId: _otherId)).thenAnswer(
         (_) async => [
           Goal(
             id: _goalId,
@@ -185,11 +186,22 @@ void main() {
         ],
       );
 
-      final req = wire(bareRequest(method: Method.get, path: '/goals'));
-      final response = await getGoals(req);
+      final req = wire(bareRequest(method: Method.get, path: '/accounts/$_otherId/goals'));
+      final response = await getTargetUserGoalsById(req, _otherId);
 
       expect(response.goals.single.id, _goalId);
       expect(response.toMap()['goals'], hasLength(1));
+      verify(service.getTargetUserGoals(requesterId: _meId, targetUserId: _otherId)).called(1);
+    });
+
+    test('propagates Forbidden when the requester is not a connection', () async {
+      when(
+        service.getTargetUserGoals(requesterId: _meId, targetUserId: _otherId),
+      ).thenThrow(const Forbidden(reason: 'not connected'));
+
+      final req = wire(bareRequest(method: Method.get, path: '/accounts/$_otherId/goals'));
+
+      await expectLater(() => getTargetUserGoalsById(req, _otherId), throwsA(isA<Forbidden>()));
     });
   });
 
@@ -284,6 +296,35 @@ void main() {
       expect(goal.stages.first.id, _stageId);
       expect(goal.stages.last.id, isNull, reason: 'a new rung gets its id minted in the db layer');
       verify(service.updateGoal(_goalId, any, _meId)).called(1);
+    });
+
+    test('preserves achievedAt through a full replace', () async {
+      // The bug: a full-replace edit round-trips the ladder, and if the input layer
+      // drops achievedAt the server blanks every stamped rung. Editing must not
+      // destroy an achievement (decision 2 — stable across devices/reinstalls).
+      when(service.updateGoal(any, any, any)).thenAnswer((i) async => i.positionalArguments[1] as Goal);
+
+      final achieved = DateTime.utc(2026, 12, 25, 9);
+      final req = wire(
+        jsonRequest(
+          method: Method.put,
+          path: '/goals/$_goalId',
+          body: {
+            'metric': 'topSetWeight',
+            'exerciseId': _exerciseId,
+            'stages': [
+              {'id': _stageId, 'target': 100, 'achievedAt': achieved.toIso8601String()},
+              {'target': 140},
+            ],
+          },
+        ),
+      );
+
+      final goal = await updateGoalById(req, _goalId);
+
+      expect(goal.stages.first.achievedAt?.toUtc(), achieved);
+      expect(goal.stages.first.isAchieved, isTrue);
+      expect(goal.stages.last.achievedAt, isNull, reason: 'the unstamped rung stays unstamped');
     });
   });
 }

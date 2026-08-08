@@ -50,6 +50,7 @@ RelicApp buildApp({
     ..use('/', awsConfig(config: aws))
     ..use('/accounts', profilesDb(db: database))
     ..use('/accounts', workoutsDb(db: database))
+    ..use('/accounts', goalsDb(db: database))
     ..use('/accounts', connectionsDb(db: database))
     ..use('/accounts', templatesDb(db: database))
     ..use('/accounts', templateFoldersDb(db: database))

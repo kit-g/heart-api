@@ -83,20 +83,23 @@ void main() {
     });
 
     test('a protected route returns 401 without a token', () async {
-      expect((await send('GET', '/goals')).status, 401);
+      expect((await send('GET', '/accounts/u1/goals')).status, 401);
     });
 
     test('a protected route returns 401 for a rejected token', () async {
-      expect((await send('GET', '/goals', token: 'bad')).status, 401);
+      expect((await send('GET', '/accounts/u1/goals', token: 'bad')).status, 401);
     });
 
     test('a valid token reaches the handler and serializes the result', () async {
-      when(db.getGoals(any)).thenAnswer((_) async => const <Goal>[]);
+      when(
+        db.getTargetUserGoals(requesterId: anyNamed('requesterId'), targetUserId: anyNamed('targetUserId')),
+      ).thenAnswer((_) async => const <Goal>[]);
 
-      final res = await send('GET', '/goals', token: 'good');
+      final res = await send('GET', '/accounts/u1/goals', token: 'good');
       expect(res.status, 200);
       expect(jsonDecode(res.body), containsPair('goals', isEmpty));
-      verify(db.getGoals('u1')).called(1); // the authenticated user's id threaded through
+      // the authenticated user's id is threaded through as the requester
+      verify(db.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1')).called(1);
     });
   });
 
@@ -128,7 +131,9 @@ void main() {
   group('version gate', () {
     test('426 when the client version is below the minimum', () async {
       await app.close(); // replace the setUp app with one whose config enforces versions
-      when(db.getGoals(any)).thenAnswer((_) async => const <Goal>[]);
+      when(
+        db.getTargetUserGoals(requesterId: anyNamed('requesterId'), targetUserId: anyNamed('targetUserId')),
+      ).thenAnswer((_) async => const <Goal>[]);
       // The gate only fires on non-exempt routes when the config demands it.
       final config = MockAppConfig();
       when(config.minimalAppVersion).thenReturn('2.0.0');
@@ -145,8 +150,8 @@ void main() {
       server = await app.serve(port: 0);
       port = server.port;
 
-      expect((await send('GET', '/goals', token: 'good', appVersion: '1.0.0')).status, 426);
-      expect((await send('GET', '/goals', token: 'good', appVersion: '2.1.0')).status, 200);
+      expect((await send('GET', '/accounts/u1/goals', token: 'good', appVersion: '1.0.0')).status, 426);
+      expect((await send('GET', '/accounts/u1/goals', token: 'good', appVersion: '2.1.0')).status, 200);
     });
   });
 }
