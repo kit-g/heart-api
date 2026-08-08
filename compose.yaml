@@ -1,0 +1,31 @@
+# Local dev database: Postgres 17 (matching CI) with pgtap preinstalled.
+#
+#   make db-up      # build + start, wait until healthy
+#   make test-db    # apply migrations + run the pgtap suite against it
+#   make db-down    # stop (data persists in the named volume)
+#
+# If a native Postgres already owns 5432, start with HEART_DB_PORT=5433 and
+# export PGPORT=5433 for the scripts.
+services:
+  db:
+    build: database/docker
+    ports:
+      # 127.0.0.1 explicitly: a wildcard bind coexists silently with a native
+      # Postgres holding loopback 5432, and connections then land on the wrong
+      # server. This way the port clash fails loudly at `make db-up` instead.
+      - "127.0.0.1:${HEART_DB_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: heart
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - heart-db:/var/lib/postgresql/data
+      - ./database/docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d heart" ]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  heart-db:
