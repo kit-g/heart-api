@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(18);
+SELECT plan(19);
 
 SELECT has_schema('archive'::name);
 SELECT has_table('archive'::name, 'deleted_workouts'::name);
@@ -15,6 +15,7 @@ SELECT columns_are(
                    'started_at',
                    'completed_at',
                    'created_at',
+                   'calories',
                    'exercises',
                    'deleted_at'
                    ]
@@ -26,6 +27,7 @@ SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'name'::name, 'tex
 SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'started_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'completed_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'created_at'::name, 'timestamp with time zone'::name);
+SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'calories'::name, 'real'::name);
 SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'exercises'::name, 'jsonb'::name);
 SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'deleted_at'::name, 'timestamp with time zone'::name);
 
