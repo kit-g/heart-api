@@ -36,6 +36,26 @@ void main() {
       expect(req.toParams()['completedAt'], isNull);
     });
 
+    test('carries calories and forwards per-exercise met', () {
+      final req = const WorkoutRequest(
+        userId: 'u1',
+        body: {
+          'calories': 512,
+          'exercises': [
+            {'exercise': 'Bench Press (Barbell)', 'order': 0, 'met': 5.5, 'sets': []},
+            {'exercise': 'Squat (Barbell)', 'order': 1, 'sets': []},
+          ],
+        },
+      );
+
+      final params = req.toParams();
+      expect(params['calories'], 512.0);
+
+      final exercises = jsonDecode(params['exercises'] as String) as List;
+      expect(exercises[0]['met'], 5.5);
+      expect(exercises[1], isNot(contains('met')));
+    });
+
     test('exercises encoded with name flattened from {exercise: name} or {exercise: {name}}', () {
       final req = const WorkoutRequest(
         userId: 'u1',
