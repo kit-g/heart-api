@@ -1,31 +1,6 @@
 name: "Deploy Dart API"
 
 on:
-  workflow_dispatch:
-    inputs:
-      AWS_REGION:
-        required: true
-        type: string
-      AWS_ROLE:
-        required: true
-        type: string
-      FUNCTION_NAME:
-        required: true
-        type: string
-        description: "Lambda function to update"
-      API:
-        required: true
-        type: string
-        description: "API Gateway base URL, used by the smoke test"
-      SECRETS_BUCKET:
-        required: true
-        type: string
-        description: "S3 bucket holding the Supabase credentials"
-      SUPABASE_CRED_KEY:
-        required: true
-        type: string
-        description: "S3 key for supabase.json; points migrations at the target database"
-
   workflow_call:
     inputs:
       AWS_REGION:

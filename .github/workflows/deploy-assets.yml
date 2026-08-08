@@ -1,19 +1,6 @@
 name: "Deploy Assets Service"
 
 on:
-  workflow_dispatch:
-    inputs:
-      AWS_REGION:
-        required: true
-        type: string
-      AWS_ROLE:
-        required: true
-        type: string
-      FUNCTION_NAME:
-        required: true
-        type: string
-        description: "Lambda function to update"
-
   workflow_call:
     inputs:
       AWS_REGION:

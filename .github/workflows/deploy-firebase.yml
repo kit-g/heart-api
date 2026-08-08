@@ -1,27 +1,6 @@
 name: "Deploy Firebase Service"
 
 on:
-  workflow_dispatch:
-    inputs:
-      AWS_REGION:
-        required: true
-        type: string
-      AWS_ROLE:
-        required: true
-        type: string
-      FUNCTION_NAME:
-        required: true
-        type: string
-        description: "Lambda function to update"
-      SECRETS_BUCKET:
-        required: true
-        type: string
-        description: "S3 bucket holding the runtime Firebase Admin SA key"
-      FIREBASE_CRED_KEY:
-        required: true
-        type: string
-        description: "S3 key for the runtime SA key, baked into the deploy zip"
-
   workflow_call:
     inputs:
       AWS_REGION:
