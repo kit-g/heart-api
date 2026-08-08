@@ -49,20 +49,14 @@ Per-component docs:
 ## Local development
 
 ```bash
-# Dart
-cd api && dart pub get && dart test
-cd shared/heart_aws && dart pub get && dart test
-cd shared/heart_models && dart pub get && dart test
-
-# Database (requires local Postgres + pgtap; defaults to localhost/heart,
-# or set the PG* / DB_* env vars — see database/README.md)
-scripts/db_tests.sh
-
-# Python services
-uv sync --all-packages
-uv run pytest                                        # firebase suite
-uv run pytest assets/tests -o pythonpath=assets/assets  # assets suite
+make bootstrap   # dart pub get + mocks for all packages, uv sync, git hooks
+make db-up       # containerized Postgres 17 + pgtap (skip if you run a native one)
+make test        # the full matrix: Dart x3, migrations + pgtap, pytest x3
+make lint        # dart analyze x3 + ruff
 ```
+
+Each suite can also run individually — `make test-dart` / `test-db` / `test-python`,
+or the underlying commands directly (see the Makefile and per-component READMEs).
 
 The api package can be run locally against any Postgres + AWS profile — see [api/README.md](api/README.md#local-development).
 

@@ -26,6 +26,7 @@ dev = [
     "jsonschema>=4.25",
     "ruamel-yaml>=0.18",
     "ruff>=0.14",
+    "pre-commit>=4.6.1",
 ]
 
 [tool.ruff]
