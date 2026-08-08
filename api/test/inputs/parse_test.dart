@@ -127,6 +127,27 @@ void main() {
       final input = await WorkoutPatchIn.fromRequest(jsonRequest(body: {'name': 'A'}));
       expect(input.start, isNull);
       expect(input.end, isNull);
+      expect(input.calories, isNull);
+    });
+
+    test('a calories-only patch is accepted', () async {
+      final input = await WorkoutPatchIn.fromRequest(jsonRequest(body: {'calories': 421.5}));
+      expect(input.calories, 421.5);
+      expect(input.name, isNull);
+    });
+
+    test('rejects negative calories', () async {
+      await expectLater(
+        WorkoutPatchIn.fromRequest(jsonRequest(body: {'calories': -1})),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
+    test('rejects non-numeric calories', () async {
+      await expectLater(
+        WorkoutPatchIn.fromRequest(jsonRequest(body: {'calories': 'many'})),
+        throwsA(isA<BadRequest>()),
+      );
     });
 
     test('rejects an empty body (no fields)', () async {
