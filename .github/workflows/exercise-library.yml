@@ -1,20 +1,6 @@
 name: "Sync Exercise library"
 
 on:
-  workflow_dispatch:
-    inputs:
-      AWS_REGION:
-        required: true
-        type: string
-        default: 'ca-central-1'
-      AWS_ROLE:
-        required: true
-        type: string
-      SECRETS_BUCKET:
-        required: true
-        type: string
-        description: "S3 bucket holding secrets/supabase.json"
-
   workflow_call:
     inputs:
       AWS_REGION:
