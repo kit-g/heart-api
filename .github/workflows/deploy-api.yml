@@ -111,8 +111,10 @@ jobs:
         working-directory: ${{ matrix.package }}
         run: dart pub get
 
+      # heart_aws has no build_runner; the other two generate their mocks
+      # (mocks are gitignored, not checked in)
       - name: "Generate Mocks"
-        if: matrix.package == 'api'
+        if: matrix.package != 'shared/heart_aws'
         working-directory: ${{ matrix.package }}
         run: dart run build_runner build --delete-conflicting-outputs
 
