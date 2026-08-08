@@ -7,10 +7,20 @@ requires-python = ">=3.13"
 dependencies = [
     "boto3>=1.42.9",
     "pillow>=12.3.0",
+    # The root depends on its workspace members so that a plain `uv sync` (or
+    # an IDE-triggered one) produces the complete environment. Without this,
+    # any sync lacking --all-packages prunes the members' deps (firebase-admin
+    # et al.) and the test suites break with ModuleNotFoundError.
+    "firebase",
+    "assets",
 ]
 
 [tool.uv.workspace]
 members = ["firebase", "assets"]
+
+[tool.uv.sources]
+firebase = { workspace = true }
+assets = { workspace = true }
 
 [dependency-groups]
 dev = [
