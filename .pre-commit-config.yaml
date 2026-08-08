@@ -1,0 +1,25 @@
+# Pre-push gate: the fast half of what CI checks, so a push that would fail
+# lint never leaves the machine. Installed by `make bootstrap`, or manually:
+#   uv run pre-commit install --hook-type pre-push
+#
+# Local hooks on purpose — they run the same project-pinned tools (dart from
+# PATH, ruff from the uv venv, the Makefile lint target) instead of separate
+# pre-commit-managed versions that could drift from CI.
+default_stages: [ pre-push ]
+
+repos:
+  - repo: local
+    hooks:
+      - id: dart-format
+        name: dart format (changed files)
+        entry: dart format --output=none --set-exit-if-changed
+        language: system
+        types: [ dart ]
+        exclude: '\.(mocks|g|freezed)\.dart$'
+
+      - id: lint
+        name: make lint (dart analyze x3 + ruff)
+        entry: make lint
+        language: system
+        pass_filenames: false
+        files: '\.(dart|py)$'
