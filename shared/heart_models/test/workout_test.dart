@@ -65,11 +65,44 @@ void main() {
               {
                 'id': startTime.toIso8601String(),
                 'completed': false,
+                'started_at': startTime.toIso8601String(),
                 'reps': 8,
                 'weight': 100.0,
               },
             ),
           );
+        },
+      );
+
+      test(
+        'toMap emits completed_at once the set is ticked',
+        () {
+          final startTime = DateTime.parse('2025-01-21T12:00:00Z');
+          final completedTime = DateTime.parse('2025-01-21T12:01:30Z');
+          final set = ExerciseSet(mockExercise, reps: 8, weight: 100.0, start: startTime)
+            ..isCompleted = true
+            ..completedAt = completedTime;
+
+          final map = set.toMap();
+
+          expect(map['completed'], isTrue);
+          expect(map['completed_at'], equals(completedTime.toIso8601String()));
+        },
+      );
+
+      test(
+        'fromJson restores completed_at',
+        () {
+          final set = ExerciseSet.fromJson(mockExercise, {
+            'id': '2025-01-21T12:00:00.000Z',
+            'started_at': '2025-01-21T12:00:00Z',
+            'completed_at': '2025-01-21T12:01:30Z',
+            'completed': true,
+            'reps': 8,
+            'weight': 100.0,
+          });
+
+          expect(set.completedAt, equals(DateTime.parse('2025-01-21T12:01:30Z')));
         },
       );
 

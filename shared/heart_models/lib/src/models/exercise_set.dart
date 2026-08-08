@@ -21,6 +21,10 @@ abstract interface class ExerciseSet with UsesTimestampForId implements Complete
   @override
   abstract bool isCompleted;
 
+  /// When the set was ticked complete. Together with [start] this bounds the
+  /// set's work window, letting clients separate work time from rest time.
+  abstract DateTime? completedAt;
+
   factory ExerciseSet(
     Exercise exercise, {
     String? id,
@@ -65,6 +69,11 @@ abstract interface class ExerciseSet with UsesTimestampForId implements Complete
         bool completed => completed,
         1 => true,
         _ => false,
+      }
+      ..completedAt = switch (json['completed_at']) {
+        String s => DateTime.tryParse(s),
+        DateTime dt => dt,
+        _ => null,
       };
   }
 
@@ -118,6 +127,8 @@ class _ExerciseSet with UsesTimestampForId implements ExerciseSet {
     return {
       'id': id,
       'completed': isCompleted,
+      'started_at': start.toIso8601String(),
+      'completed_at': ?completedAt?.toIso8601String(),
       'reps': ?reps,
       'duration': ?duration,
       'distance': ?distance,
@@ -150,6 +161,9 @@ class _ExerciseSet with UsesTimestampForId implements ExerciseSet {
 
   @override
   bool isCompleted = false;
+
+  @override
+  DateTime? completedAt;
 
   @override
   bool get canBeCompleted {
