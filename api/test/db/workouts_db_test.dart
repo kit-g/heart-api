@@ -252,6 +252,72 @@ void main() {
     });
   });
 
+  group('energy fields', () {
+    test('calories, met, and set timing round-trip through create and read', () async {
+      final exName = h.uniqueName('Ex');
+      await h.seedGlobalExercise(name: exName);
+
+      final created = await h.db.createWorkout(
+        userId: ownerId,
+        body: WorkoutRequest(
+          userId: ownerId,
+          body: {
+            'name': 'Energy workout',
+            'start': '2026-08-08T10:00:00Z',
+            'end': '2026-08-08T11:00:00Z',
+            'calories': 512,
+            'exercises': [
+              {
+                'exercise': exName,
+                'order': 0,
+                'met': 5.5,
+                'sets': [
+                  {
+                    'weight': 100,
+                    'reps': 5,
+                    'completed': true,
+                    'started_at': '2026-08-08T10:00:00Z',
+                    'completed_at': '2026-08-08T10:01:30Z',
+                  },
+                ],
+              },
+            ],
+          },
+        ),
+        imageUrl: imageUrl,
+      );
+
+      expect(created.calories, 512.0);
+      expect(created.first.met, 5.5);
+      expect(created.first.first.completedAt?.toUtc(), DateTime.utc(2026, 8, 8, 10, 1, 30));
+
+      final read = await h.db.getWorkout(userId: ownerId, workoutId: created.id, imageUrl: imageUrl);
+      expect(read.calories, 512.0);
+      expect(read.first.met, 5.5);
+      expect(read.first.first.completedAt?.toUtc(), DateTime.utc(2026, 8, 8, 10, 1, 30));
+    });
+
+    test('a calories-only patch sets calories and leaves the rest unchanged', () async {
+      final id = await h.seedWorkout(userId: ownerId);
+
+      final updated = await h.db.patchWorkout(userId: ownerId, workoutId: id, calories: 300.5, imageUrl: imageUrl);
+
+      expect(updated.calories, 300.5);
+      expect(updated.name, 'Original');
+      expect(updated.start.toUtc(), DateTime.utc(2026, 7, 20, 18)); // original
+    });
+
+    test('a name-only patch preserves previously set calories', () async {
+      final id = await h.seedWorkout(userId: ownerId);
+      await h.db.patchWorkout(userId: ownerId, workoutId: id, calories: 300.5, imageUrl: imageUrl);
+
+      final updated = await h.db.patchWorkout(userId: ownerId, workoutId: id, name: 'Renamed', imageUrl: imageUrl);
+
+      expect(updated.calories, 300.5);
+      expect(updated.name, 'Renamed');
+    });
+  });
+
   group('deleteWorkout', () {
     test('the owner deletes their workout', () async {
       final id = await h.seedWorkout(userId: ownerId);
