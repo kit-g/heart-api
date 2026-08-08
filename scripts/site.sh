@@ -1,3 +1,15 @@
+#!/usr/bin/env bash
+# Syncs site/ to S3 and invalidates the CloudFront distribution.
+#
+# Usage: scripts/site.sh <bucket> <aws-profile> <distribution-id> <env>
+#   env picks which .well-known/<env>/ association files ship.
+set -euo pipefail
+
+if [ $# -ne 4 ]; then
+  echo "usage: $0 <bucket> <aws-profile> <distribution-id> <env>" >&2
+  exit 2
+fi
+
 BUCKET=$1
 PROFILE=$2
 DISTRIBUTION_ID=$3
