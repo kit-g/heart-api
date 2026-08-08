@@ -89,6 +89,10 @@ BEGIN
         _reps => 5,
         _completed => true
     );
+    UPDATE exercise_sets
+    SET started_at   = '2026-08-08T10:00:00Z',
+        completed_at = '2026-08-08T10:01:30Z'
+    WHERE workout_exercise_id = _we_id;
 
     _result := _exercise_sets(_we_id);
 
@@ -99,6 +103,16 @@ BEGIN
     RETURN NEXT is((_result -> 0 ->> 'weight')::real, 135::real, 'weight is preserved');
     RETURN NEXT is((_result -> 0 ->> 'reps')::int, 5, 'reps is preserved');
     RETURN NEXT is((_result -> 0 ->> 'completed')::boolean, TRUE, 'completed is preserved');
+    RETURN NEXT is(
+        (_result -> 0 ->> 'started_at')::timestamptz,
+        '2026-08-08T10:00:00Z'::timestamptz,
+        'started_at is preserved'
+    );
+    RETURN NEXT is(
+        (_result -> 0 ->> 'completed_at')::timestamptz,
+        '2026-08-08T10:01:30Z'::timestamptz,
+        'completed_at is preserved'
+    );
 END
 $$ LANGUAGE plpgsql;
 
