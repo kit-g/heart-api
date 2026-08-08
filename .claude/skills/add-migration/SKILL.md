@@ -165,19 +165,38 @@ RETURN NEXT function_returns('public'::name, 'uuidv7'::name, 'uuid');
 
 ## Verify
 
-Run the DB test suite (needs local Postgres + pgtap):
+Run the DB test suite. Two equivalent environments:
 
 ```bash
-PGHOST=localhost PGDATABASE=heart ./scripts/apply_migrations.sh   # applies your new migration
-psql -d heart -f database/test_utils/helpers.sql
-cd database && pg_prove -d heart tests/**/*.sql   # zsh expands ** natively; CI uses bash -O globstar
+# Containerized (Postgres 17 + pgtap, matching CI — no native install needed):
+make db-up       # HEART_DB_PORT=5433 make db-up if a native Postgres holds 5432
+make test-db     # applies unapplied migrations, then runs the whole pgtap suite
+                 # (needs PGUSER=postgres PGPASSWORD=postgres, plus PGPORT if remapped)
+
+# Native Postgres with pgtap built locally:
+make test-db     # PGHOST defaults to localhost; PGUSER/PGPASSWORD from your env
 ```
 
-Set `PGHOST` or the script falls back to fetching Supabase credentials from S3 and pointing at the **shared** database. Or use the convenience wrapper if present: `./scripts/db_tests.sh`.
+`make test-db` pins `PGHOST=localhost` deliberately — a bare `apply_migrations.sh`
+without `PGHOST` falls back to fetching Supabase credentials from S3 and pointing at the
+**shared** database. Never run the suite against Supabase. (`scripts/db_tests.sh` also
+accepts the IDE run-config vars `DB_HOST_URL`/`DB_HOST_PORT`/`DB_USER`/`DB_PASSWORD`.)
 
 ### Reset — proving it applies from scratch
 
-Running the file with `psql -f` proves the SQL parses; it does not prove the migration *applies*, because the runner may skip it (see the naming section). To verify for real, drop what it creates, clear its tracking row, and re-run the runner:
+Running the file with `psql -f` proves the SQL parses; it does not prove the migration
+*applies*, because the runner may skip it (see the naming section). And idempotent
+re-runs only prove the migration works against the *current* state — a from-zero replay
+is what proves the whole chain still works in order.
+
+**Container (the cheap default, ~30s):**
+
+```bash
+make db-reset    # drops the data volume, rebuilds, waits healthy
+make test-db     # expect ">> Migrations: N applied" replaying every file, then PASS
+```
+
+**Native Postgres** (no volume to drop) — surgical reset of just your migration:
 
 ```bash
 psql -d heart --set ON_ERROR_STOP=1 -c "
@@ -188,7 +207,7 @@ psql -d heart --set ON_ERROR_STOP=1 -c "
 PGHOST=localhost PGDATABASE=heart ./scripts/apply_migrations.sh   # expect ">> Applying <file>.sql"
 ```
 
-Then confirm the objects exist — don't infer it from the runner's exit code:
+Either way, confirm the objects exist — don't infer it from the runner's exit code:
 
 ```bash
 psql -d heart -tAc "SELECT column_name FROM information_schema.columns WHERE table_name='<t>' AND column_name='<c>'"
@@ -196,7 +215,10 @@ psql -d heart -tAc "SELECT proname FROM pg_proc WHERE proname = '<fn>'"
 psql -d heart -tAc "SELECT indexname FROM pg_indexes WHERE indexname = '<idx>'"
 ```
 
-Dropping a column discards data. On a dev box that means re-running whatever populates it (e.g. `scripts/library_locales.py` for the exercise library) afterwards.
+A reset discards data (the container's whole dataset; on native, whatever the dropped
+column/table held). Repopulating is deterministic: `make db-seed` applies migrations and
+syncs the exercise library from `content/` into the local database — no AWS involved,
+idempotent, same source of truth the prod sync uses.
 
 ## If the table is read/written by the API
 
