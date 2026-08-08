@@ -1,7 +1,7 @@
 # Repo-wide entrypoints. `make test` runs the same matrix CI does.
 # Database targets need local Postgres + pgtap (see database/README.md).
 
-.PHONY: bootstrap test test-dart test-db test-python lint db-up db-down db-reset
+.PHONY: bootstrap test test-dart test-db test-python lint db-up db-down db-reset db-seed
 
 bootstrap:
 	cd api && dart pub get && dart run build_runner build
@@ -37,6 +37,13 @@ db-reset:
 test-db:
 	PGHOST=$${PGHOST:-localhost} PGDATABASE=$${PGDATABASE:-heart} ./scripts/apply_migrations.sh
 	./scripts/db_tests.sh
+
+# Deterministic local dataset: migrations, then the exercise library synced
+# from content/ into the local database (no AWS involved — the seed script
+# only talks S3 when SECRETS_BUCKET is set, which CI does and this does not).
+db-seed:
+	PGHOST=$${PGHOST:-localhost} PGDATABASE=$${PGDATABASE:-heart} ./scripts/apply_migrations.sh
+	PGHOST=$${PGHOST:-localhost} PGDATABASE=$${PGDATABASE:-heart} uv run python scripts/library_locales.py
 
 test-python:
 	uv run pytest

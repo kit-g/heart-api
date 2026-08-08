@@ -267,24 +267,38 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
     return upserted, translations, archived
 
 
-def main():
-    secrets_bucket = os.environ['SECRETS_BUCKET']
+def connect() -> psycopg.Connection:
+    """
+    CI and deploys set SECRETS_BUCKET and get Supabase credentials from S3.
+    Without it, connect via the standard PG* env vars, defaulting to the local
+    dev database — the `make db-seed` path. The split is deliberate: local
+    seeding must be possible with zero AWS involvement, and forgetting the env
+    var must land you on localhost, never on the shared instance.
+    """
+    if bucket := os.environ.get('SECRETS_BUCKET'):
+        print(f'>> Fetching DB credentials from s3://{bucket}/secrets/supabase.json')
+        creds = fetch_db_creds(bucket)
+        print(f'>> Connecting to {creds["host"]}:{creds["port"]}')
+        return psycopg.connect(
+            host=creds['host'],
+            port=int(creds['port']),
+            user=creds['user'],
+            password=creds['password'],
+            dbname=creds.get('database', 'heart'),
+            sslmode='require',
+        )
 
+    host = os.environ.get('PGHOST', 'localhost')
+    dbname = os.environ.get('PGDATABASE', 'heart')
+    print(f'>> Connecting to {host}/{dbname} (local; user/port/password from PG* env)')
+    return psycopg.connect(host=host, dbname=dbname)
+
+
+def main():
     print('>> Reading source')
     library = Library.parse(get_source())
 
-    print(f'>> Fetching DB credentials from s3://{secrets_bucket}/secrets/supabase.json')
-    creds = fetch_db_creds(secrets_bucket)
-
-    print(f'>> Connecting to {creds["host"]}:{creds["port"]}')
-    with psycopg.connect(
-        host=creds['host'],
-        port=int(creds['port']),
-        user=creds['user'],
-        password=creds['password'],
-        dbname=creds.get('database', 'heart'),
-        sslmode='require',
-    ) as conn:
+    with connect() as conn:
         upserted, translations, archived = sync(library, conn)
 
     print(f'>> Done: {upserted} exercises upserted, {translations} translations, {archived} archived')

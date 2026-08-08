@@ -108,6 +108,8 @@ make test-db    # apply migrations + run the suite against it
 make db-down    # stop; data persists in the named volume
 make db-reset   # drop the volume, replay every migration from zero —
                 # required after editing an already-applied migration
+make db-seed    # migrations + exercise library from content/ (local, no AWS);
+                # idempotent — the deterministic way to repopulate after a reset
 # 5432 taken by a native install: HEART_DB_PORT=5433 make db-up, then export PGPORT=5433
 ```
 
