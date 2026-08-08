@@ -79,6 +79,7 @@ Future<Workout> patchWorkoutById(final Request request, final String workoutId) 
     name: input.name,
     start: input.start,
     end: input.end,
+    calories: input.calories,
     imageUrl: request.config.cdnAssetUrl,
   );
 }

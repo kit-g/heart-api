@@ -38,8 +38,8 @@ abstract interface class ApiWorkoutService {
   });
 
   /// Partial update of a workout the user owns — sets only the provided fields
-  /// (name/start/end), leaving its exercises intact. A null argument leaves that
-  /// field unchanged.
+  /// (name/start/end/calories), leaving its exercises intact. A null argument
+  /// leaves that field unchanged.
   Future<Workout> patchWorkout({
     required String userId,
     required String workoutId,
@@ -47,6 +47,7 @@ abstract interface class ApiWorkoutService {
     String? name,
     DateTime? start,
     DateTime? end,
+    double? calories,
   });
 
   Future<void> deleteWorkout({
@@ -82,6 +83,7 @@ class WorkoutRequest {
             return {
               'exercise_name': name,
               'order': ex['order'],
+              'met': ?ex['met'],
               'sets': ex['sets'] ?? [],
             };
           },
@@ -96,6 +98,7 @@ class WorkoutRequest {
       'name': body['name'],
       'startedAt': _dt(body['start']),
       'completedAt': _dt(body['end']),
+      'calories': (body['calories'] as num?)?.toDouble(),
       'exercises': jsonEncode(_exercises()),
     };
   }
