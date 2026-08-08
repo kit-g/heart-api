@@ -21,6 +21,11 @@ abstract interface class WorkoutExercise
 
   set order(int? v);
 
+  /// Measured MET (kcal/kg/h) over this exercise's time window, computed on
+  /// device from wearable data. Body mass divides out, so the value is safe to
+  /// sync and comparable across users. Null without wearable data.
+  abstract double? met;
+
   void add(ExerciseSet set);
 
   bool remove(ExerciseSet set);
@@ -48,6 +53,7 @@ abstract interface class WorkoutExercise
       },
       id: json['id'],
       order: json['exercise_order'] ?? json['order'],
+      met: (json['met'] as num?)?.toDouble(),
     );
   }
 }
@@ -76,6 +82,11 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
   abstract String? name;
 
   abstract DateTime? end;
+
+  /// Total active energy for the session in kilocalories, computed on device
+  /// from wearable data. Arrives after the fact (HealthKit finalizes energy
+  /// minutes after the workout ends), so it is mutable and often null.
+  abstract double? calories;
 
   Iterable<WorkoutExercise> get sets;
 
@@ -128,6 +139,7 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
         },
         _ => null,
       },
+      calories: (row['calories'] as num?)?.toDouble(),
       // a workout read from the server's own store is, by definition, synced
       synced: true,
     );
@@ -182,11 +194,15 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
   @override
   int? order;
 
+  @override
+  double? met;
+
   _WorkoutExercise._({
     ExerciseSet? starter,
     DateTime? start,
     required this.id,
     this.order,
+    this.met,
     required Exercise exercise,
     List<ExerciseSet>? sets,
   }) : _exercise = exercise,
@@ -236,6 +252,7 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
       'id': id,
       'exercise': ?firstOrNull?.exercise.toMap(),
       'start': start.toIso8601String(),
+      'met': ?met,
       'sets': [
         for (final each in this) each.toMap(),
       ],
@@ -376,6 +393,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   DateTime? end;
 
   @override
+  double? calories;
+
+  @override
   final bool synced;
 
   _Workout._({
@@ -384,6 +404,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
     required this.id,
     List<WorkoutExercise>? exercises,
     this.end,
+    this.calories,
     Map<String, WorkoutImage>? images,
     this.synced = false,
   }) : _sets = exercises ?? <WorkoutExercise>[],
@@ -395,6 +416,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       name: json['name'],
       id: json['id'],
       end: DateTime.tryParse(json['end'] ?? ''),
+      calories: (json['calories'] as num?)?.toDouble(),
       exercises: switch (json['exercises']) {
         List l => l.map((each) => WorkoutExercise.fromJson(each)).toList(),
         _ => null,
@@ -442,6 +464,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       'name': name,
       'start': start.toIso8601String(),
       'end': end?.toIso8601String(),
+      'calories': ?calories,
       'exercises': where((ex) => ex.isNotEmpty).indexed.map(asRequest).toList(),
       'images': images.values.map((img) => img.toRow()).toList(),
     };
@@ -536,10 +559,13 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
 
   @override
   Workout copy({bool sameId = false}) {
+    // calories/met are measurements of the original session, so a copy with a
+    // fresh id (repeating a past workout) must not inherit them.
     final workout = _Workout._(
       id: sameId ? id : uuidV7(),
       name: name,
       start: sameId ? start : DateTime.timestamp(),
+      calories: sameId ? calories : null,
       images: images,
     );
 
