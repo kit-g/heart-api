@@ -36,7 +36,7 @@ The API wires a route across ~8 files. Miss one and it fails late (compile error
 
 8. **Register route** — `api/lib/routes/index.dart` (`('/path', .verb): domain.handler`) AND wire the DB middleware in `buildApp` (`api/lib/core/app.dart`), e.g. `..use('/path', <domain>Db(db: database))`. That's the single wiring spot — `bin/main.dart` just builds the real deps and calls `buildApp` + `serve()`. Add to `_publicRoutes` only if it bypasses auth.
 
-9. **Mocks** — if you added a service interface, add it to `@GenerateMocks` in `api/test/mocks.dart`, then **`cd api && dart run build_runner build --delete-conflicting-outputs`**. Skipping this is the #1 silent miss.
+9. **Mocks** — if you added a service interface, add it to `@GenerateMocks` in `api/test/mocks.dart`, then **`cd api && dart run build_runner build`**. Skipping this is the #1 silent miss.
 
 10. **Route test** — `api/test/routes/<domain>_test.dart`. Two styles live here; both mock the service, so neither covers SQL:
     - **Direct (default).** `jsonRequest(...)`/`bareRequest(...)` from `test/helpers/request.dart`, mocks wired onto the request via the context setters, call the handler function, assert throws with `expect(() => handler(req), throwsA(isA<NoContent>()))` etc. Fast; proves the handler's own wiring. Use this for a new endpoint by default.

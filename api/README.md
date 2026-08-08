@@ -252,7 +252,7 @@ DB-layer behavior is tested with **pgtap** (Postgres-native testing), not Dart. 
 
 ### Mocking services
 
-`test/mocks.dart` declares `@GenerateMocks([…])` for the service interfaces. Run `dart run build_runner build --delete-conflicting-outputs` to generate `mocks.mocks.dart`. CI does this automatically.
+`test/mocks.dart` declares `@GenerateMocks([…])` for the service interfaces. Run `dart run build_runner build` to generate `mocks.mocks.dart`. CI does this automatically.
 
 ```dart
 // test/mocks.dart
@@ -326,7 +326,7 @@ cd ../shared/heart_aws && dart pub get
 cd ../heart_models && dart pub get
 
 # regenerate mocks (rare — only when service interfaces change)
-cd api && dart run build_runner build --delete-conflicting-outputs
+cd api && dart run build_runner build
 
 # run tests
 dart test
