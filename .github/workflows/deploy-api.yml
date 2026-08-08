@@ -73,7 +73,7 @@ jobs:
 
       - name: "Generate Mocks"
         working-directory: api
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build
 
       - name: "Format check"
         working-directory: api
@@ -116,7 +116,7 @@ jobs:
       - name: "Generate Mocks"
         if: matrix.package != 'shared/heart_aws'
         working-directory: ${{ matrix.package }}
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build
 
       # `shared/heart_models` → `shared-heart_models`: artifact names and report
       # filenames cannot hold a slash, and the suite stays identifiable.
@@ -204,7 +204,7 @@ jobs:
 
       - name: "Generate mocks"
         working-directory: api
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build
 
       # Runs the FULL api suite — unit + `db`-tagged (unskipped via --run-skipped)
       # — against the Postgres provisioned above, so coverage reflects the code

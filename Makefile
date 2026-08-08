@@ -4,9 +4,9 @@
 .PHONY: bootstrap test test-dart test-db test-python lint db-up db-down db-reset
 
 bootstrap:
-	cd api && dart pub get && dart run build_runner build --delete-conflicting-outputs
+	cd api && dart pub get && dart run build_runner build
 	cd shared/heart_aws && dart pub get
-	cd shared/heart_models && dart pub get && dart run build_runner build --delete-conflicting-outputs
+	cd shared/heart_models && dart pub get && dart run build_runner build
 	uv sync --all-packages
 	uv run pre-commit install --hook-type pre-push
 
