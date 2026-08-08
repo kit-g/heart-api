@@ -99,6 +99,18 @@ The helpers are `CREATE OR REPLACE` so re-loads are idempotent.
 scripts/db_tests.sh
 ```
 
+No native Postgres? The repo ships a containerized one (Postgres 17 + pgtap,
+matching CI — see `compose.yaml`):
+
+```bash
+make db-up      # build + start, waits until healthy
+make test-db    # apply migrations + run the suite against it
+make db-down    # stop; data persists in the named volume
+make db-reset   # drop the volume, replay every migration from zero —
+                # required after editing an already-applied migration
+# 5432 taken by a native install: HEART_DB_PORT=5433 make db-up, then export PGPORT=5433
+```
+
 CI runs the exact same script against an ephemeral Postgres provisioned on the runner — see `.github/workflows/deploy-api.yml` (`db-test` job).
 
 ### Adding a table
