@@ -2,12 +2,15 @@ part of 'db.dart';
 
 mixin _Goals on _DatabaseBase implements GoalService {
   @override
-  Future<Iterable<Goal>> getGoals(String userId) async {
-    final result = await _pool.execute(
-      _listGoals.toSql(),
-      parameters: {'userId': userId},
+  Future<Iterable<Goal>> getTargetUserGoals({required String requesterId, required String targetUserId}) async {
+    final rows = await _pool.execute(
+      _listTargetGoals.toSql(),
+      parameters: {'requesterId': requesterId, 'targetUserId': targetUserId},
     );
-    return result.map((row) => Goal.fromRow(row.toColumnMap()));
+    if (rows.isNotEmpty && rows.first.toColumnMap()['forbidden'] == true) {
+      throw const Forbidden(reason: 'You do not have permission to view these goals.');
+    }
+    return rows.map((row) => Goal.fromRow(row.toColumnMap()));
   }
 
   @override

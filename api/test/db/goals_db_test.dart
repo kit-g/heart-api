@@ -9,7 +9,7 @@ import 'db_test_utility.dart';
 
 /// Full integration coverage of the `GoalService` query strings against a live
 /// Postgres: list/create/update/delete plus the stage-achievement update, and the
-/// owner-scoping / missing-row branches the SQL encodes.
+/// connection-visibility / owner-scoping / missing-row branches the SQL encodes.
 ///
 /// Tagged `db` — skipped by the default `dart test`. Run with:
 ///   dart test --run-skipped -t db
@@ -18,7 +18,7 @@ void main() {
 
   late String ownerId;
   late String strangerId;
-  late String listOwnerId; // isolated, so getGoals counts aren't polluted
+  late String listOwnerId; // isolated, so list counts aren't polluted
 
   const missingId = '00000000-0000-7000-8000-000000000000';
 
@@ -50,13 +50,13 @@ void main() {
 
   tearDownAll(h.teardownDatabase);
 
-  group('getGoals', () {
-    test('returns only the owner non-archived goals', () async {
+  group('getTargetUserGoals', () {
+    test('the owner sees their own non-archived goals', () async {
       final owner = await h.seedProfile();
       await h.db.createGoal(workoutsGoal(target: 2), owner);
       await h.db.createGoal(workoutsGoal(target: 5), owner);
 
-      final goals = (await h.db.getGoals(owner)).toList();
+      final goals = (await h.db.getTargetUserGoals(requesterId: owner, targetUserId: owner)).toList();
       expect(goals, hasLength(2));
       expect(goals.every((g) => !g.archived), isTrue);
     });
@@ -69,14 +69,27 @@ void main() {
         listOwnerId,
       );
 
-      final goals = await h.db.getGoals(listOwnerId);
+      final goals = await h.db.getTargetUserGoals(requesterId: listOwnerId, targetUserId: listOwnerId);
       expect(goals.map((g) => g.id), isNot(contains(created.id)));
     });
 
-    test('another user does not see the owner goals', () async {
+    test('an active connection may read the owner goals', () async {
       final created = await h.db.createGoal(workoutsGoal(), ownerId);
-      final theirs = await h.db.getGoals(strangerId);
-      expect(theirs.map((g) => g.id), isNot(contains(created.id)));
+      await h.seedConnection(initiator: strangerId, target: ownerId);
+
+      final visible = await h.db.getTargetUserGoals(requesterId: strangerId, targetUserId: ownerId);
+      expect(visible.map((g) => g.id), contains(created.id));
+    });
+
+    test('a non-connection is forbidden from the owner goals', () async {
+      final loner = await h.seedProfile();
+      await h.db.createGoal(workoutsGoal(), loner);
+      final outsider = await h.seedProfile();
+
+      await expectLater(
+        h.db.getTargetUserGoals(requesterId: outsider, targetUserId: loner),
+        throwsA(isA<Forbidden>()),
+      );
     });
   });
 
@@ -138,6 +151,26 @@ void main() {
         throwsA(isA<NotFound>()),
       );
     });
+
+    test('a full replace keeps an already-achieved stage stamped', () async {
+      final exerciseId = await h.seedGlobalExercise();
+      final created = await h.db.createGoal(ladderGoal(exerciseId), ownerId);
+      final at = DateTime.utc(2026, 11, 1, 8);
+      final stamped = await h.db.markStageAchieved(created.id!, created.stages.first.id!, ownerId, at);
+
+      // Edit the top rung; the achieved rung must carry its date through the write.
+      final edited = await h.db.updateGoal(
+        stamped.id!,
+        stamped.copyWith(
+          stages: [stamped.stages.first, stamped.stages.last.copyWith(target: 130)],
+        ),
+        ownerId,
+      );
+
+      final first = edited.stages.firstWhere((s) => s.id == created.stages.first.id);
+      expect(first.achievedAt?.toUtc(), at);
+      expect(edited.stages.last.target, 130);
+    });
   });
 
   group('deleteGoal', () {
@@ -145,7 +178,7 @@ void main() {
       final created = await h.db.createGoal(workoutsGoal(), ownerId);
       await h.db.deleteGoal(created.id!, ownerId);
 
-      final goals = await h.db.getGoals(ownerId);
+      final goals = await h.db.getTargetUserGoals(requesterId: ownerId, targetUserId: ownerId);
       expect(goals.map((g) => g.id), isNot(contains(created.id)));
     });
 
@@ -153,7 +186,7 @@ void main() {
       final created = await h.db.createGoal(workoutsGoal(), ownerId);
       await h.db.deleteGoal(created.id!, strangerId);
 
-      final goals = await h.db.getGoals(ownerId);
+      final goals = await h.db.getTargetUserGoals(requesterId: ownerId, targetUserId: ownerId);
       expect(goals.map((g) => g.id), contains(created.id)); // still there
     });
   });

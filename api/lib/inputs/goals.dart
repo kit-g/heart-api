@@ -101,6 +101,7 @@ List<GoalStage> _parseStages(Map<String, dynamic> json) {
         id: stage['id'] as String?,
         target: stage.number('target', exclusiveMin: 0),
         dueOn: stage.dateOrNull('dueOn'),
+        achievedAt: stage.dateOrNull('achievedAt'),
       ),
   ];
 }

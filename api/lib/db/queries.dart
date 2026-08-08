@@ -1324,12 +1324,37 @@ WHERE exercise_id = @id::uuid
   ;
 ''';
 
-const _listGoals = '''
-SELECT id, metric, exercise_id, cadence, stages, archived, created_at
-FROM goals
-WHERE user_id = @userId
-  AND NOT archived
-ORDER BY created_at
+// Goals are visible to their owner and to active connections, exactly like
+// workouts (see _listWorkouts) — the auth CTE is identical. Writing stays
+// owner-only; this is the only cross-user read. A forbidden requester gets a
+// single sentinel row, which the db layer turns into a 403.
+const _listTargetGoals = '''
+WITH
+_auth AS (
+  SELECT (
+    @requesterId::text = @targetUserId::text
+    OR EXISTS (
+      SELECT 1 FROM connections
+      WHERE status = 'active'
+        AND (
+          (initiator_id = @requesterId AND target_id = @targetUserId AND initiator_role IN ('COACH', 'PEER'))
+          OR
+          (initiator_id = @targetUserId AND target_id = @requesterId AND target_role IN ('COACH', 'PEER'))
+        )
+    )
+  ) AS allowed
+),
+_goals AS (
+  SELECT id, metric, exercise_id, cadence, stages, archived, created_at
+  FROM goals
+  WHERE (SELECT allowed FROM _auth)
+    AND user_id = @targetUserId::text
+    AND NOT archived
+  ORDER BY created_at
+)
+SELECT id, metric, exercise_id, cadence, stages, archived, created_at, false AS forbidden FROM _goals
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
 /// A user keeps a bounded number of live goals — enough for every sensible plan,

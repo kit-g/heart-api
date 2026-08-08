@@ -7,8 +7,14 @@ import 'package:relic/relic.dart';
 
 import '../models/errors.dart';
 
-Future<GoalsResponse> getGoals(final Request req) async {
-  final goals = await req.goalService.getGoals(req.userId);
+Future<GoalsResponse> getTargetUserGoals(final Request req) =>
+    getTargetUserGoalsById(req, req.rawPathParameters[#targetUserId]!);
+
+Future<GoalsResponse> getTargetUserGoalsById(final Request req, final String targetUserId) async {
+  final goals = await req.goalService.getTargetUserGoals(
+    requesterId: req.userId,
+    targetUserId: targetUserId,
+  );
   return GoalsResponse(goals: goals);
 }
 
