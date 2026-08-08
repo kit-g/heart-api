@@ -3,7 +3,7 @@ name: "Deploy Assets Service, prod"
 on:
   workflow_dispatch: { }
   push:
-    branches: [ assets ]
+    branches: [ main ]
     paths:
       - 'assets/**'
       - 'pyproject.toml'
