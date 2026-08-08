@@ -25,6 +25,7 @@ mixin _Goals on _DatabaseBase implements GoalService {
     // No row means the insert's cap guard fired — the user is already at the limit.
     if (result.isEmpty) {
       throw const BadRequest(
+        code: 'goal_limit',
         reason: 'you can have at most $_maxActiveGoals active goals; archive or delete one first',
       );
     }
@@ -45,7 +46,7 @@ mixin _Goals on _DatabaseBase implements GoalService {
         'archived': goal.archived,
       },
     );
-    if (result.isEmpty) throw NotFound(type: 'Goal', id: goalId);
+    if (result.isEmpty) throw NotFound(type: 'Goal', id: goalId, code: 'goal_not_found');
     return Goal.fromRow(result.first.toColumnMap());
   }
 
@@ -68,7 +69,7 @@ mixin _Goals on _DatabaseBase implements GoalService {
         'achievedAt': achievedAt.toUtc().toIso8601String(),
       },
     );
-    if (result.isEmpty) throw NotFound(type: 'Goal stage', id: stageId);
+    if (result.isEmpty) throw NotFound(type: 'Goal stage', id: stageId, code: 'goal_stage_not_found');
     return Goal.fromRow(result.first.toColumnMap());
   }
 

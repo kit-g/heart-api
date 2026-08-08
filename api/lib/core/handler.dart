@@ -23,10 +23,16 @@ Handler apiHandler(final ModelHandler handler) {
       return JsonResponse(e.statusCode, body: e);
     } on TypeError catch (e) {
       _logger.warning('Malformed request (TypeError):', e);
-      return JsonResponse(400, body: BadRequest(reason: 'malformed request: ${e.toString()}'));
+      return JsonResponse(
+        400,
+        body: BadRequest(code: 'malformed_request', reason: 'malformed request: ${e.toString()}'),
+      );
     } on FormatException catch (e) {
       _logger.warning('Malformed request (FormatException):', e);
-      return JsonResponse(400, body: BadRequest(reason: 'malformed request: ${e.message}'));
+      return JsonResponse(
+        400,
+        body: BadRequest(code: 'malformed_request', reason: 'malformed request: ${e.message}'),
+      );
     } on UnimplementedError catch (e) {
       _logger.warning('API exception:', e.message);
       return JsonResponse.notImplemented(body: NotImplemented(reason: e.message ?? 'Not implemented'));

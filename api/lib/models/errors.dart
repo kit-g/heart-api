@@ -2,15 +2,26 @@ import 'package:heart_models/heart_models.dart';
 
 abstract class ApiException implements Model {
   int get statusCode;
+
+  /// A stable, machine-readable identifier for this failure, emitted as `code`
+  /// in every error body. Unlike the human `reason`/`message`, it is never
+  /// reworded, so a client can branch on it — e.g. tell the `goal_limit`
+  /// rejection apart from any other 400 without matching prose. It always
+  /// defaults to the category (`bad_request`, `not_found`, …); specific
+  /// failures override it.
+  String get code;
 }
 
 class NotFound implements ApiException {
   final String type;
   final String id;
+  @override
+  final String code;
 
   const NotFound({
     required this.type,
     required this.id,
+    this.code = 'not_found',
   });
 
   @override
@@ -20,7 +31,7 @@ class NotFound implements ApiException {
 
   @override
   Map<String, dynamic> toMap() {
-    return {'error': 'not found', 'message': toString()};
+    return {'error': 'not found', 'code': code, 'message': toString()};
   }
 
   @override
@@ -29,6 +40,9 @@ class NotFound implements ApiException {
 
 class NoContent implements ApiException {
   const NoContent();
+
+  @override
+  String get code => 'no_content';
 
   @override
   Map<String, dynamic> toMap() {
@@ -41,16 +55,19 @@ class NoContent implements ApiException {
 
 class BadRequest implements ApiException {
   final String reason;
+  @override
+  final String code;
   final Map? payload;
 
   const BadRequest({
     required this.reason,
+    this.code = 'bad_request',
     this.payload,
   });
 
   @override
   Map<String, dynamic> toMap() {
-    return {'error': 'bad request', 'reason': reason};
+    return {'error': 'bad request', 'code': code, 'reason': reason};
   }
 
   @override
@@ -67,8 +84,10 @@ class BadRequest implements ApiException {
 
 class Forbidden implements ApiException {
   final String reason;
+  @override
+  final String code;
 
-  const Forbidden({required this.reason});
+  const Forbidden({required this.reason, this.code = 'forbidden'});
 
   @override
   int get statusCode => 403;
@@ -77,6 +96,7 @@ class Forbidden implements ApiException {
   Map<String, dynamic> toMap() {
     return {
       'error': 'forbidden',
+      'code': code,
       'reason': reason,
     };
   }
@@ -84,8 +104,10 @@ class Forbidden implements ApiException {
 
 class UnsupportedMediaType implements ApiException {
   final String reason;
+  @override
+  final String code;
 
-  const UnsupportedMediaType({required this.reason});
+  const UnsupportedMediaType({required this.reason, this.code = 'unsupported_media_type'});
 
   @override
   int get statusCode => 415;
@@ -94,6 +116,7 @@ class UnsupportedMediaType implements ApiException {
   Map<String, dynamic> toMap() {
     return {
       'error': 'unsupported media type',
+      'code': code,
       'reason': reason,
     };
   }
@@ -104,8 +127,10 @@ class UnsupportedMediaType implements ApiException {
 
 class NotImplemented implements ApiException {
   final String reason;
+  @override
+  final String code;
 
-  const NotImplemented({required this.reason});
+  const NotImplemented({required this.reason, this.code = 'not_implemented'});
 
   @override
   int get statusCode => 501;
@@ -114,6 +139,7 @@ class NotImplemented implements ApiException {
   Map<String, dynamic> toMap() {
     return {
       'error': 'not implemented',
+      'code': code,
       'reason': reason,
     };
   }
