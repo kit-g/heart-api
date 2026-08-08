@@ -22,6 +22,7 @@ DECLARE
 BEGIN
     _user_id := create_test_profile();
     _w_id    := create_test_workout(_user_id => _user_id, _name => 'archive me');
+    UPDATE workouts SET calories = 420 WHERE id = _w_id;
 
     DELETE FROM workouts WHERE id = _w_id;
 
@@ -39,6 +40,11 @@ BEGIN
             (SELECT name FROM archive.deleted_workouts WHERE id = _w_id),
             'archive me',
             'archive preserved name'
+        );
+    RETURN NEXT is(
+            (SELECT calories FROM archive.deleted_workouts WHERE id = _w_id),
+            420::real,
+            'archive preserved calories'
         );
 END
 $$ LANGUAGE plpgsql;
