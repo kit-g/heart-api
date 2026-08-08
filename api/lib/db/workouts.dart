@@ -90,6 +90,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     String? name,
     DateTime? start,
     DateTime? end,
+    double? calories,
   }) async {
     final rows = await _pool.execute(
       _patchWorkout.toSql(),
@@ -99,6 +100,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
         'name': name,
         'startedAt': start,
         'completedAt': end,
+        'calories': calories,
       },
     );
     if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
