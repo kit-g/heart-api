@@ -61,6 +61,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
+      - uses: actions/cache@v6
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-
 
       - name: "Install dependencies"
         working-directory: api
@@ -96,6 +101,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
+      - uses: actions/cache@v6
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-
 
       - name: "Install dependencies"
         working-directory: ${{ matrix.package }}
@@ -180,6 +190,11 @@ jobs:
           ./scripts/db_tests.sh | tee "$GITHUB_WORKSPACE/test-reports/pgtap.tap"
 
       - uses: dart-lang/setup-dart@v1
+      - uses: actions/cache@v6
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-
 
       - name: "Install Dart dependencies"
         working-directory: api
@@ -282,6 +297,11 @@ jobs:
         run: ./scripts/apply_migrations.sh
 
       - uses: dart-lang/setup-dart@v1
+      - uses: actions/cache@v6
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-
 
       - name: "Build Lambda binary"
         working-directory: api
