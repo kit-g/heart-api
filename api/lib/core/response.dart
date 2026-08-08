@@ -7,14 +7,14 @@ import 'package:relic/relic.dart';
 class _NotFound implements Model {
   @override
   Map<String, dynamic> toMap() {
-    return {'error': 'not found'};
+    return {'error': 'not found', 'code': 'not_found'};
   }
 }
 
 class _ServerError implements Model {
   @override
   Map<String, dynamic> toMap() {
-    return {'error': 'server error'};
+    return {'error': 'server error', 'code': 'server_error'};
   }
 }
 

@@ -113,13 +113,22 @@ void _validate({
   required List<GoalStage> stages,
 }) {
   if (metric.isWholeWorkout && exerciseId != null) {
-    throw BadRequest(reason: 'the ${metric.value} metric counts whole workouts and takes no exerciseId');
+    throw BadRequest(
+      code: 'goal_scope',
+      reason: 'the ${metric.value} metric counts whole workouts and takes no exerciseId',
+    );
   }
   if (!metric.isWholeWorkout && exerciseId == null) {
-    throw BadRequest(reason: '${metric.value} is measured per exercise, so exerciseId is required');
+    throw BadRequest(
+      code: 'goal_scope',
+      reason: '${metric.value} is measured per exercise, so exerciseId is required',
+    );
   }
   if (cadence != null && stages.length > 1) {
-    throw BadRequest(reason: 'a recurring goal has a single standing target, not a ladder of ${stages.length}');
+    throw BadRequest(
+      code: 'goal_cadence_stages',
+      reason: 'a recurring goal has a single standing target, not a ladder of ${stages.length}',
+    );
   }
   // Ladder targets are deliberately unconstrained in direction: a descending bench
   // ladder (deload, then rebuild) or a zig-zagging date-ordered plan are real goals,
