@@ -423,7 +423,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       },
       images: switch (json) {
         {'images': List l} when l.isNotEmpty => SplayTreeMap<String, WorkoutImage>.fromIterables(
-          l.map<String>((each) => each['id']),
+          l.map<String>((each) => (each as Map)['id']),
           l.map<WorkoutImage>((each) => WorkoutImage.fromJson(each)),
         ),
         _ => null,
