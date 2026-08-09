@@ -1,7 +1,7 @@
 # Repo-wide entrypoints. `make test` runs the same matrix CI does.
 # Database targets need local Postgres + pgtap (see database/README.md).
 
-.PHONY: bootstrap test test-dart test-db test-python lint db-up db-down db-reset db-seed
+.PHONY: bootstrap test test-dart test-db test-python lint format-check db-up db-down db-reset db-seed
 
 bootstrap:
 	cd api && dart pub get && dart run build_runner build
@@ -55,3 +55,14 @@ lint:
 	cd shared/heart_aws && dart analyze
 	cd shared/heart_models && dart analyze
 	uv run ruff check firebase assets scripts
+
+# The invariant is "the whole repo is formatted", so this checks everything
+# (minus generated files), not a changed-files subset.
+format-check:
+	find api shared -name '*.dart' \
+		-not -path '*/.dart_tool/*' \
+		-not -name '*.mocks.dart' \
+		-not -name '*.g.dart' \
+		-not -name '*.freezed.dart' \
+		-print0 \
+		| xargs -0 dart format --output=none --set-exit-if-changed

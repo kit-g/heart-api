@@ -7,19 +7,25 @@
 # pre-commit-managed versions that could drift from CI.
 default_stages: [ pre-push ]
 
+# Both hooks run repo-wide on every push, not on a changed-files subset. The
+# invariant is "the repo is formatted and lints clean at all times", and a
+# diff-scoped filter can't see everything that affects it (an
+# analysis_options.yaml or pyproject.toml edit changes lint results without
+# touching a single .dart/.py file). The whole-repo check is fast anyway:
+# format ~0.3s, analyze on a warm cache a few seconds.
 repos:
   - repo: local
     hooks:
       - id: dart-format
-        name: dart format (changed files)
-        entry: dart format --output=none --set-exit-if-changed
+        name: dart format (repo-wide)
+        entry: make format-check
         language: system
-        types: [ dart ]
-        exclude: '\.(mocks|g|freezed)\.dart$'
+        pass_filenames: false
+        always_run: true
 
       - id: lint
         name: make lint (dart analyze x3 + ruff)
         entry: make lint
         language: system
         pass_filenames: false
-        files: '\.(dart|py)$'
+        always_run: true

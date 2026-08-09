@@ -51,16 +51,7 @@ jobs:
         run: dart run build_runner build
 
       - name: "Format check"
-        working-directory: api
-        run: |
-          # Skip generated files (mocks, build_runner output)
-          find . -name '*.dart' \
-            -not -path './.dart_tool/*' \
-            -not -name '*.mocks.dart' \
-            -not -name '*.g.dart' \
-            -not -name '*.freezed.dart' \
-            -print0 \
-            | xargs -0 dart format --output=none --set-exit-if-changed
+        run: make format-check
 
       - name: "Run Analysis"
         working-directory: api
