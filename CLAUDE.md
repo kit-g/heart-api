@@ -25,6 +25,24 @@ Consequences for API work:
 - The server's role around health features is: reference content, algorithm parameters,
   schemas, and coordination — never storage.
 
+## Package versioning
+
+The Flutter app consumes `shared/heart_models` straight from git `main`, so every merged
+change is released the moment it lands. Consequences:
+
+- Bump `version:` in the package's pubspec **in the same commit/PR as the change** — never
+  batched into a later chore commit.
+- Semver by consumer impact: **patch** for fixes and internal changes, **minor** for new
+  public API (the normal case — heart_models changes must stay additive), **major** never,
+  without coordinating an app migration first.
+- Prepend a matching `CHANGELOG.md` entry; that file is what the app side reads to learn
+  what a pull brings in.
+- Test-, docs-, or lint-only changes don't bump.
+- `shared/heart_aws` follows the same rules — its only consumer is `api/`, but the history
+  discipline is identical.
+- `api/` is not consumed as a package; its pubspec version is inert. API releases are the
+  repo tags (`v*`), which drive the prod deploy.
+
 ## Backlog
 
 Feature backlog lives in GitHub issues under the `backlog` label. Each issue body carries
