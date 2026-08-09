@@ -315,7 +315,7 @@ void main() {
           expect(map['id'], equals(workoutExercise.id));
           expect(map['exercise'], equals(exerciseMap));
           expect(map['sets'], isA<List>());
-          expect(map['sets'][0]['id'], starterSet.id);
+          expect(((map['sets'] as List).first as Map)['id'], starterSet.id);
         },
       );
     },

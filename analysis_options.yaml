@@ -1,0 +1,25 @@
+# Shared analyzer/lint config for every Dart package in the repo. Packages
+# include this file by relative path and add only their own deltas:
+#
+#   include: ../analysis_options.yaml          # api/
+#   include: [package:flutter_lints/flutter.yaml, ../../analysis_options.yaml]
+#
+# The nearest file wins on conflicts, so a package can override a rule locally
+# — but if a rule is meant to hold everywhere, change it here.
+include: package:lints/recommended.yaml
+
+formatter:
+  trailing_commas: preserve
+  page_width: 120
+
+linter:
+  rules:
+    require_trailing_commas: true
+    prefer_const_constructors: true
+    prefer_final_in_for_each: true
+    unnecessary_underscores: false
+    avoid_positional_boolean_parameters: true
+    avoid_dynamic_calls: true
+    prefer_single_quotes: true
+    avoid_print: true
+    use_null_aware_elements: true

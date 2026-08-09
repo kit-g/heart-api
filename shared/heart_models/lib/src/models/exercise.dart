@@ -546,14 +546,14 @@ class _Exercise implements Exercise {
       target: Target.fromString(json['target']),
       asset: switch (json['asset']) {
         // comes from remote
-        {'link': String link} => (link: link, width: json['asset']['width'], height: json['asset']['height']),
+        Map asset && {'link': String link} => (link: link, width: asset['width'], height: asset['height']),
         // comes from local SQLite
         String link => (link: link, width: json['assetWidth'], height: json['assetHeight']) as Asset,
         _ => null,
       },
       thumbnail: switch (json['thumbnail']) {
         // comes from remote
-        {'link': String link} => (link: link, width: json['thumbnail']['width'], height: json['thumbnail']['height']),
+        Map thumb && {'link': String link} => (link: link, width: thumb['width'], height: thumb['height']),
         // comes from local SQLite
         String link => (link: link, width: json['thumbnailWidth'], height: json['thumbnailHeight']) as Asset,
         _ => null,

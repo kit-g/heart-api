@@ -66,7 +66,7 @@ class FakeExerciseHistoryService implements ExerciseHistoryService {
   }) async {
     final now = DateTime.timestamp();
 
-    final timeline = Iterable.generate(weeksBack + 1).toList().reversed.fold<List<(num, DateTime)>>(
+    final timeline = Iterable<int>.generate(weeksBack + 1).toList().reversed.fold<List<(num, DateTime)>>(
       [],
       (acc, i) {
         final lastValue = acc.isEmpty ? startValue : acc.last.$1.toDouble();

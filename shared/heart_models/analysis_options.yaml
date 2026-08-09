@@ -1,17 +1,5 @@
-include: package:flutter_lints/flutter.yaml
-
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
-
-formatter:
-  trailing_commas: preserve
-  page_width: 120
-
-linter:
-  rules:
-    require_trailing_commas: true
-    prefer_const_constructors: true
-    prefer_final_in_for_each: true
-    avoid_positional_boolean_parameters: true
-    prefer_single_quotes: true
-    use_null_aware_elements: true
+# flutter.yaml builds on lints/recommended, so the two includes only add to
+# each other; the shared repo config (last) wins any conflict.
+include:
+  - package:flutter_lints/flutter.yaml
+  - ../../analysis_options.yaml
