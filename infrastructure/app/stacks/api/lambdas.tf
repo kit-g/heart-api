@@ -5,8 +5,8 @@ resource "aws_lambda_function" "api" {
   runtime          = "provided.al2023"
   architectures    = ["arm64"]
   handler          = "app.handler"
-  filename         = data.archive_file.api.output_path
-  source_code_hash = data.archive_file.api.output_base64sha256
+  filename         = data.archive_file.placeholder.output_path
+  source_code_hash = data.archive_file.placeholder.output_base64sha256
   memory_size      = 512
   timeout          = 120
   depends_on       = [aws_cloudwatch_log_group.api]
@@ -42,5 +42,11 @@ resource "aws_lambda_function" "api" {
       SCHEDULER_ROLE_ARN           = aws_iam_role.scheduler.arn
       SUPPORTED_LOCALES            = "en,en_CA,ru"
     }
+  }
+
+  lifecycle {
+    # Real code is shipped by CI (deploy-api.yml). TF only manages the
+    # function's structure (runtime, role, env, wiring).
+    ignore_changes = [filename, source_code_hash]
   }
 }

@@ -41,7 +41,12 @@ terraform plan
 terraform apply
 ```
 
-The environment auto-builds the Lambda binary on `terraform apply` (via `null_resource.build_dart_api` in `app/stacks/api/archives.tf`) — no separate build step needed for infra-only applies. Note the caveat: CI is the normal ship path for function *code* (`aws lambda update-function-code` in the deploy workflows), so an infra apply after a CI deploy replaces the function with a locally-built binary of whatever is checked out.
+Terraform manages Lambda *structure* only (runtime, role, env, queue wiring); function
+*code* ships exclusively through CI (`aws lambda update-function-code` in the deploy
+workflows). Every function resource pins a placeholder archive and carries
+`lifecycle.ignore_changes = [filename, source_code_hash]`, so a plan/apply never touches
+deployed code — it used to: the api stack once compiled the local working tree on apply
+and would have shipped it over the live function.
 
 ## Conventions
 
