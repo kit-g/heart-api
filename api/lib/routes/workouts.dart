@@ -5,6 +5,7 @@ import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/imports.dart';
 import 'package:heart/models/pagination.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart';
@@ -53,6 +54,14 @@ Future<Workout> createWorkout(final Request request) async {
     body: workout,
     imageUrl: request.config.cdnAssetUrl,
   );
+}
+
+/// Bulk import of another app's CSV export; responds with a report of what
+/// was created, skipped (already imported), and which exercises had to be
+/// created as the user's customs.
+Future<WorkoutImportReport> importWorkouts(final Request request) async {
+  final input = await ImportWorkoutsIn.fromRequest(request);
+  return request.workoutsService.importWorkouts(userId: request.userId, batch: input.batch);
 }
 
 Future<Workout> updateWorkout(final Request request) async {

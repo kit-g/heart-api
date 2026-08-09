@@ -60,6 +60,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/templates/:templateId', .delete): templates.deleteMyTemplate,
   ('/templates/shares/:shareId', .delete): templates.deleteMyTemplateShare,
   ('/workouts', .post): workouts.createWorkout,
+  ('/workouts/imports', .post): workouts.importWorkouts,
   ('/workouts/images', .get): images.getGallery,
   ('/workouts/:workoutId', .get): workouts.getWorkout,
   ('/workouts/:workoutId', .put): workouts.updateWorkout,

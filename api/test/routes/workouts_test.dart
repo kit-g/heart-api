@@ -2,6 +2,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/imports.dart';
 import 'package:heart/routes/workouts.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -224,6 +225,64 @@ void main() {
       await expectLater(
         patchWorkoutById(patchReq({'name': 'x'}), 'w-1'),
         throwsA(isA<NotFound>()),
+      );
+    });
+  });
+
+  group('importWorkouts', () {
+    const csv =
+        'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps,Distance,Seconds\n'
+        '2023-01-15 17:35:12,Push Day,1h,Bench Press (Barbell),1,80,5,0,0\n';
+
+    const report = WorkoutImportReport(
+      source: 'strong',
+      workoutsFound: 1,
+      workoutsCreated: 1,
+      setsCreated: 1,
+      exercisesMatched: 1,
+      exercisesCreated: [],
+      rowsSkipped: 0,
+    );
+
+    Request importReq({String body = csv, Map<String, String> query = const {'source': 'strong'}}) =>
+        wire(textRequest(path: '/workouts/imports', body: body, query: query));
+
+    test('parses the CSV and hands the batch to the service under the caller id', () async {
+      when(
+        workouts.importWorkouts(userId: anyNamed('userId'), batch: anyNamed('batch')),
+      ).thenAnswer((_) async => report);
+
+      final result = await importWorkouts(importReq());
+
+      expect(result.toMap()['workoutsCreated'], 1);
+      final batch =
+          verify(
+                workouts.importWorkouts(userId: _meId, batch: captureAnyNamed('batch')),
+              ).captured.single
+              as WorkoutImport;
+      expect(batch.source, 'strong');
+      expect(batch.workouts.single.name, 'Push Day');
+    });
+
+    test('rejects a missing source', () async {
+      await expectLater(importWorkouts(importReq(query: {})), throwsA(isA<BadRequest>()));
+    });
+
+    test('rejects an unsupported source', () async {
+      await expectLater(
+        importWorkouts(importReq(query: {'source': 'hevy'})),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
+    test('rejects a body that is not a Strong export', () async {
+      await expectLater(importWorkouts(importReq(body: 'a,b\n1,2\n')), throwsA(isA<BadRequest>()));
+    });
+
+    test('rejects a malformed tzOffset', () async {
+      await expectLater(
+        importWorkouts(importReq(query: {'source': 'strong', 'tzOffset': 'PST'})),
+        throwsA(isA<BadRequest>()),
       );
     });
   });

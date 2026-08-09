@@ -23,6 +23,25 @@ Request jsonRequest({
   );
 }
 
+/// Builds a request with a raw text body (e.g. a CSV upload), for handlers
+/// that read via `req.text()`.
+Request textRequest({
+  Method method = Method.post,
+  String path = '/',
+  String body = '',
+  MimeType mimeType = MimeType.csv,
+  Map<String, String> query = const {},
+  Map<String, String> extraHeaders = const {},
+}) {
+  return RequestInternal.create(
+    method,
+    _uri(path, query),
+    Object(),
+    body: Body.fromString(body, mimeType: mimeType),
+    headers: _headers(extraHeaders),
+  );
+}
+
 /// Builds a request with no body. Suitable for handlers that don't call
 /// `req.json()` (e.g. event handlers given userId directly, GET routes that
 /// read only query params).
