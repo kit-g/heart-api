@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:heart_models/heart_models.dart';
 
+import 'imports.dart';
+
 abstract interface class ApiWorkoutService {
   Future<Page<Workout>> getWorkouts({
     required String userId,
@@ -53,6 +55,15 @@ abstract interface class ApiWorkoutService {
   Future<void> deleteWorkout({
     required String userId,
     required String workoutId,
+  });
+
+  /// Bulk-writes a parsed CSV export in one shot: resolves or creates the
+  /// exercises it references, then inserts the workouts that aren't already
+  /// imported (matched on their deterministic import id, so re-runs are
+  /// no-ops).
+  Future<WorkoutImportReport> importWorkouts({
+    required String userId,
+    required WorkoutImport batch,
   });
 }
 

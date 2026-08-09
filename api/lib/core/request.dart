@@ -13,6 +13,11 @@ extension JsonBody on Request {
     };
   }
 
+  /// Raw text body, whatever the declared content type — file uploads like a
+  /// CSV export arrive as `text/csv`, `text/plain`, or `application/octet-stream`
+  /// depending on the client, and the parser is the real gatekeeper anyway.
+  Future<String> text() => readAsString();
+
   /// reproducible raw shape of the request
   Map<String, String> signature() {
     return {
