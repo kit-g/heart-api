@@ -463,6 +463,87 @@ LEFT JOIN _exercises_json ej
   ON true
 ''';
 
+/// Whole CSV import in one atomic statement. Unlike [_saveWorkout]'s lookup —
+/// which silently drops exercises it can't resolve — unknown names are first
+/// created as the user's custom exercises, so nothing in the export vanishes.
+/// Workouts land with ON CONFLICT DO NOTHING on (user_id, import_id): re-running
+/// the same export inserts nothing and the report shows it.
+const _importWorkouts = '''
+WITH
+_incoming AS (
+  SELECT w AS workout, w->>'importId' AS import_id
+  FROM jsonb_array_elements(@workouts::jsonb) w
+),
+_names AS (
+  SELECT ex->>'name' AS name, ex->>'category' AS category, ex->>'target' AS target
+  FROM jsonb_array_elements(@exercises::jsonb) ex
+),
+_resolved AS (
+  SELECT DISTINCT ON (e.name) e.name, e.id
+  FROM exercises e
+  JOIN _names n ON n.name = e.name
+  WHERE e.user_id IS NULL OR e.user_id = @userId
+  ORDER BY e.name, e.user_id NULLS LAST
+),
+_created_exercises AS (
+  INSERT INTO exercises (name, category, target, user_id)
+  SELECT n.name, n.category, n.target, @userId
+  FROM _names n
+  WHERE NOT EXISTS (SELECT 1 FROM _resolved r WHERE r.name = n.name)
+  RETURNING id, name
+),
+_lookup AS (
+  SELECT name, id FROM _resolved
+  UNION ALL
+  SELECT name, id FROM _created_exercises
+),
+_inserted_workouts AS (
+  INSERT INTO workouts (user_id, name, started_at, completed_at, import_id)
+  SELECT @userId, NULLIF(i.workout->>'name', ''), (i.workout->>'start')::timestamptz, (i.workout->>'end')::timestamptz, i.import_id
+  FROM _incoming i
+  ON CONFLICT (user_id, import_id) WHERE import_id IS NOT NULL DO NOTHING
+  RETURNING id, import_id
+),
+_exercises_in AS (
+  SELECT iw.id AS workout_id, ex AS exercise, (ex->>'order')::int AS exercise_order
+  FROM _inserted_workouts iw
+  JOIN _incoming i ON i.import_id = iw.import_id
+  CROSS JOIN LATERAL jsonb_array_elements(i.workout->'exercises') ex
+),
+_inserted_exercises AS (
+  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order)
+  SELECT e.workout_id, l.id, e.exercise_order
+  FROM _exercises_in e
+  JOIN _lookup l ON l.name = e.exercise->>'name'
+  RETURNING id, workout_id, exercise_order
+),
+_sets_in AS (
+  SELECT e.workout_id, e.exercise_order, t.s AS set_data, (t.ordinality - 1)::int AS set_order
+  FROM _exercises_in e
+  CROSS JOIN LATERAL jsonb_array_elements(e.exercise->'sets') WITH ORDINALITY t(s, ordinality)
+),
+_inserted_sets AS (
+  INSERT INTO exercise_sets (workout_exercise_id, weight, reps, duration, distance, completed, set_order)
+  SELECT
+    ie.id,
+    (si.set_data->>'weight')::real,
+    (si.set_data->>'reps')::int,
+    (si.set_data->>'duration')::int,
+    (si.set_data->>'distance')::real,
+    true,
+    si.set_order
+  FROM _sets_in si
+  JOIN _inserted_exercises ie ON ie.workout_id = si.workout_id AND ie.exercise_order = si.exercise_order
+  RETURNING id
+)
+SELECT
+  (SELECT count(*) FROM _incoming)::int AS workouts_found,
+  (SELECT count(*) FROM _inserted_workouts)::int AS workouts_created,
+  (SELECT count(*) FROM _inserted_sets)::int AS sets_created,
+  (SELECT count(*) FROM _resolved)::int AS exercises_matched,
+  COALESCE((SELECT jsonb_agg(name ORDER BY name) FROM _created_exercises), '[]'::jsonb) AS exercises_created
+''';
+
 const _replaceWorkout = '''
 WITH
 _order_to_name AS (

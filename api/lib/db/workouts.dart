@@ -108,6 +108,19 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   }
 
   @override
+  Future<WorkoutImportReport> importWorkouts({required String userId, required WorkoutImport batch}) async {
+    final rows = await _pool.execute(
+      _importWorkouts.toSql(),
+      parameters: batch.toParams(userId: userId),
+    );
+    return WorkoutImportReport.fromRow(
+      rows.first.toColumnMap(),
+      source: batch.source,
+      rowsSkipped: batch.rowsSkipped,
+    );
+  }
+
+  @override
   Future<void> deleteWorkout({required String userId, required String workoutId}) async {
     await _pool.execute(
       _deleteWorkout.toSql(),
