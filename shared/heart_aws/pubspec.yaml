@@ -1,6 +1,6 @@
 name: heart_aws
 description: "Hand-rolled AWS clients: SigV4 signing, S3 presigned POST, SQS, SNS, Scheduler"
-version: 1.0.0
+version: 1.0.1
 publish_to: none
 
 environment:
