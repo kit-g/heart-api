@@ -1,12 +1,14 @@
 # Shared analyzer/lint config for every Dart package in the repo. Packages
-# include this file by relative path and add only their own deltas:
+# include this file by relative path, alongside their package: base set:
 #
-#   include: ../analysis_options.yaml          # api/
-#   include: [package:flutter_lints/flutter.yaml, ../../analysis_options.yaml]
+#   include: [package:lints/recommended.yaml, ../analysis_options.yaml]
 #
-# The nearest file wins on conflicts, so a package can override a rule locally
-# — but if a rule is meant to hold everywhere, change it here.
-include: package:lints/recommended.yaml
+# Later entries win on conflicts, and a package's own file beats both — but if
+# a rule is meant to hold everywhere, change it here.
+#
+# No package: URIs in THIS file, deliberately: the repo root has no pubspec, so
+# the IDE (which analyzes the root as its own context) could not resolve them
+# and flagged include_file_not_found. Relative includes keep this file inert.
 
 formatter:
   trailing_commas: preserve
