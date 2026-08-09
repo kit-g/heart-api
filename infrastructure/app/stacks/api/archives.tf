@@ -1,34 +1,16 @@
-resource "null_resource" "build_dart_api" {
-  # Trigger a rebuild if the source code or Makefile changes
-  triggers = {
-    source_code_hash = join(
-      "", [
-        for f in fileset(
-          "${path.module}/../../../../api", "**/*.dart"
-          ) : filebase64sha256(
-          "${path.module}/../../../../api/${f}"
-        )
-      ]
-    )
-    makefile_hash = filebase64sha256("${path.module}/../../../../api/Makefile")
-  }
-
-  provisioner "local-exec" {
-    working_dir = "${path.module}/../../../../api"
-    command     = <<EOT
-      mkdir -p ../build/api
-      dart pub get
-      dart compile exe bin/main.dart \
-        --target-os=linux \
-        --target-arch=arm64 \
-        -o ../build/api/bootstrap
-    EOT
-  }
-}
-
-data "archive_file" "api" {
-  depends_on  = [null_resource.build_dart_api]
+# Placeholder so the function resource can be created; the real code is
+# shipped by CI (deploy-api.yml) via update-function-code, and
+# `lifecycle.ignore_changes` on the function keeps TF from clobbering it.
+#
+# This replaced a local-exec `dart compile` of the working tree: a plan/apply
+# used to build and deploy whatever was on the developer's disk — staged,
+# dirty, or otherwise.
+data "archive_file" "placeholder" {
   type        = "zip"
-  source_file = "${path.module}/../../../../build/api/bootstrap"
   output_path = "${path.module}/../../../../build/api.zip"
+
+  source {
+    content  = "#!/bin/sh\necho 'placeholder: real code is deployed by CI' >&2\nexit 1\n"
+    filename = "bootstrap"
+  }
 }
