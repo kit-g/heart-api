@@ -274,16 +274,19 @@ void main() {
       expect(first.achievedAt?.toUtc(), at);
     });
 
-    test('rejects an achievedBy workout the caller does not own', () async {
-      final strangersWorkout = await h.seedWorkout(userId: strangerId);
-      await expectLater(
-        h.db.markStageAchieved(goal.id!, firstStageId, ownerId, DateTime.utc(2026), achievedBy: strangersWorkout),
-        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'goal_workout_unknown')),
-      );
-      // and the rung is left unstamped — the guard runs before the write
-      final after = await h.db.getTargetUserGoals(requesterId: ownerId, targetUserId: ownerId);
-      final reread = after.firstWhere((g) => g.id == goal.id).stages.firstWhere((s) => s.id == firstStageId);
-      expect(reread.isAchieved, isFalse);
+    test('stores achievedBy opaquely, even for a workout not (yet) on the server', () async {
+      // The attributed workout is written local-first with a server-minted id, so
+      // it may not have synced when the rung is stamped. The stamp must still
+      // succeed and keep the id — a dangling link is the client's to tolerate, and
+      // the achievement must never be blocked by it. (Regression: this used to 400
+      // goal_workout_unknown and drop the achievement entirely.)
+      const unsyncedWorkoutId = '019def00-0000-7000-8000-0000000000ff';
+      final at = DateTime.utc(2026, 12, 25, 9);
+      final updated = await h.db.markStageAchieved(goal.id!, firstStageId, ownerId, at, achievedBy: unsyncedWorkoutId);
+
+      final first = updated.stages.firstWhere((s) => s.id == firstStageId);
+      expect(first.achievedBy, unsyncedWorkoutId);
+      expect(first.achievedAt?.toUtc(), at);
     });
 
     test('a full replace keeps the workout attribution', () async {

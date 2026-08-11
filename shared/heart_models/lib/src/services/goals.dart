@@ -25,7 +25,9 @@ abstract interface class GoalService {
   /// Idempotent — re-sending overwrites the timestamp rather than failing.
   ///
   /// [achievedBy], when given, credits the workout that met the rung (a link the
-  /// client renders). It must be a workout owned by [userId], else `BadRequest`.
+  /// client renders). Stored as-sent — not validated against the workouts table,
+  /// so it survives a session that hasn't synced to the server yet; a dangling id
+  /// just renders as a stale link and never blocks the achievement.
   Future<Goal> markStageAchieved(
     String goalId,
     String stageId,

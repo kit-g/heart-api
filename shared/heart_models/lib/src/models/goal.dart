@@ -92,11 +92,12 @@ enum GoalCadence {
 /// server-owned goal pointing at one would be a dangling cross-device reference. A
 /// workout id is a server-minted UUID, stable everywhere. (Peak metrics —
 /// topSetWeight, estimatedOneRepMax, maxConsecutiveReps — could additionally carry
-/// a set id later if it earns its keep; not designed for now.) The API validates
-/// the id when a rung is stamped: it must be a workout owned by the achiever, or
-/// the stamp is a 400 (`goal_workout_unknown`). That guards against a link that
-/// never resolved; it does not chase a workout deleted afterwards, which the client
-/// tolerates as a stale link.
+/// a set id later if it earns its keep; not designed for now.) The server stores
+/// it opaquely — it does *not* check the workout exists or is owned, because the
+/// attributed session is written local-first and may not have synced yet, and a
+/// link failing to resolve must never block the achievement. If the id dangles
+/// (unsynced, or a workout deleted later) the client renders a stale link;
+/// [achievedAt] is the durable fact and never depends on it.
 abstract interface class GoalStage implements Model {
   String? get id;
 
