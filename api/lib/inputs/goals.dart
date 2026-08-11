@@ -82,15 +82,22 @@ class GoalUpdateIn {
   }
 }
 
-/// `PUT /goals/:goalId/stages/:stageId` — `{achievedAt}`.
+/// `PUT /goals/:goalId/stages/:stageId` — `{achievedAt, achievedBy?}`.
+///
+/// [achievedBy] is the id of the workout the app credits with the rung. It is
+/// optional; when present the db layer checks it is a workout owned by the caller.
 class StageAchievedIn {
   final DateTime achievedAt;
+  final String? achievedBy;
 
-  const StageAchievedIn._({required this.achievedAt});
+  const StageAchievedIn._({required this.achievedAt, this.achievedBy});
 
   static Future<StageAchievedIn> fromRequest(Request req) async {
     final json = await req.json();
-    return StageAchievedIn._(achievedAt: json.timestamp('achievedAt'));
+    return StageAchievedIn._(
+      achievedAt: json.timestamp('achievedAt'),
+      achievedBy: json.stringOrNull('achievedBy'),
+    );
   }
 }
 
@@ -101,7 +108,11 @@ List<GoalStage> _parseStages(Map<String, dynamic> json) {
         id: stage['id'] as String?,
         target: stage.number('target', exclusiveMin: 0),
         dueOn: stage.dateOrNull('dueOn'),
+        // achievedAt and achievedBy both round-trip through the full-replace PUT.
+        // Dropping either here re-blanks stamped rungs (achievedAt did exactly that
+        // once — "goal needs a restart to show Complete"), so both are read back.
         achievedAt: stage.dateOrNull('achievedAt'),
+        achievedBy: stage.stringOrNull('achievedBy'),
       ),
   ];
 }

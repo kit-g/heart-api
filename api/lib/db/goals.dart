@@ -66,7 +66,27 @@ mixin _Goals on _DatabaseBase implements GoalService {
   }
 
   @override
-  Future<Goal> markStageAchieved(String goalId, String stageId, String userId, DateTime achievedAt) async {
+  Future<Goal> markStageAchieved(
+    String goalId,
+    String stageId,
+    String userId,
+    DateTime achievedAt, {
+    String? achievedBy,
+  }) async {
+    // Validated up front, and distinctly from the stage lookup, so an unknown
+    // workout is a 400 rather than getting folded into the stage's 404.
+    if (achievedBy != null) {
+      final owned = await _pool.execute(
+        _workoutOwnedBy.toSql(),
+        parameters: {'workoutId': achievedBy, 'userId': userId},
+      );
+      if (owned.isEmpty) {
+        throw const BadRequest(
+          code: 'goal_workout_unknown',
+          reason: 'achievedBy must be a workout you own',
+        );
+      }
+    }
     final result = await _pool.execute(
       _markStageAchieved.toSql(),
       parameters: {
@@ -74,6 +94,7 @@ mixin _Goals on _DatabaseBase implements GoalService {
         'stageId': stageId,
         'userId': userId,
         'achievedAt': achievedAt.toUtc().toIso8601String(),
+        'achievedBy': achievedBy,
       },
     );
     if (result.isEmpty) throw NotFound(type: 'Goal stage', id: stageId, code: 'goal_stage_not_found');

@@ -15,6 +15,7 @@ const _otherId = 'u2';
 const _goalId = '019def00-0000-7000-8000-000000000010';
 const _stageId = '019def00-0000-7000-8000-000000000011';
 const _exerciseId = '019def00-0000-7000-8000-000000000001';
+const _workoutId = '019def00-0000-7000-8000-000000000002';
 
 void main() {
   late MockGoalService service;
@@ -258,6 +259,40 @@ void main() {
       verify(service.markStageAchieved(_goalId, _stageId, _meId, achieved)).called(1);
     });
 
+    test('forwards achievedBy to the service', () async {
+      when(
+        service.markStageAchieved(any, any, any, any, achievedBy: anyNamed('achievedBy')),
+      ).thenAnswer(
+        (i) async => Goal(
+          id: _goalId,
+          metric: GoalMetric.topSetWeight,
+          exerciseId: _exerciseId,
+          stages: [
+            GoalStage(
+              id: _stageId,
+              target: 100,
+              achievedAt: i.positionalArguments[3] as DateTime,
+              achievedBy: i.namedArguments[#achievedBy] as String?,
+            ),
+          ],
+        ),
+      );
+
+      final achieved = DateTime.utc(2026, 12, 20, 9, 30);
+      final req = wire(
+        jsonRequest(
+          method: Method.put,
+          path: '/goals/$_goalId/stages/$_stageId',
+          body: {'achievedAt': achieved.toIso8601String(), 'achievedBy': _workoutId},
+        ),
+      );
+
+      final goal = await markStageAchievedById(req, _goalId, _stageId);
+
+      expect(goal.stages.single.achievedBy, _workoutId);
+      verify(service.markStageAchieved(_goalId, _stageId, _meId, achieved, achievedBy: _workoutId)).called(1);
+    });
+
     test('requires achievedAt', () async {
       final req = wire(
         jsonRequest(
@@ -351,6 +386,37 @@ void main() {
       expect(goal.stages.first.achievedAt?.toUtc(), achieved);
       expect(goal.stages.first.isAchieved, isTrue);
       expect(goal.stages.last.achievedAt, isNull, reason: 'the unstamped rung stays unstamped');
+    });
+
+    test('preserves achievedBy through a full replace', () async {
+      // Same regression class as achievedAt: if the input layer drops achievedBy
+      // on the round-trip, a full-replace edit severs the workout attribution.
+      when(service.updateGoal(any, any, any)).thenAnswer((i) async => i.positionalArguments[1] as Goal);
+
+      final req = wire(
+        jsonRequest(
+          method: Method.put,
+          path: '/goals/$_goalId',
+          body: {
+            'metric': 'topSetWeight',
+            'exerciseId': _exerciseId,
+            'stages': [
+              {
+                'id': _stageId,
+                'target': 100,
+                'achievedAt': DateTime.utc(2026, 12, 25, 9).toIso8601String(),
+                'achievedBy': _workoutId,
+              },
+              {'target': 140},
+            ],
+          },
+        ),
+      );
+
+      final goal = await updateGoalById(req, _goalId);
+
+      expect(goal.stages.first.achievedBy, _workoutId);
+      expect(goal.stages.last.achievedBy, isNull, reason: 'the unattributed rung stays unattributed');
     });
   });
 }

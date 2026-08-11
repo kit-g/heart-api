@@ -1417,7 +1417,11 @@ SET stages = jsonb_set(
             WHERE stage ->> 'id' = @stageId
         )],
         (
-            SELECT stage || jsonb_build_object('achievedAt', @achievedAt::text)
+            -- strip_nulls keeps achievedBy out of the blob when it is absent; a
+            -- present value merges (and overwrites) alongside achievedAt.
+            SELECT stage || jsonb_strip_nulls(
+                jsonb_build_object('achievedAt', @achievedAt::text, 'achievedBy', @achievedBy::text)
+            )
             FROM jsonb_array_elements(stages) AS stage
             WHERE stage ->> 'id' = @stageId
         )
@@ -1430,4 +1434,10 @@ WHERE id = @goalId::uuid
       WHERE stage ->> 'id' = @stageId
   )
 RETURNING id, metric, exercise_id, cadence, stages, archived, created_at
+''';
+
+// Guards `achievedBy`: the attributed workout must exist and belong to the caller,
+// checked before the stamp so a bad id is a clean 400 rather than a dangling link.
+const _workoutOwnedBy = '''
+SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId
 ''';
