@@ -81,6 +81,34 @@ void main() {
       expect(visible.map((g) => g.id), contains(created.id));
     });
 
+    test('the archived slice returns only archived goals, never the live ones', () async {
+      final owner = await h.seedProfile();
+      final live = await h.db.createGoal(workoutsGoal(), owner);
+      final done = await h.db.createGoal(workoutsGoal(target: 9), owner);
+      await h.db.updateGoal(done.id!, done.copyWith(archived: true), owner);
+
+      final archived = await h.db.getTargetUserGoals(requesterId: owner, targetUserId: owner, archived: true);
+      expect(archived.map((g) => g.id), contains(done.id));
+      expect(archived.map((g) => g.id), isNot(contains(live.id)));
+      expect(archived.every((g) => g.archived), isTrue);
+    });
+
+    test('connection visibility is identical for the archived slice', () async {
+      final owner = await h.seedProfile();
+      final peer = await h.seedProfile();
+      final outsider = await h.seedProfile();
+      final done = await h.db.createGoal(workoutsGoal(), owner);
+      await h.db.updateGoal(done.id!, done.copyWith(archived: true), owner);
+      await h.seedConnection(initiator: peer, target: owner);
+
+      final visible = await h.db.getTargetUserGoals(requesterId: peer, targetUserId: owner, archived: true);
+      expect(visible.map((g) => g.id), contains(done.id));
+      await expectLater(
+        h.db.getTargetUserGoals(requesterId: outsider, targetUserId: owner, archived: true),
+        throwsA(isA<Forbidden>()),
+      );
+    });
+
     test('a non-connection is forbidden from the owner goals', () async {
       final loner = await h.seedProfile();
       await h.db.createGoal(workoutsGoal(), loner);
