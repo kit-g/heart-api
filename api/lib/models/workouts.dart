@@ -2,11 +2,8 @@ import 'dart:convert';
 
 import 'package:heart_models/heart_models.dart';
 
-<<<<<<< Updated upstream
-import 'imports.dart';
-=======
 import 'errors.dart';
->>>>>>> Stashed changes
+import 'imports.dart';
 
 abstract interface class ApiWorkoutService {
   Future<Page<Workout>> getWorkouts({
