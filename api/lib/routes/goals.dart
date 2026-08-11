@@ -7,13 +7,21 @@ import 'package:relic/relic.dart';
 
 import '../models/errors.dart';
 
-Future<GoalsResponse> getTargetUserGoals(final Request req) =>
-    getTargetUserGoalsById(req, req.rawPathParameters[#targetUserId]!);
+Future<GoalsResponse> getTargetUserGoals(final Request req) => getTargetUserGoalsById(
+  req,
+  req.rawPathParameters[#targetUserId]!,
+  archived: req.queryParameters.raw['archived'] == 'true',
+);
 
-Future<GoalsResponse> getTargetUserGoalsById(final Request req, final String targetUserId) async {
+Future<GoalsResponse> getTargetUserGoalsById(
+  final Request req,
+  final String targetUserId, {
+  final bool archived = false,
+}) async {
   final goals = await req.goalService.getTargetUserGoals(
     requesterId: req.userId,
     targetUserId: targetUserId,
+    archived: archived,
   );
   return GoalsResponse(goals: goals);
 }

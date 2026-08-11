@@ -1362,7 +1362,7 @@ _goals AS (
   FROM goals
   WHERE (SELECT allowed FROM _auth)
     AND user_id = @targetUserId::text
-    AND NOT archived
+    AND archived = @archived::boolean
   ORDER BY created_at
 )
 SELECT id, metric, exercise_id, cadence, stages, archived, created_at, false AS forbidden FROM _goals

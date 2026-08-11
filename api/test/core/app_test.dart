@@ -92,14 +92,33 @@ void main() {
 
     test('a valid token reaches the handler and serializes the result', () async {
       when(
-        db.getTargetUserGoals(requesterId: anyNamed('requesterId'), targetUserId: anyNamed('targetUserId')),
+        db.getTargetUserGoals(
+          requesterId: anyNamed('requesterId'),
+          targetUserId: anyNamed('targetUserId'),
+          archived: anyNamed('archived'),
+        ),
       ).thenAnswer((_) async => const <Goal>[]);
 
       final res = await send('GET', '/accounts/u1/goals', token: 'good');
       expect(res.status, 200);
       expect(jsonDecode(res.body), containsPair('goals', isEmpty));
-      // the authenticated user's id is threaded through as the requester
-      verify(db.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1')).called(1);
+      // the authenticated user's id is threaded through as the requester, and the
+      // absent query flag defaults to the live slice
+      verify(db.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1', archived: false)).called(1);
+    });
+
+    test('the ?archived=true query flag reaches the service', () async {
+      when(
+        db.getTargetUserGoals(
+          requesterId: anyNamed('requesterId'),
+          targetUserId: anyNamed('targetUserId'),
+          archived: anyNamed('archived'),
+        ),
+      ).thenAnswer((_) async => const <Goal>[]);
+
+      final res = await send('GET', '/accounts/u1/goals?archived=true', token: 'good');
+      expect(res.status, 200);
+      verify(db.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1', archived: true)).called(1);
     });
   });
 
