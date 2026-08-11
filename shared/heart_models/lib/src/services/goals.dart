@@ -23,5 +23,14 @@ abstract interface class GoalService {
 
   /// Stamps a single stage as achieved, leaving the rest of the ladder intact.
   /// Idempotent — re-sending overwrites the timestamp rather than failing.
-  Future<Goal> markStageAchieved(String goalId, String stageId, String userId, DateTime achievedAt);
+  ///
+  /// [achievedBy], when given, credits the workout that met the rung (a link the
+  /// client renders). It must be a workout owned by [userId], else `BadRequest`.
+  Future<Goal> markStageAchieved(
+    String goalId,
+    String stageId,
+    String userId,
+    DateTime achievedAt, {
+    String? achievedBy,
+  });
 }

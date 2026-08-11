@@ -44,6 +44,27 @@ void main() {
       expect(GoalStage(target: 100).isAchieved, isFalse);
       expect(GoalStage(target: 100, achievedAt: DateTime.utc(2026, 7, 1)).isAchieved, isTrue);
     });
+
+    test('round-trips achievedBy through toMap/fromJson', () {
+      final stage = GoalStage(
+        id: 's-1',
+        target: 100,
+        achievedAt: DateTime.utc(2026, 7, 1),
+        achievedBy: 'w-42',
+      );
+      final parsed = GoalStage.fromJson(stage.toMap());
+      expect(parsed.achievedBy, 'w-42');
+      expect(parsed.achievedAt, DateTime.utc(2026, 7, 1));
+    });
+
+    test('omits achievedBy when the rung is unattributed', () {
+      expect(GoalStage(target: 100, achievedAt: DateTime.utc(2026, 7, 1)).toMap().containsKey('achievedBy'), isFalse);
+    });
+
+    test('copyWith carries achievedBy', () {
+      final stage = GoalStage(target: 100, achievedBy: 'w-1');
+      expect(stage.copyWith(target: 120).achievedBy, 'w-1');
+    });
   });
 
   group('Goal', () {
