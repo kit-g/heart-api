@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.0
+
+- `RemoteWorkoutService` gains `getTargetWorkout({requesterId, targetUserId, workoutId})` — a single
+  server-side workout read, matching `GoalService.getTargetUserGoals`'s visibility model (owner or an
+  active COACH/PEER, else `Forbidden`). Returns a non-null `Workout`; a missing one is `NotFound`, so
+  the client can tell "gone" (`not_found`) from "not in the local mirror yet". Unblocks deep links and
+  viewing a connection's workout on clients without a warm history (notably web). The API side already
+  exists (`GET /accounts/:targetUserId/workouts/:workoutId`); this only declares the client's call.
+  Additive.
+
 ## 1.3.0
 
 - `WorkoutExercise` gains an optional `note` — a short, user-authored pin describing how the
