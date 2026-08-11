@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0
+
+- `GoalService.getTargetUserGoals` gains an optional `archived` flag: `false` (default) returns the
+  live goals, `true` returns only the archived ones — the achieved surface behind a completed card.
+  Additive; existing callers are unaffected.
+
 ## 1.1.0
 
 Changes accumulated on `main` since 1.0.2:
