@@ -1521,9 +1521,3 @@ WHERE id = @goalId::uuid
   )
 RETURNING id, metric, exercise_id, cadence, stages, archived, created_at
 ''';
-
-// Guards `achievedBy`: the attributed workout must exist and belong to the caller,
-// checked before the stamp so a bad id is a clean 400 rather than a dangling link.
-const _workoutOwnedBy = '''
-SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId
-''';

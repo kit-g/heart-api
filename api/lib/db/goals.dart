@@ -73,20 +73,11 @@ mixin _Goals on _DatabaseBase implements GoalService {
     DateTime achievedAt, {
     String? achievedBy,
   }) async {
-    // Validated up front, and distinctly from the stage lookup, so an unknown
-    // workout is a 400 rather than getting folded into the stage's 404.
-    if (achievedBy != null) {
-      final owned = await _pool.execute(
-        _workoutOwnedBy.toSql(),
-        parameters: {'workoutId': achievedBy, 'userId': userId},
-      );
-      if (owned.isEmpty) {
-        throw const BadRequest(
-          code: 'goal_workout_unknown',
-          reason: 'achievedBy must be a workout you own',
-        );
-      }
-    }
+    // achievedBy is stored opaquely, not validated against the workouts table:
+    // the attributed workout may not have synced to the server yet (workouts are
+    // written local-first and their ids minted server-side), and a link failing
+    // to resolve must never block the achievement — achievedAt is the durable
+    // fact, achievedBy is enrichment that degrades to a stale link if it dangles.
     final result = await _pool.execute(
       _markStageAchieved.toSql(),
       parameters: {
