@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(19);
+SELECT plan(23);
 
 SELECT has_table('public'::name, 'workout_exercises'::name);
 
@@ -12,7 +12,8 @@ SELECT columns_are(
                    'workout_id',
                    'exercise_id',
                    'exercise_order',
-                   'met'
+                   'met',
+                   'note'
                    ]
        );
 
@@ -21,6 +22,7 @@ SELECT col_type_is('public'::name, 'workout_exercises'::name, 'workout_id'::name
 SELECT col_type_is('public'::name, 'workout_exercises'::name, 'exercise_id'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'workout_exercises'::name, 'exercise_order'::name, 'integer'::name);
 SELECT col_type_is('public'::name, 'workout_exercises'::name, 'met'::name, 'real'::name);
+SELECT col_type_is('public'::name, 'workout_exercises'::name, 'note'::name, 'text'::name);
 
 SELECT has_pk('public'::name, 'workout_exercises'::name, 'workout_exercises has a primary key');
 SELECT col_is_pk('public'::name, 'workout_exercises'::name, 'id'::name, 'id is the primary key');
@@ -70,6 +72,46 @@ SELECT throws_ok(
                '23514',
                NULL,
                'a negative met is rejected'
+       );
+
+SELECT lives_ok(
+               $$
+               INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, note)
+               VALUES (
+                   (SELECT id FROM workouts WHERE name = 'we check workout'),
+                   (SELECT id FROM exercises WHERE name = 'WE Check Bench'),
+                   2, 'do one hand at a time'
+               )
+               $$,
+               'a short note is allowed'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, note)
+               VALUES (
+                   (SELECT id FROM workouts WHERE name = 'we check workout'),
+                   (SELECT id FROM exercises WHERE name = 'WE Check Bench'),
+                   3, repeat('x', 501)
+               )
+               $$,
+               '23514',
+               NULL,
+               'a note over 500 chars is rejected'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, note)
+               VALUES (
+                   (SELECT id FROM workouts WHERE name = 'we check workout'),
+                   (SELECT id FROM exercises WHERE name = 'WE Check Bench'),
+                   4, ''
+               )
+               $$,
+               '23514',
+               NULL,
+               'an empty note is rejected'
        );
 
 SELECT * FROM finish();
