@@ -83,6 +83,20 @@ enum GoalCadence {
 ///
 /// [id] is minted server-side and is stable across reorders — the stage is
 /// addressed by it, never by its position in the array.
+///
+/// [achievedBy] is the id of the workout the app credits with meeting the rung —
+/// posterity, and a link the client renders from the goal back to that session.
+/// It attributes to the *workout*, not a set, deliberately: no single set achieves
+/// a total-volume or total-reps goal (the whole workout, or the week, did), and an
+/// `ExerciseSet` id is a client-minted timestamp (`UsesTimestampForId`), so a
+/// server-owned goal pointing at one would be a dangling cross-device reference. A
+/// workout id is a server-minted UUID, stable everywhere. (Peak metrics —
+/// topSetWeight, estimatedOneRepMax, maxConsecutiveReps — could additionally carry
+/// a set id later if it earns its keep; not designed for now.) The API validates
+/// the id when a rung is stamped: it must be a workout owned by the achiever, or
+/// the stamp is a 400 (`goal_workout_unknown`). That guards against a link that
+/// never resolved; it does not chase a workout deleted afterwards, which the client
+/// tolerates as a stale link.
 abstract interface class GoalStage implements Model {
   String? get id;
 
@@ -92,6 +106,8 @@ abstract interface class GoalStage implements Model {
 
   DateTime? get achievedAt;
 
+  String? get achievedBy;
+
   bool get isAchieved;
 
   factory GoalStage({
@@ -99,6 +115,7 @@ abstract interface class GoalStage implements Model {
     required num target,
     DateTime? dueOn,
     DateTime? achievedAt,
+    String? achievedBy,
   }) = _GoalStage;
 
   /// Parses a stage out of the `stages` JSONB array. Keys are camelCase there —
@@ -121,10 +138,11 @@ abstract interface class GoalStage implements Model {
         final DateTime a => a,
         final other => throw ArgumentError.value(other, 'achievedAt', 'invalid timestamp'),
       },
+      achievedBy: json['achievedBy'] as String?,
     );
   }
 
-  GoalStage copyWith({String? id, num? target, DateTime? dueOn, DateTime? achievedAt});
+  GoalStage copyWith({String? id, num? target, DateTime? dueOn, DateTime? achievedAt, String? achievedBy});
 }
 
 class _GoalStage implements GoalStage {
@@ -136,24 +154,28 @@ class _GoalStage implements GoalStage {
   final DateTime? dueOn;
   @override
   final DateTime? achievedAt;
+  @override
+  final String? achievedBy;
 
   const _GoalStage({
     this.id,
     required this.target,
     this.dueOn,
     this.achievedAt,
+    this.achievedBy,
   });
 
   @override
   bool get isAchieved => achievedAt != null;
 
   @override
-  GoalStage copyWith({String? id, num? target, DateTime? dueOn, DateTime? achievedAt}) {
+  GoalStage copyWith({String? id, num? target, DateTime? dueOn, DateTime? achievedAt, String? achievedBy}) {
     return _GoalStage(
       id: id ?? this.id,
       target: target ?? this.target,
       dueOn: dueOn ?? this.dueOn,
       achievedAt: achievedAt ?? this.achievedAt,
+      achievedBy: achievedBy ?? this.achievedBy,
     );
   }
 
@@ -164,6 +186,7 @@ class _GoalStage implements GoalStage {
       'target': target,
       'dueOn': ?_date(dueOn),
       'achievedAt': ?achievedAt?.toUtc().toIso8601String(),
+      'achievedBy': ?achievedBy,
     };
   }
 

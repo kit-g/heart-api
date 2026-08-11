@@ -5,6 +5,9 @@
 - `GoalService.getTargetUserGoals` gains an optional `archived` flag: `false` (default) returns the
   live goals, `true` returns only the archived ones — the achieved surface behind a completed card.
   Additive; existing callers are unaffected.
+- `GoalStage` gains an optional `achievedBy` (workout id crediting the session that met the rung),
+  round-tripped through `fromJson`/`toMap`/`copyWith`. `GoalService.markStageAchieved` takes a
+  matching optional `achievedBy`. Additive; the field is null when unattributed.
 
 ## 1.1.0
 
