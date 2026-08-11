@@ -128,13 +128,17 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
       },
     ).toList()..sort();
 
-    final currentWeekStart = getMonday(DateTime.timestamp());
+    // Anchor the trailing window to the local "now" so the current week turns over
+    // at local midnight, not at UTC midnight (which shows an empty week early).
+    final currentWeekStart = getMonday(DateTime.now());
 
     if (parsed.isEmpty) {
       return _WorkoutAggregation.empty();
     }
 
-    final earliestParsedWeekStart = parsed.first.startDate.toUtc();
+    // startDate is already a local calendar Monday (getMonday builds an unzoned
+    // DateTime); keep it local so it shares a zone with currentWeekStart below.
+    final earliestParsedWeekStart = parsed.first.startDate;
     final limit = currentWeekStart.subtract(const Duration(days: 7 * 7));
     final earliestWeekStart = switch (earliestParsedWeekStart.isAfter(limit)) {
       true => limit,
@@ -168,7 +172,9 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
 
     for (final row in rows) {
       final DateTime start = DateTime.parse(row['start']);
-      final String weekId = sanitizeId(getMonday(start));
+      // Bucket by the user's calendar, not UTC: a Sunday-evening session west of
+      // UTC is already Monday in UTC and would file into next week otherwise.
+      final String weekId = sanitizeId(getMonday(start.toLocal()));
 
       byWeek
           .putIfAbsent(weekId, () => [])
@@ -193,8 +199,10 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
       return _WorkoutAggregation.empty();
     }
 
-    final currentWeekStart = getMonday(DateTime.timestamp());
-    final earliestParsedWeekStart = parsed.first.startDate.toUtc();
+    // Local "now" anchor + a local earliest, matching fromRows — the keys parsed
+    // above were bucketed on the local calendar, so the fill window must be too.
+    final currentWeekStart = getMonday(DateTime.now());
+    final earliestParsedWeekStart = parsed.first.startDate;
     final limit = currentWeekStart.subtract(const Duration(days: 7 * 7));
     final earliestWeekStart = earliestParsedWeekStart.isAfter(limit) ? limit : earliestParsedWeekStart;
 
