@@ -203,6 +203,32 @@ void main() {
 
       await expectLater(() => getTargetUserGoalsById(req, _otherId), throwsA(isA<Forbidden>()));
     });
+
+    test('defaults to the live slice when no flag is passed', () async {
+      when(
+        service.getTargetUserGoals(requesterId: _meId, targetUserId: _otherId, archived: false),
+      ).thenAnswer((_) async => const <Goal>[]);
+
+      final req = wire(bareRequest(method: Method.get, path: '/accounts/$_otherId/goals'));
+      await getTargetUserGoalsById(req, _otherId);
+
+      verify(
+        service.getTargetUserGoals(requesterId: _meId, targetUserId: _otherId, archived: false),
+      ).called(1);
+    });
+
+    test('forwards the archived flag to the service', () async {
+      when(
+        service.getTargetUserGoals(requesterId: _meId, targetUserId: _otherId, archived: true),
+      ).thenAnswer((_) async => const <Goal>[]);
+
+      final req = wire(bareRequest(method: Method.get, path: '/accounts/$_otherId/goals'));
+      await getTargetUserGoalsById(req, _otherId, archived: true);
+
+      verify(
+        service.getTargetUserGoals(requesterId: _meId, targetUserId: _otherId, archived: true),
+      ).called(1);
+    });
   });
 
   group('markStageAchieved', () {
