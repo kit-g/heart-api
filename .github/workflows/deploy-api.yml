@@ -42,9 +42,17 @@ jobs:
           key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
           restore-keys: pub-${{ runner.os }}-
 
+      # format-check runs over every Dart package, and `dart format` resolves each
+      # package's own analysis_options `include:` to read the formatter config
+      # (page_width + trailing_commas live in the root file, pulled in per package).
+      # Resolve all three, not just api: without a package's own pub-get, its
+      # `package:lints`/`package:flutter_lints` include fails to resolve, the whole
+      # analysis_options is discarded, and its files reformat at the default width.
       - name: "Install dependencies"
-        working-directory: api
-        run: dart pub get
+        run: |
+          for pkg in api shared/heart_aws shared/heart_models; do
+            (cd "$pkg" && dart pub get)
+          done
 
       - name: "Generate Mocks"
         working-directory: api
