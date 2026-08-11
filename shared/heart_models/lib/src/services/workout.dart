@@ -53,6 +53,20 @@ abstract interface class RemoteWorkoutService implements FileUploadService, Gall
     String? since,
   });
 
+  /// One workout, by whose it is. [requesterId] must be [targetUserId] or an
+  /// active COACH/PEER of them, else `Forbidden` — the same read model as
+  /// `GoalService.getTargetUserGoals`. Served by
+  /// `GET /accounts/:targetUserId/workouts/:workoutId`.
+  ///
+  /// Returns non-null: a missing workout is `NotFound`, never `null`, so the
+  /// caller can tell "does not exist" (`not_found`) from "not downloaded yet".
+  /// No `imageUrl` — the server builds image URLs; the client receives them ready.
+  Future<Workout> getTargetWorkout({
+    required String requesterId,
+    required String targetUserId,
+    required String workoutId,
+  });
+
   Future<Workout> saveWorkout(Workout workout);
 
   Future<Workout> editWorkout(Workout updated);
