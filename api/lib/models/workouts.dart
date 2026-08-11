@@ -2,7 +2,11 @@ import 'dart:convert';
 
 import 'package:heart_models/heart_models.dart';
 
+<<<<<<< Updated upstream
 import 'imports.dart';
+=======
+import 'errors.dart';
+>>>>>>> Stashed changes
 
 abstract interface class ApiWorkoutService {
   Future<Page<Workout>> getWorkouts({
@@ -95,6 +99,7 @@ class WorkoutRequest {
               'exercise_name': name,
               'order': ex['order'],
               'met': ?ex['met'],
+              'note': ?_note(ex['note']),
               'sets': ex['sets'] ?? [],
             };
           },
@@ -102,6 +107,25 @@ class WorkoutRequest {
         .where((e) => e['exercise_name'] != null)
         .toList();
   }
+
+  /// Normalises a per-exercise note: trims, treats blank as absent (a cleared pin
+  /// is no pin), and caps the length so it stays a pin, not an essay — comments
+  /// are the place for prose. Over-long is a clean 400, not a raw DB CHECK error.
+  static String? _note(Object? value) {
+    if (value == null) return null;
+    if (value is! String) throw const BadRequest(reason: 'an exercise note must be a string');
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+    if (trimmed.length > _maxNoteLength) {
+      throw const BadRequest(
+        code: 'workout_note_too_long',
+        reason: 'an exercise note is at most $_maxNoteLength characters',
+      );
+    }
+    return trimmed;
+  }
+
+  static const _maxNoteLength = 500;
 
   Map<String, dynamic> toParams() {
     return {

@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_dynamic_calls
 import 'dart:convert';
 
+import 'package:heart/models/errors.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:test/test.dart';
 
@@ -54,6 +55,35 @@ void main() {
       final exercises = jsonDecode(params['exercises'] as String) as List;
       expect(exercises[0]['met'], 5.5);
       expect(exercises[1], isNot(contains('met')));
+    });
+
+    test('forwards a per-exercise note, trimmed, dropping blank ones', () {
+      final req = const WorkoutRequest(
+        userId: 'u1',
+        body: {
+          'exercises': [
+            {'exercise': 'Bench Press (Barbell)', 'order': 0, 'note': '  do one hand at a time  ', 'sets': []},
+            {'exercise': 'Squat (Barbell)', 'order': 1, 'note': '   ', 'sets': []},
+          ],
+        },
+      );
+
+      final exercises = jsonDecode(req.toParams()['exercises'] as String) as List;
+      expect(exercises[0]['note'], 'do one hand at a time', reason: 'trimmed');
+      expect(exercises[1], isNot(contains('note')), reason: 'a blank note is dropped, not stored');
+    });
+
+    test('rejects an over-long note with a 400', () {
+      final req = WorkoutRequest(
+        userId: 'u1',
+        body: {
+          'exercises': [
+            {'exercise': 'Bench Press (Barbell)', 'order': 0, 'note': 'x' * 501, 'sets': []},
+          ],
+        },
+      );
+
+      expect(() => req.toParams(), throwsA(isA<BadRequest>()));
     });
 
     test('exercises encoded with name flattened from {exercise: name} or {exercise: {name}}', () {
