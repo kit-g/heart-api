@@ -318,6 +318,39 @@ void main() {
           expect(((map['sets'] as List).first as Map)['id'], starterSet.id);
         },
       );
+
+      test(
+        'toMap carries a note and omits it when unset',
+        () {
+          when(mockExercise.toMap()).thenReturn({'name': 'Mock Exercise'});
+
+          final withNote = WorkoutExercise(starter: starterSet)..note = 'do one hand at a time';
+          expect(withNote.toMap()['note'], 'do one hand at a time');
+
+          final without = WorkoutExercise(starter: starterSet);
+          expect(without.toMap().containsKey('note'), isFalse);
+        },
+      );
+
+      test(
+        'fromJson restores the note',
+        () {
+          final exercise = Exercise(
+            name: 'Bench',
+            category: Category.weightedBodyWeight,
+            target: Target.chest,
+          );
+          final parsed = WorkoutExercise.fromJson({
+            'id': 'we-1',
+            'exercise': exercise.toMap(),
+            'exercise_order': 0,
+            'note': 'pause at the bottom',
+            'sets': <Map>[],
+          });
+
+          expect(parsed.note, 'pause at the bottom');
+        },
+      );
     },
   );
 
@@ -539,6 +572,18 @@ void main() {
           final copy = workout.copy(sameId: true);
 
           expect(copy.id, equals(workout.id));
+        },
+      );
+
+      test(
+        'copy carries the exercise note forward',
+        () {
+          workoutExercise.note = 'do one hand at a time';
+          workout.append(workoutExercise);
+
+          final copy = workout.copy();
+
+          expect(copy.first.note, 'do one hand at a time');
         },
       );
 

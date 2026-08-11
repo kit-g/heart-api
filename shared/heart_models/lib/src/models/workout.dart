@@ -26,6 +26,12 @@ abstract interface class WorkoutExercise
   /// sync and comparable across users. Null without wearable data.
   abstract double? met;
 
+  /// A short, user-authored pin describing how this exercise is performed — e.g.
+  /// "do one hand at a time". The owner's own inline description, edited as part
+  /// of the workout and distinct from a comment (which is social and threaded).
+  /// Null when unset; the server caps it at 500 characters.
+  abstract String? note;
+
   void add(ExerciseSet set);
 
   bool remove(ExerciseSet set);
@@ -54,6 +60,7 @@ abstract interface class WorkoutExercise
       id: json['id'],
       order: json['exercise_order'] ?? json['order'],
       met: (json['met'] as num?)?.toDouble(),
+      note: json['note'] as String?,
     );
   }
 }
@@ -197,12 +204,16 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
   @override
   double? met;
 
+  @override
+  String? note;
+
   _WorkoutExercise._({
     ExerciseSet? starter,
     DateTime? start,
     required this.id,
     this.order,
     this.met,
+    this.note,
     required Exercise exercise,
     List<ExerciseSet>? sets,
   }) : _exercise = exercise,
@@ -253,6 +264,7 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
       'exercise': ?firstOrNull?.exercise.toMap(),
       'start': start.toIso8601String(),
       'met': ?met,
+      'note': ?note,
       'sets': [
         for (final each in this) each.toMap(),
       ],
@@ -574,6 +586,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         final exercise = WorkoutExercise(
           starter: each.first.copy(),
         );
+        // met/calories are measurements of the original session (dropped above);
+        // a note is an instruction on how to do the exercise, so a repeat carries it.
+        exercise.note = each.note;
 
         for (final (index, set) in each.skip(1).indexed) {
           final start = DateTime.timestamp().add(Duration(milliseconds: 2 * index));

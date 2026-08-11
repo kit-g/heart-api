@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0
+
+- `WorkoutExercise` gains an optional `note` — a short, user-authored pin describing how the
+  exercise is performed (e.g. "do one hand at a time"), distinct from a comment. Round-trips through
+  `fromJson`/`toMap` and is carried forward by `Workout.copy()` (it's an instruction, not a
+  measurement like `met`). Additive; null when unset. The server caps it at 500 characters.
+
 ## 1.2.0
 
 - `GoalService.getTargetUserGoals` gains an optional `archived` flag: `false` (default) returns the
