@@ -263,6 +263,48 @@ void main() {
         throwsA(isA<NotFound>()),
       );
     });
+
+    test('attributes the rung to a workout the caller owns', () async {
+      final workoutId = await h.seedWorkout(userId: ownerId);
+      final at = DateTime.utc(2026, 12, 25, 9);
+      final updated = await h.db.markStageAchieved(goal.id!, firstStageId, ownerId, at, achievedBy: workoutId);
+
+      final first = updated.stages.firstWhere((s) => s.id == firstStageId);
+      expect(first.achievedBy, workoutId);
+      expect(first.achievedAt?.toUtc(), at);
+    });
+
+    test('rejects an achievedBy workout the caller does not own', () async {
+      final strangersWorkout = await h.seedWorkout(userId: strangerId);
+      await expectLater(
+        h.db.markStageAchieved(goal.id!, firstStageId, ownerId, DateTime.utc(2026), achievedBy: strangersWorkout),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'goal_workout_unknown')),
+      );
+      // and the rung is left unstamped — the guard runs before the write
+      final after = await h.db.getTargetUserGoals(requesterId: ownerId, targetUserId: ownerId);
+      final reread = after.firstWhere((g) => g.id == goal.id).stages.firstWhere((s) => s.id == firstStageId);
+      expect(reread.isAchieved, isFalse);
+    });
+
+    test('a full replace keeps the workout attribution', () async {
+      final workoutId = await h.seedWorkout(userId: ownerId);
+      final stamped = await h.db.markStageAchieved(
+        goal.id!,
+        firstStageId,
+        ownerId,
+        DateTime.utc(2026, 11, 1),
+        achievedBy: workoutId,
+      );
+
+      final edited = await h.db.updateGoal(
+        stamped.id!,
+        stamped.copyWith(stages: [stamped.stages.first, stamped.stages.last.copyWith(target: 130)]),
+        ownerId,
+      );
+
+      final first = edited.stages.firstWhere((s) => s.id == firstStageId);
+      expect(first.achievedBy, workoutId);
+    });
   });
 }
 
