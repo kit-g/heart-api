@@ -59,5 +59,11 @@ Future<Goal> markStageAchieved(final Request req) {
 
 Future<Goal> markStageAchievedById(final Request req, final String goalId, final String stageId) async {
   final input = await StageAchievedIn.fromRequest(req);
-  return req.goalService.markStageAchieved(goalId, stageId, req.userId, input.achievedAt);
+  return req.goalService.markStageAchieved(
+    goalId,
+    stageId,
+    req.userId,
+    input.achievedAt,
+    achievedBy: input.achievedBy,
+  );
 }
