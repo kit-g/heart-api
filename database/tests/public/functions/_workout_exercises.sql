@@ -82,7 +82,7 @@ BEGIN
     _w_id    := create_test_workout(_user_id => _user_id);
     _we_id   := create_test_workout_exercise(_w_id, _ex_id, 0);
     PERFORM create_test_exercise_set(_we_id, 0, 135, 5);
-    UPDATE workout_exercises SET met = 5.5 WHERE id = _we_id;
+    UPDATE workout_exercises SET met = 5.5, note = 'do one hand at a time' WHERE id = _we_id;
 
     _result := _workout_exercises(_w_id);
 
@@ -94,6 +94,7 @@ BEGIN
     RETURN NEXT is(_result -> 0 -> 'exercise' ->> 'category', 'Barbell', 'exercise.category preserved');
     RETURN NEXT is(_result -> 0 -> 'exercise' ->> 'target', 'Chest', 'exercise.target preserved');
     RETURN NEXT is((_result -> 0 ->> 'met')::real, 5.5::real, 'met preserved');
+    RETURN NEXT is(_result -> 0 ->> 'note', 'do one hand at a time', 'note preserved');
     RETURN NEXT is(jsonb_array_length(_result -> 0 -> 'sets'), 1, 'sets array populated');
 END
 $$ LANGUAGE plpgsql;

@@ -191,7 +191,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION validate_format_workout_exercise(_we JSONB) RETURNS SETOF BOOL AS
 $$
 BEGIN
-    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_we)) = 5;
+    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_we)) = 6;
     RETURN NEXT jsonb_typeof(_we -> 'id') = 'string';
     RETURN NEXT jsonb_typeof(_we -> 'exercise') = 'object';
     RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_we -> 'exercise')) = 4;
@@ -201,6 +201,7 @@ BEGIN
     RETURN NEXT jsonb_typeof(_we -> 'exercise' -> 'target') = 'string';
     RETURN NEXT jsonb_typeof(_we -> 'exercise_order') = 'number';
     RETURN NEXT jsonb_typeof(_we -> 'met') = 'number' OR jsonb_typeof(_we -> 'met') = 'null';
+    RETURN NEXT jsonb_typeof(_we -> 'note') = 'string' OR jsonb_typeof(_we -> 'note') = 'null';
     RETURN NEXT jsonb_typeof(_we -> 'sets') = 'array';
 END
 $$ LANGUAGE plpgsql;

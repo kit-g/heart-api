@@ -362,7 +362,8 @@ _order_to_name AS (
   SELECT
     (ex->>'order')::int AS exercise_order,
     ex->>'exercise_name' AS exercise_name,
-    (ex->>'met')::real AS met
+    (ex->>'met')::real AS met,
+    ex->>'note' AS note
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -378,12 +379,12 @@ _workout AS (
   RETURNING id, name, started_at, completed_at, calories, created_at
 ),
 _inserted_exercises AS (
-  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, met)
-  SELECT w.id, el.exercise_id, otn.exercise_order, otn.met
+  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, met, note)
+  SELECT w.id, el.exercise_id, otn.exercise_order, otn.met, otn.note
   FROM _workout w
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
-  RETURNING id, exercise_order, met
+  RETURNING id, exercise_order, met, note
 ),
 _sets_input AS (
   SELECT
@@ -440,6 +441,7 @@ _exercises_json AS (
       ),
       'exercise_order', ie.exercise_order,
       'met', ie.met,
+      'note', ie.note,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -550,7 +552,8 @@ _order_to_name AS (
   SELECT
     (ex->>'order')::int AS exercise_order,
     ex->>'exercise_name' AS exercise_name,
-    (ex->>'met')::real AS met
+    (ex->>'met')::real AS met,
+    ex->>'note' AS note
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -572,17 +575,18 @@ _deleted AS (
   RETURNING id
 ),
 _inserted_exercises AS (
-  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, met)
+  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, met, note)
   SELECT
     w.id,
     el.exercise_id,
     otn.exercise_order,
-    otn.met
+    otn.met,
+    otn.note
   FROM _workout w
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
   WHERE NOT exists(SELECT 1 FROM _deleted WHERE false)
-  RETURNING id, exercise_order, met
+  RETURNING id, exercise_order, met, note
 ),
 _sets_input AS (
   SELECT
@@ -639,6 +643,7 @@ _exercises_json AS (
       ),
       'exercise_order', ie.exercise_order,
       'met', ie.met,
+      'note', ie.note,
       'sets', coalesce(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json

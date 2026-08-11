@@ -297,6 +297,42 @@ void main() {
       expect(read.first.first.completedAt?.toUtc(), DateTime.utc(2026, 8, 8, 10, 1, 30));
     });
 
+    test('a per-exercise note round-trips through create, read, and a full-replace update', () async {
+      final exName = h.uniqueName('Ex');
+      await h.seedGlobalExercise(name: exName);
+
+      WorkoutRequest withNote(String note) => WorkoutRequest(
+        userId: ownerId,
+        body: {
+          'name': 'Noted workout',
+          'start': '2026-08-08T10:00:00Z',
+          'end': '2026-08-08T11:00:00Z',
+          'exercises': [
+            {'exercise': exName, 'order': 0, 'note': note, 'sets': <Map>[]},
+          ],
+        },
+      );
+
+      final created = await h.db.createWorkout(
+        userId: ownerId,
+        body: withNote('do one hand at a time'),
+        imageUrl: imageUrl,
+      );
+      expect(created.first.note, 'do one hand at a time');
+
+      final read = await h.db.getWorkout(userId: ownerId, workoutId: created.id, imageUrl: imageUrl);
+      expect(read.first.note, 'do one hand at a time');
+
+      // updateWorkout deletes and re-inserts workout_exercises; the note must survive
+      final updated = await h.db.updateWorkout(
+        userId: ownerId,
+        workoutId: created.id,
+        body: withNote('pause at the bottom'),
+        imageUrl: imageUrl,
+      );
+      expect(updated.first.note, 'pause at the bottom');
+    });
+
     test('a calories-only patch sets calories and leaves the rest unchanged', () async {
       final id = await h.seedWorkout(userId: ownerId);
 
