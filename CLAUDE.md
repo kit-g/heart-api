@@ -43,7 +43,14 @@ change is released the moment it lands. Consequences:
 - `api/` is not consumed as a package; its pubspec version is inert. API releases are the
   repo tags (`v*`), which drive the prod deploy.
 
-## Backlog
+# Working across Heart's two repos
 
-Feature backlog lives in GitHub issues under the `backlog` label. Each issue body carries
-scope, the API-vs-FE boundary notes, and dependencies.
+Heart is two repositories that ship together:
+
+| Repo                                                              | Role                                                         |
+|-------------------------------------------------------------------|--------------------------------------------------------------|
+| [`kit-g/heart-api`](https://github.com/kit-g/heart-api)           | backend — Dart API, Postgres, Lambda services, shared models |
+| [`kit-g/heart-of-yours`](https://github.com/kit-g/heart-of-yours) | frontend — Flutter app                                       |
+
+They are coupled by one thing: the **`shared/heart_models` package**, which the app pulls straight
+from git `main`. 
