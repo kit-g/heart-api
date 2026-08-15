@@ -21,7 +21,7 @@ class WorkoutImport {
   /// Data rows that failed to parse and were left out of the batch.
   final int rowsSkipped;
 
-  WorkoutImport._({required this.source, required this.workouts, required this.rowsSkipped});
+  new _({required this.source, required this.workouts, required this.rowsSkipped});
 
   /// Distinct exercise names across the batch, each with a category/target
   /// guess for the ones that turn out not to exist and need to be created as
@@ -64,7 +64,7 @@ class WorkoutImport {
   ///
   /// Throws [FormatException] when the text isn't recognizable as a Strong
   /// export; individual bad rows are skipped and counted instead.
-  factory WorkoutImport.fromStrongCsv(
+  factory fromStrongCsv(
     String csv, {
     MeasurementUnit unit = MeasurementUnit.metric,
     Duration utcOffset = Duration.zero,
@@ -165,7 +165,7 @@ class ImportedWorkout {
   final DateTime? end;
   final List<ImportedExercise> exercises;
 
-  const ImportedWorkout({
+  const new({
     required this.importId,
     required this.name,
     required this.start,
@@ -195,7 +195,7 @@ class ImportedExercise {
   final String name;
   final List<ImportedSet> sets;
 
-  const ImportedExercise({required this.name, required this.sets});
+  const new({required this.name, required this.sets});
 }
 
 class ImportedSet {
@@ -204,7 +204,7 @@ class ImportedSet {
   final int? duration;
   final double? distance;
 
-  const ImportedSet({this.weight, this.reps, this.duration, this.distance});
+  const new({this.weight, this.reps, this.duration, this.distance});
 
   Map<String, dynamic> toPayload() {
     return {'weight': ?weight, 'reps': ?reps, 'duration': ?duration, 'distance': ?distance};
@@ -225,7 +225,7 @@ class WorkoutImportReport implements Model {
   final List<String> exercisesCreated;
   final int rowsSkipped;
 
-  const WorkoutImportReport({
+  const new({
     required this.source,
     required this.workoutsFound,
     required this.workoutsCreated,
@@ -237,7 +237,7 @@ class WorkoutImportReport implements Model {
 
   int get workoutsSkipped => workoutsFound - workoutsCreated;
 
-  factory WorkoutImportReport.fromRow(Map<String, dynamic> row, {required String source, required int rowsSkipped}) {
+  factory fromRow(Map<String, dynamic> row, {required String source, required int rowsSkipped}) {
     return WorkoutImportReport(
       source: source,
       workoutsFound: row['workouts_found'],
@@ -321,7 +321,7 @@ class _WorkoutBuilder {
   final DateTime? end;
   final _exercises = <String, List<ImportedSet>>{};
 
-  _WorkoutBuilder({required this.importId, required this.name, required this.start, required this.end});
+  new({required this.importId, required this.name, required this.start, required this.end});
 
   List<ImportedSet> exercise(String name) => _exercises.putIfAbsent(name, () => []);
 

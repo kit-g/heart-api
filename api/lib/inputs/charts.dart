@@ -3,7 +3,7 @@ part of 'inputs.dart';
 class ChartPreferenceSaveIn {
   final ChartPreference preference;
 
-  const ChartPreferenceSaveIn._({required this.preference});
+  const new _({required this.preference});
 
   /// Accepts the wire shape existing clients already send (`type`, optional
   /// `data` object or JSON-encoded string, optional `id`) — the same shape

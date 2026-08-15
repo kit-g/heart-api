@@ -31,7 +31,7 @@ class AppHarness {
   final RelicApp _app;
   final RelicServer _server;
 
-  AppHarness._(this.db, this.storage, this.events, this.config, this._app, this._server);
+  new _(this.db, this.storage, this.events, this.config, this._app, this._server);
 
   static const goodToken = 'good';
 

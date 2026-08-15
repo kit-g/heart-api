@@ -20,7 +20,7 @@ class _RecordingScheduler extends SchedulerApi {
   Exception? postError;
   Exception? deleteError;
 
-  _RecordingScheduler({this.postResponse = '{}', this.getResponse = '{}', this.postError, this.deleteError});
+  new({this.postResponse = '{}', this.getResponse = '{}', this.postError, this.deleteError});
 
   final posts = <({Uri uri, Map<String, String>? headers, Map<String, dynamic>? body})>[];
   final gets = <Uri>[];

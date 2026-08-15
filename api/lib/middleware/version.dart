@@ -4,7 +4,7 @@ import 'package:relic/relic.dart';
 import 'package:version/version.dart';
 
 class _UpgradeRequired implements Model {
-  const _UpgradeRequired();
+  const new();
 
   @override
   Map<String, dynamic> toMap() {

@@ -11,13 +11,13 @@ abstract interface class Profile implements Model {
 
   String get id;
 
-  factory Profile({
+  factory({
     required String id,
     String? name,
     String? avatar,
   }) = _Profile.new;
 
-  factory Profile.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _Profile(
       id: json['id'],
       name: json['username'],
@@ -44,7 +44,7 @@ abstract interface class User implements Model, Profile {
 
   Uint8List? localAvatar;
 
-  factory User({
+  factory({
     String? displayName,
     String? email,
     String? avatar,
@@ -66,7 +66,7 @@ abstract interface class User implements Model, Profile {
 
   User copyWith({String? displayName, String? email, Settings? settings});
 
-  factory User.fromJson(Map json) {
+  factory fromJson(Map json) {
     return User(
       displayName: json['displayName'] as String?,
       email: json['email'] as String?,
@@ -86,7 +86,7 @@ abstract interface class User implements Model, Profile {
     );
   }
 
-  factory User.fromRow(Map row) {
+  factory fromRow(Map row) {
     return User(
       id: row['id'],
       email: row['email'],
@@ -122,7 +122,7 @@ class _User implements User {
   @override
   Uint8List? localAvatar;
 
-  _User({
+  new({
     required this.displayName,
     required this.email,
     required this.remoteAvatar,
@@ -178,7 +178,7 @@ class _Profile implements Profile {
   @override
   final String? avatar;
 
-  const _Profile({
+  const new({
     required this.id,
     this.name,
     this.avatar,

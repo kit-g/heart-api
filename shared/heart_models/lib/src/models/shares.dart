@@ -24,7 +24,7 @@ abstract interface class TemplateShare implements Model {
 
   DateTime get assignedAt;
 
-  factory TemplateShare({
+  factory({
     required String id,
     required String masterTemplateId,
     required String studentTemplateId,
@@ -33,7 +33,7 @@ abstract interface class TemplateShare implements Model {
     required DateTime assignedAt,
   }) = _TemplateShare;
 
-  factory TemplateShare.fromRow(Map<String, dynamic> row) {
+  factory fromRow(Map<String, dynamic> row) {
     final studentId = row['student_id'].toString();
     return _TemplateShare(
       id: row['id'].toString(),
@@ -77,7 +77,7 @@ class _TemplateShare implements TemplateShare {
   @override
   final DateTime assignedAt;
 
-  const _TemplateShare({
+  const new({
     required this.id,
     required this.masterTemplateId,
     required this.studentTemplateId,
@@ -126,7 +126,7 @@ class TemplateSetRequest {
   final num? duration;
   final num? distance;
 
-  const TemplateSetRequest({this.weight, this.reps, this.duration, this.distance});
+  const new({this.weight, this.reps, this.duration, this.distance});
 
   /// Keys match what `_saveTemplate` reads out of the `@exercises` jsonb.
   Map<String, dynamic> toJson() {
@@ -148,7 +148,7 @@ class TemplateExerciseRequest {
   final int order;
   final List<TemplateSetRequest> sets;
 
-  const TemplateExerciseRequest({
+  const new({
     required this.exerciseName,
     required this.order,
     this.sets = const [],
@@ -182,7 +182,7 @@ class TemplateRequest {
 
   final List<TemplateExerciseRequest> exercises;
 
-  const TemplateRequest({
+  const new({
     required this.userId,
     this.name,
     this.order = 0,

@@ -24,9 +24,9 @@ enum GoalMetric {
 
   final String value;
 
-  const GoalMetric(this.value);
+  const new(this.value);
 
-  factory GoalMetric.fromString(String v) {
+  factory fromString(String v) {
     return switch (v) {
       'workouts' => workouts,
       'topSetWeight' => topSetWeight,
@@ -67,9 +67,9 @@ enum GoalCadence {
 
   final String value;
 
-  const GoalCadence(this.value);
+  const new(this.value);
 
-  factory GoalCadence.fromString(String v) {
+  factory fromString(String v) {
     return switch (v) {
       'week' => week,
       'month' => month,
@@ -111,7 +111,7 @@ abstract interface class GoalStage implements Model {
 
   bool get isAchieved;
 
-  factory GoalStage({
+  factory({
     String? id,
     required num target,
     DateTime? dueOn,
@@ -121,7 +121,7 @@ abstract interface class GoalStage implements Model {
 
   /// Parses a stage out of the `stages` JSONB array. Keys are camelCase there —
   /// the blob is written and read by us, and travels to the app unchanged.
-  factory GoalStage.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _GoalStage(
       id: json['id'] as String?,
       target: switch (json['target']) {
@@ -158,7 +158,7 @@ class _GoalStage implements GoalStage {
   @override
   final String? achievedBy;
 
-  const _GoalStage({
+  const new({
     this.id,
     required this.target,
     this.dueOn,
@@ -233,7 +233,7 @@ abstract interface class Goal implements Model {
   /// once the ladder is finished.
   GoalStage? get currentStage;
 
-  factory Goal({
+  factory({
     String? id,
     required GoalMetric metric,
     String? exerciseId,
@@ -244,7 +244,7 @@ abstract interface class Goal implements Model {
   }) = _Goal;
 
   /// Parses the wire shape (camelCase) — used by the app on `GET /goals`.
-  factory Goal.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _Goal(
       id: json['id'] as String?,
       metric: GoalMetric.fromString(json['metric'] as String),
@@ -267,7 +267,7 @@ abstract interface class Goal implements Model {
   }
 
   /// Parses a DB row (snake_case columns; `stages` arrives as decoded JSONB).
-  factory Goal.fromRow(Map row) {
+  factory fromRow(Map row) {
     return _Goal(
       id: row['id']?.toString(),
       metric: GoalMetric.fromString(row['metric'] as String),
@@ -350,7 +350,7 @@ class _Goal implements Goal {
   @override
   final DateTime? createdAt;
 
-  const _Goal({
+  const new({
     this.id,
     required this.metric,
     this.exerciseId,

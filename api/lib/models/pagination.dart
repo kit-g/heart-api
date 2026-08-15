@@ -9,11 +9,11 @@ class Paginated<T extends Model> with Iterable<T> implements Model {
   final String itemsKey;
   final String? cursor;
 
-  const Paginated({required this.items, required this.itemsKey, this.cursor});
+  const new({required this.items, required this.itemsKey, this.cursor});
 
   /// Builds a [Paginated] from a service [Page]. [cursorOf] extracts the
   /// cursor value from the last item when `page.hasMore` is true.
-  factory Paginated.from(
+  factory from(
     Page<T> page, {
     required String itemsKey,
     required String Function(T) cursorOf,

@@ -32,7 +32,7 @@ enum Env {
   dev,
   prod;
 
-  factory Env.fromString(String? v) {
+  factory fromString(String? v) {
     return switch (v) {
       'dev' || 'd' || 'development' => dev,
       'prod' || 'p' || 'production' => prod,
@@ -50,7 +50,7 @@ class PostgresConfig {
   final String? user;
   final String? password;
 
-  const PostgresConfig({
+  const new({
     required this.host,
     required this.port,
     required this.database,
@@ -118,7 +118,7 @@ abstract interface class AppConfig {
   /// development flags, allows to call the /events endpoint
   bool get allowNonHttpEvents;
 
-  factory AppConfig.fromEnv() {
+  factory fromEnv() {
     final env = Platform.environment;
     switch (env) {
       case {
@@ -230,7 +230,7 @@ class _EnvConfig implements AppConfig {
   @override
   final bool allowNonHttpEvents;
 
-  const _EnvConfig({
+  const new({
     required this.env,
     required this.firebaseProjectId,
     required this.logLevel,

@@ -5,7 +5,7 @@ class TestTimestampId with UsesTimestampForId {
   @override
   final DateTime start;
 
-  TestTimestampId(this.start);
+  new(this.start);
 }
 
 void main() {

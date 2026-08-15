@@ -7,7 +7,7 @@ class Page<T> with Iterable<T> {
   final List<T> items;
   final bool hasMore;
 
-  const Page({required this.items, required this.hasMore});
+  const new({required this.items, required this.hasMore});
 
   static const Page<Never> empty = Page(items: [], hasMore: false);
 
@@ -28,7 +28,7 @@ class OrderedCursor {
   final int order;
   final String id;
 
-  const OrderedCursor({required this.order, required this.id});
+  const new({required this.order, required this.id});
 
   @override
   String toString() => '$order:$id';

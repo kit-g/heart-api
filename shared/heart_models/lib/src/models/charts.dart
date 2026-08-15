@@ -19,9 +19,9 @@ enum ChartPreferenceType {
 
   final String value;
 
-  const ChartPreferenceType(this.value);
+  const new(this.value);
 
-  factory ChartPreferenceType.fromString(String v) {
+  factory fromString(String v) {
     return switch (v) {
       'maxConsecutiveReps' => maxConsecutiveReps,
       'topSetWeight' => topSetWeight,
@@ -99,7 +99,7 @@ abstract interface class ChartPreference implements Storable, Model {
     Map<String, dynamic>? data,
   });
 
-  factory ChartPreference.fromRow(Map row) {
+  factory fromRow(Map row) {
     return _ChartPreference(
       id: row['id']?.toString(),
       type: ChartPreferenceType.fromString(row['type']),
@@ -114,7 +114,7 @@ abstract interface class ChartPreference implements Storable, Model {
 
   /// Builds a preference from already-validated parts (e.g. a typed API
   /// input). [ChartPreference.fromRow] remains the DB-row parser.
-  factory ChartPreference.create({
+  factory create({
     String? id,
     required ChartPreferenceType type,
     Map<String, dynamic>? data,
@@ -122,7 +122,7 @@ abstract interface class ChartPreference implements Storable, Model {
     return _ChartPreference(id: id, type: type, data: data);
   }
 
-  factory ChartPreference.exercise(String exerciseName, ChartPreferenceType type) {
+  factory exercise(String exerciseName, ChartPreferenceType type) {
     return _ChartPreference(
       id: null,
       type: type,
@@ -139,7 +139,7 @@ class _ChartPreference implements ChartPreference {
   @override
   final Map<String, dynamic>? data;
 
-  const _ChartPreference({
+  const new({
     this.id,
     required this.type,
     required this.data,

@@ -12,7 +12,7 @@ class Settings implements Model {
   final String? accentColor;
   final Map<String, dynamic> extra;
 
-  const Settings({
+  const new({
     this.unitSystem,
     this.themeMode,
     this.accentColor,
@@ -21,7 +21,7 @@ class Settings implements Model {
 
   static const _known = {'unitSystem', 'unit_system', 'themeMode', 'accentColor'};
 
-  factory Settings.fromJson(Map? json) {
+  factory fromJson(Map? json) {
     if (json == null) return const Settings();
     return Settings(
       unitSystem: switch (json['unitSystem'] ?? json['unit_system']) {

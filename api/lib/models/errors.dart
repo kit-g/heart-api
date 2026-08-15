@@ -18,7 +18,7 @@ class NotFound implements ApiException {
   @override
   final String code;
 
-  const NotFound({
+  const new({
     required this.type,
     required this.id,
     this.code = 'not_found',
@@ -39,7 +39,7 @@ class NotFound implements ApiException {
 }
 
 class NoContent implements ApiException {
-  const NoContent();
+  const new();
 
   @override
   String get code => 'no_content';
@@ -59,7 +59,7 @@ class BadRequest implements ApiException {
   final String code;
   final Map? payload;
 
-  const BadRequest({
+  const new({
     required this.reason,
     this.code = 'bad_request',
     this.payload,
@@ -87,7 +87,7 @@ class Forbidden implements ApiException {
   @override
   final String code;
 
-  const Forbidden({required this.reason, this.code = 'forbidden'});
+  const new({required this.reason, this.code = 'forbidden'});
 
   @override
   int get statusCode => 403;
@@ -107,7 +107,7 @@ class UnsupportedMediaType implements ApiException {
   @override
   final String code;
 
-  const UnsupportedMediaType({required this.reason, this.code = 'unsupported_media_type'});
+  const new({required this.reason, this.code = 'unsupported_media_type'});
 
   @override
   int get statusCode => 415;
@@ -130,7 +130,7 @@ class NotImplemented implements ApiException {
   @override
   final String code;
 
-  const NotImplemented({required this.reason, this.code = 'not_implemented'});
+  const new({required this.reason, this.code = 'not_implemented'});
 
   @override
   int get statusCode => 501;

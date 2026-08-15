@@ -13,7 +13,7 @@ class _RecordingSns extends SnsApi {
     AWSCredentials('AKIDEXAMPLE', 'secret'),
   );
 
-  _RecordingSns({this.region = 'us-east-1'});
+  new({this.region = 'us-east-1'});
 
   final posts = <({Uri uri, Map<String, String>? headers, Map<String, dynamic>? body})>[];
 
