@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.0
+
+- `Template` gains `copyWith({required TemplateFolder? folder})` — an identical template filed
+  under the given folder, or unfiled when passed null. Replaces the app's `toMap`/`fromJson`
+  round trip for optimistic filing (`heart_state` `_filed`), which silently depended on the two
+  staying symmetric. `folder` is required on purpose: null means "unfile", so there is no absent
+  value for a default to mean. `toMap()` still omits `folder`/`folderId` when unfiled — the
+  wire format is unchanged. Additive.
+
 ## 1.4.0
 
 - `RemoteWorkoutService` gains `getTargetWorkout({requesterId, targetUserId, workoutId})` — a single

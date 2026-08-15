@@ -115,6 +115,60 @@ void main() {
       );
 
       test(
+        'copyWith files and unfiles without touching anything else',
+        () {
+          final template = Template.fromRow({
+            'id': 'template_12',
+            'name': 'Push',
+            'order_index': 1,
+            'source_template_id': 'master-1',
+            'assigned_by_id': 'coach-1',
+            'assigned_by_username': 'Coach',
+            'sync_enabled': true,
+            'exercises': [],
+          });
+
+          final folder = TemplateFolder(id: 'folder-1', name: 'Push block', order: 0);
+          final filed = template.copyWith(folder: folder);
+
+          expect(filed.folderId, 'folder-1');
+          expect(filed.id, template.id);
+          expect(filed.name, template.name);
+          expect(filed.order, template.order);
+          expect(filed.sourceTemplateId, 'master-1');
+          expect(filed.assignedBy?.id, 'coach-1');
+          expect(filed.syncEnabled, isTrue);
+
+          final unfiled = filed.copyWith(folder: null);
+
+          expect(unfiled.folder, isNull);
+          expect(unfiled.folderId, isNull);
+          // an unfiled copy serializes with no folder key at all
+          expect(unfiled.toMap().containsKey('folder'), isFalse);
+          // the original is untouched — copies, not mutations
+          expect(filed.folderId, 'folder-1');
+        },
+      );
+
+      test(
+        'copyWith carries the exercises but into an independent list',
+        () {
+          final workout = Workout(name: 'Push day');
+          workout.add(Exercise.fromJson({'name': 'Bench Press', 'category': 'Barbell', 'target': 'Chest'}));
+          final template = Template.fromWorkout('template_13', workout, 0);
+
+          final copy = template.copyWith(folder: null);
+
+          expect(copy.length, template.length);
+
+          copy.add(Exercise.fromJson({'name': 'Squat', 'category': 'Barbell', 'target': 'Legs'}));
+
+          expect(copy.length, 2);
+          expect(template.length, 1);
+        },
+      );
+
+      test(
         'Comparison works correctly',
         () {
           final template1 = Template.empty(id: 'template_4', order: 1);

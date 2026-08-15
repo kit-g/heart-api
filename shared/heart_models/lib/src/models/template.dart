@@ -48,6 +48,14 @@ abstract interface class Template
 
   Workout toWorkout();
 
+  /// An otherwise identical template filed under [folder] — null unfiles it.
+  ///
+  /// [folder] is deliberately required rather than defaulted: null is a
+  /// meaningful value here (unfiled), so there is no "absent" for a default
+  /// to mean. The exercises are carried into a fresh list, but the
+  /// [WorkoutExercise] objects themselves are shared with the original.
+  Template copyWith({required TemplateFolder? folder});
+
   factory empty({required String id, required int order, TemplateFolder? folder}) {
     return _Template(
       exercises: [],
@@ -195,6 +203,21 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       return orderComparison;
     }
     return id.compareTo(other.id);
+  }
+
+  @override
+  Template copyWith({required TemplateFolder? folder}) {
+    return _Template(
+      exercises: List.of(_exercises),
+      id: id,
+      order: order,
+      name: name,
+      local: local,
+      folder: folder,
+      sourceTemplateId: sourceTemplateId,
+      assignedBy: assignedBy,
+      syncEnabled: syncEnabled,
+    );
   }
 
   // todo redo
