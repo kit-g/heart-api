@@ -48,7 +48,7 @@ abstract interface class Template
 
   Workout toWorkout();
 
-  factory Template.empty({required String id, required int order, TemplateFolder? folder}) {
+  factory empty({required String id, required int order, TemplateFolder? folder}) {
     return _Template(
       exercises: [],
       id: id,
@@ -58,7 +58,7 @@ abstract interface class Template
     );
   }
 
-  factory Template.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _Template(
       exercises: switch (json['exercises']) {
         List l => l.map((each) => WorkoutExercise.fromJson(each)).toList(),
@@ -81,7 +81,7 @@ abstract interface class Template
     );
   }
 
-  factory Template.fromWorkout(String id, Workout workout, int order, {TemplateFolder? folder}) {
+  factory fromWorkout(String id, Workout workout, int order, {TemplateFolder? folder}) {
     return _Template(
       exercises: workout.toList(),
       id: id,
@@ -94,7 +94,7 @@ abstract interface class Template
 
   /// The folder arrives as the flat `folder_*` columns of the `LEFT JOIN` in
   /// `_listTemplates` and friends — null across the board when unfiled.
-  factory Template.fromRow(Map<String, dynamic> row) {
+  factory fromRow(Map<String, dynamic> row) {
     return _Template(
       id: row['id'].toString(),
       name: row['name'] as String? ?? '',
@@ -147,7 +147,7 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
 
   final List<WorkoutExercise> _exercises;
 
-  _Template({
+  new({
     required List<WorkoutExercise> exercises,
     this.name,
     required this.id,

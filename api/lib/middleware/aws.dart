@@ -5,7 +5,7 @@ class AwsConfig {
   final AWSCredentialsProvider credentialsProvider;
   final String region;
 
-  AwsConfig({
+  new({
     required this.credentialsProvider,
     required this.region,
   });

@@ -1,7 +1,7 @@
 part of '../heart_aws.dart';
 
 abstract class SnsApi with Signer {
-  SnsApi();
+  new();
 
   @override
   AWSService get service => .sns;
@@ -37,7 +37,7 @@ class Sns extends SnsApi {
   @override
   final String region;
 
-  Sns({
+  new({
     required this.credentialsProvider,
     required this.region,
   });

@@ -10,7 +10,7 @@ enum ConnectionRole {
   /// Throws [ArgumentError] on an unknown role. It used to fall back to [peer],
   /// which meant a client asking to be someone's coach and typo'ing it got a
   /// peer connection and a 200. Mirrored by `connections_initiator_role_check`.
-  factory ConnectionRole.fromString(String val) {
+  factory fromString(String val) {
     return values.firstWhere(
       (e) => e.value == val.toUpperCase(),
       orElse: () => throw ArgumentError.value(val, 'role', 'unknown connection role'),
@@ -36,7 +36,7 @@ enum ConnectionDomain {
 
   /// Throws [ArgumentError] on an unknown domain, rather than quietly filing the
   /// request under [general]. Mirrored by `connections_domain_check`.
-  factory ConnectionDomain.fromString(String val) {
+  factory fromString(String val) {
     return values.firstWhere(
       (e) => e.value == val.toLowerCase(),
       orElse: () => throw ArgumentError.value(val, 'domain', 'unknown connection domain'),
@@ -55,7 +55,7 @@ enum ConnectionStatus {
   /// Throws [ArgumentError] on an unknown status. Falling back to [pending] was
   /// how a nonsense `PUT` body turned into a silent no-op-looking 200. Mirrored
   /// by `connections_status_check`.
-  factory ConnectionStatus.fromString(String val) {
+  factory fromString(String val) {
     return values.firstWhere(
       (e) => e.name == val.toLowerCase(),
       orElse: () => throw ArgumentError.value(val, 'status', 'unknown connection status'),
@@ -94,7 +94,7 @@ abstract interface class Connection implements Model {
 
   DateTime get createdAt;
 
-  factory Connection({
+  factory({
     required String targetId,
     required ConnectionRole role,
     required ConnectionDomain domain,
@@ -102,7 +102,7 @@ abstract interface class Connection implements Model {
     required DateTime createdAt,
   }) = _Connection.new;
 
-  factory Connection.fromRow(Map<String, dynamic> row) {
+  factory fromRow(Map<String, dynamic> row) {
     return Connection(
       targetId: row['target_id'] as String,
       role: ConnectionRole.fromString(row['role'] as String),
@@ -142,7 +142,7 @@ class _Connection implements Connection {
   @override
   final DateTime createdAt;
 
-  const _Connection({
+  const new({
     required this.targetId,
     required this.role,
     required this.domain,
@@ -175,7 +175,7 @@ class _Connection implements Connection {
 class ConnectionListResponse with Iterable<Connection> implements Model {
   final List<Connection> connections;
 
-  const ConnectionListResponse(this.connections);
+  const new(this.connections);
 
   @override
   Iterator<Connection> get iterator => connections.iterator;

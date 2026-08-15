@@ -19,7 +19,7 @@ class _ServerError implements Model {
 }
 
 class JsonResponse<T extends Model> extends Response {
-  JsonResponse(super.statusCode, {T? body, Headers? headers})
+  new(super.statusCode, {T? body, Headers? headers})
     : super(
         body: switch (body) {
           T m => Body.fromString(jsonEncode(m.toMap()), mimeType: .json),
@@ -27,29 +27,29 @@ class JsonResponse<T extends Model> extends Response {
         },
       );
 
-  JsonResponse.ok({T? body, Headers? headers}) : this(200, body: body, headers: headers);
+  new ok({T? body, Headers? headers}) : this(200, body: body, headers: headers);
 
-  JsonResponse.noContent({Headers? headers}) : this(204, headers: headers);
+  new noContent({Headers? headers}) : this(204, headers: headers);
 
-  JsonResponse.unauthorized({T? body, Headers? headers}) : this(401, body: body, headers: headers);
+  new unauthorized({T? body, Headers? headers}) : this(401, body: body, headers: headers);
 
-  JsonResponse.forbidden({T? body, Headers? headers}) : this(403, body: body, headers: headers);
+  new forbidden({T? body, Headers? headers}) : this(403, body: body, headers: headers);
 
-  JsonResponse.notFound({T? body, Headers? headers})
+  new notFound({T? body, Headers? headers})
     : this(
         404,
         body: body ?? _NotFound() as T,
         headers: headers,
       );
 
-  JsonResponse.serverError({T? body, Headers? headers})
+  new serverError({T? body, Headers? headers})
     : this(
         500,
         body: body ?? _ServerError() as T,
         headers: headers,
       );
 
-  JsonResponse.notImplemented({T? body, Headers? headers})
+  new notImplemented({T? body, Headers? headers})
     : this(
         501,
         body: body ?? _ServerError() as T,

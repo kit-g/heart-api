@@ -8,9 +8,9 @@ enum ExercisePreferenceField {
 
   final String column;
 
-  const ExercisePreferenceField(this.column);
+  const new(this.column);
 
-  factory ExercisePreferenceField.fromString(String? v) {
+  factory fromString(String? v) {
     return switch (v) {
       'unitSystem' => unitSystem,
       'restTimer' => restTimer,
@@ -29,7 +29,7 @@ abstract interface class ExercisePreference implements Model {
 
   int? get restTimer;
 
-  factory ExercisePreference({
+  factory({
     required String exerciseId,
     MeasurementUnit? unitSystem,
     int? restTimer,
@@ -38,7 +38,7 @@ abstract interface class ExercisePreference implements Model {
   /// Parses the `{exerciseId, unitSystem?, restTimer?}` request body (camelCase).
   /// At least one pref field must be present. Throws [ArgumentError] (→ 400) on a
   /// missing id, an invalid unit, a non-positive timer, or nothing to update.
-  factory ExercisePreference.fromJson(Map json) {
+  factory fromJson(Map json) {
     final exerciseId = switch (json['exerciseId']) {
       final String id when id.isNotEmpty => id,
       _ => throw ArgumentError.value(json['exerciseId'], 'exerciseId', 'missing exercise id'),
@@ -68,7 +68,7 @@ class _ExercisePreference implements ExercisePreference {
   @override
   final int? restTimer;
 
-  const _ExercisePreference({
+  const new({
     required this.exerciseId,
     this.unitSystem,
     this.restTimer,

@@ -5,7 +5,7 @@ class TemplateFolderCreateIn {
   final String name;
   final int order;
 
-  const TemplateFolderCreateIn._({required this.name, required this.order});
+  const new _({required this.name, required this.order});
 
   static Future<TemplateFolderCreateIn> fromRequest(Request req) async {
     final json = await req.json();
@@ -25,7 +25,7 @@ class TemplateFolderUpdateIn {
   final String name;
   final int order;
 
-  const TemplateFolderUpdateIn._({required this.name, required this.order});
+  const new _({required this.name, required this.order});
 
   static Future<TemplateFolderUpdateIn> fromRequest(Request req) async {
     final json = await req.json();

@@ -13,7 +13,7 @@ abstract interface class EventPublisher {
 class SqsEventPublisher implements EventPublisher {
   final Sqs _sqs;
 
-  SqsEventPublisher(this._sqs);
+  new(this._sqs);
 
   @override
   Future<void> publish({required String queueUrl, required Map<String, dynamic> message}) async {

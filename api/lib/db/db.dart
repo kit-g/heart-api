@@ -59,5 +59,5 @@ class Database extends _DatabaseBase
   @override
   final Pool _pool;
 
-  Database({required this._pool});
+  new({required this._pool});
 }

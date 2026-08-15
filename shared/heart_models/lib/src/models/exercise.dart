@@ -18,9 +18,9 @@ enum Category implements ExerciseFilter {
   @override
   final String value;
 
-  const Category(this.value);
+  const new(this.value);
 
-  factory Category.fromString(String v) {
+  factory fromString(String v) {
     return switch (v) {
       'Weighted Body Weight' => weightedBodyWeight,
       'Assisted Body Weight' => assistedBodyWeight,
@@ -61,9 +61,9 @@ enum Target implements ExerciseFilter {
   @override
   final String value;
 
-  const Target(this.value);
+  const new(this.value);
 
-  factory Target.fromString(String v) {
+  factory fromString(String v) {
     return switch (v) {
       'Core' => core,
       'Arms' => arms,
@@ -110,9 +110,9 @@ enum AxialLoad {
 
   final String value;
 
-  const AxialLoad(this.value);
+  const new(this.value);
 
-  factory AxialLoad.fromString(String v) {
+  factory fromString(String v) {
     return switch (v) {
       'none' => none,
       'low' => low,
@@ -137,9 +137,9 @@ enum Stability {
 
   final String value;
 
-  const Stability(this.value);
+  const new(this.value);
 
-  factory Stability.fromString(String v) {
+  factory fromString(String v) {
     return switch (v) {
       'free' => free,
       'supported' => supported,
@@ -160,9 +160,9 @@ enum Impact {
 
   final String value;
 
-  const Impact(this.value);
+  const new(this.value);
 
-  factory Impact.fromString(String v) {
+  factory fromString(String v) {
     return switch (v) {
       'none' => none,
       'low' => low,
@@ -185,9 +185,9 @@ enum SkillLevel {
 
   final String value;
 
-  const SkillLevel(this.value);
+  const new(this.value);
 
-  factory SkillLevel.fromString(String v) {
+  factory fromString(String v) {
     return switch (v) {
       'low' => low,
       'moderate' => moderate,
@@ -236,9 +236,9 @@ abstract interface class Movement implements Model {
   /// so is a candidate substitution.
   bool sharesPatternWith(Movement other);
 
-  factory Movement.fromJson(Map json) = _Movement.fromJson;
+  factory fromJson(Map json) = _Movement.fromJson;
 
-  factory Movement.empty() {
+  factory empty() {
     return const _Movement(
       groups: [],
       axialLoad: .none,
@@ -264,7 +264,7 @@ class _Movement implements Movement {
   @override
   final SkillLevel skill;
 
-  const _Movement({
+  const new({
     required this.groups,
     required this.axialLoad,
     required this.stability,
@@ -276,7 +276,7 @@ class _Movement implements Movement {
   /// Absent keys fall back to the schema defaults; a present but unrecognised
   /// value throws, so bad content fails loudly instead of silently reading as
   /// "unloaded".
-  factory _Movement.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _Movement(
       groups: switch (json['groups']) {
         List l => l.cast<String>(),
@@ -334,7 +334,7 @@ abstract interface class MuscleTag implements Model {
 
   bool get isEmpty;
 
-  factory MuscleTag.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _MuscleTag(
       ids: switch (json['ids']) {
         List l => l.cast<String>(),
@@ -347,7 +347,7 @@ abstract interface class MuscleTag implements Model {
     );
   }
 
-  factory MuscleTag.empty() {
+  factory empty() {
     return const _MuscleTag(ids: [], groups: []);
   }
 }
@@ -358,7 +358,7 @@ class _MuscleTag implements MuscleTag {
   @override
   final List<String>? groups;
 
-  const _MuscleTag({
+  const new({
     required this.ids,
     required this.groups,
   });
@@ -382,7 +382,7 @@ abstract interface class MuscleTagging implements Model {
 
   bool get isEmpty;
 
-  factory MuscleTagging.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _MuscleTagging(
       primary: MuscleTag.fromJson(json['primary'] ?? {}),
       secondary: switch (json) {
@@ -392,7 +392,7 @@ abstract interface class MuscleTagging implements Model {
     );
   }
 
-  factory MuscleTagging.empty() {
+  factory empty() {
     return _MuscleTagging(primary: MuscleTag.empty(), secondary: null);
   }
 }
@@ -403,7 +403,7 @@ class _MuscleTagging implements MuscleTagging {
   @override
   final MuscleTag? secondary;
 
-  const _MuscleTagging({
+  const new({
     required this.primary,
     required this.secondary,
   });
@@ -454,9 +454,9 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
   /// The requesting user's preferred rest timer (seconds) for this exercise.
   int? get restTimer;
 
-  factory Exercise.fromJson(Map json) = _Exercise.fromJson;
+  factory fromJson(Map json) = _Exercise.fromJson;
 
-  factory Exercise({
+  factory({
     required String name,
     required Category category,
     required Target target,
@@ -522,7 +522,7 @@ class _Exercise implements Exercise {
   @override
   final int? restTimer;
 
-  const _Exercise({
+  const new({
     this.id,
     required this.name,
     required this.category,
@@ -538,7 +538,7 @@ class _Exercise implements Exercise {
     this.restTimer,
   });
 
-  factory _Exercise.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _Exercise(
       id: json['id'],
       name: json['name'] ?? json['exercise'],

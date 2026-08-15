@@ -9,7 +9,7 @@ class ConnectionCreateIn {
   final ConnectionRole role;
   final ConnectionDomain domain;
 
-  const ConnectionCreateIn._({
+  const new _({
     required this.targetId,
     required this.role,
     required this.domain,
@@ -36,7 +36,7 @@ class ConnectionCreateIn {
 class ConnectionStatusIn {
   final ConnectionStatus status;
 
-  const ConnectionStatusIn._(this.status);
+  const new _(this.status);
 
   static Future<ConnectionStatusIn> fromRequest(Request req) async {
     final json = await req.json();
@@ -49,7 +49,7 @@ class ConnectionStatusIn {
 class ConnectionListQuery {
   final ConnectionRole? role;
 
-  const ConnectionListQuery._(this.role);
+  const new _(this.role);
 
   static ConnectionListQuery fromRequest(Request req) {
     final query = req.url.queryParameters;
@@ -72,7 +72,7 @@ class ConnectionRef {
   final ConnectionRole role;
   final ConnectionDomain domain;
 
-  const ConnectionRef._({required this.targetId, required this.role, required this.domain});
+  const new _({required this.targetId, required this.role, required this.domain});
 
   static ConnectionRef parse(String connectionId) {
     try {

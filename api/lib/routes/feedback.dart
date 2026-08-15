@@ -15,7 +15,7 @@ class FeedbackResponse implements Model {
   final String url;
   final Map<String, String> fields;
 
-  const FeedbackResponse({required this.url, required this.fields});
+  const new({required this.url, required this.fields});
 
   @override
   Map<String, dynamic> toMap() {

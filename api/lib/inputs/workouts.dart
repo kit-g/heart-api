@@ -25,7 +25,7 @@ part of 'inputs.dart';
 class ImportWorkoutsIn {
   final WorkoutImport batch;
 
-  const ImportWorkoutsIn._(this.batch);
+  const new _(this.batch);
 
   static Future<ImportWorkoutsIn> fromRequest(Request req) async {
     final q = req.url.queryParameters;
@@ -63,7 +63,7 @@ class WorkoutPatchIn {
   final DateTime? end;
   final double? calories;
 
-  const WorkoutPatchIn._({this.name, this.start, this.end, this.calories});
+  const new _({this.name, this.start, this.end, this.calories});
 
   static Future<WorkoutPatchIn> fromRequest(Request req) async {
     final json = await req.json();

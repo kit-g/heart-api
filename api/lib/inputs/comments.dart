@@ -7,7 +7,7 @@ class CommentCreateIn {
   final String targetId;
   final String body;
 
-  const CommentCreateIn._({required this.targetType, required this.targetId, required this.body});
+  const new _({required this.targetType, required this.targetId, required this.body});
 
   static Future<CommentCreateIn> fromRequest(Request req) async {
     final json = await req.json();
@@ -23,7 +23,7 @@ class CommentEditIn {
   final String commentId;
   final String body;
 
-  const CommentEditIn._({required this.commentId, required this.body});
+  const new _({required this.commentId, required this.body});
 
   static Future<CommentEditIn> fromRequest(Request req, {required String commentId}) async {
     final json = await req.json();
@@ -40,7 +40,7 @@ class CommentsListQuery {
   final String? cursor;
   final int limit;
 
-  const CommentsListQuery._({
+  const new _({
     required this.targetType,
     required this.targetId,
     required this.cursor,

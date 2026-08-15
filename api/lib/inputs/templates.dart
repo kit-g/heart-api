@@ -16,7 +16,7 @@ class TemplateListQuery {
   final String? folderId;
   final bool unfiledOnly;
 
-  const TemplateListQuery._({
+  const new _({
     required this.limit,
     required this.cursor,
     required this.folderId,
@@ -44,7 +44,7 @@ class TemplateListQuery {
 class TemplateCreateIn {
   final TemplateRequest request;
 
-  const TemplateCreateIn._(this.request);
+  const new _(this.request);
 
   static Future<TemplateCreateIn> fromRequest(Request req) async {
     final json = await req.json();
@@ -68,7 +68,7 @@ class TemplateCreateIn {
 class TemplateUpdateIn {
   final TemplateRequest request;
 
-  const TemplateUpdateIn._(this.request);
+  const new _(this.request);
 
   static Future<TemplateUpdateIn> fromRequest(Request req) async {
     final json = await req.json();

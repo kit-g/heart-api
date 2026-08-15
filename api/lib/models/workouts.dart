@@ -72,7 +72,7 @@ class WorkoutRequest {
   final String userId;
   final Map<String, dynamic> body;
 
-  const WorkoutRequest({
+  const new({
     required this.userId,
     required this.body,
   });

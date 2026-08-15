@@ -10,9 +10,9 @@ enum CommentTarget {
   final String value;
   final String column;
 
-  const CommentTarget(this.value, this.column);
+  const new(this.value, this.column);
 
-  factory CommentTarget.fromString(String v) {
+  factory fromString(String v) {
     return switch (v) {
       'workout' => workout,
       'workout_exercise' => workoutExercise,
@@ -38,7 +38,7 @@ abstract interface class Comment implements Model {
 
   DateTime? get editedAt;
 
-  factory Comment({
+  factory({
     required String id,
     required String authorId,
     required String body,
@@ -48,7 +48,7 @@ abstract interface class Comment implements Model {
     DateTime? editedAt,
   }) = _Comment.new;
 
-  factory Comment.fromRow(Map<String, dynamic> row) {
+  factory fromRow(Map<String, dynamic> row) {
     return Comment(
       id: row['id'].toString(),
       authorId: row['author_id'] as String,

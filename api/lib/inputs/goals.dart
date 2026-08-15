@@ -7,7 +7,7 @@ class GoalCreateIn {
   final GoalCadence? cadence;
   final List<GoalStage> stages;
 
-  const GoalCreateIn._({
+  const new _({
     required this.metric,
     required this.exerciseId,
     required this.cadence,
@@ -45,7 +45,7 @@ class GoalUpdateIn {
   final List<GoalStage> stages;
   final bool archived;
 
-  const GoalUpdateIn._({
+  const new _({
     required this.metric,
     required this.exerciseId,
     required this.cadence,
@@ -90,7 +90,7 @@ class StageAchievedIn {
   final DateTime achievedAt;
   final String? achievedBy;
 
-  const StageAchievedIn._({required this.achievedAt, this.achievedBy});
+  const new _({required this.achievedAt, this.achievedBy});
 
   static Future<StageAchievedIn> fromRequest(Request req) async {
     final json = await req.json();

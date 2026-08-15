@@ -3,7 +3,7 @@ part of '../heart_aws.dart';
 const _expiresIn = Duration(minutes: 5);
 
 abstract class S3Api with Signer {
-  S3Api();
+  new();
 
   @override
   AWSService get service => .s3;

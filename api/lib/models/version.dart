@@ -4,7 +4,7 @@ class VersionInfo implements Model {
   final String commit;
   final String deployedAt;
 
-  const VersionInfo({
+  const new({
     required this.commit,
     required this.deployedAt,
   });

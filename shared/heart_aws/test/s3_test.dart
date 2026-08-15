@@ -16,7 +16,7 @@ class _TestS3 extends S3Api {
   @override
   final AWSCredentialsProvider credentialsProvider;
 
-  _TestS3({
+  new({
     this.region = _region,
     AWSCredentials credentials = const AWSCredentials(_accessKeyId, _secretAccessKey),
   }) : credentialsProvider = StaticCredentialsProvider(credentials);
