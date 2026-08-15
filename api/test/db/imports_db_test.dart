@@ -140,4 +140,4 @@ void main() {
   });
 }
 
-class _Harness extends DatabaseTestBase {}
+class _Harness extends DatabaseTestBase;
