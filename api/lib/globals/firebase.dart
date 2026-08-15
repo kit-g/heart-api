@@ -8,7 +8,7 @@ Future<Issuer> _issuer(String projectId) async {
   return _cachedIssuer ??= await Issuer.discover(Issuer.firebase(projectId));
 }
 
-class AuthenticationError implements Exception {}
+class AuthenticationError implements Exception;
 
 typedef Authenticator = Future<User> Function(String firebaseId, String authToken);
 
