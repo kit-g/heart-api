@@ -1,7 +1,7 @@
 part of '../heart_aws.dart';
 
 abstract class SqsApi with Signer {
-  SqsApi();
+  new();
 
   @override
   AWSService get service => .sqs;
@@ -58,7 +58,7 @@ class Sqs extends SqsApi {
   @override
   final String region;
 
-  Sqs({
+  new({
     required this.credentialsProvider,
     required this.region,
   });

@@ -3,7 +3,7 @@ part of 'inputs.dart';
 /// The account PUT is a discriminated union on `action`; a body without a
 /// recognized action is a profile upsert.
 sealed class AccountUpsertIn {
-  const AccountUpsertIn();
+  const new();
 
   static Future<AccountUpsertIn> fromRequest(Request req) async {
     final json = await req.json();
@@ -17,21 +17,21 @@ sealed class AccountUpsertIn {
 }
 
 class UndoAccountDeletionIn extends AccountUpsertIn {
-  const UndoAccountDeletionIn();
+  const new();
 }
 
 class RemoveAvatarIn extends AccountUpsertIn {
-  const RemoveAvatarIn();
+  const new();
 }
 
 class UploadAvatarIn extends AccountUpsertIn {
   final String mimeType;
 
-  const UploadAvatarIn._({required this.mimeType});
+  const new _({required this.mimeType});
 }
 
 class ProfileUpsertIn extends AccountUpsertIn {
   final User user;
 
-  const ProfileUpsertIn._({required this.user});
+  const new _({required this.user});
 }

@@ -41,7 +41,7 @@ abstract interface class WorkoutExercise
   /// whether at least one set was marked as done
   bool get isStarted;
 
-  factory WorkoutExercise({required ExerciseSet starter}) {
+  factory({required ExerciseSet starter}) {
     return _WorkoutExercise._(
       id: uuidV7(),
       starter: starter,
@@ -49,7 +49,7 @@ abstract interface class WorkoutExercise
     );
   }
 
-  factory WorkoutExercise.fromJson(Map json) {
+  factory fromJson(Map json) {
     final exercise = Exercise.fromJson(json['exercise']);
     return _WorkoutExercise._(
       exercise: exercise,
@@ -105,7 +105,7 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
   /// workouts stranded by a failed network save.
   bool get synced;
 
-  factory Workout({String? name}) {
+  factory({String? name}) {
     return _Workout._(
       id: uuidV7(),
       start: DateTime.timestamp(),
@@ -113,7 +113,7 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
     );
   }
 
-  factory Workout.fromExercises(Iterable<WorkoutExercise> exercises, {String? name}) {
+  factory fromExercises(Iterable<WorkoutExercise> exercises, {String? name}) {
     return _Workout._(
       id: uuidV7(),
       start: DateTime.timestamp(),
@@ -122,7 +122,7 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
     );
   }
 
-  factory Workout.fromRow(Map row, {required String Function(String) imageUrl}) {
+  factory fromRow(Map row, {required String Function(String) imageUrl}) {
     return _Workout._(
       id: row['id'],
       name: row['name'] as String,
@@ -152,7 +152,7 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
     );
   }
 
-  factory Workout.fromJson(Map json) = _Workout.fromJson;
+  factory fromJson(Map json) = _Workout.fromJson;
 
   /// the total metric (e.g., weight)
   /// in all sets of this exercise
@@ -207,7 +207,7 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
   @override
   String? note;
 
-  _WorkoutExercise._({
+  new _({
     ExerciseSet? starter,
     DateTime? start,
     required this.id,
@@ -300,9 +300,9 @@ abstract interface class WorkoutImage implements Comparable<WorkoutImage>, Media
 
   String get key;
 
-  factory WorkoutImage.fromJson(Map json) = _WorkoutImage.fromJson;
+  factory fromJson(Map json) = _WorkoutImage.fromJson;
 
-  factory WorkoutImage.local(String url, String workoutId, Uint8List bytes) {
+  factory local(String url, String workoutId, Uint8List bytes) {
     final Uri(:String path) = Uri.parse(url);
     return _WorkoutImage(
       workoutId: workoutId,
@@ -314,7 +314,7 @@ abstract interface class WorkoutImage implements Comparable<WorkoutImage>, Media
     );
   }
 
-  factory WorkoutImage.fromRow(String url, Map row) {
+  factory fromRow(String url, Map row) {
     final Uri(:String path) = Uri.parse(url);
     return _WorkoutImage(
       workoutId: row['workout_id'],
@@ -338,7 +338,7 @@ class _WorkoutImage implements WorkoutImage {
   @override
   final Uint8List? bytes;
 
-  const _WorkoutImage({
+  const new({
     required this.workoutId,
     required this.id,
     required this.link,
@@ -346,7 +346,7 @@ class _WorkoutImage implements WorkoutImage {
     this.bytes,
   });
 
-  factory _WorkoutImage.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _WorkoutImage(
       workoutId: json['workoutId'],
       id: json['id'],
@@ -410,7 +410,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   @override
   final bool synced;
 
-  _Workout._({
+  new _({
     required this.start,
     this.name,
     required this.id,
@@ -422,7 +422,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   }) : _sets = exercises ?? <WorkoutExercise>[],
        images = SplayTreeMap.from(images ?? {});
 
-  factory _Workout.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _Workout._(
       start: DateTime.parse(json['start']),
       name: json['name'],
@@ -648,11 +648,11 @@ abstract interface class ProgressGalleryResponse implements Iterable<WorkoutImag
 
   String? get cursor;
 
-  factory ProgressGalleryResponse({required List<WorkoutImage> images, String? cursor}) {
+  factory({required List<WorkoutImage> images, String? cursor}) {
     return _ProgressGalleryResponse._(images: images, cursor: cursor);
   }
 
-  factory ProgressGalleryResponse.fromJson(Map json) = _ProgressGalleryResponse.fromJson;
+  factory fromJson(Map json) = _ProgressGalleryResponse.fromJson;
 }
 
 class _ProgressGalleryResponse with Iterable<WorkoutImage> implements ProgressGalleryResponse {
@@ -661,14 +661,14 @@ class _ProgressGalleryResponse with Iterable<WorkoutImage> implements ProgressGa
   @override
   final String? cursor;
 
-  const _ProgressGalleryResponse._({required this.images, this.cursor});
+  const new _({required this.images, this.cursor});
 
-  const _ProgressGalleryResponse({
+  const new({
     required this.images,
     required this.cursor,
   });
 
-  factory _ProgressGalleryResponse.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _ProgressGalleryResponse(
       images: switch (json) {
         {'images': List images} => images.map((each) => WorkoutImage.fromJson(each)).toList(),

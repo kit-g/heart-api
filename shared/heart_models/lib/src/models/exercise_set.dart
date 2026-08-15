@@ -25,7 +25,7 @@ abstract interface class ExerciseSet with UsesTimestampForId implements Complete
   /// set's work window, letting clients separate work time from rest time.
   abstract DateTime? completedAt;
 
-  factory ExerciseSet(
+  factory(
     Exercise exercise, {
     String? id,
     DateTime? start,
@@ -48,7 +48,7 @@ abstract interface class ExerciseSet with UsesTimestampForId implements Complete
     };
   }
 
-  factory ExerciseSet.fromJson(Exercise exercise, Map json) {
+  factory fromJson(Exercise exercise, Map json) {
     return ExerciseSet(
         exercise,
         reps: json['reps'],
@@ -116,7 +116,7 @@ class _ExerciseSet with UsesTimestampForId implements ExerciseSet {
   @override
   double? distance;
 
-  _ExerciseSet({
+  new({
     required this.exercise,
     required this.start,
     String? id,

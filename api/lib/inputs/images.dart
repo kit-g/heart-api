@@ -17,7 +17,7 @@ class WorkoutImagePresignIn {
   final String mimeType;
   final String ext;
 
-  const WorkoutImagePresignIn._({required this.mimeType, required this.ext});
+  const new _({required this.mimeType, required this.ext});
 
   static Future<WorkoutImagePresignIn> fromRequest(Request req) async {
     final json = await req.json();
@@ -32,9 +32,9 @@ class WorkoutImagePresignIn {
 class WorkoutImageDeleteQuery {
   final String key;
 
-  const WorkoutImageDeleteQuery._({required this.key});
+  const new _({required this.key});
 
-  factory WorkoutImageDeleteQuery.fromRequest(Request req) {
+  factory fromRequest(Request req) {
     return WorkoutImageDeleteQuery._(key: req.queryParameters.raw.string('key'));
   }
 }

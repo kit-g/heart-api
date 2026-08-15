@@ -6,7 +6,7 @@ class ExerciseCreateIn {
   final String target;
   final String? instructions;
 
-  const ExerciseCreateIn._({
+  const new _({
     required this.name,
     required this.category,
     required this.target,
@@ -33,7 +33,7 @@ class ExerciseUpdateIn {
   final String? instructions;
   final bool? archived;
 
-  const ExerciseUpdateIn._({
+  const new _({
     required this.category,
     required this.target,
     required this.instructions,

@@ -28,7 +28,7 @@ abstract interface class TemplateFolder implements Model, Comparable<TemplateFol
 
   DateTime? get createdAt;
 
-  factory TemplateFolder({
+  factory({
     String? id,
     required String name,
     int order,
@@ -37,7 +37,7 @@ abstract interface class TemplateFolder implements Model, Comparable<TemplateFol
   }) = _TemplateFolder;
 
   /// Wire/JSON shape — camelCase, as sent to and received from the app.
-  factory TemplateFolder.fromJson(Map json) {
+  factory fromJson(Map json) {
     return _TemplateFolder(
       id: json['id']?.toString(),
       name: switch (json['name']) {
@@ -62,7 +62,7 @@ abstract interface class TemplateFolder implements Model, Comparable<TemplateFol
 
   /// Database row shape — snake_case column names. `template_count` is computed
   /// only by the folder-list query; elsewhere it stays null.
-  factory TemplateFolder.fromRow(Map<String, dynamic> row) {
+  factory fromRow(Map<String, dynamic> row) {
     return _TemplateFolder(
       id: row['id'].toString(),
       name: row['name'] as String,
@@ -91,7 +91,7 @@ class _TemplateFolder implements TemplateFolder {
   @override
   final DateTime? createdAt;
 
-  const _TemplateFolder({
+  const new({
     this.id,
     required this.name,
     this.order = 0,

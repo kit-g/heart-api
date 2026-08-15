@@ -10,7 +10,7 @@ abstract interface class WorkoutSummary implements Model {
 
   String? get name;
 
-  factory WorkoutSummary({required String id, String? name}) {
+  factory({required String id, String? name}) {
     return _WorkoutSummary(id: id, name: name);
   }
 }
@@ -36,13 +36,13 @@ abstract interface class WorkoutAggregation with Iterable<WeekSummary> {
   ///
   /// It also ensures that the weeks are represented in a reversed order (latest
   /// week first) and only retains the most recent weeks, up to the maximum defined.
-  factory WorkoutAggregation.fromJson(Map<String, dynamic> json) = _WorkoutAggregation.fromJson;
+  factory fromJson(Map<String, dynamic> json) = _WorkoutAggregation.fromJson;
 
-  factory WorkoutAggregation.fromRows(List<Map<String, dynamic>> rows) = _WorkoutAggregation.fromRows;
+  factory fromRows(List<Map<String, dynamic>> rows) = _WorkoutAggregation.fromRows;
 
-  factory WorkoutAggregation.dummy() = _WorkoutAggregation.dummy;
+  factory dummy() = _WorkoutAggregation.dummy;
 
-  factory WorkoutAggregation.empty() = _WorkoutAggregation.empty;
+  factory empty() = _WorkoutAggregation.empty;
 
   int get max;
 }
@@ -53,7 +53,7 @@ class _WorkoutSummary implements WorkoutSummary {
   @override
   final String? name;
 
-  const _WorkoutSummary({
+  const new({
     required this.id,
     required this.name,
   });
@@ -70,12 +70,12 @@ class _WeekSummary with Iterable<WorkoutSummary> implements WeekSummary {
   @override
   final Iterable<WorkoutSummary> workouts;
 
-  const _WeekSummary({
+  const new({
     required this.weekId,
     required this.workouts,
   });
 
-  factory _WeekSummary.empty({required String weekId}) {
+  factory empty({required String weekId}) {
     return _WeekSummary(weekId: weekId, workouts: const []);
   }
 
@@ -99,7 +99,7 @@ class _WeekSummary with Iterable<WorkoutSummary> implements WeekSummary {
 class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregation {
   final Iterable<WeekSummary> _weeks;
 
-  const _WorkoutAggregation({required Iterable<WeekSummary> weeks}) : _weeks = weeks;
+  const new({required Iterable<WeekSummary> weeks}) : _weeks = weeks;
 
   @override
   Iterator<WeekSummary> get iterator => _weeks.iterator;
@@ -107,11 +107,11 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
   @override
   bool get isEmpty => !any((summary) => summary.isNotEmpty);
 
-  factory _WorkoutAggregation.empty() {
+  factory empty() {
     return const _WorkoutAggregation(weeks: []);
   }
 
-  factory _WorkoutAggregation.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     final parsed = json.entries.map(
       (week) {
         return _WeekSummary(
@@ -167,7 +167,7 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
     return _WorkoutAggregation(weeks: completeWeeks);
   }
 
-  factory _WorkoutAggregation.fromRows(List<Map<String, dynamic>> rows) {
+  factory fromRows(List<Map<String, dynamic>> rows) {
     final byWeek = <String, List<_WorkoutSummary>>{};
 
     for (final row in rows) {
@@ -224,7 +224,7 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
   }
 
   /// generates a bunch of randomly populated week summaries
-  factory _WorkoutAggregation.dummy({int limit = 8}) {
+  factory dummy({int limit = 8}) {
     final currentWeekStart = getMonday(DateTime.timestamp());
     final earliestWeekStart = currentWeekStart.subtract(Duration(days: 7 * limit - 1));
 

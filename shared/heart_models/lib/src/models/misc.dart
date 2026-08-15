@@ -22,9 +22,9 @@ enum MeasurementUnit {
 
   final String name;
 
-  const MeasurementUnit(this.name);
+  const new(this.name);
 
-  factory MeasurementUnit.fromString(String v) {
+  factory fromString(String v) {
     return switch (v) {
       'imperial' => .imperial,
       'metric' => .metric,

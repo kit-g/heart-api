@@ -47,7 +47,7 @@ class PresignedUploadResponse implements Model {
   final String destinationUrl;
   final String key;
 
-  const PresignedUploadResponse({
+  const new({
     required this.preSignedUrl,
     required this.destinationUrl,
     required this.key,

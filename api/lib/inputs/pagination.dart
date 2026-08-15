@@ -9,7 +9,7 @@ class PageQuery {
   final String? cursor;
   final int limit;
 
-  const PageQuery._({required this.cursor, required this.limit});
+  const new _({required this.cursor, required this.limit});
 
   static PageQuery fromRequest(Request req, {int defaultLimit = 30, int maxLimit = 100}) {
     final q = req.url.queryParameters;

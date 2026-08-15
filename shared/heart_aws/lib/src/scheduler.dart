@@ -1,7 +1,7 @@
 part of '../heart_aws.dart';
 
 abstract class SchedulerApi with Signer {
-  SchedulerApi();
+  new();
 
   @override
   AWSService get service => .scheduler;
@@ -84,7 +84,7 @@ class Scheduler extends SchedulerApi {
   @override
   final String region;
 
-  Scheduler({
+  new({
     required this.credentialsProvider,
     required this.region,
   });

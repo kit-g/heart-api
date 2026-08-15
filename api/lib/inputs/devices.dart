@@ -6,7 +6,7 @@ class DeviceRegisterIn {
   final String locale;
   final Map<String, dynamic> settings;
 
-  const DeviceRegisterIn._({
+  const new _({
     required this.platform,
     required this.token,
     required this.locale,

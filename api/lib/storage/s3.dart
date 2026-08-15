@@ -19,7 +19,7 @@ class Storage extends _StorageBase with _Images implements ApiImageStorageServic
   @override
   final String contentBucket;
 
-  Storage({
+  new({
     required this._credentialsProvider,
     required this.region,
     required this.contentBucket,

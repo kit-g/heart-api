@@ -9,7 +9,7 @@ abstract interface class ExerciseAct with Iterable<ExerciseSet> implements Compa
 
   DateTime? get start;
 
-  factory ExerciseAct.fromRows(Exercise exercise, List<Map<String, dynamic>> rows) {
+  factory fromRows(Exercise exercise, List<Map<String, dynamic>> rows) {
     assert(rows.isNotEmpty, 'Cannot create ExerciseAct from empty rows');
     return _ExerciseAct._(
       workoutId: rows.first['workoutId'],
@@ -37,7 +37,7 @@ class _ExerciseAct with Iterable<ExerciseSet> implements ExerciseAct {
 
   final Iterable<ExerciseSet> _sets;
 
-  const _ExerciseAct._({
+  const new _({
     required Iterable<ExerciseSet> sets,
     required this.workoutId,
     this.workoutName,

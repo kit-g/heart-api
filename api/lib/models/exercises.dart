@@ -34,14 +34,14 @@ abstract interface class ExerciseService {
 abstract interface class ExerciseResponse implements Model {
   Map<String, dynamic> get exerciseLibrary;
 
-  factory ExerciseResponse({required Map<String, dynamic> exerciseLibrary}) = _ExerciseResponse.new;
+  factory({required Map<String, dynamic> exerciseLibrary}) = _ExerciseResponse.new;
 }
 
 class _ExerciseResponse implements ExerciseResponse {
   @override
   final Map<String, dynamic> exerciseLibrary;
 
-  const _ExerciseResponse({required this.exerciseLibrary});
+  const new({required this.exerciseLibrary});
 
   @override
   Map<String, dynamic> toMap() => exerciseLibrary;
@@ -50,7 +50,7 @@ class _ExerciseResponse implements ExerciseResponse {
 class ExerciseModel implements Model {
   final Map<String, dynamic> _row;
 
-  const ExerciseModel(this._row);
+  const new(this._row);
 
   @override
   Map<String, dynamic> toMap() => _row;
