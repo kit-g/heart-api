@@ -560,4 +560,4 @@ void main() {
 /// distinct from `folderId: null`.
 const _absent = Object();
 
-class _Harness extends DatabaseTestBase {}
+class _Harness extends DatabaseTestBase;

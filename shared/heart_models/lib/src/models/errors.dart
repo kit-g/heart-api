@@ -1,3 +1,3 @@
-class AccountDeleted implements Exception {}
+class AccountDeleted implements Exception;
 
-class UpgradeRequired implements Exception {}
+class UpgradeRequired implements Exception;
