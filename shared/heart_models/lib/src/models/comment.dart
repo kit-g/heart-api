@@ -70,29 +70,14 @@ abstract interface class Comment implements Model {
 }
 
 class const _Comment({
-  required this.id,
-  required this.authorId,
-  required this.body,
-  required this.targetType,
-  required this.targetId,
-  required this.createdAt,
-  this.editedAt,
+  @override required final String id,
+  @override required final String authorId,
+  @override required final String body,
+  @override required final CommentTarget targetType,
+  @override required final String targetId,
+  @override required final DateTime createdAt,
+  @override final DateTime? editedAt,
 }) implements Comment {
-  @override
-  final String id;
-  @override
-  final String authorId;
-  @override
-  final String body;
-  @override
-  final CommentTarget targetType;
-  @override
-  final String targetId;
-  @override
-  final DateTime createdAt;
-  @override
-  final DateTime? editedAt;
-
   @override
   Map<String, dynamic> toMap() {
     return {
