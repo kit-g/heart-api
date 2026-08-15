@@ -10,7 +10,7 @@ enum CommentTarget {
   final String value;
   final String column;
 
-  const new(this.value, this.column);
+  new(this.value, this.column);
 
   factory fromString(String v) {
     return switch (v) {

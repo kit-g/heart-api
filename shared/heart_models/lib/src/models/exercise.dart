@@ -18,7 +18,7 @@ enum Category implements ExerciseFilter {
   @override
   final String value;
 
-  const new(this.value);
+  new(this.value);
 
   factory fromString(String v) {
     return switch (v) {
@@ -61,7 +61,7 @@ enum Target implements ExerciseFilter {
   @override
   final String value;
 
-  const new(this.value);
+  new(this.value);
 
   factory fromString(String v) {
     return switch (v) {
@@ -110,7 +110,7 @@ enum AxialLoad {
 
   final String value;
 
-  const new(this.value);
+  new(this.value);
 
   factory fromString(String v) {
     return switch (v) {
@@ -137,7 +137,7 @@ enum Stability {
 
   final String value;
 
-  const new(this.value);
+  new(this.value);
 
   factory fromString(String v) {
     return switch (v) {
@@ -160,7 +160,7 @@ enum Impact {
 
   final String value;
 
-  const new(this.value);
+  new(this.value);
 
   factory fromString(String v) {
     return switch (v) {
@@ -185,7 +185,7 @@ enum SkillLevel {
 
   final String value;
 
-  const new(this.value);
+  new(this.value);
 
   factory fromString(String v) {
     return switch (v) {

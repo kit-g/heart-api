@@ -22,7 +22,7 @@ enum MeasurementUnit {
 
   final String name;
 
-  const new(this.name);
+  new(this.name);
 
   factory fromString(String v) {
     return switch (v) {
