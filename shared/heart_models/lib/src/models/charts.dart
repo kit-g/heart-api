@@ -19,7 +19,7 @@ enum ChartPreferenceType {
 
   final String value;
 
-  const new(this.value);
+  new(this.value);
 
   factory fromString(String v) {
     return switch (v) {

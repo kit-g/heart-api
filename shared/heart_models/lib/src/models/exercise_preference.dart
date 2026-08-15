@@ -8,7 +8,7 @@ enum ExercisePreferenceField {
 
   final String column;
 
-  const new(this.column);
+  new(this.column);
 
   factory fromString(String? v) {
     return switch (v) {
