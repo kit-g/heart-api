@@ -148,7 +148,7 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
   final List<WorkoutExercise> _exercises;
 
   new({
-    required List<WorkoutExercise> exercises,
+    required this._exercises,
     this.name,
     required this.id,
     required this.order,
@@ -157,7 +157,7 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
     this.sourceTemplateId,
     this.assignedBy,
     this.syncEnabled,
-  }) : _exercises = exercises;
+  });
 
   @override
   String? get folderId => folder?.id;

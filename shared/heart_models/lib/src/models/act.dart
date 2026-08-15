@@ -38,11 +38,11 @@ class _ExerciseAct with Iterable<ExerciseSet> implements ExerciseAct {
   final Iterable<ExerciseSet> _sets;
 
   const new _({
-    required Iterable<ExerciseSet> sets,
+    required this._sets,
     required this.workoutId,
     this.workoutName,
     this.start,
-  }) : _sets = sets;
+  });
 
   @override
   String toString() {

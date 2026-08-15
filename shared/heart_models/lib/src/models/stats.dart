@@ -99,7 +99,7 @@ class _WeekSummary with Iterable<WorkoutSummary> implements WeekSummary {
 class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregation {
   final Iterable<WeekSummary> _weeks;
 
-  const new({required Iterable<WeekSummary> weeks}) : _weeks = weeks;
+  const new({required this._weeks});
 
   @override
   Iterator<WeekSummary> get iterator => _weeks.iterator;

@@ -214,10 +214,9 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
     this.order,
     this.met,
     this.note,
-    required Exercise exercise,
+    required this._exercise,
     List<ExerciseSet>? sets,
-  }) : _exercise = exercise,
-       start = start ?? DateTime.timestamp(),
+  }) : start = start ?? DateTime.timestamp(),
        _sets = sets ?? [] {
     if (starter != null) {
       _sets.add(starter);
