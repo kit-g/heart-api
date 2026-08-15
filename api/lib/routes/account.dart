@@ -12,7 +12,7 @@ import 'package:heart_aws/heart_aws.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-Future<Model> upsertAccount(final Request request) async {
+Future<Model> upsertAccount(Request request) async {
   final input = await AccountUpsertIn.fromRequest(request);
 
   switch (input) {
@@ -63,7 +63,7 @@ Future<Model> upsertAccount(final Request request) async {
   }
 }
 
-Future<NoContent> deleteAccount(final Request request) async {
+Future<NoContent> deleteAccount(Request request) async {
   final userId = request.userId;
   final config = request.config;
 

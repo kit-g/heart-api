@@ -39,13 +39,13 @@ abstract interface class Comment implements Model {
   DateTime? get editedAt;
 
   factory Comment({
-    required final String id,
-    required final String authorId,
-    required final String body,
-    required final CommentTarget targetType,
-    required final String targetId,
-    required final DateTime createdAt,
-    final DateTime? editedAt,
+    required String id,
+    required String authorId,
+    required String body,
+    required CommentTarget targetType,
+    required String targetId,
+    required DateTime createdAt,
+    DateTime? editedAt,
   }) = _Comment.new;
 
   factory Comment.fromRow(Map<String, dynamic> row) {
@@ -69,7 +69,15 @@ abstract interface class Comment implements Model {
   }
 }
 
-class _Comment implements Comment {
+class const _Comment({
+  required this.id,
+  required this.authorId,
+  required this.body,
+  required this.targetType,
+  required this.targetId,
+  required this.createdAt,
+  this.editedAt,
+}) implements Comment {
   @override
   final String id;
   @override
@@ -84,16 +92,6 @@ class _Comment implements Comment {
   final DateTime createdAt;
   @override
   final DateTime? editedAt;
-
-  const _Comment({
-    required this.id,
-    required this.authorId,
-    required this.body,
-    required this.targetType,
-    required this.targetId,
-    required this.createdAt,
-    this.editedAt,
-  });
 
   @override
   Map<String, dynamic> toMap() {

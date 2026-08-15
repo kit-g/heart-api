@@ -36,7 +36,7 @@ RelicApp buildApp({
   required EventPublisher eventPublisher,
   firebase.Authenticator? auth,
 }) {
-  bool shouldCheckVersion(final Request request) {
+  bool shouldCheckVersion(Request request) {
     if (config.shouldCheckVersion) return isPublicRoute(request);
     return false;
   }

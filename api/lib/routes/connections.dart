@@ -6,7 +6,7 @@ import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-Future<ConnectionListResponse> getConnections(final Request request) async {
+Future<ConnectionListResponse> getConnections(Request request) async {
   final query = ConnectionListQuery.fromRequest(request);
   final connections = await request.connectionsService.getConnections(
     request.userId,
@@ -15,7 +15,7 @@ Future<ConnectionListResponse> getConnections(final Request request) async {
   return ConnectionListResponse(connections.toList());
 }
 
-Future<Connection> createConnection(final Request request) async {
+Future<Connection> createConnection(Request request) async {
   final input = await ConnectionCreateIn.fromRequest(request);
   return request.connectionsService.createConnection(
     initiatorId: request.userId,
@@ -25,11 +25,11 @@ Future<Connection> createConnection(final Request request) async {
   );
 }
 
-Future<Model?> deleteConnection(final Request request) {
+Future<Model?> deleteConnection(Request request) {
   return deleteConnectionById(request, request.rawPathParameters[#connectionId]!);
 }
 
-Future<Model?> deleteConnectionById(final Request request, final String connectionId) async {
+Future<Model?> deleteConnectionById(Request request, String connectionId) async {
   final ref = ConnectionRef.parse(connectionId);
 
   await request.connectionsService.deleteConnection(
@@ -42,11 +42,11 @@ Future<Model?> deleteConnectionById(final Request request, final String connecti
   throw const NoContent();
 }
 
-Future<Connection?> reactToConnection(final Request request) {
+Future<Connection?> reactToConnection(Request request) {
   return reactToConnectionById(request, request.rawPathParameters[#connectionId]!);
 }
 
-Future<Connection?> reactToConnectionById(final Request request, final String connectionId) async {
+Future<Connection?> reactToConnectionById(Request request, String connectionId) async {
   final ref = ConnectionRef.parse(connectionId);
   final input = await ConnectionStatusIn.fromRequest(request);
 

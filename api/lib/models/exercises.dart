@@ -34,7 +34,7 @@ abstract interface class ExerciseService {
 abstract interface class ExerciseResponse implements Model {
   Map<String, dynamic> get exerciseLibrary;
 
-  factory ExerciseResponse({required final Map<String, dynamic> exerciseLibrary}) = _ExerciseResponse.new;
+  factory ExerciseResponse({required Map<String, dynamic> exerciseLibrary}) = _ExerciseResponse.new;
 }
 
 class _ExerciseResponse implements ExerciseResponse {

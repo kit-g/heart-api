@@ -14,8 +14,8 @@ class AwsConfig {
 final _awsConfigProperty = ContextProperty<AwsConfig>('AwsConfig');
 
 Middleware awsConfig({required AwsConfig config}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _awsConfigProperty[request] = config;
       return next(request);
     };

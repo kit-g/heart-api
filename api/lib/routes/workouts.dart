@@ -11,10 +11,10 @@ import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-Future<Paginated<Workout>> getTargetUserWorkouts(final Request request) =>
+Future<Paginated<Workout>> getTargetUserWorkouts(Request request) =>
     getTargetUserWorkoutsFor(request, request.rawPathParameters[#targetUserId]!);
 
-Future<Paginated<Workout>> getTargetUserWorkoutsFor(final Request request, final String targetUserId) async {
+Future<Paginated<Workout>> getTargetUserWorkoutsFor(Request request, String targetUserId) async {
   final query = PageQuery.fromRequest(request);
   final page = await request.workoutsService.getWorkouts(
     userId: request.userId,
@@ -26,7 +26,7 @@ Future<Paginated<Workout>> getTargetUserWorkoutsFor(final Request request, final
   return Paginated<Workout>.from(page, itemsKey: 'workouts', cursorOf: (w) => w.id);
 }
 
-Future<Workout> getWorkout(final Request request) async {
+Future<Workout> getWorkout(Request request) async {
   final workoutId = request.pathParameters.raw[#workoutId]!;
   return request.workoutsService.getWorkout(
     userId: request.userId,
@@ -35,7 +35,7 @@ Future<Workout> getWorkout(final Request request) async {
   );
 }
 
-Future<Workout> getTargetUserWorkout(final Request request) async {
+Future<Workout> getTargetUserWorkout(Request request) async {
   final targetUserId = request.pathParameters.raw[#targetUserId]!;
   final workoutId = request.pathParameters.raw[#workoutId]!;
   return request.workoutsService.getTargetWorkout(
@@ -46,7 +46,7 @@ Future<Workout> getTargetUserWorkout(final Request request) async {
   );
 }
 
-Future<Workout> createWorkout(final Request request) async {
+Future<Workout> createWorkout(Request request) async {
   final body = await request.json();
   final workout = WorkoutRequest(userId: request.userId, body: body);
   return request.workoutsService.createWorkout(
@@ -59,12 +59,12 @@ Future<Workout> createWorkout(final Request request) async {
 /// Bulk import of another app's CSV export; responds with a report of what
 /// was created, skipped (already imported), and which exercises had to be
 /// created as the user's customs.
-Future<WorkoutImportReport> importWorkouts(final Request request) async {
+Future<WorkoutImportReport> importWorkouts(Request request) async {
   final input = await ImportWorkoutsIn.fromRequest(request);
   return request.workoutsService.importWorkouts(userId: request.userId, batch: input.batch);
 }
 
-Future<Workout> updateWorkout(final Request request) async {
+Future<Workout> updateWorkout(Request request) async {
   final workoutId = request.pathParameters.raw[#workoutId]!;
   final body = await request.json();
   final workout = WorkoutRequest(userId: request.userId, body: body);
@@ -76,11 +76,11 @@ Future<Workout> updateWorkout(final Request request) async {
   );
 }
 
-Future<Workout> patchWorkout(final Request request) {
+Future<Workout> patchWorkout( Request request) {
   return patchWorkoutById(request, request.rawPathParameters[#workoutId]!);
 }
 
-Future<Workout> patchWorkoutById(final Request request, final String workoutId) async {
+Future<Workout> patchWorkoutById( Request request,  String workoutId) async {
   final input = await WorkoutPatchIn.fromRequest(request);
   return request.workoutsService.patchWorkout(
     userId: request.userId,
@@ -93,7 +93,7 @@ Future<Workout> patchWorkoutById(final Request request, final String workoutId) 
   );
 }
 
-Future<NoContent> deleteWorkout(final Request request) async {
+Future<NoContent> deleteWorkout(Request request) async {
   final workoutId = request.pathParameters.raw[#workoutId]!;
   final userId = request.userId;
 
