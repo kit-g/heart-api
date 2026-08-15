@@ -3,7 +3,7 @@ import 'package:heart_models/heart_models.dart';
 abstract interface class GoalsResponse implements Model {
   Iterable<Goal> get goals;
 
-  factory GoalsResponse({required final Iterable<Goal> goals}) = _GoalsResponse.new;
+  factory GoalsResponse({required  Iterable<Goal> goals}) = _GoalsResponse.new;
 }
 
 class _GoalsResponse implements GoalsResponse {

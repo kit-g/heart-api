@@ -67,7 +67,7 @@ Uri _uri(String path, Map<String, String> query) {
 
 Headers? _headers(Map<String, String> extra) {
   if (extra.isEmpty) return null;
-  return Headers.build((final mh) {
+  return Headers.build((mh) {
     for (final MapEntry(key: name, value: value) in extra.entries) {
       mh[name] = [value];
     }

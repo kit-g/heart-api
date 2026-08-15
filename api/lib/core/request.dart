@@ -35,8 +35,8 @@ extension Locale on Request {
   /// header parsing uses BCP-47 (`en-CA`), so we normalize to the underscore
   /// form used in our config (`en_CA`) before comparison.
   String locale(
-    final List<String> supportedLocales,
-    final String defaultLocale,
+    List<String> supportedLocales,
+    String defaultLocale,
   ) {
     switch (headers.acceptLanguage?.languages) {
       case null:

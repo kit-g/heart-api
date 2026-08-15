@@ -6,7 +6,7 @@ import 'package:heart_aws/heart_aws.dart';
 import 'package:relic/relic.dart';
 
 Future<void> imageUpload(
-  final Request request,
+  Request request,
   String bucket,
   String uploadKey, {
   required Future<void> Function(Object error, [StackTrace? st]) onError,

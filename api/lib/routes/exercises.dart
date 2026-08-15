@@ -6,7 +6,7 @@ import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:relic/relic.dart';
 
-Future<ExerciseResponse> getExercises(final Request request) async {
+Future<ExerciseResponse> getExercises(Request request) async {
   final locale = request.locale(request.config.supportedLocales, request.config.defaultLocale);
   final owned = request.queryParameters.raw['owned'] == 'true';
   final response = await request.exerciseService.getExercises(
@@ -17,7 +17,7 @@ Future<ExerciseResponse> getExercises(final Request request) async {
   return ExerciseResponse(exerciseLibrary: response);
 }
 
-Future<ExerciseModel> createExercise(final Request request) async {
+Future<ExerciseModel> createExercise(Request request) async {
   final input = await ExerciseCreateIn.fromRequest(request);
   final row = await request.exerciseService.createExercise(
     userId: request.userId,
@@ -29,7 +29,7 @@ Future<ExerciseModel> createExercise(final Request request) async {
   return ExerciseModel(row);
 }
 
-Future<ExerciseModel> updateExercise(final Request request) async {
+Future<ExerciseModel> updateExercise(Request request) async {
   final exerciseId = request.pathParameters.raw[#exerciseId]!;
   final input = await ExerciseUpdateIn.fromRequest(request);
 

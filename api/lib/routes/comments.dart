@@ -9,7 +9,7 @@ import 'package:heart/notifications/renderer.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-Future<Comment> createComment(final Request req) async {
+Future<Comment> createComment(Request req) async {
   final input = await CommentCreateIn.fromRequest(req);
   final ownerId = await _assertCanAccessTarget(req, targetType: input.targetType, targetId: input.targetId);
   final comment = await req.commentService.createComment(
@@ -40,7 +40,7 @@ Future<Comment> createComment(final Request req) async {
   return comment;
 }
 
-Future<Model> listComments(final Request req) async {
+Future<Model> listComments(Request req) async {
   final input = CommentsListQuery.fromRequest(req);
   await _assertCanAccessTarget(req, targetType: input.targetType, targetId: input.targetId);
   final page = await req.commentService.listComments(
@@ -52,9 +52,9 @@ Future<Model> listComments(final Request req) async {
   return Paginated<Comment>.from(page, itemsKey: 'comments', cursorOf: (c) => c.id);
 }
 
-Future<Comment> editComment(final Request req) => editCommentById(req, req.rawPathParameters[#commentId]!);
+Future<Comment> editComment(Request req) => editCommentById(req, req.rawPathParameters[#commentId]!);
 
-Future<Comment> editCommentById(final Request req, final String commentId) async {
+Future<Comment> editCommentById(Request req, String commentId) async {
   final input = await CommentEditIn.fromRequest(req, commentId: commentId);
   return req.commentService.editComment(
     commentId: input.commentId,
@@ -63,9 +63,9 @@ Future<Comment> editCommentById(final Request req, final String commentId) async
   );
 }
 
-Future<Model> deleteComment(final Request req) => deleteCommentById(req, req.rawPathParameters[#commentId]!);
+Future<Model> deleteComment(Request req) => deleteCommentById(req, req.rawPathParameters[#commentId]!);
 
-Future<Model> deleteCommentById(final Request req, final String commentId) async {
+Future<Model> deleteCommentById(Request req, String commentId) async {
   await req.commentService.deleteComment(commentId: commentId, authorId: req.userId);
   throw const NoContent();
 }

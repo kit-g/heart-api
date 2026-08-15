@@ -10,7 +10,7 @@ import 'package:heart/storage/keys.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-Future<Paginated<WorkoutImage>> getGallery(final Request request) async {
+Future<Paginated<WorkoutImage>> getGallery(Request request) async {
   final query = PageQuery.fromRequest(request, defaultLimit: 20);
   final page = await request.imageDbService.getGallery(
     userId: request.userId,
@@ -21,7 +21,7 @@ Future<Paginated<WorkoutImage>> getGallery(final Request request) async {
   return Paginated<WorkoutImage>.from(page, itemsKey: 'images', cursorOf: (i) => i.id);
 }
 
-Future<PresignedUploadResponse> presignWorkoutImage(final Request request) async {
+Future<PresignedUploadResponse> presignWorkoutImage(Request request) async {
   final workoutId = request.pathParameters.raw[#workoutId]!;
   final input = await WorkoutImagePresignIn.fromRequest(request);
 
@@ -48,7 +48,7 @@ Future<PresignedUploadResponse> presignWorkoutImage(final Request request) async
   );
 }
 
-Future<NoContent> deleteWorkoutImage(final Request request) async {
+Future<NoContent> deleteWorkoutImage(Request request) async {
   final workoutId = request.pathParameters.raw[#workoutId]!;
   final query = WorkoutImageDeleteQuery.fromRequest(request);
 

@@ -95,11 +95,11 @@ abstract interface class Connection implements Model {
   DateTime get createdAt;
 
   factory Connection({
-    required final String targetId,
-    required final ConnectionRole role,
-    required final ConnectionDomain domain,
-    required final ConnectionStatus status,
-    required final DateTime createdAt,
+    required String targetId,
+    required ConnectionRole role,
+    required ConnectionDomain domain,
+    required ConnectionStatus status,
+    required DateTime createdAt,
   }) = _Connection.new;
 
   factory Connection.fromRow(Map<String, dynamic> row) {

@@ -10,8 +10,8 @@ final _logger = Logger('Request');
 /// second timestamp into the message itself. [initLogging] already stamps every
 /// record with a time, so all of that is duplicated bytes in CloudWatch.
 Middleware requestLogging() {
-  return (final Handler next) {
-    return (final request) async {
+  return (Handler next) {
+    return (request) async {
       final watch = Stopwatch()..start();
 
       try {
@@ -31,7 +31,7 @@ Middleware requestLogging() {
   };
 }
 
-String _message(final Request request, final Duration elapsed, final String outcome) {
+String _message(Request request, Duration elapsed, String outcome) {
   final url = request.url;
   final query = url.query.isEmpty ? '' : '?${url.query}';
   final ms = (elapsed.inMicroseconds / 1000).toStringAsFixed(1);

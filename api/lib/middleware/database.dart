@@ -17,8 +17,8 @@ final _templatesProperty = ContextProperty<ApiTemplateService>('ApiTemplateServi
 final _templateFoldersProperty = ContextProperty<ApiTemplateFolderService>('ApiTemplateFolderService');
 
 Middleware profilesDb({required ApiProfileService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _profilesProperty[request] = db;
       return next(request);
     };
@@ -26,8 +26,8 @@ Middleware profilesDb({required ApiProfileService db}) {
 }
 
 Middleware chartsDb({required ChartPreferenceService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _chatsProperty[request] = db;
       return next(request);
     };
@@ -35,8 +35,8 @@ Middleware chartsDb({required ChartPreferenceService db}) {
 }
 
 Middleware exercisePreferencesDb({required ExercisePreferenceService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _exercisePrefsProperty[request] = db;
       return next(request);
     };
@@ -44,8 +44,8 @@ Middleware exercisePreferencesDb({required ExercisePreferenceService db}) {
 }
 
 Middleware goalsDb({required GoalService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _goalsProperty[request] = db;
       return next(request);
     };
@@ -53,8 +53,8 @@ Middleware goalsDb({required GoalService db}) {
 }
 
 Middleware connectionsDb({required ConnectionsService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _connectionsProperty[request] = db;
       return next(request);
     };
@@ -62,8 +62,8 @@ Middleware connectionsDb({required ConnectionsService db}) {
 }
 
 Middleware devicesDb({required DeviceService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _devicesProperty[request] = db;
       return next(request);
     };
@@ -71,8 +71,8 @@ Middleware devicesDb({required DeviceService db}) {
 }
 
 Middleware commentsDb({required CommentService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _commentsProperty[request] = db;
       return next(request);
     };
@@ -80,8 +80,8 @@ Middleware commentsDb({required CommentService db}) {
 }
 
 Middleware templatesDb({required ApiTemplateService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _templatesProperty[request] = db;
       return next(request);
     };
@@ -89,8 +89,8 @@ Middleware templatesDb({required ApiTemplateService db}) {
 }
 
 Middleware templateFoldersDb({required ApiTemplateFolderService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _templateFoldersProperty[request] = db;
       return next(request);
     };
@@ -98,8 +98,8 @@ Middleware templateFoldersDb({required ApiTemplateFolderService db}) {
 }
 
 Middleware imageDb({required ApiImageDbService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _imageDbProperty[request] = db;
       return next(request);
     };
@@ -107,8 +107,8 @@ Middleware imageDb({required ApiImageDbService db}) {
 }
 
 Middleware workoutsDb({required ApiWorkoutService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _workoutsProperty[request] = db;
       return next(request);
     };

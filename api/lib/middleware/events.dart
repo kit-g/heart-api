@@ -24,8 +24,8 @@ class SqsEventPublisher implements EventPublisher {
 final _eventPublisherProperty = ContextProperty<EventPublisher>('EventPublisher');
 
 Middleware events({required EventPublisher publisher}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _eventPublisherProperty[request] = publisher;
       return next(request);
     };

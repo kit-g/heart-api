@@ -11,8 +11,8 @@ final _logger = Logger('API');
 /// (`TypeError`/`FormatException`) → 400, `UnimplementedError` → 501, and
 /// anything else → 500. This is the single choke point every route flows
 /// through, so its contract is worth testing directly.
-Handler apiHandler(final ModelHandler handler) {
-  return (final Request request) async {
+Handler apiHandler(ModelHandler handler) {
+  return (Request request) async {
     try {
       final response = await handler(request);
       return JsonResponse.ok(body: response);

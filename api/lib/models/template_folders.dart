@@ -3,7 +3,7 @@ import 'package:heart_models/heart_models.dart';
 abstract interface class TemplateFoldersResponse implements Model {
   Iterable<TemplateFolder> get folders;
 
-  factory TemplateFoldersResponse({required final Iterable<TemplateFolder> folders}) = _TemplateFoldersResponse.new;
+  factory TemplateFoldersResponse({required Iterable<TemplateFolder> folders}) = _TemplateFoldersResponse.new;
 }
 
 class _TemplateFoldersResponse implements TemplateFoldersResponse {
@@ -25,7 +25,7 @@ class _TemplateFoldersResponse implements TemplateFoldersResponse {
 abstract interface class TemplateSharesResponse implements Model {
   Iterable<TemplateShare> get shares;
 
-  factory TemplateSharesResponse({required final Iterable<TemplateShare> shares}) = _TemplateSharesResponse.new;
+  factory TemplateSharesResponse({required Iterable<TemplateShare> shares}) = _TemplateSharesResponse.new;
 }
 
 class _TemplateSharesResponse implements TemplateSharesResponse {

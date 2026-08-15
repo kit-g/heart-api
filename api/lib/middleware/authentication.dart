@@ -8,8 +8,8 @@ import 'package:relic/relic.dart' hide Logger;
 final _logger = Logger('AuthenticationMiddleware');
 
 Middleware authentication({bool Function(Request)? shouldAuthenticate}) {
-  return (final Handler next) {
-    return (final request) async {
+  return (Handler next) {
+    return (request) async {
       final needsAuth = shouldAuthenticate?.call(request) ?? true;
       if (!needsAuth) return next(request);
 
@@ -19,7 +19,7 @@ Middleware authentication({bool Function(Request)? shouldAuthenticate}) {
         try {
           final user = await request.authenticator(firebaseId, auth.token);
           request.user = user;
-          return next(request);
+          return await next(request);
         } on AuthenticationError {
           return JsonResponse.unauthorized();
         } catch (e, st) {

@@ -3,7 +3,7 @@ import 'package:heart_models/heart_models.dart';
 abstract interface class ChartPreferenceResponse implements Model {
   Iterable<ChartPreference> get preferences;
 
-  factory ChartPreferenceResponse({required final Iterable<ChartPreference> preferences}) =
+  factory ChartPreferenceResponse({required Iterable<ChartPreference> preferences}) =
       _ChartPreferenceResponse.new;
 }
 
