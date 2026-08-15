@@ -76,11 +76,11 @@ Future<Workout> updateWorkout(Request request) async {
   );
 }
 
-Future<Workout> patchWorkout( Request request) {
+Future<Workout> patchWorkout(Request request) {
   return patchWorkoutById(request, request.rawPathParameters[#workoutId]!);
 }
 
-Future<Workout> patchWorkoutById( Request request,  String workoutId) async {
+Future<Workout> patchWorkoutById(Request request, String workoutId) async {
   final input = await WorkoutPatchIn.fromRequest(request);
   return request.workoutsService.patchWorkout(
     userId: request.userId,
