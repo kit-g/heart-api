@@ -50,7 +50,7 @@ packages:
     source: hosted
     version: "2.13.1"
   aws_common:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: aws_common
       sha256: "939b46121d41c6d6d1419a6f242baefa2403b67ab04919465022cff297b86763"
@@ -58,7 +58,7 @@ packages:
     source: hosted
     version: "0.7.15"
   aws_signature_v4:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: aws_signature_v4
       sha256: "83d3fd9402f2a4145ec96b972da779d8658f9505cdd52888d6cbcc2551f5ad88"
