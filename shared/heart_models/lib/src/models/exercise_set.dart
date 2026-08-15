@@ -119,8 +119,8 @@ class _ExerciseSet with UsesTimestampForId implements ExerciseSet {
   new({
     required this.exercise,
     required this.start,
-    String? id,
-  }) : _id = id;
+    this._id,
+  });
 
   @override
   Map<String, dynamic> toMap() {
