@@ -26,7 +26,7 @@ class FeedbackResponse implements Model {
   }
 }
 
-Future<Model> submitFeedback(final Request request) async {
+Future<Model> submitFeedback(Request request) async {
   final body = await request.json();
   final message = body['message'] as String?;
 

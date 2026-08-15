@@ -5,7 +5,7 @@ import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-Future<Model> registerDevice(final Request req) async {
+Future<Model> registerDevice(Request req) async {
   final input = await DeviceRegisterIn.fromRequest(req);
   await req.deviceService.registerDevice(
     profileId: req.userId,

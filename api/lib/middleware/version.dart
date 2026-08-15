@@ -13,8 +13,8 @@ class _UpgradeRequired implements Model {
 }
 
 Middleware version({required String minimal, bool Function(Request)? shouldCheckVersion}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       final supported = Version.parse(minimal);
       final needsCheck = shouldCheckVersion?.call(request) ?? true;
       return switch ((needsCheck, request.headers)) {

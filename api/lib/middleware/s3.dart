@@ -7,8 +7,8 @@ final _exercisesProperty = ContextProperty<ExerciseService>('ExerciseService');
 final _imageStorageProperty = ContextProperty<ApiImageStorageService>('ApiImageStorageService');
 
 Middleware exercisesDb({required ExerciseService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _exercisesProperty[request] = db;
       return next(request);
     };
@@ -16,8 +16,8 @@ Middleware exercisesDb({required ExerciseService db}) {
 }
 
 Middleware imageStorageDb({required ApiImageStorageService db}) {
-  return (final Handler next) {
-    return (final request) {
+  return (Handler next) {
+    return (request) {
       _imageStorageProperty[request] = db;
       return next(request);
     };

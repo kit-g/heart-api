@@ -6,21 +6,21 @@ import 'package:heart/models/template_folders.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-Future<TemplateFoldersResponse> getMyFolders(final Request req) async {
+Future<TemplateFoldersResponse> getMyFolders(Request req) async {
   final folders = await req.templateFolderService.getFolders(userId: req.userId);
   return TemplateFoldersResponse(folders: folders);
 }
 
-Future<TemplateFolder> createFolder(final Request req) async {
+Future<TemplateFolder> createFolder(Request req) async {
   final input = await TemplateFolderCreateIn.fromRequest(req);
   return req.templateFolderService.createFolder(userId: req.userId, folder: input.folder);
 }
 
-Future<TemplateFolder> updateFolder(final Request req) {
+Future<TemplateFolder> updateFolder(Request req) {
   return updateFolderById(req, req.rawPathParameters[#folderId]!);
 }
 
-Future<TemplateFolder> updateFolderById(final Request req, final String folderId) async {
+Future<TemplateFolder> updateFolderById(Request req, String folderId) async {
   final input = await TemplateFolderUpdateIn.fromRequest(req);
   return req.templateFolderService.updateFolder(
     userId: req.userId,
@@ -29,11 +29,11 @@ Future<TemplateFolder> updateFolderById(final Request req, final String folderId
   );
 }
 
-Future<Model> deleteFolder(final Request req) {
+Future<Model> deleteFolder(Request req) {
   return deleteFolderById(req, req.rawPathParameters[#folderId]!);
 }
 
-Future<Model> deleteFolderById(final Request req, final String folderId) async {
+Future<Model> deleteFolderById(Request req, String folderId) async {
   await req.templateFolderService.deleteFolder(userId: req.userId, folderId: folderId);
   throw const NoContent();
 }
@@ -41,7 +41,7 @@ Future<Model> deleteFolderById(final Request req, final String folderId) async {
 /// `POST /accounts/:targetUserId/folders/:folderId` — assign every template in
 /// the folder. Shorthand for assigning each one individually, so the same
 /// permission gate and the same per-template idempotency apply.
-Future<TemplateSharesResponse> assignFolderToUser(final Request req) {
+Future<TemplateSharesResponse> assignFolderToUser(Request req) {
   return assignFolderToUserById(
     req,
     req.rawPathParameters[#targetUserId]!,
@@ -50,9 +50,9 @@ Future<TemplateSharesResponse> assignFolderToUser(final Request req) {
 }
 
 Future<TemplateSharesResponse> assignFolderToUserById(
-  final Request req,
-  final String targetUserId,
-  final String folderId,
+  Request req,
+  String targetUserId,
+  String folderId,
 ) async {
   if (req.userId == targetUserId) {
     throw const Forbidden(reason: 'You cannot assign templates to yourself.');

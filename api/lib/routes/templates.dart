@@ -6,16 +6,16 @@ import 'package:heart/models/pagination.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-Future<Template> createTemplate(final Request request) async {
+Future<Template> createTemplate(Request request) async {
   final input = await TemplateCreateIn.fromRequest(request);
   return request.templatesService.createTemplate(userId: request.userId, body: input.request);
 }
 
-Future<Template> updateTemplate(final Request request) {
+Future<Template> updateTemplate(Request request) {
   return updateTemplateById(request, request.rawPathParameters[#templateId]!);
 }
 
-Future<Template> updateTemplateById(final Request request, final String templateId) async {
+Future<Template> updateTemplateById(Request request, String templateId) async {
   final input = await TemplateUpdateIn.fromRequest(request);
   return request.templatesService.updateTemplate(
     userId: request.userId,
@@ -24,14 +24,14 @@ Future<Template> updateTemplateById(final Request request, final String template
   );
 }
 
-Future<Template> getMyTemplate(final Request request) async {
+Future<Template> getMyTemplate(Request request) async {
   return request.templatesService.getTemplate(
     userId: request.userId,
     templateId: request.pathParameters.raw[#templateId]!,
   );
 }
 
-Future<Paginated<Template>> getMyTemplates(final Request request) async {
+Future<Paginated<Template>> getMyTemplates(Request request) async {
   final query = TemplateListQuery.fromRequest(request);
   final page = await request.templatesService.getTemplates(
     userId: request.userId,
@@ -48,7 +48,7 @@ Future<Paginated<Template>> getMyTemplates(final Request request) async {
   );
 }
 
-Future<Paginated<TemplateShare>> getMyTemplateShares(final Request request) async {
+Future<Paginated<TemplateShare>> getMyTemplateShares(Request request) async {
   final query = PageQuery.fromRequest(request);
   final page = await request.templatesService.getTemplateShares(
     userId: request.userId,
@@ -58,7 +58,7 @@ Future<Paginated<TemplateShare>> getMyTemplateShares(final Request request) asyn
   return Paginated<TemplateShare>.from(page, itemsKey: 'shares', cursorOf: (s) => s.id);
 }
 
-Future<TemplateShare> assignTemplateToUser(final Request request) async {
+Future<TemplateShare> assignTemplateToUser(Request request) async {
   final userId = request.userId;
   final targetUserId = request.pathParameters.raw[#targetUserId]!;
   final templateId = request.pathParameters.raw[#templateId]!;
@@ -74,7 +74,7 @@ Future<TemplateShare> assignTemplateToUser(final Request request) async {
   );
 }
 
-Future<NoContent> deleteMyTemplate(final Request request) async {
+Future<NoContent> deleteMyTemplate(Request request) async {
   await request.templatesService.deleteTemplate(
     coachId: request.userId,
     templateId: request.pathParameters.raw[#templateId]!,
@@ -82,7 +82,7 @@ Future<NoContent> deleteMyTemplate(final Request request) async {
   throw const NoContent();
 }
 
-Future<NoContent> deleteMyTemplateShare(final Request request) async {
+Future<NoContent> deleteMyTemplateShare(Request request) async {
   await request.templatesService.deleteShare(
     coachId: request.userId,
     shareId: request.pathParameters.raw[#shareId]!,
