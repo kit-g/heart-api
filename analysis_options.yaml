@@ -25,3 +25,9 @@ linter:
     prefer_single_quotes: true
     avoid_print: true
     use_null_aware_elements: true
+    empty_container_bodies: true
+    initialize_in_field_declaration: true
+    unnecessary_const_in_enum_constructor: true
+    unnecessary_primary_constructor_body: true
+    unnecessary_type_name_in_constructor: true
+    use_declaring_parameters: true
