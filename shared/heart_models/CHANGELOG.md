@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.5.1
+
+- `ExerciseSet` construction is now category-aware: only the measurements that exist for the
+  exercise's category are kept (weight/reps for weighted categories, reps for reps-only,
+  duration/distance for cardio, duration for timed holds), mirroring `setMeasurements`. Legacy
+  device-DB rows carry zero-valued `duration`/`distance` written by an old serializer
+  ([#51](https://github.com/kit-g/heart-api/issues/51)); `fromJson` used to keep them verbatim and
+  `toMap`/`toRow` re-emitted them forever. They are now dropped on construction, so the junk heals
+  on the next round trip. No wire-format change for clean data — inapplicable fields were already
+  omitted when null.
+
 ## 1.5.0
 
 - `Template` gains `copyWith({required TemplateFolder? folder})` — an identical template filed

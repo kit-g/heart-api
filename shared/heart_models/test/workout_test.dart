@@ -173,6 +173,77 @@ void main() {
           expect(exerciseSet.isCompleted, equals(true));
         },
       );
+
+      test(
+        'fromJson scrubs legacy zero-valued measurements a weight set cannot have',
+        () {
+          // The shape an old serializer wrote into device DBs — see
+          // https://github.com/kit-g/heart-api/issues/51
+          final set = ExerciseSet.fromJson(mockExercise, {
+            'id': '2025-07-18T18:57:25.878943Z',
+            'completed': true,
+            'reps': 12,
+            'duration': 0,
+            'distance': 0.0,
+            'weight': 60.0,
+          });
+
+          expect(set.reps, equals(12));
+          expect(set.weight, equals(60.0));
+          expect(set.duration, isNull);
+          expect(set.distance, isNull);
+
+          final map = set.toMap();
+          expect(map, isNot(contains('duration')));
+          expect(map, isNot(contains('distance')));
+
+          final row = set.toRow();
+          expect(row, isNot(contains('duration')));
+          expect(row, isNot(contains('distance')));
+        },
+      );
+
+      test(
+        'a cardio set keeps duration and distance but drops weight and reps',
+        () {
+          final cardio = MockExercise();
+          when(cardio.name).thenReturn('Running');
+          when(cardio.category).thenReturn(Category.cardio);
+          when(cardio.target).thenReturn(Target.cardio);
+
+          final set = ExerciseSet.fromJson(cardio, {
+            'id': 'set-uuid',
+            'started_at': '2025-01-21T12:00:00Z',
+            'reps': 12,
+            'weight': 60.0,
+            'duration': 300,
+            'distance': 1.5,
+          });
+
+          expect(set.duration, equals(300));
+          expect(set.distance, equals(1.5));
+          expect(set.weight, isNull);
+          expect(set.reps, isNull);
+        },
+      );
+
+      test(
+        'the factory drops measurements outside the category',
+        () {
+          final set = ExerciseSet(
+            mockExercise,
+            reps: 10,
+            weight: 50.0,
+            duration: 120,
+            distance: 2.0,
+          );
+
+          expect(set.reps, equals(10));
+          expect(set.weight, equals(50.0));
+          expect(set.duration, isNull);
+          expect(set.distance, isNull);
+        },
+      );
     },
   );
 
