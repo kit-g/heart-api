@@ -34,18 +34,35 @@ abstract interface class ExerciseSet with UsesTimestampForId implements Complete
     double? distance,
     int? duration,
   }) {
-    return switch (exercise) {
-      Exercise e =>
-        _ExerciseSet(
-            id: id,
-            exercise: e,
-            start: start ?? DateTime.timestamp(),
-          )
-          ..reps = reps
+    final set = _ExerciseSet(
+      id: id,
+      exercise: exercise,
+      start: start ?? DateTime.timestamp(),
+    );
+    // Only the measurements that exist for the exercise's category are kept,
+    // mirroring [setMeasurements]. Legacy serializers wrote zero-valued
+    // defaults into every field; dropping the inapplicable ones at
+    // construction is what lets that junk heal as sets round-trip through
+    // [fromJson]/[toMap].
+    switch (exercise.category) {
+      case .weightedBodyWeight:
+      case .assistedBodyWeight:
+      case .machine:
+      case .barbell:
+      case .dumbbell:
+        set
           ..weight = weight
+          ..reps = reps;
+      case .repsOnly:
+        set.reps = reps;
+      case .cardio:
+        set
           ..distance = distance
-          ..duration = duration,
-    };
+          ..duration = duration;
+      case .duration:
+        set.duration = duration;
+    }
+    return set;
   }
 
   factory fromJson(Exercise exercise, Map json) {
