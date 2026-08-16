@@ -18,6 +18,24 @@ void main() {
       );
 
       test(
+        'createdAt is recovered from either era of id',
+        () {
+          // a server-minted v7 uuid carries its mint instant
+          expect(
+            Template.empty(id: '01950000-0000-7000-8000-000000000000', order: 0).createdAt,
+            equals(DateTime.fromMillisecondsSinceEpoch(0x019500000000, isUtc: true)),
+          );
+          // a Firebase-era id was a timestamp outright
+          expect(
+            Template.empty(id: '2025-01-21T12:00:00.000Z', order: 0).createdAt,
+            equals(DateTime.utc(2025, 1, 21, 12)),
+          );
+          // anything else yields nothing rather than a wrong date
+          expect(Template.empty(id: 'template_1', order: 0).createdAt, isNull);
+        },
+      );
+
+      test(
         'toWorkout converts Template to a Workout',
         () {
           final template = Template.empty(id: 'template_3', order: 3);

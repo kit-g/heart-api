@@ -46,6 +46,14 @@ abstract interface class Template
   /// True when this template came from a coach rather than being written here.
   bool get isAssigned;
 
+  /// When this template came to exist — recovered from the id, not stored.
+  /// Server ids are v7 uuids minted by the same INSERT that stamps the row's
+  /// `created_at`, so the embedded instant agrees with it to the millisecond;
+  /// an assigned copy's id is minted at assignment, which is the copy's
+  /// creation. Firebase-era ids were timestamps outright, hence the parse
+  /// fallback. Null only for an id from neither era.
+  DateTime? get createdAt;
+
   Workout toWorkout();
 
   /// An otherwise identical template filed under [folder] — null unfiles it.
@@ -172,6 +180,9 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
 
   @override
   bool get isAssigned => assignedBy != null;
+
+  @override
+  DateTime? get createdAt => DateTime.tryParse(id) ?? timestampOfUuidV7(id);
 
   @override
   Iterator<WorkoutExercise> get iterator => _exercises.iterator;

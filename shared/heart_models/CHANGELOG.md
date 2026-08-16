@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0
+
+- New: `Template.createdAt` — the template's creation instant, recovered from the id rather than
+  stored or synced. Server template ids are v7 uuids minted by the same insert that stamps the
+  row's `created_at`, so the value agrees with the server column to the millisecond.
+
 ## 1.6.0
 
 Retires the Firebase-era practice of using start timestamps as ids (and staggering copies by a few
