@@ -1,6 +1,7 @@
 import 'exercise.dart';
 import 'exercise_set.dart';
 import 'utils.dart';
+import 'uuid.dart';
 
 abstract interface class ExerciseAct with Iterable<ExerciseSet> implements Comparable<ExerciseAct> {
   String? get workoutName;
@@ -14,8 +15,11 @@ abstract interface class ExerciseAct with Iterable<ExerciseSet> implements Compa
     return _ExerciseAct._(
       workoutId: rows.first['workoutId'],
       workoutName: rows.first['workoutName'],
+      // Firebase-era exercise ids were sanitized start timestamps; today's are
+      // v7 uuids, which carry their mint instant. Either era's id yields the
+      // act's start.
       start: switch (rows.first['exerciseId']) {
-        String id => DateTime.tryParse(deSanitizeId(id)),
+        String id => DateTime.tryParse(deSanitizeId(id)) ?? timestampOfUuidV7(id),
         _ => null,
       },
       sets: rows.map(
