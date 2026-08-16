@@ -220,7 +220,6 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
     );
   }
 
-  // todo redo
   @override
   Workout toWorkout() {
     final exercises = <WorkoutExercise>[];
@@ -230,9 +229,8 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
           starter: each.first.copy(),
         );
 
-        for (final (index, set) in each.skip(1).indexed) {
-          final start = DateTime.timestamp().add(Duration(milliseconds: 2 * index));
-          exercise.add(set.copy(start: start));
+        for (final set in each.skip(1)) {
+          exercise.add(set.copy());
         }
 
         exercises.add(exercise);

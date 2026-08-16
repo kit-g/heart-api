@@ -1,13 +1,21 @@
 import 'exercise.dart';
 import 'misc.dart';
-import 'ts_for_id.dart';
+import 'uuid.dart';
 
 abstract interface class Completes {
   bool get isCompleted;
 }
 
 /// A single set of an exercise
-abstract interface class ExerciseSet with UsesTimestampForId implements Completes, Model, Storable {
+abstract interface class ExerciseSet implements Completes, Model, Storable, Comparable<ExerciseSet> {
+  /// Client-minted v7 uuid. Firebase-era sets used the [start] timestamp as
+  /// their id (and copies staggered starts by a few milliseconds to keep ids
+  /// unique); those ids survive in old rows as opaque strings, but identity is
+  /// no longer derived from time.
+  String get id;
+
+  DateTime get start;
+
   Exercise get exercise;
 
   double? get weight;
@@ -35,7 +43,7 @@ abstract interface class ExerciseSet with UsesTimestampForId implements Complete
     int? duration,
   }) {
     final set = _ExerciseSet(
-      id: id,
+      id: id ?? uuidV7(),
       exercise: exercise,
       start: start ?? DateTime.timestamp(),
     );
@@ -110,6 +118,8 @@ abstract interface class ExerciseSet with UsesTimestampForId implements Complete
 
   ExerciseSet copy({DateTime? start});
 
+  Duration elapsed();
+
   void setMeasurements({
     double? weight,
     int? reps,
@@ -118,8 +128,9 @@ abstract interface class ExerciseSet with UsesTimestampForId implements Complete
   });
 }
 
-class _ExerciseSet with UsesTimestampForId implements ExerciseSet {
-  final String? _id;
+class _ExerciseSet implements ExerciseSet {
+  @override
+  final String id;
   @override
   final Exercise exercise;
   @override
@@ -134,9 +145,9 @@ class _ExerciseSet with UsesTimestampForId implements ExerciseSet {
   double? distance;
 
   new({
+    required this.id,
     required this.exercise,
     required this.start,
-    this._id,
   });
 
   @override
@@ -154,7 +165,20 @@ class _ExerciseSet with UsesTimestampForId implements ExerciseSet {
   }
 
   @override
-  String get id => _id ?? super.id;
+  bool operator ==(Object other) {
+    return other is ExerciseSet && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  int compareTo(covariant ExerciseSet other) {
+    return start.compareTo(other.start);
+  }
+
+  @override
+  Duration elapsed() => DateTime.now().difference(start);
 
   @override
   bool operator >(covariant ExerciseSet other) {
@@ -206,6 +230,7 @@ class _ExerciseSet with UsesTimestampForId implements ExerciseSet {
   @override
   ExerciseSet copy({DateTime? start}) {
     return _ExerciseSet(
+        id: uuidV7(),
         exercise: exercise,
         start: start ?? DateTime.timestamp(),
       )

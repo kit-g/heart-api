@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'misc.dart';
 import 'utils.dart';
+import 'uuid.dart';
 
 final _random = math.Random();
 
@@ -82,6 +83,8 @@ class _WeekSummary with Iterable<WorkoutSummary> implements WeekSummary {
   @override
   Iterator<WorkoutSummary> get iterator => workouts.iterator;
 
+  // deSanitizeId is a legacy reader: device caches still hold Firebase-era
+  // keys with '_' for '.'; new keys are plain ISO strings and pass through.
   @override
   DateTime get startDate => DateTime.parse(deSanitizeId(weekId));
 
@@ -155,7 +158,7 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
               (iteration) {
                 return parsed.firstWhere(
                   (w) => w.startDate.isAtSameWeekAs(iteration),
-                  orElse: () => _WeekSummary.empty(weekId: sanitizeId(iteration)),
+                  orElse: () => _WeekSummary.empty(weekId: iteration.toIso8601String()),
                 );
               },
             )
@@ -174,7 +177,7 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
       final DateTime start = DateTime.parse(row['start']);
       // Bucket by the user's calendar, not UTC: a Sunday-evening session west of
       // UTC is already Monday in UTC and would file into next week otherwise.
-      final String weekId = sanitizeId(getMonday(start.toLocal()));
+      final String weekId = getMonday(start.toLocal()).toIso8601String();
 
       byWeek
           .putIfAbsent(weekId, () => [])
@@ -214,7 +217,7 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
             .map(
               (weekStart) => parsed.firstWhere(
                 (w) => w.startDate.isAtSameWeekAs(weekStart),
-                orElse: () => _WeekSummary.empty(weekId: sanitizeId(weekStart)),
+                orElse: () => _WeekSummary.empty(weekId: weekStart.toIso8601String()),
               ),
             )
             .toList()
@@ -235,15 +238,13 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
           ).map(
             (iteration) {
               return _WeekSummary(
-                weekId: sanitizeId(iteration),
+                weekId: iteration.toIso8601String(),
                 workouts: List.generate(
                   // between 2 and 6
                   2 + _random.nextInt(5),
-                  (index) {
+                  (_) {
                     return _WorkoutSummary(
-                      id: sanitizeId(
-                        iteration.copyWith(hour: iteration.hour + index),
-                      ),
+                      id: uuidV7(),
                       name: '',
                     );
                   },

@@ -1,5 +1,13 @@
+/// Reverses the Firebase-era escaping of [sanitizeId]. Kept as a reader only:
+/// device DBs still hold ids and week keys written with `_` for `.`, and those
+/// must parse forever. Plain ISO strings pass through untouched.
 String deSanitizeId(String id) => id.replaceAll('_', '.');
 
+@Deprecated(
+  "Firebase-era escaping ('.' was Firebase's path separator); nothing writes these ids anymore. "
+  'Mint a v7 uuid (uuidV7) for identities, or use plain toIso8601String() for date keys — '
+  'readers go through deSanitizeId, which accepts both forms.',
+)
 String sanitizeId(DateTime start) => start.toIso8601String().replaceAll('.', '_');
 
 /// Returns the `DateTime` of the Monday of the week for the given [date] date.

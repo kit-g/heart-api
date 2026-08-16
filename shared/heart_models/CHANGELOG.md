@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.6.0
+
+Retires the Firebase-era practice of using start timestamps as ids (and staggering copies by a few
+milliseconds to keep them unique).
+
+- `ExerciseSet` ids are now client-minted v7 uuids instead of the start's ISO string. `fromJson`
+  still honors an id it is given, so legacy timestamp ids survive as opaque strings; equality stays
+  id-based and ordering stays by `start`. The internal `UsesTimestampForId` mixin (never exported)
+  is deleted — `ExerciseSet` keeps its whole surface (`id`, `start`, `elapsed()`, `Comparable`).
+  The server never stores client set ids (it re-mints them on every save), so nothing changes on
+  the wire.
+- `Workout.copy()` and `Template.toWorkout()` no longer stagger copied sets' starts by 2 ms per
+  set — that existed only to keep timestamp-ids unique, and it polluted `started_at` with fake
+  offsets.
+- New: `timestampOfUuidV7(String)` — the mint instant embedded in a v7 uuid's leading 48 bits, or
+  null for anything else.
+- `WorkoutImage.timestamp` and `ExerciseAct.start` were still recovering a date by parsing the id
+  as a (sanitized) timestamp — always null since ids became uuids. Both now fall back to
+  `timestampOfUuidV7`, so either era's id yields the instant.
+- Week keys in `WorkoutAggregation` are written as plain ISO strings; the Firebase `.`→`_`
+  escaping is gone from the write path. Readers still go through `deSanitizeId`, which accepts
+  both forms, so cached legacy keys keep parsing. `sanitizeId` is deprecated (reader-side
+  `deSanitizeId` stays).
+- `WorkoutAggregation.dummy()` mints uuid workout ids instead of hour-shifted timestamps.
+
 ## 1.5.1
 
 - `ExerciseSet` construction is now category-aware: only the measurements that exist for the

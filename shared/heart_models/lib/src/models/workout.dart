@@ -385,8 +385,10 @@ class _WorkoutImage implements WorkoutImage {
     return 'Image $id';
   }
 
+  /// Firebase-era workout ids were start timestamps; today's are v7 uuids,
+  /// which carry their mint instant. Either era's id yields a createdAt.
   @override
-  DateTime? get timestamp => DateTime.tryParse(workoutId);
+  DateTime? get timestamp => DateTime.tryParse(workoutId) ?? timestampOfUuidV7(workoutId);
 }
 
 class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
@@ -589,9 +591,8 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         // a note is an instruction on how to do the exercise, so a repeat carries it.
         exercise.note = each.note;
 
-        for (final (index, set) in each.skip(1).indexed) {
-          final start = DateTime.timestamp().add(Duration(milliseconds: 2 * index));
-          exercise.add(set.copy(start: start));
+        for (final set in each.skip(1)) {
+          exercise.add(set.copy());
         }
 
         workout.append(exercise);

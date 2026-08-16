@@ -63,7 +63,7 @@ void main() {
             map,
             equals(
               {
-                'id': startTime.toIso8601String(),
+                'id': weightedSet.id,
                 'completed': false,
                 'started_at': startTime.toIso8601String(),
                 'reps': 8,
@@ -71,6 +71,22 @@ void main() {
               },
             ),
           );
+        },
+      );
+
+      test(
+        'a new set gets a v7 uuid id, not its start timestamp',
+        () {
+          final startTime = DateTime.parse('2025-01-21T12:00:00Z');
+          final one = ExerciseSet(mockExercise, start: startTime);
+          final two = ExerciseSet(mockExercise, start: startTime);
+
+          expect(one.id, isNot(equals(startTime.toIso8601String())));
+          expect(timestampOfUuidV7(one.id), isNotNull);
+          // Firebase-era ids were the start timestamp, so two sets sharing a
+          // start collided unless callers staggered starts by a few ms.
+          expect(one.id, isNot(equals(two.id)));
+          expect(one, isNot(equals(two)));
         },
       );
 
@@ -879,6 +895,37 @@ void main() {
           expect(image.workoutId, equals('workout-123'));
           expect(image.id, equals('photo-456'));
           expect(image.link, equals('https://example.com/image.jpg'));
+        },
+      );
+
+      test(
+        'timestamp is recovered from either era of workout id',
+        () {
+          WorkoutImage imageFor(String workoutId) {
+            return WorkoutImage.fromJson({
+              'workoutId': workoutId,
+              'id': 'photo-1',
+              'url': 'https://example.com/image.jpg',
+              'key': 'image.jpg',
+            });
+          }
+
+          // Firebase-era workout ids were start timestamps.
+          expect(
+            imageFor('2025-01-21T12:00:00.000Z').timestamp,
+            equals(DateTime.parse('2025-01-21T12:00:00.000Z')),
+          );
+
+          // Today's are v7 uuids, which embed their mint instant.
+          final before = DateTime.timestamp();
+          final minted = imageFor(uuidV7()).timestamp;
+          final after = DateTime.timestamp();
+          expect(minted, isNotNull);
+          expect(minted!.isBefore(before.subtract(const Duration(seconds: 1))), isFalse);
+          expect(minted.isAfter(after.add(const Duration(seconds: 1))), isFalse);
+
+          // An id from neither era yields nothing.
+          expect(imageFor('not-an-id').timestamp, isNull);
         },
       );
     },

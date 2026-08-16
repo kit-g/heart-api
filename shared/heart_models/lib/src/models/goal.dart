@@ -88,8 +88,9 @@ enum GoalCadence {
 /// posterity, and a link the client renders from the goal back to that session.
 /// It attributes to the *workout*, not a set, deliberately: no single set achieves
 /// a total-volume or total-reps goal (the whole workout, or the week, did), and an
-/// `ExerciseSet` id is a client-minted timestamp (`UsesTimestampForId`), so a
-/// server-owned goal pointing at one would be a dangling cross-device reference. A
+/// `ExerciseSet` id is client-minted and never stored server-side (the server
+/// re-mints set ids on every save), so a server-owned goal pointing at one would
+/// be a dangling cross-device reference. A
 /// workout id is a server-minted UUID, stable everywhere. (Peak metrics —
 /// topSetWeight, estimatedOneRepMax, maxConsecutiveReps — could additionally carry
 /// a set id later if it earns its keep; not designed for now.) The server stores
