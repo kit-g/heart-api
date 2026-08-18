@@ -278,7 +278,7 @@ packages:
       path: "../shared/heart_models"
       relative: true
     source: path
-    version: "1.4.0"
+    version: "1.8.0"
   http:
     dependency: transitive
     description:
