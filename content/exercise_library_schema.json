@@ -89,6 +89,9 @@
         "movement": {
           "$ref": "#/$defs/movement"
         },
+        "health": {
+          "$ref": "#/$defs/health"
+        },
         "muscles": {
           "$ref": "#/$defs/muscles"
         },
@@ -155,6 +158,46 @@
         }
       },
       "description": "Movement pattern and objective load attributes. Two exercises are mutually replaceable when they share a groups entry; the remaining fields let a client rank or exclude substitutes (e.g. avoid axial_load: high). Optional: exercises with no substitute in the library may omit it."
+    },
+    "health": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activity"
+      ],
+      "properties": {
+        "activity": {
+          "$ref": "#/$defs/healthActivity"
+        }
+      },
+      "description": "How the exercise is represented in the platform health store (HealthKit / Health Connect). Optional: when absent, the client derives the activity from category (Cardio/Duration -> other, everything else -> strength), so only exercises that fallback mislabels carry an entry. Objective attribute of the exercise, not a policy."
+    },
+    "healthActivity": {
+      "type": "string",
+      "enum": [
+        "strength",
+        "cycling",
+        "cycling_indoor",
+        "elliptical",
+        "hiking",
+        "rowing",
+        "running",
+        "running_treadmill",
+        "skating",
+        "skiing",
+        "snowboarding",
+        "swimming",
+        "walking",
+        "climbing",
+        "core_training",
+        "flexibility",
+        "yoga",
+        "cardio_dance",
+        "high_intensity",
+        "jump_rope",
+        "other"
+      ],
+      "description": "Canonical activity type written to the health store for a session of this exercise; the client maps it to the per-platform enum spelling. Deliberately excludes cross_training and mixed_cardio: those describe a session mixing several exercises and are derived client-side, never annotated on an exercise."
     },
     "movementGroupList": {
       "type": "array",

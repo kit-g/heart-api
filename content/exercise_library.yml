@@ -1186,6 +1186,8 @@ exercises:
   "Plank":
     category: Duration
     target: Core
+    health:
+      activity: core_training
     movement:
       groups:
         - core_bracing
@@ -1324,6 +1326,8 @@ exercises:
   "Reverse Plank":
     category: Duration
     target: Core
+    health:
+      activity: core_training
     movement:
       groups:
         - core_bracing
@@ -1732,6 +1736,8 @@ exercises:
   "Side Plank":
     category: Duration
     target: Core
+    health:
+      activity: core_training
     movement:
       groups:
         - core_bracing
@@ -15344,6 +15350,8 @@ exercises:
   "Stretching":
     category: Duration
     target: Other
+    health:
+      activity: flexibility
     movement:
       groups:
         - mobility
@@ -17002,6 +17010,8 @@ exercises:
   "Aerobics":
     category: Duration
     target: Cardio
+    health:
+      activity: cardio_dance
     movement:
       groups:
         - cardio_steady
@@ -17027,6 +17037,8 @@ exercises:
   "Battle Ropes":
     category: Cardio
     target: Cardio
+    health:
+      activity: high_intensity
     movement:
       groups:
         - cardio_steady
@@ -17095,6 +17107,8 @@ exercises:
   "Climbing":
     category: Duration
     target: Cardio
+    health:
+      activity: climbing
     movement:
       groups:
         - cardio_steady
@@ -17162,6 +17176,8 @@ exercises:
   "Cycling":
     category: Cardio
     target: Cardio
+    health:
+      activity: cycling
     movement:
       groups:
         - cardio_steady
@@ -17194,6 +17210,8 @@ exercises:
   "Cycling (Indoor)":
     category: Cardio
     target: Cardio
+    health:
+      activity: cycling_indoor
     movement:
       groups:
         - cardio_steady
@@ -17226,6 +17244,8 @@ exercises:
   "Elliptical Machine":
     category: Cardio
     target: Cardio
+    health:
+      activity: elliptical
     movement:
       groups:
         - cardio_steady
@@ -17293,6 +17313,8 @@ exercises:
   "Hiking":
     category: Cardio
     target: Cardio
+    health:
+      activity: hiking
     movement:
       groups:
         - cardio_steady
@@ -17325,6 +17347,8 @@ exercises:
   "Jump Rope":
     category: Reps Only
     target: Cardio
+    health:
+      activity: jump_rope
     movement:
       groups:
         - cardio_steady
@@ -17392,6 +17416,8 @@ exercises:
   "Rowing (Machine)":
     category: Cardio
     target: Cardio
+    health:
+      activity: rowing
     movement:
       groups:
         - cardio_steady
@@ -17462,6 +17488,8 @@ exercises:
   "Running":
     category: Cardio
     target: Cardio
+    health:
+      activity: running
     movement:
       groups:
         - cardio_steady
@@ -17494,6 +17522,8 @@ exercises:
   "Running (Treadmill)":
     category: Cardio
     target: Cardio
+    health:
+      activity: running_treadmill
     movement:
       groups:
         - cardio_steady
@@ -17526,6 +17556,8 @@ exercises:
   "Skating":
     category: Cardio
     target: Cardio
+    health:
+      activity: skating
     movement:
       groups:
         - cardio_steady
@@ -17593,6 +17625,8 @@ exercises:
   "Skiing":
     category: Cardio
     target: Cardio
+    health:
+      activity: skiing
     movement:
       groups:
         - cardio_steady
@@ -17625,6 +17659,8 @@ exercises:
   "Snowboarding":
     category: Cardio
     target: Cardio
+    health:
+      activity: snowboarding
     movement:
       groups:
         - cardio_steady
@@ -17657,6 +17693,8 @@ exercises:
   "Swimming":
     category: Cardio
     target: Cardio
+    health:
+      activity: swimming
     movement:
       groups:
         - cardio_steady
@@ -17691,6 +17729,8 @@ exercises:
   "Walking":
     category: Cardio
     target: Cardio
+    health:
+      activity: walking
     movement:
       groups:
         - cardio_steady
@@ -17716,6 +17756,8 @@ exercises:
   "Yoga":
     category: Duration
     target: Cardio
+    health:
+      activity: yoga
     movement:
       groups:
         - mobility
