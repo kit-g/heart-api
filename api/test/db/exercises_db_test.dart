@@ -181,6 +181,63 @@ void main() {
     });
   });
 
+  group('health', () {
+    /// The blob exactly as scripts/library_locales.py writes it — the activity
+    /// camelCased, so storage and wire are the same shape.
+    const stored = '{"activity": "cyclingIndoor"}';
+
+    Future<void> setHealth(String exerciseId) => h.exec(
+      'UPDATE exercises SET health = @h::jsonb WHERE id = @id::uuid',
+      {'h': stored, 'id': exerciseId},
+    );
+
+    test('getExercises ships the blob through in its wire form', () async {
+      final id = await h.seedGlobalExercise();
+      await setHealth(id);
+
+      final row = findEx((await h.db.getExercises(ownerId))['exercises'] as List, id);
+      final health = row!['health'] as Map<String, dynamic>;
+
+      // HealthActivity.fromString reads camelCase only and throws otherwise,
+      // so a snake_cased value reaching the client is a failed library read,
+      // not a workout quietly written to the health store as strength.
+      expect(health['activity'], 'cyclingIndoor');
+    });
+
+    test('getExercises returns null for an unannotated exercise', () async {
+      final id = await h.seedGlobalExercise();
+      final row = findEx((await h.db.getExercises(ownerId))['exercises'] as List, id);
+      expect(row!.containsKey('health'), isTrue);
+      expect(row['health'], isNull); // the client derives from category
+    });
+
+    test('createExercise returns a null health for a user-made exercise', () async {
+      final row = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('NoHealth'),
+        category: 'Cardio',
+        target: 'Cardio',
+      );
+      expect(row.containsKey('health'), isTrue);
+      expect(row['health'], isNull);
+    });
+
+    test('updateExercise returns the health rather than dropping it', () async {
+      final created = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('KeepsHealth'),
+        category: 'Cardio',
+        target: 'Cardio',
+      );
+      final id = created['id'].toString();
+      await setHealth(id);
+
+      final updated = await h.db.updateExercise(userId: ownerId, exerciseId: id, target: 'Legs');
+      expect(updated['target'], 'Legs');
+      expect((updated['health'] as Map)['activity'], 'cyclingIndoor');
+    });
+  });
+
   group('createExercise', () {
     test('persists a user-owned exercise and returns it flagged own', () async {
       final name = h.uniqueName('Create');

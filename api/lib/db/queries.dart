@@ -96,6 +96,7 @@ SELECT coalesce(
       'thumbnail', e.thumbnail,
       'muscles', e.muscles,
       'movement', e.movement,
+      'health', e.health,
       'own', e.user_id IS NOT NULL,
       'archived', e.archived,
       'unit_system', ep.unit_system,
@@ -128,7 +129,7 @@ INSERT INTO exercises (
   @instructions, 
   @userId
 )
-RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, archived,
+RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived,
           user_id IS NOT NULL AS own
 ''';
 
@@ -141,7 +142,7 @@ SET
   archived = coalesce(@archived, archived)
 WHERE id = @exerciseId::uuid 
   AND user_id = @userId
-RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, archived,
+RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived,
           user_id IS NOT NULL AS own
 ''';
 
@@ -1063,7 +1064,7 @@ _master_exercises AS (
     te.template_id AS master_id,
     te.id AS source_te_id,
     te.exercise_order,
-    e.name, e.category, e.target, e.instructions, e.asset, e.thumbnail, e.muscles, e.movement,
+    e.name, e.category, e.target, e.instructions, e.asset, e.thumbnail, e.muscles, e.movement, e.health,
     (
       SELECT e2.id FROM exercises e2
       WHERE e2.name = e.name
@@ -1078,9 +1079,9 @@ _master_exercises AS (
 -- Copy any unresolved exercises into the student's library so the FK holds.
 -- DISTINCT ON dedupes across masters that name the same missing exercise.
 _copied_exercises AS (
-  INSERT INTO exercises (name, category, target, instructions, asset, thumbnail, muscles, movement, user_id)
+  INSERT INTO exercises (name, category, target, instructions, asset, thumbnail, muscles, movement, health, user_id)
   SELECT DISTINCT ON (name)
-    name, category, target, instructions, asset, thumbnail, muscles, movement, @studentId
+    name, category, target, instructions, asset, thumbnail, muscles, movement, health, @studentId
   FROM _master_exercises
   WHERE resolved_id IS NULL
   RETURNING id, name
