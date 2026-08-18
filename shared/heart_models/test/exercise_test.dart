@@ -277,6 +277,80 @@ void main() {
     }
   });
 
+  group('HealthActivity.fromString', () {
+    // Fails when a value is added to the enum without a fromString arm — the
+    // same guard the app repo keeps for the per-platform table.
+    for (final activity in HealthActivity.values) {
+      test('round-trips ${activity.value}', () {
+        expect(HealthActivity.fromString(activity.value), activity);
+      });
+    }
+
+    test('the YAML snake_case spelling is not read', () {
+      // The wire is the DB blob, camelCased by scripts/library_locales.py.
+      // Quietly accepting snake_case would hide a sync script that regressed.
+      expect(() => HealthActivity.fromString('cycling_indoor'), throwsA(isA<ArgumentError>()));
+    });
+
+    for (final raw in ['Nope', '', 'crossTraining', 'mixedCardio']) {
+      test('throws on $raw', () {
+        // crossTraining/mixedCardio are session-level, derived by the client,
+        // and must never arrive annotated on an exercise.
+        expect(() => HealthActivity.fromString(raw), throwsA(isA<ArgumentError>()));
+      });
+    }
+  });
+
+  group('Health', () {
+    const json = {'activity': 'swimming'};
+
+    test('fromJson parses, toMap round-trips', () {
+      final h = Health.fromJson(json);
+      expect(h.activity, HealthActivity.swimming);
+      expect(h.isEmpty, isFalse);
+      expect(h.toMap(), json);
+      expect(Health.fromJson(Health.fromJson(json).toMap()).toMap(), json);
+    });
+
+    test('absent activity reads as empty', () {
+      expect(Health.fromJson(const {}).isEmpty, isTrue);
+      expect(Health.empty().isEmpty, isTrue);
+      expect(Health.empty().activity, isNull);
+    });
+
+    // Silently reading a bad activity as "unannotated" would write the wrong
+    // label into the user's own health record.
+    test('throws on a present but unrecognised value', () {
+      expect(() => Health.fromJson(const {'activity': 'parkour'}), throwsA(isA<ArgumentError>()));
+    });
+  });
+
+  group('Health.resolve', () {
+    test('an explicit annotation wins over the category', () {
+      final h = Health.fromJson(const {'activity': 'swimming'});
+      expect(h.resolve(Category.cardio), HealthActivity.swimming);
+      expect(h.resolve(Category.barbell), HealthActivity.swimming);
+    });
+
+    for (final category in Category.values) {
+      final expected = switch (category) {
+        Category.cardio || Category.duration => HealthActivity.other,
+        _ => HealthActivity.strength,
+      };
+      test('unannotated $category -> $expected', () {
+        expect(Health.empty().resolve(category), expected);
+      });
+    }
+
+    test('an unannotated cardio exercise never resolves to strength', () {
+      // The regression this fallback exists for: a custom user exercise has no
+      // library entry at all, and a cardio one must not land as strength.
+      for (final category in [Category.cardio, Category.duration]) {
+        expect(Health.empty().resolve(category), isNot(HealthActivity.strength));
+      }
+    });
+  });
+
   group('_Exercise model', () {
     const baseJson = {
       'id': '1',
@@ -358,6 +432,33 @@ void main() {
 
       final created = Exercise(name: 'Test', category: Category.barbell, target: Target.chest);
       expect(created.movement.isEmpty, isTrue);
+    });
+
+    test('fromJson with health, toMap includes it', () {
+      final json = {
+        ...baseJson,
+        'category': 'Cardio',
+        'target': 'Cardio',
+        'health': {'activity': 'rowing'},
+      };
+      final e = Exercise.fromJson(json);
+      expect(e.health.isEmpty, isFalse);
+      expect(e.activity, HealthActivity.rowing);
+
+      expect(e.toMap()['health'], json['health']);
+    });
+
+    test('health defaults to empty and is omitted from toMap', () {
+      final e = Exercise.fromJson(baseJson);
+      expect(e.health.isEmpty, isTrue);
+      expect(e.toMap().containsKey('health'), isFalse);
+      expect(e.activity, HealthActivity.strength);
+
+      // a custom cardio exercise has no library entry and must still resolve —
+      // and never to strength
+      final created = Exercise(name: 'Pool Laps', category: Category.cardio, target: Target.cardio);
+      expect(created.health.isEmpty, isTrue);
+      expect(created.activity, HealthActivity.other);
     });
 
     test('fromJson with muscles, toMap includes it', () {
