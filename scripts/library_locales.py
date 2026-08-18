@@ -118,6 +118,38 @@ class Movement:
 
 
 @dataclass
+class Health:
+    """Health store representation: the canonical activity type a session of the
+    exercise is written to HealthKit / Health Connect as.
+
+    Same wire discipline as Movement, applied to the value rather than the keys:
+    the YAML spells activities snake_case (the content schema's own vocabulary,
+    `cycling_indoor`), the database stores them camelCased (`cyclingIndoor`) so
+    the blob is already in its API wire form and read paths ship it verbatim.
+
+    None is the common case -- the client derives the activity from category --
+    and cross_training / mixed_cardio never appear here: they are session-level,
+    derived by the client, and the schema enum deliberately excludes them.
+    """
+
+    activity: str
+
+    @classmethod
+    def parse(cls, source: dict | None) -> Self | None:
+        if source is None:
+            return None
+        return cls(activity=source['activity'])
+
+    def to_dict(self) -> dict:
+        """The camelCased wire/storage form. Keys and value spelling must match
+        Health.fromJson / HealthActivity.fromString in shared/heart_models --
+        which throws on a snake_cased value, so a regression here fails the app
+        read loudly rather than mislabeling a workout."""
+        head, *tail = self.activity.split('_')
+        return {'activity': head + ''.join(word.capitalize() for word in tail)}
+
+
+@dataclass
 class ExerciseLocalization:
     exercise_name: str
     instructions: str | None
@@ -142,6 +174,7 @@ class Exercise:
     target: str
     muscles: Muscles | None
     movement: Movement | None
+    health: Health | None
     localizations: dict[str, ExerciseLocalization]
     fallback: str
 
@@ -153,6 +186,7 @@ class Exercise:
             target=source['target'],
             muscles=Muscles.parse(source.get('muscles')),
             movement=Movement.parse(source.get('movement')),
+            health=Health.parse(source.get('health')),
             localizations={
                 locale: ExerciseLocalization.parse(loc)
                 for locale, loc in source.get('i18n', {}).items()
@@ -203,8 +237,8 @@ def get_source() -> dict:
 
 
 UPSERT_EXERCISE = '''
-INSERT INTO exercises (name, category, target, instructions, muscles, movement, archived)
-VALUES (%s, %s, %s, %s, %s, %s, false)
+INSERT INTO exercises (name, category, target, instructions, muscles, movement, health, archived)
+VALUES (%s, %s, %s, %s, %s, %s, %s, false)
 ON CONFLICT (name) WHERE user_id IS NULL
 DO UPDATE SET
     category = EXCLUDED.category,
@@ -212,6 +246,7 @@ DO UPDATE SET
     instructions = EXCLUDED.instructions,
     muscles = EXCLUDED.muscles,
     movement = EXCLUDED.movement,
+    health = EXCLUDED.health,
     archived = false
 RETURNING id
 '''
@@ -244,6 +279,7 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
                 fallback.instructions,
                 Json(exercise.muscles.to_dict()) if exercise.muscles else None,
                 Json(exercise.movement.to_dict()) if exercise.movement else None,
+                Json(exercise.health.to_dict()) if exercise.health else None,
             ))
             exercise_id = cur.fetchone()[0]
             upserted += 1
