@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.8.0
+
+Carries the health activity type in the exercise library (kit-g/heart-api#54), replacing the
+app's name-based activity switch — `Exercise.name` is localized copy and must never key logic.
+
+- New: `HealthActivity` — the canonical, platform-neutral activity a session is written to
+  HealthKit / Health Connect as (camelCase wire values, matching the DB blob). Session-level
+  `crossTraining`/`mixedCardio` are deliberately absent: the client derives them.
+- New: `Health` on `Exercise` — optional like `movement`, empty for most exercises and all
+  user-created ones. `Health.resolve(Category)` carries the fallback (`Cardio`/`Duration` →
+  `other`, everything else → `strength`), and `Exercise.activity` reads annotation-or-fallback,
+  so a custom cardio exercise never resolves to strength training.
+
 ## 1.7.0
 
 - New: `Template.createdAt` — the template's creation instant, recovered from the id rather than
