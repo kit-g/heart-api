@@ -327,6 +327,140 @@ class _Movement implements Movement {
   }
 }
 
+/// Canonical activity type a session of an exercise is written to the platform
+/// health store as (HealthKit / Health Connect).
+///
+/// The vocabulary is deliberately platform-neutral: the client maps each value
+/// to the per-platform enum spelling (`swimming` is `SWIMMING` on iOS and
+/// `SWIMMING_POOL` on Android). Session-level activities — cross-training,
+/// mixed cardio — are not here on purpose: they describe a workout mixing
+/// several exercises and the client derives them.
+enum HealthActivity {
+  strength('strength'),
+  cycling('cycling'),
+  cyclingIndoor('cyclingIndoor'),
+  elliptical('elliptical'),
+  hiking('hiking'),
+  rowing('rowing'),
+  running('running'),
+  runningTreadmill('runningTreadmill'),
+  skating('skating'),
+  skiing('skiing'),
+  snowboarding('snowboarding'),
+  swimming('swimming'),
+  walking('walking'),
+  climbing('climbing'),
+  coreTraining('coreTraining'),
+  flexibility('flexibility'),
+  yoga('yoga'),
+  cardioDance('cardioDance'),
+  highIntensity('highIntensity'),
+  jumpRope('jumpRope'),
+  other('other');
+
+  final String value;
+
+  new(this.value);
+
+  factory fromString(String v) {
+    return switch (v) {
+      'strength' => strength,
+      'cycling' => cycling,
+      'cyclingIndoor' => cyclingIndoor,
+      'elliptical' => elliptical,
+      'hiking' => hiking,
+      'rowing' => rowing,
+      'running' => running,
+      'runningTreadmill' => runningTreadmill,
+      'skating' => skating,
+      'skiing' => skiing,
+      'snowboarding' => snowboarding,
+      'swimming' => swimming,
+      'walking' => walking,
+      'climbing' => climbing,
+      'coreTraining' => coreTraining,
+      'flexibility' => flexibility,
+      'yoga' => yoga,
+      'cardioDance' => cardioDance,
+      'highIntensity' => highIntensity,
+      'jumpRope' => jumpRope,
+      'other' => other,
+      _ => throw ArgumentError('Invalid value for HealthActivity: $v'),
+    };
+  }
+
+  @override
+  String toString() => value;
+}
+
+/// How the exercise is represented in the platform health store.
+///
+/// Optional like [Movement], and absent is the common case: most of the
+/// library is lifting, and a user-created exercise has no library entry at
+/// all. [resolve] carries the fallback, so an absent annotation is a fact
+/// about the library, never a hole in the activity path.
+///
+/// Only [fromJson]/[toMap] exist for the same reason as [Movement]:
+/// `exercises.health` is stored camelCased by scripts/library_locales.py and
+/// read paths ship the blob verbatim.
+abstract interface class Health implements Model {
+  HealthActivity? get activity;
+
+  bool get isEmpty;
+
+  /// The activity a session of an exercise in [category] is written as.
+  ///
+  /// An explicit annotation wins; otherwise `Cardio`/`Duration` resolve to
+  /// [HealthActivity.other] and everything else to [HealthActivity.strength].
+  /// The category arm is load-bearing: a custom cardio exercise must never
+  /// land in the user's health record as strength training.
+  HealthActivity resolve(Category category);
+
+  factory fromJson(Map json) = _Health.fromJson;
+
+  factory empty() {
+    return const _Health(activity: null);
+  }
+}
+
+class _Health implements Health {
+  @override
+  final HealthActivity? activity;
+
+  const new({required this.activity});
+
+  /// An absent key is the annotated-nowhere common case; a present but
+  /// unrecognised value throws, so bad content fails loudly instead of
+  /// silently mislabeling a workout in the user's own health record.
+  factory fromJson(Map json) {
+    return _Health(
+      activity: switch (json['activity']) {
+        String s => HealthActivity.fromString(s),
+        _ => null,
+      },
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'activity': ?activity?.value,
+    };
+  }
+
+  @override
+  bool get isEmpty => activity == null;
+
+  @override
+  HealthActivity resolve(Category category) {
+    return activity ??
+        switch (category) {
+          .cardio || .duration => .other,
+          _ => .strength,
+        };
+  }
+}
+
 abstract interface class MuscleTag implements Model {
   Iterable<String>? get ids;
 
@@ -447,6 +581,15 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
   /// substitute for this exercise (and for user-created exercises).
   Movement get movement;
 
+  /// Health store representation. Empty for most exercises (and all
+  /// user-created ones); read the activity through [activity], never through
+  /// the exercise name — [name] is localized copy.
+  Health get health;
+
+  /// The activity a session of this exercise is written to the health store
+  /// as, annotation or [Health.resolve] fallback.
+  HealthActivity get activity;
+
   /// The requesting user's preferred display unit for this exercise.
   /// `null` falls back to the user's global setting.
   MeasurementUnit? get unitSystem;
@@ -464,6 +607,7 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
     bool? isMine,
     MuscleTagging? tags,
     Movement? movement,
+    Health? health,
   }) {
     assert(name.isNotEmpty, 'Cannot have an empty name');
     return _Exercise(
@@ -475,6 +619,7 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
       isMine: isMine ?? false,
       muscles: tags ?? MuscleTagging.empty(),
       movement: movement ?? Movement.empty(),
+      health: health ?? Health.empty(),
     );
   }
 
@@ -490,6 +635,7 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
     bool? isArchived,
     MuscleTagging? tags,
     Movement? movement,
+    Health? health,
     MeasurementUnit? unitSystem,
   });
 }
@@ -518,6 +664,8 @@ class _Exercise implements Exercise {
   @override
   final Movement movement;
   @override
+  final Health health;
+  @override
   final MeasurementUnit? unitSystem;
   @override
   final int? restTimer;
@@ -534,6 +682,7 @@ class _Exercise implements Exercise {
     this.isArchived = false,
     required this.muscles,
     required this.movement,
+    required this.health,
     this.unitSystem,
     this.restTimer,
   });
@@ -571,6 +720,7 @@ class _Exercise implements Exercise {
       },
       muscles: MuscleTagging.fromJson(json['muscles'] ?? {}),
       movement: Movement.fromJson(json['movement'] ?? {}),
+      health: Health.fromJson(json['health'] ?? {}),
       unitSystem: switch (json['unit_system'] ?? json['unitSystem']) {
         String s => MeasurementUnit.fromString(s),
         _ => null,
@@ -604,6 +754,7 @@ class _Exercise implements Exercise {
       'archived': isArchived ? 1 : 0,
       if (!muscles.isEmpty) 'muscles': muscles.toMap(),
       if (!movement.isEmpty) 'movement': movement.toMap(),
+      if (!health.isEmpty) 'health': health.toMap(),
       'unitSystem': ?unitSystem?.name,
       'restTimer': ?restTimer,
     };
@@ -646,6 +797,9 @@ class _Exercise implements Exercise {
   bool get hasInfo => [asset, instructions, thumbnail].any((attr) => attr != null);
 
   @override
+  HealthActivity get activity => health.resolve(category);
+
+  @override
   int compareTo(Exercise other) {
     return name.toLowerCase().compareTo(other.name.toLowerCase());
   }
@@ -661,6 +815,7 @@ class _Exercise implements Exercise {
     bool? isArchived,
     MuscleTagging? tags,
     Movement? movement,
+    Health? health,
     MeasurementUnit? unitSystem,
     int? restTimer,
   }) {
@@ -676,6 +831,7 @@ class _Exercise implements Exercise {
       isArchived: isArchived ?? this.isArchived,
       muscles: tags ?? muscles,
       movement: movement ?? this.movement,
+      health: health ?? this.health,
       unitSystem: unitSystem ?? this.unitSystem,
       restTimer: restTimer ?? this.restTimer,
     );
