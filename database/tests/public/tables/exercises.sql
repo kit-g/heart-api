@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(32);
+SELECT plan(33);
 
 SELECT has_table('public'::name, 'exercises'::name);
 
@@ -18,6 +18,7 @@ SELECT columns_are(
                    'archived',
                    'muscles',
                    'movement',
+                   'health',
                    'user_id',
                    'created_at'
                    ]
@@ -33,6 +34,7 @@ SELECT col_type_is('public'::name, 'exercises'::name, 'thumbnail'::name, 'jsonb'
 SELECT col_type_is('public'::name, 'exercises'::name, 'archived'::name, 'boolean'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'muscles'::name, 'jsonb'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'movement'::name, 'jsonb'::name);
+SELECT col_type_is('public'::name, 'exercises'::name, 'health'::name, 'jsonb'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'user_id'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'created_at'::name, 'timestamp with time zone'::name);
 
