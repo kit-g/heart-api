@@ -28,7 +28,7 @@ Renaming a migration file is the same hazard in reverse: the new name is unrecor
 
 ## House style (match existing migrations)
 
-- Lead with `DROP TABLE IF EXISTS <name>;` then `CREATE TABLE IF NOT EXISTS` — migrations are written to be re-runnable in dev. (Don't drop in a migration that alters an existing populated table in a way you can't reproduce — for ALTERs, use `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`.)
+- Lead with `DROP TABLE IF EXISTS <name>;` then `CREATE TABLE IF NOT EXISTS` — migrations are written to be re-runnable in dev. Column ALTERs take the same shape in one statement: `ALTER TABLE t DROP COLUMN IF EXISTS c, ADD COLUMN IF NOT EXISTS c <type>;` — a re-run then rebuilds the column with its current definition, whereas `ADD COLUMN IF NOT EXISTS` alone no-ops and leaves you verifying against a stale one. Exception: never drop a column holding data you can't reproduce (user-written rows; synced library content is reproducible via `make db-seed`) — there, `ADD COLUMN IF NOT EXISTS` without the drop is the guard, and iterating on its definition means a new migration.
 - **snake_case** column names always (this is the DB layer).
 - `id UUID PRIMARY KEY DEFAULT uuidv7()` for new entity tables (sortable by creation).
 - `TIMESTAMPTZ NOT NULL DEFAULT now()` for timestamps.
