@@ -119,6 +119,28 @@ void main() {
       expect(batch.workouts.last.end, DateTime.utc(2024, 7, 24, 6, 41, 6));
     });
 
+    test('an oversized export keeps only the most recent workouts, in file order', () {
+      // one workout per hour, oldest first, 50 past the cap
+      final buffer = StringBuffer('Date,Workout Name,Duration,Exercise Name,Weight,Reps\n');
+      final epoch = DateTime.utc(2020, 1, 1);
+      for (var n = 0; n < WorkoutImport.maxWorkouts + 50; n++) {
+        final start = epoch.add(Duration(hours: n)).toIso8601String().replaceFirst('T', ' ').substring(0, 19);
+        buffer.writeln('$start,W$n,1h,Bench Press (Barbell),100,5');
+      }
+      final batch = WorkoutImport.fromStrongCsv(buffer.toString());
+
+      expect(batch.workouts, hasLength(WorkoutImport.maxWorkouts));
+      expect(batch.workoutsDropped, 50);
+      // the oldest 50 are the ones dropped...
+      expect(batch.workouts.first.name, 'W50');
+      // ...and the survivors keep their file (chronological) order
+      expect(batch.workouts.last.name, 'W${WorkoutImport.maxWorkouts + 49}');
+    });
+
+    test('an export within the cap drops nothing', () {
+      expect(batch.workoutsDropped, 0);
+    });
+
     test('rejects a file without the Strong columns', () {
       expect(() => WorkoutImport.fromStrongCsv('a,b,c\n1,2,3\n'), throwsFormatException);
       expect(() => WorkoutImport.fromStrongCsv(''), throwsFormatException);
@@ -200,12 +222,14 @@ void main() {
         },
         source: 'strong',
         rowsSkipped: 2,
+        workoutsDropped: 1,
       );
       expect(report.toMap(), {
         'source': 'strong',
         'workoutsFound': 10,
         'workoutsCreated': 7,
         'workoutsSkipped': 3,
+        'workoutsDropped': 1,
         'setsCreated': 120,
         'setsSkipped': 4,
         'exercisesMatched': 15,
@@ -235,6 +259,7 @@ void main() {
         'source': 'strong',
         'workoutsFound': 3,
         'workoutsAlreadyImported': 1,
+        'workoutsDropped': 0,
         'setsFound': 6,
         'exercisesMatched': 2,
         'exercisesUnmatched': [
