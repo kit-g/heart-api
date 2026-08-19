@@ -244,6 +244,7 @@ void main() {
       exercisesCreated: [],
       exercisesSkipped: [],
       rowsSkipped: 0,
+      workoutsDropped: 0,
     );
 
     Request importReq({String body = csv, Map<String, String> query = const {'source': 'strong'}}) =>
@@ -324,6 +325,7 @@ void main() {
         exercisesMatched: 1,
         exercisesUnmatched: [],
         rowsSkipped: 0,
+        workoutsDropped: 0,
       );
       when(
         workouts.previewImport(userId: anyNamed('userId'), batch: anyNamed('batch')),
