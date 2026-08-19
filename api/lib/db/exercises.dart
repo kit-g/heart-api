@@ -18,17 +18,21 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
     required String target,
     String? instructions,
   }) async {
-    final rows = await _pool.execute(
-      _createExercise.toSql(),
-      parameters: {
-        'userId': userId,
-        'name': name,
-        'category': category,
-        'target': target,
-        'instructions': instructions,
-      },
-    );
-    return rows.first.toColumnMap();
+    try {
+      final rows = await _pool.execute(
+        _createExercise.toSql(),
+        parameters: {
+          'userId': userId,
+          'name': name,
+          'category': category,
+          'target': target,
+          'instructions': instructions,
+        },
+      );
+      return rows.first.toColumnMap();
+    } on ServerException catch (e) {
+      _rethrowCapped(e);
+    }
   }
 
   @override

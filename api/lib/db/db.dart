@@ -27,6 +27,19 @@ part 'workouts.dart';
 
 abstract class _DatabaseBase {
   Pool get _pool;
+
+  /// Translates the DB-enforced volume ceilings into 400s. Every such trigger
+  /// (imported workouts per user, sets/exercises per workout or template,
+  /// custom exercises per user) raises `check_violation` with a
+  /// `<what> cap (<n>) exceeded for <owner>` message; hitting one is a client
+  /// exceeding its allowance, not a server fault. Anything else rethrows —
+  /// including genuine table CHECK violations, which are bugs.
+  Never _rethrowCapped(ServerException e) {
+    if (e.code == '23514' && e.message.contains(' cap (')) {
+      throw BadRequest(reason: 'limit reached: ${e.message.split(' exceeded').first}');
+    }
+    throw e;
+  }
 }
 
 class Database extends _DatabaseBase

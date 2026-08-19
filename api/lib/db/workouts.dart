@@ -60,11 +60,15 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required WorkoutRequest body,
     required String Function(String) imageUrl,
   }) async {
-    final rows = await _pool.execute(
-      _saveWorkout.toSql(),
-      parameters: body.toParams(),
-    );
-    return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
+    try {
+      final rows = await _pool.execute(
+        _saveWorkout.toSql(),
+        parameters: body.toParams(),
+      );
+      return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
+    } on ServerException catch (e) {
+      _rethrowCapped(e);
+    }
   }
 
   @override
@@ -74,12 +78,16 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required WorkoutRequest body,
     required String Function(String) imageUrl,
   }) async {
-    final rows = await _pool.execute(
-      _replaceWorkout.toSql(),
-      parameters: {'workoutId': workoutId, ...body.toParams()},
-    );
-    if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
-    return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
+    try {
+      final rows = await _pool.execute(
+        _replaceWorkout.toSql(),
+        parameters: {'workoutId': workoutId, ...body.toParams()},
+      );
+      if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
+      return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
+    } on ServerException catch (e) {
+      _rethrowCapped(e);
+    }
   }
 
   @override
@@ -121,19 +129,9 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
           'createCustom': createCustom == null ? null : jsonEncode(createCustom),
         },
       );
-      return WorkoutImportReport.fromRow(
-        rows.first.toColumnMap(),
-        source: batch.source,
-        rowsSkipped: batch.rowsSkipped,
-        workoutsDropped: batch.workoutsDropped,
-      );
+      return WorkoutImportReport.fromRow(rows.first.toColumnMap(), batch: batch);
     } on ServerException catch (e) {
-      // the workouts_imported_cap trigger refusing the write — the caller's
-      // account is at its imported-history ceiling, not a server fault
-      if (e.code == '23514' && (e.message.contains('imported workouts cap'))) {
-        throw const BadRequest(reason: 'import limit reached: an account holds at most 20000 imported workouts');
-      }
-      rethrow;
+      _rethrowCapped(e);
     }
   }
 
