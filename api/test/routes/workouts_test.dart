@@ -239,8 +239,10 @@ void main() {
       workoutsFound: 1,
       workoutsCreated: 1,
       setsCreated: 1,
+      setsSkipped: 0,
       exercisesMatched: 1,
       exercisesCreated: [],
+      exercisesSkipped: [],
       rowsSkipped: 0,
     );
 
@@ -249,19 +251,102 @@ void main() {
 
     test('parses the CSV and hands the batch to the service under the caller id', () async {
       when(
-        workouts.importWorkouts(userId: anyNamed('userId'), batch: anyNamed('batch')),
+        workouts.importWorkouts(
+          userId: anyNamed('userId'),
+          batch: anyNamed('batch'),
+          createCustom: anyNamed('createCustom'),
+        ),
       ).thenAnswer((_) async => report);
 
       final result = await importWorkouts(importReq());
 
       expect(result.toMap()['workoutsCreated'], 1);
-      final batch =
-          verify(
-                workouts.importWorkouts(userId: _meId, batch: captureAnyNamed('batch')),
-              ).captured.single
-              as WorkoutImport;
+      final captured = verify(
+        workouts.importWorkouts(
+          userId: _meId,
+          batch: captureAnyNamed('batch'),
+          createCustom: captureAnyNamed('createCustom'),
+        ),
+      ).captured;
+      final batch = captured.first as WorkoutImport;
       expect(batch.source, 'strong');
       expect(batch.workouts.single.name, 'Push Day');
+      // a raw CSV body carries no consent decision: create all
+      expect(captured.last, isNull);
+    });
+
+    test('a JSON envelope carries the consent decision alongside the CSV', () async {
+      when(
+        workouts.importWorkouts(
+          userId: anyNamed('userId'),
+          batch: anyNamed('batch'),
+          createCustom: anyNamed('createCustom'),
+        ),
+      ).thenAnswer((_) async => report);
+
+      final req = wire(
+        jsonRequest(
+          path: '/workouts/imports',
+          query: const {'source': 'strong'},
+          body: {'csv': csv, 'createCustom': ['Free motion Row']},
+        ),
+      );
+      await importWorkouts(req);
+
+      final captured = verify(
+        workouts.importWorkouts(
+          userId: _meId,
+          batch: captureAnyNamed('batch'),
+          createCustom: captureAnyNamed('createCustom'),
+        ),
+      ).captured;
+      expect((captured.first as WorkoutImport).workouts.single.name, 'Push Day');
+      expect(captured.last, ['Free motion Row']);
+    });
+
+    test('rejects an envelope whose createCustom is not a list of strings', () async {
+      final req = wire(
+        jsonRequest(
+          path: '/workouts/imports',
+          query: const {'source': 'strong'},
+          body: {'csv': csv, 'createCustom': 'Free motion Row'},
+        ),
+      );
+      await expectLater(importWorkouts(req), throwsA(isA<BadRequest>()));
+    });
+
+    test('dryRun=true previews instead of importing', () async {
+      const preview = WorkoutImportPreview(
+        source: 'strong',
+        workoutsFound: 1,
+        workoutsAlreadyImported: 0,
+        setsFound: 1,
+        exercisesMatched: 1,
+        exercisesUnmatched: [],
+        rowsSkipped: 0,
+      );
+      when(
+        workouts.previewImport(userId: anyNamed('userId'), batch: anyNamed('batch')),
+      ).thenAnswer((_) async => preview);
+
+      final result = await importWorkouts(importReq(query: {'source': 'strong', 'dryRun': 'true'}));
+
+      expect(result.toMap()['workoutsFound'], 1);
+      verify(workouts.previewImport(userId: _meId, batch: anyNamed('batch')));
+      verifyNever(
+        workouts.importWorkouts(
+          userId: anyNamed('userId'),
+          batch: anyNamed('batch'),
+          createCustom: anyNamed('createCustom'),
+        ),
+      );
+    });
+
+    test('rejects a malformed dryRun', () async {
+      await expectLater(
+        importWorkouts(importReq(query: {'source': 'strong', 'dryRun': 'yes'})),
+        throwsA(isA<BadRequest>()),
+      );
     });
 
     test('rejects a missing source', () async {
