@@ -23,6 +23,13 @@ class WorkoutImport {
   /// never comes close.
   static const maxWorkouts = 10000;
 
+  /// Hard cap on sets in a single workout. The gateway's body limit already
+  /// bounds a request, but ~10MB of minimal rows all naming the same workout
+  /// is still ~150k sets aimed at one row; a real workout tops out around a
+  /// hundred. The extra rows are dropped and counted, and the DB enforces its
+  /// own ceiling (1000/workout) behind this for every write path.
+  static const maxSetsPerWorkout = 500;
+
   final String source;
   final List<ImportedWorkout> workouts;
 
@@ -32,11 +39,15 @@ class WorkoutImport {
   /// Workouts beyond [maxWorkouts], dropped oldest-first.
   final int workoutsDropped;
 
+  /// Sets beyond [maxSetsPerWorkout] in their workout, dropped in file order.
+  final int setsDropped;
+
   new _({
     required this.source,
     required this.workouts,
     required this.rowsSkipped,
     required this.workoutsDropped,
+    required this.setsDropped,
   });
 
   /// Distinct exercise names across the batch, each with a category/target
@@ -96,8 +107,8 @@ class WorkoutImport {
   /// export; individual bad rows are skipped and counted instead.
   factory fromStrongCsv(
     String csv, {
-    MeasurementUnit unit = MeasurementUnit.metric,
-    Duration utcOffset = Duration.zero,
+    MeasurementUnit unit = .metric,
+    Duration utcOffset = .zero,
   }) {
     final delimiter = _detectDelimiter(csv);
     final rows = parseCsv(csv, delimiter: delimiter);
@@ -147,6 +158,7 @@ class WorkoutImport {
     }
 
     var skipped = 0;
+    var setsDropped = 0;
     final builders = <String, _WorkoutBuilder>{};
     for (final row in rows.skip(1).map(repaired)) {
       try {
@@ -175,7 +187,7 @@ class WorkoutImport {
             },
           );
         });
-        builder.exercise(exercise).add(set);
+        if (!builder.add(exercise, set)) setsDropped++;
       } on FormatException {
         skipped++;
       }
@@ -187,13 +199,17 @@ class WorkoutImport {
       final kept = Set<ImportedWorkout>.identity()..addAll(byRecency.take(maxWorkouts));
       dropped = workouts.length - maxWorkouts;
       // filter rather than take the sorted list, preserving file order
-      workouts = [for (final w in workouts) if (kept.contains(w)) w];
+      workouts = [
+        for (final w in workouts)
+          if (kept.contains(w)) w,
+      ];
     }
     return WorkoutImport._(
       source: 'strong',
       workouts: workouts,
       rowsSkipped: skipped,
       workoutsDropped: dropped,
+      setsDropped: setsDropped,
     );
   }
 }
@@ -275,6 +291,9 @@ class WorkoutImportReport implements Model {
   /// Workouts beyond the per-import cap, dropped oldest-first at parse time.
   final int workoutsDropped;
 
+  /// Sets beyond the per-workout cap, dropped in file order at parse time.
+  final int setsDropped;
+
   const new({
     required this.source,
     required this.workoutsFound,
@@ -286,18 +305,14 @@ class WorkoutImportReport implements Model {
     required this.exercisesSkipped,
     required this.rowsSkipped,
     required this.workoutsDropped,
+    required this.setsDropped,
   });
 
   int get workoutsSkipped => workoutsFound - workoutsCreated;
 
-  factory fromRow(
-    Map<String, dynamic> row, {
-    required String source,
-    required int rowsSkipped,
-    required int workoutsDropped,
-  }) {
+  factory fromRow(Map<String, dynamic> row, {required WorkoutImport batch}) {
     return WorkoutImportReport(
-      source: source,
+      source: batch.source,
       workoutsFound: row['workouts_found'],
       workoutsCreated: row['workouts_created'],
       setsCreated: row['sets_created'],
@@ -305,8 +320,9 @@ class WorkoutImportReport implements Model {
       exercisesMatched: row['exercises_matched'],
       exercisesCreated: (row['exercises_created'] as List).cast<String>(),
       exercisesSkipped: (row['exercises_skipped'] as List).cast<String>(),
-      rowsSkipped: rowsSkipped,
-      workoutsDropped: workoutsDropped,
+      rowsSkipped: batch.rowsSkipped,
+      workoutsDropped: batch.workoutsDropped,
+      setsDropped: batch.setsDropped,
     );
   }
 
@@ -320,6 +336,7 @@ class WorkoutImportReport implements Model {
       'workoutsDropped': workoutsDropped,
       'setsCreated': setsCreated,
       'setsSkipped': setsSkipped,
+      'setsDropped': setsDropped,
       'exercisesMatched': exercisesMatched,
       'exercisesCreated': exercisesCreated,
       'exercisesSkipped': exercisesSkipped,
@@ -350,6 +367,9 @@ class WorkoutImportPreview implements Model {
   /// recent slice of an oversized file would import.
   final int workoutsDropped;
 
+  /// Sets beyond the per-workout cap, dropped in file order at parse time.
+  final int setsDropped;
+
   const new({
     required this.source,
     required this.workoutsFound,
@@ -359,6 +379,7 @@ class WorkoutImportPreview implements Model {
     required this.exercisesUnmatched,
     required this.rowsSkipped,
     required this.workoutsDropped,
+    required this.setsDropped,
   });
 
   /// Combines the resolve query's row (which names matched, which identities
@@ -377,6 +398,7 @@ class WorkoutImportPreview implements Model {
       ],
       rowsSkipped: batch.rowsSkipped,
       workoutsDropped: batch.workoutsDropped,
+      setsDropped: batch.setsDropped,
     );
   }
 
@@ -388,6 +410,7 @@ class WorkoutImportPreview implements Model {
       'workoutsAlreadyImported': workoutsAlreadyImported,
       'workoutsDropped': workoutsDropped,
       'setsFound': setsFound,
+      'setsDropped': setsDropped,
       'exercisesMatched': exercisesMatched,
       'exercisesUnmatched': [
         for (final (:name, :sets) in exercisesUnmatched) {'name': name, 'sets': sets},
@@ -453,10 +476,17 @@ class _WorkoutBuilder {
   final DateTime start;
   final DateTime? end;
   final _exercises = <String, List<ImportedSet>>{};
+  var _totalSets = 0;
 
   new({required this.importId, required this.name, required this.start, required this.end});
 
-  List<ImportedSet> exercise(String name) => _exercises.putIfAbsent(name, () => []);
+  /// Adds the set unless the workout is already at [WorkoutImport.maxSetsPerWorkout].
+  bool add(String exercise, ImportedSet set) {
+    if (_totalSets >= WorkoutImport.maxSetsPerWorkout) return false;
+    _totalSets++;
+    _exercises.putIfAbsent(exercise, () => []).add(set);
+    return true;
+  }
 
   ImportedWorkout build() {
     return ImportedWorkout(
