@@ -53,10 +53,25 @@ void main() {
       expect(shifted.workouts.first.start, DateTime.utc(2023, 1, 15, 15, 35, 12));
     });
 
-    test('derives a deterministic import id from the source row', () {
-      expect(batch.workouts.first.importId, 'strong:2023-01-15 17:35:12#Push Day');
+    test('derives a deterministic, opaque import id from the source row', () {
+      // sha256('2023-01-15 17:35:12|Push Day') — pinned so a hash-input change
+      // (which would orphan dedup against already-imported rows) fails loudly
+      expect(batch.workouts.first.importId, 'strong:b5f8d5d78f2427ef');
       final again = WorkoutImport.fromStrongCsv(_strongCsv);
       expect(again.workouts.first.importId, batch.workouts.first.importId);
+    });
+
+    test('import ids are distinct per workout and leak nothing of the source', () {
+      final ids = batch.workouts.map((w) => w.importId).toSet();
+      expect(ids, hasLength(batch.workouts.length));
+      for (final id in ids) {
+        expect(id, matches(r'^strong:[0-9a-f]{16}$'));
+      }
+    });
+
+    test('the import id ignores the tz offset, so re-uploads from another timezone still dedup', () {
+      final shifted = WorkoutImport.fromStrongCsv(_strongCsv, utcOffset: const Duration(hours: 2));
+      expect(shifted.workouts.first.importId, batch.workouts.first.importId);
     });
 
     test('lists distinct exercises with inferred categories', () {
@@ -164,7 +179,7 @@ void main() {
       expect(params['userId'], 'u1');
       expect(params['workouts'], isA<String>());
       expect(params['exercises'], isA<String>());
-      expect(params['workouts'], contains('"importId":"strong:2023-01-15 17:35:12#Push Day"'));
+      expect(params['workouts'], contains('"importId":"strong:b5f8d5d78f2427ef"'));
     });
 
     test('set payload omits null measurements', () {
@@ -178,8 +193,10 @@ void main() {
           'workouts_found': 10,
           'workouts_created': 7,
           'sets_created': 120,
+          'sets_skipped': 4,
           'exercises_matched': 15,
           'exercises_created': ['Custom Curl'],
+          'exercises_skipped': ['Free motion Row'],
         },
         source: 'strong',
         rowsSkipped: 2,
@@ -190,9 +207,42 @@ void main() {
         'workoutsCreated': 7,
         'workoutsSkipped': 3,
         'setsCreated': 120,
+        'setsSkipped': 4,
         'exercisesMatched': 15,
         'exercisesCreated': ['Custom Curl'],
+        'exercisesSkipped': ['Free motion Row'],
         'rowsSkipped': 2,
+      });
+    });
+
+    test('counts sets per exercise name across the batch', () {
+      final batch = WorkoutImport.fromStrongCsv(_strongCsv);
+      expect(batch.setsByExercise['Bench Press (Barbell)'], 2);
+      expect(batch.setsByExercise['Running'], 1);
+      expect(batch.setsFound, 6);
+    });
+
+    test('preview combines the resolve row with counts from the batch', () {
+      final batch = WorkoutImport.fromStrongCsv(_strongCsv);
+      final preview = WorkoutImportPreview.fromRow(
+        {
+          'workouts_already_imported': 1,
+          'exercises_matched': ['Bench Press (Barbell)', 'Running'],
+        },
+        batch: batch,
+      );
+      expect(preview.toMap(), {
+        'source': 'strong',
+        'workoutsFound': 3,
+        'workoutsAlreadyImported': 1,
+        'setsFound': 6,
+        'exercisesMatched': 2,
+        'exercisesUnmatched': [
+          {'name': 'Fly, Seated (Cable)', 'sets': 1},
+          {'name': 'Plank', 'sets': 1},
+          {'name': 'Sit Up', 'sets': 1},
+        ],
+        'rowsSkipped': 0,
       });
     });
   });
