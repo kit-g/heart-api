@@ -2,13 +2,19 @@ import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
+import 'package:heart/middleware/aws.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/imports.dart';
 import 'package:heart/models/pagination.dart';
 import 'package:heart/models/workouts.dart';
+import 'package:heart_aws/heart_aws.dart';
 import 'package:heart_models/heart_models.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:relic/relic.dart';
+
+final _logger = logging.Logger('Workouts');
 
 Future<Paginated<Workout>> getTargetUserWorkouts(Request request) =>
     getTargetUserWorkoutsFor(request, request.rawPathParameters[#targetUserId]!);
@@ -64,11 +70,35 @@ Future<Model> importWorkouts(Request request) async {
   if (input.dryRun) {
     return request.workoutsService.previewImport(userId: request.userId, batch: input.batch);
   }
-  return request.workoutsService.importWorkouts(
+  final report = await request.workoutsService.importWorkouts(
     userId: request.userId,
     batch: input.batch,
     createCustom: input.createCustom,
   );
+  await _monitorLargeImport(request, report);
+  return report;
+}
+
+/// A big import is legitimate exactly once per user per source app — worth a
+/// human glance either way. Best-effort: monitoring must never fail the
+/// import that just succeeded.
+Future<void> _monitorLargeImport(Request request, WorkoutImportReport report) async {
+  if (report.workoutsCreated < 500 && report.setsCreated < 5000) return;
+  try {
+    final sns = Sns(
+      credentialsProvider: request.awsConfig.credentialsProvider,
+      region: request.awsConfig.region,
+    );
+    await sns.publish(
+      topicArn: request.config.monitoringTopicArn,
+      subject: 'Large workout import',
+      message:
+          'User ${request.userId} just imported ${report.workoutsCreated} workouts '
+          '(${report.setsCreated} sets) from ${report.source}.',
+    );
+  } catch (e, st) {
+    _logger.warning('failed to publish the large-import alert', e, st);
+  }
 }
 
 Future<Workout> updateWorkout(Request request) async {
