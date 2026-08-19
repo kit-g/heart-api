@@ -3,14 +3,18 @@ part of 'db.dart';
 mixin _Templates on _DatabaseBase implements ApiTemplateService {
   @override
   Future<Template> createTemplate({required String userId, required TemplateRequest body}) async {
-    final rows = await _pool.execute(
-      _saveTemplate.toSql(),
-      parameters: body.toParams(),
-    );
-    // The insert selects no row when `folderId` names a folder the user does not
-    // own — the only way a create can come back empty.
-    if (rows.isEmpty) throw NotFound(type: 'TemplateFolder', id: body.folderId ?? '');
-    return Template.fromRow(rows.first.toColumnMap());
+    try {
+      final rows = await _pool.execute(
+        _saveTemplate.toSql(),
+        parameters: body.toParams(),
+      );
+      // The insert selects no row when `folderId` names a folder the user does not
+      // own — the only way a create can come back empty.
+      if (rows.isEmpty) throw NotFound(type: 'TemplateFolder', id: body.folderId ?? '');
+      return Template.fromRow(rows.first.toColumnMap());
+    } on ServerException catch (e) {
+      _rethrowCapped(e);
+    }
   }
 
   @override
@@ -19,12 +23,16 @@ mixin _Templates on _DatabaseBase implements ApiTemplateService {
     required String templateId,
     required TemplateRequest body,
   }) async {
-    final rows = await _pool.execute(
-      _replaceTemplate.toSql(),
-      parameters: {'templateId': templateId, 'movesFolder': body.movesFolder, ...body.toParams()},
-    );
-    if (rows.isEmpty) throw NotFound(type: 'Template', id: templateId);
-    return Template.fromRow(rows.first.toColumnMap());
+    try {
+      final rows = await _pool.execute(
+        _replaceTemplate.toSql(),
+        parameters: {'templateId': templateId, 'movesFolder': body.movesFolder, ...body.toParams()},
+      );
+      if (rows.isEmpty) throw NotFound(type: 'Template', id: templateId);
+      return Template.fromRow(rows.first.toColumnMap());
+    } on ServerException catch (e) {
+      _rethrowCapped(e);
+    }
   }
 
   @override
