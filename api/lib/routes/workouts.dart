@@ -5,7 +5,6 @@ import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/errors.dart';
-import 'package:heart/models/imports.dart';
 import 'package:heart/models/pagination.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart';
@@ -57,11 +56,19 @@ Future<Workout> createWorkout(Request request) async {
 }
 
 /// Bulk import of another app's CSV export; responds with a report of what
-/// was created, skipped (already imported), and which exercises had to be
-/// created as the user's customs.
-Future<WorkoutImportReport> importWorkouts(Request request) async {
+/// was created, skipped (already imported or declined), and which exercises
+/// were created as the user's customs. With `dryRun=true`, writes nothing and
+/// responds with the preview instead — the input for the consent step.
+Future<Model> importWorkouts(Request request) async {
   final input = await ImportWorkoutsIn.fromRequest(request);
-  return request.workoutsService.importWorkouts(userId: request.userId, batch: input.batch);
+  if (input.dryRun) {
+    return request.workoutsService.previewImport(userId: request.userId, batch: input.batch);
+  }
+  return request.workoutsService.importWorkouts(
+    userId: request.userId,
+    batch: input.batch,
+    createCustom: input.createCustom,
+  );
 }
 
 Future<Workout> updateWorkout(Request request) async {
