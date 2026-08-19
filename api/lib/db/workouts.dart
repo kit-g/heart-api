@@ -113,18 +113,28 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required WorkoutImport batch,
     List<String>? createCustom,
   }) async {
-    final rows = await _pool.execute(
-      _importWorkouts.toSql(),
-      parameters: {
-        ...batch.toParams(userId: userId),
-        'createCustom': createCustom == null ? null : jsonEncode(createCustom),
-      },
-    );
-    return WorkoutImportReport.fromRow(
-      rows.first.toColumnMap(),
-      source: batch.source,
-      rowsSkipped: batch.rowsSkipped,
-    );
+    try {
+      final rows = await _pool.execute(
+        _importWorkouts.toSql(),
+        parameters: {
+          ...batch.toParams(userId: userId),
+          'createCustom': createCustom == null ? null : jsonEncode(createCustom),
+        },
+      );
+      return WorkoutImportReport.fromRow(
+        rows.first.toColumnMap(),
+        source: batch.source,
+        rowsSkipped: batch.rowsSkipped,
+        workoutsDropped: batch.workoutsDropped,
+      );
+    } on ServerException catch (e) {
+      // the workouts_imported_cap trigger refusing the write — the caller's
+      // account is at its imported-history ceiling, not a server fault
+      if (e.code == '23514' && (e.message.contains('imported workouts cap'))) {
+        throw const BadRequest(reason: 'import limit reached: an account holds at most 20000 imported workouts');
+      }
+      rethrow;
+    }
   }
 
   @override

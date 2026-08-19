@@ -16,13 +16,28 @@ import 'package:heart_models/heart_models.dart';
 /// Measurements are canonical metric (kg, km, seconds) regardless of the
 /// export's display unit — matching what the client stores.
 class WorkoutImport {
+  /// Hard cap per import: a bigger export keeps only its most recent
+  /// workouts by start time. Guards the single-statement DB write (and the
+  /// server's memory) against an arbitrarily large or maliciously infinite
+  /// file; a decade of daily training is ~3.7k workouts, so a real export
+  /// never comes close.
+  static const maxWorkouts = 10000;
+
   final String source;
   final List<ImportedWorkout> workouts;
 
   /// Data rows that failed to parse and were left out of the batch.
   final int rowsSkipped;
 
-  new _({required this.source, required this.workouts, required this.rowsSkipped});
+  /// Workouts beyond [maxWorkouts], dropped oldest-first.
+  final int workoutsDropped;
+
+  new _({
+    required this.source,
+    required this.workouts,
+    required this.rowsSkipped,
+    required this.workoutsDropped,
+  });
 
   /// Distinct exercise names across the batch, each with a category/target
   /// guess for the ones that turn out not to exist and need to be created as
@@ -165,10 +180,20 @@ class WorkoutImport {
         skipped++;
       }
     }
+    var workouts = [for (final b in builders.values) b.build()];
+    var dropped = 0;
+    if (workouts.length > maxWorkouts) {
+      final byRecency = [...workouts]..sort((a, b) => b.start.compareTo(a.start));
+      final kept = Set<ImportedWorkout>.identity()..addAll(byRecency.take(maxWorkouts));
+      dropped = workouts.length - maxWorkouts;
+      // filter rather than take the sorted list, preserving file order
+      workouts = [for (final w in workouts) if (kept.contains(w)) w];
+    }
     return WorkoutImport._(
       source: 'strong',
-      workouts: [for (final b in builders.values) b.build()],
+      workouts: workouts,
       rowsSkipped: skipped,
+      workoutsDropped: dropped,
     );
   }
 }
@@ -247,6 +272,9 @@ class WorkoutImportReport implements Model {
   final List<String> exercisesSkipped;
   final int rowsSkipped;
 
+  /// Workouts beyond the per-import cap, dropped oldest-first at parse time.
+  final int workoutsDropped;
+
   const new({
     required this.source,
     required this.workoutsFound,
@@ -257,11 +285,17 @@ class WorkoutImportReport implements Model {
     required this.exercisesCreated,
     required this.exercisesSkipped,
     required this.rowsSkipped,
+    required this.workoutsDropped,
   });
 
   int get workoutsSkipped => workoutsFound - workoutsCreated;
 
-  factory fromRow(Map<String, dynamic> row, {required String source, required int rowsSkipped}) {
+  factory fromRow(
+    Map<String, dynamic> row, {
+    required String source,
+    required int rowsSkipped,
+    required int workoutsDropped,
+  }) {
     return WorkoutImportReport(
       source: source,
       workoutsFound: row['workouts_found'],
@@ -272,6 +306,7 @@ class WorkoutImportReport implements Model {
       exercisesCreated: (row['exercises_created'] as List).cast<String>(),
       exercisesSkipped: (row['exercises_skipped'] as List).cast<String>(),
       rowsSkipped: rowsSkipped,
+      workoutsDropped: workoutsDropped,
     );
   }
 
@@ -282,6 +317,7 @@ class WorkoutImportReport implements Model {
       'workoutsFound': workoutsFound,
       'workoutsCreated': workoutsCreated,
       'workoutsSkipped': workoutsSkipped,
+      'workoutsDropped': workoutsDropped,
       'setsCreated': setsCreated,
       'setsSkipped': setsSkipped,
       'exercisesMatched': exercisesMatched,
@@ -309,6 +345,11 @@ class WorkoutImportPreview implements Model {
   final List<({String name, int sets})> exercisesUnmatched;
   final int rowsSkipped;
 
+  /// Workouts beyond the per-import cap, dropped oldest-first at parse time —
+  /// surfaced here so the user learns *before* committing that only the most
+  /// recent slice of an oversized file would import.
+  final int workoutsDropped;
+
   const new({
     required this.source,
     required this.workoutsFound,
@@ -317,6 +358,7 @@ class WorkoutImportPreview implements Model {
     required this.exercisesMatched,
     required this.exercisesUnmatched,
     required this.rowsSkipped,
+    required this.workoutsDropped,
   });
 
   /// Combines the resolve query's row (which names matched, which identities
@@ -334,6 +376,7 @@ class WorkoutImportPreview implements Model {
           if (!matched.contains(name)) (name: name, sets: sets),
       ],
       rowsSkipped: batch.rowsSkipped,
+      workoutsDropped: batch.workoutsDropped,
     );
   }
 
@@ -343,6 +386,7 @@ class WorkoutImportPreview implements Model {
       'source': source,
       'workoutsFound': workoutsFound,
       'workoutsAlreadyImported': workoutsAlreadyImported,
+      'workoutsDropped': workoutsDropped,
       'setsFound': setsFound,
       'exercisesMatched': exercisesMatched,
       'exercisesUnmatched': [
