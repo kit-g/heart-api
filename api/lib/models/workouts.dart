@@ -62,7 +62,21 @@ abstract interface class ApiWorkoutService {
   /// exercises it references, then inserts the workouts that aren't already
   /// imported (matched on their deterministic import id, so re-runs are
   /// no-ops).
+  ///
+  /// [createCustom] is the user's consent decision from the preview: the
+  /// unmatched names to create as their custom exercises. Null means create
+  /// all (the legacy, no-preview flow); declined names have their sets
+  /// skipped and counted in the report.
   Future<WorkoutImportReport> importWorkouts({
+    required String userId,
+    required WorkoutImport batch,
+    List<String>? createCustom,
+  });
+
+  /// The read-only half of a two-phase import: what [importWorkouts] would
+  /// do with [batch] — how many workouts are new vs already imported, and
+  /// which exercise names would need creating — without writing anything.
+  Future<WorkoutImportPreview> previewImport({
     required String userId,
     required WorkoutImport batch,
   });
