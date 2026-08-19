@@ -124,6 +124,16 @@ extension on Map<String, String> {
     }
   }
 
+  /// Optional boolean query param; absent or empty means [orElse].
+  bool boolean(String field, {bool orElse = false}) {
+    return switch (stringOrNull(field)) {
+      null => orElse,
+      'true' => true,
+      'false' => false,
+      final s => throw BadRequest(reason: '$field must be true or false, got: $s'),
+    };
+  }
+
   /// Required integer with optional [min]/[max] clamping. Supply [defaultValue]
   /// to make the param optional.
   int integer(String field, {int? min, int? max, int? defaultValue}) {
