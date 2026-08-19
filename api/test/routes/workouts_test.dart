@@ -245,6 +245,7 @@ void main() {
       exercisesSkipped: [],
       rowsSkipped: 0,
       workoutsDropped: 0,
+      setsDropped: 0,
     );
 
     Request importReq({String body = csv, Map<String, String> query = const {'source': 'strong'}}) =>
@@ -289,7 +290,10 @@ void main() {
         jsonRequest(
           path: '/workouts/imports',
           query: const {'source': 'strong'},
-          body: {'csv': csv, 'createCustom': ['Free motion Row']},
+          body: {
+            'csv': csv,
+            'createCustom': ['Free motion Row'],
+          },
         ),
       );
       await importWorkouts(req);
@@ -326,6 +330,7 @@ void main() {
         exercisesUnmatched: [],
         rowsSkipped: 0,
         workoutsDropped: 0,
+        setsDropped: 0,
       );
       when(
         workouts.previewImport(userId: anyNamed('userId'), batch: anyNamed('batch')),
@@ -342,6 +347,35 @@ void main() {
           createCustom: anyNamed('createCustom'),
         ),
       );
+    });
+
+    test('a large import triggers the monitoring alert without ever failing the request', () async {
+      // 600 workouts created crosses the alert threshold; the test request
+      // carries no AWS context, so the publish attempt itself throws — the
+      // handler must swallow that and still return the report
+      const large = WorkoutImportReport(
+        source: 'strong',
+        workoutsFound: 600,
+        workoutsCreated: 600,
+        setsCreated: 600,
+        setsSkipped: 0,
+        exercisesMatched: 1,
+        exercisesCreated: [],
+        exercisesSkipped: [],
+        rowsSkipped: 0,
+        workoutsDropped: 0,
+        setsDropped: 0,
+      );
+      when(
+        workouts.importWorkouts(
+          userId: anyNamed('userId'),
+          batch: anyNamed('batch'),
+          createCustom: anyNamed('createCustom'),
+        ),
+      ).thenAnswer((_) async => large);
+
+      final result = await importWorkouts(importReq());
+      expect(result.toMap()['workoutsCreated'], 600);
     });
 
     test('rejects a malformed dryRun', () async {

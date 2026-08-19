@@ -292,6 +292,27 @@ void main() {
     });
   });
 
+  test('an account at the custom-exercises ceiling gets a 400 instead of import-created customs', () async {
+    final collector = await freshProfile();
+    await h.exec(
+      'INSERT INTO exercises (name, category, target, user_id) '
+      "SELECT 'cap test ' || @id || ' ' || n, 'Barbell', 'Other', @id FROM generate_series(1, 2000) n",
+      {'id': collector},
+    );
+
+    // csv() carries two names this user has never seen — creating them would
+    // cross the 2000-customs ceiling, so the whole import is refused
+    await expectLater(
+      h.db.importWorkouts(userId: collector, batch: WorkoutImport.fromStrongCsv(csv())),
+      throwsA(isA<BadRequest>()),
+    );
+    final count = await h.exec(
+      'SELECT count(*)::int AS n FROM workouts WHERE user_id = @id',
+      {'id': collector},
+    );
+    expect(count.first.toColumnMap()['n'], 0);
+  });
+
   test('an account at the DB-enforced import ceiling gets a 400, not a 500', () async {
     final hoarder = await freshProfile();
     // fill to exactly the cap; the workouts_imported_cap trigger allows this
