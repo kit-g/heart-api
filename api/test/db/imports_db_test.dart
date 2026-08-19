@@ -1,6 +1,7 @@
 @Tags(['db'])
 library;
 
+import 'package:heart/models/errors.dart';
 import 'package:heart/models/imports.dart';
 import 'package:test/test.dart';
 
@@ -289,6 +290,35 @@ void main() {
       expect(report.exercisesCreated, containsAll([customName, cardioName]));
       expect(report.exercisesSkipped, isEmpty);
     });
+  });
+
+  test('an account at the DB-enforced import ceiling gets a 400, not a 500', () async {
+    final hoarder = await freshProfile();
+    // fill to exactly the cap; the workouts_imported_cap trigger allows this
+    await h.exec(
+      'INSERT INTO workouts (user_id, started_at, import_id) '
+      "SELECT @id, now() - (n || ' hours')::interval, 'strong:' || lpad(to_hex(n), 16, '0') "
+      'FROM generate_series(1, 20000) n',
+      {'id': hoarder},
+    );
+
+    await expectLater(
+      h.db.importWorkouts(userId: hoarder, batch: WorkoutImport.fromStrongCsv(csv())),
+      throwsA(isA<BadRequest>()),
+    );
+
+    // the refused batch wrote nothing — neither workouts nor customs
+    final counts = await h.exec(
+      'SELECT (SELECT count(*) FROM workouts WHERE user_id = @id)::int AS workouts, '
+      '       (SELECT count(*) FROM exercises WHERE user_id = @id)::int AS exercises',
+      {'id': hoarder},
+    );
+    expect(counts.first.toColumnMap(), {'workouts': 20000, 'exercises': 0});
+
+    // drop the bulk rows here (and their archive copies) rather than letting
+    // teardown route 20k rows through the delete-archival trigger for keeps
+    await h.exec('DELETE FROM workouts WHERE user_id = @id', {'id': hoarder});
+    await h.exec('DELETE FROM archive.deleted_workouts WHERE user_id = @id', {'id': hoarder});
   });
 }
 
