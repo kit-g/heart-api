@@ -63,6 +63,60 @@ void main() {
   tearDownAll(h.teardownDatabase);
 
   group('createWorkout', () {
+    test('a workout stuffed past the DB set ceiling gets a 400, not a 500', () async {
+      final exName = h.uniqueName('Ex');
+      await h.seedGlobalExercise(name: exName);
+      final stuffed = WorkoutRequest(
+        userId: ownerId,
+        body: {
+          'name': 'Stuffed',
+          'start': DateTime.utc(2026, 7, 25, 10).toIso8601String(),
+          'exercises': [
+            {
+              'exercise': exName,
+              'order': 0,
+              'sets': [
+                for (var n = 0; n < 1001; n++) {'weight': 100, 'reps': 5, 'completed': true},
+              ],
+            },
+          ],
+        },
+      );
+
+      await expectLater(
+        h.db.createWorkout(userId: ownerId, body: stuffed, imageUrl: imageUrl),
+        throwsA(isA<BadRequest>()),
+      );
+      // the refused write left no workout behind
+      final count = await h.exec(
+        "SELECT count(*)::int AS n FROM workouts WHERE user_id = @id AND name = 'Stuffed'",
+        {'id': ownerId},
+      );
+      expect(count.first.toColumnMap()['n'], 0);
+    });
+
+    test('a workout stuffed with set-less exercise entries gets a 400, not a 500', () async {
+      final exName = h.uniqueName('Ex');
+      await h.seedGlobalExercise(name: exName);
+      final stuffed = WorkoutRequest(
+        userId: ownerId,
+        body: {
+          'name': 'Exercise-stuffed',
+          'start': DateTime.utc(2026, 7, 25, 10).toIso8601String(),
+          'exercises': [
+            // empty sets, so the sets ceiling never sees these — the
+            // workout_exercises ceiling must
+            for (var n = 0; n < 1001; n++) {'exercise': exName, 'order': n, 'sets': <Object>[]},
+          ],
+        },
+      );
+
+      await expectLater(
+        h.db.createWorkout(userId: ownerId, body: stuffed, imageUrl: imageUrl),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
     test('persists the workout with its resolved exercise and set', () async {
       final exName = h.uniqueName('Ex');
       await h.seedGlobalExercise(name: exName);
