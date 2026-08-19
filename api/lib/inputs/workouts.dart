@@ -12,20 +12,32 @@ part of 'inputs.dart';
 /// `calories` exists on PATCH because wearable energy totals settle after the
 /// workout is saved: HealthKit delivers the final active-energy figure minutes
 /// later, and the device patches it in once known.
-/// `POST /workouts/imports?source=strong` — a raw CSV export in the body,
-/// parsed and unit-normalized here so the route layer only ever sees the
-/// canonical [WorkoutImport] batch.
+/// `POST /workouts/imports?source=strong` — a Strong CSV export, parsed and
+/// unit-normalized here so the route layer only ever sees the canonical
+/// [WorkoutImport] batch.
+///
+/// Two body shapes:
+/// - raw CSV (`text/csv` or anything non-JSON): the one-shot import — every
+///   unmatched exercise name is created as the user's custom.
+/// - JSON envelope `{"csv": "...", "createCustom": ["name", ...]}`: the
+///   commit half of a preview→commit flow. `createCustom` is the allowlist of
+///   unmatched names the user approved; absent means approve all, present
+///   (even empty) means exactly those and no others.
 ///
 /// Query params:
 /// - `source` (required): the exporting app; only `strong` so far.
+/// - `dryRun` (optional, default `false`): parse and resolve only — write
+///   nothing, respond with the would-be report.
 /// - `unit` (optional, `metric`|`imperial`, default `metric`): fallback for
 ///   exports that carry no unit columns of their own.
 /// - `tzOffset` (optional, `±HH:MM`): the exporting device's UTC offset —
 ///   Strong timestamps are naive local time.
 class ImportWorkoutsIn {
   final WorkoutImport batch;
+  final bool dryRun;
+  final List<String>? createCustom;
 
-  const new _(this.batch);
+  const new _(this.batch, {required this.dryRun, this.createCustom});
 
   static Future<ImportWorkoutsIn> fromRequest(Request req) async {
     final q = req.url.queryParameters;
@@ -33,6 +45,7 @@ class ImportWorkoutsIn {
     if (source != 'strong') {
       throw BadRequest(reason: 'unsupported source: $source (supported: strong)');
     }
+    final dryRun = q.boolean('dryRun');
     final unit = switch (q.stringOrNull('unit')) {
       null => MeasurementUnit.metric,
       _ => q.parsed('unit', MeasurementUnit.fromString),
@@ -41,12 +54,27 @@ class ImportWorkoutsIn {
       null => Duration.zero,
       _ => q.parsed('tzOffset', _tzOffset),
     };
-    final csv = await req.text();
+    final (csv, createCustom) = await _body(req);
     try {
-      return ImportWorkoutsIn._(WorkoutImport.fromStrongCsv(csv, unit: unit, utcOffset: offset));
+      return ImportWorkoutsIn._(
+        WorkoutImport.fromStrongCsv(csv, unit: unit, utcOffset: offset),
+        dryRun: dryRun,
+        createCustom: createCustom,
+      );
     } on FormatException catch (e) {
       throw BadRequest(reason: 'not a readable Strong export: ${e.message}');
     }
+  }
+
+  static Future<(String, List<String>?)> _body(Request req) async {
+    if (req.body.bodyType?.mimeType != MimeType.json) return (await req.text(), null);
+    final json = await req.json();
+    final createCustom = switch (json['createCustom']) {
+      null => null,
+      List l when l.every((e) => e is String) => l.cast<String>(),
+      _ => throw const BadRequest(reason: 'createCustom must be a list of strings'),
+    };
+    return (json.string('csv'), createCustom);
   }
 
   static Duration _tzOffset(String raw) {
