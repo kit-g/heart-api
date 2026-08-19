@@ -137,8 +137,29 @@ void main() {
       expect(batch.workouts.last.name, 'W${WorkoutImport.maxWorkouts + 49}');
     });
 
-    test('an export within the cap drops nothing', () {
+    test('an export within the caps drops nothing', () {
       expect(batch.workoutsDropped, 0);
+      expect(batch.setsDropped, 0);
+    });
+
+    test('a workout stuffed past the per-workout set cap keeps only its first sets', () {
+      final buffer = StringBuffer('Date,Workout Name,Duration,Exercise Name,Weight,Reps\n');
+      for (var n = 0; n < WorkoutImport.maxSetsPerWorkout + 30; n++) {
+        // spread across two exercises — the cap is per workout, not per exercise
+        buffer.writeln('2023-01-15 17:35:12,Stuffed,1h,Exercise ${n % 2},${n + 1},5');
+      }
+      // a second, normal workout must be untouched by its sibling's overflow
+      buffer.writeln('2023-01-16 08:00:00,Normal,1h,Running,0,5');
+      final batch = WorkoutImport.fromStrongCsv(buffer.toString());
+
+      expect(batch.setsDropped, 30);
+      expect(batch.workoutsDropped, 0);
+      final stuffed = batch.workouts.first;
+      final total = stuffed.exercises.fold(0, (n, e) => n + e.sets.length);
+      expect(total, WorkoutImport.maxSetsPerWorkout);
+      // survivors are the file's first rows: weights 1..cap
+      expect(stuffed.exercises.first.sets.first.weight, 1);
+      expect(batch.workouts.last.exercises.single.sets, hasLength(1));
     });
 
     test('rejects a file without the Strong columns', () {
@@ -212,30 +233,29 @@ void main() {
     test('report round-trips from a result row and derives workoutsSkipped', () {
       final report = WorkoutImportReport.fromRow(
         {
-          'workouts_found': 10,
-          'workouts_created': 7,
-          'sets_created': 120,
-          'sets_skipped': 4,
-          'exercises_matched': 15,
+          'workouts_found': 3,
+          'workouts_created': 2,
+          'sets_created': 5,
+          'sets_skipped': 1,
+          'exercises_matched': 4,
           'exercises_created': ['Custom Curl'],
           'exercises_skipped': ['Free motion Row'],
         },
-        source: 'strong',
-        rowsSkipped: 2,
-        workoutsDropped: 1,
+        batch: WorkoutImport.fromStrongCsv(_strongCsv),
       );
       expect(report.toMap(), {
         'source': 'strong',
-        'workoutsFound': 10,
-        'workoutsCreated': 7,
-        'workoutsSkipped': 3,
-        'workoutsDropped': 1,
-        'setsCreated': 120,
-        'setsSkipped': 4,
-        'exercisesMatched': 15,
+        'workoutsFound': 3,
+        'workoutsCreated': 2,
+        'workoutsSkipped': 1,
+        'workoutsDropped': 0,
+        'setsCreated': 5,
+        'setsSkipped': 1,
+        'setsDropped': 0,
+        'exercisesMatched': 4,
         'exercisesCreated': ['Custom Curl'],
         'exercisesSkipped': ['Free motion Row'],
-        'rowsSkipped': 2,
+        'rowsSkipped': 0,
       });
     });
 
@@ -261,6 +281,7 @@ void main() {
         'workoutsAlreadyImported': 1,
         'workoutsDropped': 0,
         'setsFound': 6,
+        'setsDropped': 0,
         'exercisesMatched': 2,
         'exercisesUnmatched': [
           {'name': 'Fly, Seated (Cable)', 'sets': 1},
