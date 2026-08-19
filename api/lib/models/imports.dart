@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:heart_models/heart_models.dart';
 
 /// Bulk workout import from another app's CSV export.
@@ -43,6 +44,20 @@ class WorkoutImport {
         {'name': name, 'category': _category(name, shape), 'target': 'Other'},
     ];
   }
+
+  /// Set counts per exercise name across the batch — what a declined name
+  /// would cost, surfaced in the preview so the user can decide informed.
+  Map<String, int> get setsByExercise {
+    final counts = <String, int>{};
+    for (final workout in workouts) {
+      for (final exercise in workout.exercises) {
+        counts[exercise.name] = (counts[exercise.name] ?? 0) + exercise.sets.length;
+      }
+    }
+    return counts;
+  }
+
+  int get setsFound => setsByExercise.values.fold(0, (total, n) => total + n);
 
   Map<String, dynamic> toParams({required String userId}) {
     return {
@@ -134,7 +149,7 @@ class WorkoutImport {
         final builder = builders.putIfAbsent('$rawDate $name', () {
           final start = _instant(rawDate, utcOffset);
           return _WorkoutBuilder(
-            importId: 'strong:$rawDate#${name ?? ''}',
+            importId: 'strong:${_opaque('$rawDate|${name ?? ''}')}',
             name: name,
             start: start,
             // a "duration" past 24h is a workout left running, not a window
@@ -217,12 +232,19 @@ class WorkoutImportReport implements Model {
   final int workoutsFound;
   final int workoutsCreated;
   final int setsCreated;
+
+  /// Sets left out because the user declined their unmatched exercise —
+  /// counted, never silently dropped. Excludes already-imported workouts.
+  final int setsSkipped;
   final int exercisesMatched;
 
   /// Names that had no catalog or custom counterpart and were created as the
   /// user's custom exercises — the candidates for promoting into the shared
   /// library.
   final List<String> exercisesCreated;
+
+  /// Unmatched names the user declined to create.
+  final List<String> exercisesSkipped;
   final int rowsSkipped;
 
   const new({
@@ -230,8 +252,10 @@ class WorkoutImportReport implements Model {
     required this.workoutsFound,
     required this.workoutsCreated,
     required this.setsCreated,
+    required this.setsSkipped,
     required this.exercisesMatched,
     required this.exercisesCreated,
+    required this.exercisesSkipped,
     required this.rowsSkipped,
   });
 
@@ -243,8 +267,10 @@ class WorkoutImportReport implements Model {
       workoutsFound: row['workouts_found'],
       workoutsCreated: row['workouts_created'],
       setsCreated: row['sets_created'],
+      setsSkipped: row['sets_skipped'],
       exercisesMatched: row['exercises_matched'],
       exercisesCreated: (row['exercises_created'] as List).cast<String>(),
+      exercisesSkipped: (row['exercises_skipped'] as List).cast<String>(),
       rowsSkipped: rowsSkipped,
     );
   }
@@ -257,8 +283,71 @@ class WorkoutImportReport implements Model {
       'workoutsCreated': workoutsCreated,
       'workoutsSkipped': workoutsSkipped,
       'setsCreated': setsCreated,
+      'setsSkipped': setsSkipped,
       'exercisesMatched': exercisesMatched,
       'exercisesCreated': exercisesCreated,
+      'exercisesSkipped': exercisesSkipped,
+      'rowsSkipped': rowsSkipped,
+    };
+  }
+}
+
+/// What an import *would* do — the `dryRun=true` response. Nothing is
+/// written; the interesting half is [exercisesUnmatched], which the client
+/// turns into the "bring these over as your own?" consent step.
+class WorkoutImportPreview implements Model {
+  final String source;
+  final int workoutsFound;
+
+  /// Workouts whose import identity is already in the user's history — a
+  /// commit would skip these.
+  final int workoutsAlreadyImported;
+  final int setsFound;
+  final int exercisesMatched;
+
+  /// Unmatched names with what declining each would cost, in batch order.
+  final List<({String name, int sets})> exercisesUnmatched;
+  final int rowsSkipped;
+
+  const new({
+    required this.source,
+    required this.workoutsFound,
+    required this.workoutsAlreadyImported,
+    required this.setsFound,
+    required this.exercisesMatched,
+    required this.exercisesUnmatched,
+    required this.rowsSkipped,
+  });
+
+  /// Combines the resolve query's row (which names matched, which identities
+  /// exist) with counts the parsed [batch] already knows.
+  factory fromRow(Map<String, dynamic> row, {required WorkoutImport batch}) {
+    final matched = ((row['exercises_matched'] as List).cast<String>()).toSet();
+    return WorkoutImportPreview(
+      source: batch.source,
+      workoutsFound: batch.workouts.length,
+      workoutsAlreadyImported: row['workouts_already_imported'],
+      setsFound: batch.setsFound,
+      exercisesMatched: matched.length,
+      exercisesUnmatched: [
+        for (final MapEntry(key: name, value: sets) in batch.setsByExercise.entries)
+          if (!matched.contains(name)) (name: name, sets: sets),
+      ],
+      rowsSkipped: batch.rowsSkipped,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'source': source,
+      'workoutsFound': workoutsFound,
+      'workoutsAlreadyImported': workoutsAlreadyImported,
+      'setsFound': setsFound,
+      'exercisesMatched': exercisesMatched,
+      'exercisesUnmatched': [
+        for (final (:name, :sets) in exercisesUnmatched) {'name': name, 'sets': sets},
+      ],
       'rowsSkipped': rowsSkipped,
     };
   }
@@ -342,6 +431,12 @@ String _detectDelimiter(String csv) {
   final firstLine = csv.split('\n').first;
   return !firstLine.contains(',') && firstLine.contains(';') ? ';' : ',';
 }
+
+/// Deterministic opaque token for an import identity: same source row →
+/// same token, but nothing of the row (names, dates) survives into a value
+/// that ends up in URLs and logs. 64 bits of sha256 — collision-free at any
+/// realistic per-user history size.
+String _opaque(String identity) => sha256.convert(utf8.encode(identity)).toString().substring(0, 16);
 
 /// `"Workout Name"` → `workoutname`, `"Weight (kg)"` → `weightkg`
 String _normalized(String header) => header.toLowerCase().replaceAll(RegExp('[^a-z]'), '');
