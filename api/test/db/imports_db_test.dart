@@ -292,6 +292,94 @@ void main() {
     });
   });
 
+  group('case-insensitive name resolution', () {
+    // the DB's own notion of exercise identity is (user_id, lower(name)) —
+    // resolution must agree with it, or a case-variant spelling either forks
+    // a duplicate custom or crashes the insert on the unique index
+
+    test('a case-variant of a global resolves to it instead of forking a custom', () async {
+      final shouter = await freshProfile();
+      final report = await h.db.importWorkouts(
+        userId: shouter,
+        batch: WorkoutImport.fromStrongCsv(
+          'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
+          '2023-03-01 09:00:00,Push,30m,${benchName.toUpperCase()},1,60,8\n',
+        ),
+      );
+
+      expect(report.exercisesMatched, 1);
+      expect(report.exercisesCreated, isEmpty);
+      expect(report.setsCreated, 1);
+
+      final owner = await h.exec(
+        'SELECT DISTINCT e.user_id FROM exercises e '
+        'JOIN workout_exercises we ON we.exercise_id = e.id '
+        'JOIN workouts w ON w.id = we.workout_id '
+        'WHERE w.user_id = @id',
+        {'id': shouter},
+      );
+      expect(owner.single.toColumnMap()['user_id'], isNull);
+    });
+
+    test('a case-variant of an existing custom resolves to it instead of tripping unique (user_id, lower(name))', () async {
+      final shouter = await freshProfile();
+      final name = h.uniqueName('Mystery Move');
+      await h.db.importWorkouts(
+        userId: shouter,
+        batch: WorkoutImport.fromStrongCsv(
+          'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
+          '2023-03-01 09:00:00,Day One,30m,$name,1,60,8\n',
+        ),
+      );
+
+      final again = await h.db.importWorkouts(
+        userId: shouter,
+        batch: WorkoutImport.fromStrongCsv(
+          'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
+          '2023-03-02 09:00:00,Day Two,30m,${name.toLowerCase()},1,62,8\n',
+        ),
+      );
+      expect(again.exercisesMatched, 1);
+      expect(again.exercisesCreated, isEmpty);
+
+      final customs = await h.exec('SELECT name FROM exercises WHERE user_id = @id', {'id': shouter});
+      expect(customs.map((r) => r.toColumnMap()['name']), [name]);
+    });
+
+    test('two case-variant spellings in one export fold into a single created custom', () async {
+      final shouter = await freshProfile();
+      final name = h.uniqueName('Mystery Move');
+      final report = await h.db.importWorkouts(
+        userId: shouter,
+        batch: WorkoutImport.fromStrongCsv(
+          'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
+          '2023-03-01 09:00:00,Day One,30m,$name,1,60,8\n'
+          '2023-03-01 09:00:00,Day One,30m,${name.toLowerCase()},1,62,8\n',
+        ),
+      );
+
+      expect(report.exercisesCreated, hasLength(1));
+      expect(report.exercisesSkipped, isEmpty);
+      expect(report.setsCreated, 2);
+
+      final customs = await h.exec('SELECT count(*)::int AS n FROM exercises WHERE user_id = @id', {'id': shouter});
+      expect(customs.single.toColumnMap()['n'], 1);
+    });
+
+    test('the preview reports a case-variant as matched, under its incoming spelling', () async {
+      final shouter = await freshProfile();
+      final preview = await h.db.previewImport(
+        userId: shouter,
+        batch: WorkoutImport.fromStrongCsv(
+          'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
+          '2023-03-01 09:00:00,Push,30m,${benchName.toUpperCase()},1,60,8\n',
+        ),
+      );
+      expect(preview.exercisesMatched, 1);
+      expect(preview.exercisesUnmatched, isEmpty);
+    });
+  });
+
   test('an account at the custom-exercises ceiling gets a 400 instead of import-created customs', () async {
     final collector = await freshProfile();
     await h.exec(
