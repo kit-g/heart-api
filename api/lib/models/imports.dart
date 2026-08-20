@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:csv/csv.dart';
 import 'package:heart_models/heart_models.dart';
 
 /// Bulk workout import from another app's CSV export.
@@ -110,8 +111,7 @@ class WorkoutImport {
     MeasurementUnit unit = .metric,
     Duration utcOffset = .zero,
   }) {
-    final delimiter = _detectDelimiter(csv);
-    final rows = parseCsv(csv, delimiter: delimiter);
+    final rows = parseCsv(csv);
     if (rows.isEmpty) throw const FormatException('empty file');
 
     final header = [for (final cell in rows.first) _normalized(cell)];
@@ -420,54 +420,17 @@ class WorkoutImportPreview implements Model {
   }
 }
 
-/// Minimal RFC-4180 CSV: quoted fields, doubled-quote escapes, newlines
-/// inside quotes, any of CRLF/LF/CR as row breaks. Fully-empty lines are
-/// dropped.
-List<List<String>> parseCsv(String text, {String delimiter = ','}) {
-  final rows = <List<String>>[];
-  var row = <String>[];
-  final field = StringBuffer();
-  var inQuotes = false;
-
-  void endField() {
-    row.add(field.toString());
-    field.clear();
-  }
-
-  void endRow() {
-    endField();
-    if (row.length > 1 || row.first.isNotEmpty) rows.add(row);
-    row = [];
-  }
-
-  for (var i = 0; i < text.length; i++) {
-    final c = text[i];
-    if (inQuotes) {
-      if (c == '"') {
-        if (i + 1 < text.length && text[i + 1] == '"') {
-          field.write('"');
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        field.write(c);
-      }
-    } else if (c == '"') {
-      inQuotes = true;
-    } else if (c == delimiter) {
-      endField();
-    } else if (c == '\r') {
-      if (i + 1 < text.length && text[i + 1] == '\n') i++;
-      endRow();
-    } else if (c == '\n') {
-      endRow();
-    } else {
-      field.write(c);
-    }
-  }
-  if (field.isNotEmpty || row.isNotEmpty) endRow();
-  return rows;
+/// RFC-4180 CSV via `package:csv` — quoted fields, doubled-quote escapes,
+/// newlines inside quotes, any of CRLF/LF/CR as row breaks, plus a BOM and
+/// Excel `sep=` hints. Rows whose every field is empty are dropped. With
+/// [delimiter] null, the delimiter is auto-detected over the first lines
+/// (`,`, `;`, tab, `|`) — which is what recognizes both `,`- and
+/// `;`-delimited Strong exports.
+List<List<String>> parseCsv(String text, {String? delimiter}) {
+  final rows = CsvDecoder(fieldDelimiter: delimiter).convert(text);
+  return [
+    for (final row in rows) [for (final cell in row) cell as String],
+  ];
 }
 
 class _WorkoutBuilder {
@@ -499,11 +462,6 @@ class _WorkoutBuilder {
       ],
     );
   }
-}
-
-String _detectDelimiter(String csv) {
-  final firstLine = csv.split('\n').first;
-  return !firstLine.contains(',') && firstLine.contains(';') ? ';' : ',';
 }
 
 /// Deterministic opaque token for an import identity: same source row →
