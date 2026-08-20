@@ -491,12 +491,15 @@ _names AS (
   SELECT ex->>'name' AS name, ex->>'category' AS category, ex->>'target' AS target
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
+-- keyed by the *incoming* name so downstream joins on the CSV's spelling still
+-- hit; matching is case-insensitive because that is the DB's own notion of
+-- identity (unique on (user_id, lower(name)))
 _resolved AS (
-  SELECT DISTINCT ON (e.name) e.name, e.id
+  SELECT DISTINCT ON (n.name) n.name, e.id
   FROM exercises e
-  JOIN _names n ON n.name = e.name
+  JOIN _names n ON lower(n.name) = lower(e.name)
   WHERE e.user_id IS NULL OR e.user_id = @userId
-  ORDER BY e.name, e.user_id NULLS LAST
+  ORDER BY n.name, e.user_id NULLS LAST
 ),
 _already_imported AS (
   SELECT i.import_id
@@ -505,16 +508,24 @@ _already_imported AS (
 ),
 _created_exercises AS (
   INSERT INTO exercises (name, category, target, user_id)
-  SELECT n.name, n.category, n.target, @userId
+  -- DISTINCT ON folds case-variant spellings of one exercise into a single
+  -- custom; inserting both would trip unique (user_id, lower(name))
+  SELECT DISTINCT ON (lower(n.name)) n.name, n.category, n.target, @userId
   FROM _names n
-  WHERE NOT exists (SELECT 1 FROM _resolved r WHERE r.name = n.name)
+  WHERE NOT exists (SELECT 1 FROM _resolved r WHERE lower(r.name) = lower(n.name))
     AND (@createCustom::jsonb IS NULL OR n.name IN (SELECT jsonb_array_elements_text(@createCustom::jsonb)))
+  ORDER BY lower(n.name), n.name
   RETURNING id, name
 ),
+-- case-folded name -> exercise id; DISTINCT because two case-variant incoming
+-- names resolve to the same id and must not fan out the joins below
 _lookup AS (
-  SELECT name, id FROM _resolved
-  UNION ALL
-  SELECT name, id FROM _created_exercises
+  SELECT DISTINCT lower(name) AS name, id
+  FROM (
+    SELECT name, id FROM _resolved
+    UNION ALL
+    SELECT name, id FROM _created_exercises
+  ) _all
 ),
 _inserted_workouts AS (
   INSERT INTO workouts (id, user_id, name, started_at, completed_at, import_id)
@@ -522,7 +533,7 @@ _inserted_workouts AS (
   FROM _incoming i
   WHERE exists (
     SELECT 1 FROM jsonb_array_elements(i.workout->'exercises') ex
-    JOIN _lookup l ON l.name = ex->>'name'
+    JOIN _lookup l ON l.name = lower(ex->>'name')
   )
   ON CONFLICT (user_id, import_id) WHERE import_id IS NOT NULL DO NOTHING
   RETURNING id, import_id
@@ -538,7 +549,7 @@ _inserted_exercises AS (
   INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order)
   SELECT uuidv7(e.started_at), e.workout_id, l.id, e.exercise_order
   FROM _exercises_in e
-  JOIN _lookup l ON l.name = e.exercise->>'name'
+  JOIN _lookup l ON l.name = lower(e.exercise->>'name')
   RETURNING id, workout_id, exercise_order
 ),
 _sets_in AS (
@@ -572,13 +583,13 @@ SELECT
    CROSS JOIN LATERAL jsonb_array_elements(i.workout->'exercises') ex
    CROSS JOIN LATERAL jsonb_array_elements(ex->'sets') s
    WHERE NOT EXISTS (SELECT 1 FROM _already_imported a WHERE a.import_id = i.import_id)
-     AND NOT EXISTS (SELECT 1 FROM _lookup l WHERE l.name = ex->>'name'))::int AS sets_skipped,
+     AND NOT EXISTS (SELECT 1 FROM _lookup l WHERE l.name = lower(ex->>'name')))::int AS sets_skipped,
   (SELECT count(*) FROM _resolved)::int AS exercises_matched,
   COALESCE((SELECT jsonb_agg(name ORDER BY name) FROM _created_exercises), '[]'::jsonb) AS exercises_created,
   COALESCE(
     (SELECT jsonb_agg(n.name ORDER BY n.name)
      FROM _names n
-     WHERE NOT EXISTS (SELECT 1 FROM _lookup l WHERE l.name = n.name)),
+     WHERE NOT EXISTS (SELECT 1 FROM _lookup l WHERE l.name = lower(n.name))),
     '[]'::jsonb
   ) AS exercises_skipped
 ''';
@@ -601,11 +612,15 @@ SELECT
    FROM _incoming i
    WHERE EXISTS (SELECT 1 FROM workouts w WHERE w.user_id = @userId AND w.import_id = i.import_id))::int
     AS workouts_already_imported,
+  -- the *incoming* spellings that matched: the caller set-subtracts these from
+  -- the batch's names, so DB-cased names would misreport case-variant matches
   COALESCE(
-    (SELECT jsonb_agg(DISTINCT e.name)
-     FROM exercises e
-     JOIN _names n ON n.name = e.name
-     WHERE e.user_id IS NULL OR e.user_id = @userId),
+    (SELECT jsonb_agg(DISTINCT n.name)
+     FROM _names n
+     WHERE EXISTS (
+       SELECT 1 FROM exercises e
+       WHERE lower(e.name) = lower(n.name) AND (e.user_id IS NULL OR e.user_id = @userId)
+     )),
     '[]'::jsonb
   ) AS exercises_matched
 ''';
