@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   crypto: ^3.0.6
+  csv: ^8.0.0
   heart_aws:
     path: "../shared/heart_aws"
   heart_models:
