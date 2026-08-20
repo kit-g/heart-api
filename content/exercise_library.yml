@@ -3270,6 +3270,72 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
+  "Push Up - Close Grip":
+    category: Weighted Body Weight
+    target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Push Up - Close Grip"
+        validated: true
+        instructions: |
+          ## Overview
+          The close grip push up is a bodyweight pressing exercise that primarily targets the triceps. Placing the hands closer together shifts the work from the chest to the arms, while the chest, shoulders, and core assist throughout the movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Start in a plank position with your hands directly under your chest
+          - Place your hands closer than shoulder width, thumbs nearly touching
+          - Keep your body in a straight line from head to heels
+          - Brace your core and squeeze your glutes
+
+          ### 2. Movement
+          1. Bend your elbows to lower your chest toward your hands
+          2. Keep your elbows tucked close to your sides as you descend
+          3. Lower until your chest nearly touches the floor
+          4. Press back up to the starting position by straightening your arms
+          5. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Inhale as you lower yourself
+          - Exhale as you press back up
+
+          ### 4. Tips
+          - Keep your elbows pointing back, not flaring out
+          - Maintain a rigid plank from head to heels
+          - Move slowly and with control in both directions
+
+          ### 5. Common Mistakes
+          - Letting the hips sag or pike upward
+          - Flaring the elbows wide, which shifts work away from the triceps
+          - Cutting the range of motion short
+
+          ### 6. Safety / Modifications
+          - Perform from your knees to reduce the load
+          - Elevate your hands on a bench to make it easier
+          - Progress by slowing the lowering phase or elevating your feet
+
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary:
+        groups:
+          - chest
+          - core
+          - shoulders
   "Reverse Curl (Band)":
     category: Reps Only
     target: Arms
@@ -3544,6 +3610,71 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
+  "Seated Dip (Machine)":
+    category: Machine
+    target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Seated Dip (Machine)"
+        validated: true
+        instructions: |
+          ## Overview
+          The seated dip machine is a pressing exercise that primarily targets the triceps. The chest and front shoulders assist, and the seated, guided setup lets you focus on the arms without balancing your whole body as in a free dip.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Adjust the seat so the handles sit at about chest height
+          - Sit with your back firmly against the pad
+          - Grip the handles with your palms facing in, elbows bent
+          - Plant your feet flat on the floor
+
+          ### 2. Movement
+          1. Press the handles down by straightening your arms
+          2. Continue until your arms are fully extended without locking hard
+          3. Pause briefly and squeeze your triceps
+          4. Slowly bend your elbows to return to the starting position
+          5. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you press down
+          - Inhale as you return up
+
+          ### 4. Tips
+          - Keep your back and shoulders against the pad
+          - Keep your elbows tracking close to your sides
+          - Control the weight on the way up instead of letting it drop
+
+          ### 5. Common Mistakes
+          - Shrugging the shoulders up toward the ears
+          - Using momentum by rocking the torso
+          - Letting the weight stack slam between reps
+
+          ### 6. Safety / Modifications
+          - Start with a light weight to learn the handle path
+          - Shorten the range of motion if you feel shoulder discomfort
+          - Advanced variation: add a pause at full extension
+
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary:
+        groups:
+          - chest
+          - shoulders
   "Seated Palms Up Wrist Curl (Dumbbell)":
     category: Dumbbell
     target: Arms
@@ -5347,6 +5478,68 @@ exercises:
         groups:
           - arms
           - shoulders
+  "High Row (Machine)":
+    category: Machine
+    target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "High Row (Machine)"
+        validated: true
+        instructions: |
+          ## Overview
+          The machine high row is a pulling exercise that primarily targets the back, especially the lats. Pulling from a high position down and back also works the rear shoulders and biceps, with the chest pad keeping your torso supported throughout.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Adjust the seat so the handles sit above shoulder height
+          - Sit with your chest firmly against the pad
+          - Reach up and grip the handles with both hands
+          - Plant your feet flat on the floor
+
+          ### 2. Movement
+          1. Pull the handles down and back toward your upper chest
+          2. Drive your elbows down and behind you
+          3. Squeeze your shoulder blades together at the end of the pull
+          4. Slowly return the handles to the starting position with control
+          5. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull
+          - Inhale as you return
+
+          ### 4. Tips
+          - Keep your chest against the pad the entire set
+          - Lead the pull with your elbows, not your hands
+          - Let your arms extend fully between reps to work the full range
+
+          ### 5. Common Mistakes
+          - Leaning back and heaving the weight
+          - Pulling with the arms only, without moving the shoulder blades
+          - Letting the weight stack slam between reps
+
+          ### 6. Safety / Modifications
+          - Start light to find the seat height that fits your arms
+          - One arm at a time is a useful variation for evening out sides
+
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
   "Iso-Lateral Row (Machine)":
     category: Machine
     target: Back
@@ -5746,6 +5939,66 @@ exercises:
           - Place your free hand on the machine for additional stability
           - Advanced variation: pause for 2-3 seconds at the bottom of each rep
           - Ensure equal reps and focus on both sides for balanced development
+
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
+  "Lat Pulldown - Close Grip (Cable)":
+    category: Machine
+    target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Lat Pulldown - Close Grip (Cable)"
+        validated: true
+        instructions: |
+          ## Overview
+          The close grip lat pulldown is a pulling exercise that primarily targets the back, especially the lats. The narrow grip keeps the elbows in front of the body, which also brings the biceps strongly into the movement.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Attach a close grip handle or use a narrow grip on the bar
+          - Sit with your thighs secured under the pads
+          - Grip the handle with both hands, arms fully extended overhead
+          - Lean back slightly and lift your chest
+
+          ### 2. Movement
+          1. Pull the handle down toward your upper chest
+          2. Drive your elbows down toward your sides
+          3. Squeeze your lats at the bottom of the pull
+          4. Slowly let the handle rise back up until your arms are fully extended
+          5. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull down
+          - Inhale as you return up
+
+          ### 4. Tips
+          - Keep your chest up and shoulders down away from your ears
+          - Pull with your back, using your hands as hooks
+          - Control the return instead of letting the weight yank your arms up
+
+          ### 5. Common Mistakes
+          - Leaning far back and turning the pull into a row
+          - Using momentum to swing the weight down
+          - Stopping short of full arm extension at the top
+
+          ### 6. Safety / Modifications
+          - Start light and add weight once the bar path feels smooth
+          - Advanced variation: pause for a count at the bottom of each rep
 
     muscles:
       primary:
@@ -12739,6 +12992,62 @@ exercises:
           - gastrocnemius_l
           - gastrocnemius_r
       secondary: {}
+  "Standing Leg Curl (Machine)":
+    category: Machine
+    target: Legs
+    movement:
+      groups:
+        - knee_flexion
+      axial_load: none
+      stability: machine
+      unilateral: true
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Standing Leg Curl (Machine)"
+        validated: true
+        instructions: |
+          ## Overview
+          The standing leg curl is an isolation exercise that primarily targets the hamstrings, working one leg at a time. The calves assist, and the standing position lets you train each leg through a full range while the machine supports your body.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing the machine and rest your thigh against the support pad
+          - Hook the roller pad behind one ankle
+          - Hold the handles for balance
+          - Keep your torso upright and your standing leg slightly bent
+
+          ### 2. Movement
+          1. Curl your heel up toward your glutes by bending the knee
+          2. Squeeze your hamstring at the top of the curl
+          3. Slowly lower the pad back to the starting position with control
+          4. Complete the desired number of controlled reps
+          5. Repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you curl up
+          - Inhale as you lower
+
+          ### 4. Tips
+          - Keep your hips still; only the knee should move
+          - Pause briefly at the top of each rep
+          - Match the reps and weight on both legs
+
+          ### 5. Common Mistakes
+          - Swinging the leg and using momentum
+          - Lifting the hip to help the leg up
+          - Dropping the weight on the way down
+
+          ### 6. Safety / Modifications
+          - Start light to find the pad position that keeps your knee comfortable
+          - The seated or lying leg curl is an easier alternative for beginners
+
+    muscles:
+      primary:
+        groups:
+          - hamstrings
+      secondary: {}
   "Step-up (Bodyweight)":
     category: Reps Only
     target: Legs
@@ -13944,6 +14253,67 @@ exercises:
           - anterior_deltoid_l
           - anterior_deltoid_r
       secondary: {}
+  "Landmine Press":
+    category: Barbell
+    target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: moderate
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Landmine Press"
+        validated: true
+        instructions: |
+          ## Overview
+          The landmine press is a pressing exercise that primarily targets the shoulders, especially the front delts. The triceps, upper chest, and core assist, and the barbell's anchored arc makes it a shoulder-friendly alternative to pressing straight overhead.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Anchor one end of a barbell in a landmine attachment or a corner
+          - Stand facing the bar with your feet shoulder width apart
+          - Hold the free end at shoulder height with both hands, or one hand for the single-arm version
+          - Brace your core and keep your ribs down
+
+          ### 2. Movement
+          1. Press the bar up and forward along its natural arc
+          2. Continue until your arms are fully extended
+          3. Pause briefly at the top
+          4. Lower the bar back to shoulder height with control
+          5. Repeat for the desired number of controlled reps; if pressing one-handed, repeat on the other side
+
+          ### 3. Breathing
+          - Exhale as you press
+          - Inhale as you lower
+
+          ### 4. Tips
+          - Keep your whole body tight; don't let your lower back arch
+          - Press along the bar's arc rather than fighting it
+          - Step one foot back slightly for a stronger stance
+
+          ### 5. Common Mistakes
+          - Arching the back to finish the press
+          - Shrugging the shoulder toward the ear
+          - Standing too far from or too close to the anchored end
+
+          ### 6. Safety / Modifications
+          - Kneel on one or both knees to take the lower body out of the movement
+          - Start with the empty bar; the anchored end already reduces the load
+
+    muscles:
+      primary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+      secondary:
+        groups:
+          - arms
+          - chest
+          - core
   "Lateral Raise (Band)":
     category: Weighted Body Weight
     target: Shoulders
@@ -15336,6 +15706,68 @@ exercises:
           - Stop at shoulder height if you experience any shoulder pain
           - Start with light dumbbells to master the movement pattern
           - If you experience shoulder discomfort, consider face pulls as an alternative
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
+  "Upright Row (Smith Machine)":
+    category: Machine
+    target: Shoulders
+    movement:
+      groups:
+        - upright_row
+      axial_load: moderate
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Upright Row (Smith Machine)"
+        validated: true
+        instructions: |
+          ## Overview
+          The Smith machine upright row is a pulling exercise that primarily targets the shoulders and upper back, especially the side delts and traps. The biceps assist, and the machine's fixed bar path keeps the movement steady so you can focus on the pull.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set the bar at about hip height and load it lightly
+          - Stand close to the bar with your feet shoulder width apart
+          - Grip the bar overhand, hands about shoulder width apart
+          - Unrack the bar and let it hang at arm's length
+
+          ### 2. Movement
+          1. Pull the bar straight up along the rails toward your collarbone
+          2. Lead with your elbows, keeping them higher than your wrists
+          3. Stop when your elbows reach about shoulder height
+          4. Lower the bar back down slowly with control
+          5. Repeat for the desired number of controlled reps
+
+          ### 3. Breathing
+          - Exhale as you pull up
+          - Inhale as you lower
+
+          ### 4. Tips
+          - Keep the bar close to your body throughout
+          - Keep your torso upright; avoid leaning back
+          - A slightly wider grip is often more comfortable for the shoulders
+
+          ### 5. Common Mistakes
+          - Pulling the bar too high, above the collarbone
+          - Swinging the body to heave the weight up
+          - Gripping too narrow, which can pinch the shoulders
+
+          ### 6. Safety / Modifications
+          - Stop the pull lower if you feel any shoulder pinching
+          - Start with the empty bar to groove the path
+
     muscles:
       primary:
         groups:
