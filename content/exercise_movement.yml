@@ -378,6 +378,14 @@
   unilateral: false
   impact: none
   skill: low
+"Push Up - Close Grip":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
 "Reverse Curl (Band)":
   groups:
     - elbow_flexion
@@ -408,6 +416,14 @@
   axial_load: none
   stability: supported
   unilateral: true
+  impact: none
+  skill: low
+"Seated Dip (Machine)":
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: machine
+  unilateral: false
   impact: none
   skill: low
 "Seated Palms Up Wrist Curl (Dumbbell)":
@@ -618,6 +634,14 @@
   unilateral: false
   impact: none
   skill: low
+"High Row (Machine)":
+  groups:
+    - vertical_pull
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
 "Iso-Lateral Row (Machine)":
   groups:
     - horizontal_row
@@ -664,6 +688,14 @@
   axial_load: none
   stability: machine
   unilateral: true
+  impact: none
+  skill: low
+"Lat Pulldown - Close Grip (Cable)":
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: supported
+  unilateral: false
   impact: none
   skill: low
 "Lat Pulldown - Underhand (Band)":
@@ -1482,6 +1514,14 @@
   unilateral: false
   impact: none
   skill: low
+"Standing Leg Curl (Machine)":
+  groups:
+    - knee_flexion
+  axial_load: none
+  stability: machine
+  unilateral: true
+  impact: none
+  skill: low
 "Step-up (Bodyweight)":
   groups:
     - lunge_split
@@ -1623,6 +1663,14 @@
     - front_raise
   axial_load: low
   stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+"Landmine Press":
+  groups:
+    - vertical_press
+  axial_load: moderate
+  stability: supported
   unilateral: false
   impact: none
   skill: low
@@ -1783,6 +1831,14 @@
     - upright_row
   axial_load: moderate
   stability: free
+  unilateral: false
+  impact: none
+  skill: low
+"Upright Row (Smith Machine)":
+  groups:
+    - upright_row
+  axial_load: moderate
+  stability: machine
   unilateral: false
   impact: none
   skill: low
