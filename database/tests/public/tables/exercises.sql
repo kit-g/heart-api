@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(33);
+SELECT plan(34);
 
 SELECT has_table('public'::name, 'exercises'::name);
 
@@ -20,7 +20,8 @@ SELECT columns_are(
                    'movement',
                    'health',
                    'user_id',
-                   'created_at'
+                   'created_at',
+                   'validated'
                    ]
        );
 
@@ -37,6 +38,7 @@ SELECT col_type_is('public'::name, 'exercises'::name, 'movement'::name, 'jsonb':
 SELECT col_type_is('public'::name, 'exercises'::name, 'health'::name, 'jsonb'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'user_id'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'created_at'::name, 'timestamp with time zone'::name);
+SELECT col_type_is('public'::name, 'exercises'::name, 'validated'::name, 'boolean'::name);
 
 SELECT has_pk('public'::name, 'exercises'::name, 'exercises has a primary key');
 SELECT col_is_pk('public'::name, 'exercises'::name, 'id'::name, 'id is the primary key');
