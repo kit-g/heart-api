@@ -95,6 +95,36 @@ void main() {
       expect(base!['name'], isNot('Sentadilla'));
     });
 
+    test('ships copy provenance: validated follows whichever copy the locale serves', () async {
+      final id = await h.seedGlobalExercise();
+      await h.exec('UPDATE exercises SET validated = false WHERE id = @id::uuid', {'id': id});
+      await h.exec(
+        'INSERT INTO exercise_translations (exercise_id, locale, name, instructions, validated) '
+        'VALUES (@id::uuid, @loc, @n, @i, true)',
+        {'id': id, 'loc': 'fr', 'n': 'Nom relu', 'i': 'Relu par un humain'},
+      );
+
+      // fallback copy → the exercises row's flag
+      final base = findEx((await h.db.getExercises(ownerId))['exercises'] as List, id);
+      expect(base!['validated'], isFalse);
+
+      // translated copy → the translation row's own flag, not the fallback's
+      final fr = findEx((await h.db.getExercises(ownerId, locale: 'fr'))['exercises'] as List, id);
+      expect(fr!['validated'], isTrue);
+    });
+
+    test('a user-created exercise takes no stance: validated is null', () async {
+      final own = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('My Move'),
+        category: 'Dumbbell',
+        target: 'Arms',
+      );
+      final row = findEx((await h.db.getExercises(ownerId))['exercises'] as List, own['id'].toString());
+      expect(row, isNotNull);
+      expect(row!['validated'], isNull);
+    });
+
     test('surfaces the caller\'s per-exercise unit and rest-timer preferences', () async {
       final id = await h.seedGlobalExercise();
       await h.exec(

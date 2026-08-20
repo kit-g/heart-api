@@ -92,6 +92,9 @@ SELECT coalesce(
       'category', e.category,
       'target', e.target,
       'instructions', COALESCE(t.instructions, e.instructions),
+      -- tracks whichever copy the locale join serves, not COALESCE: a
+      -- translation's NULL flag must not fall through to the fallback's
+      'validated', CASE WHEN t.exercise_id IS NOT NULL THEN t.validated ELSE e.validated END,
       'asset', e.asset,
       'thumbnail', e.thumbnail,
       'muscles', e.muscles,
