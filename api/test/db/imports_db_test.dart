@@ -321,30 +321,33 @@ void main() {
       expect(owner.single.toColumnMap()['user_id'], isNull);
     });
 
-    test('a case-variant of an existing custom resolves to it instead of tripping unique (user_id, lower(name))', () async {
-      final shouter = await freshProfile();
-      final name = h.uniqueName('Mystery Move');
-      await h.db.importWorkouts(
-        userId: shouter,
-        batch: WorkoutImport.fromStrongCsv(
-          'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
-          '2023-03-01 09:00:00,Day One,30m,$name,1,60,8\n',
-        ),
-      );
+    test(
+      'a case-variant of an existing custom resolves to it instead of tripping unique (user_id, lower(name))',
+      () async {
+        final shouter = await freshProfile();
+        final name = h.uniqueName('Mystery Move');
+        await h.db.importWorkouts(
+          userId: shouter,
+          batch: WorkoutImport.fromStrongCsv(
+            'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
+            '2023-03-01 09:00:00,Day One,30m,$name,1,60,8\n',
+          ),
+        );
 
-      final again = await h.db.importWorkouts(
-        userId: shouter,
-        batch: WorkoutImport.fromStrongCsv(
-          'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
-          '2023-03-02 09:00:00,Day Two,30m,${name.toLowerCase()},1,62,8\n',
-        ),
-      );
-      expect(again.exercisesMatched, 1);
-      expect(again.exercisesCreated, isEmpty);
+        final again = await h.db.importWorkouts(
+          userId: shouter,
+          batch: WorkoutImport.fromStrongCsv(
+            'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
+            '2023-03-02 09:00:00,Day Two,30m,${name.toLowerCase()},1,62,8\n',
+          ),
+        );
+        expect(again.exercisesMatched, 1);
+        expect(again.exercisesCreated, isEmpty);
 
-      final customs = await h.exec('SELECT name FROM exercises WHERE user_id = @id', {'id': shouter});
-      expect(customs.map((r) => r.toColumnMap()['name']), [name]);
-    });
+        final customs = await h.exec('SELECT name FROM exercises WHERE user_id = @id', {'id': shouter});
+        expect(customs.map((r) => r.toColumnMap()['name']), [name]);
+      },
+    );
 
     test('two case-variant spellings in one export fold into a single created custom', () async {
       final shouter = await freshProfile();
