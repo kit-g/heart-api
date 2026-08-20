@@ -154,6 +154,9 @@ class ExerciseLocalization:
     exercise_name: str
     instructions: str | None
     fallback_to: str | None
+    # a human has reviewed this locale's copy; false is the schema default and
+    # marks machine-authored copy the client labels as such (the spark icon)
+    validated: bool
 
     @classmethod
     def parse(cls, source: dict) -> Self:
@@ -161,6 +164,7 @@ class ExerciseLocalization:
             exercise_name=source.get('name'),
             instructions=source.get('instructions'),
             fallback_to=source.get('fallback_to'),
+            validated=source.get('validated', False),
         )
 
     def is_concrete(self) -> bool:
@@ -237,8 +241,8 @@ def get_source() -> dict:
 
 
 UPSERT_EXERCISE = '''
-INSERT INTO exercises (name, category, target, instructions, muscles, movement, health, archived)
-VALUES (%s, %s, %s, %s, %s, %s, %s, false)
+INSERT INTO exercises (name, category, target, instructions, muscles, movement, health, validated, archived)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, false)
 ON CONFLICT (name) WHERE user_id IS NULL
 DO UPDATE SET
     category = EXCLUDED.category,
@@ -247,15 +251,16 @@ DO UPDATE SET
     muscles = EXCLUDED.muscles,
     movement = EXCLUDED.movement,
     health = EXCLUDED.health,
+    validated = EXCLUDED.validated,
     archived = false
 RETURNING id
 '''
 
 UPSERT_TRANSLATION = '''
-INSERT INTO exercise_translations (exercise_id, locale, name, instructions)
-VALUES (%s, %s, %s, %s)
+INSERT INTO exercise_translations (exercise_id, locale, name, instructions, validated)
+VALUES (%s, %s, %s, %s, %s)
 ON CONFLICT (exercise_id, locale)
-DO UPDATE SET name = EXCLUDED.name, instructions = EXCLUDED.instructions
+DO UPDATE SET name = EXCLUDED.name, instructions = EXCLUDED.instructions, validated = EXCLUDED.validated
 '''
 
 ARCHIVE_MISSING = '''
@@ -280,6 +285,7 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
                 Json(exercise.muscles.to_dict()) if exercise.muscles else None,
                 Json(exercise.movement.to_dict()) if exercise.movement else None,
                 Json(exercise.health.to_dict()) if exercise.health else None,
+                fallback.validated,
             ))
             exercise_id = cur.fetchone()[0]
             upserted += 1
@@ -287,7 +293,11 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
             for locale, loc in exercise.localizations.items():
                 if locale == exercise.fallback or not loc.is_concrete():
                     continue
-                cur.execute(UPSERT_TRANSLATION, (exercise_id, locale, loc.exercise_name, loc.instructions))
+                cur.execute(
+                    UPSERT_TRANSLATION, (
+                        exercise_id, locale, loc.exercise_name, loc.instructions, loc.validated
+                    )
+                )
                 translations += 1
 
         cur.execute(ARCHIVE_MISSING, (list(library.exercises.keys()),))
