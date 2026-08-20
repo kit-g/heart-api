@@ -393,6 +393,29 @@ void main() {
       expect(Exercise.fromJson(baseJson).toMap().containsKey('unitSystem'), isFalse);
     });
 
+    test('fromJson parses validated and toMap round-trips it as local 1/0', () {
+      // API ships a bool; the local store keeps it as an int next to own/archived
+      final reviewed = Exercise.fromJson({...baseJson, 'validated': true});
+      expect(reviewed.validated, isTrue);
+      expect(reviewed.toMap()['validated'], 1);
+
+      final machine = Exercise.fromJson({...baseJson, 'validated': false});
+      expect(machine.validated, isFalse);
+      expect(machine.toMap()['validated'], 0);
+
+      // local ints read back as bools
+      expect(Exercise.fromJson({...baseJson, 'validated': 1}).validated, isTrue);
+      expect(Exercise.fromJson({...baseJson, 'validated': 0}).validated, isFalse);
+
+      // absent = no library-managed copy: no stance, and the key is omitted
+      final custom = Exercise.fromJson(baseJson);
+      expect(custom.validated, isNull);
+      expect(custom.toMap().containsKey('validated'), isFalse);
+
+      // server-owned: survives copyWith untouched
+      expect(machine.copyWith(instructions: 'edited').validated, isFalse);
+    });
+
     test('fromJson parses rest_timer and toMap round-trips it', () {
       final e = Exercise.fromJson({...baseJson, 'rest_timer': 90});
       expect(e.restTimer, 90);

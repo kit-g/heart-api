@@ -569,6 +569,15 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
 
   String? get instructions;
 
+  /// Whether a human has reviewed this exercise's copy ([name] and
+  /// [instructions]) for the served locale.
+  ///
+  /// `false` marks machine-authored library copy — the client labels it as
+  /// such, in the spirit of being explicit about provenance. `null` is "no
+  /// stance": the exercise carries no library-managed copy (user-created
+  /// exercises), so there is nothing to label.
+  bool? get validated;
+
   bool get hasInfo;
 
   bool get isMine;
@@ -656,6 +665,8 @@ class _Exercise implements Exercise {
   @override
   final String? instructions;
   @override
+  final bool? validated;
+  @override
   final bool isMine;
   @override
   final bool isArchived;
@@ -678,6 +689,7 @@ class _Exercise implements Exercise {
     this.asset,
     this.thumbnail,
     this.instructions,
+    this.validated,
     this.isMine = false,
     this.isArchived = false,
     required this.muscles,
@@ -708,6 +720,12 @@ class _Exercise implements Exercise {
         _ => null,
       },
       instructions: json['instructions'],
+      validated: switch (json['validated']) {
+        bool validated => validated, // API
+        1 => true, // local
+        0 => false, // local
+        _ => null, // no library-managed copy
+      },
       isMine: switch (json['own']) {
         bool mine => mine, // API
         1 => true, // local
@@ -740,6 +758,7 @@ class _Exercise implements Exercise {
       'name': name,
       'target': target.value,
       if (instructions != null) 'instructions': instructions,
+      if (validated case bool validated) 'validated': validated ? 1 : 0,
       if (asset case Asset asset) ...{
         'asset': asset.link,
         'assetHeight': asset.height,
@@ -828,6 +847,8 @@ class _Exercise implements Exercise {
       thumbnail: thumbnail ?? this.thumbnail,
       isMine: isMine ?? this.isMine,
       instructions: instructions ?? this.instructions,
+      // library-owned provenance flag: carried, never client-mutated
+      validated: validated,
       isArchived: isArchived ?? this.isArchived,
       muscles: tags ?? muscles,
       movement: movement ?? this.movement,

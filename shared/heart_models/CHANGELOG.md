@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.9.0
+
+Surfaces the exercise library's copy-provenance flag, so the client can be explicit about
+machine-authored copy (a spark icon in the exercise library).
+
+- New: `Exercise.validated` — whether a human has reviewed the exercise's copy (name and
+  instructions) for the served locale. `false` marks machine-authored library copy to label;
+  `null` means there is no library-managed copy to take a stance on (user-created exercises).
+  Server-owned: `copyWith` carries it, nothing client-side mutates it. Local round-trip stores
+  it as 1/0 next to `own`/`archived`.
+
 ## 1.8.0
 
 Carries the health activity type in the exercise library (kit-g/heart-api#54), replacing the
