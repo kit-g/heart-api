@@ -136,6 +136,7 @@ class WorkoutImport {
     final distance = column(['distance', 'distancemeters', 'distancekm', 'distancemiles']);
     final distanceUnit = column(['distanceunit']);
     final seconds = column(['seconds']);
+    final setOrder = column(['setorder']);
 
     // a unit spelled out in the header itself ("Weight (kg)") beats the fallback
     final headerWeightUnit = weight == null ? null : _unitIn(header[weight]);
@@ -162,6 +163,12 @@ class WorkoutImport {
     final builders = <String, _WorkoutBuilder>{};
     for (final row in rows.skip(1).map(repaired)) {
       try {
+        // Strong interleaves non-set rows with the sets: after any set that
+        // ran a rest timer comes a "Rest Timer" row, flagged in the Set Order
+        // column — real sets carry a number there, or W/D/F for
+        // warm-up/drop/failure. Structure, not data: skipped like the header
+        // row, not counted like a bad one.
+        if (cell(row, setOrder) case final order? when _normalized(order) == 'resttimer') continue;
         final rawDate = cell(row, date) ?? (throw const FormatException('no date'));
         final exercise = cell(row, exerciseName) ?? (throw const FormatException('no exercise'));
         final name = cell(row, workoutName);

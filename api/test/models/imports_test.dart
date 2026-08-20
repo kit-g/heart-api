@@ -3,10 +3,13 @@ import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 /// A realistic Strong export: one row per set, quoted fields with embedded
-/// commas/quotes, zeros meaning "unset", and an RPE column we ignore.
+/// commas/quotes, zeros meaning "unset", an RPE column we ignore — and a
+/// "Rest Timer" row, which Strong interleaves after any set that ran one.
+/// Every count below is blind to it: it is structure, not a set.
 const _strongCsv =
     'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps,Distance,Seconds,Notes,Workout Notes,RPE\n'
     '2023-01-15 17:35:12,Push Day,1h 10m,Bench Press (Barbell),1,80,5,0,0,,,8\n'
+    '2023-01-15 17:35:12,Push Day,1h 10m,Bench Press (Barbell),Rest Timer,0,0,0,120,,,\n'
     '2023-01-15 17:35:12,Push Day,1h 10m,Bench Press (Barbell),2,85,3,0,0,,,9\n'
     '2023-01-15 17:35:12,Push Day,1h 10m,"Fly, Seated (Cable)",1,25,12,0,0,"felt ""good""",,\n'
     '2023-01-17 08:00:00,Morning Run,45m,Running,1,0,0,5.2,1800,,,\n'
@@ -83,6 +86,22 @@ void main() {
       expect(byName['Plank']!['category'], 'Duration');
       expect(byName['Sit Up']!['category'], 'Reps Only');
       expect(byName.values.every((e) => e['target'] == 'Other'), isTrue);
+    });
+
+    test('drops Rest Timer rows but keeps warm-up/drop/failure sets — Set Order letters are sets', () {
+      const csv =
+          'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
+          '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),W,20,12\n'
+          '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),1,48,8\n'
+          '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),Rest Timer,0,0\n'
+          '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),D,41,10\n'
+          '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),F,34,12\n';
+      final batch = WorkoutImport.fromStrongCsv(csv);
+      final sets = batch.workouts.single.exercises.single.sets;
+      expect(sets, hasLength(4));
+      expect(sets.map((s) => s.weight), [20, 48, 41, 34]);
+      // structure, not a bad row — nothing to alarm the report over
+      expect(batch.rowsSkipped, 0);
     });
 
     test('skips and counts unparseable rows instead of failing the batch', () {
