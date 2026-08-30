@@ -43,13 +43,24 @@ void main() {
 
     test('falls back to default locale on unknown locale', () {
       final out = renderTitle(
-        locale: 'fr',
+        locale: 'de',
         eventType: 'comment.created',
         variant: 'workout',
         args: {'author': 'Sarah'},
         defaultLocale: 'en',
       );
       expect(out, 'Sarah: new comment on your workout');
+    });
+
+    test('a regional locale without templates falls back to its base language', () {
+      final out = renderTitle(
+        locale: 'fr_CA',
+        eventType: 'comment.created',
+        variant: 'workout',
+        args: {'author': 'Sarah'},
+        defaultLocale: 'en',
+      );
+      expect(out, 'Sarah : nouveau commentaire sur votre entraînement');
     });
 
     test('returns the variant key when neither variant nor fallback exists', () {
