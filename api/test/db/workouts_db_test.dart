@@ -24,14 +24,14 @@ void main() {
 
   String imageUrl(String key) => 'https://cdn.test/$key';
 
-  /// A create/update request body referencing [exerciseName] (which must already
-  /// exist so the query can resolve name → id).
+  /// A create/update request body referencing [exerciseId] (a seeded row's
+  /// uuid — the only reference the SQL resolves since the id cutover).
   WorkoutRequest req(
     String userId, {
     required String name,
     required DateTime start,
     DateTime? end,
-    required String exerciseName,
+    required String exerciseId,
   }) {
     return WorkoutRequest(
       userId: userId,
@@ -41,7 +41,7 @@ void main() {
         if (end != null) 'end': end.toIso8601String(),
         'exercises': [
           {
-            'exercise': exerciseName,
+            'exercise': exerciseId,
             'order': 0,
             'sets': [
               {'weight': 100, 'reps': 5, 'completed': true},
@@ -66,7 +66,7 @@ void main() {
   group('createWorkout', () {
     test('a workout stuffed past the DB set ceiling gets a 400, not a 500', () async {
       final exName = h.uniqueName('Ex');
-      await h.seedGlobalExercise(name: exName);
+      final exId = await h.seedGlobalExercise(name: exName);
       final stuffed = WorkoutRequest(
         userId: ownerId,
         body: {
@@ -74,7 +74,7 @@ void main() {
           'start': DateTime.utc(2026, 7, 25, 10).toIso8601String(),
           'exercises': [
             {
-              'exercise': exName,
+              'exercise': exId,
               'order': 0,
               'sets': [
                 for (var n = 0; n < 1001; n++) {'weight': 100, 'reps': 5, 'completed': true},
@@ -98,7 +98,7 @@ void main() {
 
     test('a workout stuffed with set-less exercise entries gets a 400, not a 500', () async {
       final exName = h.uniqueName('Ex');
-      await h.seedGlobalExercise(name: exName);
+      final exId = await h.seedGlobalExercise(name: exName);
       final stuffed = WorkoutRequest(
         userId: ownerId,
         body: {
@@ -107,7 +107,7 @@ void main() {
           'exercises': [
             // empty sets, so the sets ceiling never sees these — the
             // workout_exercises ceiling must
-            for (var n = 0; n < 1001; n++) {'exercise': exName, 'order': n, 'sets': <Object>[]},
+            for (var n = 0; n < 1001; n++) {'exercise': exId, 'order': n, 'sets': <Object>[]},
           ],
         },
       );
@@ -120,7 +120,7 @@ void main() {
 
     test('persists the workout with its resolved exercise and set', () async {
       final exName = h.uniqueName('Ex');
-      await h.seedGlobalExercise(name: exName);
+      final exId = await h.seedGlobalExercise(name: exName);
 
       final created = await h.db.createWorkout(
         userId: ownerId,
@@ -129,7 +129,7 @@ void main() {
           name: 'New workout',
           start: DateTime.utc(2026, 7, 25, 10),
           end: DateTime.utc(2026, 7, 25, 11),
-          exerciseName: exName,
+          exerciseId: exId,
         ),
         imageUrl: imageUrl,
       );
@@ -265,15 +265,15 @@ void main() {
   group('updateWorkout', () {
     test('replaces the times, name, and exercises', () async {
       final exA = h.uniqueName('Ex');
-      await h.seedGlobalExercise(name: exA);
+      final exAId = await h.seedGlobalExercise(name: exA);
       final id = (await h.db.createWorkout(
         userId: ownerId,
-        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseName: exA),
+        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exAId),
         imageUrl: imageUrl,
       )).id;
 
       final exB = h.uniqueName('Ex');
-      await h.seedGlobalExercise(name: exB);
+      final exBId = await h.seedGlobalExercise(name: exB);
       final updated = await h.db.updateWorkout(
         userId: ownerId,
         workoutId: id,
@@ -282,7 +282,7 @@ void main() {
           name: 'V2',
           start: DateTime.utc(2026, 7, 25, 9),
           end: DateTime.utc(2026, 7, 25, 10),
-          exerciseName: exB,
+          exerciseId: exBId,
         ),
         imageUrl: imageUrl,
       );
@@ -295,10 +295,10 @@ void main() {
 
     test('client-sent v7 ids survive the replace', () async {
       final exName = h.uniqueName('Ex');
-      await h.seedGlobalExercise(name: exName);
+      final exId = await h.seedGlobalExercise(name: exName);
       final created = await h.db.createWorkout(
         userId: ownerId,
-        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseName: exName),
+        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exId),
         imageUrl: imageUrl,
       );
       final exerciseId = created.first.id;
@@ -315,7 +315,7 @@ void main() {
             'exercises': [
               {
                 'id': exerciseId,
-                'exercise': exName,
+                'exercise': exId,
                 'order': 0,
                 'sets': [
                   {'id': setId, 'weight': 105, 'reps': 5, 'completed': true},
@@ -337,10 +337,10 @@ void main() {
 
     test('a non-uuid exercise id is re-minted at the exercise start', () async {
       final exName = h.uniqueName('Ex');
-      await h.seedGlobalExercise(name: exName);
+      final exId = await h.seedGlobalExercise(name: exName);
       final id = (await h.db.createWorkout(
         userId: ownerId,
-        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseName: exName),
+        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exId),
         imageUrl: imageUrl,
       )).id;
 
@@ -359,7 +359,7 @@ void main() {
                 // v7 at the exercise's own start instead of "now"
                 'id': '2023-01-01T10-00-00',
                 'start': '2026-07-25T08:30:00Z',
-                'exercise': exName,
+                'exercise': exId,
                 'order': 0,
                 'sets': [
                   {'weight': 100, 'reps': 5, 'completed': true},
@@ -376,10 +376,10 @@ void main() {
 
     test('an id colliding with an existing row is a BadRequest, not a raw 23505', () async {
       final exName = h.uniqueName('Ex');
-      await h.seedGlobalExercise(name: exName);
+      final exId = await h.seedGlobalExercise(name: exName);
       final other = await h.db.createWorkout(
         userId: ownerId,
-        body: req(ownerId, name: 'Existing', start: DateTime.utc(2026, 7, 25, 8), exerciseName: exName),
+        body: req(ownerId, name: 'Existing', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exId),
         imageUrl: imageUrl,
       );
 
@@ -396,7 +396,7 @@ void main() {
               'exercises': [
                 {
                   'id': other.first.id,
-                  'exercise': exName,
+                  'exercise': exId,
                   'order': 0,
                   'sets': [
                     {'weight': 100, 'reps': 5, 'completed': true},
@@ -417,7 +417,12 @@ void main() {
         h.db.updateWorkout(
           userId: strangerId,
           workoutId: id,
-          body: req(strangerId, name: 'hijack', start: DateTime.utc(2026, 7, 25, 9), exerciseName: 'nonexistent'),
+          body: req(
+            strangerId,
+            name: 'hijack',
+            start: DateTime.utc(2026, 7, 25, 9),
+            exerciseId: '0198c1a2-b3c4-7d5e-8f60-7182deadbeef',
+          ),
           imageUrl: imageUrl,
         ),
         throwsA(isA<NotFound>()),
@@ -428,7 +433,7 @@ void main() {
   group('energy fields', () {
     test('calories, met, and set timing round-trip through create and read', () async {
       final exName = h.uniqueName('Ex');
-      await h.seedGlobalExercise(name: exName);
+      final exId = await h.seedGlobalExercise(name: exName);
 
       final created = await h.db.createWorkout(
         userId: ownerId,
@@ -441,7 +446,7 @@ void main() {
             'calories': 512,
             'exercises': [
               {
-                'exercise': exName,
+                'exercise': exId,
                 'order': 0,
                 'met': 5.5,
                 'sets': [
@@ -472,7 +477,7 @@ void main() {
 
     test('a per-exercise note round-trips through create, read, and a full-replace update', () async {
       final exName = h.uniqueName('Ex');
-      await h.seedGlobalExercise(name: exName);
+      final exId = await h.seedGlobalExercise(name: exName);
 
       WorkoutRequest withNote(String note) => WorkoutRequest(
         userId: ownerId,
@@ -481,7 +486,7 @@ void main() {
           'start': '2026-08-08T10:00:00Z',
           'end': '2026-08-08T11:00:00Z',
           'exercises': [
-            {'exercise': exName, 'order': 0, 'note': note, 'sets': <Map>[]},
+            {'exercise': exId, 'order': 0, 'note': note, 'sets': <Map>[]},
           ],
         },
       );
