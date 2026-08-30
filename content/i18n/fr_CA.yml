@@ -1,0 +1,13 @@
+# Canadian French overlay. Rides the regional fallback chain (fr_CA -> fr -> en)
+# over the base `fr` (neutral international French): entries exist only where
+# Québécois copy should differ, so absence here is the normal state.
+# The one concrete entry below is a genuine divergence (Québec says «planche à
+# neige» where France says «snowboard»); its instructions fall through to fr
+# per field. Machine-authored, validated: false until a human reviews it.
+# Validated against content/exercise_i18n_schema.json (scripts/validate_library.py).
+locale: fr_CA
+exercises:
+  "Snowboarding":
+    name: "Planche à neige"
+    validated: false
+    source_digest: "688694896c6d"
