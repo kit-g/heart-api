@@ -25,12 +25,12 @@ Future<void> exerciseAssetProcessed(Request request, Map event) async {
 
   switch (event) {
     case {
-      'name': String name,
+      'key': String key,
       'asset': final asset,
       'thumbnail': final thumbnail,
     }:
       await request.exerciseService.setExerciseMedia(
-        name: name,
+        key: key,
         asset: media(asset),
         thumbnail: media(thumbnail),
       );

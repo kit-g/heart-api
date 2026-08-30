@@ -151,18 +151,19 @@ extension on Map<String, dynamic> {
 }
 
 TemplateExerciseRequest _exercise(Map<String, dynamic> json, int index) {
-  // The exercise arrives either as a bare name or as the full object the app
-  // holds; both carry the name, which is the only part the SQL resolves on.
-  final name = switch (json['exercise']) {
-    final String s when s.isNotEmpty => s,
-    {'name': final String n} when n.isNotEmpty => n,
+  // The exercise arrives either as a bare uuid or as the full object the app
+  // holds; both carry the id, which is the only part the SQL resolves on —
+  // the name is localized display copy since the id cutover.
+  final id = switch (json['exercise']) {
+    final String s when isUuidV7(s) => s,
+    {'id': final String id} when isUuidV7(id) => id,
     _ => throw BadRequest(
-      reason: 'exercises[$index].exercise must be an exercise name or an object with one',
+      reason: 'exercises[$index].exercise must be an exercise id or an object with one',
     ),
   };
 
   return TemplateExerciseRequest(
-    exerciseName: name,
+    exerciseId: id,
     order: switch (json['order']) {
       null => index,
       final num o => o.toInt(),

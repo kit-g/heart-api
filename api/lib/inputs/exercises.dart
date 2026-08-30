@@ -1,12 +1,14 @@
 part of 'inputs.dart';
 
 class ExerciseCreateIn {
+  final String? id;
   final String name;
   final String category;
   final String target;
   final String? instructions;
 
   const new _({
+    required this.id,
     required this.name,
     required this.category,
     required this.target,
@@ -16,6 +18,13 @@ class ExerciseCreateIn {
   static Future<ExerciseCreateIn> fromRequest(Request req) async {
     final json = await req.json();
     return ExerciseCreateIn._(
+      // the app mints a v7 at construction and keeps it as the exercise's
+      // identity through sync; present-but-malformed is the client's mistake
+      id: switch (json['id']) {
+        null => null,
+        final String id when isUuidV7(id) => id,
+        _ => throw const BadRequest(reason: 'id must be a UUIDv7'),
+      },
       name: switch (json.string('name', maxLength: 200).trim()) {
         String s when s.isNotEmpty => s,
         _ => throw const BadRequest(reason: 'name must be a non-empty string'),
