@@ -440,7 +440,6 @@ void main() {
     /// covered in `templates_db_test.dart` and would complicate teardown here.
     Future<Template> seedFiledTemplate(String name) async {
       final exercise = await h.seedGlobalExercise();
-      final exerciseName = await h.exec('SELECT name FROM exercises WHERE id = @id::uuid', {'id': exercise});
       return h.db.createTemplate(
         userId: coachId,
         body: TemplateRequest(
@@ -450,7 +449,7 @@ void main() {
           movesFolder: true,
           exercises: [
             TemplateExerciseRequest(
-              exerciseName: exerciseName.first.toColumnMap()['name'] as String,
+              exerciseId: exercise,
               order: 0,
               sets: const [TemplateSetRequest(weight: 60, reps: 5)],
             ),

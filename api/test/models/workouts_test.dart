@@ -5,6 +5,10 @@ import 'package:heart/models/errors.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:test/test.dart';
 
+// fixed v7 uuids — the only reference shape the input accepts since the id cutover
+const _bench = '0198c1a2-b3c4-7d5e-8f60-718293a4b501';
+const _squat = '0198c1a2-b3c4-7d5e-8f60-718293a4b502';
+
 void main() {
   group('WorkoutRequest.toParams', () {
     test('extracts userId, name, parsed dates', () {
@@ -43,8 +47,8 @@ void main() {
         body: {
           'calories': 512,
           'exercises': [
-            {'exercise': 'Bench Press (Barbell)', 'order': 0, 'met': 5.5, 'sets': []},
-            {'exercise': 'Squat (Barbell)', 'order': 1, 'sets': []},
+            {'exercise': _bench, 'order': 0, 'met': 5.5, 'sets': []},
+            {'exercise': _squat, 'order': 1, 'sets': []},
           ],
         },
       );
@@ -62,8 +66,8 @@ void main() {
         userId: 'u1',
         body: {
           'exercises': [
-            {'exercise': 'Bench Press (Barbell)', 'order': 0, 'note': '  do one hand at a time  ', 'sets': []},
-            {'exercise': 'Squat (Barbell)', 'order': 1, 'note': '   ', 'sets': []},
+            {'exercise': _bench, 'order': 0, 'note': '  do one hand at a time  ', 'sets': []},
+            {'exercise': _squat, 'order': 1, 'note': '   ', 'sets': []},
           ],
         },
       );
@@ -78,7 +82,7 @@ void main() {
         userId: 'u1',
         body: {
           'exercises': [
-            {'exercise': 'Bench Press (Barbell)', 'order': 0, 'note': 'x' * 501, 'sets': []},
+            {'exercise': _bench, 'order': 0, 'note': 'x' * 501, 'sets': []},
           ],
         },
       );
@@ -86,20 +90,20 @@ void main() {
       expect(() => req.toParams(), throwsA(isA<BadRequest>()));
     });
 
-    test('exercises encoded with name flattened from {exercise: name} or {exercise: {name}}', () {
+    test('exercises encoded with the id flattened from {exercise: id} or {exercise: {id}}', () {
       final req = const WorkoutRequest(
         userId: 'u1',
         body: {
           'exercises': [
             {
-              'exercise': 'Bench Press (Barbell)',
+              'exercise': _bench,
               'order': 0,
               'sets': [
                 {'reps': 5},
               ],
             },
             {
-              'exercise': {'name': 'Squat (Barbell)'},
+              'exercise': {'id': _squat, 'name': 'Squat (Barbell)'},
               'order': 1,
               'sets': [],
             },
@@ -110,29 +114,42 @@ void main() {
       final exercises = jsonDecode(req.toParams()['exercises'] as String) as List;
       expect(exercises, hasLength(2));
       expect(exercises[0], {
-        'exercise_name': 'Bench Press (Barbell)',
+        'exercise_id': _bench,
         'order': 0,
         'sets': [
           {'reps': 5},
         ],
       });
-      expect(exercises[1]['exercise_name'], 'Squat (Barbell)');
+      expect(exercises[1]['exercise_id'], _squat);
     });
 
-    test('drops exercises whose name cannot be derived', () {
+    test('drops an exercise the user emptied, keeps the rest', () {
       final req = const WorkoutRequest(
         userId: 'u1',
         body: {
           'exercises': [
             {'exercise': null, 'order': 0, 'sets': []},
-            {'exercise': 'Squat (Barbell)', 'order': 1, 'sets': []},
+            {'exercise': _squat, 'order': 1, 'sets': []},
           ],
         },
       );
 
       final exercises = jsonDecode(req.toParams()['exercises'] as String) as List;
       expect(exercises, hasLength(1));
-      expect(exercises.first['exercise_name'], 'Squat (Barbell)');
+      expect(exercises.first['exercise_id'], _squat);
+    });
+
+    test('a present but malformed exercise reference is a 400, not a silent drop', () {
+      final req = const WorkoutRequest(
+        userId: 'u1',
+        body: {
+          'exercises': [
+            {'exercise': 'Squat (Barbell)', 'order': 0, 'sets': []},
+          ],
+        },
+      );
+
+      expect(() => req.toParams(), throwsA(isA<BadRequest>()));
     });
 
     test('defaults sets to [] when missing', () {
@@ -140,7 +157,7 @@ void main() {
         userId: 'u1',
         body: {
           'exercises': [
-            {'exercise': 'Squat (Barbell)', 'order': 0},
+            {'exercise': _squat, 'order': 0},
           ],
         },
       );

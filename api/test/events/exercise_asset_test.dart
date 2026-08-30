@@ -23,7 +23,7 @@ void main() {
       when(config.cdnAssetUrl(any)).thenAnswer((inv) => 'https://cdn.example/${inv.positionalArguments.first}');
       when(
         exercises.setExerciseMedia(
-          name: anyNamed('name'),
+          key: anyNamed('key'),
           asset: anyNamed('asset'),
           thumbnail: anyNamed('thumbnail'),
         ),
@@ -43,7 +43,7 @@ void main() {
           request,
           {
             'type': 'exercise.asset.processed',
-            'name': 'Bicycle Crunch',
+            'key': 'bicycle-crunch',
             'asset': {'key': 'exercises/Bicycle Crunch/asset.gif', 'width': 480, 'height': 360},
             'thumbnail': {'key': 'exercises/Bicycle Crunch/thumbnail.jpg', 'width': 320, 'height': 240},
           },
@@ -51,7 +51,7 @@ void main() {
 
         verify(
           exercises.setExerciseMedia(
-            name: 'Bicycle Crunch',
+            key: 'bicycle-crunch',
             asset: {
               'link': 'https://cdn.example/exercises/Bicycle Crunch/asset.gif',
               'width': 480,
@@ -72,14 +72,14 @@ void main() {
           expect(
             () => exerciseAssetProcessed(request, {
               'type': 'exercise.asset.processed',
-              'name': 'Bicycle Crunch',
+              'key': 'bicycle-crunch',
               // asset / thumbnail missing
             }),
             throwsArgumentError,
           );
           verifyNever(
             exercises.setExerciseMedia(
-              name: anyNamed('name'),
+              key: anyNamed('key'),
               asset: anyNamed('asset'),
               thumbnail: anyNamed('thumbnail'),
             ),
@@ -95,7 +95,7 @@ void main() {
               request,
               {
                 'type': 'exercise.asset.processed',
-                'name': 'Bicycle Crunch',
+                'key': 'bicycle-crunch',
                 'asset': {'key': 'exercises/Bicycle Crunch/asset.gif'},
                 'thumbnail': {'key': 'exercises/Bicycle Crunch/thumbnail.jpg', 'width': 320, 'height': 240},
               },
@@ -104,7 +104,7 @@ void main() {
           );
           verifyNever(
             exercises.setExerciseMedia(
-              name: anyNamed('name'),
+              key: anyNamed('key'),
               asset: anyNamed('asset'),
               thumbnail: anyNamed('thumbnail'),
             ),
