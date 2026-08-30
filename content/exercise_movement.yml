@@ -1,8 +1,8 @@
-# Movement patterns and load attributes, keyed by exercise name.
+# Movement patterns and load attributes, keyed by exercise slug (the master map key).
 # Exercises sharing a `groups` entry are mutually replaceable.
 # Seeded by scripts/movement_seed.py; hand edits here are preserved.
 # Fold into content/exercise_library.yml with scripts/movement_merge.py.
-"Ab Wheel":
+ab-wheel:
   groups:
     - core_bracing
   axial_load: none
@@ -10,7 +10,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Bicycle Crunch":
+bicycle-crunch:
   groups:
     - trunk_flexion
   axial_load: none
@@ -18,7 +18,7 @@
   unilateral: true
   impact: none
   skill: low
-"Cable Crunch":
+cable-crunch:
   groups:
     - trunk_flexion
   axial_load: none
@@ -26,7 +26,7 @@
   unilateral: false
   impact: none
   skill: low
-"Cable Twist":
+cable-twist:
   groups:
     - trunk_lateral_rotation
   axial_load: low
@@ -34,7 +34,7 @@
   unilateral: false
   impact: none
   skill: low
-"Cross Body Crunch":
+cross-body-crunch:
   groups:
     - trunk_flexion
   axial_load: none
@@ -42,7 +42,7 @@
   unilateral: true
   impact: none
   skill: low
-"Crunch":
+crunch:
   groups:
     - trunk_flexion
   axial_load: none
@@ -50,7 +50,7 @@
   unilateral: false
   impact: none
   skill: low
-"Crunch (Machine)":
+crunch-machine:
   groups:
     - trunk_flexion
   axial_load: none
@@ -58,7 +58,7 @@
   unilateral: false
   impact: none
   skill: low
-"Crunch (Stability Ball)":
+crunch-stability-ball:
   groups:
     - trunk_flexion
   axial_load: none
@@ -66,7 +66,7 @@
   unilateral: false
   impact: none
   skill: low
-"Decline Crunch":
+decline-crunch:
   groups:
     - trunk_flexion
   axial_load: none
@@ -74,7 +74,7 @@
   unilateral: false
   impact: none
   skill: low
-"Flat Knee Raise":
+flat-knee-raise:
   groups:
     - hip_flexion_hanging
   axial_load: none
@@ -82,7 +82,7 @@
   unilateral: false
   impact: none
   skill: low
-"Flat Leg Raise":
+flat-leg-raise:
   groups:
     - hip_flexion_hanging
   axial_load: none
@@ -90,7 +90,7 @@
   unilateral: false
   impact: none
   skill: low
-"Hanging Knee Raise":
+hanging-knee-raise:
   groups:
     - hip_flexion_hanging
   axial_load: none
@@ -98,7 +98,7 @@
   unilateral: false
   impact: none
   skill: low
-"Hanging Leg Raise":
+hanging-leg-raise:
   groups:
     - hip_flexion_hanging
   axial_load: none
@@ -106,7 +106,7 @@
   unilateral: false
   impact: none
   skill: low
-"Jackknife Sit Up":
+jackknife-sit-up:
   groups:
     - trunk_flexion
   axial_load: none
@@ -114,7 +114,7 @@
   unilateral: false
   impact: none
   skill: low
-"Knee Raise (Captain's Chair)":
+knee-raise-captain-s-chair:
   groups:
     - hip_flexion_hanging
   axial_load: none
@@ -122,7 +122,7 @@
   unilateral: false
   impact: none
   skill: low
-"Knees to Elbows":
+knees-to-elbows:
   groups:
     - hip_flexion_hanging
   axial_load: none
@@ -130,7 +130,7 @@
   unilateral: false
   impact: none
   skill: low
-"Oblique Crunch":
+oblique-crunch:
   groups:
     - trunk_flexion
   axial_load: none
@@ -138,7 +138,7 @@
   unilateral: true
   impact: none
   skill: low
-"Plank":
+plank:
   groups:
     - core_bracing
   axial_load: none
@@ -146,7 +146,7 @@
   unilateral: false
   impact: none
   skill: low
-"Reverse Crunch":
+reverse-crunch:
   groups:
     - trunk_flexion
   axial_load: none
@@ -154,7 +154,7 @@
   unilateral: false
   impact: none
   skill: low
-"Reverse Plank":
+reverse-plank:
   groups:
     - core_bracing
   axial_load: none
@@ -162,7 +162,7 @@
   unilateral: false
   impact: none
   skill: low
-"Russian Twist":
+russian-twist:
   groups:
     - trunk_lateral_rotation
   axial_load: low
@@ -170,7 +170,7 @@
   unilateral: false
   impact: none
   skill: low
-"Flutter Kick":
+flutter-kick:
   groups:
     - hip_flexion_hanging
   axial_load: none
@@ -178,7 +178,7 @@
   unilateral: true
   impact: none
   skill: low
-"Side Bend (Cable)":
+side-bend-cable:
   groups:
     - trunk_lateral_rotation
   axial_load: low
@@ -186,7 +186,7 @@
   unilateral: true
   impact: none
   skill: low
-"Side Bend (Band)":
+side-bend-band:
   groups:
     - trunk_lateral_rotation
   axial_load: low
@@ -194,7 +194,7 @@
   unilateral: true
   impact: none
   skill: low
-"Side Bend (Dumbbell)":
+side-bend-dumbbell:
   groups:
     - trunk_lateral_rotation
   axial_load: low
@@ -202,7 +202,7 @@
   unilateral: true
   impact: none
   skill: low
-"Side Plank":
+side-plank:
   groups:
     - core_bracing
   axial_load: none
@@ -210,7 +210,7 @@
   unilateral: true
   impact: none
   skill: low
-"Sit Up":
+sit-up:
   groups:
     - trunk_flexion
   axial_load: none
@@ -218,7 +218,7 @@
   unilateral: false
   impact: none
   skill: low
-"Superman":
+superman:
   groups:
     - spinal_extension
   axial_load: moderate
@@ -226,7 +226,7 @@
   unilateral: false
   impact: none
   skill: low
-"Toes To Bar":
+toes-to-bar:
   groups:
     - hip_flexion_hanging
   axial_load: none
@@ -234,7 +234,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Torso Rotation (Machine)":
+torso-rotation-machine:
   groups:
     - trunk_lateral_rotation
   axial_load: low
@@ -242,7 +242,7 @@
   unilateral: false
   impact: none
   skill: low
-"V Up":
+v-up:
   groups:
     - trunk_flexion
   axial_load: none
@@ -250,7 +250,7 @@
   unilateral: false
   impact: none
   skill: low
-"Bench Dip":
+bench-dip:
   groups:
     - elbow_extension
   axial_load: none
@@ -258,7 +258,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Bench Press - Close Grip (Barbell)":
+bench-press-close-grip-barbell:
   groups:
     - elbow_extension
   axial_load: none
@@ -266,7 +266,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Bicep Curl (Barbell)":
+bicep-curl-barbell:
   groups:
     - elbow_flexion
   axial_load: none
@@ -274,7 +274,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Bicep Curl (Cable)":
+bicep-curl-cable:
   groups:
     - elbow_flexion
   axial_load: none
@@ -282,7 +282,7 @@
   unilateral: false
   impact: none
   skill: low
-"Bicep Curl (Dumbbell)":
+bicep-curl-dumbbell:
   groups:
     - elbow_flexion
   axial_load: none
@@ -290,7 +290,7 @@
   unilateral: false
   impact: none
   skill: low
-"Bicep Curl (Machine)":
+bicep-curl-machine:
   groups:
     - elbow_flexion
   axial_load: none
@@ -298,7 +298,7 @@
   unilateral: false
   impact: none
   skill: low
-"Cable Kickback":
+cable-kickback:
   groups:
     - elbow_extension
   axial_load: none
@@ -306,7 +306,7 @@
   unilateral: true
   impact: none
   skill: low
-"Concentration Curl (Dumbbell)":
+concentration-curl-dumbbell:
   groups:
     - elbow_flexion
   axial_load: none
@@ -314,7 +314,7 @@
   unilateral: true
   impact: none
   skill: low
-"Hammer Curl (Band)":
+hammer-curl-band:
   groups:
     - elbow_flexion
   axial_load: low
@@ -322,7 +322,7 @@
   unilateral: false
   impact: none
   skill: low
-"Hammer Curl (Cable)":
+hammer-curl-cable:
   groups:
     - elbow_flexion
   axial_load: none
@@ -330,7 +330,7 @@
   unilateral: false
   impact: none
   skill: low
-"Incline Curl (Dumbbell)":
+incline-curl-dumbbell:
   groups:
     - elbow_flexion
   axial_load: none
@@ -338,7 +338,7 @@
   unilateral: false
   impact: none
   skill: low
-"Hammer Curl (Dumbbell)":
+hammer-curl-dumbbell:
   groups:
     - elbow_flexion
   axial_load: none
@@ -346,7 +346,7 @@
   unilateral: false
   impact: none
   skill: low
-"Preacher Curl (Barbell)":
+preacher-curl-barbell:
   groups:
     - elbow_flexion
   axial_load: none
@@ -354,7 +354,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Preacher Curl (Dumbbell)":
+preacher-curl-dumbbell:
   groups:
     - elbow_flexion
   axial_load: none
@@ -362,7 +362,7 @@
   unilateral: false
   impact: none
   skill: low
-"Heart Pump":
+heart-pump:
   groups:
     - elbow_flexion
   axial_load: none
@@ -370,7 +370,7 @@
   unilateral: false
   impact: none
   skill: low
-"Preacher Curl (Machine)":
+preacher-curl-machine:
   groups:
     - elbow_flexion
   axial_load: none
@@ -378,7 +378,7 @@
   unilateral: false
   impact: none
   skill: low
-"Push Up - Close Grip":
+push-up-close-grip:
   groups:
     - elbow_extension
   axial_load: none
@@ -386,7 +386,7 @@
   unilateral: false
   impact: none
   skill: low
-"Reverse Curl (Band)":
+reverse-curl-band:
   groups:
     - elbow_flexion
   axial_load: low
@@ -394,7 +394,7 @@
   unilateral: false
   impact: none
   skill: low
-"Reverse Curl (Barbell)":
+reverse-curl-barbell:
   groups:
     - elbow_flexion
   axial_load: none
@@ -402,7 +402,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Reverse Curl (Dumbbell)":
+reverse-curl-dumbbell:
   groups:
     - elbow_flexion
   axial_load: none
@@ -410,7 +410,7 @@
   unilateral: false
   impact: none
   skill: low
-"Reverse Grip Concentration Curl (Dumbbell)":
+reverse-grip-concentration-curl-dumbbell:
   groups:
     - elbow_flexion
   axial_load: none
@@ -418,7 +418,7 @@
   unilateral: true
   impact: none
   skill: low
-"Seated Dip (Machine)":
+seated-dip-machine:
   groups:
     - elbow_extension
   axial_load: none
@@ -426,7 +426,7 @@
   unilateral: false
   impact: none
   skill: low
-"Seated Palms Up Wrist Curl (Dumbbell)":
+seated-palms-up-wrist-curl-dumbbell:
   groups:
     - forearm
   axial_load: none
@@ -434,7 +434,7 @@
   unilateral: false
   impact: none
   skill: low
-"Skullcrusher (Barbell)":
+skullcrusher-barbell:
   groups:
     - elbow_extension
   axial_load: none
@@ -442,7 +442,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Skullcrusher (Dumbbell)":
+skullcrusher-dumbbell:
   groups:
     - elbow_extension
   axial_load: none
@@ -450,7 +450,7 @@
   unilateral: false
   impact: none
   skill: low
-"Triceps Dip":
+triceps-dip:
   groups:
     - elbow_extension
   axial_load: none
@@ -458,7 +458,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Triceps Dip (Assisted)":
+triceps-dip-assisted:
   groups:
     - elbow_extension
   axial_load: none
@@ -466,7 +466,7 @@
   unilateral: false
   impact: none
   skill: low
-"Triceps Extension":
+triceps-extension:
   groups:
     - elbow_extension
   axial_load: none
@@ -474,7 +474,7 @@
   unilateral: false
   impact: none
   skill: low
-"Triceps Extension (Barbell)":
+triceps-extension-barbell:
   groups:
     - elbow_extension
   axial_load: none
@@ -482,7 +482,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Triceps Extension (Cable)":
+triceps-extension-cable:
   groups:
     - elbow_extension
   axial_load: none
@@ -490,7 +490,7 @@
   unilateral: false
   impact: none
   skill: low
-"Triceps Extension (Dumbbell)":
+triceps-extension-dumbbell:
   groups:
     - elbow_extension
   axial_load: none
@@ -498,7 +498,7 @@
   unilateral: false
   impact: none
   skill: low
-"Triceps Extension (Machine)":
+triceps-extension-machine:
   groups:
     - elbow_extension
   axial_load: none
@@ -506,7 +506,7 @@
   unilateral: false
   impact: none
   skill: low
-"Triceps Pushdown (Cable - Straight Bar)":
+triceps-pushdown-cable-straight-bar:
   groups:
     - elbow_extension
   axial_load: none
@@ -514,7 +514,7 @@
   unilateral: false
   impact: none
   skill: low
-"Upright Row (Cable)":
+upright-row-cable:
   groups:
     - upright_row
   axial_load: moderate
@@ -522,7 +522,7 @@
   unilateral: false
   impact: none
   skill: low
-"Wrist Roller":
+wrist-roller:
   groups:
     - forearm
   axial_load: none
@@ -530,7 +530,7 @@
   unilateral: false
   impact: none
   skill: low
-"Back Extension":
+back-extension:
   groups:
     - spinal_extension
   axial_load: moderate
@@ -538,7 +538,7 @@
   unilateral: false
   impact: none
   skill: low
-"Back Extension (Machine)":
+back-extension-machine:
   groups:
     - spinal_extension
   axial_load: low
@@ -546,7 +546,7 @@
   unilateral: false
   impact: none
   skill: low
-"Bent Over One Arm Row (Dumbbell)":
+bent-over-one-arm-row-dumbbell:
   groups:
     - horizontal_row
   axial_load: moderate
@@ -554,7 +554,7 @@
   unilateral: true
   impact: none
   skill: low
-"Bent Over Row (Band)":
+bent-over-row-band:
   groups:
     - horizontal_row
   axial_load: low
@@ -562,7 +562,7 @@
   unilateral: false
   impact: none
   skill: low
-"Bent Over Row (Barbell)":
+bent-over-row-barbell:
   groups:
     - horizontal_row
   axial_load: high
@@ -570,7 +570,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Bent Over Row (Dumbbell)":
+bent-over-row-dumbbell:
   groups:
     - horizontal_row
   axial_load: moderate
@@ -578,7 +578,7 @@
   unilateral: false
   impact: none
   skill: low
-"Bent Over Row - Underhand (Barbell)":
+bent-over-row-underhand-barbell:
   groups:
     - horizontal_row
   axial_load: high
@@ -586,7 +586,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Chin Up":
+chin-up:
   groups:
     - vertical_pull
   axial_load: none
@@ -594,7 +594,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Chin Up (Assisted)":
+chin-up-assisted:
   groups:
     - vertical_pull
   axial_load: none
@@ -602,7 +602,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Deadlift (Barbell)":
+deadlift-barbell:
   groups:
     - deadlift_floor
   axial_load: high
@@ -610,7 +610,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Good Morning (Barbell)":
+good-morning-barbell:
   groups:
     - hip_hinge_stifflegged
   axial_load: high
@@ -618,7 +618,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Incline Row (Dumbbell)":
+incline-row-dumbbell:
   groups:
     - horizontal_row
   axial_load: moderate
@@ -626,7 +626,7 @@
   unilateral: false
   impact: none
   skill: low
-"Inverted Row (Bodyweight)":
+inverted-row-bodyweight:
   groups:
     - horizontal_row
   axial_load: low
@@ -634,7 +634,7 @@
   unilateral: false
   impact: none
   skill: low
-"High Row (Machine)":
+high-row-machine:
   groups:
     - vertical_pull
   axial_load: low
@@ -642,7 +642,7 @@
   unilateral: false
   impact: none
   skill: low
-"Iso-Lateral Row (Machine)":
+iso-lateral-row-machine:
   groups:
     - horizontal_row
   axial_load: low
@@ -650,7 +650,7 @@
   unilateral: true
   impact: none
   skill: low
-"Kipping Pull Up":
+kipping-pull-up:
   groups:
     - vertical_pull
   axial_load: none
@@ -658,7 +658,7 @@
   unilateral: false
   impact: high
   skill: high
-"Kneeling Pulldown (Band)":
+kneeling-pulldown-band:
   groups:
     - vertical_pull
   axial_load: low
@@ -666,7 +666,7 @@
   unilateral: false
   impact: none
   skill: low
-"Lat Pulldown (Cable)":
+lat-pulldown-cable:
   groups:
     - vertical_pull
   axial_load: none
@@ -674,7 +674,7 @@
   unilateral: false
   impact: none
   skill: low
-"Lat Pulldown (Machine)":
+lat-pulldown-machine:
   groups:
     - vertical_pull
   axial_load: none
@@ -682,7 +682,7 @@
   unilateral: false
   impact: none
   skill: low
-"Lat Pulldown (Single Arm)":
+lat-pulldown-single-arm:
   groups:
     - vertical_pull
   axial_load: none
@@ -690,7 +690,7 @@
   unilateral: true
   impact: none
   skill: low
-"Lat Pulldown - Close Grip (Cable)":
+lat-pulldown-close-grip-cable:
   groups:
     - vertical_pull
   axial_load: none
@@ -698,7 +698,7 @@
   unilateral: false
   impact: none
   skill: low
-"Lat Pulldown - Underhand (Band)":
+lat-pulldown-underhand-band:
   groups:
     - vertical_pull
   axial_load: low
@@ -706,7 +706,7 @@
   unilateral: false
   impact: none
   skill: low
-"Lat Pulldown - Underhand (Cable)":
+lat-pulldown-underhand-cable:
   groups:
     - vertical_pull
   axial_load: none
@@ -714,7 +714,7 @@
   unilateral: false
   impact: none
   skill: low
-"Lat Pulldown - Wide Grip (Cable)":
+lat-pulldown-wide-grip-cable:
   groups:
     - vertical_pull
   axial_load: none
@@ -722,7 +722,7 @@
   unilateral: false
   impact: none
   skill: low
-"Pendlay Row (Barbell)":
+pendlay-row-barbell:
   groups:
     - horizontal_row
   axial_load: high
@@ -730,7 +730,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Pull Up":
+pull-up:
   groups:
     - vertical_pull
   axial_load: none
@@ -738,7 +738,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Pull Up (Assisted)":
+pull-up-assisted:
   groups:
     - vertical_pull
   axial_load: none
@@ -746,7 +746,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Pull Up (Band)":
+pull-up-band:
   groups:
     - vertical_pull
   axial_load: low
@@ -754,7 +754,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Rack Pull (Barbell)":
+rack-pull-barbell:
   groups:
     - deadlift_floor
   axial_load: high
@@ -762,7 +762,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Romanian Deadlift (Barbell)":
+romanian-deadlift-barbell:
   groups:
     - hip_hinge_stifflegged
   axial_load: high
@@ -770,7 +770,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Seated Row (Cable)":
+seated-row-cable:
   groups:
     - horizontal_row
   axial_load: low
@@ -778,7 +778,7 @@
   unilateral: false
   impact: none
   skill: low
-"Seated Row (Machine)":
+seated-row-machine:
   groups:
     - horizontal_row
   axial_load: low
@@ -786,7 +786,7 @@
   unilateral: false
   impact: none
   skill: low
-"Seated Wide-Grip Row (Cable)":
+seated-wide-grip-row-cable:
   groups:
     - horizontal_row
   axial_load: low
@@ -794,7 +794,7 @@
   unilateral: false
   impact: none
   skill: low
-"Shrug (Machine)":
+shrug-machine:
   groups:
     - shrug
   axial_load: moderate
@@ -802,7 +802,7 @@
   unilateral: false
   impact: none
   skill: low
-"Shrug (Smith Machine)":
+shrug-smith-machine:
   groups:
     - shrug
   axial_load: moderate
@@ -810,7 +810,7 @@
   unilateral: false
   impact: none
   skill: low
-"Stiff Leg Deadlift (Barbell)":
+stiff-leg-deadlift-barbell:
   groups:
     - hip_hinge_stifflegged
   axial_load: high
@@ -818,7 +818,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Sumo Deadlift (Barbell)":
+sumo-deadlift-barbell:
   groups:
     - deadlift_floor
   axial_load: high
@@ -826,7 +826,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"T Bar Row":
+t-bar-row:
   groups:
     - horizontal_row
   axial_load: moderate
@@ -834,7 +834,7 @@
   unilateral: false
   impact: none
   skill: low
-"Upright Row (Barbell)":
+upright-row-barbell:
   groups:
     - upright_row
   axial_load: moderate
@@ -842,7 +842,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Wide Pull Up":
+wide-pull-up:
   groups:
     - vertical_pull
   axial_load: none
@@ -850,7 +850,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Around the World":
+around-the-world:
   groups:
     - chest_fly
   axial_load: none
@@ -858,7 +858,7 @@
   unilateral: false
   impact: none
   skill: low
-"Bench Press (Barbell)":
+bench-press-barbell:
   groups:
     - horizontal_press
   axial_load: none
@@ -866,7 +866,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Bench Press (Cable)":
+bench-press-cable:
   groups:
     - horizontal_press
   axial_load: none
@@ -874,7 +874,7 @@
   unilateral: false
   impact: none
   skill: low
-"Bench Press (Dumbbell)":
+bench-press-dumbbell:
   groups:
     - horizontal_press
   axial_load: none
@@ -882,7 +882,7 @@
   unilateral: false
   impact: none
   skill: low
-"Bench Press (Smith Machine)":
+bench-press-smith-machine:
   groups:
     - horizontal_press
   axial_load: none
@@ -890,7 +890,7 @@
   unilateral: false
   impact: none
   skill: low
-"Bench Press - Wide Grip (Barbell)":
+bench-press-wide-grip-barbell:
   groups:
     - horizontal_press
   axial_load: none
@@ -898,7 +898,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Cable Crossover":
+cable-crossover:
   groups:
     - chest_fly
   axial_load: none
@@ -906,7 +906,7 @@
   unilateral: false
   impact: none
   skill: low
-"Chest Dip":
+chest-dip:
   groups:
     - chest_dip
   axial_load: none
@@ -914,7 +914,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Chest Dip (Assisted)":
+chest-dip-assisted:
   groups:
     - chest_dip
   axial_load: none
@@ -922,7 +922,7 @@
   unilateral: false
   impact: none
   skill: low
-"Chest Fly":
+chest-fly:
   groups:
     - chest_fly
   axial_load: none
@@ -930,7 +930,7 @@
   unilateral: false
   impact: none
   skill: low
-"Chest Fly (Band)":
+chest-fly-band:
   groups:
     - chest_fly
   axial_load: low
@@ -938,7 +938,7 @@
   unilateral: false
   impact: none
   skill: low
-"Chest Fly (Dumbbell)":
+chest-fly-dumbbell:
   groups:
     - chest_fly
   axial_load: none
@@ -946,7 +946,7 @@
   unilateral: false
   impact: none
   skill: low
-"Chest Press (Band)":
+chest-press-band:
   groups:
     - horizontal_press
   axial_load: low
@@ -954,7 +954,7 @@
   unilateral: false
   impact: none
   skill: low
-"Chest Press (Machine)":
+chest-press-machine:
   groups:
     - horizontal_press
   axial_load: none
@@ -962,7 +962,7 @@
   unilateral: false
   impact: none
   skill: low
-"Decline Bench Press (Barbell)":
+decline-bench-press-barbell:
   groups:
     - decline_press
   axial_load: none
@@ -970,7 +970,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Decline Bench Press (Dumbbell)":
+decline-bench-press-dumbbell:
   groups:
     - decline_press
   axial_load: none
@@ -978,7 +978,7 @@
   unilateral: false
   impact: none
   skill: low
-"Decline Bench Press (Smith Machine)":
+decline-bench-press-smith-machine:
   groups:
     - decline_press
   axial_load: none
@@ -986,7 +986,7 @@
   unilateral: false
   impact: none
   skill: low
-"Floor Press (Barbell)":
+floor-press-barbell:
   groups:
     - horizontal_press
   axial_load: none
@@ -994,7 +994,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Incline Bench Press (Barbell)":
+incline-bench-press-barbell:
   groups:
     - incline_press
   axial_load: none
@@ -1002,7 +1002,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Incline Bench Press (Cable)":
+incline-bench-press-cable:
   groups:
     - incline_press
   axial_load: none
@@ -1010,7 +1010,7 @@
   unilateral: false
   impact: none
   skill: low
-"Incline Bench Press (Dumbbell)":
+incline-bench-press-dumbbell:
   groups:
     - incline_press
   axial_load: none
@@ -1018,7 +1018,7 @@
   unilateral: false
   impact: none
   skill: low
-"Incline Bench Press (Smith Machine)":
+incline-bench-press-smith-machine:
   groups:
     - incline_press
   axial_load: none
@@ -1026,7 +1026,7 @@
   unilateral: false
   impact: none
   skill: low
-"Incline Chest Fly (Dumbbell)":
+incline-chest-fly-dumbbell:
   groups:
     - chest_fly
   axial_load: none
@@ -1034,7 +1034,7 @@
   unilateral: false
   impact: none
   skill: low
-"Incline Chest Press (Machine)":
+incline-chest-press-machine:
   groups:
     - incline_press
   axial_load: none
@@ -1042,7 +1042,7 @@
   unilateral: false
   impact: none
   skill: low
-"Iso-Lateral Chest Press (Machine)":
+iso-lateral-chest-press-machine:
   groups:
     - horizontal_press
   axial_load: none
@@ -1050,7 +1050,7 @@
   unilateral: true
   impact: none
   skill: low
-"Pec Deck (Machine)":
+pec-deck-machine:
   groups:
     - chest_fly
   axial_load: none
@@ -1058,7 +1058,7 @@
   unilateral: false
   impact: none
   skill: low
-"Pullover (Dumbbell)":
+pullover-dumbbell:
   groups:
     - pullover
   axial_load: none
@@ -1066,7 +1066,7 @@
   unilateral: false
   impact: none
   skill: low
-"Pullover (Machine)":
+pullover-machine:
   groups:
     - pullover
   axial_load: none
@@ -1074,7 +1074,7 @@
   unilateral: false
   impact: none
   skill: low
-"Push Up":
+push-up:
   groups:
     - horizontal_press
   axial_load: none
@@ -1082,7 +1082,7 @@
   unilateral: false
   impact: none
   skill: low
-"Push Up (Band)":
+push-up-band:
   groups:
     - horizontal_press
   axial_load: low
@@ -1090,7 +1090,7 @@
   unilateral: false
   impact: none
   skill: low
-"Push Up (Knees)":
+push-up-knees:
   groups:
     - horizontal_press
   axial_load: none
@@ -1098,7 +1098,7 @@
   unilateral: false
   impact: none
   skill: low
-"Box Jump":
+box-jump:
   groups:
     - plyometric_lower
   axial_load: low
@@ -1106,7 +1106,7 @@
   unilateral: false
   impact: high
   skill: low
-"Box Squat (Barbell)":
+box-squat-barbell:
   groups:
     - squat_bilateral
   axial_load: high
@@ -1114,7 +1114,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Bulgarian Split Squat":
+bulgarian-split-squat:
   groups:
     - lunge_split
   axial_load: high
@@ -1122,7 +1122,7 @@
   unilateral: true
   impact: none
   skill: moderate
-"Cable Pull Through":
+cable-pull-through:
   groups:
     - hip_hinge_stifflegged
   axial_load: low
@@ -1130,7 +1130,7 @@
   unilateral: false
   impact: none
   skill: low
-"Calf Press on Leg Press":
+calf-press-on-leg-press:
   groups:
     - calf_raise
   axial_load: low
@@ -1138,7 +1138,7 @@
   unilateral: false
   impact: none
   skill: low
-"Calf Press on Seated Leg Press":
+calf-press-on-seated-leg-press:
   groups:
     - calf_raise
   axial_load: low
@@ -1146,7 +1146,7 @@
   unilateral: false
   impact: none
   skill: low
-"Deadlift (Band)":
+deadlift-band:
   groups:
     - deadlift_floor
   axial_load: low
@@ -1154,7 +1154,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Deadlift (Dumbbell)":
+deadlift-dumbbell:
   groups:
     - deadlift_floor
   axial_load: high
@@ -1162,7 +1162,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Deadlift (Smith Machine)":
+deadlift-smith-machine:
   groups:
     - deadlift_floor
   axial_load: high
@@ -1170,7 +1170,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Deficit Deadlift (Barbell)":
+deficit-deadlift-barbell:
   groups:
     - deadlift_floor
   axial_load: high
@@ -1178,7 +1178,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Front Squat (Barbell)":
+front-squat-barbell:
   groups:
     - squat_bilateral
   axial_load: high
@@ -1186,7 +1186,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Glute Ham Raise":
+glute-ham-raise:
   groups:
     - knee_flexion
   axial_load: none
@@ -1194,7 +1194,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Glute Kickback (Machine)":
+glute-kickback-machine:
   groups:
     - glute_isolation
   axial_load: none
@@ -1202,7 +1202,7 @@
   unilateral: true
   impact: none
   skill: low
-"Goblet Squat (Kettlebell)":
+goblet-squat-kettlebell:
   groups:
     - squat_bilateral
   axial_load: moderate
@@ -1210,7 +1210,7 @@
   unilateral: false
   impact: none
   skill: low
-"Hack Squat":
+hack-squat:
   groups:
     - squat_bilateral
   axial_load: moderate
@@ -1218,7 +1218,7 @@
   unilateral: false
   impact: none
   skill: low
-"Hack Squat (Barbell)":
+hack-squat-barbell:
   groups:
     - squat_bilateral
   axial_load: high
@@ -1226,7 +1226,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"High Knee Skips":
+high-knee-skips:
   groups:
     - plyometric_lower
   axial_load: low
@@ -1234,7 +1234,7 @@
   unilateral: false
   impact: high
   skill: low
-"Hip Abductor (Machine)":
+hip-abductor-machine:
   groups:
     - hip_abduction
   axial_load: none
@@ -1242,7 +1242,7 @@
   unilateral: false
   impact: none
   skill: low
-"Hip Adductor (Machine)":
+hip-adductor-machine:
   groups:
     - hip_adduction
   axial_load: none
@@ -1250,7 +1250,7 @@
   unilateral: false
   impact: none
   skill: low
-"Hip Thrust (Barbell)":
+hip-thrust-barbell:
   groups:
     - hip_extension_bridge
   axial_load: low
@@ -1258,7 +1258,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Hip Thrust (Bodyweight)":
+hip-thrust-bodyweight:
   groups:
     - hip_extension_bridge
   axial_load: none
@@ -1266,7 +1266,7 @@
   unilateral: false
   impact: none
   skill: low
-"Donkey Kick (Smith Machine)":
+donkey-kick-smith-machine:
   groups:
     - glute_isolation
   axial_load: none
@@ -1274,7 +1274,7 @@
   unilateral: true
   impact: none
   skill: low
-"Donkey Kick":
+donkey-kick:
   groups:
     - glute_isolation
   axial_load: none
@@ -1282,7 +1282,7 @@
   unilateral: true
   impact: none
   skill: low
-"Fire Hydrant":
+fire-hydrant:
   groups:
     - glute_isolation
   axial_load: none
@@ -1290,7 +1290,7 @@
   unilateral: true
   impact: none
   skill: low
-"Jump Squat":
+jump-squat:
   groups:
     - plyometric_lower
   axial_load: low
@@ -1298,7 +1298,7 @@
   unilateral: false
   impact: high
   skill: low
-"Lateral Box Jump":
+lateral-box-jump:
   groups:
     - plyometric_lower
   axial_load: low
@@ -1306,7 +1306,7 @@
   unilateral: false
   impact: high
   skill: low
-"Leg Extension (Machine)":
+leg-extension-machine:
   groups:
     - knee_extension
   axial_load: none
@@ -1314,7 +1314,7 @@
   unilateral: false
   impact: none
   skill: low
-"Leg Press":
+leg-press:
   groups:
     - squat_bilateral
   axial_load: low
@@ -1322,7 +1322,7 @@
   unilateral: false
   impact: none
   skill: low
-"Lunge (Barbell)":
+lunge-barbell:
   groups:
     - lunge_split
   axial_load: high
@@ -1330,7 +1330,7 @@
   unilateral: true
   impact: none
   skill: moderate
-"Lunge (Bodyweight)":
+lunge-bodyweight:
   groups:
     - lunge_split
   axial_load: none
@@ -1338,7 +1338,7 @@
   unilateral: true
   impact: none
   skill: low
-"Lunge (Dumbbell)":
+lunge-dumbbell:
   groups:
     - lunge_split
   axial_load: moderate
@@ -1346,7 +1346,7 @@
   unilateral: true
   impact: none
   skill: low
-"Step-Back Lunge":
+step-back-lunge:
   groups:
     - lunge_split
   axial_load: moderate
@@ -1354,7 +1354,7 @@
   unilateral: true
   impact: none
   skill: low
-"Lying Leg Curl (Machine)":
+lying-leg-curl-machine:
   groups:
     - knee_flexion
   axial_load: none
@@ -1362,7 +1362,7 @@
   unilateral: false
   impact: none
   skill: low
-"Mountain Climber":
+mountain-climber:
   groups:
     - full_body_conditioning
   axial_load: low
@@ -1370,7 +1370,7 @@
   unilateral: false
   impact: high
   skill: low
-"Pistol Squat":
+pistol-squat:
   groups:
     - lunge_split
   axial_load: moderate
@@ -1378,7 +1378,7 @@
   unilateral: true
   impact: none
   skill: high
-"Romanian Deadlift (Dumbbell)":
+romanian-deadlift-dumbbell:
   groups:
     - hip_hinge_stifflegged
   axial_load: high
@@ -1386,7 +1386,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Seated Calf Raise (Machine)":
+seated-calf-raise-machine:
   groups:
     - calf_raise
   axial_load: none
@@ -1394,7 +1394,7 @@
   unilateral: false
   impact: none
   skill: low
-"Seated Calf Raise (Plate Loaded)":
+seated-calf-raise-plate-loaded:
   groups:
     - calf_raise
   axial_load: none
@@ -1402,7 +1402,7 @@
   unilateral: false
   impact: none
   skill: low
-"Seated Leg Curl (Machine)":
+seated-leg-curl-machine:
   groups:
     - knee_flexion
   axial_load: none
@@ -1410,7 +1410,7 @@
   unilateral: false
   impact: none
   skill: low
-"Seated Leg Press (Machine)":
+seated-leg-press-machine:
   groups:
     - squat_bilateral
   axial_load: low
@@ -1418,7 +1418,7 @@
   unilateral: false
   impact: none
   skill: low
-"Single Leg Bridge":
+single-leg-bridge:
   groups:
     - hip_extension_bridge
   axial_load: none
@@ -1426,7 +1426,7 @@
   unilateral: true
   impact: none
   skill: low
-"Squat (Band)":
+squat-band:
   groups:
     - squat_bilateral
   axial_load: low
@@ -1434,7 +1434,7 @@
   unilateral: false
   impact: none
   skill: low
-"Squat (Barbell)":
+squat-barbell:
   groups:
     - squat_bilateral
   axial_load: high
@@ -1442,7 +1442,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Squat (Bodyweight)":
+squat-bodyweight:
   groups:
     - squat_bilateral
   axial_load: none
@@ -1450,7 +1450,7 @@
   unilateral: false
   impact: none
   skill: low
-"Squat (Dumbbell)":
+squat-dumbbell:
   groups:
     - squat_bilateral
   axial_load: moderate
@@ -1458,7 +1458,7 @@
   unilateral: false
   impact: none
   skill: low
-"Squat (Machine)":
+squat-machine:
   groups:
     - squat_bilateral
   axial_load: moderate
@@ -1466,7 +1466,7 @@
   unilateral: false
   impact: none
   skill: low
-"Squat (Smith Machine)":
+squat-smith-machine:
   groups:
     - squat_bilateral
   axial_load: moderate
@@ -1474,7 +1474,7 @@
   unilateral: false
   impact: none
   skill: low
-"Standing Calf Raise (Barbell)":
+standing-calf-raise-barbell:
   groups:
     - calf_raise
   axial_load: moderate
@@ -1482,7 +1482,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Standing Calf Raise (Bodyweight)":
+standing-calf-raise-bodyweight:
   groups:
     - calf_raise
   axial_load: none
@@ -1490,7 +1490,7 @@
   unilateral: false
   impact: none
   skill: low
-"Standing Calf Raise (Dumbbell)":
+standing-calf-raise-dumbbell:
   groups:
     - calf_raise
   axial_load: low
@@ -1498,7 +1498,7 @@
   unilateral: false
   impact: none
   skill: low
-"Standing Calf Raise (Machine)":
+standing-calf-raise-machine:
   groups:
     - calf_raise
   axial_load: low
@@ -1506,7 +1506,7 @@
   unilateral: false
   impact: none
   skill: low
-"Standing Calf Raise (Smith Machine)":
+standing-calf-raise-smith-machine:
   groups:
     - calf_raise
   axial_load: low
@@ -1514,7 +1514,7 @@
   unilateral: false
   impact: none
   skill: low
-"Standing Leg Curl (Machine)":
+standing-leg-curl-machine:
   groups:
     - knee_flexion
   axial_load: none
@@ -1522,7 +1522,7 @@
   unilateral: true
   impact: none
   skill: low
-"Step-up (Bodyweight)":
+step-up-bodyweight:
   groups:
     - lunge_split
   axial_load: none
@@ -1530,7 +1530,7 @@
   unilateral: true
   impact: none
   skill: low
-"Step-up (Barbell)":
+step-up-barbell:
   groups:
     - lunge_split
   axial_load: high
@@ -1538,7 +1538,7 @@
   unilateral: true
   impact: none
   skill: moderate
-"Step-up (Dumbbell)":
+step-up-dumbbell:
   groups:
     - lunge_split
   axial_load: moderate
@@ -1546,7 +1546,7 @@
   unilateral: true
   impact: none
   skill: low
-"Straight Leg Deadlift (Band)":
+straight-leg-deadlift-band:
   groups:
     - hip_hinge_stifflegged
   axial_load: low
@@ -1554,7 +1554,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Stiff Leg Deadlift (Dumbbell)":
+stiff-leg-deadlift-dumbbell:
   groups:
     - hip_hinge_stifflegged
   axial_load: high
@@ -1562,7 +1562,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Curtsey Lunges (Barbell)":
+curtsey-lunges-barbell:
   groups:
     - lunge_split
   axial_load: moderate
@@ -1570,7 +1570,7 @@
   unilateral: true
   impact: none
   skill: moderate
-"Deficit Squat":
+deficit-squat:
   groups:
     - squat_bilateral
   axial_load: moderate
@@ -1578,7 +1578,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Trap Bar Deadlift":
+trap-bar-deadlift:
   groups:
     - deadlift_floor
   axial_load: moderate
@@ -1586,7 +1586,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Zercher Squat (Barbell)":
+zercher-squat-barbell:
   groups:
     - squat_bilateral
   axial_load: high
@@ -1594,7 +1594,7 @@
   unilateral: false
   impact: none
   skill: high
-"Arnold Press (Dumbbell)":
+arnold-press-dumbbell:
   groups:
     - vertical_press
   axial_load: moderate
@@ -1602,7 +1602,7 @@
   unilateral: false
   impact: none
   skill: low
-"Halo":
+halo:
   groups:
     - mobility
   axial_load: none
@@ -1610,7 +1610,7 @@
   unilateral: true
   impact: none
   skill: low
-"Handstand Push Up":
+handstand-push-up:
   groups:
     - vertical_press
   axial_load: moderate
@@ -1618,7 +1618,7 @@
   unilateral: false
   impact: none
   skill: high
-"Face Pull (Cable)":
+face-pull-cable:
   groups:
     - rear_delt
   axial_load: none
@@ -1626,7 +1626,7 @@
   unilateral: false
   impact: none
   skill: low
-"Front Raise (Band)":
+front-raise-band:
   groups:
     - front_raise
   axial_load: low
@@ -1634,7 +1634,7 @@
   unilateral: false
   impact: none
   skill: low
-"Front Raise (Barbell)":
+front-raise-barbell:
   groups:
     - front_raise
   axial_load: low
@@ -1642,7 +1642,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Front Raise (Cable)":
+front-raise-cable:
   groups:
     - front_raise
   axial_load: low
@@ -1650,7 +1650,7 @@
   unilateral: false
   impact: none
   skill: low
-"Front Raise (Dumbbell)":
+front-raise-dumbbell:
   groups:
     - front_raise
   axial_load: low
@@ -1658,7 +1658,7 @@
   unilateral: false
   impact: none
   skill: low
-"Front Raise (Plate)":
+front-raise-plate:
   groups:
     - front_raise
   axial_load: low
@@ -1666,7 +1666,7 @@
   unilateral: false
   impact: none
   skill: low
-"Landmine Press":
+landmine-press:
   groups:
     - vertical_press
   axial_load: moderate
@@ -1674,7 +1674,7 @@
   unilateral: false
   impact: none
   skill: low
-"Lateral Raise (Band)":
+lateral-raise-band:
   groups:
     - lateral_raise
   axial_load: low
@@ -1682,7 +1682,7 @@
   unilateral: false
   impact: none
   skill: low
-"Lateral Raise (Cable)":
+lateral-raise-cable:
   groups:
     - lateral_raise
   axial_load: low
@@ -1690,7 +1690,7 @@
   unilateral: false
   impact: none
   skill: low
-"Lateral Raise (Dumbbell)":
+lateral-raise-dumbbell:
   groups:
     - lateral_raise
   axial_load: low
@@ -1698,7 +1698,7 @@
   unilateral: false
   impact: none
   skill: low
-"Lateral Raise (Machine)":
+lateral-raise-machine:
   groups:
     - lateral_raise
   axial_load: low
@@ -1706,7 +1706,7 @@
   unilateral: false
   impact: none
   skill: low
-"Overhead Press (Barbell)":
+overhead-press-barbell:
   groups:
     - vertical_press
   axial_load: moderate
@@ -1714,7 +1714,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Overhead Press (Cable)":
+overhead-press-cable:
   groups:
     - vertical_press
   axial_load: moderate
@@ -1722,7 +1722,7 @@
   unilateral: false
   impact: none
   skill: low
-"Overhead Press (Dumbbell)":
+overhead-press-dumbbell:
   groups:
     - vertical_press
   axial_load: moderate
@@ -1730,7 +1730,7 @@
   unilateral: false
   impact: none
   skill: low
-"Overhead Press (Smith Machine)":
+overhead-press-smith-machine:
   groups:
     - vertical_press
   axial_load: moderate
@@ -1738,7 +1738,7 @@
   unilateral: false
   impact: none
   skill: low
-"Push Press":
+push-press:
   groups:
     - vertical_press
   axial_load: high
@@ -1746,7 +1746,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Reverse Fly (Cable)":
+reverse-fly-cable:
   groups:
     - rear_delt
   axial_load: none
@@ -1754,7 +1754,7 @@
   unilateral: false
   impact: none
   skill: low
-"Reverse Fly (Dumbbell)":
+reverse-fly-dumbbell:
   groups:
     - rear_delt
   axial_load: none
@@ -1762,7 +1762,7 @@
   unilateral: false
   impact: none
   skill: low
-"Reverse Fly (Machine)":
+reverse-fly-machine:
   groups:
     - rear_delt
   axial_load: none
@@ -1770,7 +1770,7 @@
   unilateral: false
   impact: none
   skill: low
-"Seated Overhead Press (Barbell)":
+seated-overhead-press-barbell:
   groups:
     - vertical_press
   axial_load: low
@@ -1778,7 +1778,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Seated Overhead Press (Dumbbell)":
+seated-overhead-press-dumbbell:
   groups:
     - vertical_press
   axial_load: low
@@ -1786,7 +1786,7 @@
   unilateral: false
   impact: none
   skill: low
-"Shoulder Press (Machine)":
+shoulder-press-machine:
   groups:
     - vertical_press
   axial_load: low
@@ -1794,7 +1794,7 @@
   unilateral: false
   impact: none
   skill: low
-"Shoulder Press (Plate Loaded)":
+shoulder-press-plate-loaded:
   groups:
     - vertical_press
   axial_load: low
@@ -1802,7 +1802,7 @@
   unilateral: false
   impact: none
   skill: low
-"Shrug (Barbell)":
+shrug-barbell:
   groups:
     - shrug
   axial_load: high
@@ -1810,7 +1810,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Shrug (Dumbbell)":
+shrug-dumbbell:
   groups:
     - shrug
   axial_load: moderate
@@ -1818,7 +1818,7 @@
   unilateral: false
   impact: none
   skill: low
-"Strict Military Press (Barbell)":
+strict-military-press-barbell:
   groups:
     - vertical_press
   axial_load: high
@@ -1826,7 +1826,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Upright Row (Dumbbell)":
+upright-row-dumbbell:
   groups:
     - upright_row
   axial_load: moderate
@@ -1834,7 +1834,7 @@
   unilateral: false
   impact: none
   skill: low
-"Upright Row (Smith Machine)":
+upright-row-smith-machine:
   groups:
     - upright_row
   axial_load: moderate
@@ -1842,7 +1842,7 @@
   unilateral: false
   impact: none
   skill: low
-"Stretching":
+stretching:
   groups:
     - mobility
   axial_load: none
@@ -1850,7 +1850,7 @@
   unilateral: false
   impact: none
   skill: low
-"Clean (Barbell)":
+clean-barbell:
   groups:
     - olympic_lift
   axial_load: high
@@ -1858,7 +1858,7 @@
   unilateral: false
   impact: none
   skill: high
-"Clean and Jerk (Barbell)":
+clean-and-jerk-barbell:
   groups:
     - olympic_lift
   axial_load: high
@@ -1866,7 +1866,7 @@
   unilateral: false
   impact: none
   skill: high
-"Deadlift High Pull (Barbell)":
+deadlift-high-pull-barbell:
   groups:
     - deadlift_floor
   axial_load: high
@@ -1874,7 +1874,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Hang Clean (Barbell)":
+hang-clean-barbell:
   groups:
     - olympic_lift
   axial_load: high
@@ -1882,7 +1882,7 @@
   unilateral: false
   impact: none
   skill: high
-"Hang Snatch (Barbell)":
+hang-snatch-barbell:
   groups:
     - olympic_lift
   axial_load: high
@@ -1890,7 +1890,7 @@
   unilateral: false
   impact: none
   skill: high
-"Jump Shrug (Barbell)":
+jump-shrug-barbell:
   groups:
     - shrug
   axial_load: moderate
@@ -1898,7 +1898,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Overhead Squat (Barbell)":
+overhead-squat-barbell:
   groups:
     - squat_bilateral
   axial_load: high
@@ -1906,7 +1906,7 @@
   unilateral: false
   impact: none
   skill: high
-"Power Clean":
+power-clean:
   groups:
     - olympic_lift
   axial_load: high
@@ -1914,7 +1914,7 @@
   unilateral: false
   impact: none
   skill: high
-"Power Snatch (Barbell)":
+power-snatch-barbell:
   groups:
     - olympic_lift
   axial_load: high
@@ -1922,7 +1922,7 @@
   unilateral: false
   impact: none
   skill: high
-"Press Under (Barbell)":
+press-under-barbell:
   groups:
     - olympic_lift
   axial_load: high
@@ -1930,7 +1930,7 @@
   unilateral: false
   impact: none
   skill: high
-"Snatch (Barbell)":
+snatch-barbell:
   groups:
     - olympic_lift
   axial_load: high
@@ -1938,7 +1938,7 @@
   unilateral: false
   impact: none
   skill: high
-"Snatch Pull (Barbell)":
+snatch-pull-barbell:
   groups:
     - olympic_lift
   axial_load: high
@@ -1946,7 +1946,7 @@
   unilateral: false
   impact: none
   skill: high
-"Split Jerk (Barbell)":
+split-jerk-barbell:
   groups:
     - olympic_lift
   axial_load: high
@@ -1954,7 +1954,7 @@
   unilateral: false
   impact: none
   skill: high
-"Ball Slams":
+ball-slams:
   groups:
     - full_body_conditioning
   axial_load: low
@@ -1962,7 +1962,7 @@
   unilateral: false
   impact: high
   skill: low
-"Burpee":
+burpee:
   groups:
     - full_body_conditioning
   axial_load: low
@@ -1970,7 +1970,7 @@
   unilateral: false
   impact: high
   skill: low
-"Jumping Jack":
+jumping-jack:
   groups:
     - full_body_conditioning
   axial_load: low
@@ -1978,7 +1978,7 @@
   unilateral: false
   impact: high
   skill: low
-"Kettlebell Swing":
+kettlebell-swing:
   groups:
     - hip_hinge_stifflegged
   axial_load: moderate
@@ -1986,7 +1986,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Kettlebell Turkish Get Up":
+kettlebell-turkish-get-up:
   groups:
     - full_body_conditioning
   axial_load: low
@@ -1994,7 +1994,7 @@
   unilateral: true
   impact: none
   skill: high
-"Muscle Up":
+muscle-up:
   groups:
     - vertical_pull
   axial_load: none
@@ -2002,7 +2002,7 @@
   unilateral: false
   impact: none
   skill: high
-"Squat Row (Band)":
+squat-row-band:
   groups:
     - full_body_conditioning
     - horizontal_row
@@ -2011,7 +2011,7 @@
   unilateral: false
   impact: none
   skill: low
-"Sumo Deadlift High Pull (Barbell)":
+sumo-deadlift-high-pull-barbell:
   groups:
     - deadlift_floor
     - upright_row
@@ -2020,7 +2020,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Thruster (Barbell)":
+thruster-barbell:
   groups:
     - squat_bilateral
     - vertical_press
@@ -2029,7 +2029,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Thruster (Kettlebell)":
+thruster-kettlebell:
   groups:
     - squat_bilateral
     - vertical_press
@@ -2038,7 +2038,7 @@
   unilateral: false
   impact: none
   skill: moderate
-"Aerobics":
+aerobics:
   groups:
     - cardio_steady
   axial_load: none
@@ -2046,7 +2046,7 @@
   unilateral: false
   impact: low
   skill: low
-"Battle Ropes":
+battle-ropes:
   groups:
     - cardio_steady
   axial_load: none
@@ -2054,7 +2054,7 @@
   unilateral: false
   impact: low
   skill: low
-"Climbing":
+climbing:
   groups:
     - cardio_steady
   axial_load: none
@@ -2062,7 +2062,7 @@
   unilateral: false
   impact: low
   skill: low
-"Cycling":
+cycling:
   groups:
     - cardio_steady
   axial_load: none
@@ -2070,7 +2070,7 @@
   unilateral: false
   impact: none
   skill: low
-"Cycling (Indoor)":
+cycling-indoor:
   groups:
     - cardio_steady
   axial_load: none
@@ -2078,7 +2078,7 @@
   unilateral: false
   impact: none
   skill: low
-"Elliptical Machine":
+elliptical-machine:
   groups:
     - cardio_steady
   axial_load: none
@@ -2086,7 +2086,7 @@
   unilateral: false
   impact: none
   skill: low
-"Hiking":
+hiking:
   groups:
     - cardio_steady
   axial_load: none
@@ -2094,7 +2094,7 @@
   unilateral: false
   impact: low
   skill: low
-"Jump Rope":
+jump-rope:
   groups:
     - cardio_steady
   axial_load: none
@@ -2102,7 +2102,7 @@
   unilateral: false
   impact: high
   skill: low
-"Rowing (Machine)":
+rowing-machine:
   groups:
     - cardio_steady
   axial_load: none
@@ -2110,7 +2110,7 @@
   unilateral: false
   impact: none
   skill: low
-"Running":
+running:
   groups:
     - cardio_steady
   axial_load: none
@@ -2118,7 +2118,7 @@
   unilateral: false
   impact: high
   skill: low
-"Running (Treadmill)":
+running-treadmill:
   groups:
     - cardio_steady
   axial_load: none
@@ -2126,7 +2126,7 @@
   unilateral: false
   impact: high
   skill: low
-"Skating":
+skating:
   groups:
     - cardio_steady
   axial_load: none
@@ -2134,7 +2134,7 @@
   unilateral: false
   impact: high
   skill: low
-"Skiing":
+skiing:
   groups:
     - cardio_steady
   axial_load: none
@@ -2142,7 +2142,7 @@
   unilateral: false
   impact: low
   skill: low
-"Snowboarding":
+snowboarding:
   groups:
     - cardio_steady
   axial_load: none
@@ -2150,7 +2150,7 @@
   unilateral: false
   impact: low
   skill: low
-"Swimming":
+swimming:
   groups:
     - cardio_steady
   axial_load: none
@@ -2158,7 +2158,7 @@
   unilateral: false
   impact: none
   skill: low
-"Walking":
+walking:
   groups:
     - cardio_steady
   axial_load: none
@@ -2166,7 +2166,7 @@
   unilateral: false
   impact: low
   skill: low
-"Yoga":
+yoga:
   groups:
     - mobility
   axial_load: none

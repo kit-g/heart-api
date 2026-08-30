@@ -6,6 +6,6 @@
 # Validated against content/exercise_i18n_schema.json (scripts/validate_library.py).
 locale: es_ES
 exercises:
-  "Lat Pulldown (Cable)":
+  lat-pulldown-cable:
     name: "Jalón al pecho (polea)"
     fallback_to: es
