@@ -32,4 +32,23 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
       'workout_image': '{author}: новый комментарий к вашему фото',
     },
   },
+  // neutral international Spanish; es_ES reaches these via the renderer's
+  // base-language fallback, same chain as the exercise library
+  'es': {
+    'comment.created': {
+      'workout': '{author}: nuevo comentario en tu entrenamiento',
+      'workout_exercise': '{author}: nuevo comentario en tu ejercicio',
+      'exercise_set': '{author}: nuevo comentario en tu serie',
+      'workout_image': '{author}: nuevo comentario en tu foto',
+    },
+  },
+  // neutral international French; fr_CA reaches these via the same fallback
+  'fr': {
+    'comment.created': {
+      'workout': '{author} : nouveau commentaire sur votre entraînement',
+      'workout_exercise': '{author} : nouveau commentaire sur votre exercice',
+      'exercise_set': '{author} : nouveau commentaire sur votre série',
+      'workout_image': '{author} : nouveau commentaire sur votre photo',
+    },
+  },
 };
