@@ -20,6 +20,7 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
   @override
   Future<Map<String, dynamic>> createExercise({
     required String userId,
+    String? id,
     required String name,
     required String category,
     required String target,
@@ -30,6 +31,7 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
         _createExercise.toSql(),
         parameters: {
           'userId': userId,
+          'id': id,
           'name': name,
           'category': category,
           'target': target,
@@ -38,7 +40,7 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
       );
       return rows.first.toColumnMap();
     } on ServerException catch (e) {
-      _rethrowCapped(e);
+      _rethrowClientIdCollision(e);
     }
   }
 
@@ -68,18 +70,18 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
 
   @override
   Future<void> setExerciseMedia({
-    required String name,
+    required String key,
     required Map<String, dynamic> asset,
     required Map<String, dynamic> thumbnail,
   }) async {
     final rows = await _pool.execute(
       _setExerciseMedia.toSql(),
       parameters: {
-        'name': name,
+        'key': key,
         'asset': jsonEncode(asset),
         'thumbnail': jsonEncode(thumbnail),
       },
     );
-    if (rows.isEmpty) throw NotFound(type: 'Exercise', id: name);
+    if (rows.isEmpty) throw NotFound(type: 'Exercise', id: key);
   }
 }
