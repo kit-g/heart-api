@@ -1,4 +1,4 @@
-version: "2026-02-07"
+version: "2026-08-29"
 locales: [en, en_CA, ru]
 fallback_to_default: en
 exercises:
@@ -2137,9 +2137,6 @@ exercises:
           - Advanced variation: hold a light weight between your feet for added resistance
           - If you experience lower back discomfort, reduce your range of motion or switch to easier variations
 
-      en_CA:
-        name: "V Up"
-        fallback_to: en
 
     muscles:
       primary:
