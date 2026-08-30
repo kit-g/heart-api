@@ -555,8 +555,17 @@ class _MuscleTagging implements MuscleTagging {
 }
 
 abstract interface class Exercise implements Searchable, Model, Comparable<Exercise> {
-  String? get id;
+  /// The identity: the server row's uuid, or the client-minted UUIDv7 for a
+  /// custom exercise created offline (the server persists that id on sync).
+  String get id;
 
+  /// The env-stable content slug (`bench-press-barbell`) for library
+  /// exercises; null for user-created ones. A content/fixture handle, not a
+  /// wire reference — saves go by [id].
+  String? get key;
+
+  /// Localized display copy for the locale the library was fetched under —
+  /// never an identifier.
   String get name;
 
   Category get category;
@@ -651,7 +660,9 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
 
 class _Exercise implements Exercise {
   @override
-  final String? id;
+  final String id;
+  @override
+  final String? key;
   @override
   final String name;
   @override
@@ -682,7 +693,8 @@ class _Exercise implements Exercise {
   final int? restTimer;
 
   const new({
-    this.id,
+    required this.id,
+    this.key,
     required this.name,
     required this.category,
     required this.target,
@@ -701,7 +713,11 @@ class _Exercise implements Exercise {
 
   factory fromJson(Map json) {
     return _Exercise(
-      id: json['id'],
+      id: switch (json['id']) {
+        final String id => id,
+        _ => throw ArgumentError.value(json, 'json', 'an exercise payload must carry its id'),
+      },
+      key: json['key'],
       name: json['name'] ?? json['exercise'],
       category: Category.fromString(json['category']),
       target: Target.fromString(json['target']),
@@ -754,6 +770,7 @@ class _Exercise implements Exercise {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'key': ?key,
       'category': category.value,
       'name': name,
       'target': target.value,
@@ -787,19 +804,25 @@ class _Exercise implements Exercise {
     if (query.isEmpty) return true;
 
     final queryWords = query.normalized().split(RegExp(r'\s+')).map((w) => w.trim());
-    final nameWords = name.normalized().split(RegExp(r'[\s()]+')).map((w) => w.trim());
+    final words = [
+      ...name.normalized().split(RegExp(r'[\s()]+')),
+      // the slug still matches the canonical English wording when the display
+      // name is localized
+      ...?key?.split('-'),
+    ].map((w) => w.trim());
 
-    return queryWords.every((queryWord) => nameWords.any((nameWord) => nameWord.contains(queryWord)));
+    return queryWords.every((queryWord) => words.any((word) => word.contains(queryWord)));
   }
 
-  /// name is the database identifier
+  /// The uuid is the identity; [name] is localized display copy and two
+  /// locales' views of the same exercise must compare equal.
   @override
   bool operator ==(Object other) {
-    return other is Exercise && other.name == name;
+    return other is Exercise && other.id == id;
   }
 
   @override
-  int get hashCode => name.hashCode;
+  int get hashCode => id.hashCode;
 
   @override
   bool fits(Iterable<ExerciseFilter> filters) {
@@ -840,6 +863,7 @@ class _Exercise implements Exercise {
   }) {
     return _Exercise(
       id: id,
+      key: key,
       name: name,
       category: category ?? this.category,
       target: target ?? this.target,
@@ -863,9 +887,10 @@ typedef ExerciseId = String;
 typedef Asset = ({String link, int? width, int? height});
 
 extension on String {
-  /// Strip dashes and other common symbols to make search more forgiving
-  /// This keeps only letters, numbers, and spaces
+  /// Strip dashes and other common symbols to make search more forgiving.
+  /// Keeps letters (any script — display names are localized), numbers, and
+  /// spaces.
   String normalized() {
-    return toLowerCase().replaceAll(RegExp(r'[^a-z0-9\s]'), '');
+    return toLowerCase().replaceAll(RegExp(r'[^\p{L}\p{N}\s]', unicode: true), '');
   }
 }
