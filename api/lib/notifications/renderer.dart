@@ -21,7 +21,8 @@ String renderTitle({
   required Map<String, String> args,
   String defaultLocale = 'en',
 }) {
-  final byEvent = notificationTemplates[locale] ??
+  final byEvent =
+      notificationTemplates[locale] ??
       notificationTemplates[locale.split('_').first] ??
       notificationTemplates[defaultLocale]!;
   final byVariant = byEvent[eventType] ?? const {};
