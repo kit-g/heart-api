@@ -1,11 +1,10 @@
 """
 Pure image + key logic — no AWS, so it unit-tests against bytes alone.
 
-Raw uploads land at `exercise-uploads/<Exercise Name>.<ext>`; the exercise
-name is the filename stem. Processed objects are written under
-`exercises/<Exercise Name>/` (literal name — the API percent-encodes it when it
-builds the CDN link, so the S3 key stays human-readable and matches existing
-data).
+Raw uploads land at `exercise-uploads/<exercise-slug>.<ext>`; the filename stem
+is the exercise's stable slug (exercises.key, the content repo's map key), not
+its display name — names are renamable copy, S3 keys are not. Processed objects
+are written under `exercises/<exercise-slug>/`.
 """
 
 import io
@@ -40,9 +39,12 @@ class ProcessedMedia:
     thumbnail: Dimensions
 
 
-def exercise_name(key: str) -> str:
+def exercise_key(key: str) -> str:
     """
-    `exercise-uploads/Bicycle Crunch.gif` -> `Bicycle Crunch`.
+    `exercise-uploads/bicycle-crunch.gif` -> `bicycle-crunch`.
+
+    The stem is the exercise's stable slug (exercises.key), the same key the
+    content repo uses — not the display name, which is renamable copy.
     """
     base = key.rsplit('/', 1)[-1]
     stem, dot, _ext = base.rpartition('.')
@@ -62,12 +64,12 @@ def content_type(ext: str) -> str:
     return _CONTENT_TYPES.get(ext.lower(), 'application/octet-stream')
 
 
-def dest_keys(name: str, ext: str) -> tuple[str, str]:
+def dest_keys(exercise: str, ext: str) -> tuple[str, str]:
     """
-    Returns (asset_key, thumbnail_key) under `exercises/<name>/`.
+    Returns (asset_key, thumbnail_key) under `exercises/<slug>/`.
     """
-    asset = f'{DEST_PREFIX}{name}/asset.{ext}' if ext else f'{DEST_PREFIX}{name}/asset'
-    return asset, f'{DEST_PREFIX}{name}/{THUMBNAIL_NAME}'
+    asset = f'{DEST_PREFIX}{exercise}/asset.{ext}' if ext else f'{DEST_PREFIX}{exercise}/asset'
+    return asset, f'{DEST_PREFIX}{exercise}/{THUMBNAIL_NAME}'
 
 
 def render(data: bytes) -> ProcessedMedia:
