@@ -20,7 +20,7 @@ from typing import Any
 import boto3
 from events import Event, ObjectCreated
 from PIL import UnidentifiedImageError
-from process import SOURCE_PREFIX, asset_ext, content_type, dest_keys, exercise_name, render
+from process import SOURCE_PREFIX, asset_ext, content_type, dest_keys, exercise_key, render
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ def _upload(bucket: str, key: str) -> None:
         log.warning('ignoring object outside %s: %s', SOURCE_PREFIX, key)
         return
 
-    name = exercise_name(key)
+    exercise = exercise_key(key)
     ext = asset_ext(key)
 
     data = _client('s3').get_object(Bucket=bucket, Key=key)['Body'].read()
@@ -80,7 +80,7 @@ def _upload(bucket: str, key: str) -> None:
         # consume the message instead of cycling it through SQS to the DLQ.
         log.warning('skipping non-image upload %s (%d bytes)', key, len(data))
         return
-    asset_key, thumb_key = dest_keys(name, ext)
+    asset_key, thumb_key = dest_keys(exercise, ext)
 
     s3 = _client('s3')
     s3.put_object(Bucket=bucket, Key=asset_key, Body=data, ContentType=content_type(ext))
@@ -91,7 +91,7 @@ def _upload(bucket: str, key: str) -> None:
         MessageBody=json.dumps(
             {
                 'type': 'exercise.asset.processed',
-                'name': name,
+                'key': exercise,
                 'asset': {'key': asset_key, 'width': media.asset.width, 'height': media.asset.height},
                 'thumbnail': {
                     'key': thumb_key,

@@ -5,7 +5,7 @@ from process import (
     asset_ext,
     content_type,
     dest_keys,
-    exercise_name,
+    exercise_key,
     render,
 )
 
@@ -17,11 +17,11 @@ def _image_bytes(fmt: str, size: tuple[int, int], mode: str = 'RGB') -> bytes:
 
 
 class TestKeyHelpers:
-    def test_exercise_name_strips_prefix_and_extension(self):
-        assert exercise_name('exercise-uploads/Bicycle Crunch.gif') == 'Bicycle Crunch'
+    def test_exercise_key_strips_prefix_and_extension(self):
+        assert exercise_key('exercise-uploads/bicycle-crunch.gif') == 'bicycle-crunch'
 
-    def test_exercise_name_handles_dotted_names(self):
-        assert exercise_name('exercise-uploads/Step-up (Dumbbell).gif') == 'Step-up (Dumbbell)'
+    def test_exercise_key_is_the_slug_verbatim(self):
+        assert exercise_key('exercise-uploads/step-up-dumbbell.gif') == 'step-up-dumbbell'
 
     def test_asset_ext_lowercased(self):
         assert asset_ext('exercise-uploads/Plank.JPEG') == 'jpeg'
@@ -35,13 +35,13 @@ class TestKeyHelpers:
         assert content_type('mystery') == 'application/octet-stream'
 
     def test_dest_keys(self):
-        asset, thumb = dest_keys('Bicycle Crunch', 'gif')
-        assert asset == 'exercises/Bicycle Crunch/asset.gif'
-        assert thumb == 'exercises/Bicycle Crunch/thumbnail.jpg'
+        asset, thumb = dest_keys('bicycle-crunch', 'gif')
+        assert asset == 'exercises/bicycle-crunch/asset.gif'
+        assert thumb == 'exercises/bicycle-crunch/thumbnail.jpg'
 
     def test_dest_keys_without_extension(self):
-        asset, _ = dest_keys('Bicycle Crunch', '')
-        assert asset == 'exercises/Bicycle Crunch/asset'
+        asset, _ = dest_keys('bicycle-crunch', '')
+        assert asset == 'exercises/bicycle-crunch/asset'
 
 
 class TestRender:

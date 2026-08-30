@@ -34,28 +34,28 @@ class TestHandler:
     def test_writes_asset_and_thumbnail_then_notifies_api(self, mocker, monkeypatch):
         s3, sqs = _wire(mocker, monkeypatch)
 
-        result = app.handler(_sqs_event('exercise-uploads/Bicycle Crunch.gif'), None)
+        result = app.handler(_sqs_event('exercise-uploads/bicycle-crunch.gif'), None)
         assert result == {'batchItemFailures': []}
 
         put_keys = {call.kwargs['Key'] for call in s3.put_object.call_args_list}
         assert put_keys == {
-            'exercises/Bicycle Crunch/asset.gif',
-            'exercises/Bicycle Crunch/thumbnail.jpg',
+            'exercises/bicycle-crunch/asset.gif',
+            'exercises/bicycle-crunch/thumbnail.jpg',
         }
 
         sqs.send_message.assert_called_once()
         msg = json.loads(sqs.send_message.call_args.kwargs['MessageBody'])
         assert msg['type'] == 'exercise.asset.processed'
-        assert msg['name'] == 'Bicycle Crunch'
-        assert msg['asset'] == {'key': 'exercises/Bicycle Crunch/asset.gif', 'width': 600, 'height': 400}
-        assert msg['thumbnail']['key'] == 'exercises/Bicycle Crunch/thumbnail.jpg'
+        assert msg['key'] == 'bicycle-crunch'
+        assert msg['asset'] == {'key': 'exercises/bicycle-crunch/asset.gif', 'width': 600, 'height': 400}
+        assert msg['thumbnail']['key'] == 'exercises/bicycle-crunch/thumbnail.jpg'
         assert max(msg['thumbnail']['width'], msg['thumbnail']['height']) == 320
 
     def test_original_bytes_are_stored_as_the_asset(self, mocker, monkeypatch):
         source = _png()
         s3, _ = _wire(mocker, monkeypatch, source_bytes=source)
 
-        app.handler(_sqs_event('exercise-uploads/Plank.png'), None)
+        app.handler(_sqs_event('exercise-uploads/plank.png'), None)
 
         asset_put = next(c for c in s3.put_object.call_args_list if c.kwargs['Key'].endswith('/asset.png'))
         assert asset_put.kwargs['Body'] == source
@@ -69,7 +69,7 @@ class TestHandler:
     def test_object_outside_source_prefix_is_consumed_untouched(self, mocker, monkeypatch):
         s3, sqs = _wire(mocker, monkeypatch)
 
-        result = app.handler(_sqs_event('exercises/Bicycle Crunch/asset.gif'), None)
+        result = app.handler(_sqs_event('exercises/bicycle-crunch/asset.gif'), None)
 
         assert result == {'batchItemFailures': []}
         s3.get_object.assert_not_called()
@@ -79,7 +79,7 @@ class TestHandler:
     def test_non_image_upload_is_consumed_not_retried(self, mocker, monkeypatch):
         s3, sqs = _wire(mocker, monkeypatch, source_bytes=b'\x00\x00\x00\x18ftypmp42 not an image')
 
-        result = app.handler(_sqs_event('exercise-uploads/Squat.mp4'), None)
+        result = app.handler(_sqs_event('exercise-uploads/squat.mp4'), None)
 
         assert result == {'batchItemFailures': []}
         s3.put_object.assert_not_called()
