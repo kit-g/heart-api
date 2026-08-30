@@ -30,7 +30,7 @@ void main() {
         userId: 'u1',
         exercises: [
           TemplateExerciseRequest(
-            exerciseName: 'Bench Press',
+            exerciseId: '0198c1a2-b3c4-7d5e-8f60-718293a4b5c6',
             order: 0,
             sets: [TemplateSetRequest(weight: 60, reps: 5)],
           ),
@@ -38,7 +38,7 @@ void main() {
       );
 
       final encoded = exercisesOf(request).single as Map;
-      expect(encoded['exercise_name'], 'Bench Press');
+      expect(encoded['exercise_id'], '0198c1a2-b3c4-7d5e-8f60-718293a4b5c6');
       expect(encoded['order'], 0);
       expect((encoded['sets'] as List).single, {'weight': 60, 'reps': 5});
     });
@@ -47,7 +47,11 @@ void main() {
       final request = const TemplateRequest(
         userId: 'u1',
         exercises: [
-          TemplateExerciseRequest(exerciseName: 'Plank', order: 0, sets: [TemplateSetRequest(duration: 60)]),
+          TemplateExerciseRequest(
+            exerciseId: '0198c1a2-b3c4-7d5e-8f60-718293a4b5c7',
+            order: 0,
+            sets: [TemplateSetRequest(duration: 60)],
+          ),
         ],
       );
 
