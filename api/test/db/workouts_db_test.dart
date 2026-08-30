@@ -374,6 +374,43 @@ void main() {
       expect(timestampOfUuidV7(updated.first.id), DateTime.utc(2026, 7, 25, 8, 30));
     });
 
+    test('an id colliding with an existing row is a BadRequest, not a raw 23505', () async {
+      final exName = h.uniqueName('Ex');
+      await h.seedGlobalExercise(name: exName);
+      final other = await h.db.createWorkout(
+        userId: ownerId,
+        body: req(ownerId, name: 'Existing', start: DateTime.utc(2026, 7, 25, 8), exerciseName: exName),
+        imageUrl: imageUrl,
+      );
+
+      // duplicate payload ids or a hostile probe of someone else's id both
+      // land here; either way it's the client's mistake, never a 500
+      await expectLater(
+        h.db.createWorkout(
+          userId: ownerId,
+          body: WorkoutRequest(
+            userId: ownerId,
+            body: {
+              'name': 'Clash',
+              'start': '2026-07-25T09:00:00Z',
+              'exercises': [
+                {
+                  'id': other.first.id,
+                  'exercise': exName,
+                  'order': 0,
+                  'sets': [
+                    {'weight': 100, 'reps': 5, 'completed': true},
+                  ],
+                },
+              ],
+            },
+          ),
+          imageUrl: imageUrl,
+        ),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
     test('updating a workout you do not own throws NotFound', () async {
       final id = await h.seedWorkout(userId: ownerId);
       await expectLater(
