@@ -3,11 +3,15 @@ Sync the exercise library from content/exercise_library.yml to Postgres.
 
 Reads:
   - Source YAML: ../content/exercise_library.yml
+  - Locale overlays: ../content/i18n/<locale>.yml (merged into the master's
+    i18n maps before parsing; the fallback locale lives in the master itself)
   - Supabase creds: s3://SECRETS_BUCKET/secrets/supabase.json
 
 Writes:
   - exercises (global, user_id IS NULL) — fallback locale fields, muscles, movement
-  - exercise_translations — one row per non-fallback locale that has its own name/instructions
+  - exercise_translations — one row per non-fallback locale that has its own
+    name/instructions; rows the source no longer defines are pruned (archived
+    exercises keep theirs)
   - Archives any global exercise not in the source YAML.
 
 The exercises.asset / .thumbnail columns are NOT touched here — the assets
@@ -19,6 +23,7 @@ Env:
   SECRETS_BUCKET     static bucket holding secrets/supabase.json
 """
 
+import hashlib
 import json
 import os
 from dataclasses import dataclass
@@ -234,10 +239,91 @@ def fetch_db_creds(secrets_bucket: str) -> dict:
     return json.loads(obj['Body'].read())
 
 
-def get_source() -> dict:
+def content_dir() -> str:
     here = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(here, '..', 'content', 'exercise_library.yml')) as f:
-        return yaml.safe_load(f)
+    return os.path.join(here, '..', 'content')
+
+
+def source_digest(name: str, instructions: str | None) -> str:
+    """Fingerprint of the fallback-locale copy a translation was made from.
+
+    Stored on overlay entries as `source_digest`; when the fallback copy later
+    changes, the stored digest no longer matches and the coverage report
+    (validate_library.py) flags the translation as stale. Bookkeeping only —
+    stripped during merge, never synced to the database.
+    """
+    payload = f'{name}\n\n{instructions or ""}'.encode()
+    return hashlib.sha256(payload).hexdigest()[:12]
+
+
+# Overlay keys that exist for the translation workflow, not for the library
+# document itself; merge_overlays drops them so the merged document stays
+# valid against the master schema's closed i18nEntry.
+OVERLAY_BOOKKEEPING_KEYS = frozenset({'source_digest'})
+
+
+def load_overlays(content: str | None = None) -> list[tuple[str, dict]]:
+    """All content/i18n/<locale>.yml files as (filename, document) pairs."""
+    i18n_dir = os.path.join(content or content_dir(), 'i18n')
+    if not os.path.isdir(i18n_dir):
+        return []
+    overlays = []
+    for filename in sorted(os.listdir(i18n_dir)):
+        if not filename.endswith('.yml'):
+            continue
+        with open(os.path.join(i18n_dir, filename)) as f:
+            overlays.append((filename, yaml.safe_load(f)))
+    return overlays
+
+
+def merge_overlays(master: dict, overlays: list[tuple[str, dict]]) -> dict:
+    """Fold per-locale overlay files into the master document's i18n maps.
+
+    The master owns the structure and the fallback locale; every other locale
+    lives in its own overlay so the master file doesn't multiply in size per
+    locale and translation diffs stay isolated. Mutates and returns `master`.
+
+    Collects every problem before failing, mirroring validate_library.py:
+    a translator fixing an overlay should see the full list, not the first hit.
+    """
+    declared = set(master.get('locales', []))
+    fallback = master.get('fallback_to_default')
+    problems = []
+
+    for filename, overlay in overlays:
+        locale = (overlay or {}).get('locale')
+        stem = os.path.splitext(filename)[0]
+        if locale != stem:
+            problems.append(f'i18n/{filename}: declares locale {locale!r}, expected {stem!r} from its filename')
+            continue
+        if locale not in declared:
+            problems.append(f'i18n/{filename}: locale {locale!r} is not declared in the master `locales` list')
+            continue
+        if locale == fallback:
+            problems.append(f'i18n/{filename}: {locale!r} is the fallback locale and lives in the master file')
+            continue
+
+        for name, entry in (overlay.get('exercises') or {}).items():
+            exercise = master['exercises'].get(name)
+            if exercise is None:
+                problems.append(f'i18n/{filename}: unknown exercise {name!r}')
+                continue
+            i18n = exercise.setdefault('i18n', {})
+            if locale in i18n:
+                problems.append(f'i18n/{filename}: exercise {name!r} already defines {locale!r} in the master file')
+                continue
+            i18n[locale] = {k: v for k, v in entry.items() if k not in OVERLAY_BOOKKEEPING_KEYS}
+
+    if problems:
+        raise ValueError('overlay merge failed:\n' + '\n'.join(f'  {p}' for p in problems))
+    return master
+
+
+def get_source() -> dict:
+    content = content_dir()
+    with open(os.path.join(content, 'exercise_library.yml')) as f:
+        master = yaml.safe_load(f)
+    return merge_overlays(master, load_overlays(content))
 
 
 UPSERT_EXERCISE = '''
@@ -269,10 +355,25 @@ SET archived = true
 WHERE user_id IS NULL AND name <> ALL(%s) AND archived = false
 '''
 
+# A translation the source no longer defines must stop being served, or it
+# lingers with stale copy forever. Scoped to the exercises this run touched:
+# archived exercises (absent from the source) keep whatever translations they
+# had when they shipped.
+PRUNE_TRANSLATIONS = '''
+DELETE FROM exercise_translations t
+WHERE t.exercise_id = ANY(%s::uuid[])
+  AND NOT EXISTS (
+    SELECT 1 FROM unnest(%s::uuid[], %s::text[]) AS kept(exercise_id, locale)
+    WHERE kept.exercise_id = t.exercise_id AND kept.locale = t.locale
+  )
+'''
 
-def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
+
+def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int, int]:
     upserted = 0
     translations = 0
+    exercise_ids = []
+    kept = []  # (exercise_id, locale) pairs the source still defines
     with conn.cursor() as cur:
         for name, exercise in library.exercises.items():
             fallback = exercise.fallback_localization()
@@ -288,6 +389,7 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
                 fallback.validated,
             ))
             exercise_id = cur.fetchone()[0]
+            exercise_ids.append(exercise_id)
             upserted += 1
 
             for locale, loc in exercise.localizations.items():
@@ -298,7 +400,17 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
                         exercise_id, locale, loc.exercise_name, loc.instructions, loc.validated
                     )
                 )
+                kept.append((exercise_id, locale))
                 translations += 1
+
+        cur.execute(
+            PRUNE_TRANSLATIONS, (
+                exercise_ids,
+                [exercise_id for exercise_id, _ in kept],
+                [locale for _, locale in kept],
+            )
+        )
+        pruned = cur.rowcount
 
         cur.execute(ARCHIVE_MISSING, (list(library.exercises.keys()),))
         archived = cur.rowcount
@@ -310,7 +422,7 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int]:
                 f'usually a truncated or half-edited exercise_library.yml. '
                 f'If intended, re-run with MAX_ARCHIVED={archived}.'
             )
-    return upserted, translations, archived
+    return upserted, translations, pruned, archived
 
 
 def connect() -> psycopg.Connection:
@@ -345,9 +457,12 @@ def main():
     library = Library.parse(get_source())
 
     with connect() as conn:
-        upserted, translations, archived = sync(library, conn)
+        upserted, translations, pruned, archived = sync(library, conn)
 
-    print(f'>> Done: {upserted} exercises upserted, {translations} translations, {archived} archived')
+    print(
+        f'>> Done: {upserted} exercises upserted, {translations} translations '
+        f'({pruned} pruned), {archived} archived'
+    )
 
 
 if __name__ == '__main__':

@@ -1,0 +1,9 @@
+# Canadian English overlay. An alias locale: entries exist only where the
+# Canadian spelling differs from en; everything else falls back via the
+# API's per-field COALESCE, so absence here is the normal state.
+# Validated against content/exercise_i18n_schema.json (scripts/validate_library.py).
+locale: en_CA
+exercises:
+  "V Up":
+    name: "V Up"
+    fallback_to: en

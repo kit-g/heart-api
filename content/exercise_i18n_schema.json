@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/exercises-i18n.2026-08-29.schema.json",
+  "title": "Exercise Library Locale Overlay",
+  "description": "One file per non-fallback locale (content/i18n/<locale>.yml). Merged into the master document's i18n maps by scripts/library_locales.py before validation and sync; the fallback locale lives in the master file itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "locale",
+    "exercises"
+  ],
+  "properties": {
+    "locale": {
+      "type": "string",
+      "pattern": "^[a-z]{2}(_[A-Z]{2})?$",
+      "description": "Locale code; must match the filename stem and appear in the master `locales` list."
+    },
+    "exercises": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/entry"
+      },
+      "description": "Map: exerciseId (master key) -> localized entry."
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Exercise name in this locale."
+        },
+        "instructions": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 20000,
+          "description": "Markdown content; keep the master entry's section structure."
+        },
+        "fallback_to": {
+          "type": "string",
+          "pattern": "^[a-z]{2}(_[A-Z]{2})?$",
+          "description": "If a field is missing in this entry, read it from this locale (read-only fallback). Example: en_CA -> en."
+        },
+        "validated": {
+          "type": "boolean",
+          "default": false,
+          "description": "True once a human has reviewed this locale's copy; false marks machine-authored copy the client labels as such."
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{12}$",
+          "description": "source_digest() of the fallback-locale name+instructions this translation was made from; a mismatch marks the translation stale in the coverage report. Stripped during merge, never synced."
+        }
+      }
+    }
+  }
+}
