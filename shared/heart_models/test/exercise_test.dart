@@ -683,14 +683,28 @@ void main() {
     });
 
     group('equality/hash/compare', () {
-      test('equality and hashCode depend on name only', () {
-        final a1 = Exercise(name: 'Bench', category: Category.barbell, target: Target.chest);
-        final a2 = Exercise(name: 'Bench', category: Category.machine, target: Target.back);
-        final b = Exercise(name: 'Squat', category: Category.barbell, target: Target.legs);
+      test('equality and hashCode depend on id only', () {
+        const id = '0198c1a2-b3c4-7d5e-8f60-718293a4b5c6';
+        // two locales' views of the same exercise: same id, different copy
+        final a1 = Exercise.fromJson(const {'id': id, 'name': 'Bench Press', 'category': 'Barbell', 'target': 'Chest'});
+        final a2 = Exercise.fromJson(const {'id': id, 'name': 'Жим лёжа', 'category': 'Barbell', 'target': 'Chest'});
+        // same name, different id: a different exercise
+        final b = Exercise.fromJson(
+          const {
+            'id': '0198c1a2-b3c4-7d5e-8f60-718293a4b5c7',
+            'name': 'Bench Press',
+            'category': 'Barbell',
+            'target': 'Chest',
+          },
+        );
+        // the factory mints a fresh identity every call
+        final c1 = Exercise(name: 'Bench', category: Category.barbell, target: Target.chest);
+        final c2 = Exercise(name: 'Bench', category: Category.barbell, target: Target.chest);
 
         expect(a1, equals(a2));
         expect(a1.hashCode, equals(a2.hashCode));
         expect(a1 == b, isFalse);
+        expect(c1 == c2, isFalse);
       });
 
       test('compareTo uses case-insensitive name ordering', () {

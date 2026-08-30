@@ -172,14 +172,28 @@ void main() {
         'copyWith carries the exercises but into an independent list',
         () {
           final workout = Workout(name: 'Push day');
-          workout.add(Exercise.fromJson({'name': 'Bench Press', 'category': 'Barbell', 'target': 'Chest'}));
+          workout.add(
+            Exercise.fromJson({
+              'id': '0198c1a2-b3c4-7d5e-8f60-718293a4b5c6',
+              'name': 'Bench Press',
+              'category': 'Barbell',
+              'target': 'Chest',
+            }),
+          );
           final template = Template.fromWorkout('template_13', workout, 0);
 
           final copy = template.copyWith(folder: null);
 
           expect(copy.length, template.length);
 
-          copy.add(Exercise.fromJson({'name': 'Squat', 'category': 'Barbell', 'target': 'Legs'}));
+          copy.add(
+            Exercise.fromJson({
+              'id': '0198c1a2-b3c4-7d5e-8f60-718293a4b5c8',
+              'name': 'Squat',
+              'category': 'Barbell',
+              'target': 'Legs',
+            }),
+          );
 
           expect(copy.length, 2);
           expect(template.length, 1);

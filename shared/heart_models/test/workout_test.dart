@@ -755,6 +755,7 @@ void main() {
               {
                 'id': 'we-1',
                 'exercise': {
+                  'id': '0198c1a2-b3c4-7d5e-8f60-718293a4b5c6',
                   'name': 'Bench Press',
                   'category': 'Barbell',
                   'target': 'Chest',
