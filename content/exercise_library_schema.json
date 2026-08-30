@@ -35,12 +35,13 @@
       "type": "object",
       "minProperties": 1,
       "propertyNames": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
       },
       "additionalProperties": {
         "$ref": "#/$defs/exercise"
       },
-      "description": "Map: exerciseId -> exercise definition."
+      "description": "Map: exercise slug -> exercise definition. The slug is the exercise's stable identity (exercises.key in the database, the sync's conflict target, the asset pipeline's S3 stem): kebab-case, minted once from the English name and never re-derived — the display name under i18n is renamable copy, the slug is not."
     }
   },
   "$defs": {
