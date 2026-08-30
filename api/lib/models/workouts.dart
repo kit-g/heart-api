@@ -98,34 +98,38 @@ class WorkoutRequest {
   };
 
   List<Map> _exercises() {
-    return ((body['exercises'] as List? ?? []).cast<Map>())
-        .map(
-          (ex) {
-            final name = switch (ex['exercise']) {
-              String s => s,
-              {'name': String n} => n,
-              _ => null,
-            };
-            return {
-              'exercise_name': name,
-              // A v7 id round-trips so a save keeps the row's identity — the
-              // clients read an act's start off the id's mint instant, and a
-              // re-minted id silently moves every act to "edited just now".
-              // Anything else (absent, Firebase-era, garbage) is dropped and
-              // the insert mints from 'start' instead.
-              'id': ?_v7OrNull(ex['id']),
-              'start': ?_dt(ex['start'])?.toIso8601String(),
-              'order': ex['order'],
-              'met': ?ex['met'],
-              'note': ?_note(ex['note']),
-              'sets': [
-                for (final set in (ex['sets'] as List? ?? []).cast<Map>()) _set(set),
-              ],
-            };
-          },
-        )
-        .where((e) => e['exercise_name'] != null)
-        .toList();
+    final source = (body['exercises'] as List? ?? []).cast<Map>();
+    final out = <Map>[];
+    for (final (index, ex) in source.indexed) {
+      // an emptied editor row names nothing and means "no exercise here",
+      // matching the pre-cutover silent drop of nameless rows
+      if (ex['exercise'] == null) continue;
+      out.add({
+        // The reference is the exercise's uuid — the name is localized
+        // display copy and resolves nothing since the id cutover. A present
+        // but malformed reference is the client's mistake: a 400, not a
+        // silent drop.
+        'exercise_id': switch (ex['exercise']) {
+          final String id when isUuidV7(id) => id,
+          {'id': final String id} when isUuidV7(id) => id,
+          _ => throw BadRequest(reason: 'exercises[$index].exercise must reference an exercise by its id'),
+        },
+        // A v7 id round-trips so a save keeps the row's identity — the
+        // clients read an act's start off the id's mint instant, and a
+        // re-minted id silently moves every act to "edited just now".
+        // Anything else (absent, Firebase-era, garbage) is dropped and
+        // the insert mints from 'start' instead.
+        'id': ?_v7OrNull(ex['id']),
+        'start': ?_dt(ex['start'])?.toIso8601String(),
+        'order': ex['order'],
+        'met': ?ex['met'],
+        'note': ?_note(ex['note']),
+        'sets': [
+          for (final set in (ex['sets'] as List? ?? []).cast<Map>()) _set(set),
+        ],
+      });
+    }
+    return out;
   }
 
   /// The same id round-trip for a set: keep a v7, strip anything else so the
@@ -140,17 +144,10 @@ class WorkoutRequest {
 
   static String? _v7OrNull(Object? value) {
     return switch (value) {
-      String id when _v7.hasMatch(id) => id,
+      String id when isUuidV7(id) => id,
       _ => null,
     };
   }
-
-  // heart_models keeps its own copy private; api/ is not a consumed package,
-  // so duplicating beats widening the shared surface for one predicate.
-  static final _v7 = RegExp(
-    r'^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
-    caseSensitive: false,
-  );
 
   /// Normalises a per-exercise note: trims, treats blank as absent (a cleared pin
   /// is no pin), and caps the length so it stays a pin, not an essay — comments

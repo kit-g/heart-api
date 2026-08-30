@@ -5,6 +5,7 @@ abstract interface class ExerciseService {
 
   Future<Map<String, dynamic>> createExercise({
     required String userId,
+    String? id,
     required String name,
     required String category,
     required String target,
@@ -25,7 +26,7 @@ abstract interface class ExerciseService {
   /// rendered by the assets pipeline. Throws [NotFound] if no such global
   /// exercise exists (e.g. the library hasn't been synced yet).
   Future<void> setExerciseMedia({
-    required String name,
+    required String key,
     required Map<String, dynamic> asset,
     required Map<String, dynamic> thumbnail,
   });

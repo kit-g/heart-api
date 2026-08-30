@@ -21,6 +21,7 @@ Future<ExerciseModel> createExercise(Request request) async {
   final input = await ExerciseCreateIn.fromRequest(request);
   final row = await request.exerciseService.createExercise(
     userId: request.userId,
+    id: input.id,
     name: input.name,
     category: input.category,
     target: input.target,
