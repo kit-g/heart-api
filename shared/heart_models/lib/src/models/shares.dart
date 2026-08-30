@@ -139,24 +139,24 @@ class TemplateSetRequest {
   }
 }
 
-/// One exercise in a template body. The exercise is addressed **by name**, not
-/// by id: the same name resolves to the caller's own custom exercise if they
-/// have one and the global otherwise, which is what lets an assigned template
-/// land on the student's own variants.
+/// One exercise in a template body, addressed **by id** — the uuid is the
+/// exercise's identity; its name is localized display copy. (Assigned-template
+/// resolution onto a student's own variants happens server-side at share time,
+/// not through this reference.)
 class TemplateExerciseRequest {
-  final String exerciseName;
+  final String exerciseId;
   final int order;
   final List<TemplateSetRequest> sets;
 
   const new({
-    required this.exerciseName,
+    required this.exerciseId,
     required this.order,
     this.sets = const [],
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'exercise_name': exerciseName,
+      'exercise_id': exerciseId,
       'order': order,
       'sets': sets.map((s) => s.toJson()).toList(),
     };
