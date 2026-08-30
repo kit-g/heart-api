@@ -8,8 +8,9 @@ String snippetize(String s, {int maxLength = 200}) {
   return '${s.substring(0, maxLength)}…';
 }
 
-/// Renders the title for a push notification. Falls back to the default
-/// locale when the requested locale isn't in [notificationTemplates]; falls
+/// Renders the title for a push notification. A regional locale without
+/// templates of its own falls back to its base language before the default
+/// locale (`es_ES -> es -> en`), mirroring the exercise-library chain; falls
 /// back to the variant raw if the variant key is unknown (so a missing
 /// translation surfaces as a non-localized but still readable string instead
 /// of crashing).
@@ -20,7 +21,9 @@ String renderTitle({
   required Map<String, String> args,
   String defaultLocale = 'en',
 }) {
-  final byEvent = notificationTemplates[locale] ?? notificationTemplates[defaultLocale]!;
+  final byEvent = notificationTemplates[locale] ??
+      notificationTemplates[locale.split('_').first] ??
+      notificationTemplates[defaultLocale]!;
   final byVariant = byEvent[eventType] ?? const {};
   final template = byVariant[variant] ?? variant;
   return template.interpolated(args);
