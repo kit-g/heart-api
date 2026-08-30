@@ -2,46 +2,19 @@ import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group(
-    'timestampOfUuidV7',
-    () {
-      test(
-        'recovers the mint instant of a v7 uuid',
-        () {
-          final before = DateTime.timestamp();
-          final id = uuidV7();
-          final after = DateTime.timestamp();
+  group('isUuidV7', () {
+    test('accepts a minted v7 and a fixed one, either case', () {
+      expect(isUuidV7(uuidV7()), isTrue);
+      expect(isUuidV7('0198c1a2-b3c4-7d5e-8f60-718293a4b5c6'), isTrue);
+      expect(isUuidV7('0198C1A2-B3C4-7D5E-8F60-718293A4B5C6'), isTrue);
+    });
 
-          final minted = timestampOfUuidV7(id);
-
-          expect(minted, isNotNull);
-          // v7 carries millisecond precision, so allow the window's edges.
-          expect(minted!.isBefore(before.subtract(const Duration(milliseconds: 1))), isFalse);
-          expect(minted.isAfter(after.add(const Duration(milliseconds: 1))), isFalse);
-        },
-      );
-
-      test(
-        'reads the leading 48 bits as milliseconds since the epoch',
-        () {
-          expect(
-            timestampOfUuidV7('01950000-0000-7000-8000-000000000000'),
-            equals(DateTime.fromMillisecondsSinceEpoch(0x019500000000, isUtc: true)),
-          );
-        },
-      );
-
-      test(
-        'yields nothing for anything that is not a v7 uuid',
-        () {
-          // a Firebase-era timestamp id
-          expect(timestampOfUuidV7('2025-01-21T12:00:00.000Z'), isNull);
-          // a v4 uuid
-          expect(timestampOfUuidV7('e58ed763-928c-4155-bee9-fdbaaadc15f3'), isNull);
-          expect(timestampOfUuidV7(''), isNull);
-          expect(timestampOfUuidV7('garbage'), isNull);
-        },
-      );
-    },
-  );
+    test('rejects other versions, Firebase-era ids, and garbage', () {
+      expect(isUuidV7('0198c1a2-b3c4-4d5e-8f60-718293a4b5c6'), isFalse, reason: 'v4');
+      expect(isUuidV7('0198c1a2-b3c4-7d5e-c f60-718293a4b5c6'.replaceAll(' ', '')), isFalse, reason: 'bad variant');
+      expect(isUuidV7('2023-01-01T10-00-00'), isFalse, reason: 'sanitized timestamp');
+      expect(isUuidV7('Bench Press (Barbell)'), isFalse);
+      expect(isUuidV7(''), isFalse);
+    });
+  });
 }

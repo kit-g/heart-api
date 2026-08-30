@@ -9,6 +9,12 @@ final _v7 = RegExp(
   caseSensitive: false,
 );
 
+/// Whether [id] has the shape of a UUIDv7 — the only id format the platform
+/// mints or accepts. The shared wire predicate: the API guards client-sent
+/// ids with it before any `::uuid` cast, and the app validates local rows
+/// with it, so a Firebase-era or garbage id fails cleanly on both sides.
+bool isUuidV7(String id) => _v7.hasMatch(id);
+
 /// The instant a v7 uuid was minted — its leading 48 bits are milliseconds
 /// since the Unix epoch. Null when [id] is not a v7 uuid, which is how callers
 /// fall back on Firebase-era ids, which were timestamps outright.
