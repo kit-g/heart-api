@@ -57,7 +57,7 @@ BEGIN
     );
 
     RETURN NEXT lives_ok(
-        'INSERT INTO exercises (name, category, target) VALUES (''global cap-test row'', ''Barbell'', ''Other'')',
+        'INSERT INTO exercises (key, name, category, target) VALUES (''global-cap-test-row'', ''global cap-test row'', ''Barbell'', ''Other'')',
         'global library rows are exempt'
     );
 
