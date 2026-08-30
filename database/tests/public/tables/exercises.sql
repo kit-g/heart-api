@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(34);
+SELECT plan(38);
 
 SELECT has_table('public'::name, 'exercises'::name);
 
@@ -21,7 +21,8 @@ SELECT columns_are(
                    'health',
                    'user_id',
                    'created_at',
-                   'validated'
+                   'validated',
+                   'key'
                    ]
        );
 
@@ -39,6 +40,7 @@ SELECT col_type_is('public'::name, 'exercises'::name, 'health'::name, 'jsonb'::n
 SELECT col_type_is('public'::name, 'exercises'::name, 'user_id'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'created_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'validated'::name, 'boolean'::name);
+SELECT col_type_is('public'::name, 'exercises'::name, 'key'::name, 'text'::name);
 
 SELECT has_pk('public'::name, 'exercises'::name, 'exercises has a primary key');
 SELECT col_is_pk('public'::name, 'exercises'::name, 'id'::name, 'id is the primary key');
@@ -60,9 +62,12 @@ SELECT has_index('public'::name, 'exercises'::name, 'exercises_global_name_idx':
 SELECT has_index('public'::name, 'exercises'::name, 'exercises_user_name_idx'::name);
 SELECT has_index('public'::name, 'exercises'::name, 'exercises_user_id_idx'::name);
 SELECT has_index('public'::name, 'exercises'::name, 'exercises_movement_groups_idx'::name);
+SELECT has_index('public'::name, 'exercises'::name, 'exercises_global_key_idx'::name);
 
 SELECT index_is_unique('public'::name, 'exercises'::name, 'exercises_global_name_idx'::name);
 SELECT index_is_unique('public'::name, 'exercises'::name, 'exercises_user_name_idx'::name);
+SELECT index_is_unique('public'::name, 'exercises'::name, 'exercises_global_key_idx'::name);
+SELECT has_check('public'::name, 'exercises'::name, 'exercises has a check constraint (global rows carry a key)');
 
 SELECT * FROM finish();
 
