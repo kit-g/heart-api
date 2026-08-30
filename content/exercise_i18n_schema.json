@@ -19,12 +19,13 @@
       "type": "object",
       "minProperties": 1,
       "propertyNames": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
       },
       "additionalProperties": {
         "$ref": "#/$defs/entry"
       },
-      "description": "Map: exerciseId (master key) -> localized entry."
+      "description": "Map: exercise slug (master map key) -> localized entry."
     }
   },
   "$defs": {

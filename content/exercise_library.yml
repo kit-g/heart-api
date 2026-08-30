@@ -1,8 +1,8 @@
-version: "2026-08-29"
-locales: [ en, en_CA, ru, es, es_ES, fr, fr_CA ]
+version: "2026-08-30"
+locales: [en, en_CA, ru, es, es_ES, fr, fr_CA]
 fallback_to_default: en
 exercises:
-  "Ab Wheel":
+  ab-wheel:
     category: Weighted Body Weight
     target: Core
     movement:
@@ -77,7 +77,7 @@ exercises:
         ids:
           - external_oblique_l
           - external_oblique_r
-  "Bicycle Crunch":
+  bicycle-crunch:
     category: Weighted Body Weight
     target: Core
     movement:
@@ -148,7 +148,7 @@ exercises:
       secondary:
         groups:
           - legs
-  "Cable Crunch":
+  cable-crunch:
     category: Machine
     target: Core
     movement:
@@ -219,7 +219,7 @@ exercises:
       secondary:
         groups:
           - arms
-  "Cable Twist":
+  cable-twist:
     category: Machine
     target: Core
     movement:
@@ -288,7 +288,7 @@ exercises:
         groups:
           - core
           - shoulders
-  "Cross Body Crunch":
+  cross-body-crunch:
     category: Weighted Body Weight
     target: Core
     movement:
@@ -357,7 +357,7 @@ exercises:
           - rectus_abdominis_2_l
           - rectus_abdominis_2_r
       secondary: {}
-  "Crunch":
+  crunch:
     category: Weighted Body Weight
     target: Core
     movement:
@@ -424,7 +424,7 @@ exercises:
           - rectus_abdominis_2_l
           - rectus_abdominis_2_r
       secondary: {}
-  "Crunch (Machine)":
+  crunch-machine:
     category: Machine
     target: Core
     movement:
@@ -491,7 +491,7 @@ exercises:
           - rectus_abdominis_2_l
           - rectus_abdominis_2_r
       secondary: {}
-  "Crunch (Stability Ball)":
+  crunch-stability-ball:
     category: Reps Only
     target: Core
     movement:
@@ -558,7 +558,7 @@ exercises:
           - rectus_abdominis_2_l
           - rectus_abdominis_2_r
       secondary: {}
-  "Decline Crunch":
+  decline-crunch:
     category: Weighted Body Weight
     target: Core
     movement:
@@ -625,7 +625,7 @@ exercises:
           - rectus_abdominis_2_l
           - rectus_abdominis_2_r
       secondary: {}
-  "Flat Knee Raise":
+  flat-knee-raise:
     category: Reps Only
     target: Core
     movement:
@@ -695,7 +695,7 @@ exercises:
       secondary:
         groups:
           - legs
-  "Flat Leg Raise":
+  flat-leg-raise:
     category: Reps Only
     target: Core
     movement:
@@ -766,7 +766,7 @@ exercises:
       secondary:
         groups:
           - legs
-  "Hanging Knee Raise":
+  hanging-knee-raise:
     category: Reps Only
     target: Core
     movement:
@@ -836,7 +836,7 @@ exercises:
       secondary:
         groups:
           - legs
-  "Hanging Leg Raise":
+  hanging-leg-raise:
     category: Weighted Body Weight
     target: Core
     movement:
@@ -907,7 +907,7 @@ exercises:
       secondary:
         groups:
           - legs
-  "Jackknife Sit Up":
+  jackknife-sit-up:
     category: Weighted Body Weight
     target: Core
     movement:
@@ -975,7 +975,7 @@ exercises:
         groups:
           - legs
           - shoulders
-  "Knee Raise (Captain's Chair)":
+  knee-raise-captain-s-chair:
     category: Weighted Body Weight
     target: Core
     movement:
@@ -1045,7 +1045,7 @@ exercises:
       secondary:
         groups:
           - legs
-  "Knees to Elbows":
+  knees-to-elbows:
     category: Reps Only
     target: Core
     movement:
@@ -1114,7 +1114,7 @@ exercises:
         groups:
           - legs
           - shoulders
-  "Oblique Crunch":
+  oblique-crunch:
     category: Reps Only
     target: Core
     movement:
@@ -1183,7 +1183,7 @@ exercises:
           - rectus_abdominis_1
           - rectus_abdominis_2_l
           - rectus_abdominis_2_r
-  "Plank":
+  plank:
     category: Duration
     target: Core
     health:
@@ -1253,7 +1253,7 @@ exercises:
         groups:
           - glutes
           - shoulders
-  "Reverse Crunch":
+  reverse-crunch:
     category: Weighted Body Weight
     target: Core
     movement:
@@ -1323,7 +1323,7 @@ exercises:
       secondary:
         groups:
           - legs
-  "Reverse Plank":
+  reverse-plank:
     category: Duration
     target: Core
     health:
@@ -1395,7 +1395,7 @@ exercises:
       secondary:
         groups:
           - shoulders
-  "Russian Twist":
+  russian-twist:
     category: Reps Only
     target: Core
     movement:
@@ -1465,7 +1465,7 @@ exercises:
           - rectus_abdominis_1
           - rectus_abdominis_2_l
           - rectus_abdominis_2_r
-  "Flutter Kick":
+  flutter-kick:
     category: Reps Only
     target: Core
     movement:
@@ -1535,7 +1535,7 @@ exercises:
       secondary:
         groups:
           - legs
-  "Side Bend (Cable)":
+  side-bend-cable:
     category: Machine
     target: Core
     movement:
@@ -1601,7 +1601,7 @@ exercises:
           - external_oblique_l
           - external_oblique_r
       secondary: {}
-  "Side Bend (Band)":
+  side-bend-band:
     category: Reps Only
     target: Core
     movement:
@@ -1667,7 +1667,7 @@ exercises:
           - external_oblique_l
           - external_oblique_r
       secondary: {}
-  "Side Bend (Dumbbell)":
+  side-bend-dumbbell:
     category: Dumbbell
     target: Core
     movement:
@@ -1733,7 +1733,7 @@ exercises:
           - external_oblique_l
           - external_oblique_r
       secondary: {}
-  "Side Plank":
+  side-plank:
     category: Duration
     target: Core
     health:
@@ -1804,7 +1804,7 @@ exercises:
         groups:
           - core
           - shoulders
-  "Sit Up":
+  sit-up:
     category: Weighted Body Weight
     target: Core
     movement:
@@ -1875,7 +1875,7 @@ exercises:
       secondary:
         groups:
           - legs
-  "Superman":
+  superman:
     category: Reps Only
     target: Core
     movement:
@@ -1941,7 +1941,7 @@ exercises:
           - back
           - glutes
       secondary: {}
-  "Toes To Bar":
+  toes-to-bar:
     category: Reps Only
     target: Core
     movement:
@@ -2009,7 +2009,7 @@ exercises:
         groups:
           - legs
           - shoulders
-  "Torso Rotation (Machine)":
+  torso-rotation-machine:
     category: Machine
     target: Core
     movement:
@@ -2077,7 +2077,7 @@ exercises:
       secondary:
         groups:
           - core
-  "V Up":
+  v-up:
     category: Reps Only
     target: Core
     movement:
@@ -2146,7 +2146,7 @@ exercises:
         groups:
           - legs
           - shoulders
-  "Bench Dip":
+  bench-dip:
     category: Weighted Body Weight
     target: Arms
     movement:
@@ -2219,7 +2219,7 @@ exercises:
         groups:
           - chest
           - shoulders
-  "Bench Press - Close Grip (Barbell)":
+  bench-press-close-grip-barbell:
     category: Barbell
     target: Arms
     movement:
@@ -2291,7 +2291,7 @@ exercises:
       secondary:
         groups:
           - chest
-  "Bicep Curl (Barbell)":
+  bicep-curl-barbell:
     category: Barbell
     target: Arms
     movement:
@@ -2362,7 +2362,7 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
-  "Bicep Curl (Cable)":
+  bicep-curl-cable:
     category: Machine
     target: Arms
     movement:
@@ -2433,7 +2433,7 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
-  "Bicep Curl (Dumbbell)":
+  bicep-curl-dumbbell:
     category: Dumbbell
     target: Arms
     movement:
@@ -2504,7 +2504,7 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
-  "Bicep Curl (Machine)":
+  bicep-curl-machine:
     category: Machine
     target: Arms
     movement:
@@ -2575,7 +2575,7 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
-  "Cable Kickback":
+  cable-kickback:
     category: Machine
     target: Arms
     movement:
@@ -2646,7 +2646,7 @@ exercises:
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
       secondary: {}
-  "Concentration Curl (Dumbbell)":
+  concentration-curl-dumbbell:
     category: Dumbbell
     target: Arms
     movement:
@@ -2717,7 +2717,7 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
-  "Hammer Curl (Band)":
+  hammer-curl-band:
     category: Weighted Body Weight
     target: Arms
     movement:
@@ -2785,7 +2785,7 @@ exercises:
           - brachioradialis_l
           - brachioradialis_r
       secondary: {}
-  "Hammer Curl (Cable)":
+  hammer-curl-cable:
     category: Machine
     target: Arms
     movement:
@@ -2853,7 +2853,7 @@ exercises:
           - brachioradialis_l
           - brachioradialis_r
       secondary: {}
-  "Incline Curl (Dumbbell)":
+  incline-curl-dumbbell:
     category: Dumbbell
     target: Arms
     movement:
@@ -2918,7 +2918,7 @@ exercises:
         groups:
           - arms
       secondary: {}
-  "Hammer Curl (Dumbbell)":
+  hammer-curl-dumbbell:
     category: Dumbbell
     target: Arms
     movement:
@@ -2986,7 +2986,7 @@ exercises:
           - brachioradialis_l
           - brachioradialis_r
       secondary: {}
-  "Preacher Curl (Barbell)":
+  preacher-curl-barbell:
     category: Barbell
     target: Arms
     movement:
@@ -3057,7 +3057,7 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
-  "Preacher Curl (Dumbbell)":
+  preacher-curl-dumbbell:
     category: Dumbbell
     target: Arms
     movement:
@@ -3127,7 +3127,7 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
-  "Heart Pump":
+  heart-pump:
     category: Dumbbell
     target: Arms
     movement:
@@ -3197,7 +3197,7 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
-  "Preacher Curl (Machine)":
+  preacher-curl-machine:
     category: Machine
     target: Arms
     movement:
@@ -3267,7 +3267,7 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
-  "Push Up - Close Grip":
+  push-up-close-grip:
     category: Weighted Body Weight
     target: Arms
     movement:
@@ -3333,7 +3333,7 @@ exercises:
           - chest
           - core
           - shoulders
-  "Reverse Curl (Band)":
+  reverse-curl-band:
     category: Reps Only
     target: Arms
     movement:
@@ -3401,7 +3401,7 @@ exercises:
         ids:
           - extensor_digitorum_l
           - extensor_digitorum_r
-  "Reverse Curl (Barbell)":
+  reverse-curl-barbell:
     category: Barbell
     target: Arms
     movement:
@@ -3469,7 +3469,7 @@ exercises:
         ids:
           - extensor_digitorum_l
           - extensor_digitorum_r
-  "Reverse Curl (Dumbbell)":
+  reverse-curl-dumbbell:
     category: Dumbbell
     target: Arms
     movement:
@@ -3537,7 +3537,7 @@ exercises:
         ids:
           - extensor_digitorum_l
           - extensor_digitorum_r
-  "Reverse Grip Concentration Curl (Dumbbell)":
+  reverse-grip-concentration-curl-dumbbell:
     category: Dumbbell
     target: Arms
     movement:
@@ -3607,7 +3607,7 @@ exercises:
         ids:
           - brachioradialis_l
           - brachioradialis_r
-  "Seated Dip (Machine)":
+  seated-dip-machine:
     category: Machine
     target: Arms
     movement:
@@ -3672,7 +3672,7 @@ exercises:
         groups:
           - chest
           - shoulders
-  "Seated Palms Up Wrist Curl (Dumbbell)":
+  seated-palms-up-wrist-curl-dumbbell:
     category: Dumbbell
     target: Arms
     movement:
@@ -3739,7 +3739,7 @@ exercises:
           - flexor_carpi_ulnaris_l
           - flexor_carpi_ulnaris_r
       secondary: {}
-  "Skullcrusher (Barbell)":
+  skullcrusher-barbell:
     category: Barbell
     target: Arms
     movement:
@@ -3808,7 +3808,7 @@ exercises:
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
       secondary: {}
-  "Skullcrusher (Dumbbell)":
+  skullcrusher-dumbbell:
     category: Dumbbell
     target: Arms
     movement:
@@ -3877,7 +3877,7 @@ exercises:
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
       secondary: {}
-  "Triceps Dip":
+  triceps-dip:
     category: Weighted Body Weight
     target: Arms
     movement:
@@ -3949,7 +3949,7 @@ exercises:
         groups:
           - chest
           - shoulders
-  "Triceps Dip (Assisted)":
+  triceps-dip-assisted:
     category: Machine
     target: Arms
     movement:
@@ -4021,7 +4021,7 @@ exercises:
         groups:
           - chest
           - shoulders
-  "Triceps Extension":
+  triceps-extension:
     category: Barbell
     target: Arms
     movement:
@@ -4090,7 +4090,7 @@ exercises:
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
       secondary: {}
-  "Triceps Extension (Barbell)":
+  triceps-extension-barbell:
     category: Barbell
     target: Arms
     movement:
@@ -4159,7 +4159,7 @@ exercises:
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
       secondary: {}
-  "Triceps Extension (Cable)":
+  triceps-extension-cable:
     category: Machine
     target: Arms
     movement:
@@ -4228,7 +4228,7 @@ exercises:
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
       secondary: {}
-  "Triceps Extension (Dumbbell)":
+  triceps-extension-dumbbell:
     category: Dumbbell
     target: Arms
     movement:
@@ -4297,7 +4297,7 @@ exercises:
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
       secondary: {}
-  "Triceps Extension (Machine)":
+  triceps-extension-machine:
     category: Machine
     target: Arms
     movement:
@@ -4366,7 +4366,7 @@ exercises:
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
       secondary: {}
-  "Triceps Pushdown (Cable - Straight Bar)":
+  triceps-pushdown-cable-straight-bar:
     category: Machine
     target: Arms
     movement:
@@ -4435,7 +4435,7 @@ exercises:
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
       secondary: {}
-  "Upright Row (Cable)":
+  upright-row-cable:
     category: Machine
     target: Arms
     movement:
@@ -4505,7 +4505,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Wrist Roller":
+  wrist-roller:
     category: Machine
     target: Arms
     movement:
@@ -4569,7 +4569,7 @@ exercises:
         groups:
           - arms
       secondary: {}
-  "Back Extension":
+  back-extension:
     category: Weighted Body Weight
     target: Back
     movement:
@@ -4636,7 +4636,7 @@ exercises:
         groups:
           - glutes
           - hamstrings
-  "Back Extension (Machine)":
+  back-extension-machine:
     category: Machine
     target: Back
     movement:
@@ -4703,7 +4703,7 @@ exercises:
         groups:
           - glutes
           - hamstrings
-  "Bent Over One Arm Row (Dumbbell)":
+  bent-over-one-arm-row-dumbbell:
     category: Dumbbell
     target: Back
     movement:
@@ -4773,7 +4773,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Bent Over Row (Band)":
+  bent-over-row-band:
     category: Weighted Body Weight
     target: Back
     movement:
@@ -4843,7 +4843,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Bent Over Row (Barbell)":
+  bent-over-row-barbell:
     category: Barbell
     target: Back
     movement:
@@ -4913,7 +4913,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Bent Over Row (Dumbbell)":
+  bent-over-row-dumbbell:
     category: Dumbbell
     target: Back
     movement:
@@ -4983,7 +4983,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Bent Over Row - Underhand (Barbell)":
+  bent-over-row-underhand-barbell:
     category: Barbell
     target: Back
     movement:
@@ -5053,7 +5053,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Chin Up":
+  chin-up:
     category: Weighted Body Weight
     target: Back
     movement:
@@ -5126,7 +5126,7 @@ exercises:
           - biceps_brachii_caput_breve_r
           - biceps_brachii_caput_longum_l
           - biceps_brachii_caput_longum_r
-  "Chin Up (Assisted)":
+  chin-up-assisted:
     category: Assisted Body Weight
     target: Back
     movement:
@@ -5199,7 +5199,7 @@ exercises:
           - biceps_brachii_caput_breve_r
           - biceps_brachii_caput_longum_l
           - biceps_brachii_caput_longum_r
-  "Deadlift (Barbell)":
+  deadlift-barbell:
     category: Barbell
     target: Back
     movement:
@@ -5268,7 +5268,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Good Morning (Barbell)":
+  good-morning-barbell:
     category: Barbell
     target: Back
     movement:
@@ -5335,7 +5335,7 @@ exercises:
         groups:
           - glutes
           - hamstrings
-  "Incline Row (Dumbbell)":
+  incline-row-dumbbell:
     category: Dumbbell
     target: Back
     movement:
@@ -5405,7 +5405,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Inverted Row (Bodyweight)":
+  inverted-row-bodyweight:
     category: Reps Only
     target: Back
     movement:
@@ -5475,7 +5475,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "High Row (Machine)":
+  high-row-machine:
     category: Machine
     target: Back
     movement:
@@ -5537,7 +5537,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Iso-Lateral Row (Machine)":
+  iso-lateral-row-machine:
     category: Machine
     target: Back
     movement:
@@ -5607,7 +5607,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Kipping Pull Up":
+  kipping-pull-up:
     category: Reps Only
     target: Back
     movement:
@@ -5674,7 +5674,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Kneeling Pulldown (Band)":
+  kneeling-pulldown-band:
     category: Weighted Body Weight
     target: Back
     movement:
@@ -5742,7 +5742,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Lat Pulldown (Cable)":
+  lat-pulldown-cable:
     category: Machine
     target: Back
     movement:
@@ -5810,7 +5810,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Lat Pulldown (Machine)":
+  lat-pulldown-machine:
     category: Machine
     target: Back
     movement:
@@ -5878,7 +5878,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Lat Pulldown (Single Arm)":
+  lat-pulldown-single-arm:
     category: Machine
     target: Back
     movement:
@@ -5946,7 +5946,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Lat Pulldown - Close Grip (Cable)":
+  lat-pulldown-close-grip-cable:
     category: Machine
     target: Back
     movement:
@@ -6006,7 +6006,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Lat Pulldown - Underhand (Band)":
+  lat-pulldown-underhand-band:
     category: Weighted Body Weight
     target: Back
     movement:
@@ -6074,7 +6074,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Lat Pulldown - Underhand (Cable)":
+  lat-pulldown-underhand-cable:
     category: Machine
     target: Back
     movement:
@@ -6142,7 +6142,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Lat Pulldown - Wide Grip (Cable)":
+  lat-pulldown-wide-grip-cable:
     category: Machine
     target: Back
     movement:
@@ -6210,7 +6210,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Pendlay Row (Barbell)":
+  pendlay-row-barbell:
     category: Barbell
     target: Back
     movement:
@@ -6280,7 +6280,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Pull Up":
+  pull-up:
     category: Weighted Body Weight
     target: Back
     movement:
@@ -6348,7 +6348,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Pull Up (Assisted)":
+  pull-up-assisted:
     category: Assisted Body Weight
     target: Back
     movement:
@@ -6416,7 +6416,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Pull Up (Band)":
+  pull-up-band:
     category: Assisted Body Weight
     target: Back
     movement:
@@ -6484,7 +6484,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Rack Pull (Barbell)":
+  rack-pull-barbell:
     category: Barbell
     target: Back
     movement:
@@ -6551,7 +6551,7 @@ exercises:
         groups:
           - glutes
           - hamstrings
-  "Romanian Deadlift (Barbell)":
+  romanian-deadlift-barbell:
     category: Barbell
     target: Back
     movement:
@@ -6618,7 +6618,7 @@ exercises:
         groups:
           - back
           - glutes
-  "Seated Row (Cable)":
+  seated-row-cable:
     category: Machine
     target: Back
     movement:
@@ -6687,7 +6687,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Seated Row (Machine)":
+  seated-row-machine:
     category: Machine
     target: Back
     movement:
@@ -6757,7 +6757,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Seated Wide-Grip Row (Cable)":
+  seated-wide-grip-row-cable:
     category: Machine
     target: Back
     movement:
@@ -6827,7 +6827,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Shrug (Machine)":
+  shrug-machine:
     category: Machine
     target: Back
     movement:
@@ -6892,7 +6892,7 @@ exercises:
           - trapezius_upper_l
           - trapezius_upper_r
       secondary: {}
-  "Shrug (Smith Machine)":
+  shrug-smith-machine:
     category: Machine
     target: Back
     movement:
@@ -6957,7 +6957,7 @@ exercises:
           - trapezius_upper_l
           - trapezius_upper_r
       secondary: {}
-  "Stiff Leg Deadlift (Barbell)":
+  stiff-leg-deadlift-barbell:
     category: Barbell
     target: Back
     movement:
@@ -7024,7 +7024,7 @@ exercises:
         groups:
           - back
           - glutes
-  "Sumo Deadlift (Barbell)":
+  sumo-deadlift-barbell:
     category: Barbell
     target: Back
     movement:
@@ -7094,7 +7094,7 @@ exercises:
           - back
           - hamstrings
           - legs
-  "T Bar Row":
+  t-bar-row:
     category: Machine
     target: Back
     movement:
@@ -7164,7 +7164,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Upright Row (Barbell)":
+  upright-row-barbell:
     category: Barbell
     target: Back
     movement:
@@ -7234,7 +7234,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Wide Pull Up":
+  wide-pull-up:
     category: Weighted Body Weight
     target: Back
     movement:
@@ -7302,7 +7302,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Around the World":
+  around-the-world:
     category: Dumbbell
     target: Chest
     movement:
@@ -7366,7 +7366,7 @@ exercises:
         groups:
           - chest
       secondary: {}
-  "Bench Press (Barbell)":
+  bench-press-barbell:
     category: Barbell
     target: Chest
     movement:
@@ -7440,7 +7440,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Bench Press (Cable)":
+  bench-press-cable:
     category: Machine
     target: Chest
     movement:
@@ -7514,7 +7514,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Bench Press (Dumbbell)":
+  bench-press-dumbbell:
     category: Dumbbell
     target: Chest
     movement:
@@ -7588,7 +7588,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Bench Press (Smith Machine)":
+  bench-press-smith-machine:
     category: Machine
     target: Chest
     movement:
@@ -7662,7 +7662,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Bench Press - Wide Grip (Barbell)":
+  bench-press-wide-grip-barbell:
     category: Barbell
     target: Chest
     movement:
@@ -7736,7 +7736,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Cable Crossover":
+  cable-crossover:
     category: Machine
     target: Chest
     movement:
@@ -7804,7 +7804,7 @@ exercises:
         ids:
           - anterior_deltoid_l
           - anterior_deltoid_r
-  "Chest Dip":
+  chest-dip:
     category: Weighted Body Weight
     target: Chest
     movement:
@@ -7877,7 +7877,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Chest Dip (Assisted)":
+  chest-dip-assisted:
     category: Assisted Body Weight
     target: Chest
     movement:
@@ -7950,7 +7950,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Chest Fly":
+  chest-fly:
     category: Machine
     target: Chest
     movement:
@@ -8018,7 +8018,7 @@ exercises:
         ids:
           - anterior_deltoid_l
           - anterior_deltoid_r
-  "Chest Fly (Band)":
+  chest-fly-band:
     category: Weighted Body Weight
     target: Chest
     movement:
@@ -8086,7 +8086,7 @@ exercises:
         ids:
           - anterior_deltoid_l
           - anterior_deltoid_r
-  "Chest Fly (Dumbbell)":
+  chest-fly-dumbbell:
     category: Dumbbell
     target: Chest
     movement:
@@ -8154,7 +8154,7 @@ exercises:
         ids:
           - anterior_deltoid_l
           - anterior_deltoid_r
-  "Chest Press (Band)":
+  chest-press-band:
     category: Weighted Body Weight
     target: Chest
     movement:
@@ -8228,7 +8228,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Chest Press (Machine)":
+  chest-press-machine:
     category: Machine
     target: Chest
     movement:
@@ -8302,7 +8302,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Decline Bench Press (Barbell)":
+  decline-bench-press-barbell:
     category: Barbell
     target: Chest
     movement:
@@ -8376,7 +8376,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Decline Bench Press (Dumbbell)":
+  decline-bench-press-dumbbell:
     category: Dumbbell
     target: Chest
     movement:
@@ -8450,7 +8450,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Decline Bench Press (Smith Machine)":
+  decline-bench-press-smith-machine:
     category: Machine
     target: Chest
     movement:
@@ -8524,7 +8524,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Floor Press (Barbell)":
+  floor-press-barbell:
     category: Barbell
     target: Chest
     movement:
@@ -8598,7 +8598,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Incline Bench Press (Barbell)":
+  incline-bench-press-barbell:
     category: Barbell
     target: Chest
     movement:
@@ -8671,7 +8671,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Incline Bench Press (Cable)":
+  incline-bench-press-cable:
     category: Machine
     target: Chest
     movement:
@@ -8745,7 +8745,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Incline Bench Press (Dumbbell)":
+  incline-bench-press-dumbbell:
     category: Dumbbell
     target: Chest
     movement:
@@ -8819,7 +8819,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Incline Bench Press (Smith Machine)":
+  incline-bench-press-smith-machine:
     category: Machine
     target: Chest
     movement:
@@ -8893,7 +8893,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Incline Chest Fly (Dumbbell)":
+  incline-chest-fly-dumbbell:
     category: Dumbbell
     target: Chest
     movement:
@@ -8961,7 +8961,7 @@ exercises:
         ids:
           - anterior_deltoid_l
           - anterior_deltoid_r
-  "Incline Chest Press (Machine)":
+  incline-chest-press-machine:
     category: Machine
     target: Chest
     movement:
@@ -9035,7 +9035,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Iso-Lateral Chest Press (Machine)":
+  iso-lateral-chest-press-machine:
     category: Machine
     target: Chest
     movement:
@@ -9109,7 +9109,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Pec Deck (Machine)":
+  pec-deck-machine:
     category: Machine
     target: Chest
     movement:
@@ -9177,7 +9177,7 @@ exercises:
         ids:
           - anterior_deltoid_l
           - anterior_deltoid_r
-  "Pullover (Dumbbell)":
+  pullover-dumbbell:
     category: Dumbbell
     target: Chest
     movement:
@@ -9244,7 +9244,7 @@ exercises:
           - pectoralis_major_l
           - pectoralis_major_r
       secondary: {}
-  "Pullover (Machine)":
+  pullover-machine:
     category: Machine
     target: Chest
     movement:
@@ -9311,7 +9311,7 @@ exercises:
           - pectoralis_major_l
           - pectoralis_major_r
       secondary: {}
-  "Push Up":
+  push-up:
     category: Weighted Body Weight
     target: Chest
     movement:
@@ -9380,7 +9380,7 @@ exercises:
           - arms
           - core
           - shoulders
-  "Push Up (Band)":
+  push-up-band:
     category: Weighted Body Weight
     target: Chest
     movement:
@@ -9449,7 +9449,7 @@ exercises:
           - arms
           - core
           - shoulders
-  "Push Up (Knees)":
+  push-up-knees:
     category: Reps Only
     target: Chest
     movement:
@@ -9518,7 +9518,7 @@ exercises:
           - arms
           - core
           - shoulders
-  "Box Jump":
+  box-jump:
     category: Reps Only
     target: Legs
     movement:
@@ -9585,7 +9585,7 @@ exercises:
         groups:
           - core
           - glutes
-  "Box Squat (Barbell)":
+  box-squat-barbell:
     category: Barbell
     target: Legs
     movement:
@@ -9654,7 +9654,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Bulgarian Split Squat":
+  bulgarian-split-squat:
     category: Barbell
     target: Legs
     movement:
@@ -9722,7 +9722,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Cable Pull Through":
+  cable-pull-through:
     category: Machine
     target: Legs
     movement:
@@ -9789,7 +9789,7 @@ exercises:
       secondary:
         groups:
           - back
-  "Calf Press on Leg Press":
+  calf-press-on-leg-press:
     category: Machine
     target: Legs
     movement:
@@ -9857,7 +9857,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Calf Press on Seated Leg Press":
+  calf-press-on-seated-leg-press:
     category: Machine
     target: Legs
     movement:
@@ -9925,7 +9925,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Deadlift (Band)":
+  deadlift-band:
     category: Weighted Body Weight
     target: Legs
     movement:
@@ -9994,7 +9994,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Deadlift (Dumbbell)":
+  deadlift-dumbbell:
     category: Dumbbell
     target: Legs
     movement:
@@ -10063,7 +10063,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Deadlift (Smith Machine)":
+  deadlift-smith-machine:
     category: Machine
     target: Legs
     movement:
@@ -10132,7 +10132,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Deficit Deadlift (Barbell)":
+  deficit-deadlift-barbell:
     category: Barbell
     target: Legs
     movement:
@@ -10201,7 +10201,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Front Squat (Barbell)":
+  front-squat-barbell:
     category: Barbell
     target: Legs
     movement:
@@ -10270,7 +10270,7 @@ exercises:
           - back
           - core
           - glutes
-  "Glute Ham Raise":
+  glute-ham-raise:
     category: Weighted Body Weight
     target: Legs
     movement:
@@ -10334,7 +10334,7 @@ exercises:
         groups:
           - legs
       secondary: {}
-  "Glute Kickback (Machine)":
+  glute-kickback-machine:
     category: Machine
     target: Legs
     movement:
@@ -10400,7 +10400,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Goblet Squat (Kettlebell)":
+  goblet-squat-kettlebell:
     category: Dumbbell
     target: Legs
     movement:
@@ -10468,7 +10468,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Hack Squat":
+  hack-squat:
     category: Barbell
     target: Legs
     movement:
@@ -10536,7 +10536,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Hack Squat (Barbell)":
+  hack-squat-barbell:
     category: Barbell
     target: Legs
     movement:
@@ -10605,7 +10605,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "High Knee Skips":
+  high-knee-skips:
     category: Reps Only
     target: Legs
     movement:
@@ -10667,7 +10667,7 @@ exercises:
         groups:
           - core
           - glutes
-  "Hip Abductor (Machine)":
+  hip-abductor-machine:
     category: Machine
     target: Legs
     movement:
@@ -10734,7 +10734,7 @@ exercises:
           - gluteus_medius_2_l
           - gluteus_medius_2_r
       secondary: {}
-  "Hip Adductor (Machine)":
+  hip-adductor-machine:
     category: Machine
     target: Legs
     movement:
@@ -10798,7 +10798,7 @@ exercises:
         groups:
           - adductors
       secondary: {}
-  "Hip Thrust (Barbell)":
+  hip-thrust-barbell:
     category: Barbell
     target: Legs
     movement:
@@ -10864,7 +10864,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Hip Thrust (Bodyweight)":
+  hip-thrust-bodyweight:
     category: Reps Only
     target: Legs
     movement:
@@ -10930,7 +10930,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Donkey Kick (Smith Machine)":
+  donkey-kick-smith-machine:
     category: Machine
     target: Legs
     movement:
@@ -10996,7 +10996,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Donkey Kick":
+  donkey-kick:
     category: Weighted Body Weight
     target: Legs
     movement:
@@ -11062,7 +11062,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Fire Hydrant":
+  fire-hydrant:
     category: Weighted Body Weight
     target: Legs
     movement:
@@ -11128,7 +11128,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Jump Squat":
+  jump-squat:
     category: Reps Only
     target: Legs
     movement:
@@ -11195,7 +11195,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Lateral Box Jump":
+  lateral-box-jump:
     category: Reps Only
     target: Legs
     movement:
@@ -11262,7 +11262,7 @@ exercises:
         groups:
           - core
           - glutes
-  "Leg Extension (Machine)":
+  leg-extension-machine:
     category: Machine
     target: Legs
     movement:
@@ -11331,7 +11331,7 @@ exercises:
           - vastus_medialis_l
           - vastus_medialis_r
       secondary: {}
-  "Leg Press":
+  leg-press:
     category: Machine
     target: Legs
     movement:
@@ -11399,7 +11399,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Lunge (Barbell)":
+  lunge-barbell:
     category: Barbell
     target: Legs
     movement:
@@ -11467,7 +11467,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Lunge (Bodyweight)":
+  lunge-bodyweight:
     category: Reps Only
     target: Legs
     movement:
@@ -11534,7 +11534,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Lunge (Dumbbell)":
+  lunge-dumbbell:
     category: Dumbbell
     target: Legs
     movement:
@@ -11601,7 +11601,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Step-Back Lunge":
+  step-back-lunge:
     category: Dumbbell
     target: Legs
     movement:
@@ -11667,7 +11667,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Lying Leg Curl (Machine)":
+  lying-leg-curl-machine:
     category: Machine
     target: Legs
     movement:
@@ -11731,7 +11731,7 @@ exercises:
         groups:
           - hamstrings
       secondary: {}
-  "Mountain Climber":
+  mountain-climber:
     category: Reps Only
     target: Legs
     movement:
@@ -11797,7 +11797,7 @@ exercises:
         groups:
           - core
           - glutes
-  "Pistol Squat":
+  pistol-squat:
     category: Weighted Body Weight
     target: Legs
     movement:
@@ -11864,7 +11864,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Romanian Deadlift (Dumbbell)":
+  romanian-deadlift-dumbbell:
     category: Dumbbell
     target: Legs
     movement:
@@ -11930,7 +11930,7 @@ exercises:
         groups:
           - back
           - glutes
-  "Seated Calf Raise (Machine)":
+  seated-calf-raise-machine:
     category: Machine
     target: Legs
     movement:
@@ -11995,7 +11995,7 @@ exercises:
           - gastrocnemius_l
           - gastrocnemius_r
       secondary: {}
-  "Seated Calf Raise (Plate Loaded)":
+  seated-calf-raise-plate-loaded:
     category: Machine
     target: Legs
     movement:
@@ -12060,7 +12060,7 @@ exercises:
           - gastrocnemius_l
           - gastrocnemius_r
       secondary: {}
-  "Seated Leg Curl (Machine)":
+  seated-leg-curl-machine:
     category: Machine
     target: Legs
     movement:
@@ -12124,7 +12124,7 @@ exercises:
         groups:
           - hamstrings
       secondary: {}
-  "Seated Leg Press (Machine)":
+  seated-leg-press-machine:
     category: Machine
     target: Legs
     movement:
@@ -12192,7 +12192,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Single Leg Bridge":
+  single-leg-bridge:
     category: Weighted Body Weight
     target: Legs
     movement:
@@ -12258,7 +12258,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Squat (Band)":
+  squat-band:
     category: Weighted Body Weight
     target: Legs
     movement:
@@ -12325,7 +12325,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Squat (Barbell)":
+  squat-barbell:
     category: Barbell
     target: Legs
     movement:
@@ -12394,7 +12394,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Squat (Bodyweight)":
+  squat-bodyweight:
     category: Weighted Body Weight
     target: Legs
     movement:
@@ -12461,7 +12461,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Squat (Dumbbell)":
+  squat-dumbbell:
     category: Dumbbell
     target: Legs
     movement:
@@ -12528,7 +12528,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Squat (Machine)":
+  squat-machine:
     category: Machine
     target: Legs
     movement:
@@ -12596,7 +12596,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Squat (Smith Machine)":
+  squat-smith-machine:
     category: Machine
     target: Legs
     movement:
@@ -12664,7 +12664,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Standing Calf Raise (Barbell)":
+  standing-calf-raise-barbell:
     category: Barbell
     target: Legs
     movement:
@@ -12729,7 +12729,7 @@ exercises:
           - gastrocnemius_l
           - gastrocnemius_r
       secondary: {}
-  "Standing Calf Raise (Bodyweight)":
+  standing-calf-raise-bodyweight:
     category: Reps Only
     target: Legs
     movement:
@@ -12794,7 +12794,7 @@ exercises:
           - gastrocnemius_l
           - gastrocnemius_r
       secondary: {}
-  "Standing Calf Raise (Dumbbell)":
+  standing-calf-raise-dumbbell:
     category: Barbell
     target: Legs
     movement:
@@ -12859,7 +12859,7 @@ exercises:
           - gastrocnemius_l
           - gastrocnemius_r
       secondary: {}
-  "Standing Calf Raise (Machine)":
+  standing-calf-raise-machine:
     category: Machine
     target: Legs
     movement:
@@ -12924,7 +12924,7 @@ exercises:
           - gastrocnemius_l
           - gastrocnemius_r
       secondary: {}
-  "Standing Calf Raise (Smith Machine)":
+  standing-calf-raise-smith-machine:
     category: Machine
     target: Legs
     movement:
@@ -12989,7 +12989,7 @@ exercises:
           - gastrocnemius_l
           - gastrocnemius_r
       secondary: {}
-  "Standing Leg Curl (Machine)":
+  standing-leg-curl-machine:
     category: Machine
     target: Legs
     movement:
@@ -13045,7 +13045,7 @@ exercises:
         groups:
           - hamstrings
       secondary: {}
-  "Step-up (Bodyweight)":
+  step-up-bodyweight:
     category: Reps Only
     target: Legs
     movement:
@@ -13112,7 +13112,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Step-up (Barbell)":
+  step-up-barbell:
     category: Barbell
     target: Legs
     movement:
@@ -13179,7 +13179,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Step-up (Dumbbell)":
+  step-up-dumbbell:
     category: Dumbbell
     target: Legs
     movement:
@@ -13246,7 +13246,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Straight Leg Deadlift (Band)":
+  straight-leg-deadlift-band:
     category: Weighted Body Weight
     target: Legs
     movement:
@@ -13312,7 +13312,7 @@ exercises:
         groups:
           - back
           - glutes
-  "Stiff Leg Deadlift (Dumbbell)":
+  stiff-leg-deadlift-dumbbell:
     category: Dumbbell
     target: Legs
     movement:
@@ -13378,7 +13378,7 @@ exercises:
         groups:
           - back
           - glutes
-  "Curtsey Lunges (Barbell)":
+  curtsey-lunges-barbell:
     category: Dumbbell
     target: Legs
     movement:
@@ -13444,7 +13444,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Deficit Squat":
+  deficit-squat:
     category: Dumbbell
     target: Legs
     movement:
@@ -13511,7 +13511,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Trap Bar Deadlift":
+  trap-bar-deadlift:
     category: Barbell
     target: Legs
     movement:
@@ -13580,7 +13580,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Zercher Squat (Barbell)":
+  zercher-squat-barbell:
     category: Barbell
     target: Legs
     movement:
@@ -13649,7 +13649,7 @@ exercises:
         groups:
           - core
           - hamstrings
-  "Arnold Press (Dumbbell)":
+  arnold-press-dumbbell:
     category: Dumbbell
     target: Shoulders
     movement:
@@ -13724,7 +13724,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Halo":
+  halo:
     category: Dumbbell
     target: Shoulders
     movement:
@@ -13789,7 +13789,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Handstand Push Up":
+  handstand-push-up:
     category: Weighted Body Weight
     target: Shoulders
     movement:
@@ -13858,7 +13858,7 @@ exercises:
           - arms
           - core
           - shoulders
-  "Face Pull (Cable)":
+  face-pull-cable:
     category: Machine
     target: Shoulders
     movement:
@@ -13925,7 +13925,7 @@ exercises:
       secondary:
         groups:
           - back
-  "Front Raise (Band)":
+  front-raise-band:
     category: Weighted Body Weight
     target: Shoulders
     movement:
@@ -13990,7 +13990,7 @@ exercises:
           - anterior_deltoid_l
           - anterior_deltoid_r
       secondary: {}
-  "Front Raise (Barbell)":
+  front-raise-barbell:
     category: Barbell
     target: Shoulders
     movement:
@@ -14055,7 +14055,7 @@ exercises:
           - anterior_deltoid_l
           - anterior_deltoid_r
       secondary: {}
-  "Front Raise (Cable)":
+  front-raise-cable:
     category: Machine
     target: Shoulders
     movement:
@@ -14120,7 +14120,7 @@ exercises:
           - anterior_deltoid_l
           - anterior_deltoid_r
       secondary: {}
-  "Front Raise (Dumbbell)":
+  front-raise-dumbbell:
     category: Dumbbell
     target: Shoulders
     movement:
@@ -14185,7 +14185,7 @@ exercises:
           - anterior_deltoid_l
           - anterior_deltoid_r
       secondary: {}
-  "Front Raise (Plate)":
+  front-raise-plate:
     category: Machine
     target: Shoulders
     movement:
@@ -14250,7 +14250,7 @@ exercises:
           - anterior_deltoid_l
           - anterior_deltoid_r
       secondary: {}
-  "Landmine Press":
+  landmine-press:
     category: Barbell
     target: Shoulders
     movement:
@@ -14311,7 +14311,7 @@ exercises:
           - arms
           - chest
           - core
-  "Lateral Raise (Band)":
+  lateral-raise-band:
     category: Weighted Body Weight
     target: Shoulders
     movement:
@@ -14376,7 +14376,7 @@ exercises:
           - lateral_deltoid_l
           - lateral_deltoid_r
       secondary: {}
-  "Lateral Raise (Cable)":
+  lateral-raise-cable:
     category: Machine
     target: Shoulders
     movement:
@@ -14441,7 +14441,7 @@ exercises:
           - lateral_deltoid_l
           - lateral_deltoid_r
       secondary: {}
-  "Lateral Raise (Dumbbell)":
+  lateral-raise-dumbbell:
     category: Dumbbell
     target: Shoulders
     movement:
@@ -14506,7 +14506,7 @@ exercises:
           - lateral_deltoid_l
           - lateral_deltoid_r
       secondary: {}
-  "Lateral Raise (Machine)":
+  lateral-raise-machine:
     category: Machine
     target: Shoulders
     movement:
@@ -14571,7 +14571,7 @@ exercises:
           - lateral_deltoid_l
           - lateral_deltoid_r
       secondary: {}
-  "Overhead Press (Barbell)":
+  overhead-press-barbell:
     category: Barbell
     target: Shoulders
     movement:
@@ -14646,7 +14646,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Overhead Press (Cable)":
+  overhead-press-cable:
     category: Machine
     target: Shoulders
     movement:
@@ -14720,7 +14720,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Overhead Press (Dumbbell)":
+  overhead-press-dumbbell:
     category: Dumbbell
     target: Shoulders
     movement:
@@ -14794,7 +14794,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Overhead Press (Smith Machine)":
+  overhead-press-smith-machine:
     category: Machine
     target: Shoulders
     movement:
@@ -14868,7 +14868,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Push Press":
+  push-press:
     category: Barbell
     target: Shoulders
     movement:
@@ -14942,7 +14942,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Reverse Fly (Cable)":
+  reverse-fly-cable:
     category: Machine
     target: Shoulders
     movement:
@@ -15009,7 +15009,7 @@ exercises:
       secondary:
         groups:
           - back
-  "Reverse Fly (Dumbbell)":
+  reverse-fly-dumbbell:
     category: Dumbbell
     target: Shoulders
     movement:
@@ -15076,7 +15076,7 @@ exercises:
       secondary:
         groups:
           - back
-  "Reverse Fly (Machine)":
+  reverse-fly-machine:
     category: Machine
     target: Shoulders
     movement:
@@ -15143,7 +15143,7 @@ exercises:
       secondary:
         groups:
           - back
-  "Seated Overhead Press (Barbell)":
+  seated-overhead-press-barbell:
     category: Barbell
     target: Shoulders
     movement:
@@ -15218,7 +15218,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Seated Overhead Press (Dumbbell)":
+  seated-overhead-press-dumbbell:
     category: Dumbbell
     target: Shoulders
     movement:
@@ -15292,7 +15292,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Shoulder Press (Machine)":
+  shoulder-press-machine:
     category: Machine
     target: Shoulders
     movement:
@@ -15366,7 +15366,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Shoulder Press (Plate Loaded)":
+  shoulder-press-plate-loaded:
     category: Machine
     target: Shoulders
     movement:
@@ -15440,7 +15440,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Shrug (Barbell)":
+  shrug-barbell:
     category: Barbell
     target: Shoulders
     movement:
@@ -15505,7 +15505,7 @@ exercises:
           - trapezius_upper_l
           - trapezius_upper_r
       secondary: {}
-  "Shrug (Dumbbell)":
+  shrug-dumbbell:
     category: Dumbbell
     target: Shoulders
     movement:
@@ -15570,7 +15570,7 @@ exercises:
           - trapezius_upper_l
           - trapezius_upper_r
       secondary: {}
-  "Strict Military Press (Barbell)":
+  strict-military-press-barbell:
     category: Barbell
     target: Shoulders
     movement:
@@ -15645,7 +15645,7 @@ exercises:
           - triceps_brachii_caput_longum_r
           - triceps_brachii_caput_mediale_l
           - triceps_brachii_caput_mediale_r
-  "Upright Row (Dumbbell)":
+  upright-row-dumbbell:
     category: Dumbbell
     target: Shoulders
     movement:
@@ -15714,7 +15714,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Upright Row (Smith Machine)":
+  upright-row-smith-machine:
     category: Machine
     target: Shoulders
     movement:
@@ -15776,7 +15776,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Stretching":
+  stretching:
     category: Duration
     target: Other
     health:
@@ -15840,7 +15840,7 @@ exercises:
     muscles:
       primary: {}
       secondary: {}
-  "Clean (Barbell)":
+  clean-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -15912,7 +15912,7 @@ exercises:
           - arms
           - core
           - hamstrings
-  "Clean and Jerk (Barbell)":
+  clean-and-jerk-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -15983,7 +15983,7 @@ exercises:
           - arms
           - core
           - hamstrings
-  "Deadlift High Pull (Barbell)":
+  deadlift-high-pull-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -16052,7 +16052,7 @@ exercises:
       secondary:
         groups:
           - hamstrings
-  "Hang Clean (Barbell)":
+  hang-clean-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -16124,7 +16124,7 @@ exercises:
           - arms
           - core
           - hamstrings
-  "Hang Snatch (Barbell)":
+  hang-snatch-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -16196,7 +16196,7 @@ exercises:
           - arms
           - core
           - hamstrings
-  "Jump Shrug (Barbell)":
+  jump-shrug-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -16261,7 +16261,7 @@ exercises:
           - trapezius_upper_l
           - trapezius_upper_r
       secondary: {}
-  "Overhead Squat (Barbell)":
+  overhead-squat-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -16330,7 +16330,7 @@ exercises:
         groups:
           - back
           - core
-  "Power Clean":
+  power-clean:
     category: Barbell
     target: Olympic
     movement:
@@ -16402,7 +16402,7 @@ exercises:
           - arms
           - core
           - hamstrings
-  "Power Snatch (Barbell)":
+  power-snatch-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -16474,7 +16474,7 @@ exercises:
           - arms
           - core
           - hamstrings
-  "Press Under (Barbell)":
+  press-under-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -16536,7 +16536,7 @@ exercises:
     muscles:
       primary: {}
       secondary: {}
-  "Snatch (Barbell)":
+  snatch-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -16608,7 +16608,7 @@ exercises:
           - arms
           - core
           - hamstrings
-  "Snatch Pull (Barbell)":
+  snatch-pull-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -16680,7 +16680,7 @@ exercises:
           - arms
           - core
           - hamstrings
-  "Split Jerk (Barbell)":
+  split-jerk-barbell:
     category: Barbell
     target: Olympic
     movement:
@@ -16752,7 +16752,7 @@ exercises:
           - arms
           - core
           - hamstrings
-  "Ball Slams":
+  ball-slams:
     category: Dumbbell
     target: Full Body
     movement:
@@ -16819,7 +16819,7 @@ exercises:
         groups:
           - arms
           - legs
-  "Burpee":
+  burpee:
     category: Reps Only
     target: Full Body
     movement:
@@ -16886,7 +16886,7 @@ exercises:
           - arms
           - core
           - shoulders
-  "Jumping Jack":
+  jumping-jack:
     category: Reps Only
     target: Full Body
     movement:
@@ -16950,7 +16950,7 @@ exercises:
       secondary:
         groups:
           - shoulders
-  "Kettlebell Swing":
+  kettlebell-swing:
     category: Dumbbell
     target: Full Body
     movement:
@@ -17019,7 +17019,7 @@ exercises:
           - back
           - core
           - shoulders
-  "Kettlebell Turkish Get Up":
+  kettlebell-turkish-get-up:
     category: Dumbbell
     target: Full Body
     movement:
@@ -17088,7 +17088,7 @@ exercises:
         groups:
           - back
           - glutes
-  "Muscle Up":
+  muscle-up:
     category: Weighted Body Weight
     target: Full Body
     movement:
@@ -17158,7 +17158,7 @@ exercises:
         groups:
           - core
           - shoulders
-  "Squat Row (Band)":
+  squat-row-band:
     category: Reps Only
     target: Full Body
     movement:
@@ -17229,7 +17229,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Sumo Deadlift High Pull (Barbell)":
+  sumo-deadlift-high-pull-barbell:
     category: Barbell
     target: Full Body
     movement:
@@ -17300,7 +17300,7 @@ exercises:
           - back
           - hamstrings
           - legs
-  "Thruster (Barbell)":
+  thruster-barbell:
     category: Barbell
     target: Full Body
     movement:
@@ -17368,7 +17368,7 @@ exercises:
         groups:
           - core
           - glutes
-  "Thruster (Kettlebell)":
+  thruster-kettlebell:
     category: Dumbbell
     target: Full Body
     movement:
@@ -17436,7 +17436,7 @@ exercises:
         groups:
           - core
           - glutes
-  "Aerobics":
+  aerobics:
     category: Duration
     target: Cardio
     health:
@@ -17463,7 +17463,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Battle Ropes":
+  battle-ropes:
     category: Cardio
     target: Cardio
     health:
@@ -17533,7 +17533,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Climbing":
+  climbing:
     category: Duration
     target: Cardio
     health:
@@ -17602,7 +17602,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Cycling":
+  cycling:
     category: Cardio
     target: Cardio
     health:
@@ -17636,7 +17636,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Cycling (Indoor)":
+  cycling-indoor:
     category: Cardio
     target: Cardio
     health:
@@ -17670,7 +17670,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Elliptical Machine":
+  elliptical-machine:
     category: Cardio
     target: Cardio
     health:
@@ -17739,7 +17739,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Hiking":
+  hiking:
     category: Cardio
     target: Cardio
     health:
@@ -17773,7 +17773,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Jump Rope":
+  jump-rope:
     category: Reps Only
     target: Cardio
     health:
@@ -17842,7 +17842,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Rowing (Machine)":
+  rowing-machine:
     category: Cardio
     target: Cardio
     health:
@@ -17914,7 +17914,7 @@ exercises:
         groups:
           - arms
           - shoulders
-  "Running":
+  running:
     category: Cardio
     target: Cardio
     health:
@@ -17948,7 +17948,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Running (Treadmill)":
+  running-treadmill:
     category: Cardio
     target: Cardio
     health:
@@ -17982,7 +17982,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Skating":
+  skating:
     category: Cardio
     target: Cardio
     health:
@@ -18051,7 +18051,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Skiing":
+  skiing:
     category: Cardio
     target: Cardio
     health:
@@ -18085,7 +18085,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Snowboarding":
+  snowboarding:
     category: Cardio
     target: Cardio
     health:
@@ -18119,7 +18119,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Swimming":
+  swimming:
     category: Cardio
     target: Cardio
     health:
@@ -18155,7 +18155,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Walking":
+  walking:
     category: Cardio
     target: Cardio
     health:
@@ -18182,7 +18182,7 @@ exercises:
       secondary:
         groups:
           - core
-  "Yoga":
+  yoga:
     category: Duration
     target: Cardio
     health:

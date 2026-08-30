@@ -7,7 +7,7 @@
 # when en changes, `validate_library.py --coverage` reports the entry stale.
 locale: es
 exercises:
-  Ab Wheel:
+  ab-wheel:
     name: Rueda abdominal
     instructions: |
       ## Resumen
@@ -53,7 +53,7 @@ exercises:
       - Progresa a los rollouts de pie solo cuando domines la versión de rodillas
     validated: false
     source_digest: 88d0c5e76120
-  Bicycle Crunch:
+  bicycle-crunch:
     name: Crunch bicicleta
     instructions: |
       ## Resumen
@@ -101,7 +101,7 @@ exercises:
       - Variante avanzada: haz una pausa de 2-3 segundos en cada giro
     validated: false
     source_digest: f32a661f68a7
-  Cable Crunch:
+  cable-crunch:
     name: Crunch en polea
     instructions: |
       ## Resumen
@@ -149,7 +149,7 @@ exercises:
       - Regresión: realiza crunches con el peso corporal hasta desarrollar suficiente fuerza en el core
     validated: false
     source_digest: b3ba6c257213
-  Cable Twist:
+  cable-twist:
     name: Giro de torso en polea
     instructions: |
       ## Resumen
@@ -197,7 +197,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el rango de movimiento o el peso
     validated: false
     source_digest: 3251f7b9e0af
-  Cross Body Crunch:
+  cross-body-crunch:
     name: Crunch cruzado
     instructions: |
       ## Resumen
@@ -245,7 +245,7 @@ exercises:
       - Progresa reduciendo el tempo para aumentar el tiempo bajo tensión
     validated: false
     source_digest: d785ed87e3d4
-  Crunch:
+  crunch:
     name: Crunch
     instructions: |
       ## Resumen
@@ -293,7 +293,7 @@ exercises:
       - Progresa añadiendo una pausa de 3-5 segundos en la contracción máxima
     validated: false
     source_digest: b490a4123ead
-  Crunch (Machine):
+  crunch-machine:
     name: Crunch (máquina)
     instructions: |
       ## Resumen
@@ -341,7 +341,7 @@ exercises:
       - Progresa gradualmente añadiendo pequeños incrementos de peso con el tiempo
     validated: false
     source_digest: 7b43c5d8e382
-  Crunch (Stability Ball):
+  crunch-stability-ball:
     name: Crunch (fitball)
     instructions: |
       ## Resumen
@@ -389,7 +389,7 @@ exercises:
       - Si te cuesta mantener el equilibrio, desinfla ligeramente el balón para una superficie más estable
     validated: false
     source_digest: 3561b8a4b1bd
-  Decline Crunch:
+  decline-crunch:
     name: Crunch declinado
     instructions: |
       ## Resumen
@@ -437,7 +437,7 @@ exercises:
       - Progresa aumentando gradualmente el ángulo de declive a medida que ganes fuerza
     validated: false
     source_digest: 4bd6330033e3
-  Flat Knee Raise:
+  flat-knee-raise:
     name: Elevación de rodillas tumbado
     instructions: |
       ## Resumen
@@ -485,7 +485,7 @@ exercises:
       - Progresa a la elevación de piernas tumbado cuando domines la elevación de rodillas con buena técnica
     validated: false
     source_digest: f22cfeb74873
-  Flat Leg Raise:
+  flat-leg-raise:
     name: Elevación de piernas tumbado
     instructions: |
       ## Resumen
@@ -534,7 +534,7 @@ exercises:
       - Variante avanzada: baja las piernas muy despacio (3-5 segundos) para aumentar la intensidad
     validated: false
     source_digest: 528147abd292
-  Hanging Knee Raise:
+  hanging-knee-raise:
     name: Elevación de rodillas colgado
     instructions: |
       ## Resumen
@@ -582,7 +582,7 @@ exercises:
       - Progresa a la elevación de piernas colgado cuando domines la elevación de rodillas con buena técnica
     validated: false
     source_digest: b11bae7517c2
-  Hanging Leg Raise:
+  hanging-leg-raise:
     name: Elevación de piernas colgado
     instructions: |
       ## Resumen
@@ -631,7 +631,7 @@ exercises:
       - Variante avanzada: añade tobilleras lastradas o realiza pies a la barra
     validated: false
     source_digest: defa397750ea
-  Jackknife Sit Up:
+  jackknife-sit-up:
     name: Navaja (jackknife)
     instructions: |
       ## Resumen
@@ -679,7 +679,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el rango de movimiento
     validated: false
     source_digest: 2d5f4e16d6b5
-  Knee Raise (Captain's Chair):
+  knee-raise-captain-s-chair:
     name: Elevación de rodillas (silla romana)
     instructions: |
       ## Resumen
@@ -727,7 +727,7 @@ exercises:
       - Si sientes molestias en los hombros, ajusta el agarre o la posición de los brazos
     validated: false
     source_digest: bf78aa7a4323
-  Knees to Elbows:
+  knees-to-elbows:
     name: Rodillas a los codos
     instructions: |
       ## Resumen
@@ -776,7 +776,7 @@ exercises:
       - Variante avanzada: añade un giro para llevar las rodillas alternadamente hacia el codo contrario
     validated: false
     source_digest: d24f310ca1ac
-  Oblique Crunch:
+  oblique-crunch:
     name: Crunch oblicuo
     instructions: |
       ## Resumen
@@ -823,7 +823,7 @@ exercises:
       - Progresa añadiendo una pausa de 2-3 segundos en la contracción máxima
     validated: false
     source_digest: 19ec790338d8
-  Plank:
+  plank:
     name: Plancha
     instructions: |
       ## Resumen
@@ -871,7 +871,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, revisa tu técnica y reduce el tiempo de la posición
     validated: false
     source_digest: f6f4e1bd5166
-  Reverse Crunch:
+  reverse-crunch:
     name: Crunch invertido
     instructions: |
       ## Resumen
@@ -919,7 +919,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, concéntrate en movimientos más pequeños con mejor control
     validated: false
     source_digest: 43d83c25c206
-  Reverse Plank:
+  reverse-plank:
     name: Plancha invertida
     instructions: |
       ## Resumen
@@ -967,7 +967,7 @@ exercises:
       - Si sientes molestias en las muñecas, apóyate sobre los antebrazos
     validated: false
     source_digest: aadf60e05173
-  Russian Twist:
+  russian-twist:
     name: Giro ruso
     instructions: |
       ## Resumen
@@ -1015,7 +1015,7 @@ exercises:
       - Progresa levantando más los pies o añadiendo una pausa en cada lado
     validated: false
     source_digest: b51bd4ad131f
-  Flutter Kick:
+  flutter-kick:
     name: Patadas de nado
     instructions: |
       ## Resumen
@@ -1063,7 +1063,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, eleva más las piernas o reduce la duración
     validated: false
     source_digest: b3267ebe8f7c
-  Side Bend (Cable):
+  side-bend-cable:
     name: Flexión lateral (polea)
     instructions: |
       ## Resumen
@@ -1111,7 +1111,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y revisa tu técnica
     validated: false
     source_digest: 379e91d01bdf
-  Side Bend (Band):
+  side-bend-band:
     name: Flexión lateral (banda)
     instructions: |
       ## Resumen
@@ -1159,7 +1159,7 @@ exercises:
       - Ajusta la posición de los pies sobre la banda para modificar la resistencia
     validated: false
     source_digest: df7860f5474a
-  Side Bend (Dumbbell):
+  side-bend-dumbbell:
     name: Flexión lateral (mancuerna)
     instructions: |
       ## Resumen
@@ -1207,7 +1207,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y revisa tu técnica
     validated: false
     source_digest: 633615d81d38
-  Side Plank:
+  side-plank:
     name: Plancha lateral
     instructions: |
       ## Resumen
@@ -1255,7 +1255,7 @@ exercises:
       - Repite con ambos lados para un desarrollo equilibrado del core
     validated: false
     source_digest: 9cdba1c841c1
-  Sit Up:
+  sit-up:
     name: Abdominales
     instructions: |
       ## Resumen
@@ -1303,7 +1303,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, cambia al crunch o reduce el rango de movimiento
     validated: false
     source_digest: 6f2d6eb00f7c
-  Superman:
+  superman:
     name: Superman
     instructions: |
       ## Resumen
@@ -1351,7 +1351,7 @@ exercises:
       - Progresa al superman alterno (brazo y pierna opuestos) como variación
     validated: false
     source_digest: 30a1abfa19fa
-  Toes To Bar:
+  toes-to-bar:
     name: Pies a la barra
     instructions: |
       ## Resumen
@@ -1399,7 +1399,7 @@ exercises:
       - Variante avanzada: realiza pies a la barra estricto, sin balanceo ni kipping
     validated: false
     source_digest: 60e2720420df
-  Torso Rotation (Machine):
+  torso-rotation-machine:
     name: Rotación de torso (máquina)
     instructions: |
       ## Resumen
@@ -1447,7 +1447,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y asegúrate de mantener una técnica correcta
     validated: false
     source_digest: 735f0c747832
-  V Up:
+  v-up:
     name: V-up
     instructions: |
       ## Resumen
@@ -1495,7 +1495,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el rango de movimiento o cambia a variantes más fáciles
     validated: false
     source_digest: 9e189768c3a3
-  Bench Dip:
+  bench-dip:
     name: Fondos entre bancos
     instructions: |
       ## Resumen
@@ -1543,7 +1543,7 @@ exercises:
       - Si sientes molestias en los hombros, reduce el rango de movimiento
     validated: false
     source_digest: 393c27caa822
-  Bench Press - Close Grip (Barbell):
+  bench-press-close-grip-barbell:
     name: Press de banca con agarre cerrado (barra)
     instructions: |
       ## Resumen
@@ -1591,7 +1591,7 @@ exercises:
       - Variante avanzada: añade cadenas o bandas para una resistencia variable
     validated: false
     source_digest: 62003ea68079
-  Bicep Curl (Barbell):
+  bicep-curl-barbell:
     name: Curl de bíceps (barra)
     instructions: |
       ## Resumen
@@ -1639,7 +1639,7 @@ exercises:
       - Los principiantes pueden usar mancuernas para una posición de muñeca más natural
     validated: false
     source_digest: 9c595f5859b1
-  Bicep Curl (Cable):
+  bicep-curl-cable:
     name: Curl de bíceps (polea)
     instructions: |
       ## Resumen
@@ -1687,7 +1687,7 @@ exercises:
       - Usa un accesorio de cuerda si sientes molestias en las muñecas con las barras
     validated: false
     source_digest: 9a0018a48255
-  Bicep Curl (Dumbbell):
+  bicep-curl-dumbbell:
     name: Curl de bíceps (mancuernas)
     instructions: |
       ## Resumen
@@ -1735,7 +1735,7 @@ exercises:
       - La variante sentado ayuda a eliminar el impulso y el balanceo del cuerpo
     validated: false
     source_digest: 27ebdfaed5b6
-  Bicep Curl (Machine):
+  bicep-curl-machine:
     name: Curl de bíceps (máquina)
     instructions: |
       ## Resumen
@@ -1783,7 +1783,7 @@ exercises:
       - Añade una pausa de 2-3 segundos en la contracción máxima para mayor intensidad
     validated: false
     source_digest: 11550deccdee
-  Cable Kickback:
+  cable-kickback:
     name: Patada de tríceps (polea)
     instructions: |
       ## Resumen
@@ -1832,7 +1832,7 @@ exercises:
       - Usa un accesorio de cuerda en lugar del mango para una opción de agarre diferente
     validated: false
     source_digest: b017c5b010e4
-  Concentration Curl (Dumbbell):
+  concentration-curl-dumbbell:
     name: Curl concentrado (mancuerna)
     instructions: |
       ## Resumen
@@ -1880,7 +1880,7 @@ exercises:
       - Realízalo con el brazo apoyado en un banco inclinado para un ángulo diferente
     validated: false
     source_digest: 5bc3b241a77b
-  Hammer Curl (Band):
+  hammer-curl-band:
     name: Curl martillo (banda)
     instructions: |
       ## Resumen
@@ -1928,7 +1928,7 @@ exercises:
       - Ajusta la posición de los pies sobre la banda para modificar el nivel de resistencia
     validated: false
     source_digest: 0999bdd3814f
-  Hammer Curl (Cable):
+  hammer-curl-cable:
     name: Curl martillo (polea)
     instructions: |
       ## Resumen
@@ -1976,7 +1976,7 @@ exercises:
       - Usa distintas alturas de polea (baja, media, alta) para variar el énfasis muscular
     validated: false
     source_digest: ebfed2fe0bb4
-  Incline Curl (Dumbbell):
+  incline-curl-dumbbell:
     name: Curl en banco inclinado (mancuernas)
     instructions: |
       ## Resumen
@@ -2024,7 +2024,7 @@ exercises:
       - Variante avanzada: añade una fase negativa de 3 a 5 segundos para mayor intensidad
     validated: false
     source_digest: b6fbff60d063
-  Hammer Curl (Dumbbell):
+  hammer-curl-dumbbell:
     name: Curl martillo (mancuernas)
     instructions: |
       ## Resumen
@@ -2072,7 +2072,7 @@ exercises:
       - La variante sentado ayuda a eliminar el impulso y el balanceo del cuerpo
     validated: false
     source_digest: 6e1b12b84a86
-  Preacher Curl (Barbell):
+  preacher-curl-barbell:
     name: Curl en banco Scott (barra)
     instructions: |
       ## Resumen
@@ -2120,7 +2120,7 @@ exercises:
       - Asegura la extensión completa de los brazos abajo sin hiperextender
     validated: false
     source_digest: 9e75a7fbd710
-  Preacher Curl (Dumbbell):
+  preacher-curl-dumbbell:
     name: Curl en banco Scott (mancuerna)
     instructions: |
       ## Resumen
@@ -2168,7 +2168,7 @@ exercises:
       - Asegura la extensión completa del brazo abajo sin hiperextender
     validated: false
     source_digest: 4f75edcbc4d4
-  Heart Pump:
+  heart-pump:
     name: Heart Pump
     instructions: |
       ## Resumen
@@ -2216,7 +2216,7 @@ exercises:
       - Realízalo sentado para eliminar el impulso del tren inferior
     validated: false
     source_digest: 6553c8e94490
-  Preacher Curl (Machine):
+  preacher-curl-machine:
     name: Curl en banco Scott (máquina)
     instructions: |
       ## Resumen
@@ -2264,7 +2264,7 @@ exercises:
       - Trabaja un brazo a la vez si la máquina permite el trabajo unilateral
     validated: false
     source_digest: 43589cb43b39
-  Push Up - Close Grip:
+  push-up-close-grip:
     name: Flexiones con agarre cerrado
     instructions: |
       ## Resumen
@@ -2304,7 +2304,7 @@ exercises:
       - Progresa ralentizando la fase de bajada o elevando los pies
     validated: false
     source_digest: cf515abf12be
-  Reverse Curl (Band):
+  reverse-curl-band:
     name: Curl invertido (banda)
     instructions: |
       ## Resumen
@@ -2352,7 +2352,7 @@ exercises:
       - Ajusta la posición de los pies sobre la banda para modificar el nivel de resistencia
     validated: false
     source_digest: e033a7b84d67
-  Reverse Curl (Barbell):
+  reverse-curl-barbell:
     name: Curl invertido (barra)
     instructions: |
       ## Resumen
@@ -2400,7 +2400,7 @@ exercises:
       - Mantén las muñecas en posición neutra para evitar molestias
     validated: false
     source_digest: f30574db4d11
-  Reverse Curl (Dumbbell):
+  reverse-curl-dumbbell:
     name: Curl invertido (mancuernas)
     instructions: |
       ## Resumen
@@ -2448,7 +2448,7 @@ exercises:
       - La variante sentado ayuda a eliminar el impulso y el balanceo del cuerpo
     validated: false
     source_digest: 21ab17af7a26
-  Reverse Grip Concentration Curl (Dumbbell):
+  reverse-grip-concentration-curl-dumbbell:
     name: Curl concentrado con agarre invertido (mancuerna)
     instructions: |
       ## Resumen
@@ -2496,7 +2496,7 @@ exercises:
       - Concéntrate en la sensación de apretar el antebrazo y la parte externa del bíceps
     validated: false
     source_digest: eda241aaaac3
-  Seated Dip (Machine):
+  seated-dip-machine:
     name: Fondos sentado (máquina)
     instructions: |
       ## Resumen
@@ -2536,7 +2536,7 @@ exercises:
       - Variante avanzada: añade una pausa en la extensión completa
     validated: false
     source_digest: 43185a800a88
-  Seated Palms Up Wrist Curl (Dumbbell):
+  seated-palms-up-wrist-curl-dumbbell:
     name: Curl de muñeca sentado con palmas arriba (mancuernas)
     instructions: |
       ## Resumen
@@ -2584,7 +2584,7 @@ exercises:
       - Si sientes molestias, reduce el peso y asegura un buen apoyo de los antebrazos
     validated: false
     source_digest: 04d523597748
-  Skullcrusher (Barbell):
+  skullcrusher-barbell:
     name: Press francés (barra)
     instructions: |
       ## Resumen
@@ -2632,7 +2632,7 @@ exercises:
       - Variante avanzada: baja la barra por detrás de la cabeza para un mayor estiramiento
     validated: false
     source_digest: 078c569165ec
-  Skullcrusher (Dumbbell):
+  skullcrusher-dumbbell:
     name: Press francés (mancuernas)
     instructions: |
       ## Resumen
@@ -2680,7 +2680,7 @@ exercises:
       - Usa agarre neutro o prono según tu comodidad
     validated: false
     source_digest: 20ebebeba9a0
-  Triceps Dip:
+  triceps-dip:
     name: Fondos en paralelas
     instructions: |
       ## Resumen
@@ -2728,7 +2728,7 @@ exercises:
       - Progresa de forma gradual para evitar molestias en los hombros
     validated: false
     source_digest: 7bf053c9b531
-  Triceps Dip (Assisted):
+  triceps-dip-assisted:
     name: Fondos en paralelas (asistidos)
     instructions: |
       ## Resumen
@@ -2776,7 +2776,7 @@ exercises:
       - Prioriza la técnica antes que reducir la asistencia demasiado rápido
     validated: false
     source_digest: cb26283a6d1d
-  Triceps Extension:
+  triceps-extension:
     name: Extensión de tríceps
     instructions: |
       ## Resumen
@@ -2824,7 +2824,7 @@ exercises:
       - Variante avanzada: realízalo de pie para involucrar más el core
     validated: false
     source_digest: 8d8afa6593c4
-  Triceps Extension (Barbell):
+  triceps-extension-barbell:
     name: Extensión de tríceps (barra)
     instructions: |
       ## Resumen
@@ -2872,7 +2872,7 @@ exercises:
       - Variante avanzada: realízalo de pie para involucrar más el core
     validated: false
     source_digest: 26d67b0028e5
-  Triceps Extension (Cable):
+  triceps-extension-cable:
     name: Extensión de tríceps (polea)
     instructions: |
       ## Resumen
@@ -2920,7 +2920,7 @@ exercises:
       - Arrodíllate sobre ambas rodillas para una posición más estable si lo necesitas
     validated: false
     source_digest: 80fae05778a3
-  Triceps Extension (Dumbbell):
+  triceps-extension-dumbbell:
     name: Extensión de tríceps (mancuernas)
     instructions: |
       ## Resumen
@@ -2968,7 +2968,7 @@ exercises:
       - Usa dos mancuernas (una en cada mano) para un movimiento independiente de cada brazo
     validated: false
     source_digest: 512383c846a5
-  Triceps Extension (Machine):
+  triceps-extension-machine:
     name: Extensión de tríceps (máquina)
     instructions: |
       ## Resumen
@@ -3016,7 +3016,7 @@ exercises:
       - Trabaja un brazo a la vez si la máquina permite el entrenamiento unilateral
     validated: false
     source_digest: 6556f917e034
-  Triceps Pushdown (Cable - Straight Bar):
+  triceps-pushdown-cable-straight-bar:
     name: Empuje de tríceps hacia abajo (polea, barra recta)
     instructions: |
       ## Resumen
@@ -3064,7 +3064,7 @@ exercises:
       - Añade una pausa de 2-3 segundos en la extensión completa para mayor intensidad
     validated: false
     source_digest: 71683f6aee68
-  Upright Row (Cable):
+  upright-row-cable:
     name: Remo al mentón (polea)
     instructions: |
       ## Resumen
@@ -3112,7 +3112,7 @@ exercises:
       - Variación avanzada: trabaja un brazo a la vez para un enfoque unilateral
     validated: false
     source_digest: 932b862568a1
-  Wrist Roller:
+  wrist-roller:
     name: Rodillo de muñeca
     instructions: |
       ## Resumen
@@ -3160,7 +3160,7 @@ exercises:
       - Variación con agarre invertido: usa agarre supino para enfatizar otros músculos del antebrazo
     validated: false
     source_digest: 5056f13ec465
-  Back Extension:
+  back-extension:
     name: Hiperextensiones
     instructions: |
       ## Resumen
@@ -3208,7 +3208,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el rango de movimiento y consulta a un profesional
     validated: false
     source_digest: f09399658790
-  Back Extension (Machine):
+  back-extension-machine:
     name: Hiperextensiones (máquina)
     instructions: |
       ## Resumen
@@ -3256,7 +3256,7 @@ exercises:
       - Si sientes molestias, reduce el peso y comprueba la alineación del cojín
     validated: false
     source_digest: d252a478dc13
-  Bent Over One Arm Row (Dumbbell):
+  bent-over-one-arm-row-dumbbell:
     name: Remo con mancuerna a una mano
     instructions: |
       ## Resumen
@@ -3304,7 +3304,7 @@ exercises:
       - Haz el mismo número de repeticiones con cada lado para un desarrollo equilibrado
     validated: false
     source_digest: e142f192b0b0
-  Bent Over Row (Band):
+  bent-over-row-band:
     name: Remo inclinado (banda)
     instructions: |
       ## Resumen
@@ -3352,7 +3352,7 @@ exercises:
       - Mantén las rodillas ligeramente flexionadas para proteger la zona lumbar
     validated: false
     source_digest: 7be12bd678c5
-  Bent Over Row (Barbell):
+  bent-over-row-barbell:
     name: Remo inclinado (barra)
     instructions: |
       ## Resumen
@@ -3400,7 +3400,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y revisa tu técnica
     validated: false
     source_digest: 1f7fb34b3916
-  Bent Over Row (Dumbbell):
+  bent-over-row-dumbbell:
     name: Remo inclinado (mancuernas)
     instructions: |
       ## Resumen
@@ -3448,7 +3448,7 @@ exercises:
       - Mantén las rodillas ligeramente flexionadas para proteger la zona lumbar
     validated: false
     source_digest: 7164de57aeb3
-  Bent Over Row - Underhand (Barbell):
+  bent-over-row-underhand-barbell:
     name: Remo inclinado con agarre supino (barra)
     instructions: |
       ## Resumen
@@ -3496,7 +3496,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y revisa tu técnica
     validated: false
     source_digest: 8c777311f103
-  Chin Up:
+  chin-up:
     name: Dominadas supinas
     instructions: |
       ## Resumen
@@ -3544,7 +3544,7 @@ exercises:
       - Progresa de forma gradual para evitar sobrecargar los hombros
     validated: false
     source_digest: 92459e98fb3a
-  Chin Up (Assisted):
+  chin-up-assisted:
     name: Dominadas supinas (asistidas)
     instructions: |
       ## Resumen
@@ -3592,7 +3592,7 @@ exercises:
       - Realiza jalones al pecho como alternativa para construir una base de fuerza
     validated: false
     source_digest: 4efae5242e5c
-  Deadlift (Barbell):
+  deadlift-barbell:
     name: Peso muerto (barra)
     instructions: |
       ## Resumen
@@ -3641,7 +3641,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y revisa tu técnica con un profesional
     validated: false
     source_digest: a1e3cc206041
-  Good Morning (Barbell):
+  good-morning-barbell:
     name: Buenos días (barra)
     instructions: |
       ## Resumen
@@ -3689,7 +3689,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y asegúrate de que la técnica sea correcta
     validated: false
     source_digest: d9cf954eb4e1
-  Incline Row (Dumbbell):
+  incline-row-dumbbell:
     name: Remo en banco inclinado (mancuernas)
     instructions: |
       ## Resumen
@@ -3737,7 +3737,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la parte alta de cada repetición
     validated: false
     source_digest: 623181806c7a
-  Inverted Row (Bodyweight):
+  inverted-row-bodyweight:
     name: Remo invertido (peso corporal)
     instructions: |
       ## Resumen
@@ -3785,7 +3785,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la parte alta de cada repetición
     validated: false
     source_digest: 2cbbda9a56d8
-  High Row (Machine):
+  high-row-machine:
     name: Remo alto (máquina)
     instructions: |
       ## Resumen
@@ -3824,7 +3824,7 @@ exercises:
       - Trabajar un brazo a la vez es una variación útil para igualar ambos lados
     validated: false
     source_digest: 21f426920a36
-  Iso-Lateral Row (Machine):
+  iso-lateral-row-machine:
     name: Remo iso-lateral (máquina)
     instructions: |
       ## Resumen
@@ -3872,7 +3872,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en el punto de máxima contracción
     validated: false
     source_digest: 9d63f2b68505
-  Kipping Pull Up:
+  kipping-pull-up:
     name: Dominadas con kipping
     instructions: |
       ## Resumen
@@ -3919,7 +3919,7 @@ exercises:
       - Trabaja con un entrenador para aprender la mecánica del kipping de forma segura
     validated: false
     source_digest: a108350c818a
-  Kneeling Pulldown (Band):
+  kneeling-pulldown-band:
     name: Jalón de rodillas (banda)
     instructions: |
       ## Resumen
@@ -3967,7 +3967,7 @@ exercises:
       - Variación avanzada: usa una banda de mayor resistencia o añade una pausa en la parte baja
     validated: false
     source_digest: 325ddf67b27d
-  Lat Pulldown (Cable):
+  lat-pulldown-cable:
     name: Jalón al pecho (polea)
     instructions: |
       ## Resumen
@@ -4015,7 +4015,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la parte baja de cada repetición
     validated: false
     source_digest: 334bd2ac137e
-  Lat Pulldown (Machine):
+  lat-pulldown-machine:
     name: Jalón al pecho (máquina)
     instructions: |
       ## Resumen
@@ -4063,7 +4063,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la parte baja de cada repetición
     validated: false
     source_digest: bcfb44435143
-  Lat Pulldown (Single Arm):
+  lat-pulldown-single-arm:
     name: Jalón al pecho a una mano
     instructions: |
       ## Resumen
@@ -4111,7 +4111,7 @@ exercises:
       - Asegura el mismo número de repeticiones y atención en ambos lados para un desarrollo equilibrado
     validated: false
     source_digest: a2dd3c686a6d
-  Lat Pulldown - Close Grip (Cable):
+  lat-pulldown-close-grip-cable:
     name: Jalón al pecho con agarre cerrado (polea)
     instructions: |
       ## Resumen
@@ -4150,7 +4150,7 @@ exercises:
       - Variación avanzada: haz una pausa en la parte baja de cada repetición
     validated: false
     source_digest: 505c85fc5294
-  Lat Pulldown - Underhand (Band):
+  lat-pulldown-underhand-band:
     name: Jalón con agarre supino (banda)
     instructions: |
       ## Resumen
@@ -4198,7 +4198,7 @@ exercises:
       - Variación avanzada: usa una banda de mayor resistencia o añade una pausa en la parte baja
     validated: false
     source_digest: 9675360cc5d6
-  Lat Pulldown - Underhand (Cable):
+  lat-pulldown-underhand-cable:
     name: Jalón al pecho con agarre supino (polea)
     instructions: |
       ## Resumen
@@ -4246,7 +4246,7 @@ exercises:
       - Prueba un agarre más estrecho para variar el énfasis muscular
     validated: false
     source_digest: a47fd3359003
-  Lat Pulldown - Wide Grip (Cable):
+  lat-pulldown-wide-grip-cable:
     name: Jalón al pecho con agarre amplio (polea)
     instructions: |
       ## Resumen
@@ -4294,7 +4294,7 @@ exercises:
       - Si notas molestias en los hombros, cierra un poco el agarre
     validated: false
     source_digest: 2e018d2f871f
-  Pendlay Row (Barbell):
+  pendlay-row-barbell:
     name: Remo Pendlay (barra)
     instructions: |
       ## Resumen
@@ -4342,7 +4342,7 @@ exercises:
       - Si notas molestias en la zona lumbar, reduce el peso y revisa tu técnica
     validated: false
     source_digest: ce6d0b122bc8
-  Pull Up:
+  pull-up:
     name: Dominadas
     instructions: |
       ## Resumen
@@ -4390,7 +4390,7 @@ exercises:
       - Progresa de forma gradual para evitar sobrecargar los hombros
     validated: false
     source_digest: 4187fbcdd776
-  Pull Up (Assisted):
+  pull-up-assisted:
     name: Dominadas (asistidas)
     instructions: |
       ## Resumen
@@ -4438,7 +4438,7 @@ exercises:
       - Haz jalones al pecho como alternativa para construir fuerza de base
     validated: false
     source_digest: 9a9628828da8
-  Pull Up (Band):
+  pull-up-band:
     name: Dominadas (banda)
     instructions: |
       ## Resumen
@@ -4486,7 +4486,7 @@ exercises:
       - Combina las dominadas con banda con dominadas negativas para progresar más rápido
     validated: false
     source_digest: 235aa19ed280
-  Rack Pull (Barbell):
+  rack-pull-barbell:
     name: Peso muerto desde soportes (barra)
     instructions: |
       ## Resumen
@@ -4534,7 +4534,7 @@ exercises:
       - Si notas molestias en la zona lumbar, sube los soportes y reduce el peso
     validated: false
     source_digest: 8b84fe7d6bd4
-  Romanian Deadlift (Barbell):
+  romanian-deadlift-barbell:
     name: Peso muerto rumano (barra)
     instructions: |
       ## Resumen
@@ -4582,7 +4582,7 @@ exercises:
       - Si notas molestias en la zona lumbar, reduce el peso y asegura una buena técnica
     validated: false
     source_digest: 1dfa08ff9218
-  Seated Row (Cable):
+  seated-row-cable:
     name: Remo en polea baja
     instructions: |
       ## Resumen
@@ -4629,7 +4629,7 @@ exercises:
       - Trabaja un brazo a la vez para un enfoque unilateral
     validated: false
     source_digest: ad55b9702220
-  Seated Row (Machine):
+  seated-row-machine:
     name: Remo sentado (máquina)
     instructions: |
       ## Resumen
@@ -4677,7 +4677,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en el punto de máxima contracción
     validated: false
     source_digest: 0f00df28ceb6
-  Seated Wide-Grip Row (Cable):
+  seated-wide-grip-row-cable:
     name: Remo en polea baja con agarre amplio
     instructions: |
       ## Resumen
@@ -4725,7 +4725,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en el punto de máxima contracción
     validated: false
     source_digest: 465066c2732a
-  Shrug (Machine):
+  shrug-machine:
     name: Encogimientos de hombros (máquina)
     instructions: |
       ## Resumen
@@ -4773,7 +4773,7 @@ exercises:
       - Hazlo con una fase negativa lenta de 3-5 segundos para mayor intensidad
     validated: false
     source_digest: '624285189856'
-  Shrug (Smith Machine):
+  shrug-smith-machine:
     name: Encogimientos de hombros (máquina Smith)
     instructions: |
       ## Resumen
@@ -4821,7 +4821,7 @@ exercises:
       - Usa correas de agarre si la fuerza de agarre te limita
     validated: false
     source_digest: 7777cd124dbf
-  Stiff Leg Deadlift (Barbell):
+  stiff-leg-deadlift-barbell:
     name: Peso muerto con piernas rígidas (barra)
     instructions: |
       ## Resumen
@@ -4869,7 +4869,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y asegúrate de mantener una técnica correcta
     validated: false
     source_digest: 2754c8c99f76
-  Sumo Deadlift (Barbell):
+  sumo-deadlift-barbell:
     name: Peso muerto sumo (barra)
     instructions: |
       ## Resumen
@@ -4918,7 +4918,7 @@ exercises:
       - Si sientes molestias en la cadera, ajusta el ancho de la postura o el ángulo de los pies
     validated: false
     source_digest: ec564510a3e0
-  T Bar Row:
+  t-bar-row:
     name: Remo en barra T
     instructions: |
       ## Resumen
@@ -4966,7 +4966,7 @@ exercises:
       - Variante avanzada: haz una pausa de 2 a 3 segundos en la parte superior de cada repetición
     validated: false
     source_digest: b5f908107d8c
-  Upright Row (Barbell):
+  upright-row-barbell:
     name: Remo al mentón (barra)
     instructions: |
       ## Resumen
@@ -5014,7 +5014,7 @@ exercises:
       - Variante avanzada: realízalo con mancuernas para un movimiento independiente de cada brazo
     validated: false
     source_digest: 30f67db6daf2
-  Wide Pull Up:
+  wide-pull-up:
     name: Dominadas con agarre amplio
     instructions: |
       ## Resumen
@@ -5062,7 +5062,7 @@ exercises:
       - Si sientes molestias en los hombros, cierra un poco el agarre
     validated: false
     source_digest: e0873801278e
-  Around the World:
+  around-the-world:
     name: Alrededor del mundo
     instructions: |
       ## Resumen
@@ -5110,7 +5110,7 @@ exercises:
       - Si sientes molestias en los hombros, reduce el rango de movimiento o el peso
     validated: false
     source_digest: 15af4e43e52f
-  Bench Press (Barbell):
+  bench-press-barbell:
     name: Press de banca (barra)
     instructions: |
       ## Resumen
@@ -5158,7 +5158,7 @@ exercises:
       - Variante avanzada: añade cadenas o bandas para una resistencia acomodada
     validated: false
     source_digest: 9c3bf05c415e
-  Bench Press (Cable):
+  bench-press-cable:
     name: Press de banca (polea)
     instructions: |
       ## Resumen
@@ -5206,7 +5206,7 @@ exercises:
       - Trabaja un brazo a la vez para entrenamiento unilateral
     validated: false
     source_digest: 079ccda7d747
-  Bench Press (Dumbbell):
+  bench-press-dumbbell:
     name: Press de banca (mancuernas)
     instructions: |
       ## Resumen
@@ -5254,7 +5254,7 @@ exercises:
       - Variante avanzada: haz una pausa de 2 a 3 segundos abajo
     validated: false
     source_digest: 208852f59348
-  Bench Press (Smith Machine):
+  bench-press-smith-machine:
     name: Press de banca (máquina Smith)
     instructions: |
       ## Resumen
@@ -5302,7 +5302,7 @@ exercises:
       - Variante avanzada: añade cadenas o realiza negativas lentas
     validated: false
     source_digest: e0117cb03dc5
-  Bench Press - Wide Grip (Barbell):
+  bench-press-wide-grip-barbell:
     name: Press de banca con agarre amplio (barra)
     instructions: |
       ## Resumen
@@ -5350,7 +5350,7 @@ exercises:
       - Si sientes molestias en los hombros, cierra un poco el agarre
     validated: false
     source_digest: 2e8530ce0042
-  Cable Crossover:
+  cable-crossover:
     name: Cruce de poleas
     instructions: |
       ## Resumen
@@ -5398,7 +5398,7 @@ exercises:
       - Variante avanzada: haz una pausa de 2 a 3 segundos en la máxima contracción
     validated: false
     source_digest: 00338b9d05d5
-  Chest Dip:
+  chest-dip:
     name: Fondos para pecho
     instructions: |
       ## Resumen
@@ -5446,7 +5446,7 @@ exercises:
       - Progresa de forma gradual para evitar sobrecargar los hombros
     validated: false
     source_digest: 050f9dfd82f8
-  Chest Dip (Assisted):
+  chest-dip-assisted:
     name: Fondos para pecho (asistidos)
     instructions: |
       ## Resumen
@@ -5494,7 +5494,7 @@ exercises:
       - Reduce el rango de movimiento si sientes molestias en los hombros
     validated: false
     source_digest: 79a88a4eb17c
-  Chest Fly:
+  chest-fly:
     name: Aperturas
     instructions: |
       ## Resumen
@@ -5542,7 +5542,7 @@ exercises:
       - Ajusta la posición de las asas para variar la profundidad del estiramiento
     validated: false
     source_digest: 1609e5610d35
-  Chest Fly (Band):
+  chest-fly-band:
     name: Aperturas (banda)
     instructions: |
       ## Resumen
@@ -5590,7 +5590,7 @@ exercises:
       - Variante avanzada: haz una pausa de 2 a 3 segundos en la máxima contracción
     validated: false
     source_digest: 00243a7d52f5
-  Chest Fly (Dumbbell):
+  chest-fly-dumbbell:
     name: Aperturas (mancuernas)
     instructions: |
       ## Resumen
@@ -5638,7 +5638,7 @@ exercises:
       - Variante avanzada: haz una pausa de 2 a 3 segundos en el estiramiento abajo
     validated: false
     source_digest: f3dde2427bb5
-  Chest Press (Band):
+  chest-press-band:
     name: Press de pecho (banda)
     instructions: |
       ## Resumen
@@ -5686,7 +5686,7 @@ exercises:
       - Variante avanzada: usa una banda de mayor resistencia o añade una pausa en la extensión
     validated: false
     source_digest: 9167ff4726d5
-  Chest Press (Machine):
+  chest-press-machine:
     name: Press de pecho (máquina)
     instructions: |
       ## Resumen
@@ -5734,7 +5734,7 @@ exercises:
       - Variante avanzada: haz una pausa de 2 a 3 segundos en la extensión completa
     validated: false
     source_digest: 58c64ce5997f
-  Decline Bench Press (Barbell):
+  decline-bench-press-barbell:
     name: Press de banca declinado (barra)
     instructions: |
       ## Resumen
@@ -5782,7 +5782,7 @@ exercises:
       - Si sientes molestias en los hombros, ajusta la anchura del agarre
     validated: false
     source_digest: decc38eb0337
-  Decline Bench Press (Dumbbell):
+  decline-bench-press-dumbbell:
     name: Press de banca declinado (mancuernas)
     instructions: |
       ## Resumen
@@ -5830,7 +5830,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la posición baja
     validated: false
     source_digest: 603f8f3083d4
-  Decline Bench Press (Smith Machine):
+  decline-bench-press-smith-machine:
     name: Press de banca declinado (máquina Smith)
     instructions: |
       ## Resumen
@@ -5878,7 +5878,7 @@ exercises:
       - Variación avanzada: usa negativas lentas o añade cadenas
     validated: false
     source_digest: 6c5fc5afa801
-  Floor Press (Barbell):
+  floor-press-barbell:
     name: Press en el suelo (barra)
     instructions: |
       ## Resumen
@@ -5926,7 +5926,7 @@ exercises:
       - Variación avanzada: añade cadenas o usa negativas lentas
     validated: false
     source_digest: 6bd2ff89ec34
-  Incline Bench Press (Barbell):
+  incline-bench-press-barbell:
     name: Press de banca inclinado (barra)
     instructions: |
       ## Resumen
@@ -5974,7 +5974,7 @@ exercises:
       - Si sientes molestias en los hombros, ajusta la anchura del agarre o el ángulo de inclinación
     validated: false
     source_digest: a5d1f6869d46
-  Incline Bench Press (Cable):
+  incline-bench-press-cable:
     name: Press de banca inclinado (polea)
     instructions: |
       ## Resumen
@@ -6022,7 +6022,7 @@ exercises:
       - Variación avanzada: añade una pausa en la posición baja para aumentar la intensidad
     validated: false
     source_digest: 64a4e405734f
-  Incline Bench Press (Dumbbell):
+  incline-bench-press-dumbbell:
     name: Press de banca inclinado (mancuernas)
     instructions: |
       ## Resumen
@@ -6070,7 +6070,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la posición baja
     validated: false
     source_digest: 553053c1bcf4
-  Incline Bench Press (Smith Machine):
+  incline-bench-press-smith-machine:
     name: Press de banca inclinado (máquina Smith)
     instructions: |
       ## Resumen
@@ -6118,7 +6118,7 @@ exercises:
       - Variación avanzada: usa negativas lentas o añade cadenas
     validated: false
     source_digest: afc5ab08d289
-  Incline Chest Fly (Dumbbell):
+  incline-chest-fly-dumbbell:
     name: Aperturas en banco inclinado (mancuernas)
     instructions: |
       ## Resumen
@@ -6166,7 +6166,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en el estiramiento de la posición baja
     validated: false
     source_digest: 0c74368fa381
-  Incline Chest Press (Machine):
+  incline-chest-press-machine:
     name: Press de pecho inclinado (máquina)
     instructions: |
       ## Resumen
@@ -6214,7 +6214,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la extensión completa
     validated: false
     source_digest: 3bb2c59c953e
-  Iso-Lateral Chest Press (Machine):
+  iso-lateral-chest-press-machine:
     name: Press de pecho iso-lateral (máquina)
     instructions: |
       ## Resumen
@@ -6262,7 +6262,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la extensión completa
     validated: false
     source_digest: f1b123a5e6cc
-  Pec Deck (Machine):
+  pec-deck-machine:
     name: Pec deck (máquina)
     instructions: |
       ## Resumen
@@ -6310,7 +6310,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la contracción máxima
     validated: false
     source_digest: 2a9c54be9814
-  Pullover (Dumbbell):
+  pullover-dumbbell:
     name: Pull-over (mancuerna)
     instructions: |
       ## Resumen
@@ -6358,7 +6358,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en el estiramiento de la posición baja
     validated: false
     source_digest: d9676c5691f6
-  Pullover (Machine):
+  pullover-machine:
     name: Pull-over (máquina)
     instructions: |
       ## Resumen
@@ -6406,7 +6406,7 @@ exercises:
       - Concéntrate en sentir el estiramiento arriba y la contracción abajo
     validated: false
     source_digest: c534df9f8f47
-  Push Up:
+  push-up:
     name: Flexiones
     instructions: |
       ## Resumen
@@ -6454,7 +6454,7 @@ exercises:
       - Prueba distintas posiciones de manos (amplia, cerrada, diamante) para variar
     validated: false
     source_digest: c50b0b7f257d
-  Push Up (Band):
+  push-up-band:
     name: Flexiones (banda)
     instructions: |
       ## Resumen
@@ -6502,7 +6502,7 @@ exercises:
       - Variación avanzada: usa una banda de mayor resistencia o añade una pausa en la posición baja
     validated: false
     source_digest: e9b5bb98a22c
-  Push Up (Knees):
+  push-up-knees:
     name: Flexiones de rodillas
     instructions: |
       ## Resumen
@@ -6550,7 +6550,7 @@ exercises:
       - Prueba distintas posiciones de manos para variar a medida que ganes fuerza
     validated: false
     source_digest: e94ac18155aa
-  Box Jump:
+  box-jump:
     name: Salto al cajón
     instructions: |
       ## Resumen
@@ -6598,7 +6598,7 @@ exercises:
       - Variación avanzada: añade un chaleco lastrado o realiza saltos al cajón a una pierna
     validated: false
     source_digest: fc5a42d63c7f
-  Box Squat (Barbell):
+  box-squat-barbell:
     name: Sentadilla al cajón (barra)
     instructions: |
       ## Resumen
@@ -6647,7 +6647,7 @@ exercises:
       - Variación avanzada: añade cadenas o bandas para una resistencia acomodada
     validated: false
     source_digest: 7fe468447300
-  Bulgarian Split Squat:
+  bulgarian-split-squat:
     name: Sentadilla búlgara
     instructions: |
       ## Resumen
@@ -6695,7 +6695,7 @@ exercises:
       - Variación avanzada: añade peso con mancuernas, barra o chaleco lastrado
     validated: false
     source_digest: c31ae4f6bc98
-  Cable Pull Through:
+  cable-pull-through:
     name: Tirón entre piernas en polea
     instructions: |
       ## Resumen
@@ -6743,7 +6743,7 @@ exercises:
       - Variación avanzada: realiza el tirón entre piernas a una pierna
     validated: false
     source_digest: 6a9d6430dccd
-  Calf Press on Leg Press:
+  calf-press-on-leg-press:
     name: Elevación de talones en prensa
     instructions: |
       ## Resumen
@@ -6791,7 +6791,7 @@ exercises:
       - Haz una pausa de 2-3 segundos en la contracción máxima para aumentar la intensidad
     validated: false
     source_digest: 1ceba47a5bb8
-  Calf Press on Seated Leg Press:
+  calf-press-on-seated-leg-press:
     name: Elevación de talones en prensa sentado
     instructions: |
       ## Resumen
@@ -6839,7 +6839,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la contracción máxima
     validated: false
     source_digest: bcd98430ec81
-  Deadlift (Band):
+  deadlift-band:
     name: Peso muerto (banda)
     instructions: |
       ## Resumen
@@ -6888,7 +6888,7 @@ exercises:
       - Variación avanzada: usa una banda de mayor resistencia o realiza pesos muertos con banda a una pierna
     validated: false
     source_digest: b4e454550a82
-  Deadlift (Dumbbell):
+  deadlift-dumbbell:
     name: Peso muerto (mancuernas)
     instructions: |
       ## Resumen
@@ -6937,7 +6937,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y revisa tu técnica
     validated: false
     source_digest: 79d7400640f9
-  Deadlift (Smith Machine):
+  deadlift-smith-machine:
     name: Peso muerto (máquina Smith)
     instructions: |
       ## Resumen
@@ -6986,7 +6986,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y revisa tu técnica
     validated: false
     source_digest: ec2c53de435e
-  Deficit Deadlift (Barbell):
+  deficit-deadlift-barbell:
     name: Peso muerto con déficit (barra)
     instructions: |
       ## Resumen
@@ -7035,7 +7035,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce la altura del déficit o el peso
     validated: false
     source_digest: 000c6dc661f7
-  Front Squat (Barbell):
+  front-squat-barbell:
     name: Sentadilla frontal (barra)
     instructions: |
       ## Resumen
@@ -7084,7 +7084,7 @@ exercises:
       - Variación avanzada: añade una pausa abajo o realiza sentadillas frontales con tempo
     validated: false
     source_digest: 9e7aac957495
-  Glute Ham Raise:
+  glute-ham-raise:
     name: Elevación glúteo-femoral (GHR)
     instructions: |
       ## Resumen
@@ -7132,7 +7132,7 @@ exercises:
       - Variación avanzada: sujeta un disco contra el pecho para añadir resistencia
     validated: false
     source_digest: 46ef77c4a561
-  Glute Kickback (Machine):
+  glute-kickback-machine:
     name: Patada de glúteo (máquina)
     instructions: |
       ## Resumen
@@ -7180,7 +7180,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la extensión completa
     validated: false
     source_digest: 77dc375f135f
-  Goblet Squat (Kettlebell):
+  goblet-squat-kettlebell:
     name: Sentadilla goblet (pesa rusa)
     instructions: |
       ## Resumen
@@ -7228,7 +7228,7 @@ exercises:
       - Variación avanzada: añade una pausa abajo o realiza sentadillas goblet con tempo
     validated: false
     source_digest: 9de27ecccd0a
-  Hack Squat:
+  hack-squat:
     name: Sentadilla hack
     instructions: |
       ## Resumen
@@ -7276,7 +7276,7 @@ exercises:
       - Variación avanzada: realiza sentadillas hack a una pierna o añade una pausa abajo
     validated: false
     source_digest: 5ab1df58572e
-  Hack Squat (Barbell):
+  hack-squat-barbell:
     name: Sentadilla hack (barra)
     instructions: |
       ## Resumen
@@ -7325,7 +7325,7 @@ exercises:
       - Si sientes molestias, considera usar la máquina de sentadilla hack en su lugar
     validated: false
     source_digest: e806af9ce164
-  High Knee Skips:
+  high-knee-skips:
     name: Skipping con rodillas altas
     instructions: |
       ## Resumen
@@ -7368,7 +7368,7 @@ exercises:
       - Variación avanzada: añade un chaleco lastrado o aumenta la velocidad y la altura
     validated: false
     source_digest: 2bc1c614bbac
-  Hip Abductor (Machine):
+  hip-abductor-machine:
     name: Abducción de cadera (máquina)
     instructions: |
       ## Resumen
@@ -7416,7 +7416,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la abducción completa
     validated: false
     source_digest: fad46dd8650f
-  Hip Adductor (Machine):
+  hip-adductor-machine:
     name: Aducción de cadera (máquina)
     instructions: |
       ## Resumen
@@ -7464,7 +7464,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la aducción completa
     validated: false
     source_digest: 989ec0e197f2
-  Hip Thrust (Barbell):
+  hip-thrust-barbell:
     name: Hip thrust (barra)
     instructions: |
       ## Resumen
@@ -7512,7 +7512,7 @@ exercises:
       - Variación avanzada: realiza hip thrusts con barra a una pierna o añade una pausa arriba
     validated: false
     source_digest: 8d9583665aa7
-  Hip Thrust (Bodyweight):
+  hip-thrust-bodyweight:
     name: Hip thrust (peso corporal)
     instructions: |
       ## Resumen
@@ -7560,7 +7560,7 @@ exercises:
       - Variación avanzada: realiza hip thrusts a una pierna con el peso corporal o añade una pausa arriba
     validated: false
     source_digest: b58ce2ebffda
-  Donkey Kick (Smith Machine):
+  donkey-kick-smith-machine:
     name: Patada de burro (máquina Smith)
     instructions: |
       ## Resumen
@@ -7608,7 +7608,7 @@ exercises:
       - Variación avanzada: haz una pausa de 2-3 segundos en la parte alta de cada repetición
     validated: false
     source_digest: d5bacbc3a819
-  Donkey Kick:
+  donkey-kick:
     name: Patada de burro
     instructions: |
       ## Resumen
@@ -7656,7 +7656,7 @@ exercises:
       - Variación avanzada: añade un pulso arriba o mantén la posición 2-3 segundos
     validated: false
     source_digest: 80c9b50c7d86
-  Fire Hydrant:
+  fire-hydrant:
     name: Hidrante
     instructions: |
       ## Resumen
@@ -7704,7 +7704,7 @@ exercises:
       - Variante avanzada: mantén la posición 2-3 segundos en la parte alta de cada repetición
     validated: false
     source_digest: 91b4728a3b07
-  Jump Squat:
+  jump-squat:
     name: Sentadilla con salto
     instructions: |
       ## Resumen
@@ -7751,7 +7751,7 @@ exercises:
       - Variante avanzada: añade un chaleco lastrado o sostén mancuernas
     validated: false
     source_digest: 912dec4d800e
-  Lateral Box Jump:
+  lateral-box-jump:
     name: Salto lateral al cajón
     instructions: |
       ## Resumen
@@ -7799,7 +7799,7 @@ exercises:
       - Variante avanzada: aumenta la altura del cajón o realiza saltos laterales continuos sin pausa
     validated: false
     source_digest: fe85179f0fdf
-  Leg Extension (Machine):
+  leg-extension-machine:
     name: Extensión de piernas (máquina)
     instructions: |
       ## Resumen
@@ -7847,7 +7847,7 @@ exercises:
       - Variante avanzada: trabaja una pierna a la vez o añade una pausa en la extensión
     validated: false
     source_digest: 4ba0356ce9e8
-  Leg Press:
+  leg-press:
     name: Prensa de piernas
     instructions: |
       ## Resumen
@@ -7895,7 +7895,7 @@ exercises:
       - Variante avanzada: realiza la prensa a una pierna o añade una pausa abajo
     validated: false
     source_digest: 908add1dcc82
-  Lunge (Barbell):
+  lunge-barbell:
     name: Zancadas (barra)
     instructions: |
       ## Resumen
@@ -7943,7 +7943,7 @@ exercises:
       - Variante avanzada: añade un déficit apoyando el pie delantero sobre una plataforma
     validated: false
     source_digest: 585f44764f98
-  Lunge (Bodyweight):
+  lunge-bodyweight:
     name: Zancadas (peso corporal)
     instructions: |
       ## Resumen
@@ -7990,7 +7990,7 @@ exercises:
       - Variante avanzada: añade mancuernas, zancadas con salto o zancadas caminando
     validated: false
     source_digest: 99a94f686de5
-  Lunge (Dumbbell):
+  lunge-dumbbell:
     name: Zancadas (mancuernas)
     instructions: |
       ## Resumen
@@ -8037,7 +8037,7 @@ exercises:
       - Variante avanzada: añade un déficit, realiza zancadas con salto o aumenta el peso de las mancuernas
     validated: false
     source_digest: 87a189be7418
-  Step-Back Lunge:
+  step-back-lunge:
     name: Zancadas hacia atrás
     instructions: |
       ## Resumen
@@ -8083,7 +8083,7 @@ exercises:
       - Variante avanzada: añade una elevación de rodilla al subir o aumenta el peso de las mancuernas
     validated: false
     source_digest: 0e7a89e03c53
-  Lying Leg Curl (Machine):
+  lying-leg-curl-machine:
     name: Curl femoral tumbado (máquina)
     instructions: |
       ## Resumen
@@ -8131,7 +8131,7 @@ exercises:
       - Variante avanzada: trabaja una pierna a la vez o añade una pausa en la flexión completa
     validated: false
     source_digest: df65769d19b5
-  Mountain Climber:
+  mountain-climber:
     name: Escaladores
     instructions: |
       ## Resumen
@@ -8178,7 +8178,7 @@ exercises:
       - Variante avanzada: añade un giro llevando la rodilla al codo opuesto o aumenta la velocidad
     validated: false
     source_digest: 987abc0b7af6
-  Pistol Squat:
+  pistol-squat:
     name: Sentadilla pistol
     instructions: |
       ## Resumen
@@ -8225,7 +8225,7 @@ exercises:
       - Si sientes molestias en la rodilla, mejora tu movilidad antes de progresar
     validated: false
     source_digest: 3a4c0289a485
-  Romanian Deadlift (Dumbbell):
+  romanian-deadlift-dumbbell:
     name: Peso muerto rumano (mancuernas)
     instructions: |
       ## Resumen
@@ -8272,7 +8272,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y asegúrate de mantener una técnica correcta
     validated: false
     source_digest: f6f254f8e441
-  Seated Calf Raise (Machine):
+  seated-calf-raise-machine:
     name: Elevación de talones sentado (máquina)
     instructions: |
       ## Resumen
@@ -8320,7 +8320,7 @@ exercises:
       - Variante avanzada: haz una pausa de 2-3 segundos en la contracción máxima
     validated: false
     source_digest: bd323420c366
-  Seated Calf Raise (Plate Loaded):
+  seated-calf-raise-plate-loaded:
     name: Elevación de talones sentado (discos)
     instructions: |
       ## Resumen
@@ -8368,7 +8368,7 @@ exercises:
       - Variante avanzada: haz una pausa de 2-3 segundos en la contracción máxima
     validated: false
     source_digest: aebaa8ed5136
-  Seated Leg Curl (Machine):
+  seated-leg-curl-machine:
     name: Curl femoral sentado (máquina)
     instructions: |
       ## Resumen
@@ -8416,7 +8416,7 @@ exercises:
       - Variante avanzada: trabaja una pierna a la vez o añade una pausa en la flexión completa
     validated: false
     source_digest: ae1970bcfe60
-  Seated Leg Press (Machine):
+  seated-leg-press-machine:
     name: Prensa de piernas sentado (máquina)
     instructions: |
       ## Resumen
@@ -8464,7 +8464,7 @@ exercises:
       - Variante avanzada: realiza la prensa sentado a una pierna o añade una pausa abajo
     validated: false
     source_digest: 847fbdcc1b26
-  Single Leg Bridge:
+  single-leg-bridge:
     name: Puente de glúteos a una pierna
     instructions: |
       ## Resumen
@@ -8512,7 +8512,7 @@ exercises:
       - Variante avanzada: eleva el pie sobre un banco o añade una pausa arriba
     validated: false
     source_digest: bac27708446f
-  Squat (Band):
+  squat-band:
     name: Sentadilla (banda)
     instructions: |
       ## Resumen
@@ -8559,7 +8559,7 @@ exercises:
       - Variante avanzada: usa una banda de mayor resistencia o añade una pausa abajo
     validated: false
     source_digest: 715439e6fa3f
-  Squat (Barbell):
+  squat-barbell:
     name: Sentadilla (barra)
     instructions: |
       ## Resumen
@@ -8608,7 +8608,7 @@ exercises:
       - Variante avanzada: añade cadenas, bandas o realiza sentadillas con pausa
     validated: false
     source_digest: 68977410873f
-  Squat (Bodyweight):
+  squat-bodyweight:
     name: Sentadilla (peso corporal)
     instructions: |
       ## Resumen
@@ -8655,7 +8655,7 @@ exercises:
       - Variante avanzada: agrega sentadillas con salto, sentadillas pistol o progresa a sentadillas con peso
     validated: false
     source_digest: 1d2bc92939b7
-  Squat (Dumbbell):
+  squat-dumbbell:
     name: Sentadilla (mancuernas)
     instructions: |
       ## Resumen
@@ -8702,7 +8702,7 @@ exercises:
       - Variante avanzada: agrega una pausa abajo o aumenta el peso de las mancuernas
     validated: false
     source_digest: 62f54ec891b3
-  Squat (Machine):
+  squat-machine:
     name: Sentadilla (máquina)
     instructions: |
       ## Resumen
@@ -8750,7 +8750,7 @@ exercises:
       - Variante avanzada: realiza sentadillas en máquina a una pierna o agrega una pausa abajo
     validated: false
     source_digest: b9f6708f88b5
-  Squat (Smith Machine):
+  squat-smith-machine:
     name: Sentadilla (máquina Smith)
     instructions: |
       ## Resumen
@@ -8798,7 +8798,7 @@ exercises:
       - Variante avanzada: realiza sentadillas a una pierna en máquina Smith o agrega una pausa abajo
     validated: false
     source_digest: c472f2a8197e
-  Standing Calf Raise (Barbell):
+  standing-calf-raise-barbell:
     name: Elevación de talones de pie (barra)
     instructions: |
       ## Resumen
@@ -8846,7 +8846,7 @@ exercises:
       - Variante avanzada: realiza elevaciones de talones con barra a una pierna
     validated: false
     source_digest: 72e4bcbe1ddc
-  Standing Calf Raise (Bodyweight):
+  standing-calf-raise-bodyweight:
     name: Elevación de talones de pie (peso corporal)
     instructions: |
       ## Resumen
@@ -8894,7 +8894,7 @@ exercises:
       - Variante avanzada: realiza elevaciones de talones a una pierna o agrega una pausa arriba
     validated: false
     source_digest: 7dfcb889a8d3
-  Standing Calf Raise (Dumbbell):
+  standing-calf-raise-dumbbell:
     name: Elevación de talones de pie (mancuernas)
     instructions: |
       ## Resumen
@@ -8942,7 +8942,7 @@ exercises:
       - Variante avanzada: realiza elevaciones de talones con mancuerna a una pierna
     validated: false
     source_digest: 4f4b25089490
-  Standing Calf Raise (Machine):
+  standing-calf-raise-machine:
     name: Elevación de talones de pie (máquina)
     instructions: |
       ## Resumen
@@ -8990,7 +8990,7 @@ exercises:
       - Variante avanzada: realiza elevaciones de talones en máquina a una pierna o haz una pausa arriba
     validated: false
     source_digest: 8a6ea34fc157
-  Standing Calf Raise (Smith Machine):
+  standing-calf-raise-smith-machine:
     name: Elevación de talones de pie (máquina Smith)
     instructions: |
       ## Resumen
@@ -9038,7 +9038,7 @@ exercises:
       - Variante avanzada: realiza elevaciones de talones a una pierna en máquina Smith
     validated: false
     source_digest: 907e615bf922
-  Standing Leg Curl (Machine):
+  standing-leg-curl-machine:
     name: Curl femoral de pie (máquina)
     instructions: |
       ## Resumen
@@ -9077,7 +9077,7 @@ exercises:
       - El curl femoral sentado o tumbado es una alternativa más fácil para principiantes
     validated: false
     source_digest: 50a180824105
-  Step-up (Bodyweight):
+  step-up-bodyweight:
     name: Subida al cajón (peso corporal)
     instructions: |
       ## Resumen
@@ -9124,7 +9124,7 @@ exercises:
       - Variante avanzada: agrega mancuernas, una barra o aumenta la altura del cajón
     validated: false
     source_digest: 403cac696ede
-  Step-up (Barbell):
+  step-up-barbell:
     name: Subida al cajón (barra)
     instructions: |
       ## Resumen
@@ -9171,7 +9171,7 @@ exercises:
       - Variante avanzada: aumenta la altura del cajón o el peso de la barra de forma gradual
     validated: false
     source_digest: 3666cda21075
-  Step-up (Dumbbell):
+  step-up-dumbbell:
     name: Subida al cajón (mancuernas)
     instructions: |
       ## Resumen
@@ -9218,7 +9218,7 @@ exercises:
       - Variante avanzada: aumenta la altura del cajón, añade peso o sostén una sola mancuerna para un enfoque unilateral
     validated: false
     source_digest: 1e0d5919d249
-  Straight Leg Deadlift (Band):
+  straight-leg-deadlift-band:
     name: Peso muerto con piernas rectas (banda)
     instructions: |
       ## Resumen
@@ -9265,7 +9265,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce la resistencia y revisa tu técnica
     validated: false
     source_digest: 572f98f090ed
-  Stiff Leg Deadlift (Dumbbell):
+  stiff-leg-deadlift-dumbbell:
     name: Peso muerto con piernas rígidas (mancuernas)
     instructions: |
       ## Resumen
@@ -9312,7 +9312,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, reduce el peso y revisa tu técnica
     validated: false
     source_digest: 9b08bdbe6092
-  Curtsey Lunges (Barbell):
+  curtsey-lunges-barbell:
     name: Zancadas cruzadas (barra)
     instructions: |
       ## Resumen
@@ -9358,7 +9358,7 @@ exercises:
       - Variante avanzada: aumenta el peso de las mancuernas o agrega un rebote corto abajo
     validated: false
     source_digest: 503869786b2d
-  Deficit Squat:
+  deficit-squat:
     name: Sentadilla con déficit
     instructions: |
       ## Resumen
@@ -9405,7 +9405,7 @@ exercises:
       - Si sientes molestias en las rodillas, reduce la altura del déficit o el peso
     validated: false
     source_digest: c738865627e9
-  Trap Bar Deadlift:
+  trap-bar-deadlift:
     name: Peso muerto con barra hexagonal
     instructions: |
       ## Resumen
@@ -9454,7 +9454,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, revisa tu técnica y reduce el peso
     validated: false
     source_digest: a928a23446da
-  Zercher Squat (Barbell):
+  zercher-squat-barbell:
     name: Sentadilla Zercher (barra)
     instructions: |
       ## Resumen
@@ -9503,7 +9503,7 @@ exercises:
       - Si sientes molestias, reduce el peso o prueba otra variante de sentadilla
     validated: false
     source_digest: 7f7115fdf11d
-  Arnold Press (Dumbbell):
+  arnold-press-dumbbell:
     name: Press Arnold (mancuernas)
     instructions: |
       ## Resumen
@@ -9552,7 +9552,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o el rango de movimiento
     validated: false
     source_digest: d8f0bdd24d23
-  Halo:
+  halo:
     name: Halo
     instructions: |
       ## Resumen
@@ -9599,7 +9599,7 @@ exercises:
       - Reduce el rango de movimiento si sientes molestias en el hombro
     validated: false
     source_digest: a8ae67c006c6
-  Handstand Push Up:
+  handstand-push-up:
     name: Flexiones en parada de manos
     instructions: |
       ## Resumen
@@ -9647,7 +9647,7 @@ exercises:
       - Asegúrate de poder mantener una parada de manos contra la pared durante 30+ segundos antes de intentarlo
     validated: false
     source_digest: 793beae39821
-  Face Pull (Cable):
+  face-pull-cable:
     name: Face pull (polea)
     instructions: |
       ## Resumen
@@ -9695,7 +9695,7 @@ exercises:
       - Prioriza las repeticiones controladas y la buena técnica sobre el peso elevado
     validated: false
     source_digest: 38c03d258d51
-  Front Raise (Band):
+  front-raise-band:
     name: Elevaciones frontales (banda)
     instructions: |
       ## Resumen
@@ -9743,7 +9743,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el rango de movimiento o la resistencia
     validated: false
     source_digest: c4608b29420c
-  Front Raise (Barbell):
+  front-raise-barbell:
     name: Elevaciones frontales (barra)
     instructions: |
       ## Resumen
@@ -9791,7 +9791,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o el rango de movimiento
     validated: false
     source_digest: dbddc71b5eab
-  Front Raise (Cable):
+  front-raise-cable:
     name: Elevaciones frontales (polea)
     instructions: |
       ## Resumen
@@ -9839,7 +9839,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o el rango de movimiento
     validated: false
     source_digest: d67ea93015cd
-  Front Raise (Dumbbell):
+  front-raise-dumbbell:
     name: Elevaciones frontales (mancuernas)
     instructions: |
       ## Resumen
@@ -9887,7 +9887,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o el rango de movimiento
     validated: false
     source_digest: c57c7b0ffc50
-  Front Raise (Plate):
+  front-raise-plate:
     name: Elevaciones frontales (disco)
     instructions: |
       ## Resumen
@@ -9935,7 +9935,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o el rango de movimiento
     validated: false
     source_digest: a22aa410cfb2
-  Landmine Press:
+  landmine-press:
     name: Press landmine
     instructions: |
       ## Resumen
@@ -9974,7 +9974,7 @@ exercises:
       - Empieza con la barra vacía; el extremo anclado ya reduce la carga
     validated: false
     source_digest: de11b2bcc3b9
-  Lateral Raise (Band):
+  lateral-raise-band:
     name: Elevaciones laterales (banda)
     instructions: |
       ## Resumen
@@ -10022,7 +10022,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el rango de movimiento o la resistencia
     validated: false
     source_digest: 0b98c675d497
-  Lateral Raise (Cable):
+  lateral-raise-cable:
     name: Elevaciones laterales (polea)
     instructions: |
       ## Resumen
@@ -10070,7 +10070,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o el rango de movimiento
     validated: false
     source_digest: 6aa264843394
-  Lateral Raise (Dumbbell):
+  lateral-raise-dumbbell:
     name: Elevaciones laterales (mancuernas)
     instructions: |
       ## Resumen
@@ -10118,7 +10118,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o el rango de movimiento
     validated: false
     source_digest: b6fb18474199
-  Lateral Raise (Machine):
+  lateral-raise-machine:
     name: Elevaciones laterales (máquina)
     instructions: |
       ## Resumen
@@ -10166,7 +10166,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o el rango de movimiento
     validated: false
     source_digest: 4585a7dcd977
-  Overhead Press (Barbell):
+  overhead-press-barbell:
     name: Press militar (barra)
     instructions: |
       ## Resumen
@@ -10215,7 +10215,7 @@ exercises:
       - Si sientes molestias en el hombro, revisa la anchura del agarre y la trayectoria de la barra
     validated: false
     source_digest: 0dca28b8ea77
-  Overhead Press (Cable):
+  overhead-press-cable:
     name: Press militar (polea)
     instructions: |
       ## Resumen
@@ -10263,7 +10263,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o revisa tu técnica
     validated: false
     source_digest: 43a182c99dfc
-  Overhead Press (Dumbbell):
+  overhead-press-dumbbell:
     name: Press militar (mancuernas)
     instructions: |
       ## Resumen
@@ -10311,7 +10311,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o revisa tu técnica
     validated: false
     source_digest: 868ad693dc43
-  Overhead Press (Smith Machine):
+  overhead-press-smith-machine:
     name: Press militar (máquina Smith)
     instructions: |
       ## Resumen
@@ -10359,7 +10359,7 @@ exercises:
       - Si sientes molestias en el hombro, ajusta la anchura del agarre o reduce el peso
     validated: false
     source_digest: bb95fdee178c
-  Push Press:
+  push-press:
     name: Push press
     instructions: |
       ## Resumen
@@ -10407,7 +10407,7 @@ exercises:
       - Este ejercicio es excelente para desarrollar potencia explosiva
     validated: false
     source_digest: efda5a5d98ac
-  Reverse Fly (Cable):
+  reverse-fly-cable:
     name: Aperturas invertidas (polea)
     instructions: |
       ## Resumen
@@ -10455,7 +10455,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o el rango de movimiento
     validated: false
     source_digest: 2cf6d97f86ff
-  Reverse Fly (Dumbbell):
+  reverse-fly-dumbbell:
     name: Aperturas invertidas (mancuernas)
     instructions: |
       ## Resumen
@@ -10503,7 +10503,7 @@ exercises:
       - Si sientes molestias en la zona lumbar, usa una variante con apoyo
     validated: false
     source_digest: 87a5d0108d49
-  Reverse Fly (Machine):
+  reverse-fly-machine:
     name: Aperturas invertidas (máquina)
     instructions: |
       ## Resumen
@@ -10551,7 +10551,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o el rango de movimiento
     validated: false
     source_digest: f9e5c93e2877
-  Seated Overhead Press (Barbell):
+  seated-overhead-press-barbell:
     name: Press militar sentado (barra)
     instructions: |
       ## Resumen
@@ -10600,7 +10600,7 @@ exercises:
       - Si sientes molestias en el hombro, revisa la anchura del agarre y la trayectoria de la barra
     validated: false
     source_digest: e1ec88384a30
-  Seated Overhead Press (Dumbbell):
+  seated-overhead-press-dumbbell:
     name: Press militar sentado (mancuernas)
     instructions: |
       ## Resumen
@@ -10648,7 +10648,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o revisa tu técnica
     validated: false
     source_digest: 31c8a656859a
-  Shoulder Press (Machine):
+  shoulder-press-machine:
     name: Press de hombros (máquina)
     instructions: |
       ## Resumen
@@ -10696,7 +10696,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o revisa la posición
     validated: false
     source_digest: 03999cfe8ec4
-  Shoulder Press (Plate Loaded):
+  shoulder-press-plate-loaded:
     name: Press de hombros (discos)
     instructions: |
       ## Resumen
@@ -10744,7 +10744,7 @@ exercises:
       - Si sientes molestias en el hombro, reduce el peso o revisa la posición
     validated: false
     source_digest: abe91048376f
-  Shrug (Barbell):
+  shrug-barbell:
     name: Encogimientos de hombros (barra)
     instructions: |
       ## Resumen
@@ -10792,7 +10792,7 @@ exercises:
       - Si sientes molestias en el cuello, reduce el peso y asegúrate de mantener una técnica correcta
     validated: false
     source_digest: bdc6f33aee2b
-  Shrug (Dumbbell):
+  shrug-dumbbell:
     name: Encogimientos de hombros (mancuernas)
     instructions: |
       ## Resumen
@@ -10840,7 +10840,7 @@ exercises:
       - Si sientes molestias en el cuello, reduce el peso y asegúrate de mantener una técnica correcta
     validated: false
     source_digest: 7e134e54c294
-  Strict Military Press (Barbell):
+  strict-military-press-barbell:
     name: Press militar estricto (barra)
     instructions: |
       ## Resumen
@@ -10889,7 +10889,7 @@ exercises:
       - Esta es una variante avanzada que enfatiza la técnica estricta y el control
     validated: false
     source_digest: e2c87e5b1982
-  Upright Row (Dumbbell):
+  upright-row-dumbbell:
     name: Remo al mentón (mancuernas)
     instructions: |
       ## Resumen
@@ -10937,7 +10937,7 @@ exercises:
       - Si sientes molestias en el hombro, considera el face pull como alternativa
     validated: false
     source_digest: 25b8618c4155
-  Upright Row (Smith Machine):
+  upright-row-smith-machine:
     name: Remo al mentón (máquina Smith)
     instructions: |
       ## Resumen
@@ -10976,7 +10976,7 @@ exercises:
       - Empieza con la barra sin discos para asimilar la trayectoria
     validated: false
     source_digest: 04545520a9e3
-  Stretching:
+  stretching:
     name: Estiramientos
     instructions: |
       ## Resumen
@@ -11024,7 +11024,7 @@ exercises:
       - Considera estiramientos dinámicos antes de entrenar y estáticos después
     validated: false
     source_digest: 0fc692fdb87b
-  Clean (Barbell):
+  clean-barbell:
     name: Cargada (barra)
     instructions: |
       ## Resumen
@@ -11073,7 +11073,7 @@ exercises:
       - Usa discos de goma y una plataforma de levantamiento para soltar la barra con seguridad
     validated: false
     source_digest: eb79fe4e2953
-  Clean and Jerk (Barbell):
+  clean-and-jerk-barbell:
     name: Cargada y envión (barra)
     instructions: |
       ## Resumen
@@ -11121,7 +11121,7 @@ exercises:
       - Progresa muy gradualmente con los aumentos de peso
     validated: false
     source_digest: f637791e361f
-  Deadlift High Pull (Barbell):
+  deadlift-high-pull-barbell:
     name: Peso muerto con tirón alto (barra)
     instructions: |
       ## Resumen
@@ -11170,7 +11170,7 @@ exercises:
       - Úsalo para desarrollar potencia para cargadas y arranques
     validated: false
     source_digest: 8ea0ef2fae88
-  Hang Clean (Barbell):
+  hang-clean-barbell:
     name: Cargada en suspensión (barra)
     instructions: |
       ## Resumen
@@ -11219,7 +11219,7 @@ exercises:
       - Busca supervisión de un entrenador para una técnica correcta de halterofilia
     validated: false
     source_digest: f5697557befb
-  Hang Snatch (Barbell):
+  hang-snatch-barbell:
     name: Arranque en suspensión (barra)
     instructions: |
       ## Resumen
@@ -11268,7 +11268,7 @@ exercises:
       - Progresa muy gradualmente con el peso
     validated: false
     source_digest: 74045c2ad8e4
-  Jump Shrug (Barbell):
+  jump-shrug-barbell:
     name: Encogimiento con salto (barra)
     instructions: |
       ## Resumen
@@ -11316,7 +11316,7 @@ exercises:
       - Úsalo para desarrollar potencia para cargadas y arranques
     validated: false
     source_digest: 76899947c63f
-  Overhead Squat (Barbell):
+  overhead-squat-barbell:
     name: Sentadilla con barra sobre la cabeza
     instructions: |
       ## Resumen
@@ -11365,7 +11365,7 @@ exercises:
       - Es una preparación esencial para el entrenamiento del arranque olímpico
     validated: false
     source_digest: a13395feafe2
-  Power Clean:
+  power-clean:
     name: Cargada de potencia
     instructions: |
       ## Resumen
@@ -11414,7 +11414,7 @@ exercises:
       - Esta variante es excelente para el desarrollo de la potencia atlética
     validated: false
     source_digest: 50b910f5c234
-  Power Snatch (Barbell):
+  power-snatch-barbell:
     name: Arranque de potencia (barra)
     instructions: |
       ## Resumen
@@ -11463,7 +11463,7 @@ exercises:
       - Más accesible que los arranques completos para atletas en general
     validated: false
     source_digest: 1efe418e66ec
-  Press Under (Barbell):
+  press-under-barbell:
     name: Press bajo la barra
     instructions: |
       ## Resumen
@@ -11511,7 +11511,7 @@ exercises:
       - Es esencial para aprender el envión con tijera y el arranque
     validated: false
     source_digest: b5d37f5d4039
-  Snatch (Barbell):
+  snatch-barbell:
     name: Arranque (barra)
     instructions: |
       ## Resumen
@@ -11560,7 +11560,7 @@ exercises:
       - Este levantamiento exige años de práctica para dominarse
     validated: false
     source_digest: a1f337ee3323
-  Snatch Pull (Barbell):
+  snatch-pull-barbell:
     name: Tirón de arranque (barra)
     instructions: |
       ## Resumen
@@ -11609,7 +11609,7 @@ exercises:
       - Es un accesorio clave para desarrollar fuerza en el arranque
     validated: false
     source_digest: bdebe12179ef
-  Split Jerk (Barbell):
+  split-jerk-barbell:
     name: Envión con tijera (barra)
     instructions: |
       ## Resumen
@@ -11658,7 +11658,7 @@ exercises:
       - Usa bloques para practicar la posición de recepción
     validated: false
     source_digest: cd79be31037d
-  Ball Slams:
+  ball-slams:
     name: Azotes con balón
     instructions: |
       ## Resumen
@@ -11705,7 +11705,7 @@ exercises:
       - Varía el ritmo de explosivo a controlado según tus objetivos
     validated: false
     source_digest: f82f4ae752ab
-  Burpee:
+  burpee:
     name: Burpees
     instructions: |
       ## Resumen
@@ -11751,7 +11751,7 @@ exercises:
       - Variante avanzada: añade una dominada o aumenta la velocidad
     validated: false
     source_digest: 246f8a44b1fd
-  Jumping Jack:
+  jumping-jack:
     name: Saltos de tijera
     instructions: |
       ## Resumen
@@ -11797,7 +11797,7 @@ exercises:
       - Variante avanzada: añade una sentadilla o un alcance con los brazos
     validated: false
     source_digest: 772b60eb3bcd
-  Kettlebell Swing:
+  kettlebell-swing:
     name: Swing con pesa rusa
     instructions: |
       ## Resumen
@@ -11845,7 +11845,7 @@ exercises:
       - Variante avanzada: swings a una mano o swings americanos (por encima de la cabeza)
     validated: false
     source_digest: 381565014faf
-  Kettlebell Turkish Get Up:
+  kettlebell-turkish-get-up:
     name: Levantamiento turco (pesa rusa)
     instructions: |
       ## Resumen
@@ -11893,7 +11893,7 @@ exercises:
       - Considera trabajar al principio con un instructor cualificado
     validated: false
     source_digest: 92c8662ecfc7
-  Muscle Up:
+  muscle-up:
     name: Muscle-up
     instructions: |
       ## Resumen
@@ -11942,7 +11942,7 @@ exercises:
       - El muscle-up en anillas suele ser más fácil de aprender que en barra
     validated: false
     source_digest: cc435a817d65
-  Squat Row (Band):
+  squat-row-band:
     name: Sentadilla con remo (banda)
     instructions: |
       ## Resumen
@@ -11990,7 +11990,7 @@ exercises:
       - Ancla la banda de forma segura antes de empezar
     validated: false
     source_digest: '0e3014527499'
-  Sumo Deadlift High Pull (Barbell):
+  sumo-deadlift-high-pull-barbell:
     name: Tirón alto sumo (barra)
     instructions: |
       ## Resumen
@@ -12039,7 +12039,7 @@ exercises:
       - Es un ejercicio excelente para CrossFit y entrenamiento funcional
     validated: false
     source_digest: 81ed0973540a
-  Thruster (Barbell):
+  thruster-barbell:
     name: Thruster (barra)
     instructions: |
       ## Resumen
@@ -12086,7 +12086,7 @@ exercises:
       - Reduce el peso para series de resistencia con más repeticiones
     validated: false
     source_digest: 2919114fce9d
-  Thruster (Kettlebell):
+  thruster-kettlebell:
     name: Thruster (pesa rusa)
     instructions: |
       ## Resumen
@@ -12133,14 +12133,14 @@ exercises:
       - Este ejercicio es excelente para el acondicionamiento metabólico
     validated: false
     source_digest: e79446181d4f
-  Aerobics:
+  aerobics:
     name: Aeróbicos
     instructions: |
       ## Resumen
       Los aeróbicos son una forma de ejercicio cardiovascular que combina movimientos rítmicos con música. Trabajan el sistema cardiovascular y varios grupos musculares, mejorando la salud del corazón, la resistencia, la coordinación y la condición física general mediante una actividad sostenida de intensidad moderada a vigorosa.
     validated: false
     source_digest: 48ce16b91ca4
-  Battle Ropes:
+  battle-ropes:
     name: Cuerdas de batalla
     instructions: |
       ## Resumen
@@ -12189,7 +12189,7 @@ exercises:
       - Descansa lo suficiente entre intervalos
     validated: false
     source_digest: 39ab652bdaaf
-  Climbing:
+  climbing:
     name: Escalada
     instructions: |
       ## Resumen
@@ -12238,7 +12238,7 @@ exercises:
       - Aprende la técnica correcta de escaladores o instructores con experiencia
     validated: false
     source_digest: f2d56b2a68a1
-  Cycling:
+  cycling:
     name: Ciclismo
     instructions: |
       ## Resumen
@@ -12252,7 +12252,7 @@ exercises:
       - Considera la bicicleta estática si el clima o la seguridad lo aconsejan
     validated: false
     source_digest: 607d48819cb2
-  Cycling (Indoor):
+  cycling-indoor:
     name: Bicicleta estática
     instructions: |
       ## Resumen
@@ -12266,7 +12266,7 @@ exercises:
       - Haz pausas si lo necesitas durante los intervalos exigentes
     validated: false
     source_digest: a7bd526aee43
-  Elliptical Machine:
+  elliptical-machine:
     name: Elíptica
     instructions: |
       ## Resumen
@@ -12315,7 +12315,7 @@ exercises:
       - Varía la inclinación y la resistencia para lograr distintos efectos de entrenamiento
     validated: false
     source_digest: b719cbe54c9a
-  Hiking:
+  hiking:
     name: Senderismo
     instructions: |
       ## Resumen
@@ -12329,7 +12329,7 @@ exercises:
       - Progresa gradualmente hacia distancias más largas y mayor desnivel
     validated: false
     source_digest: 2906e4e21389
-  Jump Rope:
+  jump-rope:
     name: Saltar la cuerda
     instructions: |
       ## Resumen
@@ -12378,7 +12378,7 @@ exercises:
       - Usa calzado deportivo con buen soporte
     validated: false
     source_digest: cba52d158006
-  Rowing (Machine):
+  rowing-machine:
     name: Máquina de remo
     instructions: |
       ## Resumen
@@ -12426,7 +12426,7 @@ exercises:
       - Es un excelente cardio de cuerpo completo y bajo impacto
     validated: false
     source_digest: bb6a56898a2a
-  Running:
+  running:
     name: Correr
     instructions: |
       ## Resumen
@@ -12440,7 +12440,7 @@ exercises:
       - Considera el método de correr-caminar si eres principiante
     validated: false
     source_digest: a14c3f21b7d6
-  Running (Treadmill):
+  running-treadmill:
     name: Correr (cinta)
     instructions: |
       ## Resumen
@@ -12454,7 +12454,7 @@ exercises:
       - Detente de inmediato si sientes mareo o inestabilidad
     validated: false
     source_digest: da1790843499
-  Skating:
+  skating:
     name: Patinaje
     instructions: |
       ## Resumen
@@ -12503,7 +12503,7 @@ exercises:
       - Toma clases con instructores cualificados para progresar más rápido
     validated: false
     source_digest: da63ba496160
-  Skiing:
+  skiing:
     name: Esquí
     instructions: |
       ## Resumen
@@ -12517,7 +12517,7 @@ exercises:
       - Consulta las condiciones meteorológicas y el riesgo de avalanchas
     validated: false
     source_digest: d4dd24fa0d22
-  Snowboarding:
+  snowboarding:
     name: Snowboard
     instructions: |
       ## Resumen
@@ -12531,7 +12531,7 @@ exercises:
       - Consulta las condiciones del clima y de la nieve antes de salir
     validated: false
     source_digest: 688694896c6d
-  Swimming:
+  swimming:
     name: Natación
     instructions: |
       ## Resumen
@@ -12545,14 +12545,14 @@ exercises:
       - Usa dispositivos de flotación si los necesitas mientras aprendes
     validated: false
     source_digest: 943f9f21f031
-  Walking:
+  walking:
     name: Caminar
     instructions: |
       ## Resumen
       Caminar es un ejercicio cardiovascular de bajo impacto que trabaja las piernas, los glúteos y el sistema cardiovascular. Ofrece un acondicionamiento aeróbico accesible para todos los niveles de condición física, mejora la salud general y no requiere equipamiento ni entrenamiento especial.
     validated: false
     source_digest: 90f9dc477c73
-  Yoga:
+  yoga:
     name: Yoga
     instructions: |
       ## Resumen

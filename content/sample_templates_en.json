@@ -8,9 +8,9 @@
         {
           "id": "7be6fc4e-ecc4-413c-8fae-9bc876043496",
           "exercise": {
-            "name": "Bench Press (Barbell)",
             "category": "Barbell",
-            "target": "Chest"
+            "target": "Chest",
+            "key": "bench-press-barbell"
           },
           "exercise_order": 0,
           "sets": [
@@ -37,9 +37,9 @@
         {
           "id": "ba562a46-fd39-4746-a636-87628618758f",
           "exercise": {
-            "name": "Overhead Press (Barbell)",
             "category": "Barbell",
-            "target": "Shoulders"
+            "target": "Shoulders",
+            "key": "overhead-press-barbell"
           },
           "exercise_order": 1,
           "sets": [
@@ -66,9 +66,9 @@
         {
           "id": "8186ce21-955e-4fef-9a0d-93a8daaf4039",
           "exercise": {
-            "name": "Incline Bench Press (Dumbbell)",
             "category": "Dumbbell",
-            "target": "Chest"
+            "target": "Chest",
+            "key": "incline-bench-press-dumbbell"
           },
           "exercise_order": 2,
           "sets": [
@@ -95,9 +95,9 @@
         {
           "id": "6526e63b-75d8-4528-ab12-0791457de6ba",
           "exercise": {
-            "name": "Lateral Raise (Dumbbell)",
             "category": "Dumbbell",
-            "target": "Shoulders"
+            "target": "Shoulders",
+            "key": "lateral-raise-dumbbell"
           },
           "exercise_order": 3,
           "sets": [
@@ -124,9 +124,9 @@
         {
           "id": "d138b34b-0947-4a82-ba4e-10c0ce216709",
           "exercise": {
-            "name": "Triceps Pushdown (Cable - Straight Bar)",
             "category": "Machine",
-            "target": "Arms"
+            "target": "Arms",
+            "key": "triceps-pushdown-cable-straight-bar"
           },
           "exercise_order": 4,
           "sets": [
@@ -160,9 +160,9 @@
         {
           "id": "32daa298-6e40-4aa4-9789-931c52c647a8",
           "exercise": {
-            "name": "Deadlift (Barbell)",
             "category": "Barbell",
-            "target": "Back"
+            "target": "Back",
+            "key": "deadlift-barbell"
           },
           "exercise_order": 0,
           "sets": [
@@ -189,9 +189,9 @@
         {
           "id": "d9effecd-7eb6-4902-b231-44590f17dbe5",
           "exercise": {
-            "name": "Pull Up",
             "category": "Weighted Body Weight",
-            "target": "Back"
+            "target": "Back",
+            "key": "pull-up"
           },
           "exercise_order": 1,
           "sets": [
@@ -218,9 +218,9 @@
         {
           "id": "2a4a6147-ecf5-410a-ab9e-57423a468885",
           "exercise": {
-            "name": "Bent Over Row (Barbell)",
             "category": "Barbell",
-            "target": "Back"
+            "target": "Back",
+            "key": "bent-over-row-barbell"
           },
           "exercise_order": 2,
           "sets": [
@@ -247,9 +247,9 @@
         {
           "id": "dfb95175-1a8d-424d-b612-f518e108c7ab",
           "exercise": {
-            "name": "Lat Pulldown (Cable)",
             "category": "Machine",
-            "target": "Back"
+            "target": "Back",
+            "key": "lat-pulldown-cable"
           },
           "exercise_order": 3,
           "sets": [
@@ -276,9 +276,9 @@
         {
           "id": "21c2e584-d315-4255-832d-7c0d896e95a5",
           "exercise": {
-            "name": "Bicep Curl (Dumbbell)",
             "category": "Dumbbell",
-            "target": "Arms"
+            "target": "Arms",
+            "key": "bicep-curl-dumbbell"
           },
           "exercise_order": 4,
           "sets": [
@@ -312,9 +312,9 @@
         {
           "id": "6b9e87e9-c1d7-4823-a720-5b19205d0313",
           "exercise": {
-            "name": "Squat (Barbell)",
             "category": "Barbell",
-            "target": "Legs"
+            "target": "Legs",
+            "key": "squat-barbell"
           },
           "exercise_order": 0,
           "sets": [
@@ -341,9 +341,9 @@
         {
           "id": "a08c3370-b58b-4573-9e4e-972d9ef1ee21",
           "exercise": {
-            "name": "Romanian Deadlift (Barbell)",
             "category": "Barbell",
-            "target": "Back"
+            "target": "Back",
+            "key": "romanian-deadlift-barbell"
           },
           "exercise_order": 1,
           "sets": [
@@ -370,9 +370,9 @@
         {
           "id": "1f107eed-a1d5-4b93-a428-d7d8ad00a9e5",
           "exercise": {
-            "name": "Leg Press",
             "category": "Machine",
-            "target": "Legs"
+            "target": "Legs",
+            "key": "leg-press"
           },
           "exercise_order": 2,
           "sets": [
@@ -399,9 +399,9 @@
         {
           "id": "d1aad953-958d-4a6b-8e46-4d1e0339f7c0",
           "exercise": {
-            "name": "Leg Extension (Machine)",
             "category": "Machine",
-            "target": "Legs"
+            "target": "Legs",
+            "key": "leg-extension-machine"
           },
           "exercise_order": 3,
           "sets": [
@@ -428,9 +428,9 @@
         {
           "id": "c5b4e713-08f1-4445-8b9b-b5ed221b266b",
           "exercise": {
-            "name": "Lying Leg Curl (Machine)",
             "category": "Machine",
-            "target": "Legs"
+            "target": "Legs",
+            "key": "lying-leg-curl-machine"
           },
           "exercise_order": 4,
           "sets": [
@@ -457,9 +457,9 @@
         {
           "id": "be77a8ce-c3b9-40c9-97c8-4fdc0399c4f1",
           "exercise": {
-            "name": "Plank",
             "category": "Duration",
-            "target": "Core"
+            "target": "Core",
+            "key": "plank"
           },
           "exercise_order": 5,
           "sets": [
@@ -490,9 +490,9 @@
         {
           "id": "dd88ae3a-effa-4d43-8b18-5f41b257f41c",
           "exercise": {
-            "name": "Bench Press (Barbell)",
             "category": "Barbell",
-            "target": "Chest"
+            "target": "Chest",
+            "key": "bench-press-barbell"
           },
           "exercise_order": 0,
           "sets": [
@@ -519,9 +519,9 @@
         {
           "id": "2778d595-25fd-4222-951f-5b8c58023d46",
           "exercise": {
-            "name": "Bent Over Row (Barbell)",
             "category": "Barbell",
-            "target": "Back"
+            "target": "Back",
+            "key": "bent-over-row-barbell"
           },
           "exercise_order": 1,
           "sets": [
@@ -548,9 +548,9 @@
         {
           "id": "b5247850-8265-49fc-9f96-f93033870ec0",
           "exercise": {
-            "name": "Overhead Press (Barbell)",
             "category": "Barbell",
-            "target": "Shoulders"
+            "target": "Shoulders",
+            "key": "overhead-press-barbell"
           },
           "exercise_order": 2,
           "sets": [
@@ -577,9 +577,9 @@
         {
           "id": "a15b3b53-8905-4e23-8252-dcfe1d2676b1",
           "exercise": {
-            "name": "Lat Pulldown (Cable)",
             "category": "Machine",
-            "target": "Back"
+            "target": "Back",
+            "key": "lat-pulldown-cable"
           },
           "exercise_order": 3,
           "sets": [
@@ -606,9 +606,9 @@
         {
           "id": "417e322a-2867-488c-8f79-277e919f1367",
           "exercise": {
-            "name": "Bicep Curl (Dumbbell)",
             "category": "Dumbbell",
-            "target": "Arms"
+            "target": "Arms",
+            "key": "bicep-curl-dumbbell"
           },
           "exercise_order": 4,
           "sets": [
@@ -635,9 +635,9 @@
         {
           "id": "23909cbd-306b-4535-8834-d39d2cf2b4d3",
           "exercise": {
-            "name": "Triceps Pushdown (Cable - Straight Bar)",
             "category": "Machine",
-            "target": "Arms"
+            "target": "Arms",
+            "key": "triceps-pushdown-cable-straight-bar"
           },
           "exercise_order": 5,
           "sets": [
@@ -671,9 +671,9 @@
         {
           "id": "c6f9e33e-02da-47ce-89af-56fbd2f53b11",
           "exercise": {
-            "name": "Squat (Barbell)",
             "category": "Barbell",
-            "target": "Legs"
+            "target": "Legs",
+            "key": "squat-barbell"
           },
           "exercise_order": 0,
           "sets": [
@@ -700,9 +700,9 @@
         {
           "id": "396e1029-66bc-4de0-870d-c1e4e56aa6d1",
           "exercise": {
-            "name": "Bench Press (Barbell)",
             "category": "Barbell",
-            "target": "Chest"
+            "target": "Chest",
+            "key": "bench-press-barbell"
           },
           "exercise_order": 1,
           "sets": [
@@ -729,9 +729,9 @@
         {
           "id": "cb085cac-3a4c-464c-bf4f-b234fdc5483b",
           "exercise": {
-            "name": "Bent Over Row (Barbell)",
             "category": "Barbell",
-            "target": "Back"
+            "target": "Back",
+            "key": "bent-over-row-barbell"
           },
           "exercise_order": 2,
           "sets": [
@@ -758,9 +758,9 @@
         {
           "id": "bf741abd-83b5-4780-97cd-2fc72e54b270",
           "exercise": {
-            "name": "Plank",
             "category": "Duration",
-            "target": "Core"
+            "target": "Core",
+            "key": "plank"
           },
           "exercise_order": 3,
           "sets": [

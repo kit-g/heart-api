@@ -7,7 +7,7 @@
 # Validated against content/exercise_i18n_schema.json (scripts/validate_library.py).
 locale: fr_CA
 exercises:
-  "Snowboarding":
+  snowboarding:
     name: "Planche à neige"
     validated: false
     source_digest: "688694896c6d"

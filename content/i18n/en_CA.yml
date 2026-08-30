@@ -4,6 +4,6 @@
 # Validated against content/exercise_i18n_schema.json (scripts/validate_library.py).
 locale: en_CA
 exercises:
-  "V Up":
+  v-up:
     name: "V Up"
     fallback_to: en
