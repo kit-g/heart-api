@@ -9,6 +9,8 @@ on:
     paths:
       - content/exercise_library.yml
       - content/exercise_library_schema.json
+      - content/exercise_i18n_schema.json
+      - content/i18n/**
       - scripts/library_locales.py
       - scripts/validate_library.py
       - .github/workflows/exercise-library.yml
@@ -18,6 +20,8 @@ on:
     paths:
       - content/exercise_library.yml
       - content/exercise_library_schema.json
+      - content/exercise_i18n_schema.json
+      - content/i18n/**
       - scripts/library_locales.py
       - scripts/validate_library.py
       - .github/workflows/exercise-library.yml
