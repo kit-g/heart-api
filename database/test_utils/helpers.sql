@@ -32,8 +32,13 @@ $$
 DECLARE
     _new_id UUID;
 BEGIN
-    INSERT INTO exercises (name, category, target, user_id)
+    INSERT INTO exercises (key, name, category, target, user_id)
     VALUES (
+        -- global rows must carry a content key (exercises_global_key_chk);
+        -- user-owned rows never do
+        CASE WHEN _user_id IS NULL
+            THEN btrim(regexp_replace(lower(coalesce(_name, 'test-exercise-' || gen_random_uuid()::text)), '[^a-z0-9]+', '-', 'g'), '-')
+        END,
         coalesce(_name, 'Test Exercise ' || gen_random_uuid()::text),
         _category,
         _target,
