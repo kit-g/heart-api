@@ -1,0 +1,11 @@
+# Castilian Spanish overlay. An alias locale over the base `es` (neutral
+# international Spanish): entries exist only where Castilian copy should
+# differ; everything else is served through the API's regional fallback
+# chain (es_ES -> es -> en), so absence here is the normal state.
+# To diverge an entry, replace fallback_to with real name/instructions.
+# Validated against content/exercise_i18n_schema.json (scripts/validate_library.py).
+locale: es_ES
+exercises:
+  "Lat Pulldown (Cable)":
+    name: "Jalón al pecho (polea)"
+    fallback_to: es
