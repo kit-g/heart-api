@@ -8,7 +8,9 @@ Reads:
   - Supabase creds: s3://SECRETS_BUCKET/secrets/supabase.json
 
 Writes:
-  - exercises (global, user_id IS NULL) — fallback locale fields, muscles, movement
+  - exercises (global, user_id IS NULL) — keyed by the master map key (slug,
+    exercises.key, the conflict target), so renaming the fallback-locale name
+    updates the row in place; fallback locale fields, muscles, movement
   - exercise_translations — one row per non-fallback locale that has its own
     name/instructions; rows the source no longer defines are pruned (archived
     exercises keep theirs)
@@ -178,7 +180,11 @@ class ExerciseLocalization:
 
 @dataclass
 class Exercise:
-    name: str
+    # the stable identity: the master map key (kebab-case slug), the sync's
+    # conflict target. The display name lives in the localizations — the
+    # fallback locale's name is what lands in exercises.name, and renaming it
+    # updates the row in place rather than forking it.
+    key: str
     category: str
     target: str
     muscles: Muscles | None
@@ -188,9 +194,9 @@ class Exercise:
     fallback: str
 
     @classmethod
-    def parse(cls, source: dict, name: str, global_fallback: str) -> Self:
+    def parse(cls, source: dict, key: str, global_fallback: str) -> Self:
         return cls(
-            name=name,
+            key=key,
             category=source['category'],
             target=source['target'],
             muscles=Muscles.parse(source.get('muscles')),
@@ -206,7 +212,7 @@ class Exercise:
     def fallback_localization(self) -> ExerciseLocalization:
         loc = self.localizations.get(self.fallback)
         if loc is None or not loc.is_concrete():
-            raise ValueError(f'exercise {self.name!r}: fallback locale {self.fallback!r} missing concrete localization')
+            raise ValueError(f'exercise {self.key!r}: fallback locale {self.fallback!r} missing concrete localization')
         return loc
 
 
@@ -327,10 +333,11 @@ def get_source() -> dict:
 
 
 UPSERT_EXERCISE = '''
-INSERT INTO exercises (name, category, target, instructions, muscles, movement, health, validated, archived)
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s, false)
-ON CONFLICT (name) WHERE user_id IS NULL
+INSERT INTO exercises (key, name, category, target, instructions, muscles, movement, health, validated, archived)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, false)
+ON CONFLICT (key) WHERE user_id IS NULL
 DO UPDATE SET
+    name = EXCLUDED.name,
     category = EXCLUDED.category,
     target = EXCLUDED.target,
     instructions = EXCLUDED.instructions,
@@ -352,7 +359,7 @@ DO UPDATE SET name = EXCLUDED.name, instructions = EXCLUDED.instructions, valida
 ARCHIVE_MISSING = '''
 UPDATE exercises
 SET archived = true
-WHERE user_id IS NULL AND name <> ALL(%s) AND archived = false
+WHERE user_id IS NULL AND key <> ALL(%s) AND archived = false
 '''
 
 # A translation the source no longer defines must stop being served, or it
@@ -375,11 +382,12 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int, int
     exercise_ids = []
     kept = []  # (exercise_id, locale) pairs the source still defines
     with conn.cursor() as cur:
-        for name, exercise in library.exercises.items():
+        for key, exercise in library.exercises.items():
             fallback = exercise.fallback_localization()
 
             cur.execute(UPSERT_EXERCISE, (
-                name,
+                key,
+                fallback.exercise_name,
                 exercise.category,
                 exercise.target,
                 fallback.instructions,
