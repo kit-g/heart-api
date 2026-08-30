@@ -67,7 +67,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
       );
       return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
     } on ServerException catch (e) {
-      _rethrowCapped(e);
+      _rethrowClientIdCollision(e);
     }
   }
 
@@ -86,7 +86,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
       if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
       return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
     } on ServerException catch (e) {
-      _rethrowCapped(e);
+      _rethrowClientIdCollision(e);
     }
   }
 

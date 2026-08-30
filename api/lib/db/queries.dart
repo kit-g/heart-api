@@ -88,13 +88,17 @@ SELECT coalesce(
   jsonb_agg(
     jsonb_build_object(
       'id', e.id,
-      'name', COALESCE(t.name, e.name),
+      'name', COALESCE(t.name, tb.name, e.name),
       'category', e.category,
       'target', e.target,
-      'instructions', COALESCE(t.instructions, e.instructions),
-      -- tracks whichever copy the locale join serves, not COALESCE: a
+      'instructions', COALESCE(t.instructions, tb.instructions, e.instructions),
+      -- tracks whichever copy the locale joins serve, not COALESCE: a
       -- translation's NULL flag must not fall through to the fallback's
-      'validated', CASE WHEN t.exercise_id IS NOT NULL THEN t.validated ELSE e.validated END,
+      'validated', CASE
+        WHEN t.exercise_id IS NOT NULL THEN t.validated
+        WHEN tb.exercise_id IS NOT NULL THEN tb.validated
+        ELSE e.validated
+      END,
       'asset', e.asset,
       'thumbnail', e.thumbnail,
       'muscles', e.muscles,
@@ -110,6 +114,12 @@ SELECT coalesce(
 ) AS exercises
 FROM exercises e
 LEFT JOIN exercise_translations t ON t.exercise_id = e.id AND t.locale = @locale
+-- the regional fallback chain (es_ES -> es -> en): a regional locale with no
+-- row of its own must serve its base language, not jump straight to the
+-- master columns. @baseLocale is the language part of @locale; the DISTINCT
+-- guard keeps base-locale requests to a single join.
+LEFT JOIN exercise_translations tb
+  ON tb.exercise_id = e.id AND tb.locale = @baseLocale AND @baseLocale IS DISTINCT FROM @locale
 LEFT JOIN exercise_preferences ep ON ep.exercise_id = e.id AND ep.user_id = @userId
 WHERE
   CASE WHEN @owned::boolean
@@ -364,6 +374,11 @@ const _saveWorkout = '''
 WITH
 _order_to_name AS (
   SELECT
+    -- ids round-trip, same as _replaceWorkout: the exercise id the client
+    -- minted mid-workout carries the instant the exercise was started, and
+    -- that is what the act history reads back
+    (ex->>'id')::uuid AS id,
+    (ex->>'start')::timestamptz AS started_at,
     (ex->>'order')::int AS exercise_order,
     ex->>'exercise_name' AS exercise_name,
     (ex->>'met')::real AS met,
@@ -383,8 +398,14 @@ _workout AS (
   RETURNING id, name, started_at, completed_at, calories, created_at
 ),
 _inserted_exercises AS (
-  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, met, note)
-  SELECT w.id, el.exercise_id, otn.exercise_order, otn.met, otn.note
+  INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note)
+  SELECT
+    coalesce(otn.id, uuidv7(coalesce(otn.started_at, clock_timestamp()))),
+    w.id,
+    el.exercise_id,
+    otn.exercise_order,
+    otn.met,
+    otn.note
   FROM _workout w
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
@@ -399,8 +420,9 @@ _sets_input AS (
   LATERAL jsonb_array_elements(ex->'sets') WITH ORDINALITY t(s, ordinality)
 ),
 _inserted_sets AS (
-  INSERT INTO exercise_sets (workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order)
+  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order)
   SELECT
+    coalesce((si.set_data->>'id')::uuid, uuidv7()),
     ie.id,
     (si.set_data->>'weight')::real,
     (si.set_data->>'reps')::int,
@@ -632,6 +654,12 @@ const _replaceWorkout = '''
 WITH
 _order_to_name AS (
   SELECT
+    -- ids round-trip: the clients read an act's start off the exercise id's
+    -- v7 mint instant, so a replace that re-minted moved every act to "now".
+    -- WorkoutRequest only lets a valid v7 through, so the cast is safe; a row
+    -- arriving without one is minted at the exercise's own start.
+    (ex->>'id')::uuid AS id,
+    (ex->>'start')::timestamptz AS started_at,
     (ex->>'order')::int AS exercise_order,
     ex->>'exercise_name' AS exercise_name,
     (ex->>'met')::real AS met,
@@ -651,14 +679,25 @@ _workout AS (
   WHERE id = @workoutId::uuid AND user_id = @userId
   RETURNING id, name, started_at, completed_at, calories, created_at
 ),
+_deleted_sets AS (
+  -- explicit, not left to the ON DELETE CASCADE: a cascade is an AFTER
+  -- trigger whose timing against the re-insert below is unspecified, and a
+  -- round-tripped set id must land after its old row is already dead
+  DELETE FROM exercise_sets
+  WHERE workout_exercise_id IN (
+    SELECT id FROM workout_exercises WHERE workout_id = (SELECT id FROM _workout)
+  )
+  RETURNING id
+),
 _deleted AS (
   DELETE FROM workout_exercises
   WHERE workout_id = (SELECT id FROM _workout)
   RETURNING id
 ),
 _inserted_exercises AS (
-  INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order, met, note)
+  INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note)
   SELECT
+    coalesce(otn.id, uuidv7(coalesce(otn.started_at, clock_timestamp()))),
     w.id,
     el.exercise_id,
     otn.exercise_order,
@@ -667,7 +706,11 @@ _inserted_exercises AS (
   FROM _workout w
   CROSS JOIN _order_to_name otn
   JOIN _exercise_lookup el ON el.name = otn.exercise_name
-  WHERE NOT exists(SELECT 1 FROM _deleted WHERE false)
+  -- forces _deleted to run to completion first. The old form
+  -- (NOT exists(... WHERE false)) constant-folded away, which left the
+  -- delete/insert order unspecified — harmless while every insert minted a
+  -- fresh id, a duplicate-key violation now that ids round-trip.
+  WHERE (SELECT count(*) FROM _deleted) IS NOT NULL
   RETURNING id, exercise_order, met, note
 ),
 _sets_input AS (
@@ -679,8 +722,9 @@ _sets_input AS (
   LATERAL jsonb_array_elements(ex->'sets') WITH ORDINALITY t(s, ordinality)
 ),
 _inserted_sets AS (
-  INSERT INTO exercise_sets (workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order)
+  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order)
   SELECT
+    coalesce((si.set_data->>'id')::uuid, uuidv7()),
     ie.id,
     (si.set_data->>'weight')::real,
     (si.set_data->>'reps')::int,
@@ -692,6 +736,8 @@ _inserted_sets AS (
     si.set_order
   FROM _sets_input si
   JOIN _inserted_exercises ie ON ie.exercise_order = si.exercise_order
+  -- sequenced after the explicit sets delete, same reason as _inserted_exercises
+  WHERE (SELECT count(*) FROM _deleted_sets) IS NOT NULL
   RETURNING id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order
 ),
 _sets_json AS (
