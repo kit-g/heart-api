@@ -32,8 +32,17 @@ extension Locale on Request {
   /// and a default fallback.
   ///
   /// Greedy match against the highest-quality acceptable language; relic's
-  /// header parsing uses BCP-47 (`en-CA`), so we normalize to the underscore
-  /// form used in our config (`en_CA`) before comparison.
+  /// header parsing lowercases the whole BCP-47 tag (`en-CA` -> `en-ca`), so
+  /// each tag is canonicalized to the spelling our config uses (`en_CA`:
+  /// lowercase language, underscore, uppercase region) before comparison.
+  ///
+  /// Each requested tag is tried three ways before moving to the next: the
+  /// exact tag, then its bare language, then any supported regional variant
+  /// of that language. Devices commonly send only a regional tag (`es-MX`),
+  /// and content is authored under base languages (`es`) with regional
+  /// overlays only where copy diverges — without the truncation step every
+  /// Spanish speaker outside the one listed region would fall through to
+  /// [defaultLocale] (i.e. English).
   String locale(
     List<String> supportedLocales,
     String defaultLocale,
@@ -45,9 +54,20 @@ extension Locale on Request {
         return defaultLocale;
       case List<LanguageQuality> l:
         final sorted = List.of(l)..sort((a, b) => (b.quality ?? 0).compareTo(a.quality ?? 0));
-        return sorted
-            .map((l) => l.language.replaceAll('-', '_'))
-            .firstWhere(supportedLocales.contains, orElse: () => defaultLocale);
+        for (final tag in sorted.map((l) => _canonical(l.language))) {
+          if (supportedLocales.contains(tag)) return tag;
+          final language = tag.split('_').first;
+          if (supportedLocales.contains(language)) return language;
+          for (final supported in supportedLocales) {
+            if (supported.startsWith('${language}_')) return supported;
+          }
+        }
+        return defaultLocale;
     }
+  }
+
+  static String _canonical(String tag) {
+    final [language, ...rest] = tag.replaceAll('-', '_').split('_');
+    return [language.toLowerCase(), ...rest.map((part) => part.toUpperCase())].join('_');
   }
 }
