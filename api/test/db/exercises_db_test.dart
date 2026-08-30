@@ -95,6 +95,33 @@ void main() {
       expect(base!['name'], isNot('Sentadilla'));
     });
 
+    test('a regional locale chains through its base language before the master columns', () async {
+      final id = await h.seedGlobalExercise();
+      await h.exec(
+        'INSERT INTO exercise_translations (exercise_id, locale, name, instructions, validated) '
+        'VALUES (@id::uuid, @loc, @n, @i, false)',
+        {'id': id, 'loc': 'es', 'n': 'Sentadilla', 'i': 'Instrucciones neutras'},
+      );
+
+      // no es_ES row → the es copy serves, flag included (es_ES -> es -> en)
+      final regional = findEx((await h.db.getExercises(ownerId, locale: 'es_ES'))['exercises'] as List, id);
+      expect(regional!['name'], 'Sentadilla');
+      expect(regional['instructions'], 'Instrucciones neutras');
+      expect(regional['validated'], isFalse);
+
+      // a concrete es_ES row wins over the base language, per field
+      await h.exec(
+        'INSERT INTO exercise_translations (exercise_id, locale, name, validated) '
+        'VALUES (@id::uuid, @loc, @n, true)',
+        {'id': id, 'loc': 'es_ES', 'n': 'Sentadilla castellana'},
+      );
+      final castilian = findEx((await h.db.getExercises(ownerId, locale: 'es_ES'))['exercises'] as List, id);
+      expect(castilian!['name'], 'Sentadilla castellana');
+      // missing fields still read from the base language, not the master
+      expect(castilian['instructions'], 'Instrucciones neutras');
+      expect(castilian['validated'], isTrue);
+    });
+
     test('ships copy provenance: validated follows whichever copy the locale serves', () async {
       final id = await h.seedGlobalExercise();
       await h.exec('UPDATE exercises SET validated = false WHERE id = @id::uuid', {'id': id});

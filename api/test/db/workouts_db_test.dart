@@ -3,6 +3,7 @@ library;
 
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/workouts.dart';
+import 'package:heart_models/heart_models.dart' show timestampOfUuidV7;
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -290,6 +291,87 @@ void main() {
       expect(updated.start.toUtc(), DateTime.utc(2026, 7, 25, 9));
       expect(updated.length, 1);
       expect(updated.first.exercise.name, exB); // A replaced by B
+    });
+
+    test('client-sent v7 ids survive the replace', () async {
+      final exName = h.uniqueName('Ex');
+      await h.seedGlobalExercise(name: exName);
+      final created = await h.db.createWorkout(
+        userId: ownerId,
+        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseName: exName),
+        imageUrl: imageUrl,
+      );
+      final exerciseId = created.first.id;
+      final setId = created.first.first.id;
+
+      final updated = await h.db.updateWorkout(
+        userId: ownerId,
+        workoutId: created.id,
+        body: WorkoutRequest(
+          userId: ownerId,
+          body: {
+            'name': 'V2',
+            'start': '2026-07-25T08:00:00Z',
+            'exercises': [
+              {
+                'id': exerciseId,
+                'exercise': exName,
+                'order': 0,
+                'sets': [
+                  {'id': setId, 'weight': 105, 'reps': 5, 'completed': true},
+                ],
+              },
+            ],
+          },
+        ),
+        imageUrl: imageUrl,
+      );
+
+      // identity survives the delete-and-reinsert: the clients read an act's
+      // start off the exercise id's v7 mint instant, so a re-minted id moves
+      // every act in that workout's history to "edited just now"
+      expect(updated.first.id, exerciseId);
+      expect(updated.first.first.id, setId);
+      expect(updated.first.first.weight, 105);
+    });
+
+    test('a non-uuid exercise id is re-minted at the exercise start', () async {
+      final exName = h.uniqueName('Ex');
+      await h.seedGlobalExercise(name: exName);
+      final id = (await h.db.createWorkout(
+        userId: ownerId,
+        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseName: exName),
+        imageUrl: imageUrl,
+      )).id;
+
+      final updated = await h.db.updateWorkout(
+        userId: ownerId,
+        workoutId: id,
+        body: WorkoutRequest(
+          userId: ownerId,
+          body: {
+            'name': 'V2',
+            'start': '2026-07-25T08:00:00Z',
+            'exercises': [
+              {
+                // Firebase-era ids were sanitized timestamps, not uuids; they
+                // cannot round-trip into a uuid column, so the insert mints a
+                // v7 at the exercise's own start instead of "now"
+                'id': '2023-01-01T10-00-00',
+                'start': '2026-07-25T08:30:00Z',
+                'exercise': exName,
+                'order': 0,
+                'sets': [
+                  {'weight': 100, 'reps': 5, 'completed': true},
+                ],
+              },
+            ],
+          },
+        ),
+        imageUrl: imageUrl,
+      );
+
+      expect(timestampOfUuidV7(updated.first.id), DateTime.utc(2026, 7, 25, 8, 30));
     });
 
     test('updating a workout you do not own throws NotFound', () async {

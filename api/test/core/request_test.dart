@@ -27,4 +27,46 @@ void main() {
   test('a bodiless request throws UnsupportedMediaType', () {
     expect(bareRequest().json, throwsA(isA<UnsupportedMediaType>()));
   });
+
+  group('locale resolution', () {
+    const supported = ['en', 'en_CA', 'ru', 'es'];
+
+    String resolve(String? acceptLanguage) {
+      final request = bareRequest(
+        extraHeaders: acceptLanguage == null ? const {} : {'accept-language': acceptLanguage},
+      );
+      return request.locale(supported, 'en');
+    }
+
+    test('no header falls back to the default', () {
+      expect(resolve(null), 'en');
+    });
+
+    test('an exact tag matches, BCP-47 normalized', () {
+      expect(resolve('en-CA'), 'en_CA');
+      expect(resolve('ru'), 'ru');
+    });
+
+    test('the highest-quality supported language wins', () {
+      expect(resolve('ru;q=0.8, es;q=0.9'), 'es');
+    });
+
+    test('a regional tag truncates to its supported base language', () {
+      expect(resolve('es-MX'), 'es');
+      expect(resolve('es-AR, en;q=0.5'), 'es');
+    });
+
+    test('a bare language matches a supported regional variant', () {
+      final request = bareRequest(extraHeaders: {'accept-language': 'en'});
+      expect(request.locale(['en_CA', 'ru'], 'ru'), 'en_CA');
+    });
+
+    test('an unsupported language falls through to the next candidate', () {
+      expect(resolve('fr-FR, ru;q=0.7'), 'ru');
+    });
+
+    test('nothing acceptable falls back to the default', () {
+      expect(resolve('fr-FR, de;q=0.9'), 'en');
+    });
+  });
 }
