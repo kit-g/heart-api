@@ -327,14 +327,16 @@ def main() -> int:
             existing = yaml.load(f) or {}
 
     annotations, kept = {}, 0
-    for name, exercise in exercises.items():
-        if name in existing:
-            annotations[name] = existing[name]
+    for key, exercise in exercises.items():
+        if key in existing:
+            annotations[key] = existing[key]
             kept += 1
             continue
-        record = annotate(name, exercise)
+        # the rules pattern-match the English display copy (parens, spacing);
+        # the sidecar is keyed by the slug, like every content file
+        record = annotate(exercise['i18n']['en']['name'], exercise)
         if record is not None:
-            annotations[name] = record
+            annotations[key] = record
 
     stale = [n for n in existing if n not in exercises]
 
@@ -349,7 +351,7 @@ def main() -> int:
         return 0
 
     with open(SIDECAR, 'w') as f:
-        f.write('# Movement patterns and load attributes, keyed by exercise name.\n'
+        f.write('# Movement patterns and load attributes, keyed by exercise slug (the master map key).\n'
                 '# Exercises sharing a `groups` entry are mutually replaceable.\n'
                 '# Seeded by scripts/movement_seed.py; hand edits here are preserved.\n'
                 '# Fold into content/exercise_library.yml with scripts/movement_merge.py.\n')
