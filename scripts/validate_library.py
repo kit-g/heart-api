@@ -45,8 +45,12 @@ def coverage(master: dict, overlays: list[tuple[str, dict]], detailed: bool) -> 
 
     A locale entry counts as translated when it is concrete (own name, no
     fallback_to) and stale when its stored source_digest no longer matches the
-    fallback copy it was translated from. Alias locales (every entry
-    fallback_to'd, like en_CA) report as aliases, not as 0% coverage.
+    fallback copy it was translated from.
+
+    Regional overlays (en_CA, es_ES — a declared locale whose base language is
+    also served) are reported by what they hold, never as incomplete: absence
+    there is the normal state, covered by the serving chain (es_ES -> es -> en),
+    so a "missing" count would just be noise.
     """
     fallback = master['fallback_to_default']
     exercises = master['exercises']
@@ -60,11 +64,7 @@ def coverage(master: dict, overlays: list[tuple[str, dict]], detailed: bool) -> 
             name: entry for name, entry in entries.items()
             if entry.get('fallback_to') is None and entry.get('name')
         }
-        if entries and not concrete:
-            print(f'>> {locale}: alias locale ({len(entries)} entries, all fallback)')
-            continue
 
-        missing = [name for name in exercises if name not in concrete]
         stale = []
         untracked = []
         for name, entry in concrete.items():
@@ -77,13 +77,23 @@ def coverage(master: dict, overlays: list[tuple[str, dict]], detailed: bool) -> 
                     stale.append(name)
         validated = sum(1 for entry in concrete.values() if entry.get('validated'))
 
-        print(
-            f'>> {locale}: {len(concrete)}/{len(exercises)} translated '
-            f'({len(missing)} missing, {len(stale)} stale, {len(untracked)} untracked, {validated} validated)'
-        )
+        base = locale.split('_')[0]
+        if '_' in locale and (base == fallback or base in master['locales']):
+            print(
+                f'>> {locale}: regional overlay over {base}: '
+                f'{len(concrete)} concrete of {len(entries)} entries '
+                f'({len(stale)} stale, {len(untracked)} untracked, {validated} validated)'
+            )
+        else:
+            missing = [name for name in exercises if name not in concrete]
+            print(
+                f'>> {locale}: {len(concrete)}/{len(exercises)} translated '
+                f'({len(missing)} missing, {len(stale)} stale, {len(untracked)} untracked, {validated} validated)'
+            )
+            if detailed:
+                for name in missing:
+                    print(f'   missing: {name}')
         if detailed:
-            for name in missing:
-                print(f'   missing: {name}')
             for name in stale:
                 print(f'   stale: {name}')
             for name in untracked:
