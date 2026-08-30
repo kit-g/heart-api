@@ -5,7 +5,14 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
   Future<Map<String, dynamic>> getExercises(String userId, {String? locale, bool owned = false}) async {
     final rows = await _pool.execute(
       _listExercises.toSql(),
-      parameters: {'userId': userId, 'locale': locale, 'owned': owned},
+      parameters: {
+        'userId': userId,
+        'locale': locale,
+        // regional locales (es_ES) fall back to their base language (es)
+        // before the master columns; see the tb join in _listExercises
+        'baseLocale': locale?.split('_').first,
+        'owned': owned,
+      },
     );
     return {'exercises': rows.first.toColumnMap()['exercises'] as List? ?? const []};
   }

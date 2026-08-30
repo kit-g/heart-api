@@ -40,6 +40,21 @@ abstract class _DatabaseBase {
     }
     throw e;
   }
+
+  /// Client-sent workout-exercise/set ids round-trip into plain INSERTs, so an
+  /// id that already exists — a duplicate within the payload, a stale copy, or
+  /// a hostile probe — surfaces as a unique violation. That's the client's
+  /// mistake: reject it as a 400 instead of letting the 23505 bubble up as a
+  /// 500 (the same reasoning that puts ON CONFLICT DO NOTHING on the
+  /// create-exercise path).
+  static const _clientIdConstraints = {'workout_exercises_pkey', 'exercise_sets_pkey'};
+
+  Never _rethrowClientIdCollision(ServerException e) {
+    if (e.code == '23505' && _clientIdConstraints.contains(e.constraintName)) {
+      throw const BadRequest(reason: 'an exercise or set id in the payload already exists');
+    }
+    _rethrowCapped(e);
+  }
 }
 
 class Database extends _DatabaseBase
