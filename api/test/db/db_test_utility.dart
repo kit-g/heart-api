@@ -105,15 +105,21 @@ abstract class DatabaseTestBase {
   }
 
   /// Inserts a global exercise (user_id NULL) and tracks it for cleanup. Pass
-  /// [name] when a test needs to reference it by name (e.g. in a workout body).
+  /// [name] when a test needs a specific display name; the content key is
+  /// derived from it (global rows must carry one).
   Future<String> seedGlobalExercise({String? name}) async {
+    final n = name ?? uniqueName('Ex');
     final id = await insertId(
-      'INSERT INTO exercises (name, category, target) VALUES (@n, @c, @t) RETURNING id',
-      {'n': name ?? uniqueName('Ex'), 'c': 'Barbell', 't': 'Chest'},
+      'INSERT INTO exercises (key, name, category, target) VALUES (@k, @n, @c, @t) RETURNING id',
+      {'k': slug(n), 'n': n, 'c': 'Barbell', 't': 'Chest'},
     );
     _seededExercises.add(id);
     return id;
   }
+
+  /// The content slug a [seedGlobalExercise] row carries for [name].
+  static String slug(String name) =>
+      name.toLowerCase().replaceAll(RegExp('[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-+|-+$'), '');
 
   /// Inserts a workout owned by [userId]. With [withExercise], also links one
   /// global exercise + one set so reads return a populated workout.

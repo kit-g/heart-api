@@ -381,30 +381,30 @@ void main() {
     final asset = {'link': 'https://cdn.test/asset.mp4', 'width': 640, 'height': 480};
     final thumbnail = {'link': 'https://cdn.test/thumb.jpg', 'width': 160, 'height': 120};
 
-    test('writes asset and thumbnail onto the global exercise matched by name', () async {
+    test('writes asset and thumbnail onto the global exercise matched by key', () async {
       final name = h.uniqueName('Media');
       final id = await h.seedGlobalExercise(name: name);
 
-      await h.db.setExerciseMedia(name: name, asset: asset, thumbnail: thumbnail);
+      await h.db.setExerciseMedia(key: DatabaseTestBase.slug(name), asset: asset, thumbnail: thumbnail);
 
       final row = findEx((await h.db.getExercises(ownerId))['exercises'] as List, id);
       expect(row!['asset'], asset);
       expect(row['thumbnail'], thumbnail);
     });
 
-    test('throws NotFound when no global exercise has that name', () async {
+    test('throws NotFound when no global exercise has that key', () async {
       await expectLater(
-        h.db.setExerciseMedia(name: h.uniqueName('Missing'), asset: asset, thumbnail: thumbnail),
+        h.db.setExerciseMedia(key: DatabaseTestBase.slug(h.uniqueName('Missing')), asset: asset, thumbnail: thumbnail),
         throwsA(isA<NotFound>()),
       );
     });
 
-    test('a user-owned exercise with the same name is not matched (NotFound)', () async {
+    test('a user-owned exercise never matches: keys belong to globals only', () async {
       final name = h.uniqueName('UserOwnedMedia');
       await h.db.createExercise(userId: ownerId, name: name, category: 'Barbell', target: 'Chest');
-      // The query requires user_id IS NULL, so the owned row is invisible here.
+      // Owned rows carry no key (and the query requires user_id IS NULL).
       await expectLater(
-        h.db.setExerciseMedia(name: name, asset: asset, thumbnail: thumbnail),
+        h.db.setExerciseMedia(key: DatabaseTestBase.slug(name), asset: asset, thumbnail: thumbnail),
         throwsA(isA<NotFound>()),
       );
     });

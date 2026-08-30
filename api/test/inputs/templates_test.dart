@@ -8,6 +8,11 @@ import 'package:test/test.dart';
 import '../helpers/request.dart';
 
 const _meId = 'u1';
+// fixed v7 uuids — the only reference shape the input accepts since the id cutover
+const _bench = '0198c1a2-b3c4-7d5e-8f60-718293a4b501';
+const _squat = '0198c1a2-b3c4-7d5e-8f60-718293a4b502';
+const _rowA = '0198c1a2-b3c4-7d5e-8f60-718293a4b503';
+const _rowB = '0198c1a2-b3c4-7d5e-8f60-718293a4b504';
 
 /// The input layer reads `req.userId`, which the auth middleware normally sets.
 Request req({Map<String, dynamic> body = const {}, Map<String, String> query = const {}}) {
@@ -25,7 +30,7 @@ void main() {
             'folderId': 'f-1',
             'exercises': [
               {
-                'exercise': 'Bench Press',
+                'exercise': _bench,
                 'order': 0,
                 'sets': [
                   {'weight': 60, 'reps': 5},
@@ -40,24 +45,24 @@ void main() {
       expect(input.request.name, 'Push day');
       expect(input.request.order, 2);
       expect(input.request.folderId, 'f-1');
-      expect(input.request.exercises.single.exerciseName, 'Bench Press');
+      expect(input.request.exercises.single.exerciseId, _bench);
       expect(input.request.exercises.single.sets.single.weight, 60);
     });
 
-    test('accepts the full exercise object the app holds, not just a name', () async {
+    test('accepts the full exercise object the app holds, not just a bare id', () async {
       final input = await TemplateCreateIn.fromRequest(
         req(
           body: {
             'exercises': [
               {
-                'exercise': {'id': 'e-1', 'name': 'Squat', 'category': 'Barbell'},
+                'exercise': {'id': _squat, 'name': 'Squat', 'category': 'Barbell'},
               },
             ],
           },
         ),
       );
 
-      expect(input.request.exercises.single.exerciseName, 'Squat');
+      expect(input.request.exercises.single.exerciseId, _squat);
     });
 
     test('falls back to array position when an exercise omits its order', () async {
@@ -65,8 +70,8 @@ void main() {
         req(
           body: {
             'exercises': [
-              {'exercise': 'A'},
-              {'exercise': 'B'},
+              {'exercise': _rowA},
+              {'exercise': _rowB},
             ],
           },
         ),
@@ -95,19 +100,19 @@ void main() {
         req(
           body: {
             'exercises': [
-              {'exercise': 'Bench', 'order': 0},
+              {'exercise': _bench, 'order': 0},
               {'id': 'we-2', 'start': '2026-08-02T10:00:00.000Z', 'sets': []},
             ],
           },
         ),
       );
 
-      expect(input.request.exercises.map((e) => e.exerciseName), ['Bench']);
+      expect(input.request.exercises.map((e) => e.exerciseId), [_bench]);
     });
 
-    // Previously an exercise with sets but no resolvable name was silently
+    // Previously an exercise with sets but no resolvable reference was silently
     // dropped too — the user saved five exercises and got four back.
-    test('rejects an exercise that has sets but no resolvable name', () async {
+    test('rejects an exercise that has sets but no resolvable id', () async {
       await expectLater(
         TemplateCreateIn.fromRequest(
           req(
@@ -127,15 +132,30 @@ void main() {
       );
     });
 
-    test('rejects an exercise whose nested object has no name', () async {
+    test('rejects an exercise whose nested object has no id', () async {
       await expectLater(
         TemplateCreateIn.fromRequest(
           req(
             body: {
               'exercises': [
                 {
-                  'exercise': {'id': 'e-1'},
+                  'exercise': {'name': 'Squat'},
                 },
+              ],
+            },
+          ),
+        ),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
+    test('rejects a malformed exercise id before the SQL ever casts it', () async {
+      await expectLater(
+        TemplateCreateIn.fromRequest(
+          req(
+            body: {
+              'exercises': [
+                {'exercise': 'Bench Press'},
               ],
             },
           ),
@@ -151,7 +171,7 @@ void main() {
             body: {
               'exercises': [
                 {
-                  'exercise': 'Bench',
+                  'exercise': _bench,
                   'sets': [
                     {'reps': -1},
                   ],
@@ -172,7 +192,7 @@ void main() {
           body: {
             'exercises': [
               {
-                'exercise': 'Assisted Pull Up',
+                'exercise': _rowA,
                 'sets': [
                   {'weight': -20, 'reps': 8},
                 ],
@@ -197,7 +217,7 @@ void main() {
             'exercises': [
               {
                 'id': 'we-1',
-                'exercise': {'id': 'e-1', 'name': 'Bench Press', 'category': 'Barbell', 'target': 'Chest'},
+                'exercise': {'id': _bench, 'name': 'Bench Press', 'category': 'Barbell', 'target': 'Chest'},
                 'start': '2026-08-02T10:00:00.000Z',
                 'sets': [
                   {'id': 's-1', 'completed': false, 'reps': 5, 'weight': 60},
@@ -208,7 +228,7 @@ void main() {
         ),
       );
 
-      expect(input.request.exercises.single.exerciseName, 'Bench Press');
+      expect(input.request.exercises.single.exerciseId, _bench);
       expect(input.request.exercises.single.order, 0);
       expect(input.request.exercises.single.sets.single.reps, 5);
     });

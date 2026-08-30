@@ -32,7 +32,7 @@ void main() {
     when(app.config.cdnAssetUrl(any)).thenReturn('https://cdn.example/asset');
     when(
       app.db.setExerciseMedia(
-        name: anyNamed('name'),
+        key: anyNamed('key'),
         asset: anyNamed('asset'),
         thumbnail: anyNamed('thumbnail'),
       ),
@@ -40,7 +40,7 @@ void main() {
 
     final record = jsonEncode({
       'type': 'exercise.asset.processed',
-      'name': 'Squat',
+      'key': 'squat',
       'asset': {'key': 'exercises/squat/asset.gif', 'width': 400, 'height': 300},
       'thumbnail': {'key': 'exercises/squat/thumb.gif', 'width': 100, 'height': 75},
     });
@@ -57,7 +57,7 @@ void main() {
     expect(res.status, 204);
     verify(
       app.db.setExerciseMedia(
-        name: 'Squat',
+        key: 'squat',
         asset: anyNamed('asset'),
         thumbnail: anyNamed('thumbnail'),
       ),
