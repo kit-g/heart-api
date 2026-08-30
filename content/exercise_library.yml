@@ -1,5 +1,5 @@
 version: "2026-08-29"
-locales: [en, en_CA, ru]
+locales: [en, en_CA, ru, es, es_ES]
 fallback_to_default: en
 exercises:
   "Ab Wheel":
