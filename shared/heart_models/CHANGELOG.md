@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.0.0
+
+Exercise identity moves from the name to the uuid — a coordinated breaking release for the
+stable-keys cutover (the app must adopt this in lockstep; the API's name-based lookups are gone).
+
+- **Breaking**: `Exercise.id` is non-nullable and is the identity — `==`/`hashCode` compare ids,
+  and `fromJson` throws on a payload without one. Two locales' views of the same exercise now
+  compare equal; the factory still mints a client-side UUIDv7, which the server persists on
+  create, so offline-created customs keep their identity through sync.
+- **Breaking**: `TemplateExerciseRequest.exerciseName` is now `exerciseId`, serialized as
+  `exercise_id` — the only reference the template SQL resolves.
+- New: `Exercise.key` — the env-stable content slug (`bench-press-barbell`) for library
+  exercises, `null` for user-created ones. A content/fixture handle, not a wire reference.
+- `Exercise.name` is localized display copy, never an identifier.
+- Search (`Exercise.contains`) normalization is unicode-aware, so Cyrillic/accented display
+  names match; the slug also matches, so the canonical English wording keeps working under any
+  locale.
+
 ## 1.9.0
 
 Surfaces the exercise library's copy-provenance flag, so the client can be explicit about
