@@ -88,6 +88,9 @@ SELECT coalesce(
   jsonb_agg(
     jsonb_build_object(
       'id', e.id,
+      -- the env-stable content slug (null for user-created rows); identity
+      -- for content and fixtures, while the uuid is the wire identity
+      'key', e.key,
       'name', COALESCE(t.name, tb.name, e.name),
       'category', e.category,
       'target', e.target,
@@ -130,16 +133,21 @@ WHERE
 
 const _createExercise = '''
 INSERT INTO exercises (
-  name, 
-  category, 
-  target, 
-  instructions, 
+  id,
+  name,
+  category,
+  target,
+  instructions,
   user_id
 ) VALUES (
-  @name, 
-  @category, 
-  @target, 
-  @instructions, 
+  -- the app mints a v7 id at construction (offline-first needs identity
+  -- before the server ack) and it round-trips here; absent, the column
+  -- default mints one
+  coalesce(@id::uuid, uuidv7()),
+  @name,
+  @category,
+  @target,
+  @instructions,
   @userId
 )
 RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived,
@@ -164,7 +172,7 @@ UPDATE exercises
 SET
   asset = @asset::jsonb,
   thumbnail = @thumbnail::jsonb
-WHERE name = @name 
+WHERE key = @key 
   AND user_id IS NULL
 RETURNING id
 ''';
@@ -372,7 +380,7 @@ SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT
 
 const _saveWorkout = '''
 WITH
-_order_to_name AS (
+_order_to_id AS (
   SELECT
     -- ids round-trip, same as _replaceWorkout: the exercise id the client
     -- minted mid-workout carries the instant the exercise was started, and
@@ -380,17 +388,19 @@ _order_to_name AS (
     (ex->>'id')::uuid AS id,
     (ex->>'start')::timestamptz AS started_at,
     (ex->>'order')::int AS exercise_order,
-    ex->>'exercise_name' AS exercise_name,
+    (ex->>'exercise_id')::uuid AS exercise_id,
     (ex->>'met')::real AS met,
     ex->>'note' AS note
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
-  SELECT DISTINCT ON (e.name) e.id AS exercise_id, e.name
+  -- ids are unique, so the old DISTINCT ON (name) user-over-global tie-break
+  -- is gone; visibility still scopes to globals plus the caller's own rows,
+  -- and a reference to anything else drops the row via the join below
+  SELECT DISTINCT e.id AS exercise_id
   FROM exercises e
-  JOIN _order_to_name otn ON otn.exercise_name = e.name
+  JOIN _order_to_id otn ON otn.exercise_id = e.id
   WHERE e.user_id IS NULL OR e.user_id = @userId
-  ORDER BY e.name, e.user_id NULLS LAST
 ),
 _workout AS (
   INSERT INTO workouts (user_id, name, started_at, completed_at, calories)
@@ -407,8 +417,8 @@ _inserted_exercises AS (
     otn.met,
     otn.note
   FROM _workout w
-  CROSS JOIN _order_to_name otn
-  JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  CROSS JOIN _order_to_id otn
+  JOIN _exercise_lookup el ON el.exercise_id = otn.exercise_id
   RETURNING id, exercise_order, met, note
 ),
 _sets_input AS (
@@ -463,7 +473,7 @@ _exercises_json AS (
         'id', el.exercise_id,
         'category', e.category,
         'target', e.target,
-        'name', el.name
+        'name', e.name
       ),
       'exercise_order', ie.exercise_order,
       'met', ie.met,
@@ -472,8 +482,8 @@ _exercises_json AS (
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
   FROM _inserted_exercises ie
-  JOIN _order_to_name otn ON otn.exercise_order = ie.exercise_order
-  JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  JOIN _order_to_id otn ON otn.exercise_order = ie.exercise_order
+  JOIN _exercise_lookup el ON el.exercise_id = otn.exercise_id
   JOIN exercises e ON e.id = el.exercise_id
   LEFT JOIN _sets_json sj ON sj.workout_exercise_id = ie.id
 )
@@ -652,7 +662,7 @@ SELECT
 
 const _replaceWorkout = '''
 WITH
-_order_to_name AS (
+_order_to_id AS (
   SELECT
     -- ids round-trip: the clients read an act's start off the exercise id's
     -- v7 mint instant, so a replace that re-minted moved every act to "now".
@@ -661,17 +671,19 @@ _order_to_name AS (
     (ex->>'id')::uuid AS id,
     (ex->>'start')::timestamptz AS started_at,
     (ex->>'order')::int AS exercise_order,
-    ex->>'exercise_name' AS exercise_name,
+    (ex->>'exercise_id')::uuid AS exercise_id,
     (ex->>'met')::real AS met,
     ex->>'note' AS note
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
-  SELECT DISTINCT ON (e.name) e.id AS exercise_id, e.name
+  -- ids are unique, so the old DISTINCT ON (name) user-over-global tie-break
+  -- is gone; visibility still scopes to globals plus the caller's own rows,
+  -- and a reference to anything else drops the row via the join below
+  SELECT DISTINCT e.id AS exercise_id
   FROM exercises e
-  JOIN _order_to_name otn ON otn.exercise_name = e.name
+  JOIN _order_to_id otn ON otn.exercise_id = e.id
   WHERE e.user_id IS NULL OR e.user_id = @userId
-  ORDER BY e.name, e.user_id NULLS LAST
 ),
 _workout AS (
   UPDATE workouts
@@ -704,8 +716,8 @@ _inserted_exercises AS (
     otn.met,
     otn.note
   FROM _workout w
-  CROSS JOIN _order_to_name otn
-  JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  CROSS JOIN _order_to_id otn
+  JOIN _exercise_lookup el ON el.exercise_id = otn.exercise_id
   -- forces _deleted to run to completion first. The old form
   -- (NOT exists(... WHERE false)) constant-folded away, which left the
   -- delete/insert order unspecified — harmless while every insert minted a
@@ -767,7 +779,7 @@ _exercises_json AS (
         'id', el.exercise_id,
         'category', e.category,
         'target', e.target,
-        'name', el.name
+        'name', e.name
       ),
       'exercise_order', ie.exercise_order,
       'met', ie.met,
@@ -776,8 +788,8 @@ _exercises_json AS (
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
   FROM _inserted_exercises ie
-  JOIN _order_to_name otn ON otn.exercise_order = ie.exercise_order
-  JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  JOIN _order_to_id otn ON otn.exercise_order = ie.exercise_order
+  JOIN _exercise_lookup el ON el.exercise_id = otn.exercise_id
   JOIN exercises e ON e.id = el.exercise_id
   LEFT JOIN _sets_json sj ON sj.workout_exercise_id = ie.id
 )
@@ -841,18 +853,19 @@ _folder AS (
   SELECT id FROM template_folders
   WHERE id = @folderId::uuid AND user_id = @userId
 ),
-_order_to_name AS (
+_order_to_id AS (
   SELECT
     (ex->>'order')::int AS exercise_order,
-    ex->>'exercise_name' AS exercise_name
+    (ex->>'exercise_id')::uuid AS exercise_id
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
-  SELECT DISTINCT ON (e.name) e.id, e.name, e.category, e.target
+  -- ids are unique, so the old DISTINCT ON (name) user-over-global tie-break
+  -- is gone; visibility still scopes to globals plus the caller's own rows
+  SELECT DISTINCT e.id, e.name, e.category, e.target
   FROM exercises e
-  JOIN _order_to_name otn ON otn.exercise_name = e.name
+  JOIN _order_to_id otn ON otn.exercise_id = e.id
   WHERE e.user_id IS NULL OR e.user_id = @userId
-  ORDER BY e.name, e.user_id NULLS LAST
 ),
 -- A folder the user does not own resolves to no row, so the INSERT selects
 -- nothing and the mixin reports NotFound rather than silently unfiling.
@@ -866,8 +879,8 @@ _inserted_exercises AS (
   INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
   SELECT t.id, el.id, otn.exercise_order
   FROM _template t
-  CROSS JOIN _order_to_name otn
-  JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  CROSS JOIN _order_to_id otn
+  JOIN _exercise_lookup el ON el.id = otn.exercise_id
   RETURNING id, exercise_id, exercise_order
 ),
 _sets_input AS (
@@ -943,18 +956,19 @@ _folder AS (
   SELECT id FROM template_folders
   WHERE id = @folderId::uuid AND user_id = @userId
 ),
-_order_to_name AS (
+_order_to_id AS (
   SELECT
     (ex->>'order')::int AS exercise_order,
-    ex->>'exercise_name' AS exercise_name
+    (ex->>'exercise_id')::uuid AS exercise_id
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
-  SELECT DISTINCT ON (e.name) e.id, e.name, e.category, e.target
+  -- ids are unique, so the old DISTINCT ON (name) user-over-global tie-break
+  -- is gone; visibility still scopes to globals plus the caller's own rows
+  SELECT DISTINCT e.id, e.name, e.category, e.target
   FROM exercises e
-  JOIN _order_to_name otn ON otn.exercise_name = e.name
+  JOIN _order_to_id otn ON otn.exercise_id = e.id
   WHERE e.user_id IS NULL OR e.user_id = @userId
-  ORDER BY e.name, e.user_id NULLS LAST
 ),
 -- @movesFolder distinguishes "the body said nothing about folderId" (leave it
 -- where it is) from "the body said folderId: null" (unfile it). A folderId the
@@ -976,8 +990,8 @@ _inserted_exercises AS (
   INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
   SELECT t.id, el.id, otn.exercise_order
   FROM _template t
-  CROSS JOIN _order_to_name otn
-  JOIN _exercise_lookup el ON el.name = otn.exercise_name
+  CROSS JOIN _order_to_id otn
+  JOIN _exercise_lookup el ON el.id = otn.exercise_id
   WHERE NOT EXISTS (SELECT 1 FROM _deleted WHERE false)
   RETURNING id, exercise_id, exercise_order
 ),
