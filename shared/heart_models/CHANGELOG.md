@@ -14,6 +14,8 @@ stable-keys cutover (the app must adopt this in lockstep; the API's name-based l
 - New: `Exercise.key` — the env-stable content slug (`bench-press-barbell`) for library
   exercises, `null` for user-created ones. A content/fixture handle, not a wire reference.
 - `Exercise.name` is localized display copy, never an identifier.
+- New: `isUuidV7` — the shared shape predicate for platform ids, now public so the API and the
+  app validate client-minted ids against one definition instead of private copies.
 - Search (`Exercise.contains`) normalization is unicode-aware, so Cyrillic/accented display
   names match; the slug also matches, so the canonical English wording keeps working under any
   locale.
