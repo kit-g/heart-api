@@ -40,7 +40,7 @@ resource "aws_lambda_function" "api" {
       REGION                       = var.region
       SCHEDULE_GROUP               = aws_scheduler_schedule_group.accounts.name
       SCHEDULER_ROLE_ARN           = aws_iam_role.scheduler.arn
-      SUPPORTED_LOCALES            = "en,en_CA,ru"
+      SUPPORTED_LOCALES            = "en,en_CA,ru,es,es_ES,fr,fr_CA"
     }
   }
 
