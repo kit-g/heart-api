@@ -21,22 +21,25 @@ CDN links.
 ## Flow
 
 ```
-you: aws s3 cp "content/assets/Bicycle Crunch.gif" s3://<content>/exercise-uploads/
-        │
+you: uv run python scripts/sync_assets.py --source content/assets --bucket <content>
+        │  validates display-name stems against the library, slugifies,
+        │  uploads only new/changed files as exercise-uploads/<slug>.<ext>
         ▼  S3 ─ EventBridge (prefix exercise-uploads/) ─ SQS ─▶ this Lambda
                                                                    │ measure dims
                                                                    │ render 320px JPEG thumb (first GIF frame)
-                                                                   │ PUT exercises/<name>/asset.<ext>
-                                                                   │ PUT exercises/<name>/thumbnail.jpg
+                                                                   │ PUT exercises/<slug>/asset.<ext>
+                                                                   │ PUT exercises/<slug>/thumbnail.jpg
                                                                    ▼ SQS ─▶ heart-api-events
-        API /events ◀─ {type: exercise.asset.processed, name, asset:{key,w,h}, thumbnail:{key,w,h}} ─┘
+        API /events ◀─ {type: exercise.asset.processed, key, asset:{key,w,h}, thumbnail:{key,w,h}} ─┘
                           updates the exercises row (link built via cdnAssetUrl)
 ```
 
-The exercise name is the uploaded file's stem (`Bicycle Crunch.gif` →
-`Bicycle Crunch`). Processed objects keep the literal name in the S3 key; the
-API percent-encodes it when it builds the CDN link, so the stored link is
-`https://<media>/exercises/Bicycle%20Crunch/asset.gif`.
+The uploaded file's stem is the exercise's **slug** (`bicycle-crunch.gif` →
+`exercises.key`), never its display name — names are renamable, localized
+copy. The human collection lives in Drive under display names (mirrored
+locally at `content/assets/`, gitignored); `scripts/sync_assets.py` is the
+only bridge between the two conventions. Never write `exercises/` by hand —
+it is pipeline output.
 
 ## Events
 
