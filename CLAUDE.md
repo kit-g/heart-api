@@ -43,6 +43,14 @@ change is released the moment it lands. Consequences:
 - `api/` is not consumed as a package; its pubspec version is inert. API releases are the
   repo tags (`v*`), which drive the prod deploy.
 
+## Definition of done
+
+`docs/handoff.md` is the submission checklist for any nontrivial change.
+Autonomous agents (`agents/README.md`) finish by writing `HANDOFF.md` (worktree root,
+gitignored) and, when dispatched from a GitHub issue, commenting the summary on it;
+interactive sessions just meet the list. Commits and pushes are the user's, always —
+`.claude/settings.json` and `agents/hooks/guard.sh` enforce that for every session here.
+
 # Working across Heart's two repos
 
 Heart is two repositories that ship together:

@@ -1,0 +1,14 @@
+#!/bin/bash
+# Live view into a running containerized agent's session.
+#
+#   agents/watch <name>        follow the narration from the start
+#
+# Read-only: Ctrl-C stops the view, never the agent. Ends when the
+# container exits (the final summary is in `docker logs heart-api-agent-<name>`).
+set -euo pipefail
+
+NAME="${1:?usage: agents/watch <name>}"
+HERE="$(cd "$(dirname "$0")" && pwd)"
+
+exec docker exec "heart-api-agent-$NAME" sh -c \
+  'tail -f -n +1 "$CLAUDE_CONFIG_DIR"/projects/*/*.jsonl' | jq -rj -f "$HERE/narrate.jq"
