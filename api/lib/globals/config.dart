@@ -58,6 +58,21 @@ class PostgresConfig {
     this.password,
   });
 
+  /// The Postgres connection alone, from the same `PG_*` variables the API
+  /// Lambda's environment carries — for entrypoints (like the CDN library
+  /// publisher) that need a `Database` but none of [AppConfig]'s other,
+  /// unrelated required config.
+  factory fromEnv() {
+    final env = Platform.environment;
+    return PostgresConfig(
+      host: env['PG_HOST'] ?? 'localhost',
+      port: int.tryParse(env['PG_PORT'] ?? '') ?? 5432,
+      database: env['PG_DATABASE'] ?? 'heart',
+      user: env['PG_USER'],
+      password: env['PG_PASSWORD'],
+    );
+  }
+
   Endpoint get endpoint {
     return Endpoint(
       host: host,
@@ -162,13 +177,7 @@ abstract interface class AppConfig {
           mediaDistribution: mediaDistribution,
           allowedMimeTypes: env['ALLOWED_MIME_TYPES']?.split(',').toSet() ?? _defaultMimeTypes,
           allowNonHttpEvents: bool.tryParse(env['ALLOW_NON_HTTP_EVENTS'] ?? '', caseSensitive: false) ?? false,
-          db: PostgresConfig(
-            host: env['PG_HOST'] ?? 'localhost',
-            port: int.tryParse(env['PG_PORT'] ?? '') ?? 5432,
-            database: env['PG_DATABASE'] ?? 'heart',
-            user: env['PG_USER'],
-            password: env['PG_PASSWORD'],
-          ),
+          db: PostgresConfig.fromEnv(),
         );
       default:
         final missing = _requiredConfig.where((key) => env[key] == null || env[key]!.isEmpty).toList();
