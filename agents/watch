@@ -5,10 +5,19 @@
 #
 # Read-only: Ctrl-C stops the view, never the agent. Ends when the
 # container exits (the final summary is in `docker logs heart-api-agent-<name>`).
+#
+# The session transcript appears a minute or so after launch (worktree
+# creation, first model turn); until then there is nothing to tail, so this
+# waits for it rather than exiting on "no such file".
 set -euo pipefail
 
 NAME="${1:?usage: agents/watch <name>}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
-exec docker exec "heart-api-agent-$NAME" sh -c \
-  'tail -f -n +1 "$CLAUDE_CONFIG_DIR"/projects/*/*.jsonl' | jq -rj -f "$HERE/narrate.jq"
+docker exec "heart-api-agent-$NAME" sh -c '
+  until ls "$CLAUDE_CONFIG_DIR"/projects/*/*.jsonl >/dev/null 2>&1; do
+    echo "waiting for the session to start…" >&2
+    sleep 3
+  done
+  exec tail -f -n +1 "$CLAUDE_CONFIG_DIR"/projects/*/*.jsonl
+' | jq -rj -f "$HERE/narrate.jq"
