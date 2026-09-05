@@ -139,6 +139,19 @@ resource "aws_cloudfront_distribution" "media" {
     cache_policy_id        = aws_cloudfront_cache_policy.media.id
   }
 
+  # Static, unauthenticated CDN objects (static/templates, static/exercises/*):
+  # the only behavior on this distribution that compresses, since the exercise
+  # library files are ~650 KB of instruction markdown each.
+  ordered_cache_behavior {
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    path_pattern           = "/static/*"
+    target_origin_id       = local.content_origin
+    viewer_protocol_policy = "https-only"
+    compress               = true
+    cache_policy_id        = local.caching_optimized
+  }
+
   viewer_certificate {
     ssl_support_method  = "sni-only"
     acm_certificate_arn = var.media_distribution_ssl_certificate
