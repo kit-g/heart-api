@@ -13,6 +13,12 @@ on:
       SECRETS_BUCKET:
         required: true
         type: string
+      CONTENT_BUCKET:
+        required: true
+        type: string
+      MEDIA_DISTRIBUTION_ID:
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -62,3 +68,31 @@ jobs:
         env:
           SECRETS_BUCKET: ${{ inputs.SECRETS_BUCKET }}
         run: uv run python scripts/library_locales.py
+
+      # Same secrets object apply_migrations.sh reads (host/port/user/password);
+      # fetched fresh rather than reused from the sync step above, since that
+      # step's psycopg connection doesn't leave credentials behind for later
+      # steps to pick up.
+      - name: "Fetch Supabase credentials"
+        run: aws s3 cp "s3://${{ inputs.SECRETS_BUCKET }}/secrets/supabase.json" /tmp/supabase.json
+
+      - uses: dart-lang/setup-dart@v1
+      - uses: actions/cache@v6
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-
+
+      # PostgresConfig.fromEnv() (api/bin/publish_library.dart) needs the same
+      # PG_* names the API Lambda's own environment carries — not the bare
+      # PGHOST names apply_migrations.sh uses. Exported and consumed within
+      # this one step so the password never round-trips through $GITHUB_ENV.
+      - name: "Publish exercise library to the CDN"
+        run: |
+          export PG_HOST="$(jq -r .host /tmp/supabase.json)"
+          export PG_PORT="$(jq -r .port /tmp/supabase.json)"
+          export PG_USER="$(jq -r .user /tmp/supabase.json)"
+          export PG_PASSWORD="$(jq -r .password /tmp/supabase.json)"
+          export PG_DATABASE=heart
+          echo "::add-mask::$PG_PASSWORD"
+          ./scripts/publish_library.sh "${{ inputs.CONTENT_BUCKET }}" "${{ inputs.MEDIA_DISTRIBUTION_ID }}"
