@@ -41,3 +41,10 @@ __pycache__/
 .venv/
 .pytest_cache/
 .ruff_cache/
+# Agents (see agents/README.md): worktrees, and the handoff notes plus their
+# review (review material, never committed). Root-anchored: on a
+# case-insensitive filesystem an unanchored HANDOFF.md also swallows
+# docs/handoff.md.
+/.claude/worktrees
+/HANDOFF.md
+/REVIEW.md

@@ -1,0 +1,70 @@
+#!/bin/bash
+# Host-side agent: full toolchain, your dev database, terraform, AWS.
+#
+#   agents/host-agent <name> [--task "..." | --issue N]
+#
+# Use it for what containers cannot do here: the database suites (psql and
+# pg_prove are on the host, and `make db-up` needs Docker), `terraform plan`
+# against real state, anything needing your AWS profiles.
+#
+# Weaker isolation than the containers — it runs as you, with your
+# credentials. Safety comes from three layers: worktree isolation (edits
+# outside the worktree are blocked), acceptEdits mode plus the allowlist in
+# .claude/settings.local.json (anything unlisted still prompts, and a
+# headless run cannot answer a prompt, so it fails closed), and the guard
+# hook (agents/hooks/guard.sh: no commit/push, no destructive git, no
+# terraform apply, no migrations against anything but localhost, no prod
+# profile, no AWS writes — even where a rule would allow the command).
+set -euo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+REPO="$(cd "$HERE/.." && pwd)"
+
+NAME="${1:?usage: agents/host-agent <name> [--task \"...\" | --issue N]}"
+shift
+
+TASK="" ISSUE=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --task)  TASK="$2"; shift 2 ;;
+    --issue) ISSUE="$2"; shift 2 ;;
+    *) echo "unknown option: $1" >&2; exit 1 ;;
+  esac
+done
+
+if [[ -n "$ISSUE" ]]; then
+  TASK="$(gh -R "$(git -C "$REPO" remote get-url origin)" issue view "$ISSUE" \
+    --json number,title,body \
+    --template 'GitHub issue #{{.number}}: {{.title}}
+
+{{.body}}')"
+fi
+
+PROMPT_PREFIX="You are an autonomous agent in an isolated worktree of this repo.
+docs/handoff.md is your definition of done — work through its checklist,
+then run the review-handoff skill on your own work (self-review mode: fix what
+it finds, re-run, leave REVIEW.md describing the final tree), and only then
+write HANDOFF.md at the worktree root. You run on the host: the dev database
+is yours to use ('make db-up', then 'make test-db' and the api's db-tagged
+tests), and 'terraform plan' and read-only AWS calls in the dev account work.
+Never 'terraform apply', never run migrations against anything but
+localhost, never touch the prod account or profile. If this task came from a
+GitHub issue, post your closing summary as a comment on it ('gh issue
+comment') — that one outward action is pre-authorized; nothing else outward
+is. Never commit or push. End with a short summary: what changed,
+verification, open ends."
+
+cd "$REPO"
+if [[ -n "$TASK" ]]; then
+  # Plain -p is silent until the run ends. Stream the session and render it
+  # with the same filter `watch` uses; the raw event stream survives in $LOG
+  # for post-mortems.
+  LOG="${TMPDIR:-/tmp}/heart-agent-$NAME.jsonl"
+  echo "narrating; raw stream: $LOG" >&2
+  claude --worktree "$NAME" --permission-mode acceptEdits \
+    --output-format stream-json --verbose -p "$PROMPT_PREFIX
+
+$TASK" | tee "$LOG" | jq -rj -f "$HERE/narrate.jq"
+else
+  exec claude --worktree "$NAME" --permission-mode acceptEdits
+fi
