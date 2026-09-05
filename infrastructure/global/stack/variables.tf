@@ -25,6 +25,11 @@ variable "web_distribution_id" {
   description = "Web CloudFront distribution; invalidations target this."
 }
 
+variable "media_distribution_id" {
+  type        = string
+  description = "Media CloudFront distribution; invalidations target this (e.g. after publishing static/exercises/)."
+}
+
 variable "firebase_project_config" {
   description = "Firebase GCP project"
   type = object({

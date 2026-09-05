@@ -115,9 +115,12 @@ resource "aws_iam_role_policy" "exercise_library" {
 
 data "aws_iam_policy_document" "cloudfront" {
   statement {
-    effect    = "Allow"
-    actions   = ["cloudfront:CreateInvalidation"]
-    resources = ["arn:aws:cloudfront::${local.account_id}:distribution/${var.web_distribution_id}"]
+    effect  = "Allow"
+    actions = ["cloudfront:CreateInvalidation"]
+    resources = [
+      "arn:aws:cloudfront::${local.account_id}:distribution/${var.web_distribution_id}",
+      "arn:aws:cloudfront::${local.account_id}:distribution/${var.media_distribution_id}",
+    ]
   }
 }
 
