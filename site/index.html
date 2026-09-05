@@ -1,119 +1,88 @@
 <!DOCTYPE html>
-
-<html class="light" lang="en">
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <link rel="apple-touch-icon" href="assets/favicon.png">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Heart of Yours - Yet another fitness tracker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&amp;display=swap"
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,600;7..72,700&family=Onest:wght@400;600&family=Unbounded:wght@700&family=Golos+Text:wght@400;600;700&family=Rubik:wght@400;600;700&display=swap"
           rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-          rel="stylesheet"/>
+    <link rel="stylesheet" href="assets/site.css">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="assets/site.js"></script>
-
-    <style>
-        /* Custom subtle fade-in animation */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 1s ease-out forwards;
-        }
-
-        .animate-delay-100 {
-            animation-delay: 0.1s;
-        }
-
-        .animate-delay-200 {
-            animation-delay: 0.3s;
-        }
-
-        .animate-delay-300 {
-            animation-delay: 0.5s;
-        }
-
-        .opacity-0 {
-            opacity: 0;
-        }
-    </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-[#0d121b] dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-primary/20">
+<body class="bg-ground text-ink font-text min-h-screen flex flex-col overflow-x-hidden selection:bg-accent selection:text-on-accent">
 <!-- Navbar -->
-<header class="w-full flex justify-center pt-6 pb-2 px-6 sm:px-10 z-10">
+<header class="w-full flex flex-col items-center pt-6 pb-2 px-6 sm:px-10 z-10">
     <div class="w-full max-w-[1200px] flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <div class="size-9 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full shadow-md overflow-hidden border border-slate-100 dark:border-slate-700">
+            <div class="size-9 flex items-center justify-center bg-surface rounded overflow-hidden border">
                 <img src="assets/favicon.png" alt="Heart of Yours Logo" class="size-full object-cover"/>
             </div>
-            <h2 class="text-lg font-semibold tracking-tight">Heart of Yours</h2>
+            <h2 class="text-lg font-title font-semibold tracking-tight">Heart of Yours</h2>
         </div>
         <nav class="hidden md:flex items-center gap-8">
-            <a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
                href="terms.html">Terms of Service</a>
-            <a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
                href="privacy.html">Privacy</a>
-            <a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
                href="account.html">Account Control</a>
         </nav>
         <div class="flex items-center gap-4">
-            <button class="md:hidden flex items-center justify-center p-2 text-slate-600 dark:text-slate-300">
+            <button id="menu-button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Menu"
+                    class="md:hidden flex items-center justify-center size-10 rounded bg-fill text-ink">
                 <span class="material-symbols-outlined">menu</span>
             </button>
-            <a class="hidden md:flex items-center justify-center h-10 px-5 rounded-lg bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary/90 transition-all hover:shadow-md"
+            <a class="hidden md:flex items-center justify-center h-10 px-5 rounded bg-accent text-on-accent text-sm font-semibold hover:opacity-90 transition-opacity"
                href="#download">
                 Get App
             </a>
         </div>
     </div>
+    <nav id="mobile-nav" hidden class="md:hidden w-full max-w-[1200px] mt-4 flex flex-col border rounded-xl bg-surface divide-y divide-border">
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="terms.html">Terms of Service</a>
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="privacy.html">Privacy</a>
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="account.html">Account Control</a>
+        <a class="px-4 py-3 text-sm font-semibold text-accent-ink" href="#download">Get App</a>
+    </nav>
 </header>
-<!-- Main Content -->
+
+<!-- Hero -->
 <main class="flex-grow flex flex-col items-center justify-center w-full px-6 py-12 md:py-20 lg:py-24">
     <div class="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         <!-- Text Content -->
         <div class="flex flex-col gap-8 text-left max-w-xl mx-auto lg:mx-0 order-2 lg:order-1">
-            <div class="flex flex-col gap-4 animate-fade-in opacity-0">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 w-fit self-start">
-                    <span class="material-symbols-outlined text-primary text-sm">fitness_center</span>
-                    <span class="text-xs font-semibold text-primary uppercase tracking-wider">For stronger you</span>
+            <div class="flex flex-col gap-5 animate-fade-in opacity-0">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-fill w-fit self-start">
+                    <span class="material-symbols-outlined text-accent-ink text-[18px]">fitness_center</span>
+                    <span class="text-xs font-semibold text-accent-ink uppercase tracking-wider">For a stronger you</span>
                 </div>
-                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight leading-[1.1] text-slate-900 dark:text-white">
-                    Fitness tracking that <span class="text-primary font-medium">stays with you</span>.
+                <h1 class="font-title text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] text-ink">
+                    Fitness tracking that <span class="text-accent-ink">stays with you</span>.
                 </h1>
-                <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-light max-w-md animate-fade-in opacity-0 animate-delay-100">
+                <p class="text-lg text-muted leading-relaxed max-w-md animate-fade-in opacity-0 animate-delay-100">
                     Your data is yours forever. Just keep going to the gym.
                 </p>
             </div>
-            <div class="flex flex-wrap gap-4 pt-4 animate-fade-in opacity-0 animate-delay-200" id="download">
-                <a href="#" class="inline-block transition-transform hover:scale-[1.02] active:scale-95">
-                    <img src="assets/appstore_button.svg" alt="Download on the App Store"
-                         class="h-10 w-auto hover:opacity-90"/>
+            <div class="flex flex-wrap gap-4 pt-2 animate-fade-in opacity-0 animate-delay-200" id="download">
+                <a href="#" class="inline-block hover:opacity-90 transition-opacity">
+                    <img src="assets/appstore_button.svg" alt="Download on the App Store" class="h-10 w-auto"/>
                 </a>
-                <a href="#" class="inline-block transition-transform hover:scale-[1.02] active:scale-95">
-                    <img src="assets/google_play_button.svg" alt="Get it on Google Play"
-                         class="h-10 w-auto hover:opacity-90"/>
+                <a href="#" class="inline-block hover:opacity-90 transition-opacity">
+                    <img src="assets/google_play_button.svg" alt="Get it on Google Play" class="h-10 w-auto"/>
                 </a>
             </div>
         </div>
         <!-- Visual Hero -->
         <div class="relative flex justify-center lg:justify-end order-1 lg:order-2 animate-fade-in opacity-0 animate-delay-300">
-            <!-- Decorative Elements -->
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-gradient-to-tr from-primary/10 to-transparent rounded-full blur-3xl -z-10"></div>
-            <!-- Phone Mockup Container -->
-            <div class="relative bg-black dark:bg-black rounded-[2.5rem] p-3 shadow-2xl border-4 border-slate-600 dark:border-slate-600 max-w-[320px] w-full aspect-[9/19] overflow-hidden">
-                <!-- Screen Content -->
+            <!-- Phone mockup: a device, so it keeps its bezel radius; separated by a border, not a shadow. -->
+            <div class="relative bg-[#1A1815] rounded-[2.5rem] p-3 border max-w-[320px] w-full aspect-[9/19] overflow-hidden">
                 <img src="assets/workout.png" alt="App Screenshot" class="h-full w-full object-cover rounded-[2rem]"/>
             </div>
         </div>
@@ -121,52 +90,127 @@
 </main>
 
 <!-- Features / Highlights -->
-<section class="w-full py-12 px-6 bg-white dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
+<section class="w-full py-14 px-6 border-t">
     <div class="max-w-[960px] mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8">
-        <div class="flex flex-col items-center text-center gap-3 p-4">
-            <div class="bg-primary/10 p-4 rounded-full text-primary mb-2 flex items-center justify-center">
+        <div class="flex flex-col items-start text-left gap-3 p-4">
+            <div class="bg-fill size-11 rounded text-accent-ink mb-1 flex items-center justify-center">
                 <span class="material-symbols-outlined">query_stats</span>
             </div>
-            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Templates, timers, and charts</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Build your workouts. Track your
-                progress. Stay consistent</p>
+            <h3 class="font-title text-lg font-semibold text-ink">Templates, timers, and charts</h3>
+            <p class="text-sm text-muted leading-relaxed">Build your workouts. Track your progress. Stay consistent.</p>
         </div>
-        <div class="flex flex-col items-center text-center gap-3 p-4">
-            <div class="bg-primary/10 p-4 rounded-full text-primary mb-2 flex items-center justify-center">
+        <div class="flex flex-col items-start text-left gap-3 p-4">
+            <div class="bg-fill size-11 rounded text-accent-ink mb-1 flex items-center justify-center">
                 <span class="material-symbols-outlined">tune</span>
             </div>
-            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Just the right features</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">It's your workout assistant, not a
-                life coach</p>
+            <h3 class="font-title text-lg font-semibold text-ink">Just the right features</h3>
+            <p class="text-sm text-muted leading-relaxed">It's your workout assistant, not a life coach.</p>
         </div>
-        <div class="flex flex-col items-center text-center gap-3 p-4">
-            <div class="bg-primary/10 p-4 rounded-full text-primary mb-2 flex items-center justify-center">
+        <div class="flex flex-col items-start text-left gap-3 p-4">
+            <div class="bg-fill size-11 rounded text-accent-ink mb-1 flex items-center justify-center">
                 <span class="material-symbols-outlined">favorite</span>
             </div>
-            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Wellness Focused</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Metrics that matter to your health</p>
+            <h3 class="font-title text-lg font-semibold text-ink">Your health stays on your device</h3>
+            <p class="text-sm text-muted leading-relaxed">Heart rate, sleep, and body metrics never leave your phone.</p>
         </div>
     </div>
 </section>
 
-<!-- Minimal Footer -->
-<footer class="w-full py-10 px-6 border-t border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark">
+<!-- Presets -->
+<section class="w-full py-16 px-6 border-t">
+    <div class="max-w-[1200px] mx-auto flex flex-col gap-10">
+        <div class="max-w-xl flex flex-col gap-3">
+            <h2 class="font-title text-3xl sm:text-4xl font-semibold tracking-tight text-ink">Four looks. One app.</h2>
+            <p class="text-muted leading-relaxed">Every preset is hand-tuned, from the colors to the typeface. Pick the
+                one that feels like your gym, in light or dark.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Forge -->
+            <div class="preset-forge rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
+                <div class="workout-card">
+                    <div class="wc-head"><span class="wc-title">Pull Day</span><span class="wc-more">•••</span></div>
+                    <div class="wc-date">Friday, 21 Aug</div>
+                    <div class="wc-stats">
+                        <div class="wc-stat"><div class="wc-value">1 h 24 m</div><div class="wc-label">DURATION</div></div>
+                        <div class="wc-stat"><div class="wc-value">3375 kg</div><div class="wc-label">TOTAL VOLUME</div></div>
+                    </div>
+                    <div class="wc-rule"></div>
+                    <div class="wc-row"><span>Deadlift ×3</span><span>225 kg × 5</span></div>
+                    <div class="wc-row"><span>Pull Up ×3</span><span>12×</span></div>
+                    <div class="wc-row"><span>Bent Over Row ×3</span><span>135 kg × 8</span></div>
+                </div>
+                <div style="color: var(--ink); font-family: var(--font-display);" class="text-base font-bold">Forge</div>
+                <div style="color: var(--muted); font-family: var(--font-text);" class="text-xs -mt-3">Volt on green-black. Onest and Unbounded.</div>
+            </div>
+            <!-- Ink -->
+            <div class="preset-ink rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
+                <div class="workout-card">
+                    <div class="wc-head"><span class="wc-title">Pull Day</span><span class="wc-more">•••</span></div>
+                    <div class="wc-date">Friday, 21 Aug</div>
+                    <div class="wc-stats">
+                        <div class="wc-stat"><div class="wc-value">1 h 24 m</div><div class="wc-label">DURATION</div></div>
+                        <div class="wc-stat"><div class="wc-value">3375 kg</div><div class="wc-label">TOTAL VOLUME</div></div>
+                    </div>
+                    <div class="wc-rule"></div>
+                    <div class="wc-row"><span>Deadlift ×3</span><span>225 kg × 5</span></div>
+                    <div class="wc-row"><span>Pull Up ×3</span><span>12×</span></div>
+                    <div class="wc-row"><span>Bent Over Row ×3</span><span>135 kg × 8</span></div>
+                </div>
+                <div style="color: var(--ink); font-family: var(--font-display);" class="text-base font-semibold">Ink</div>
+                <div style="color: var(--muted); font-family: var(--font-text);" class="text-xs -mt-3">Paper and cobalt. Plex Sans and Literata.</div>
+            </div>
+            <!-- Utility -->
+            <div class="preset-utility rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
+                <div class="workout-card">
+                    <div class="wc-head"><span class="wc-title">Pull Day</span><span class="wc-more">•••</span></div>
+                    <div class="wc-date">Friday, 21 Aug</div>
+                    <div class="wc-stats">
+                        <div class="wc-stat"><div class="wc-value">1 h 24 m</div><div class="wc-label">DURATION</div></div>
+                        <div class="wc-stat"><div class="wc-value">3375 kg</div><div class="wc-label">TOTAL VOLUME</div></div>
+                    </div>
+                    <div class="wc-rule"></div>
+                    <div class="wc-row"><span>Deadlift ×3</span><span>225 kg × 5</span></div>
+                    <div class="wc-row"><span>Pull Up ×3</span><span>12×</span></div>
+                    <div class="wc-row"><span>Bent Over Row ×3</span><span>135 kg × 8</span></div>
+                </div>
+                <div style="color: var(--ink); font-family: var(--font-display);" class="text-base font-bold">Utility</div>
+                <div style="color: var(--muted); font-family: var(--font-text);" class="text-xs -mt-3">Forest on cool neutrals. Golos Text.</div>
+            </div>
+            <!-- Ember -->
+            <div class="preset-ember rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
+                <div class="workout-card">
+                    <div class="wc-head"><span class="wc-title">Pull Day</span><span class="wc-more">•••</span></div>
+                    <div class="wc-date">Friday, 21 Aug</div>
+                    <div class="wc-stats">
+                        <div class="wc-stat"><div class="wc-value">1 h 24 m</div><div class="wc-label">DURATION</div></div>
+                        <div class="wc-stat"><div class="wc-value">3375 kg</div><div class="wc-label">TOTAL VOLUME</div></div>
+                    </div>
+                    <div class="wc-rule"></div>
+                    <div class="wc-row"><span>Deadlift ×3</span><span>225 kg × 5</span></div>
+                    <div class="wc-row"><span>Pull Up ×3</span><span>12×</span></div>
+                    <div class="wc-row"><span>Bent Over Row ×3</span><span>135 kg × 8</span></div>
+                </div>
+                <div style="color: var(--ink); font-family: var(--font-display);" class="text-base font-bold">Ember</div>
+                <div style="color: var(--muted); font-family: var(--font-text);" class="text-xs -mt-3">Heat on warm neutrals. Rubik.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="w-full py-10 px-6 border-t bg-ground">
     <div class="max-w-[960px] mx-auto flex flex-col items-center gap-6">
         <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-            <a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors flex items-center gap-1"
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors flex items-center gap-1"
                href="privacy.html">
                 <span class="material-symbols-outlined text-[16px]">shield</span>
                 Privacy Policy
             </a>
-            <a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors" href="terms.html">Terms
-                of
-                Service</a>
-            <a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors"
-               href="account.html">Account Control</a>
-            <a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors"
-               href="mailto:info@heart-of.me">info@heart-of.me</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="terms.html">Terms of Service</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="account.html">Account Control</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="mailto:info@heart-of.me">info@heart-of.me</a>
         </div>
-        <p class="text-xs text-slate-400 font-light">
+        <p class="text-xs text-muted">
             © <span id="footer-year"></span> Heart of Yours. All rights reserved. Designed for peace of mind.
         </p>
     </div>

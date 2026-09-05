@@ -1,70 +1,51 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <link rel="apple-touch-icon" href="assets/favicon.png">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Delete Account - Heart of Yours</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap"
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,600&display=swap"
           rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"/>
+    <link rel="stylesheet" href="assets/site.css">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="assets/site.js"></script>
-    <style>
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 1s ease-out forwards;
-        }
-
-        .opacity-0 {
-            opacity: 0;
-        }
-    </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-[#0d121b] dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-primary/20">
+<body class="bg-ground text-ink font-text min-h-screen flex flex-col overflow-x-hidden selection:bg-accent selection:text-on-accent">
 <!-- Navbar -->
 <header class="w-full flex justify-center pt-6 pb-2 px-6 sm:px-10 z-10">
     <div class="w-full max-w-[1200px] flex items-center justify-between">
         <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div class="size-9 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full shadow-md overflow-hidden border border-slate-100 dark:border-slate-700">
+            <div class="size-9 flex items-center justify-center bg-surface rounded overflow-hidden border">
                 <img src="assets/favicon.png" alt="Heart of Yours Logo" class="size-full object-cover"/>
             </div>
-            <h2 class="text-lg font-semibold tracking-tight">Heart of Yours</h2>
+            <h2 class="text-lg font-title font-semibold tracking-tight">Heart of Yours</h2>
         </a>
-        <nav class="hidden md:flex items-center gap-8">
-            <a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
-               href="terms.html">Terms of Service</a>
-            <a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
-               href="privacy.html">Privacy</a>
+        <nav class="flex items-center gap-6 sm:gap-8">
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="terms.html">Terms of Service</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="privacy.html">Privacy</a>
         </nav>
     </div>
 </header>
 
 <!-- Main Content -->
 <main class="flex-grow flex flex-col items-center justify-center w-full px-6 py-12 md:py-20">
-    <div class="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-12 shadow-sm border border-slate-100 dark:border-slate-800 animate-fade-in opacity-0 text-center">
+    <div class="w-full max-w-2xl bg-surface rounded-xl p-8 sm:p-12 border animate-fade-in opacity-0 text-center">
 
-        <div class="w-16 h-16 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <div class="size-14 bg-fill text-destructive rounded-xl flex items-center justify-center mx-auto mb-6">
             <span class="material-symbols-outlined text-3xl">no_accounts</span>
         </div>
 
-        <h1 class="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white mb-4">
+        <h1 class="font-title text-3xl font-semibold tracking-tight text-ink mb-4">
             Delete Your Account
         </h1>
 
-        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-8">
+        <p class="text-muted leading-relaxed mb-8">
             To delete your Heart of Yours account and all associated data, you need to open the app settings. Tap the
             button below from your mobile device to be taken directly to the account deletion screen in the app.
         </p>
@@ -72,7 +53,7 @@
         <a id="app-settings-link"
            target="_blank"
            href="#"
-           class="inline-flex items-center justify-center gap-2 h-14 px-8 rounded-xl bg-red-500 text-white font-semibold shadow-sm hover:bg-red-600 transition-all hover:shadow-md hover:-translate-y-0.5 w-full sm:w-auto">
+           class="inline-flex items-center justify-center gap-2 h-11 px-6 rounded bg-destructive text-on-destructive font-medium hover:opacity-90 transition-opacity w-full sm:w-auto">
             <span class="material-symbols-outlined">open_in_new</span>
             Open App Settings
         </a>
@@ -81,28 +62,26 @@
             document.getElementById('app-settings-link').href = window.location.origin + '/profile/settings/account';
         </script>
 
-        <div class="mt-8 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-sm text-slate-500 dark:text-slate-400 text-left">
-            <strong>Note:</strong> If the button doesn't open the app automatically, you can manually navigate to:
+        <div class="mt-8 p-4 bg-fill rounded text-sm text-muted text-left">
+            <strong class="text-ink">Note:</strong> If the button doesn't open the app automatically, you can manually navigate to
             <em>Profile > Settings > Account control > Delete Account</em> inside the Heart of Yours app.
         </div>
     </div>
 </main>
 
-<!-- Minimal Footer -->
-<footer class="w-full py-10 px-6 border-t border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark mt-auto">
+<!-- Footer -->
+<footer class="w-full py-10 px-6 border-t bg-ground mt-auto">
     <div class="max-w-[960px] mx-auto flex flex-col items-center gap-6">
         <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-            <a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors flex items-center gap-1"
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors flex items-center gap-1"
                href="privacy.html">
                 <span class="material-symbols-outlined text-[16px]">shield</span>
                 Privacy Policy
             </a>
-            <a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors" href="terms.html">Terms
-                of Service</a>
-            <a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors"
-               href="mailto:info@heart-of.me">info@heart-of.me</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="terms.html">Terms of Service</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="mailto:info@heart-of.me">info@heart-of.me</a>
         </div>
-        <p class="text-xs text-slate-400 font-light">
+        <p class="text-xs text-muted">
             © <span id="footer-year"></span> Heart of Yours. All rights reserved. Designed for peace of mind.
         </p>
     </div>
