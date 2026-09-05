@@ -35,6 +35,10 @@ class AppHarness {
 
   static const goodToken = 'good';
 
+  /// A valid, correctly-signed Firebase token whose `sign_in_provider` is
+  /// `anonymous` — exercises the 403 path without touching the network.
+  static const anonymousToken = 'anonymous';
+
   static Future<AppHarness> start({User? user}) async {
     final db = MockDatabase();
     final storage = MockStorage();
@@ -47,6 +51,7 @@ class AppHarness {
     final authenticated = user ?? User(id: 'u1', displayName: 'Sam');
     Future<User> verify(String _, String token) async {
       if (token == goodToken) return authenticated;
+      if (token == anonymousToken) throw AnonymousAccountError();
       throw AuthenticationError();
     }
 
