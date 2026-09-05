@@ -32,13 +32,17 @@
 <main class="flex-grow w-full max-w-3xl mx-auto px-6 py-16 md:py-24">
     <article class="prose prose-h1:text-4xl prose-h1:tracking-tight max-w-none">
         <h1>Privacy Policy</h1>
-        <p><strong>Last updated: December 18, 2025</strong></p>
+        <p><strong>Last updated: September 5, 2026</strong></p>
+        <p>Last reviewed against the app’s behaviour: September 5, 2026.</p>
 
         <p>Thanks for using Heart of Yours. This document explains what data we collect, how we use it, and what choices
             you have.</p>
 
         <p>We believe your workout data is your own. We store it carefully, don’t share it, and don’t lock it behind a
             paywall.</p>
+
+        <p>Your health data is a different matter: we don’t store it at all. Anything Heart reads from Apple Health
+            or Health Connect stays on your phone. More on that below.</p>
 
         <p>If anything here feels off, you're welcome to stop using the app — but we hope you won’t have to.</p>
 
@@ -53,9 +57,45 @@
         <p>This is the core of the app: your sets, reps, weights, and sessions. It’s stored securely in the cloud and
             linked to your account. You can always view, update, or delete your data.</p>
 
+        <h3>Health Data (Apple Health and Health Connect)</h3>
+        <p>If you choose to, Heart can read a few health metrics from your phone’s health store — Apple Health on
+            iPhone, Health Connect on Android — and show them next to your training. This only happens after you grant
+            permission in the operating system’s own sheet, and you can decline or revoke it at any time.</p>
+
+        <p><strong>What Heart reads:</strong> resting heart rate, heart rate variability, sleep, steps, active energy,
+            and body mass. Nothing else. Each reading also carries which app or device recorded it, so Heart can tell a
+            watch from a phone and avoid double-counting.</p>
+
+        <p><strong>Where it goes:</strong> nowhere. Heart keeps a copy on your phone so charts work offline, and that
+            copy never leaves the device. It is not uploaded to our servers, not included in analytics, and not shared
+            with anyone. It is not used for advertising, profiling, or anything other than showing it back to you.
+            Crash reports are stripped of anything that could contain a health value, and if you send us a bug report
+            with a screenshot, health numbers are blacked out before the picture is taken.</p>
+
+        <p><strong>What Heart writes:</strong> with your separate permission, Heart can save each workout you finish to
+            your health store, so your activity rings credit your lifting. It writes when you started, when you finished,
+            and what kind of workout it was — nothing else. Heart does not estimate calories or heart rate, and it never
+            writes anything you didn’t do. <strong>Settings → Health</strong> shows whether it’s on and takes you to your
+            phone’s health permissions to change it.</p>
+
+        <p><strong>Your controls:</strong></p>
+        <ul>
+            <li>Change or revoke what Heart may read in the Health app (iPhone: your profile → Apps) or in Health
+                Connect (Android).</li>
+            <li>Delete Heart’s copy from your phone under <strong>Settings → Health → Delete health data</strong>. Your
+                phone’s health store is untouched; Heart will read it again the next time it syncs, if you still allow
+                it.</li>
+            <li>Deleting the app removes Heart’s copy entirely.</li>
+        </ul>
+
+        <p>Because health data is never on our servers, deleting your Heart account doesn’t affect it either way: the
+            copy on your phone stays until you delete it or the app, and your phone’s health store keeps everything it
+            had. On Android, Heart’s local database is excluded from device backups. On iPhone it is part of the app’s
+            data, so it is included in your device backup if you have one — that backup is yours, and we never see it.</p>
+
         <h3>App Usage &amp; Debug Info</h3>
-        <p>We collect basic analytics (like which screens are used) and crash logs to help improve the app. This data is
-            anonymous and never sold.</p>
+        <p>We collect basic analytics through Firebase Analytics (like which screens are used) and crash logs to help
+            improve the app. This data is anonymous, never sold, and never includes your health data.</p>
 
         <h2>Your Choices</h2>
 
@@ -75,7 +115,7 @@
         <p><em>If you signed in with Google or Apple, you’ll first need to set a password. This ensures you can securely
             confirm the deletion.</em></p>
         <p>Once confirmed, your account and all synced workout data will be permanently removed. Deleted means
-            deleted.</p>
+            deleted. Health data was never there to begin with — see above for how to clear the copy on your phone.</p>
 
         <h2>Other Details</h2>
 
@@ -90,7 +130,8 @@
             to collect crash reports and error diagnostics.
 
             These reports may include technical details like device type, OS version, and logs related to the crash —
-            but they do not include your workout data or personal identifiers.
+            but they do not include your workout data, your health data, or personal identifiers. Errors in the
+            health feature are reported with their message removed, so a value can’t slip through inside one.
 
             We use this information solely to fix bugs and improve stability.
         </p>
