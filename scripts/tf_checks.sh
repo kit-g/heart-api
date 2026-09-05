@@ -40,11 +40,17 @@ export TF_IN_AUTOMATION=1
 export TF_INPUT=0
 mkdir -p "$TF_PLUGIN_CACHE_DIR"
 
-# The native tests configure an aws provider with skip_credentials_validation;
-# they pass with no credentials at all, but an AWS_PROFILE inherited from the
-# shell that does not exist (or has expired SSO) makes the SDK bail before the
-# skip flags apply. The checks are credential-free by design, so drop it.
-unset AWS_PROFILE
+# The iam module's test configures a real aws provider (skip_credentials_validation,
+# skip_requesting_account_id), and the SDK still insists on *finding* a
+# credential before the skip flags apply: on a CI runner with nothing
+# configured that is "No valid credential sources found". Placeholder static
+# keys satisfy the lookup and are never sent anywhere — the tests are plan-only
+# and the content stack's test mocks its providers entirely. Placeholders also
+# shadow whatever the shell has (a profile that does not exist, expired SSO),
+# so the checks are credential-free and environment-independent by design.
+unset AWS_PROFILE AWS_SESSION_TOKEN
+export AWS_ACCESS_KEY_ID=tf-checks-placeholder
+export AWS_SECRET_ACCESS_KEY=tf-checks-placeholder
 export AWS_EC2_METADATA_DISABLED=true
 
 echo "==> fmt"
