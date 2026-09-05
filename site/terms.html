@@ -1,37 +1,36 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Privacy Policy - Heart of Yours</title>
+    <title>Terms of Use - Heart of Yours</title>
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <link rel="apple-touch-icon" href="assets/favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&amp;display=swap"
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,600&display=swap"
           rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-          rel="stylesheet"/>
+    <link rel="stylesheet" href="assets/site.css">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script src="assets/site.js"></script>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-[#0d121b] dark:text-white font-display min-h-screen flex flex-col selection:bg-primary/20">
+<body class="bg-ground text-ink font-text min-h-screen flex flex-col selection:bg-accent selection:text-on-accent">
 <header class="w-full flex justify-center pt-6 pb-2 px-6 sm:px-10 z-10">
     <div class="w-full max-w-[1200px] flex items-center justify-between">
         <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div class="size-9 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full shadow-md overflow-hidden border border-slate-100 dark:border-slate-700">
+            <div class="size-9 flex items-center justify-center bg-surface rounded overflow-hidden border">
                 <img src="assets/favicon.png" alt="Heart of Yours Logo" class="size-full object-cover"/>
             </div>
-            <h2 class="text-lg font-semibold tracking-tight">Heart of Yours</h2>
+            <h2 class="text-lg font-title font-semibold tracking-tight">Heart of Yours</h2>
         </a>
         <nav class="flex items-center gap-8">
-            <a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
-               href="/">Back Home</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="/">Back Home</a>
         </nav>
     </div>
 </header>
 
 <main class="flex-grow w-full max-w-3xl mx-auto px-6 py-16 md:py-24">
-    <article
-            class="prose prose-slate dark:prose-invert prose-headings:font-semibold prose-h1:text-4xl prose-h1:tracking-tight max-w-none">
+    <article class="prose prose-h1:text-4xl prose-h1:tracking-tight max-w-none">
         <h1>Terms of Use</h1>
         <p><strong>Last updated: December 18, 2025</strong></p>
 
@@ -114,9 +113,9 @@
     </article>
 </main>
 
-<footer class="w-full py-10 px-6 border-t border-slate-200 dark:border-slate-800">
+<footer class="w-full py-10 px-6 border-t">
     <div class="max-w-[960px] mx-auto flex flex-col items-center gap-6">
-        <p class="text-xs text-slate-400 font-light">
+        <p class="text-xs text-muted">
             © <span id="footer-year"></span> Heart of Yours.
         </p>
     </div>

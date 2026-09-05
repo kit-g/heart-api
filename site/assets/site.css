@@ -1,0 +1,239 @@
+/* Heart marketing site — Ink preset of the Heart design system.
+   Token values mirror lib/core/theme/tokens.dart in kit-g/heart-of-yours.
+   Eleven tokens per brightness; the site never invents a twelfth. */
+
+:root {
+    --ground: #FFFFFF;
+    --surface: #FFFFFF;
+    --fill: #F4F1EA;
+    --ink: #1A1815;
+    --muted: #5D584E;
+    --faint: #948F85;
+    --border: #E2DED4;
+    --accent: #1F4EC8;
+    --on-accent: #FFFFFF;
+    --accent-ink: #1B43A8;
+    --destructive: #9E2B25;
+    --on-destructive: #FFFFFF;
+
+    --font-text: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-title: 'Literata', Georgia, serif;
+
+    color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ground: #141311;
+        --surface: #1E1C19;
+        --fill: #2A2721;
+        --ink: #F2F0EA;
+        --muted: #A29D93;
+        --faint: #6F6B63;
+        --border: #302D27;
+        --accent: #93ADFF;
+        --on-accent: #0F1526;
+        --accent-ink: #93ADFF;
+        --destructive: #FF7A66;
+        --on-destructive: #0F1526;
+    }
+}
+
+body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-text);
+}
+
+/* The other three presets, shown as swatches on the home page. Each is
+   pinned to the brightness the design system showcases it in. */
+.preset-forge {
+    --ground: #0F100D;
+    --surface: #191B15;
+    --fill: #232720;
+    --ink: #F1F2E9;
+    --muted: #9BA092;
+    --faint: #6F746A;
+    --border: #2A2D24;
+    --accent: #D4F547;
+    --on-accent: #121408;
+    --accent-ink: #D4F547;
+    --font-text: 'Onest', system-ui, sans-serif;
+    --font-title: 'Onest', system-ui, sans-serif;
+    --font-display: 'Unbounded', system-ui, sans-serif;
+}
+
+.preset-ink {
+    --ground: #FFFFFF;
+    --surface: #FFFFFF;
+    --fill: #F4F1EA;
+    --ink: #1A1815;
+    --muted: #5D584E;
+    --faint: #948F85;
+    --border: #E2DED4;
+    --accent: #1F4EC8;
+    --on-accent: #FFFFFF;
+    --accent-ink: #1B43A8;
+    --font-text: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-title: 'Literata', Georgia, serif;
+    --font-display: 'Literata', Georgia, serif;
+}
+
+.preset-utility {
+    --ground: #FFFFFF;
+    --surface: #FFFFFF;
+    --fill: #F2F4F5;
+    --ink: #16181D;
+    --muted: #575D66;
+    --faint: #949AA4;
+    --border: #E1E4E8;
+    --accent: #2F7A5F;
+    --on-accent: #FFFFFF;
+    --accent-ink: #27664E;
+    --font-text: 'Golos Text', system-ui, sans-serif;
+    --font-title: 'Golos Text', system-ui, sans-serif;
+    --font-display: 'Golos Text', system-ui, sans-serif;
+}
+
+.preset-ember {
+    --ground: #14100C;
+    --surface: #1F1913;
+    --fill: #2B241C;
+    --ink: #F4EFE6;
+    --muted: #A69C8C;
+    --faint: #746A5C;
+    --border: #332B21;
+    --accent: #FF9E3D;
+    --on-accent: #211204;
+    --accent-ink: #FF9E3D;
+    --font-text: 'Rubik', system-ui, sans-serif;
+    --font-title: 'Rubik', system-ui, sans-serif;
+    --font-display: 'Rubik', system-ui, sans-serif;
+}
+
+/* Workout card, straight from the design system's component spec:
+   title → date → two hero stats in the display face → hairline → roster. */
+.workout-card {
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px 14px 16px;
+    font-family: var(--font-text);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.workout-card .wc-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.workout-card .wc-title {
+    font-family: var(--font-title);
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.workout-card .wc-more {
+    color: var(--faint);
+    letter-spacing: 2px;
+}
+
+.workout-card .wc-date {
+    color: var(--muted);
+}
+
+.workout-card .wc-stats {
+    display: flex;
+    margin-top: 14px;
+}
+
+.workout-card .wc-stat {
+    flex: 1;
+}
+
+.workout-card .wc-value {
+    font-family: var(--font-display, var(--font-title));
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--accent-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.workout-card .wc-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+}
+
+.workout-card .wc-rule {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 0 8px;
+}
+
+.workout-card .wc-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.workout-card .wc-row + .wc-row {
+    margin-top: 4px;
+}
+
+.workout-card .wc-row span:first-child {
+    color: var(--muted);
+}
+
+.workout-card .wc-row span:last-child {
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Entrance motion. The system is silent on motion; keep it short and honest. */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-delay-100 {
+    animation-delay: 0.1s;
+}
+
+.animate-delay-200 {
+    animation-delay: 0.3s;
+}
+
+.animate-delay-300 {
+    animation-delay: 0.5s;
+}
+
+.opacity-0 {
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-fade-in {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+/* Utility classes must not resurrect an element the hidden attribute removed. */
+[hidden] {
+    display: none !important;
+}
