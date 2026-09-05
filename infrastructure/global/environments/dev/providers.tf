@@ -6,6 +6,13 @@ terraform {
       source  = "hashicorp/aws"
       version = ">= 6.40.0"
     }
+
+    # Used by ../../stack/firebase.tf; pinned here (not in the module) so
+    # Dependabot bumps each environment separately.
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "~> 8.0"
+    }
   }
 }
 

@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     supabase = {
-      source  = "supabase/supabase"
+      source = "supabase/supabase"
       # Minimum only, on purpose: the environment roots pin the exact version
       # (and Dependabot bumps those pins). An upper bound here would conflict
       # with every such bump — as `~> 1.9.0` vs the roots' 1.10.1 once did.
