@@ -1,0 +1,58 @@
+{
+  "exercises": [
+    {
+      "id": "018f2c9a-0000-7000-8000-000000000001",
+      "key": "ab-wheel",
+      "name": "Rueda abdominal",
+      "category": "Weighted Body Weight",
+      "target": "Core",
+      "instructions": "The ab wheel rollout is a challenging core exercise.",
+      "validated": true,
+      "asset": null,
+      "thumbnail": null,
+      "muscles": null,
+      "movement": null,
+      "health": null,
+      "own": false,
+      "archived": false,
+      "unit_system": null,
+      "rest_timer": null
+    },
+    {
+      "id": "018f2c9a-0000-7000-8000-000000000002",
+      "key": "lat-pulldown-cable",
+      "name": "Jalón al pecho (polea)",
+      "category": "Machine",
+      "target": "Back",
+      "instructions": "Pull the bar down to chest level, squeezing the lats.",
+      "validated": true,
+      "asset": null,
+      "thumbnail": null,
+      "muscles": null,
+      "movement": null,
+      "health": null,
+      "own": false,
+      "archived": false,
+      "unit_system": null,
+      "rest_timer": null
+    },
+    {
+      "id": "018f2c9a-0000-7000-8000-000000000003",
+      "key": "bench-press-barbell",
+      "name": "Press de banca (barra)",
+      "category": "Barbell",
+      "target": "Chest",
+      "instructions": "Lower the bar to the chest, then press up to lockout.",
+      "validated": true,
+      "asset": null,
+      "thumbnail": null,
+      "muscles": null,
+      "movement": null,
+      "health": null,
+      "own": false,
+      "archived": false,
+      "unit_system": null,
+      "rest_timer": null
+    }
+  ]
+}
