@@ -1,8 +1,11 @@
 terraform {
   required_providers {
+    # No version here on purpose. Both environments wire this one module, so
+    # a constraint in this file made Dependabot open the same one-line PR
+    # twice (once per environment directory it watches). Each environment
+    # pins google-beta in its own providers.tf instead.
     google-beta = {
-      source  = "hashicorp/google-beta"
-      version = "~> 8.0"
+      source = "hashicorp/google-beta"
     }
   }
 }

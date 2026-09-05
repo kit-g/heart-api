@@ -16,6 +16,9 @@ pass account-specific inputs (role ARN, bucket, function name).
   and dispatch-with-typed-inputs on a reusable is the fat-finger path to prod (hand-typed
   ARNs). Manual runs go through the wrappers' `workflow_dispatch: { }`.
 - Wrappers own all triggers, `permissions`, and `concurrency`; reusables own the jobs.
+- **Check-only workflows** (`python-checks.yml`, `terraform-checks.yml`) are single
+  files, not families: `pull_request` + `push: main` with the same `paths:` filter, and
+  they only ever call a repo script (`scripts/tf_checks.sh`) or make target.
 
 ## Triggers
 

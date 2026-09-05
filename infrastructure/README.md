@@ -32,6 +32,18 @@ infrastructure/
 
 `modules/iam/tests/` and `stacks/content/tests/` hold native `terraform test` (`.tftest.hcl`) suites.
 
+## Checks
+
+`make test-tf` (CI: `terraform-checks.yml`, on any PR touching this tree) runs
+`scripts/tf_checks.sh`: `fmt -check`, then `init -backend=false` + `validate` for every
+root module, then the native test suites. No credentials, no state. It is what tests a
+Dependabot provider bump — the new constraint gets resolved and every resource is checked
+against the new provider's schema. A real `terraform plan` is still a local step.
+
+Provider versions are pinned in each environment's `providers.tf`, never in a shared
+module: both `global/` environments wire the same `stack/`, and a constraint there made
+Dependabot open the same one-line PR twice.
+
 ## Deployment
 
 ```bash

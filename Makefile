@@ -1,7 +1,7 @@
 # Repo-wide entrypoints. `make test` runs the same matrix CI does.
 # Database targets need local Postgres + pgtap (see database/README.md).
 
-.PHONY: bootstrap test test-dart test-db test-python lint format-check db-up db-down db-reset db-seed
+.PHONY: bootstrap test test-dart test-db test-python test-tf lint format-check db-up db-down db-reset db-seed
 
 bootstrap:
 	cd api && dart pub get && dart run build_runner build
@@ -10,7 +10,7 @@ bootstrap:
 	uv sync --all-packages
 	uv run pre-commit install --hook-type pre-push
 
-test: test-dart test-db test-python
+test: test-dart test-db test-python test-tf
 
 test-dart:
 	cd api && dart test
@@ -49,6 +49,11 @@ test-python:
 	uv run pytest
 	uv run pytest assets/tests -o pythonpath=assets/assets
 	uv run pytest scripts/tests -o pythonpath=scripts
+
+# fmt + init/validate of every Terraform root + the native .tftest.hcl suites.
+# Credential-free; first run downloads providers (cached in ~/.terraform.d).
+test-tf:
+	./scripts/tf_checks.sh
 
 lint:
 	cd api && dart analyze

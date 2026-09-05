@@ -1,0 +1,51 @@
+name: "Terraform checks"
+
+# Credential-free checks for infrastructure/: fmt, init + validate of every
+# root module, and the native .tftest.hcl suites. This is the only thing that
+# exercises Dependabot's provider bumps — init resolves the new constraint,
+# validate checks every resource against the new provider's schema. Nothing
+# here reads state or talks to a cloud; `terraform plan` stays a local step.
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'infrastructure/**'
+      - 'scripts/tf_checks.sh'
+      - '.github/workflows/terraform-checks.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'infrastructure/**'
+      - 'scripts/tf_checks.sh'
+      - '.github/workflows/terraform-checks.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-checks-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    env:
+      TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform-plugin-cache
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.8
+          terraform_wrapper: false
+
+      # Lock files are gitignored, so key the provider cache on the
+      # constraints themselves.
+      - uses: actions/cache@v6
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: tf-providers-${{ runner.os }}-${{ hashFiles('infrastructure/**/*.tf') }}
+          restore-keys: tf-providers-${{ runner.os }}-
+
+      - name: "Terraform checks"
+        run: ./scripts/tf_checks.sh
