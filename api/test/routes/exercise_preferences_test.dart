@@ -7,6 +7,7 @@ import 'package:mockito/mockito.dart';
 import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
 
+import '../helpers/app_harness.dart';
 import '../helpers/request.dart';
 import '../mocks.mocks.dart';
 
@@ -14,10 +15,10 @@ const _meId = 'u1';
 const _exerciseId = '019def00-0000-7000-8000-000000000001';
 
 void main() {
-  late MockExercisePreferenceService service;
+  late MockApiExercisePreferenceService service;
 
   setUp(() {
-    service = MockExercisePreferenceService();
+    service = MockApiExercisePreferenceService();
   });
 
   Request wire(Request req) {
@@ -25,6 +26,40 @@ void main() {
       ..user = User(id: _meId)
       ..exercisePreferenceService = service;
   }
+
+  group('getExercisePreferences', () {
+    test('returns the envelope with the service’s items', () async {
+      final prefs = [
+        ExercisePreference(exerciseId: _exerciseId, unitSystem: MeasurementUnit.imperial, restTimer: 90),
+        ExercisePreference(exerciseId: '019def00-0000-7000-8000-000000000002', restTimer: 120),
+      ];
+      when(service.getExercisePreferences(any)).thenAnswer((_) async => prefs);
+
+      final req = wire(bareRequest(method: Method.get, path: '/exercise-preferences'));
+
+      final result = await getExercisePreferences(req);
+      expect(result.preferences, prefs);
+      verify(service.getExercisePreferences(_meId)).called(1);
+
+      // Parity: every item must round-trip through ExercisePreference.fromJson
+      // — this is the whole point of the read, since the app parses it that way.
+      for (final pref in result.preferences) {
+        final roundTripped = ExercisePreference.fromJson(pref.toMap());
+        expect(roundTripped.exerciseId, pref.exerciseId);
+        expect(roundTripped.unitSystem, pref.unitSystem);
+        expect(roundTripped.restTimer, pref.restTimer);
+      }
+    });
+
+    test('returns an empty envelope when the user has no preferences', () async {
+      when(service.getExercisePreferences(any)).thenAnswer((_) async => const []);
+
+      final req = wire(bareRequest(method: Method.get, path: '/exercise-preferences'));
+
+      final result = await getExercisePreferences(req);
+      expect(result.preferences, isEmpty);
+    });
+  });
 
   group('saveExercisePreference', () {
     test('upserts unit + rest timer for the requesting user', () async {
@@ -160,6 +195,26 @@ void main() {
       );
       expect(() => deleteExercisePreference(req), throwsA(isA<BadRequest>()));
       verifyNever(service.clearPreference(any, any, any));
+    });
+  });
+
+  group('GET /exercise-preferences (auth)', () {
+    late AppHarness app;
+
+    setUp(() async => app = await AppHarness.start());
+    tearDown(() => app.stop());
+
+    test('rejects an anonymous Firebase account (403 anonymous_account)', () async {
+      final res = await app.send('GET', '/exercise-preferences', token: AppHarness.anonymousToken);
+      expect(res.status, 403);
+      expect(res.body, contains('anonymous_account'));
+      verifyNever(app.db.getExercisePreferences(any));
+    });
+
+    test('rejects a missing token (401)', () async {
+      final res = await app.send('GET', '/exercise-preferences', token: null);
+      expect(res.status, 401);
+      verifyNever(app.db.getExercisePreferences(any));
     });
   });
 }

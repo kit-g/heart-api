@@ -2,6 +2,7 @@ import 'package:heart/db/db.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/events.dart';
 import 'package:heart/models/creates.dart';
+import 'package:heart/models/exercise_preferences.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/profile.dart';
@@ -22,7 +23,7 @@ import 'package:mockito/annotations.dart';
   IdempotentTemplateFolderService,
   ExerciseService,
   ChartPreferenceService,
-  ExercisePreferenceService,
+  ApiExercisePreferenceService,
   IdempotentGoalService,
   CommentService,
   ConnectionsService,
