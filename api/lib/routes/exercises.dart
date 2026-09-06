@@ -1,9 +1,11 @@
+import 'package:heart/core/handler.dart';
 import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/exercises.dart';
+import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
 Future<ExerciseResponse> getExercises(Request request) async {
@@ -17,7 +19,7 @@ Future<ExerciseResponse> getExercises(Request request) async {
   return ExerciseResponse(exerciseLibrary: response);
 }
 
-Future<ExerciseModel> createExercise(Request request) async {
+Future<Model> createExercise(Request request) async {
   final input = await ExerciseCreateIn.fromRequest(request);
   final row = await request.exerciseService.createExercise(
     userId: request.userId,
@@ -27,7 +29,12 @@ Future<ExerciseModel> createExercise(Request request) async {
     target: input.target,
     instructions: input.instructions,
   );
-  return ExerciseModel(row);
+  // `created` rides along in the row map (kit-g/heart-api#66) purely to pick
+  // the status code — it is never part of the wire body.
+  final created = row.remove('created') as bool;
+  final model = ExerciseModel(row);
+  if (created) return Created(model);
+  return model;
 }
 
 Future<ExerciseModel> updateExercise(Request request) async {
