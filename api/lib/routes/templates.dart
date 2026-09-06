@@ -1,3 +1,4 @@
+import 'package:heart/core/handler.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
@@ -6,9 +7,14 @@ import 'package:heart/models/pagination.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-Future<Template> createTemplate(Request request) async {
+Future<Model> createTemplate(Request request) async {
   final input = await TemplateCreateIn.fromRequest(request);
-  return request.templatesService.createTemplate(userId: request.userId, body: input.request);
+  final (template, isNew) = await request.templatesService.createTemplateOrExisting(
+    userId: request.userId,
+    body: input.request,
+  );
+  if (isNew) return Created(template);
+  return template;
 }
 
 Future<Template> updateTemplate(Request request) {

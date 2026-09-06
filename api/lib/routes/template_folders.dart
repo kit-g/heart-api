@@ -1,3 +1,4 @@
+import 'package:heart/core/handler.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
@@ -11,9 +12,14 @@ Future<TemplateFoldersResponse> getMyFolders(Request req) async {
   return TemplateFoldersResponse(folders: folders);
 }
 
-Future<TemplateFolder> createFolder(Request req) async {
+Future<Model> createFolder(Request req) async {
   final input = await TemplateFolderCreateIn.fromRequest(req);
-  return req.templateFolderService.createFolder(userId: req.userId, folder: input.folder);
+  final (folder, isNew) = await req.templateFolderService.createFolderOrExisting(
+    userId: req.userId,
+    folder: input.folder,
+  );
+  if (isNew) return Created(folder);
+  return folder;
 }
 
 Future<TemplateFolder> updateFolder(Request req) {
