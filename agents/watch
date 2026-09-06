@@ -5,10 +5,24 @@
 #
 # Read-only: Ctrl-C stops the view, never the agent. Ends when the
 # container exits (the final summary is in `docker logs heart-api-agent-<name>`).
+#
+# Follows the *newest* transcript of the agent's worktree project: the config
+# volume is per name and survives --rm, so a relaunched agent has older
+# sessions beside its current one, and `tail` over several files interleaves
+# "==> file <==" headers that are not JSON. The transcript appears a minute
+# or so after launch (worktree creation, first model turn), so wait for it.
 set -euo pipefail
 
 NAME="${1:?usage: agents/watch <name>}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
-exec docker exec "heart-api-agent-$NAME" sh -c \
-  'tail -f -n +1 "$CLAUDE_CONFIG_DIR"/projects/*/*.jsonl' | jq -rj -f "$HERE/narrate.jq"
+docker exec "heart-api-agent-$NAME" sh -c '
+  until f=$(ls -t "$CLAUDE_CONFIG_DIR"/projects/*--claude-worktrees-"$1"/*.jsonl 2>/dev/null | head -n 1) \
+        && [ -n "$f" ]; do
+    echo "waiting for the session to start…" >&2
+    sleep 3
+  done
+  exec tail -q -f -n +1 "$f"
+' _ "$NAME" \
+  | grep --line-buffered '^{' \
+  | jq --unbuffered -rj -f "$HERE/narrate.jq"

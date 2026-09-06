@@ -70,6 +70,22 @@ void main() {
 
       expect(await _status(handler, request), 401);
     });
+
+    test('403 with code anonymous_account when the authenticator rejects an anonymous token', () async {
+      var nextCalled = false;
+      Response next(Request _) {
+        nextCalled = true;
+        return JsonResponse.ok();
+      }
+
+      final handler = authentication(shouldAuthenticate: (_) => true)(next);
+      final request = req(bearer: 'anon')..authenticator = (_, _) async => throw AnonymousAccountError();
+
+      final result = await handler(request) as Response;
+      expect(result.statusCode, 403);
+      expect(await result.readAsString(), contains('anonymous_account'));
+      expect(nextCalled, isFalse);
+    });
   });
 
   group('version', () {

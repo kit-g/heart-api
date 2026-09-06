@@ -73,16 +73,16 @@ Then register in `routes/index.dart`:
 
 ### Inputs available on a Request
 
-| What                                               | Where it comes from                                                                                            |
-|----------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| `request.userId`, `request.user`                   | `RequestUser` extension in `globals/globals.dart`. Set by `authentication` middleware (Firebase token verify). |
-| `request.config`                                   | `AppConfig`, set by `configuration` middleware. Reads env vars.                                                |
-| `request.awsConfig`                                | `AwsConfig` (credentials + region), set by `awsConfig` middleware.                                             |
-| `request.profileService`, `.workoutsService`, etc. | Set by per-path DB middleware (`profilesDb`, `workoutsDb`, …) defined in `middleware/database.dart`.           |
-| `request.imageStorageService`                      | S3-backed `ApiImageStorageService`, set by `imageStorageDb` middleware.                                        |
-| `request.pathParameters.raw[#workoutId]`           | Provided by relic's router for `:workoutId`-style segments.                                                    |
-| `request.queryParameters.raw['cursor']`            | Query string. Typed query params via `IntQueryParam('limit')`.                                                 |
-| `await request.json()`                             | Parses the JSON body. From `core/request.dart`.                                                                |
+| What                                               | Where it comes from                                                                                                                                                                                                              |
+|----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `request.userId`, `request.user`                   | `RequestUser` extension in `globals/globals.dart`. Set by `authentication` middleware (Firebase token verify). A valid but anonymous Firebase token is rejected here with `403 anonymous_account`, never reaches `request.user`. |
+| `request.config`                                   | `AppConfig`, set by `configuration` middleware. Reads env vars.                                                                                                                                                                  |
+| `request.awsConfig`                                | `AwsConfig` (credentials + region), set by `awsConfig` middleware.                                                                                                                                                               |
+| `request.profileService`, `.workoutsService`, etc. | Set by per-path DB middleware (`profilesDb`, `workoutsDb`, …) defined in `middleware/database.dart`.                                                                                                                             |
+| `request.imageStorageService`                      | S3-backed `ApiImageStorageService`, set by `imageStorageDb` middleware.                                                                                                                                                          |
+| `request.pathParameters.raw[#workoutId]`           | Provided by relic's router for `:workoutId`-style segments.                                                                                                                                                                      |
+| `request.queryParameters.raw['cursor']`            | Query string. Typed query params via `IntQueryParam('limit')`.                                                                                                                                                                   |
+| `await request.json()`                             | Parses the JSON body. From `core/request.dart`.                                                                                                                                                                                  |
 
 ### Returning errors
 
