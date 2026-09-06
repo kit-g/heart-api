@@ -4,17 +4,12 @@
 
 Supports the anonymous-to-account upsync replay (kit-g/heart-api#66): the app's
 local-first writes become idempotent on the client's own id when replayed into
-a real account. Server-only interfaces — no app-facing behavior changes.
+a real account.
 
-- New: `TemplateRequest.id` — the template's client-minted id, read on create
-  so a replayed `POST /templates` lands on the same row instead of a
-  duplicate.
-- **Note**: `ApiTemplateService.createTemplate`, `ApiTemplateFolderService.createFolder`,
-  and `GoalService.createGoal` now return `(T, bool created)` instead of a bare
-  `T` — `created` distinguishes a freshly-inserted row from an idempotent
-  replay landing on one that already existed. These three interfaces are
-  implemented only by `api/`'s `Database`; the app does not consume them, so
-  this is not treated as an app-facing break.
+- New: `TemplateRequest.id` — the template's client-minted id, optional, read
+  on create so a replayed `POST /templates` lands on the same row instead of a
+  duplicate. Nothing else in the package changes; the created-vs-existing
+  signal the API needs lives in API-only sub-interfaces (`api/lib/models/creates.dart`).
 
 ## 2.0.0
 
