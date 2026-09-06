@@ -1,6 +1,6 @@
 part of 'db.dart';
 
-mixin _TemplateFolders on _DatabaseBase, _Templates implements ApiTemplateFolderService {
+mixin _TemplateFolders on _DatabaseBase, _Templates implements IdempotentTemplateFolderService {
   @override
   Future<Iterable<TemplateFolder>> getFolders({required String userId}) async {
     final rows = await _pool.execute(
@@ -11,14 +11,26 @@ mixin _TemplateFolders on _DatabaseBase, _Templates implements ApiTemplateFolder
   }
 
   @override
-  Future<TemplateFolder> createFolder({required String userId, required TemplateFolder folder}) async {
-    final rows = await _pool.execute(
-      _createTemplateFolder.toSql(),
-      parameters: {'userId': userId, 'name': folder.name, 'orderIndex': folder.order},
-    );
-    // ON CONFLICT DO NOTHING: no row means the name is already in use.
-    if (rows.isEmpty) throw BadRequest(reason: 'you already have a folder called "${folder.name}"');
-    return TemplateFolder.fromRow(rows.first.toColumnMap());
+  Future<TemplateFolder> createFolder({required String userId, required TemplateFolder folder}) async =>
+      (await createFolderOrExisting(userId: userId, folder: folder)).$1;
+
+  @override
+  Future<(TemplateFolder, bool created)> createFolderOrExisting({
+    required String userId,
+    required TemplateFolder folder,
+  }) async {
+    try {
+      final rows = await _retryOnCreateRace(
+        () => _pool.execute(
+          _createTemplateFolder.toSql(),
+          parameters: {'userId': userId, 'id': folder.id, 'name': folder.name, 'orderIndex': folder.order},
+        ),
+      );
+      final row = rows.first.toColumnMap();
+      return (TemplateFolder.fromRow(row), row['created'] as bool);
+    } on ServerException catch (e) {
+      _rethrowForeignId(e);
+    }
   }
 
   @override
