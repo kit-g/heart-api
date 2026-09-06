@@ -114,6 +114,60 @@ void main() {
     });
   });
 
+  group('getExercisePreferences', () {
+    test('lists unit-only, timer-only, and both rows, excluding chart-only and other users', () async {
+      final unitOnly = await h.seedGlobalExercise();
+      final timerOnly = await h.seedGlobalExercise();
+      final both = await h.seedGlobalExercise();
+      final chartOnly = await h.seedGlobalExercise();
+      final otherUsersExercise = await h.seedGlobalExercise();
+
+      await h.db.savePreference(
+        ExercisePreference(exerciseId: unitOnly, unitSystem: MeasurementUnit.imperial),
+        ownerId,
+      );
+      await h.db.savePreference(
+        ExercisePreference(exerciseId: timerOnly, restTimer: 60),
+        ownerId,
+      );
+      await h.db.savePreference(
+        ExercisePreference(exerciseId: both, unitSystem: MeasurementUnit.metric, restTimer: 90),
+        ownerId,
+      );
+      await h.db.saveChartPreference(
+        ChartPreference.create(id: chartOnly, type: ChartPreferenceType.totalVolume),
+        ownerId,
+      );
+      await h.db.savePreference(
+        ExercisePreference(exerciseId: otherUsersExercise, unitSystem: MeasurementUnit.imperial),
+        otherId,
+      );
+
+      final prefs = (await h.db.getExercisePreferences(ownerId)).toList();
+
+      expect(prefs, hasLength(3));
+      expect(prefs.map((p) => p.exerciseId), isNot(contains(chartOnly)));
+      expect(prefs.map((p) => p.exerciseId), isNot(contains(otherUsersExercise)));
+
+      final unitOnlyPref = prefs.firstWhere((p) => p.exerciseId == unitOnly);
+      expect(unitOnlyPref.unitSystem, MeasurementUnit.imperial);
+      expect(unitOnlyPref.restTimer, isNull);
+
+      final timerOnlyPref = prefs.firstWhere((p) => p.exerciseId == timerOnly);
+      expect(timerOnlyPref.unitSystem, isNull);
+      expect(timerOnlyPref.restTimer, 60);
+
+      final bothPref = prefs.firstWhere((p) => p.exerciseId == both);
+      expect(bothPref.unitSystem, MeasurementUnit.metric);
+      expect(bothPref.restTimer, 90);
+    });
+
+    test('returns an empty list for a user with no preferences', () async {
+      final freshUser = await h.seedProfile();
+      expect(await h.db.getExercisePreferences(freshUser), isEmpty);
+    });
+  });
+
   group('clearPreference', () {
     test('unitSystem clears only the unit, leaving the rest timer intact', () async {
       final exerciseId = await h.seedGlobalExercise();
