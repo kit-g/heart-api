@@ -1,6 +1,6 @@
 part of 'db.dart';
 
-mixin _Goals on _DatabaseBase implements GoalService {
+mixin _Goals on _DatabaseBase implements IdempotentGoalService {
   @override
   Future<Iterable<Goal>> getTargetUserGoals({
     required String requesterId,
@@ -18,25 +18,38 @@ mixin _Goals on _DatabaseBase implements GoalService {
   }
 
   @override
-  Future<Goal> createGoal(Goal goal, String userId) async {
-    final result = await _pool.execute(
-      _createGoal.toSql(),
-      parameters: {
-        'userId': userId,
-        'metric': goal.metric.value,
-        'exerciseId': goal.exerciseId,
-        'cadence': goal.cadence?.value,
-        'stages': _encodeStages(goal.stages),
-      },
-    );
-    // No row means the insert's cap guard fired — the user is already at the limit.
-    if (result.isEmpty) {
-      throw const BadRequest(
-        code: 'goal_limit',
-        reason: 'you can have at most $_maxActiveGoals active goals; archive or delete one first',
+  Future<Goal> createGoal(Goal goal, String userId) async => (await createGoalOrExisting(goal, userId)).$1;
+
+  @override
+  Future<(Goal, bool created)> createGoalOrExisting(Goal goal, String userId) async {
+    try {
+      final result = await _retryOnCreateRace(
+        () => _pool.execute(
+          _createGoal.toSql(),
+          parameters: {
+            'id': goal.id,
+            'userId': userId,
+            'metric': goal.metric.value,
+            'exerciseId': goal.exerciseId,
+            'cadence': goal.cadence?.value,
+            'stages': _encodeStages(goal.stages),
+          },
+        ),
       );
+      // The id pre-check (kit-g/heart-api#66) has already ruled out "this id
+      // is mine", so an empty result here can only be the cap guard firing —
+      // an id belonging to someone else trips the pkey exception instead.
+      if (result.isEmpty) {
+        throw const BadRequest(
+          code: 'goal_limit',
+          reason: 'you can have at most $_maxActiveGoals active goals; archive or delete one first',
+        );
+      }
+      final row = result.first.toColumnMap();
+      return (Goal.fromRow(row), row['created'] as bool);
+    } on ServerException catch (e) {
+      _rethrowForeignId(e);
     }
-    return Goal.fromRow(result.first.toColumnMap());
   }
 
   @override
