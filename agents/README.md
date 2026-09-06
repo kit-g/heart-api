@@ -7,7 +7,7 @@ manual prompt; work leaves as an **uncommitted diff in a per-agent
 worktree** — you review and commit, always.
 
 Same shape as `agents/` in the app repo (heart-of-yours), built for
-this repo's toolchain: the image carries the Dart SDK, uv + Python 3.13,
+this repo's toolchain: the image carries the Dart SDK, uv + Python 3.14,
 psql + pg_prove, Terraform, gh, the AWS CLI and Claude Code — no Flutter,
 no Docker-in-Docker. The two repos share only the credentials file.
 
@@ -89,11 +89,11 @@ point at the container's SDKs.
 
 ## Credentials (default.env, shared; per-agent override optional)
 
-| What                      | Scope                                                                                        | Why this scope                                                                                                                                                                                                                                              |
-|---------------------------|----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `CLAUDE_CODE_OAUTH_TOKEN` | from `claude setup-token`                                                                    | headless auth in containers                                                                                                                                                                                                                                 |
-| `GH_TOKEN`                | fine-grained PAT: heart-api + heart; Contents **Read**, Issues **Read/write**, Metadata Read | agents read issues and comment; read-only Contents means the token cannot push even if asked to                                                                                                                                                             |
-| `SENTRY_AUTH_TOKEN`       | project:read, event:read, issue:read                                                         | triage crashes; no mutation                                                                                                                                                                                                                                 |
+| What                      | Scope                                                                                                      | Why this scope                                                                                                                                                                                                                                                                      |
+|---------------------------|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `CLAUDE_CODE_OAUTH_TOKEN` | from `claude setup-token`                                                                                  | headless auth in containers                                                                                                                                                                                                                                                         |
+| `GH_TOKEN`                | fine-grained PAT: heart-api + heart; Contents **Read**, Issues **Read/write**, Metadata Read               | agents read issues and comment; read-only Contents means the token cannot push even if asked to                                                                                                                                                                                     |
+| `SENTRY_AUTH_TOKEN`       | project:read, event:read, issue:read                                                                       | triage crashes; no mutation                                                                                                                                                                                                                                                         |
 | `AGENT_AWS_ROLE_ARN`      | `heart-agent` role, dev account only, `ReadOnlyAccess` (`infrastructure/global/environments/dev/agent.tf`) | no static secret at all — with `--aws` the launcher assumes the role via your `heart-dev` profile and injects session creds that expire on their own (default 4h; agent needs a restart past that); `--aws` also opens the firewall to AWS ranges in ca-central-1; prod stays yours |
 
 The issue text for `--issue` is fetched on the **host** with your own `gh`
@@ -109,7 +109,12 @@ auth before the container starts, so agent PATs stay minimal.
   `--rm`. Pub, uv and Terraform-provider caches are shared volumes — first
   `make bootstrap` is slow, later ones aren't.
 - **The database is yours to start**: no docker-in-docker, deliberately
-  (the socket is root on the host). `make db-up` here, `--db` there.
+  (the socket is root on the host). `make db-up` here, `--db` there. A
+  native Postgres owning 5432 is not reachable from a container (Docker's
+  host gateway does not reach loopback-only listeners), so put the compose
+  database on another port and tell the launcher the same:
+  `HEART_DB_PORT=5433 make db-up`, then `HEART_DB_PORT=5433 agents/agent … --db`.
+  The variable sets the container's `PGPORT` and the firewall hole together.
 - **Migrations in a container**: with `--db`, `PGHOST` is already in the
   environment, but the guard reads the command line, so a bare
   `./scripts/apply_migrations.sh` is still refused. `make test-db` or an

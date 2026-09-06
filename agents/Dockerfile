@@ -47,7 +47,9 @@ RUN useradd -m -s /bin/bash agent \
 
 USER agent
 WORKDIR /home/agent
-ENV PATH="/home/agent/.local/bin:${PATH}"
+# UTF-8 by default: Dart and Python print the repo's non-ASCII content (locale
+# overlays, em-dashes in prompts) and a C locale mangles it.
+ENV PATH="/home/agent/.local/bin:${PATH}" LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 # Python 3.14 (uv.lock resolves for >=3.14; Ubuntu ships 3.12) while the
 # build still has an open network.

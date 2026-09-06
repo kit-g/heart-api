@@ -28,6 +28,18 @@ void main() {
       expect(res.status, 403);
       verifyNever(app.db.upsertProfile(any));
     });
+
+    test('rejects an anonymous Firebase account before it reaches the profile service (403)', () async {
+      final res = await app.send(
+        'PUT',
+        '/accounts',
+        token: AppHarness.anonymousToken,
+        body: {'id': 'u1', 'displayName': 'Sam'},
+      );
+      expect(res.status, 403);
+      expect(res.body, contains('anonymous_account'));
+      verifyNever(app.db.upsertProfile(any));
+    });
   });
 
   group('PUT /accounts (removeAvatar)', () {
