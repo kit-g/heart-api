@@ -6,7 +6,7 @@ import 'errors.dart';
 /// [WorkoutRequest] (a lazy getter over its raw body) — the one place that
 /// knows what a client-minted id looks like on the wire.
 extension UuidV7Field on Map<String, dynamic> {
-  /// Optional client-minted id (kit-g/heart-api#66, the upsync replay): the app
+  /// Optional client-minted id (heart-api#66, the upsync replay): the app
   /// mints a v7 uuid at construction and it round-trips here so a retried
   /// create lands on the same row; absent, the server mints one instead.
   /// Present-but-malformed is the client's mistake, same rule everywhere this

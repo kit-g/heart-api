@@ -7,7 +7,7 @@ import 'package:relic/relic.dart' hide Logger;
 final _logger = Logger('API');
 
 /// Marks a model as freshly inserted rather than an existing row a create
-/// resolved to (kit-g/heart-api#66 — the upsync replay's idempotent creates).
+/// resolved to (heart-api#66 — the upsync replay's idempotent creates).
 /// `apiHandler` responds `201` for one of these and `200` for a bare [Model],
 /// including the "already there" outcome of the very same route. The wire
 /// body is identical either way — `toMap()` forwards to [value] — so this is

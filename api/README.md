@@ -163,7 +163,7 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
   primary key — caught in the mixin and rethrown as `Forbidden(code: 'id_taken')` rather than the
   500 a raw constraint violation would otherwise surface as. See
   [`docs/2026-09-05.upsync-replay.md`](../docs/2026-09-05.upsync-replay.md) for the full contract
-  (kit-g/heart-api#66).
+  (heart-api#66).
 
 ### Adding a new resource
 

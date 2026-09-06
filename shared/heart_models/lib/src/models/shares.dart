@@ -170,7 +170,7 @@ class TemplateExerciseRequest {
 class TemplateRequest {
   final String userId;
 
-  /// The template's own client-minted id (kit-g/heart-api#66). Only a create
+  /// The template's own client-minted id (heart-api#66). Only a create
   /// reads this — an update addresses its template by path parameter, same as
   /// before. Absent, the insert mints one.
   final String? id;

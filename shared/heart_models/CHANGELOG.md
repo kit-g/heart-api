@@ -2,7 +2,7 @@
 
 ## 2.1.0
 
-Supports the anonymous-to-account upsync replay (kit-g/heart-api#66): the app's
+Supports the anonymous-to-account upsync replay (heart-api#66): the app's
 local-first writes become idempotent on the client's own id when replayed into
 a real account.
 
@@ -44,7 +44,7 @@ machine-authored copy (a spark icon in the exercise library).
 
 ## 1.8.0
 
-Carries the health activity type in the exercise library (kit-g/heart-api#54), replacing the
+Carries the health activity type in the exercise library (heart-api#54), replacing the
 app's name-based activity switch — `Exercise.name` is localized copy and must never key logic.
 
 - New: `HealthActivity` — the canonical, platform-neutral activity a session is written to

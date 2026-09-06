@@ -15,7 +15,7 @@ const _meId = 'u1';
 const _folderId = 'f-1';
 
 // A well-formed v7 uuid, the shape the app mints for the client-side id
-// (kit-g/heart-api#66).
+// (heart-api#66).
 const _v7Id = '019def00-0000-7000-8000-0000000000f2';
 
 TemplateFolder _fakeFolder(String name, {int order = 0, int count = 0}) =>

@@ -18,7 +18,7 @@ mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
         ),
       );
       // Empty means `folderId` names a folder the user does not own — the id
-      // pre-check (kit-g/heart-api#66) has already ruled out "this id is
+      // pre-check (heart-api#66) has already ruled out "this id is
       // mine", so an empty result can only be the folder guard failing.
       if (rows.isEmpty) throw NotFound(type: 'TemplateFolder', id: body.folderId ?? '');
       final row = rows.first.toColumnMap();

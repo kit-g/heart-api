@@ -36,7 +36,7 @@ mixin _Goals on _DatabaseBase implements IdempotentGoalService {
           },
         ),
       );
-      // The id pre-check (kit-g/heart-api#66) has already ruled out "this id
+      // The id pre-check (heart-api#66) has already ruled out "this id
       // is mine", so an empty result here can only be the cap guard firing —
       // an id belonging to someone else trips the pkey exception instead.
       if (result.isEmpty) {

@@ -321,7 +321,7 @@ void main() {
       expect(a['id'], isNot(b['id']));
     });
 
-    // kit-g/heart-api#66: anonymous-account upsync replay. The client mints its
+    // heart-api#66: anonymous-account upsync replay. The client mints its
     // own id offline and may retry a create (flaky network, app relaunch)
     // without knowing whether the first POST landed; these cover the replay
     // being a safe no-op instead of a duplicate or an error.

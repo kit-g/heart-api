@@ -132,7 +132,7 @@ WHERE
 ''';
 
 /// Idempotent create for a custom exercise, the upsync replay's first resource
-/// (kit-g/heart-api#66): a client id already owned by the caller, or a name
+/// (heart-api#66): a client id already owned by the caller, or a name
 /// (case-insensitively — matching the import path's own notion) the caller
 /// already uses, resolves to that existing row with `created = false` rather
 /// than erroring. Both pre-checks are scoped to `user_id = @userId`, so an id
@@ -407,7 +407,7 @@ SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT
 ''';
 
 /// Idempotent create for a workout, the replay's fifth resource
-/// (kit-g/heart-api#66): a client id the caller already owns is never
+/// (heart-api#66): a client id the caller already owns is never
 /// re-inserted — its exercises and sets are skipped wholesale (the
 /// `_inserted_exercises` CROSS JOIN against `_workout` naturally yields no rows
 /// once `_workout`'s INSERT is guarded away), and the existing row is fetched
@@ -909,8 +909,8 @@ WHERE id = @workoutId::uuid
 ''';
 
 /// Idempotent create for a template, the replay's third resource
-/// (kit-g/heart-api#66): templates carry no natural key (decision 2 in
-/// kit-g/heart-api#66 — two templates may share a name), so only a client id
+/// (heart-api#66): templates carry no natural key (decision 2 in
+/// heart-api#66 — two templates may share a name), so only a client id
 /// the caller already owns short-circuits the insert; the existing row is
 /// fetched via `_template_exercises`, same shape as `_getTemplate`. An id owned
 /// by someone else reaches the INSERT regardless of `@folderId` (see
@@ -1438,7 +1438,7 @@ ORDER BY f.order_index, lower(f.name)
 ''';
 
 /// Idempotent create for a folder, the replay's second resource
-/// (kit-g/heart-api#66): a client id the caller already owns, or a name (on
+/// (heart-api#66): a client id the caller already owns, or a name (on
 /// the case-insensitive index) the caller already has, resolves to that
 /// existing folder with `created = false` — replacing the old `400 "you
 /// already have a folder called..."`. An id owned by someone else matches
@@ -1737,7 +1737,7 @@ const _maxActiveGoals = 50;
 // creates can't both pass a stale count and land a 51st. A full table returns no row,
 // which the db layer turns into a 400.
 //
-// Idempotent create, the replay's last resource (kit-g/heart-api#66): a client
+// Idempotent create, the replay's last resource (heart-api#66): a client
 // id the caller already owns short-circuits the insert (and the cap check —
 // a retry must never count against the ceiling it already cleared), returning
 // the existing goal with `created = false`. Goals have no natural key, so this

@@ -1,12 +1,12 @@
 ---
 name: handoff
-description: Hand a backend-first feature off to the Flutter app (kit-g/heart-of-yours). Use after a feature lands on main that the app must consume, or when reporting progress on a backend ticket. Produces the four linked artifacts — design doc, heart_models wire models, frontend ticket, backend-ticket report — so an agent in the app repo can implement its side without ever seeing this repo. Triggers: "hand this off", "report back to the ticket", "write the frontend ticket", "the app needs to consume this".
+description: Hand a backend-first feature off to the Flutter app (heart-of-yours). Use after a feature lands on main that the app must consume, or when reporting progress on a backend ticket. Produces the four linked artifacts — design doc, heart_models wire models, frontend ticket, backend-ticket report — so an agent in the app repo can implement its side without ever seeing this repo. Triggers: "hand this off", "report back to the ticket", "write the frontend ticket", "the app needs to consume this".
 ---
 
 # Handing a backend feature off to the app
 
 Heart is two repos that ship together: this one (backend) and
-[`kit-g/heart-of-yours`](https://github.com/kit-g/heart-of-yours) (Flutter app). The app — and any
+[`heart-of-yours`](https://github.com/kit-g/heart-of-yours) (Flutter app). The app — and any
 agent working in it — can read exactly three things from here: the `shared/heart_models` package it
 pulls from git `main` (code + `CHANGELOG.md`), GitHub issues, and public repo files via links. It
 cannot see `api/lib`, so a contract that lives only in route handlers and model classes here does
@@ -32,7 +32,7 @@ without its anchor.
    Additive only, minor bump + `CHANGELOG.md` entry in the same commit (see CLAUDE.md's versioning
    rules); the CHANGELOG entry links the frontend ticket, because that file is what the app side
    reads to learn what a pull brings in.
-3. **Frontend ticket** in `kit-g/heart-of-yours` — the agent brief. This is the primary instrument:
+3. **Frontend ticket** in `heart-of-yours` — the agent brief. This is the primary instrument:
    assume the implementing agent reads *only this ticket*, so the contract goes inline, with links
    as backup, not as the mechanism.
 4. **Report on the backend ticket** — scope-vs-delivered, what remains, links to the other three.

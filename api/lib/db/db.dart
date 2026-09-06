@@ -56,7 +56,7 @@ abstract class _DatabaseBase {
     _rethrowForeignId(e);
   }
 
-  /// The five upsync-replay creates (kit-g/heart-api#66) pre-check every id
+  /// The five upsync-replay creates (heart-api#66) pre-check every id
   /// against `user_id = @userId` before inserting, so if the insert itself
   /// still trips one of these primary keys, the only way that happens is the
   /// id belongs to someone else (or, for exercises, a global row) — a hostile
@@ -80,7 +80,7 @@ abstract class _DatabaseBase {
   }
 
   /// The natural-key half of the upsync replay's idempotent creates
-  /// (kit-g/heart-api#66) — a name the caller already uses resolving to that
+  /// (heart-api#66) — a name the caller already uses resolving to that
   /// row instead of erroring — is enforced by real unique indexes distinct
   /// from the id-scoped ones in [_foreignIdConstraints].
   static const _raceableNameConstraints = {'exercises_user_name_idx', 'template_folders_user_name_idx'};

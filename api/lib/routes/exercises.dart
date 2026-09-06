@@ -29,7 +29,7 @@ Future<Model> createExercise(Request request) async {
     target: input.target,
     instructions: input.instructions,
   );
-  // `created` rides along in the row map (kit-g/heart-api#66) purely to pick
+  // `created` rides along in the row map (heart-api#66) purely to pick
   // the status code — it is never part of the wire body.
   final created = row.remove('created') as bool;
   final model = ExerciseModel(row);
