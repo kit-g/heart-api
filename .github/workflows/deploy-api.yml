@@ -201,7 +201,7 @@ jobs:
           dart pub global run coverage:format_coverage \
             --lcov --in=coverage --out=coverage/lcov.info \
             --report-on=lib --packages=.dart_tool/package_config.json
-          dart run tool/check_coverage.dart 75 | tee "$GITHUB_WORKSPACE/test-reports/coverage.txt"
+          dart run tool/check_coverage.dart 82 | tee "$GITHUB_WORKSPACE/test-reports/coverage.txt"
 
       - name: "Upload test report"
         if: always()
