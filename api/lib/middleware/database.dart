@@ -1,4 +1,5 @@
 import 'package:heart/models/creates.dart';
+import 'package:heart/models/exercise_preferences.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/workouts.dart';
@@ -8,7 +9,7 @@ import 'package:relic/relic.dart';
 final _profilesProperty = ContextProperty<ApiProfileService>('ApiProfileService');
 final _imageDbProperty = ContextProperty<ApiImageDbService>('ApiImageDbService');
 final _chatsProperty = ContextProperty<ChartPreferenceService>('ChartPreferenceService');
-final _exercisePrefsProperty = ContextProperty<ExercisePreferenceService>('ExercisePreferenceService');
+final _exercisePrefsProperty = ContextProperty<ApiExercisePreferenceService>('ApiExercisePreferenceService');
 final _goalsProperty = ContextProperty<IdempotentGoalService>('IdempotentGoalService');
 final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
@@ -35,7 +36,7 @@ Middleware chartsDb({required ChartPreferenceService db}) {
   };
 }
 
-Middleware exercisePreferencesDb({required ExercisePreferenceService db}) {
+Middleware exercisePreferencesDb({required ApiExercisePreferenceService db}) {
   return (Handler next) {
     return (request) {
       _exercisePrefsProperty[request] = db;
@@ -125,9 +126,9 @@ extension DatabaseContext on Request {
 
   set chartPreferenceService(ChartPreferenceService v) => _chatsProperty[this] = v;
 
-  ExercisePreferenceService get exercisePreferenceService => _exercisePrefsProperty.get(this);
+  ApiExercisePreferenceService get exercisePreferenceService => _exercisePrefsProperty.get(this);
 
-  set exercisePreferenceService(ExercisePreferenceService v) => _exercisePrefsProperty[this] = v;
+  set exercisePreferenceService(ApiExercisePreferenceService v) => _exercisePrefsProperty[this] = v;
 
   IdempotentGoalService get goalService => _goalsProperty.get(this);
 

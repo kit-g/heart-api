@@ -41,6 +41,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/exercises', .get): exercises.getExercises,
   ('/exercises', .post): exercises.createExercise,
   ('/exercises/:exerciseId', .put): exercises.updateExercise,
+  ('/exercise-preferences', .get): exercise_preferences.getExercisePreferences,
   ('/exercise-preferences', .post): exercise_preferences.saveExercisePreference,
   ('/exercise-preferences/:exerciseId', .delete): exercise_preferences.deleteExercisePreference,
   ('/goals', .post): goals.createGoal,
