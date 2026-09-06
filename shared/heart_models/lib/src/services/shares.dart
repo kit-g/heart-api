@@ -3,7 +3,12 @@ import '../models/shares.dart';
 import '../models/template.dart';
 
 abstract interface class ApiTemplateService {
-  Future<Template> createTemplate({required String userId, required TemplateRequest body});
+  /// `created` is true when this call minted the row; false when [body]'s
+  /// [TemplateRequest.id] already named a template the caller owns — the
+  /// upsync replay's idempotent-retry case (kit-g/heart-api#66) — in which
+  /// case the existing row is returned untouched, content ignored. Templates
+  /// carry no natural key, so an id is the only thing a retry can match on.
+  Future<(Template, bool created)> createTemplate({required String userId, required TemplateRequest body});
 
   Future<Template> updateTemplate({
     required String userId,
