@@ -1,3 +1,4 @@
+import 'package:heart/core/handler.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
@@ -14,6 +15,11 @@ const _meId = 'u1';
 
 Template _fakeTemplate(String id, {int order = 0}) => Template.empty(id: id, order: order);
 
+// A well-formed v7 uuid, the shape the app mints for the client-side id
+// (kit-g/heart-api#66) — distinct from '_fakeTemplate's ids, which are never
+// validated as uuids.
+const _v7Id = '019def00-0000-7000-8000-0000000000f1';
+
 TemplateShare _fakeShare(String id) => TemplateShare(
   id: id,
   masterTemplateId: 'm-$id',
@@ -24,9 +30,9 @@ TemplateShare _fakeShare(String id) => TemplateShare(
 );
 
 void main() {
-  late MockApiTemplateService templates;
+  late MockIdempotentTemplateService templates;
 
-  setUp(() => templates = MockApiTemplateService());
+  setUp(() => templates = MockIdempotentTemplateService());
 
   Request wire(Request req) => req
     ..user = User(id: _meId)
@@ -34,6 +40,57 @@ void main() {
 
   Request getReq(String path, {Map<String, String> query = const {}}) =>
       wire(bareRequest(method: Method.get, path: path, query: query));
+
+  Request bodyReq(Map<String, dynamic> body, {Method method = Method.post}) =>
+      wire(jsonRequest(method: method, path: '/templates', body: body));
+
+  group('createTemplate', () {
+    void stub((Template, bool) answer) {
+      when(
+        templates.createTemplateOrExisting(userId: anyNamed('userId'), body: anyNamed('body')),
+      ).thenAnswer((_) async => answer);
+    }
+
+    test('a fresh id inserts and responds 201', () async {
+      final template = _fakeTemplate('t-1');
+      stub((template, true));
+
+      final result = await createTemplate(bodyReq({'id': _v7Id, 'name': 'Push'}));
+
+      expect(result, isA<Created<Template>>());
+      expect((result as Created<Template>).value, same(template));
+      verify(templates.createTemplateOrExisting(userId: _meId, body: anyNamed('body'))).called(1);
+    });
+
+    test('a replayed id resolves to the existing template and responds 200, not 201', () async {
+      final template = _fakeTemplate('t-1');
+      stub((template, false));
+
+      final result = await createTemplate(bodyReq({'id': _v7Id, 'name': 'Push'}));
+
+      expect(result, same(template));
+      expect(result, isNot(isA<Created<Template>>()));
+    });
+
+    test('an id belonging to another account is Forbidden with id_taken', () async {
+      when(
+        templates.createTemplateOrExisting(userId: anyNamed('userId'), body: anyNamed('body')),
+      ).thenThrow(const Forbidden(code: 'id_taken', reason: 'this id belongs to another account'));
+
+      await expectLater(
+        createTemplate(bodyReq({'id': _v7Id, 'name': 'Push'})),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+      );
+    });
+
+    test('a malformed id is rejected before reaching the service', () async {
+      await expectLater(
+        createTemplate(bodyReq({'id': 'not-a-uuid', 'name': 'Push'})),
+        throwsA(isA<BadRequest>()),
+      );
+      verifyNever(templates.createTemplateOrExisting(userId: anyNamed('userId'), body: anyNamed('body')));
+    });
+  });
 
   group('getMyTemplates', () {
     void stub(Page<Template> page) {

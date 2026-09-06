@@ -1,3 +1,4 @@
+import 'package:heart/core/handler.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
@@ -13,6 +14,10 @@ import '../mocks.mocks.dart';
 const _meId = 'u1';
 const _folderId = 'f-1';
 
+// A well-formed v7 uuid, the shape the app mints for the client-side id
+// (kit-g/heart-api#66).
+const _v7Id = '019def00-0000-7000-8000-0000000000f2';
+
 TemplateFolder _fakeFolder(String name, {int order = 0, int count = 0}) =>
     TemplateFolder(id: _folderId, name: name, order: order, templateCount: count);
 
@@ -26,9 +31,9 @@ TemplateShare _fakeShare(String id) => TemplateShare(
 );
 
 void main() {
-  late MockApiTemplateFolderService folders;
+  late MockIdempotentTemplateFolderService folders;
 
-  setUp(() => folders = MockApiTemplateFolderService());
+  setUp(() => folders = MockIdempotentTemplateFolderService());
 
   Request wire(Request req) => req
     ..user = User(id: _meId)
@@ -64,10 +69,10 @@ void main() {
   });
 
   group('createFolder', () {
-    void stub() {
+    void stub({bool created = true}) {
       when(
-        folders.createFolder(userId: anyNamed('userId'), folder: anyNamed('folder')),
-      ).thenAnswer((invocation) async => invocation.namedArguments[#folder] as TemplateFolder);
+        folders.createFolderOrExisting(userId: anyNamed('userId'), folder: anyNamed('folder')),
+      ).thenAnswer((invocation) async => (invocation.namedArguments[#folder] as TemplateFolder, created));
     }
 
     test('passes the trimmed name and order through', () async {
@@ -75,7 +80,9 @@ void main() {
 
       await createFolder(bodyReq({'name': '  Push  ', 'order': 2}));
 
-      final sent = verify(folders.createFolder(userId: _meId, folder: captureAnyNamed('folder'))).captured.single;
+      final sent = verify(folders.createFolderOrExisting(userId: _meId, folder: captureAnyNamed('folder')))
+          .captured
+          .single;
       expect((sent as TemplateFolder).name, 'Push');
       expect(sent.order, 2);
     });
@@ -85,8 +92,46 @@ void main() {
 
       await createFolder(bodyReq({'name': 'Push'}));
 
-      final sent = verify(folders.createFolder(userId: _meId, folder: captureAnyNamed('folder'))).captured.single;
+      final sent = verify(folders.createFolderOrExisting(userId: _meId, folder: captureAnyNamed('folder')))
+          .captured
+          .single;
       expect((sent as TemplateFolder).order, 0);
+    });
+
+    test('a fresh id/name inserts and responds 201', () async {
+      stub(created: true);
+
+      final result = await createFolder(bodyReq({'id': _v7Id, 'name': 'Push'}));
+
+      expect(result, isA<Created<TemplateFolder>>());
+    });
+
+    test('a replay (created: false) resolves to the existing folder and responds 200, not 201', () async {
+      stub(created: false);
+
+      final result = await createFolder(bodyReq({'id': _v7Id, 'name': 'Push'}));
+
+      expect(result, isNot(isA<Created<TemplateFolder>>()));
+      expect((result as TemplateFolder).name, 'Push');
+    });
+
+    test('an id belonging to another account is Forbidden with id_taken', () async {
+      when(
+        folders.createFolderOrExisting(userId: anyNamed('userId'), folder: anyNamed('folder')),
+      ).thenThrow(const Forbidden(code: 'id_taken', reason: 'this id belongs to another account'));
+
+      await expectLater(
+        createFolder(bodyReq({'id': _v7Id, 'name': 'Push'})),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+      );
+    });
+
+    test('a malformed id is rejected before reaching the service', () async {
+      await expectLater(
+        createFolder(bodyReq({'id': 'not-a-uuid', 'name': 'Push'})),
+        throwsA(isA<BadRequest>()),
+      );
+      verifyNever(folders.createFolderOrExisting(userId: anyNamed('userId'), folder: anyNamed('folder')));
     });
 
     test('rejects a missing name', () async {
