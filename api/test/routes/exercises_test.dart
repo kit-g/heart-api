@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:heart/models/errors.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -52,7 +53,44 @@ void main() {
           target: anyNamed('target'),
           instructions: anyNamed('instructions'),
         ),
-      ).thenAnswer((_) async => {'id': 'e1', 'name': 'Squat'});
+      ).thenAnswer((_) async => {'id': 'e1', 'name': 'Squat', 'created': true});
+
+      final res = await app.send(
+        'POST',
+        '/exercises',
+        body: {
+          'name': 'Squat',
+          'category': 'legs',
+          'target': 'quads',
+        },
+      );
+      // A fresh custom row was actually inserted → 201, not the 200 an
+      // idempotent replay resolves to (heart-api#66).
+      expect(res.status, 201);
+      final decoded = jsonDecode(res.body);
+      expect(decoded, containsPair('name', 'Squat'));
+      expect(decoded, isNot(contains('created'))); // internal-only, never on the wire
+      verify(
+        app.db.createExercise(
+          userId: 'u1',
+          name: 'Squat',
+          category: 'legs',
+          target: 'quads',
+          instructions: null,
+        ),
+      ).called(1);
+    });
+
+    test('an idempotent replay (created: false) responds 200, not 201', () async {
+      when(
+        app.db.createExercise(
+          userId: anyNamed('userId'),
+          name: anyNamed('name'),
+          category: anyNamed('category'),
+          target: anyNamed('target'),
+          instructions: anyNamed('instructions'),
+        ),
+      ).thenAnswer((_) async => {'id': 'e1', 'name': 'Squat', 'created': false});
 
       final res = await app.send(
         'POST',
@@ -64,16 +102,33 @@ void main() {
         },
       );
       expect(res.status, 200);
-      expect(jsonDecode(res.body), containsPair('name', 'Squat'));
-      verify(
+      final decoded = jsonDecode(res.body);
+      expect(decoded, containsPair('name', 'Squat'));
+      expect(decoded, isNot(contains('created')));
+    });
+
+    test('an id belonging to another account is Forbidden with id_taken', () async {
+      when(
         app.db.createExercise(
-          userId: 'u1',
-          name: 'Squat',
-          category: 'legs',
-          target: 'quads',
-          instructions: null,
+          userId: anyNamed('userId'),
+          name: anyNamed('name'),
+          category: anyNamed('category'),
+          target: anyNamed('target'),
+          instructions: anyNamed('instructions'),
         ),
-      ).called(1);
+      ).thenThrow(const Forbidden(code: 'id_taken', reason: 'this id belongs to another account'));
+
+      final res = await app.send(
+        'POST',
+        '/exercises',
+        body: {
+          'name': 'Squat',
+          'category': 'legs',
+          'target': 'quads',
+        },
+      );
+      expect(res.status, 403);
+      expect(jsonDecode(res.body), containsPair('code', 'id_taken'));
     });
 
     test('rejects a missing name / category / target with 400', () async {

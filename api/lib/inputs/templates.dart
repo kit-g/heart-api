@@ -40,7 +40,7 @@ class TemplateListQuery {
   }
 }
 
-/// `POST /templates` — `{name?, order?, folderId?, exercises: [...]}`.
+/// `POST /templates` — `{id?, name?, order?, folderId?, exercises: [...]}`.
 class TemplateCreateIn {
   final TemplateRequest request;
 
@@ -51,6 +51,7 @@ class TemplateCreateIn {
     return TemplateCreateIn._(
       TemplateRequest(
         userId: req.userId,
+        id: json.uuidV7OrNull(),
         name: json.templateName(),
         order: json.templateOrder(),
         folderId: json.folderIdOrNull(),

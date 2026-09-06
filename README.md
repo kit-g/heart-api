@@ -21,7 +21,7 @@ heart-go/
 ├── content/                   # Exercise library YAML + schema + sample templates JSON, synced to CDN
 ├── scripts/                   # Migration runner, db test runner, library sync/validation
 ├── site/                      # Static marketing/legal pages
-├── docs/                      # Dated design docs; handoff.md is the definition of done
+├── docs/                      # Dated design docs; handoff.md is the definition of done, style.md the house style
 ├── agents/                    # Autonomous agent launchers + guard hook (see agents/README.md)
 └── .github/workflows/         # CI: deploy-api, deploy-assets, deploy-firebase, exercise-library
                                # (each split into a reusable workflow + dev/prod wrappers)

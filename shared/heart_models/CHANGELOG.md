@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.1.0
+
+Supports the anonymous-to-account upsync replay (heart-api#66): the app's
+local-first writes become idempotent on the client's own id when replayed into
+a real account.
+
+- New: `TemplateRequest.id` — the template's client-minted id, optional, read
+  on create so a replayed `POST /templates` lands on the same row instead of a
+  duplicate. Nothing else in the package changes; the created-vs-existing
+  signal the API needs lives in API-only sub-interfaces (`api/lib/models/creates.dart`).
+
 ## 2.0.0
 
 Exercise identity moves from the name to the uuid — a coordinated breaking release for the
@@ -33,7 +44,7 @@ machine-authored copy (a spark icon in the exercise library).
 
 ## 1.8.0
 
-Carries the health activity type in the exercise library (kit-g/heart-api#54), replacing the
+Carries the health activity type in the exercise library (heart-api#54), replacing the
 app's name-based activity switch — `Exercise.name` is localized copy and must never key logic.
 
 - New: `HealthActivity` — the canonical, platform-neutral activity a session is written to

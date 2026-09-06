@@ -1,19 +1,30 @@
 part of 'db.dart';
 
-mixin _Templates on _DatabaseBase implements ApiTemplateService {
+mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
   @override
-  Future<Template> createTemplate({required String userId, required TemplateRequest body}) async {
+  Future<Template> createTemplate({required String userId, required TemplateRequest body}) async =>
+      (await createTemplateOrExisting(userId: userId, body: body)).$1;
+
+  @override
+  Future<(Template, bool created)> createTemplateOrExisting({
+    required String userId,
+    required TemplateRequest body,
+  }) async {
     try {
-      final rows = await _pool.execute(
-        _saveTemplate.toSql(),
-        parameters: body.toParams(),
+      final rows = await _retryOnCreateRace(
+        () => _pool.execute(
+          _saveTemplate.toSql(),
+          parameters: {'id': body.id, ...body.toParams()},
+        ),
       );
-      // The insert selects no row when `folderId` names a folder the user does not
-      // own — the only way a create can come back empty.
+      // Empty means `folderId` names a folder the user does not own — the id
+      // pre-check (heart-api#66) has already ruled out "this id is
+      // mine", so an empty result can only be the folder guard failing.
       if (rows.isEmpty) throw NotFound(type: 'TemplateFolder', id: body.folderId ?? '');
-      return Template.fromRow(rows.first.toColumnMap());
+      final row = rows.first.toColumnMap();
+      return (Template.fromRow(row), row['created'] as bool);
     } on ServerException catch (e) {
-      _rethrowCapped(e);
+      _rethrowForeignId(e);
     }
   }
 

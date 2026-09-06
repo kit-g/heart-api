@@ -29,11 +29,12 @@ void main() {
     );
   }
 
-  Future<TemplateFolder> newFolder(String userId, String prefix) {
-    return h.db.createFolder(
+  Future<TemplateFolder> newFolder(String userId, String prefix) async {
+    final (folder, _) = await h.db.createFolderOrExisting(
       userId: userId,
       folder: TemplateFolder(name: h.uniqueName(prefix)),
     );
+    return folder;
   }
 
   setUpAll(() async {
@@ -47,11 +48,12 @@ void main() {
   group('folder CRUD', () {
     test('createFolder persists and getFolders reads it back', () async {
       final user = await h.seedProfile();
-      final created = await h.db.createFolder(
+      final (created, isNew) = await h.db.createFolderOrExisting(
         userId: user,
         folder: TemplateFolder(name: 'Push', order: 2),
       );
 
+      expect(isNew, isTrue);
       expect(created.id, isNotEmpty);
       expect(created.name, 'Push');
       expect(created.order, 2);
@@ -66,19 +68,19 @@ void main() {
       final push = await newFolder(user, 'Push');
       final pull = await newFolder(user, 'Pull');
 
-      await h.db.createTemplate(
+      await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'Bench', folderId: push.id),
       );
-      await h.db.createTemplate(
+      await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'Dips', folderId: push.id),
       );
-      await h.db.createTemplate(
+      await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'Rows', folderId: pull.id),
       );
-      await h.db.createTemplate(userId: user, body: tReq(user, 'Unfiled'));
+      await h.db.createTemplateOrExisting(userId: user, body: tReq(user, 'Unfiled'));
 
       final counts = {for (final f in await h.db.getFolders(userId: user)) f.id: f.templateCount};
       expect(counts[push.id], 2);
@@ -94,15 +96,15 @@ void main() {
 
     test('getFolders orders by order_index then name', () async {
       final user = await h.seedProfile();
-      await h.db.createFolder(
+      await h.db.createFolderOrExisting(
         userId: user,
         folder: TemplateFolder(name: 'Zebra', order: 0),
       );
-      await h.db.createFolder(
+      await h.db.createFolderOrExisting(
         userId: user,
         folder: TemplateFolder(name: 'Alpha', order: 0),
       );
-      await h.db.createFolder(
+      await h.db.createFolderOrExisting(
         userId: user,
         folder: TemplateFolder(name: 'First', order: -1),
       );
@@ -111,34 +113,23 @@ void main() {
       expect(names, ['First', 'Alpha', 'Zebra']);
     });
 
-    test('a duplicate folder name is rejected regardless of case', () async {
-      final user = await h.seedProfile();
-      await h.db.createFolder(
-        userId: user,
-        folder: TemplateFolder(name: 'Legs'),
-      );
-
-      await expectLater(
-        h.db.createFolder(
-          userId: user,
-          folder: TemplateFolder(name: 'legs'),
-        ),
-        throwsA(isA<BadRequest>()),
-      );
-    });
+    // heart-api#66: a duplicate name used to 400 here; it is now a no-op
+    // that resolves to the existing folder, same as a duplicate client id — see
+    // the "idempotent create" group below.
 
     test('two users may each have a folder of the same name', () async {
       final a = await h.seedProfile();
       final b = await h.seedProfile();
-      await h.db.createFolder(
+      await h.db.createFolderOrExisting(
         userId: a,
         folder: TemplateFolder(name: 'Shared Name'),
       );
 
-      final theirs = await h.db.createFolder(
+      final (theirs, isNew) = await h.db.createFolderOrExisting(
         userId: b,
         folder: TemplateFolder(name: 'Shared Name'),
       );
+      expect(isNew, isTrue);
       expect(theirs.name, 'Shared Name');
     });
 
@@ -160,7 +151,7 @@ void main() {
     test('updateFolder keeps the template count', () async {
       final user = await h.seedProfile();
       final folder = await newFolder(user, 'Counted');
-      await h.db.createTemplate(
+      await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'One', folderId: folder.id),
       );
@@ -175,11 +166,11 @@ void main() {
 
     test('updateFolder rejects a rename onto another folder of the same user', () async {
       final user = await h.seedProfile();
-      final taken = await h.db.createFolder(
+      final (taken, _) = await h.db.createFolderOrExisting(
         userId: user,
         folder: TemplateFolder(name: 'Taken'),
       );
-      final folder = await h.db.createFolder(
+      final (folder, _) = await h.db.createFolderOrExisting(
         userId: user,
         folder: TemplateFolder(name: 'Free'),
       );
@@ -222,7 +213,7 @@ void main() {
     test('deleteFolder removes it and unfiles its templates rather than deleting them', () async {
       final user = await h.seedProfile();
       final folder = await newFolder(user, 'Doomed');
-      final template = await h.db.createTemplate(
+      final (template, _) = await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'Survivor', folderId: folder.id),
       );
@@ -243,12 +234,83 @@ void main() {
     });
   });
 
+  // heart-api#66: anonymous-account upsync replay. A client id the
+  // caller already owns, or a name (case-insensitively) they already have,
+  // resolves to the existing folder instead of erroring — the id pre-check
+  // runs first, so a name match only fires when the id itself is fresh.
+  group('idempotent create (heart-api#66)', () {
+    test('reposting the same client id is idempotent: first creates, second is a no-op', () async {
+      final user = await h.seedProfile();
+      const id = '019def00-0000-7000-8000-00000000b001';
+      final name = h.uniqueName('Idempotent');
+
+      final (first, firstCreated) = await h.db.createFolderOrExisting(
+        userId: user,
+        folder: TemplateFolder(id: id, name: name),
+      );
+      expect(firstCreated, isTrue);
+      expect(first.id, id);
+
+      // Same id, different name — the replay is ignored wholesale; the
+      // original row comes back untouched.
+      final (second, secondCreated) = await h.db.createFolderOrExisting(
+        userId: user,
+        folder: TemplateFolder(id: id, name: h.uniqueName('ShouldBeIgnored')),
+      );
+      expect(secondCreated, isFalse);
+      expect(second.id, id);
+      expect(second.name, name);
+
+      final rows = await h.exec('SELECT count(*) AS n FROM template_folders WHERE id = @id::uuid', {'id': id});
+      expect(rows.first.toColumnMap()['n'], 1);
+    });
+
+    test('a new id colliding on name (case-insensitive) resolves to the pre-existing folder', () async {
+      final user = await h.seedProfile();
+      final (original, _) = await h.db.createFolderOrExisting(
+        userId: user,
+        folder: TemplateFolder(name: 'Push Day'),
+      );
+
+      const newId = '019def00-0000-7000-8000-00000000b002';
+      final (result, created) = await h.db.createFolderOrExisting(
+        userId: user,
+        folder: TemplateFolder(id: newId, name: 'push day'),
+      );
+
+      expect(created, isFalse);
+      expect(result.id, original.id); // the pre-existing folder's id, not newId
+      expect(result.name, 'Push Day'); // untouched by the colliding call's payload
+
+      final rows = await h.exec('SELECT id FROM template_folders WHERE id = @id::uuid', {'id': newId});
+      expect(rows, isEmpty); // newId was never inserted
+    });
+
+    test('an id already owned by a different user is Forbidden with id_taken', () async {
+      final owner = await h.seedProfile();
+      final other = await h.seedProfile();
+      const id = '019def00-0000-7000-8000-00000000b003';
+      await h.db.createFolderOrExisting(
+        userId: owner,
+        folder: TemplateFolder(id: id, name: h.uniqueName('Theirs')),
+      );
+
+      await expectLater(
+        h.db.createFolderOrExisting(
+          userId: other,
+          folder: TemplateFolder(id: id, name: h.uniqueName('AttemptedTake')),
+        ),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+      );
+    });
+  });
+
   group('filing templates', () {
     test('createTemplate files into a folder', () async {
       final user = await h.seedProfile();
       final folder = await newFolder(user, 'Filed');
 
-      final created = await h.db.createTemplate(
+      final (created, _) = await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'In folder', folderId: folder.id),
       );
@@ -260,12 +322,12 @@ void main() {
     // still satisfy every `folderId` assertion in this file.
     test('every read nests the whole folder, not just its id', () async {
       final user = await h.seedProfile();
-      final folder = await h.db.createFolder(
+      final (folder, _) = await h.db.createFolderOrExisting(
         userId: user,
         folder: TemplateFolder(name: h.uniqueName('Nested'), order: 4),
       );
 
-      final created = await h.db.createTemplate(
+      final (created, _) = await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'Filed', folderId: folder.id),
       );
@@ -295,7 +357,7 @@ void main() {
 
     test('an unfiled template nests no folder at all', () async {
       final user = await h.seedProfile();
-      final created = await h.db.createTemplate(userId: user, body: tReq(user, 'Loose'));
+      final (created, _) = await h.db.createTemplateOrExisting(userId: user, body: tReq(user, 'Loose'));
 
       expect(created.folder, isNull);
       expect(created.toMap().containsKey('folder'), isFalse);
@@ -303,7 +365,7 @@ void main() {
 
     test('createTemplate with no folderId leaves the template unfiled', () async {
       final user = await h.seedProfile();
-      final created = await h.db.createTemplate(userId: user, body: tReq(user, 'Loose'));
+      final (created, _) = await h.db.createTemplateOrExisting(userId: user, body: tReq(user, 'Loose'));
       expect(created.folderId, isNull);
     });
 
@@ -311,7 +373,7 @@ void main() {
       final folder = await newFolder(ownerId, 'Theirs');
 
       await expectLater(
-        h.db.createTemplate(
+        h.db.createTemplateOrExisting(
           userId: strangerId,
           body: tReq(strangerId, 'Sneaky', folderId: folder.id),
         ),
@@ -323,7 +385,7 @@ void main() {
       final user = await h.seedProfile();
       final from = await newFolder(user, 'From');
       final to = await newFolder(user, 'To');
-      final created = await h.db.createTemplate(
+      final (created, _) = await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'Mover', folderId: from.id),
       );
@@ -339,7 +401,7 @@ void main() {
     test('updateTemplate with an explicit null folderId unfiles the template', () async {
       final user = await h.seedProfile();
       final folder = await newFolder(user, 'Temporary');
-      final created = await h.db.createTemplate(
+      final (created, _) = await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'Evictee', folderId: folder.id),
       );
@@ -355,7 +417,7 @@ void main() {
     test('updateTemplate without a folderId key leaves the filing alone', () async {
       final user = await h.seedProfile();
       final folder = await newFolder(user, 'Sticky');
-      final created = await h.db.createTemplate(
+      final (created, _) = await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'Stayer', folderId: folder.id),
       );
@@ -371,7 +433,7 @@ void main() {
 
     test('updateTemplate into another user\'s folder throws NotFound', () async {
       final theirs = await newFolder(ownerId, 'Fortress');
-      final mine = await h.db.createTemplate(userId: strangerId, body: tReq(strangerId, 'Mine'));
+      final (mine, _) = await h.db.createTemplateOrExisting(userId: strangerId, body: tReq(strangerId, 'Mine'));
 
       await expectLater(
         h.db.updateTemplate(
@@ -386,11 +448,11 @@ void main() {
     test('getTemplates filters to one folder', () async {
       final user = await h.seedProfile();
       final folder = await newFolder(user, 'Only');
-      final inside = await h.db.createTemplate(
+      final (inside, _) = await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'Inside', folderId: folder.id),
       );
-      await h.db.createTemplate(userId: user, body: tReq(user, 'Outside'));
+      await h.db.createTemplateOrExisting(userId: user, body: tReq(user, 'Outside'));
 
       final page = await h.db.getTemplates(userId: user, folderId: folder.id, limit: 50);
       expect(page.items.map((t) => t.id), [inside.id]);
@@ -399,11 +461,11 @@ void main() {
     test('getTemplates lists only the unfiled ones on request', () async {
       final user = await h.seedProfile();
       final folder = await newFolder(user, 'Hidden');
-      await h.db.createTemplate(
+      await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'Filed', folderId: folder.id),
       );
-      final loose = await h.db.createTemplate(userId: user, body: tReq(user, 'Loose'));
+      final (loose, _) = await h.db.createTemplateOrExisting(userId: user, body: tReq(user, 'Loose'));
 
       final page = await h.db.getTemplates(userId: user, unfiledOnly: true, limit: 50);
       expect(page.items.map((t) => t.id), [loose.id]);
@@ -412,11 +474,11 @@ void main() {
     test('getTemplates with no filter returns filed and unfiled alike', () async {
       final user = await h.seedProfile();
       final folder = await newFolder(user, 'Mixed');
-      await h.db.createTemplate(
+      await h.db.createTemplateOrExisting(
         userId: user,
         body: tReq(user, 'Filed', folderId: folder.id),
       );
-      await h.db.createTemplate(userId: user, body: tReq(user, 'Loose'));
+      await h.db.createTemplateOrExisting(userId: user, body: tReq(user, 'Loose'));
 
       final page = await h.db.getTemplates(userId: user, limit: 50);
       expect(page.items, hasLength(2));
@@ -440,7 +502,7 @@ void main() {
     /// covered in `templates_db_test.dart` and would complicate teardown here.
     Future<Template> seedFiledTemplate(String name) async {
       final exercise = await h.seedGlobalExercise();
-      return h.db.createTemplate(
+      final (template, _) = await h.db.createTemplateOrExisting(
         userId: coachId,
         body: TemplateRequest(
           userId: coachId,
@@ -456,6 +518,7 @@ void main() {
           ],
         ),
       );
+      return template;
     }
 
     test('shareFolder assigns every template in the folder', () async {
@@ -471,7 +534,7 @@ void main() {
 
     test('shareFolder ignores templates outside the folder', () async {
       await seedFiledTemplate('Inside');
-      await h.db.createTemplate(userId: coachId, body: tReq(coachId, 'Outside'));
+      await h.db.createTemplateOrExisting(userId: coachId, body: tReq(coachId, 'Outside'));
 
       final shares = await h.db.shareFolder(coachId: coachId, targetUserId: studentId, folderId: folder.id!);
       expect(shares, hasLength(1));

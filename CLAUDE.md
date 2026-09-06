@@ -51,14 +51,21 @@ gitignored) and, when dispatched from a GitHub issue, commenting the summary on 
 interactive sessions just meet the list. Commits and pushes are the user's, always —
 `.claude/settings.json` and `agents/hooks/guard.sh` enforce that for every session here.
 
+`docs/style.md` is what the linter cannot say: boundaries, switch-over-cast, SQL shapes, the
+casing-by-layer rule, and the naming conventions. Every entry there is a review finding.
+
 # Working across Heart's two repos
 
 Heart is two repositories that ship together:
 
 | Repo                                                              | Role                                                         |
 |-------------------------------------------------------------------|--------------------------------------------------------------|
-| [`kit-g/heart-api`](https://github.com/kit-g/heart-api)           | backend — Dart API, Postgres, Lambda services, shared models |
-| [`kit-g/heart-of-yours`](https://github.com/kit-g/heart-of-yours) | frontend — Flutter app                                       |
+| [`heart-api`](https://github.com/kit-g/heart-api)           | backend — Dart API, Postgres, Lambda services, shared models |
+| [`heart-of-yours`](https://github.com/kit-g/heart-of-yours) | frontend — Flutter app                                       |
 
 They are coupled by one thing: the **`shared/heart_models` package**, which the app pulls straight
-from git `main`. 
+from git `main`.
+
+Refer to them as **`heart-api`** and **`heart-of-yours`**, and to issues as `heart-api#66` /
+`heart-of-yours#92` — no `kit-g/` prefix in prose, docs, comments, changelogs or tickets. The owner
+appears only where a tool needs the full slug (a `github.com` URL, `gh -R`, an OIDC `repo:` subject). 

@@ -1,3 +1,4 @@
+import 'package:heart/core/handler.dart';
 import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
@@ -51,14 +52,15 @@ Future<Workout> getTargetUserWorkout(Request request) async {
   );
 }
 
-Future<Workout> createWorkout(Request request) async {
+Future<Model> createWorkout(Request request) async {
   final body = await request.json();
-  final workout = WorkoutRequest(userId: request.userId, body: body);
-  return request.workoutsService.createWorkout(
+  final (workout, isNew) = await request.workoutsService.createWorkout(
     userId: request.userId,
-    body: workout,
+    body: WorkoutRequest(userId: request.userId, body: body),
     imageUrl: request.config.cdnAssetUrl,
   );
+  if (isNew) return Created(workout);
+  return workout;
 }
 
 /// Bulk import of another app's CSV export; responds with a report of what

@@ -1,3 +1,4 @@
+import 'package:heart/models/creates.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/workouts.dart';
@@ -8,13 +9,13 @@ final _profilesProperty = ContextProperty<ApiProfileService>('ApiProfileService'
 final _imageDbProperty = ContextProperty<ApiImageDbService>('ApiImageDbService');
 final _chatsProperty = ContextProperty<ChartPreferenceService>('ChartPreferenceService');
 final _exercisePrefsProperty = ContextProperty<ExercisePreferenceService>('ExercisePreferenceService');
-final _goalsProperty = ContextProperty<GoalService>('GoalService');
+final _goalsProperty = ContextProperty<IdempotentGoalService>('IdempotentGoalService');
 final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
 final _devicesProperty = ContextProperty<DeviceService>('DeviceService');
 final _workoutsProperty = ContextProperty<ApiWorkoutService>('ApiWorkoutService');
-final _templatesProperty = ContextProperty<ApiTemplateService>('ApiTemplateService');
-final _templateFoldersProperty = ContextProperty<ApiTemplateFolderService>('ApiTemplateFolderService');
+final _templatesProperty = ContextProperty<IdempotentTemplateService>('IdempotentTemplateService');
+final _templateFoldersProperty = ContextProperty<IdempotentTemplateFolderService>('IdempotentTemplateFolderService');
 
 Middleware profilesDb({required ApiProfileService db}) {
   return (Handler next) {
@@ -43,7 +44,7 @@ Middleware exercisePreferencesDb({required ExercisePreferenceService db}) {
   };
 }
 
-Middleware goalsDb({required GoalService db}) {
+Middleware goalsDb({required IdempotentGoalService db}) {
   return (Handler next) {
     return (request) {
       _goalsProperty[request] = db;
@@ -79,7 +80,7 @@ Middleware commentsDb({required CommentService db}) {
   };
 }
 
-Middleware templatesDb({required ApiTemplateService db}) {
+Middleware templatesDb({required IdempotentTemplateService db}) {
   return (Handler next) {
     return (request) {
       _templatesProperty[request] = db;
@@ -88,7 +89,7 @@ Middleware templatesDb({required ApiTemplateService db}) {
   };
 }
 
-Middleware templateFoldersDb({required ApiTemplateFolderService db}) {
+Middleware templateFoldersDb({required IdempotentTemplateFolderService db}) {
   return (Handler next) {
     return (request) {
       _templateFoldersProperty[request] = db;
@@ -128,9 +129,9 @@ extension DatabaseContext on Request {
 
   set exercisePreferenceService(ExercisePreferenceService v) => _exercisePrefsProperty[this] = v;
 
-  GoalService get goalService => _goalsProperty.get(this);
+  IdempotentGoalService get goalService => _goalsProperty.get(this);
 
-  set goalService(GoalService v) => _goalsProperty[this] = v;
+  set goalService(IdempotentGoalService v) => _goalsProperty[this] = v;
 
   ConnectionsService get connectionsService => _connectionsProperty.get(this);
 
@@ -152,11 +153,11 @@ extension DatabaseContext on Request {
 
   set workoutsService(ApiWorkoutService v) => _workoutsProperty[this] = v;
 
-  ApiTemplateService get templatesService => _templatesProperty.get(this);
+  IdempotentTemplateService get templatesService => _templatesProperty.get(this);
 
-  set templatesService(ApiTemplateService v) => _templatesProperty[this] = v;
+  set templatesService(IdempotentTemplateService v) => _templatesProperty[this] = v;
 
-  ApiTemplateFolderService get templateFolderService => _templateFoldersProperty.get(this);
+  IdempotentTemplateFolderService get templateFolderService => _templateFoldersProperty.get(this);
 
-  set templateFolderService(ApiTemplateFolderService v) => _templateFoldersProperty[this] = v;
+  set templateFolderService(IdempotentTemplateFolderService v) => _templateFoldersProperty[this] = v;
 }

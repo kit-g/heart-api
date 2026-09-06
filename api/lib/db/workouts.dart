@@ -55,17 +55,20 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   }
 
   @override
-  Future<Workout> createWorkout({
+  Future<(Workout, bool)> createWorkout({
     required String userId,
     required WorkoutRequest body,
     required String Function(String) imageUrl,
   }) async {
     try {
-      final rows = await _pool.execute(
-        _saveWorkout.toSql(),
-        parameters: body.toParams(),
+      final rows = await _retryOnCreateRace(
+        () => _pool.execute(
+          _saveWorkout.toSql(),
+          parameters: {'id': body.id, ...body.toParams()},
+        ),
       );
-      return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
+      final row = rows.first.toColumnMap();
+      return (Workout.fromRow(row, imageUrl: imageUrl), row['created'] as bool);
     } on ServerException catch (e) {
       _rethrowClientIdCollision(e);
     }

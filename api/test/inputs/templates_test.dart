@@ -13,6 +13,7 @@ const _bench = '0198c1a2-b3c4-7d5e-8f60-718293a4b501';
 const _squat = '0198c1a2-b3c4-7d5e-8f60-718293a4b502';
 const _rowA = '0198c1a2-b3c4-7d5e-8f60-718293a4b503';
 const _rowB = '0198c1a2-b3c4-7d5e-8f60-718293a4b504';
+const _pushDay = '0198c1a2-b3c4-7d5e-8f60-718293a4b505';
 
 /// The input layer reads `req.userId`, which the auth middleware normally sets.
 Request req({Map<String, dynamic> body = const {}, Map<String, String> query = const {}}) {
@@ -206,12 +207,15 @@ void main() {
     });
 
     // Exactly what the app posts: template.toMap() -> WorkoutExercise.toMap(),
-    // which nests the whole exercise object and omits `order` entirely.
+    // which nests the whole exercise object and omits `order` entirely. The
+    // template's own `id` is real here (heart-api#66 now validates it as
+    // a v7) — Template.id is non-nullable and always the app's local mint, so
+    // this is what the wire body actually carries, not a placeholder.
     test('accepts the payload shape the app actually sends', () async {
       final input = await TemplateCreateIn.fromRequest(
         req(
           body: {
-            'id': 't-1',
+            'id': _pushDay,
             'name': 'Push day',
             'order': 0,
             'exercises': [
@@ -228,9 +232,17 @@ void main() {
         ),
       );
 
+      expect(input.request.id, _pushDay);
       expect(input.request.exercises.single.exerciseId, _bench);
       expect(input.request.exercises.single.order, 0);
       expect(input.request.exercises.single.sets.single.reps, 5);
+    });
+
+    test('rejects a malformed top-level id', () async {
+      await expectLater(
+        TemplateCreateIn.fromRequest(req(body: {'id': 't-1', 'name': 'Push day'})),
+        throwsA(isA<BadRequest>()),
+      );
     });
 
     test('rejects exercises that are not an array of objects', () async {

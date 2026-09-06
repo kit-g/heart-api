@@ -6,7 +6,7 @@ your own toolchain and AWS profiles). Work arrives from GitHub issues or a
 manual prompt; work leaves as an **uncommitted diff in a per-agent
 worktree** — you review and commit, always.
 
-Same shape as `agents/` in the app repo (kit-g/heart-of-yours), built for
+Same shape as `agents/` in the app repo (heart-of-yours), built for
 this repo's toolchain: the image carries the Dart SDK, uv + Python 3.14,
 psql + pg_prove, Terraform, gh, the AWS CLI and Claude Code — no Flutter,
 no Docker-in-Docker. The two repos share only the credentials file.
