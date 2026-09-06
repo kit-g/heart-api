@@ -3,7 +3,7 @@ library;
 
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/workouts.dart';
-import 'package:heart_models/heart_models.dart' show timestampOfUuidV7;
+import 'package:heart_models/heart_models.dart' show timestampOfUuidV7, uuidV7;
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -122,7 +122,7 @@ void main() {
       final exName = h.uniqueName('Ex');
       final exId = await h.seedGlobalExercise(name: exName);
 
-      final created = await h.db.createWorkout(
+      final (created, isNew) = await h.db.createWorkout(
         userId: ownerId,
         body: req(
           ownerId,
@@ -140,6 +140,127 @@ void main() {
       expect(created.length, 1); // one exercise
       expect(created.first.exercise.name, exName);
       expect(created.first.length, 1); // one set
+      expect(isNew, isTrue); // no client id was sent, so a fresh workout is always minted
+    });
+
+    test('retrying the same workout id (and its child ids) is idempotent', () async {
+      final exName = h.uniqueName('Ex');
+      final exId = await h.seedGlobalExercise(name: exName);
+      final workoutId = uuidV7();
+      final exerciseId = uuidV7();
+      final setId = uuidV7();
+
+      WorkoutRequest body() => WorkoutRequest(
+        userId: ownerId,
+        body: {
+          'id': workoutId,
+          'name': 'Replayed',
+          'start': '2026-08-09T10:00:00Z',
+          'exercises': [
+            {
+              'id': exerciseId,
+              'exercise': exId,
+              'order': 0,
+              'sets': [
+                {'id': setId, 'weight': 100, 'reps': 5, 'completed': true},
+              ],
+            },
+          ],
+        },
+      );
+
+      final (first, firstIsNew) = await h.db.createWorkout(userId: ownerId, body: body(), imageUrl: imageUrl);
+      // the retry sends the identical payload — content is never compared, only the id
+      final (second, secondIsNew) = await h.db.createWorkout(userId: ownerId, body: body(), imageUrl: imageUrl);
+
+      expect(firstIsNew, isTrue);
+      expect(secondIsNew, isFalse);
+      expect(second.id, first.id);
+      expect(second.first.id, first.first.id);
+      expect(second.first.first.id, first.first.first.id);
+
+      // nothing doubled: the second call's whole insert chain was skipped
+      final workouts = await h.exec('SELECT count(*)::int AS n FROM workouts WHERE id = @id::uuid', {'id': workoutId});
+      expect(workouts.first.toColumnMap()['n'], 1);
+      final exercises = await h.exec(
+        'SELECT count(*)::int AS n FROM workout_exercises WHERE workout_id = @id::uuid',
+        {'id': workoutId},
+      );
+      expect(exercises.first.toColumnMap()['n'], 1);
+      final sets = await h.exec(
+        'SELECT count(*)::int AS n FROM exercise_sets WHERE workout_exercise_id = @id::uuid',
+        {'id': exerciseId},
+      );
+      expect(sets.first.toColumnMap()['n'], 1);
+    });
+
+    test('a workout id already owned by a different user throws Forbidden id_taken', () async {
+      final exName = h.uniqueName('Ex');
+      final exId = await h.seedGlobalExercise(name: exName);
+      final workoutId = uuidV7();
+      await h.db.createWorkout(
+        userId: ownerId,
+        body: WorkoutRequest(
+          userId: ownerId,
+          body: {
+            'id': workoutId,
+            'name': 'Mine',
+            'start': '2026-08-09T10:00:00Z',
+            'exercises': [
+              {'exercise': exId, 'order': 0, 'sets': <Map>[]},
+            ],
+          },
+        ),
+        imageUrl: imageUrl,
+      );
+
+      // the pre-check against user_id fails for someone else's id, so the insert
+      // is attempted anyway and trips workouts_pkey for real
+      await expectLater(
+        h.db.createWorkout(
+          userId: strangerId,
+          body: WorkoutRequest(
+            userId: strangerId,
+            body: {
+              'id': workoutId,
+              'name': 'Hijack',
+              'start': '2026-08-09T11:00:00Z',
+              'exercises': <Map>[],
+            },
+          ),
+          imageUrl: imageUrl,
+        ),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+      );
+    });
+
+    test('a malformed id is a BadRequest before any insert is attempted', () async {
+      final exName = h.uniqueName('Ex');
+      final exId = await h.seedGlobalExercise(name: exName);
+
+      await expectLater(
+        h.db.createWorkout(
+          userId: ownerId,
+          body: WorkoutRequest(
+            userId: ownerId,
+            body: {
+              'id': 'not-a-real-uuid',
+              'name': 'Malformed',
+              'start': '2026-08-09T10:00:00Z',
+              'exercises': [
+                {'exercise': exId, 'order': 0, 'sets': <Map>[]},
+              ],
+            },
+          ),
+          imageUrl: imageUrl,
+        ),
+        throwsA(isA<BadRequest>()),
+      );
+      final count = await h.exec(
+        "SELECT count(*)::int AS n FROM workouts WHERE user_id = @id AND name = 'Malformed'",
+        {'id': ownerId},
+      );
+      expect(count.first.toColumnMap()['n'], 0);
     });
   });
 
@@ -270,7 +391,7 @@ void main() {
         userId: ownerId,
         body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exAId),
         imageUrl: imageUrl,
-      )).id;
+      )).$1.id;
 
       final exB = h.uniqueName('Ex');
       final exBId = await h.seedGlobalExercise(name: exB);
@@ -296,7 +417,7 @@ void main() {
     test('client-sent v7 ids survive the replace', () async {
       final exName = h.uniqueName('Ex');
       final exId = await h.seedGlobalExercise(name: exName);
-      final created = await h.db.createWorkout(
+      final (created, _) = await h.db.createWorkout(
         userId: ownerId,
         body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exId),
         imageUrl: imageUrl,
@@ -342,7 +463,7 @@ void main() {
         userId: ownerId,
         body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exId),
         imageUrl: imageUrl,
-      )).id;
+      )).$1.id;
 
       final updated = await h.db.updateWorkout(
         userId: ownerId,
@@ -377,7 +498,7 @@ void main() {
     test('an id colliding with an existing row is a BadRequest, not a raw 23505', () async {
       final exName = h.uniqueName('Ex');
       final exId = await h.seedGlobalExercise(name: exName);
-      final other = await h.db.createWorkout(
+      final (other, _) = await h.db.createWorkout(
         userId: ownerId,
         body: req(ownerId, name: 'Existing', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exId),
         imageUrl: imageUrl,
@@ -435,7 +556,7 @@ void main() {
       final exName = h.uniqueName('Ex');
       final exId = await h.seedGlobalExercise(name: exName);
 
-      final created = await h.db.createWorkout(
+      final (created, _) = await h.db.createWorkout(
         userId: ownerId,
         body: WorkoutRequest(
           userId: ownerId,
@@ -491,7 +612,7 @@ void main() {
         },
       );
 
-      final created = await h.db.createWorkout(
+      final (created, _) = await h.db.createWorkout(
         userId: ownerId,
         body: withNote('do one hand at a time'),
         imageUrl: imageUrl,
