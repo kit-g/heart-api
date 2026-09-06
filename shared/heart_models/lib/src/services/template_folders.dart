@@ -8,12 +8,7 @@ abstract interface class ApiTemplateFolderService {
   /// folders are a handful per user, not a feed.
   Future<Iterable<TemplateFolder>> getFolders({required String userId});
 
-  /// `created` is true when this call minted the row; false when [folder]'s
-  /// id or (case-insensitive) name already named a folder the caller owns —
-  /// the upsync replay's idempotent-retry / name-merge cases
-  /// (kit-g/heart-api#66) — in which case the existing folder comes back
-  /// untouched, under its own id.
-  Future<(TemplateFolder, bool created)> createFolder({required String userId, required TemplateFolder folder});
+  Future<TemplateFolder> createFolder({required String userId, required TemplateFolder folder});
 
   Future<TemplateFolder> updateFolder({
     required String userId,
