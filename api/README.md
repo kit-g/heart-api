@@ -96,7 +96,24 @@ Throw, don't return. The wrapper in `bin/main.dart` maps these:
 | `NotFound`       | 404    |
 | `NotImplemented` | 501    |
 
-All defined in `lib/models/errors.dart`. They `implement Model` so their `toMap()` is the response body.
+All defined in `lib/models/errors.dart`. They `implement Model` so their `toMap()` is the response body. Every `ApiException` also carries a machine-readable `code` (default is the category — `bad_request`, `not_found`, …); a specific failure overrides it so a client can branch without matching prose, e.g. `Forbidden(code: 'id_taken')` when a create's client-supplied `id` belongs to someone else.
+
+### `201` vs `200` on a create
+
+A route that can resolve to either a freshly-inserted row or an idempotent replay landing
+on one that already existed (see "Idempotent creates" below) returns `Created(model)` — from
+`core/handler.dart` — for the fresh-insert case, and the bare `model` otherwise. `apiHandler`
+maps a `Created` to `201` and anything else to `200`; the JSON body is identical either way,
+`Created.toMap()` just forwards to the wrapped model.
+
+```dart
+Future<Model> createGoal(Request req) async {
+  final input = await GoalCreateIn.fromRequest(req);
+  final (goal, isNew) = await req.goalService.createGoal(input.goal, req.userId);
+  if (isNew) return Created(goal);
+  return goal;
+}
+```
 
 ### Multi-action endpoints
 
@@ -135,6 +152,18 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
 - **Partial updates with `COALESCE`**: `SET col = coalesce(@col, col)` lets you pass `null` for fields you want unchanged.
 - **Always `RETURNING`** the columns you need — `Future<Void>` queries that don't return are fine but losing the chance to round-trip the new state is usually a bug, not a feature.
 - **Triggers for snapshots**: `BEFORE DELETE` triggers can copy data into an archive table while the deleted row is still readable (and `_workout_exercises(OLD.id)` and similar SQL functions work because cascade deletes haven't fired yet).
+- **Idempotent creates on a client-minted id**: `POST /exercises`, `/workouts`, `/templates`,
+  `/template-folders`, `/goals` all accept an optional client `id` (a v7 uuid, same
+  `isUuidV7` check everywhere) — absent, `coalesce(@id::uuid, uuidv7())` mints one. The shape
+  (see `_createExercise`/`_createTemplateFolder`/`_createGoal`/`_saveTemplate`/`_saveWorkout` in
+  `queries.dart`) is: pre-check the id (and, for exercises/folders, the name — their one natural
+  key) against rows the caller already owns; if either matches, skip the INSERT and return that
+  row with `false AS created`; otherwise insert and return `true AS created`. An id that belongs
+  to a *different* owner matches neither pre-check, so the INSERT is attempted and trips the real
+  primary key — caught in the mixin and rethrown as `Forbidden(code: 'id_taken')` rather than the
+  500 a raw constraint violation would otherwise surface as. See
+  [`docs/2026-09-05.upsync-replay.md`](../docs/2026-09-05.upsync-replay.md) for the full contract
+  (kit-g/heart-api#66).
 
 ### Adding a new resource
 
