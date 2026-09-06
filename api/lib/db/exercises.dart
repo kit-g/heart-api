@@ -27,20 +27,29 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
     String? instructions,
   }) async {
     try {
-      final rows = await _pool.execute(
-        _createExercise.toSql(),
-        parameters: {
-          'userId': userId,
-          'id': id,
-          'name': name,
-          'category': category,
-          'target': target,
-          'instructions': instructions,
-        },
+      final rows = await _retryOnCreateRace(
+        () => _pool.execute(
+          _createExercise.toSql(),
+          parameters: {
+            'userId': userId,
+            'id': id,
+            'name': name,
+            'category': category,
+            'target': target,
+            'instructions': instructions,
+          },
+        ),
       );
+      // Empty means the pre-check missed (the id belongs to someone else) and
+      // the insert itself was never attempted at all — impossible with the
+      // current statement, but the exception path below is what actually
+      // handles that case; this is just the type-safe fallback.
+      if (rows.isEmpty) throw _idTaken;
+      // `created` rides along in the row map — routes/exercises.dart strips it
+      // before serializing and uses it to pick 200 vs 201.
       return rows.first.toColumnMap();
     } on ServerException catch (e) {
-      _rethrowClientIdCollision(e);
+      _rethrowForeignId(e);
     }
   }
 

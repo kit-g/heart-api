@@ -20,11 +20,7 @@ class ExerciseCreateIn {
     return ExerciseCreateIn._(
       // the app mints a v7 at construction and keeps it as the exercise's
       // identity through sync; present-but-malformed is the client's mistake
-      id: switch (json['id']) {
-        null => null,
-        final String id when isUuidV7(id) => id,
-        _ => throw const BadRequest(reason: 'id must be a UUIDv7'),
-      },
+      id: json.uuidV7OrNull(),
       name: switch (json.string('name', maxLength: 200).trim()) {
         String s when s.isNotEmpty => s,
         _ => throw const BadRequest(reason: 'name must be a non-empty string'),

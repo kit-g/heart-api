@@ -1,3 +1,4 @@
+import 'package:heart/core/handler.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
@@ -26,9 +27,11 @@ Future<GoalsResponse> getTargetUserGoalsById(
   return GoalsResponse(goals: goals);
 }
 
-Future<Goal> createGoal(Request req) async {
+Future<Model> createGoal(Request req) async {
   final input = await GoalCreateIn.fromRequest(req);
-  return req.goalService.createGoal(input.goal, req.userId);
+  final (goal, isNew) = await req.goalService.createGoalOrExisting(input.goal, req.userId);
+  if (isNew) return Created(goal);
+  return goal;
 }
 
 Future<Goal> updateGoal(Request req) {

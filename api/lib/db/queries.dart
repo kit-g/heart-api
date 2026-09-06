@@ -131,27 +131,55 @@ WHERE
   END
 ''';
 
+/// Idempotent create for a custom exercise, the upsync replay's first resource
+/// (heart-api#66): a client id already owned by the caller, or a name
+/// (case-insensitively — matching the import path's own notion) the caller
+/// already uses, resolves to that existing row with `created = false` rather
+/// than erroring. Both pre-checks are scoped to `user_id = @userId`, so an id
+/// that belongs to someone else (or a global exercise) matches neither CTE and
+/// falls through to the plain INSERT, which then trips the real
+/// `exercises_pkey` violation — caught and rethrown as `403 id_taken` by
+/// `_rethrowForeignId`, never silently absorbed.
 const _createExercise = '''
-INSERT INTO exercises (
-  id,
-  name,
-  category,
-  target,
-  instructions,
-  user_id
-) VALUES (
+WITH
+_by_id AS (
+  SELECT id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived, user_id
+  FROM exercises
+  WHERE id = @id::uuid AND user_id = @userId
+),
+_by_name AS (
+  -- the real unique index (exercises_user_name_idx) is case-sensitive; the
+  -- match here is deliberately looser (case-insensitive, matching the CSV
+  -- import's own notion of "the same exercise"), so pre-existing case-variant
+  -- rows are a real if rare possibility — LIMIT 1 keeps this CTE single-row
+  SELECT id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived, user_id
+  FROM exercises
+  WHERE user_id = @userId AND lower(name) = lower(@name)
+  ORDER BY id
+  LIMIT 1
+),
+_ins AS (
+  INSERT INTO exercises (id, name, category, target, instructions, user_id)
   -- the app mints a v7 id at construction (offline-first needs identity
   -- before the server ack) and it round-trips here; absent, the column
   -- default mints one
-  coalesce(@id::uuid, uuidv7()),
-  @name,
-  @category,
-  @target,
-  @instructions,
-  @userId
+  SELECT coalesce(@id::uuid, uuidv7()), @name, @category, @target, @instructions, @userId
+  WHERE NOT EXISTS (SELECT 1 FROM _by_id) AND NOT EXISTS (SELECT 1 FROM _by_name)
+  RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived, user_id
 )
-RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived,
-          user_id IS NOT NULL AS own
+SELECT id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived,
+       user_id IS NOT NULL AS own, true AS created
+FROM _ins
+UNION ALL
+SELECT id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived,
+       user_id IS NOT NULL AS own, false AS created
+FROM _by_id
+WHERE NOT EXISTS (SELECT 1 FROM _ins)
+UNION ALL
+SELECT id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived,
+       user_id IS NOT NULL AS own, false AS created
+FROM _by_name
+WHERE NOT EXISTS (SELECT 1 FROM _ins) AND NOT EXISTS (SELECT 1 FROM _by_id)
 ''';
 
 const _updateExercise = '''
@@ -378,8 +406,22 @@ UNION ALL
 SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
+/// Idempotent create for a workout, the replay's fifth resource
+/// (heart-api#66): a client id the caller already owns is never
+/// re-inserted — its exercises and sets are skipped wholesale (the
+/// `_inserted_exercises` CROSS JOIN against `_workout` naturally yields no rows
+/// once `_workout`'s INSERT is guarded away), and the existing row is fetched
+/// instead, `created = false`. A retried child id under the *same* workout id
+/// therefore never touches `workout_exercises`/`exercise_sets` a second time; a
+/// child id reused under a *different* workout id still hits the real pkey and
+/// 400s, unchanged. An id owned by someone else matches neither branch, so the
+/// INSERT is attempted and trips `workouts_pkey` — `403 id_taken` via
+/// `_rethrowForeignId`.
 const _saveWorkout = '''
 WITH
+_existing_workout AS (
+  SELECT id FROM workouts WHERE id = @id::uuid AND user_id = @userId
+),
 _order_to_id AS (
   SELECT
     -- ids round-trip, same as _replaceWorkout: the exercise id the client
@@ -403,8 +445,9 @@ _exercise_lookup AS (
   WHERE e.user_id IS NULL OR e.user_id = @userId
 ),
 _workout AS (
-  INSERT INTO workouts (user_id, name, started_at, completed_at, calories)
-  VALUES (@userId, @name, @startedAt, @completedAt, @calories)
+  INSERT INTO workouts (id, user_id, name, started_at, completed_at, calories)
+  SELECT coalesce(@id::uuid, uuidv7()), @userId, @name, @startedAt, @completedAt, @calories
+  WHERE NOT EXISTS (SELECT 1 FROM _existing_workout)
   RETURNING id, name, started_at, completed_at, calories, created_at
 ),
 _inserted_exercises AS (
@@ -495,10 +538,28 @@ SELECT
   w.calories,
   w.created_at,
   coalesce(ej.exercises_json, '[]'::jsonb) AS exercises,
-  '[]'::jsonb AS images
+  '[]'::jsonb AS images,
+  true AS created
 FROM _workout w
 LEFT JOIN _exercises_json ej
   ON true
+UNION ALL
+SELECT
+  w.id,
+  w.name,
+  w.started_at,
+  w.completed_at,
+  w.calories,
+  w.created_at,
+  _workout_exercises(w.id) AS exercises,
+  COALESCE(
+    (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
+     FROM workout_images wi WHERE wi.workout_id = w.id),
+    '[]'::jsonb
+  ) AS images,
+  false AS created
+FROM workouts w
+WHERE w.id IN (SELECT id FROM _existing_workout)
 ''';
 
 /// Whole CSV import in one atomic statement. Unlike [_saveWorkout]'s lookup —
@@ -847,8 +908,26 @@ WHERE id = @workoutId::uuid
   AND user_id = @userId
 ''';
 
+/// Idempotent create for a template, the replay's third resource
+/// (heart-api#66): templates carry no natural key (decision 2 in
+/// heart-api#66 — two templates may share a name), so only a client id
+/// the caller already owns short-circuits the insert; the existing row is
+/// fetched via `_template_exercises`, same shape as `_getTemplate`. An id owned
+/// by someone else reaches the INSERT regardless of `@folderId` (see
+/// `_foreign_template`, which keeps a bad folder from masking the id
+/// conflict) and trips `templates_pkey` — `403 id_taken` via
+/// `_rethrowForeignId`.
 const _saveTemplate = '''
 WITH
+_existing_template AS (
+  SELECT id FROM templates WHERE id = @id::uuid AND user_id = @userId
+),
+-- an id belonging to someone else must still reach the INSERT and trip
+-- templates_pkey (-> 403 id_taken) even when @folderId is also invalid — the
+-- folder guard below must not mask a foreign-id conflict behind a 404
+_foreign_template AS (
+  SELECT 1 FROM templates WHERE id = @id::uuid AND user_id <> @userId
+),
 _folder AS (
   SELECT id FROM template_folders
   WHERE id = @folderId::uuid AND user_id = @userId
@@ -870,9 +949,13 @@ _exercise_lookup AS (
 -- A folder the user does not own resolves to no row, so the INSERT selects
 -- nothing and the mixin reports NotFound rather than silently unfiling.
 _template AS (
-  INSERT INTO templates (user_id, name, order_index, folder_id)
-  SELECT @userId, @name, @orderIndex, (SELECT id FROM _folder)
-  WHERE @folderId::uuid IS NULL OR EXISTS (SELECT 1 FROM _folder)
+  INSERT INTO templates (id, user_id, name, order_index, folder_id)
+  SELECT coalesce(@id::uuid, uuidv7()), @userId, @name, @orderIndex, (SELECT id FROM _folder)
+  WHERE NOT EXISTS (SELECT 1 FROM _existing_template)
+    AND (
+      EXISTS (SELECT 1 FROM _foreign_template)
+      OR (@folderId::uuid IS NULL OR EXISTS (SELECT 1 FROM _folder))
+    )
   RETURNING id, name, order_index, folder_id, source_template_id, assigned_by, sync_enabled, created_at
 ),
 _inserted_exercises AS (
@@ -943,11 +1026,33 @@ SELECT
   p.avatar_url AS assigned_by_avatar,
   t.sync_enabled,
   t.created_at,
-  COALESCE(ej.exercises_json, '[]'::jsonb) AS exercises
+  COALESCE(ej.exercises_json, '[]'::jsonb) AS exercises,
+  true AS created
 FROM _template t
 LEFT JOIN template_folders f ON f.id = t.folder_id
 LEFT JOIN profiles p ON p.id = t.assigned_by
 LEFT JOIN _exercises_json ej ON true
+UNION ALL
+SELECT
+  t.id,
+  t.name,
+  t.order_index,
+  t.folder_id,
+  f.name AS folder_name,
+  f.order_index AS folder_order,
+  f.created_at AS folder_created_at,
+  t.source_template_id,
+  t.assigned_by AS assigned_by_id,
+  p.username AS assigned_by_username,
+  p.avatar_url AS assigned_by_avatar,
+  t.sync_enabled,
+  t.created_at,
+  _template_exercises(t.id) AS exercises,
+  false AS created
+FROM templates t
+LEFT JOIN template_folders f ON f.id = t.folder_id
+LEFT JOIN profiles p ON p.id = t.assigned_by
+WHERE t.id IN (SELECT id FROM _existing_template)
 ''';
 
 const _replaceTemplate = '''
@@ -1332,15 +1437,41 @@ GROUP BY f.id
 ORDER BY f.order_index, lower(f.name)
 ''';
 
-/// `ON CONFLICT DO NOTHING` on the case-insensitive unique index turns a
-/// duplicate name into zero rows instead of a 23505 the route would surface as a
-/// 500. The owner always exists (they are authenticated), so no rows can only
-/// mean the name is taken.
+/// Idempotent create for a folder, the replay's second resource
+/// (heart-api#66): a client id the caller already owns, or a name (on
+/// the case-insensitive index) the caller already has, resolves to that
+/// existing folder with `created = false` — replacing the old `400 "you
+/// already have a folder called..."`. An id owned by someone else matches
+/// neither pre-check and falls through to the plain INSERT, tripping
+/// `template_folders_pkey` — `403 id_taken` via `_rethrowForeignId`.
 const _createTemplateFolder = '''
-INSERT INTO template_folders (user_id, name, order_index)
-VALUES (@userId, @name, @orderIndex)
-ON CONFLICT (user_id, lower(name)) DO NOTHING
-RETURNING id, name, order_index, created_at, 0 AS template_count
+WITH
+_by_id AS (
+  SELECT id, name, order_index, created_at FROM template_folders
+  WHERE id = @id::uuid AND user_id = @userId
+),
+_by_name AS (
+  -- the real unique index (template_folders_user_name_idx) already keys on
+  -- lower(name), so this can only ever match one row; LIMIT 1 documents that
+  -- rather than relying on it silently
+  SELECT id, name, order_index, created_at FROM template_folders
+  WHERE user_id = @userId AND lower(name) = lower(@name)
+  ORDER BY id
+  LIMIT 1
+),
+_ins AS (
+  INSERT INTO template_folders (id, user_id, name, order_index)
+  SELECT coalesce(@id::uuid, uuidv7()), @userId, @name, @orderIndex
+  WHERE NOT EXISTS (SELECT 1 FROM _by_id) AND NOT EXISTS (SELECT 1 FROM _by_name)
+  RETURNING id, name, order_index, created_at
+)
+SELECT id, name, order_index, created_at, 0 AS template_count, true AS created FROM _ins
+UNION ALL
+SELECT id, name, order_index, created_at, 0 AS template_count, false AS created FROM _by_id
+WHERE NOT EXISTS (SELECT 1 FROM _ins)
+UNION ALL
+SELECT id, name, order_index, created_at, 0 AS template_count, false AS created FROM _by_name
+WHERE NOT EXISTS (SELECT 1 FROM _ins) AND NOT EXISTS (SELECT 1 FROM _by_id)
 ''';
 
 /// Three outcomes, told apart without a second round trip: no rows (the folder
@@ -1605,12 +1736,44 @@ const _maxActiveGoals = 50;
 // The cap is enforced in the INSERT, not read-then-write in Dart, so two concurrent
 // creates can't both pass a stale count and land a 51st. A full table returns no row,
 // which the db layer turns into a 400.
+//
+// Idempotent create, the replay's last resource (heart-api#66): a client
+// id the caller already owns short-circuits the insert (and the cap check —
+// a retry must never count against the ceiling it already cleared), returning
+// the existing goal with `created = false`. Goals have no natural key, so this
+// is the only pre-check.
+//
+// The cap must not be allowed to mask a foreign-id conflict: an id belonging
+// to someone else has to reach the INSERT and trip `goals_pkey` — `403
+// id_taken` via `_rethrowForeignId` — even when the caller is at their own
+// cap, so `_foreign` short-circuits the cap check in that case (`OR`, not
+// `AND`). Only when the id is genuinely free does the cap gate the insert; a
+// genuinely empty result (no `_by_id`, no `_foreign`, no `_ins`, no
+// exception) is then unambiguously the cap.
 const _createGoal =
     '''
-INSERT INTO goals (user_id, metric, exercise_id, cadence, stages)
-SELECT @userId, @metric::text, @exerciseId::uuid, @cadence::text, @stages::jsonb
-WHERE (SELECT count(*) FROM goals WHERE user_id = @userId AND NOT archived) < $_maxActiveGoals
-RETURNING id, metric, exercise_id, cadence, stages, archived, created_at
+WITH
+_by_id AS (
+  SELECT id, metric, exercise_id, cadence, stages, archived, created_at
+  FROM goals WHERE id = @id::uuid AND user_id = @userId
+),
+_foreign AS (
+  SELECT 1 FROM goals WHERE id = @id::uuid AND user_id <> @userId
+),
+_ins AS (
+  INSERT INTO goals (id, user_id, metric, exercise_id, cadence, stages)
+  SELECT coalesce(@id::uuid, uuidv7()), @userId, @metric::text, @exerciseId::uuid, @cadence::text, @stages::jsonb
+  WHERE NOT EXISTS (SELECT 1 FROM _by_id)
+    AND (
+      EXISTS (SELECT 1 FROM _foreign)
+      OR (SELECT count(*) FROM goals WHERE user_id = @userId AND NOT archived) < $_maxActiveGoals
+    )
+  RETURNING id, metric, exercise_id, cadence, stages, archived, created_at
+)
+SELECT id, metric, exercise_id, cadence, stages, archived, created_at, true AS created FROM _ins
+UNION ALL
+SELECT id, metric, exercise_id, cadence, stages, archived, created_at, false AS created FROM _by_id
+WHERE NOT EXISTS (SELECT 1 FROM _ins)
 ''';
 
 const _updateGoal = '''

@@ -22,8 +22,15 @@ void main() {
   late String strangerId;
   late String listOwnerId; // isolated, for getTemplates pagination
 
-  TemplateRequest tReq(String userId, String name, {int order = 0}) =>
-      TemplateRequest(userId: userId, name: name, order: order);
+  TemplateRequest tReq(String userId, String name, {int order = 0, String? id}) =>
+      TemplateRequest(userId: userId, name: name, order: order, id: id);
+
+  /// Number of `templates` rows for [id] — used to confirm a replayed create
+  /// did not insert a second row.
+  Future<int> templateRowCount(String id) async {
+    final rows = await h.exec('SELECT count(*) AS n FROM templates WHERE id = @id::uuid', {'id': id});
+    return rows.first.toColumnMap()['n'] as int;
+  }
 
   /// A coach-owned master template with one exercise + set, ready to share.
   Future<String> seedMasterTemplate() async {
@@ -56,8 +63,9 @@ void main() {
 
   group('template CRUD', () {
     test('createTemplate persists and getTemplate reads it back', () async {
-      final created = await h.db.createTemplate(userId: coachId, body: tReq(coachId, 'Leg day'));
+      final (created, isNew) = await h.db.createTemplateOrExisting(userId: coachId, body: tReq(coachId, 'Leg day'));
       expect(created.name, 'Leg day');
+      expect(isNew, isTrue);
 
       final fetched = await h.db.getTemplate(userId: coachId, templateId: created.id);
       expect(fetched.id, created.id);
@@ -65,7 +73,7 @@ void main() {
     });
 
     test('getTemplate is owner-scoped (NotFound for another user)', () async {
-      final created = await h.db.createTemplate(userId: coachId, body: tReq(coachId, 'Private'));
+      final (created, _) = await h.db.createTemplateOrExisting(userId: coachId, body: tReq(coachId, 'Private'));
       await expectLater(
         h.db.getTemplate(userId: strangerId, templateId: created.id),
         throwsA(isA<NotFound>()),
@@ -74,9 +82,9 @@ void main() {
 
     test('getTemplates walks the owner\'s arrangement with limit+1 pagination', () async {
       // Deliberately out of creation order: the third one created sits first.
-      final t1 = await h.db.createTemplate(userId: listOwnerId, body: tReq(listOwnerId, 'T1', order: 1));
-      final t2 = await h.db.createTemplate(userId: listOwnerId, body: tReq(listOwnerId, 'T2', order: 2));
-      final t0 = await h.db.createTemplate(userId: listOwnerId, body: tReq(listOwnerId, 'T0', order: 0));
+      final (t1, _) = await h.db.createTemplateOrExisting(userId: listOwnerId, body: tReq(listOwnerId, 'T1', order: 1));
+      final (t2, _) = await h.db.createTemplateOrExisting(userId: listOwnerId, body: tReq(listOwnerId, 'T2', order: 2));
+      final (t0, _) = await h.db.createTemplateOrExisting(userId: listOwnerId, body: tReq(listOwnerId, 'T0', order: 0));
 
       final page1 = await h.db.getTemplates(userId: listOwnerId, limit: 1);
       expect(page1.items, hasLength(1));
@@ -97,7 +105,8 @@ void main() {
     test('templates sharing an order_index page by id without repeating or skipping', () async {
       final owner = await h.seedProfile();
       final created = [
-        for (var i = 0; i < 5; i++) await h.db.createTemplate(userId: owner, body: tReq(owner, 'Tied $i')),
+        for (var i = 0; i < 5; i++)
+          (await h.db.createTemplateOrExisting(userId: owner, body: tReq(owner, 'Tied $i'))).$1,
       ];
 
       final walked = <String>[];
@@ -113,14 +122,14 @@ void main() {
     });
 
     test('updateTemplate renames an owned template', () async {
-      final created = await h.db.createTemplate(userId: coachId, body: tReq(coachId, 'Before'));
+      final (created, _) = await h.db.createTemplateOrExisting(userId: coachId, body: tReq(coachId, 'Before'));
       final updated = await h.db.updateTemplate(userId: coachId, templateId: created.id, body: tReq(coachId, 'After'));
       expect(updated.id, created.id);
       expect(updated.name, 'After');
     });
 
     test('updateTemplate on a template you do not own throws NotFound', () async {
-      final created = await h.db.createTemplate(userId: coachId, body: tReq(coachId, 'Mine'));
+      final (created, _) = await h.db.createTemplateOrExisting(userId: coachId, body: tReq(coachId, 'Mine'));
       await expectLater(
         h.db.updateTemplate(userId: strangerId, templateId: created.id, body: tReq(strangerId, 'Yours')),
         throwsA(isA<NotFound>()),
@@ -128,11 +137,93 @@ void main() {
     });
 
     test('deleteTemplate removes an owned template', () async {
-      final created = await h.db.createTemplate(userId: coachId, body: tReq(coachId, 'Temp'));
+      final (created, _) = await h.db.createTemplateOrExisting(userId: coachId, body: tReq(coachId, 'Temp'));
       await h.db.deleteTemplate(coachId: coachId, templateId: created.id);
       await expectLater(
         h.db.getTemplate(userId: coachId, templateId: created.id),
         throwsA(isA<NotFound>()),
+      );
+    });
+  });
+
+  // heart-api#66: anonymous-account upsync replay. Templates have no
+  // natural key (two may share a name — see the regression test below), so a
+  // client-minted id owned by the caller is the only thing a retry can land
+  // on; unlike exercises/workouts/goals there is no name-match fallback.
+  group('idempotent create (heart-api#66)', () {
+    test('reposting the same client id is idempotent: first creates, second is a no-op', () async {
+      const id = '019def00-0000-7000-8000-00000000a001';
+      final name = h.uniqueName('Idempotent');
+
+      final (first, firstCreated) = await h.db.createTemplateOrExisting(
+        userId: coachId,
+        body: tReq(coachId, name, id: id),
+      );
+      expect(firstCreated, isTrue);
+      expect(first.id, id);
+
+      // Same id, different payload — the replay is ignored wholesale, not
+      // merged; the original row comes back untouched.
+      final (second, secondCreated) = await h.db.createTemplateOrExisting(
+        userId: coachId,
+        body: tReq(coachId, h.uniqueName('ShouldBeIgnored'), id: id),
+      );
+      expect(secondCreated, isFalse);
+      expect(second.id, id);
+      expect(second.name, name);
+
+      expect(await templateRowCount(id), 1);
+    });
+
+    test('two templates may share a name — templates have no natural key', () async {
+      final name = h.uniqueName('SameName');
+      final (a, aCreated) = await h.db.createTemplateOrExisting(userId: coachId, body: tReq(coachId, name));
+      final (b, bCreated) = await h.db.createTemplateOrExisting(userId: coachId, body: tReq(coachId, name));
+
+      expect(aCreated, isTrue);
+      expect(bCreated, isTrue);
+      expect(a.id, isNot(b.id));
+    });
+
+    test('an id already owned by a different user is Forbidden with id_taken', () async {
+      const id = '019def00-0000-7000-8000-00000000a002';
+      await h.db.createTemplateOrExisting(
+        userId: coachId,
+        body: tReq(coachId, h.uniqueName('Theirs'), id: id),
+      );
+
+      await expectLater(
+        h.db.createTemplateOrExisting(
+          userId: strangerId,
+          body: tReq(strangerId, h.uniqueName('AttemptedTake'), id: id),
+        ),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+      );
+    });
+
+    // Regression: the foreign-id check and the folder-ownership guard are two
+    // independent conditions on the same INSERT guard; if a bad folderId
+    // alone were allowed to block the insert, a hostile id_taken attempt that
+    // also happened to name a folder it didn't own would never trip the pkey
+    // violation, and would see a misleading 404 instead. The foreign id must win.
+    test('a foreign id with an invalid folderId is still id_taken, not folder NotFound', () async {
+      const id = '019def00-0000-7000-8000-00000000a003';
+      await h.db.createTemplateOrExisting(
+        userId: coachId,
+        body: tReq(coachId, h.uniqueName('Theirs'), id: id),
+      );
+
+      await expectLater(
+        h.db.createTemplateOrExisting(
+          userId: strangerId,
+          body: TemplateRequest(
+            userId: strangerId,
+            id: id,
+            name: h.uniqueName('AttemptedTake'),
+            folderId: '00000000-0000-7000-8000-000000000000', // owned by no one
+          ),
+        ),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
       );
     });
   });

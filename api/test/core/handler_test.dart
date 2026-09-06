@@ -25,6 +25,14 @@ void main() {
     expect(await status((_) async => _Ok()), 200);
   });
 
+  test('a Created-wrapped model becomes 201', () async {
+    expect(await status((_) async => Created(_Ok())), 201);
+  });
+
+  test('a Created-wrapped model forwards toMap to the wrapped value', () {
+    expect(Created(_Ok()).toMap(), _Ok().toMap());
+  });
+
   test('a null return becomes 200 with an empty body', () async {
     expect(await status((_) async => null), 200);
   });

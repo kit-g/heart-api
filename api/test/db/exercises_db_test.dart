@@ -320,6 +320,86 @@ void main() {
       final b = await h.db.createExercise(userId: otherId, name: name, category: 'Barbell', target: 'Chest');
       expect(a['id'], isNot(b['id']));
     });
+
+    // heart-api#66: anonymous-account upsync replay. The client mints its
+    // own id offline and may retry a create (flaky network, app relaunch)
+    // without knowing whether the first POST landed; these cover the replay
+    // being a safe no-op instead of a duplicate or an error.
+    test('reposting the same client id is idempotent: first creates, second is a no-op', () async {
+      const id = '019def00-0000-7000-8000-0000000000e1';
+      final name = h.uniqueName('Idempotent');
+
+      final first = await h.db.createExercise(
+        userId: ownerId,
+        id: id,
+        name: name,
+        category: 'Barbell',
+        target: 'Chest',
+      );
+      expect(first['created'], isTrue);
+      expect(first['id'], id);
+
+      // Same id, different payload — the replay is ignored wholesale, not
+      // merged; the original row comes back untouched.
+      final second = await h.db.createExercise(
+        userId: ownerId,
+        id: id,
+        name: h.uniqueName('ShouldBeIgnored'),
+        category: 'Dumbbell',
+        target: 'Legs',
+      );
+      expect(second['created'], isFalse);
+      expect(second['id'], id);
+      expect(second['name'], name);
+      expect(second['category'], 'Barbell');
+
+      final mine = (await h.db.getExercises(ownerId, owned: true))['exercises'] as List;
+      expect(mine.where((e) => (e as Map)['id'] == id), hasLength(1));
+    });
+
+    test('a new id colliding on name (case-insensitive) resolves to the pre-existing row', () async {
+      final name = h.uniqueName('CaseName');
+      final original = await h.db.createExercise(userId: ownerId, name: name, category: 'Barbell', target: 'Chest');
+      final originalId = original['id'].toString();
+
+      const newId = '019def00-0000-7000-8000-0000000000e2';
+      final result = await h.db.createExercise(
+        userId: ownerId,
+        id: newId,
+        name: name.toUpperCase(),
+        category: 'Machine',
+        target: 'Back',
+      );
+
+      expect(result['created'], isFalse);
+      expect(result['id'], originalId); // the pre-existing custom's id, not newId
+      expect(result['category'], 'Barbell'); // untouched by the colliding call's payload
+
+      final mine = (await h.db.getExercises(ownerId, owned: true))['exercises'] as List;
+      expect(mine.where((e) => (e as Map)['id'] == newId), isEmpty); // newId was never inserted
+    });
+
+    test('an id already owned by a different user is Forbidden with id_taken', () async {
+      const id = '019def00-0000-7000-8000-0000000000e3';
+      await h.db.createExercise(
+        userId: otherId,
+        id: id,
+        name: h.uniqueName('TakenById'),
+        category: 'Barbell',
+        target: 'Chest',
+      );
+
+      await expectLater(
+        h.db.createExercise(
+          userId: ownerId,
+          id: id,
+          name: h.uniqueName('AttemptedTake'),
+          category: 'Barbell',
+          target: 'Chest',
+        ),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+      );
+    });
   });
 
   group('updateExercise', () {

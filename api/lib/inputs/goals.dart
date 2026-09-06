@@ -1,13 +1,15 @@
 part of 'inputs.dart';
 
-/// `POST /goals` — `{metric, exerciseId?, cadence?, stages: [{target, dueOn?}]}`.
+/// `POST /goals` — `{id?, metric, exerciseId?, cadence?, stages: [{target, dueOn?}]}`.
 class GoalCreateIn {
+  final String? id;
   final GoalMetric metric;
   final String? exerciseId;
   final GoalCadence? cadence;
   final List<GoalStage> stages;
 
   const new _({
+    required this.id,
     required this.metric,
     required this.exerciseId,
     required this.cadence,
@@ -22,6 +24,7 @@ class GoalCreateIn {
       _ => json.parsed('cadence', GoalCadence.fromString),
     };
     final input = GoalCreateIn._(
+      id: json.uuidV7OrNull(),
       metric: metric,
       exerciseId: json['exerciseId'] as String?,
       cadence: cadence,
@@ -32,7 +35,7 @@ class GoalCreateIn {
   }
 
   Goal get goal {
-    return Goal(metric: metric, exerciseId: exerciseId, cadence: cadence, stages: stages);
+    return Goal(id: id, metric: metric, exerciseId: exerciseId, cadence: cadence, stages: stages);
   }
 }
 
