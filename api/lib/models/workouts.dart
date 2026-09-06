@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:heart_models/heart_models.dart';
 
 import 'errors.dart';
+import 'ids.dart';
 import 'imports.dart';
 
 abstract interface class ApiWorkoutService {
@@ -27,7 +28,11 @@ abstract interface class ApiWorkoutService {
     required String Function(String) imageUrl,
   });
 
-  Future<Workout> createWorkout({
+  /// `created` is true when this call minted the row; false when [body]'s
+  /// [WorkoutRequest.id] already named a workout the caller owns — the
+  /// upsync replay's idempotent-retry case (kit-g/heart-api#66) — in which
+  /// case the existing row is returned untouched, content ignored.
+  Future<(Workout, bool created)> createWorkout({
     required String userId,
     required WorkoutRequest body,
     required String Function(String) imageUrl,
@@ -96,6 +101,11 @@ class WorkoutRequest {
     DateTime dt => dt,
     _ => null,
   };
+
+  /// The workout's own client-minted id (kit-g/heart-api#66) — absent, the
+  /// insert mints one; present-but-malformed is the client's mistake, same
+  /// rule as every other id on this payload.
+  String? get id => body.uuidV7OrNull();
 
   List<Map> _exercises() {
     final source = (body['exercises'] as List? ?? []).cast<Map>();
@@ -168,6 +178,9 @@ class WorkoutRequest {
 
   static const _maxNoteLength = 500;
 
+  /// Deliberately omits [id] — `_replaceWorkout` (unlike `_saveWorkout`) has
+  /// no `@id` placeholder, and the postgres client rejects a superfluous named
+  /// parameter, so a create merges `id` in itself rather than carrying it here.
   Map<String, dynamic> toParams() {
     return {
       'userId': userId,
