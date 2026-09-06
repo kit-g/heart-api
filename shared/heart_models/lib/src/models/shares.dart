@@ -169,6 +169,12 @@ class TemplateExerciseRequest {
 /// input layer (`api/lib/inputs/templates.dart`), which is what builds this.
 class TemplateRequest {
   final String userId;
+
+  /// The template's own client-minted id (kit-g/heart-api#66). Only a create
+  /// reads this — an update addresses its template by path parameter, same as
+  /// before. Absent, the insert mints one.
+  final String? id;
+
   final String? name;
   final int order;
 
@@ -184,6 +190,7 @@ class TemplateRequest {
 
   const new({
     required this.userId,
+    this.id,
     this.name,
     this.order = 0,
     this.folderId,
@@ -191,6 +198,9 @@ class TemplateRequest {
     this.exercises = const [],
   });
 
+  /// Deliberately omits [id] — `_replaceTemplate` (unlike `_saveTemplate`) has
+  /// no `@id` placeholder, and the postgres client rejects a superfluous named
+  /// parameter, so a create merges `id` in itself rather than carrying it here.
   Map<String, dynamic> toParams() {
     return {
       'userId': userId,

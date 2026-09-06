@@ -15,7 +15,13 @@ abstract interface class GoalService {
     bool archived = false,
   });
 
-  Future<Goal> createGoal(Goal goal, String userId);
+  /// `created` is true when this call minted the row; false when [goal].id
+  /// already named a goal the caller owns — the upsync replay's
+  /// idempotent-retry case (kit-g/heart-api#66) — in which case the existing
+  /// goal comes back untouched and the retry never counts against the active
+  /// goal cap. Goals carry no natural key, so an id is the only thing a
+  /// retry can match on.
+  Future<(Goal, bool created)> createGoal(Goal goal, String userId);
 
   Future<Goal> updateGoal(String goalId, Goal goal, String userId);
 

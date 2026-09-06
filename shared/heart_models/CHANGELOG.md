@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.1.0
+
+Supports the anonymous-to-account upsync replay (kit-g/heart-api#66): the app's
+local-first writes become idempotent on the client's own id when replayed into
+a real account. Server-only interfaces — no app-facing behavior changes.
+
+- New: `TemplateRequest.id` — the template's client-minted id, read on create
+  so a replayed `POST /templates` lands on the same row instead of a
+  duplicate.
+- **Note**: `ApiTemplateService.createTemplate`, `ApiTemplateFolderService.createFolder`,
+  and `GoalService.createGoal` now return `(T, bool created)` instead of a bare
+  `T` — `created` distinguishes a freshly-inserted row from an idempotent
+  replay landing on one that already existed. These three interfaces are
+  implemented only by `api/`'s `Database`; the app does not consume them, so
+  this is not treated as an app-facing break.
+
 ## 2.0.0
 
 Exercise identity moves from the name to the uuid — a coordinated breaking release for the
