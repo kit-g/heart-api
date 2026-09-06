@@ -1,21 +1,23 @@
 part of 'inputs.dart';
 
-/// `POST /template-folders` — `{name, order?}`.
+/// `POST /template-folders` — `{id?, name, order?}`.
 class TemplateFolderCreateIn {
+  final String? id;
   final String name;
   final int order;
 
-  const new _({required this.name, required this.order});
+  const new _({required this.id, required this.name, required this.order});
 
   static Future<TemplateFolderCreateIn> fromRequest(Request req) async {
     final json = await req.json();
     return TemplateFolderCreateIn._(
+      id: json.uuidV7OrNull(),
       name: json.folderName(),
       order: json.folderOrder(),
     );
   }
 
-  TemplateFolder get folder => TemplateFolder(name: name, order: order);
+  TemplateFolder get folder => TemplateFolder(id: id, name: name, order: order);
 }
 
 /// `PUT /template-folders/:folderId` — `{name, order?}`. A full replace of the
