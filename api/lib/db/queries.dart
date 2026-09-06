@@ -1669,6 +1669,17 @@ WHERE exercise_id = @id::uuid
   AND user_id = @userId
 ''';
 
+/// Unpaginated, same as `_getChartPreferences` — `UNIQUE (user_id, exercise_id)`
+/// bounds this to a handful of rows per user. Excludes chart-only rows (those
+/// belong to `GET /charts`); ordered by `exercise_id` for a stable response.
+const _listExercisePreferences = '''
+SELECT exercise_id, unit_system, rest_timer
+FROM exercise_preferences
+WHERE user_id = @userId
+  AND (unit_system IS NOT NULL OR rest_timer IS NOT NULL)
+ORDER BY exercise_id
+''';
+
 const _getChartPreferences = '''
 SELECT 
   exercise_id AS id, 
