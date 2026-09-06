@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:heart/models/creates.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/exercise_preferences.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/imports.dart';
@@ -127,7 +128,7 @@ class Database extends _DatabaseBase
         _TemplateFolders
     implements
         ChartPreferenceService,
-        ExercisePreferenceService,
+        ApiExercisePreferenceService,
         CommentService,
         ConnectionsService,
         DeviceService,
