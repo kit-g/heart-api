@@ -65,7 +65,7 @@ void main() {
         },
       );
       // A fresh custom row was actually inserted → 201, not the 200 an
-      // idempotent replay resolves to (kit-g/heart-api#66).
+      // idempotent replay resolves to (heart-api#66).
       expect(res.status, 201);
       final decoded = jsonDecode(res.body);
       expect(decoded, containsPair('name', 'Squat'));

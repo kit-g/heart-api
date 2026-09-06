@@ -1,6 +1,6 @@
 variable "github_repos" {
   type        = list(string)
-  default     = ["kit-g/heart-api", "kit-g/heart-of-yours"]
+  default     = ["heart-api", "heart-of-yours"]
   description = "GitHub repos (owner/name) allowed to assume the deploy role."
 }
 

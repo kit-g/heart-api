@@ -49,9 +49,13 @@ feature off to the Flutter app. This file is about finishing work *here*.)
 8. **Secrets stay out** — nothing fetched from S3 (`secrets/*.json`,
    `/tmp/supabase.json`), no env files, no tokens or connection strings in
    the diff or in the handoff text.
-9. **Git** — never commit or push. Leave work in the tree and run
+9. **Style** — `docs/style.md`, the no-nos the linter cannot catch: inputs at the
+   boundary, switch over cast-and-branch, one-round-trip SQL with `RETURNING`,
+   casing by layer, shapes in one place, repos named without the `kit-g/`
+   prefix. Every entry there is a finding.
+10. **Git** — never commit or push. Leave work in the tree and run
    `git add -N .` so new files appear in `git diff`.
-10. **Self-review** — run the `review-handoff` skill on the finished tree
+11. **Self-review** — run the `review-handoff` skill on the finished tree
     before writing the handoff. Fix what it finds, re-run, and leave
     `REVIEW.md` describing the tree as handed off. The reviewer runs the
     same skill, so anything it would catch is cheaper caught here.

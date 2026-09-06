@@ -113,7 +113,7 @@ void main() {
       expect(names, ['First', 'Alpha', 'Zebra']);
     });
 
-    // kit-g/heart-api#66: a duplicate name used to 400 here; it is now a no-op
+    // heart-api#66: a duplicate name used to 400 here; it is now a no-op
     // that resolves to the existing folder, same as a duplicate client id — see
     // the "idempotent create" group below.
 
@@ -234,11 +234,11 @@ void main() {
     });
   });
 
-  // kit-g/heart-api#66: anonymous-account upsync replay. A client id the
+  // heart-api#66: anonymous-account upsync replay. A client id the
   // caller already owns, or a name (case-insensitively) they already have,
   // resolves to the existing folder instead of erroring — the id pre-check
   // runs first, so a name match only fires when the id itself is fresh.
-  group('idempotent create (kit-g/heart-api#66)', () {
+  group('idempotent create (heart-api#66)', () {
     test('reposting the same client id is idempotent: first creates, second is a no-op', () async {
       final user = await h.seedProfile();
       const id = '019def00-0000-7000-8000-00000000b001';

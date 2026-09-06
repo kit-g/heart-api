@@ -208,7 +208,7 @@ void main() {
 
     // Exactly what the app posts: template.toMap() -> WorkoutExercise.toMap(),
     // which nests the whole exercise object and omits `order` entirely. The
-    // template's own `id` is real here (kit-g/heart-api#66 now validates it as
+    // template's own `id` is real here (heart-api#66 now validates it as
     // a v7) — Template.id is non-nullable and always the app's local mint, so
     // this is what the wire body actually carries, not a placeholder.
     test('accepts the payload shape the app actually sends', () async {

@@ -8,7 +8,7 @@ description: Review an autonomous agent's work against this repo's definition of
 Agent work arrives as an **uncommitted diff in a worktree** plus `HANDOFF.md`; the user reviews,
 commits, and opens the PR. This skill is the review. Its stance: **HANDOFF.md is a set of claims,
 and every claim gets checked.** The built-in `/code-review` finds bugs in any codebase; this skill
-adds what only this repo knows — `docs/handoff.md`, CLAUDE.md, the `add-endpoint` /
+adds what only this repo knows — `docs/handoff.md`, `docs/style.md`, CLAUDE.md, the `add-endpoint` /
 `add-migration` / `ci-workflows` skills, and the contract table below.
 
 Two modes, same checklist:
@@ -94,6 +94,7 @@ Each row is a check to run, not a box to tick from the handoff.
 | **Infrastructure** — plan only              | `make test-tf` green. The handoff shows no `terraform apply` (the guard blocks it; check anyway). Provider `version` pins live in `environments/*/providers.tf`, never in a `stack/` or `modules/` file. `terraform fmt` clean.                                                                                                                                                                                     |
 | **Content** — validated                     | `content/` changes: `uv run python scripts/validate_library.py` passes. Localized overlays under `content/i18n/` edited only for the locale the ticket names.                                                                                                                                                                                                                                                      |
 | **Secrets**                                 | `git diff \| grep -inE 'AKIA\|aws_secret\|password\|token\|postgres://'` over added lines. Anything real is a finding above everything else, and so is a `secrets/*.json` or `supabase.json` body pasted into a doc, test fixture, or the handoff.                                                                                                                                                                  |
+| **Style** — `docs/style.md`                 | Every entry there is a finding. Quick tells over the diff hunks: parsing inside a handler; `as` casts where a `switch` pattern belongs; a multi-line ternary; a `try`/`catch` that only rethrows; a second query where one CTE would do; a write without `RETURNING`; a server-only type added to `heart_models`; `kit-g/` in prose. Comments that narrate the next line instead of the reason.                                                                                                                                                              |
 | **Dependencies**                            | A new `pubspec.yaml` or `pyproject.toml` entry is a finding to surface (not reject): what it is for, whether the lockfile moved only for it.                                                                                                                                                                                                                                                                       |
 
 ## 6. Tree hygiene

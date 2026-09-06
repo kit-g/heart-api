@@ -1,5 +1,5 @@
 /// API-side extensions of the shared service interfaces, for the creates the
-/// upsync replay (kit-g/heart-api#66) makes idempotent.
+/// upsync replay (heart-api#66) makes idempotent.
 ///
 /// The shared interfaces in `heart_models` keep their bare-model signatures:
 /// the app implements `GoalService` for its local database and consumes the

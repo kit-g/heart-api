@@ -151,7 +151,7 @@ void main() {
       expect(ids.contains(null), isFalse);
     });
 
-    // Idempotent create, the replay's last resource (kit-g/heart-api#66): goals
+    // Idempotent create, the replay's last resource (heart-api#66): goals
     // have no natural key, so a client-minted id is the only way a retry lands
     // on the same row instead of a duplicate.
     test('replaying the same client id returns the existing goal untouched', () async {

@@ -30,7 +30,7 @@ abstract interface class ApiWorkoutService {
 
   /// `created` is true when this call minted the row; false when [body]'s
   /// [WorkoutRequest.id] already named a workout the caller owns — the
-  /// upsync replay's idempotent-retry case (kit-g/heart-api#66) — in which
+  /// upsync replay's idempotent-retry case (heart-api#66) — in which
   /// case the existing row is returned untouched, content ignored.
   Future<(Workout, bool created)> createWorkout({
     required String userId,
@@ -102,7 +102,7 @@ class WorkoutRequest {
     _ => null,
   };
 
-  /// The workout's own client-minted id (kit-g/heart-api#66) — absent, the
+  /// The workout's own client-minted id (heart-api#66) — absent, the
   /// insert mints one; present-but-malformed is the client's mistake, same
   /// rule as every other id on this payload.
   String? get id => body.uuidV7OrNull();

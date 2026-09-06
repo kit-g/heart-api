@@ -16,7 +16,7 @@ const _meId = 'u1';
 Template _fakeTemplate(String id, {int order = 0}) => Template.empty(id: id, order: order);
 
 // A well-formed v7 uuid, the shape the app mints for the client-side id
-// (kit-g/heart-api#66) — distinct from '_fakeTemplate's ids, which are never
+// (heart-api#66) — distinct from '_fakeTemplate's ids, which are never
 // validated as uuids.
 const _v7Id = '019def00-0000-7000-8000-0000000000f1';
 

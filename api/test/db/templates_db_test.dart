@@ -146,11 +146,11 @@ void main() {
     });
   });
 
-  // kit-g/heart-api#66: anonymous-account upsync replay. Templates have no
+  // heart-api#66: anonymous-account upsync replay. Templates have no
   // natural key (two may share a name — see the regression test below), so a
   // client-minted id owned by the caller is the only thing a retry can land
   // on; unlike exercises/workouts/goals there is no name-match fallback.
-  group('idempotent create (kit-g/heart-api#66)', () {
+  group('idempotent create (heart-api#66)', () {
     test('reposting the same client id is idempotent: first creates, second is a no-op', () async {
       const id = '019def00-0000-7000-8000-00000000a001';
       final name = h.uniqueName('Idempotent');
