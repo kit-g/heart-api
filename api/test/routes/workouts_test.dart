@@ -1,3 +1,4 @@
+import 'package:heart/core/handler.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
@@ -227,6 +228,66 @@ void main() {
         throwsA(isA<NotFound>()),
       );
     });
+  });
+
+  group('createWorkout', () {
+    Request createReq(Map<String, dynamic> body) => wire(jsonRequest(path: '/workouts', body: body));
+
+    void stubCreate((Workout, bool) result) {
+      when(
+        workouts.createWorkout(
+          userId: anyNamed('userId'),
+          body: anyNamed('body'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).thenAnswer((_) async => result);
+    }
+
+    test('a genuinely new workout comes back wrapped in Created (201)', () async {
+      stubCreate((_fakeWorkout('w-1'), true));
+
+      final result = await createWorkout(createReq({'name': 'Push', 'start': '2026-07-20T18:00:00Z'}));
+
+      expect(result, isA<Created<Workout>>());
+      expect((result as Created<Workout>).value.id, 'w-1');
+    });
+
+    test('a retry that resolved to an existing workout comes back bare (200)', () async {
+      final id = uuidV7();
+      stubCreate((_fakeWorkout('w-1'), false));
+
+      final result = await createWorkout(
+        createReq({'id': id, 'name': 'Push', 'start': '2026-07-20T18:00:00Z'}),
+      );
+
+      expect(result, isNot(isA<Created>()));
+      expect((result as Workout).id, 'w-1');
+    });
+
+    test('propagates Forbidden id_taken when the client id belongs to another account', () async {
+      final id = uuidV7();
+      when(
+        workouts.createWorkout(
+          userId: anyNamed('userId'),
+          body: anyNamed('body'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).thenThrow(const Forbidden(code: 'id_taken', reason: 'this id belongs to another account'));
+
+      await expectLater(
+        createWorkout(createReq({'id': id, 'name': 'Push', 'start': '2026-07-20T18:00:00Z'})),
+        throwsA(
+          isA<Forbidden>().having((e) => e.statusCode, 'statusCode', 403).having((e) => e.code, 'code', 'id_taken'),
+        ),
+      );
+    });
+
+    // Unlike ExerciseCreateIn/TemplateCreateIn, WorkoutRequest.id is a lazy
+    // getter the route never touches — only the real _Workouts.createWorkout
+    // evaluates it (via toParams(), building the SQL params). With the service
+    // mocked out here, a malformed id sails through the route unvalidated;
+    // the "id must be a UUIDv7" 400 is exercised for real in
+    // db/workouts_db_test.dart, against the live implementation.
   });
 
   group('importWorkouts', () {

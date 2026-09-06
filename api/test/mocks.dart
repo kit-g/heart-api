@@ -1,6 +1,7 @@
 import 'package:heart/db/db.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/events.dart';
+import 'package:heart/models/creates.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/profile.dart';
@@ -17,12 +18,12 @@ import 'package:mockito/annotations.dart';
   ApiImageDbService,
   ApiImageStorageService,
   ApiWorkoutService,
-  ApiTemplateService,
-  ApiTemplateFolderService,
+  IdempotentTemplateService,
+  IdempotentTemplateFolderService,
   ExerciseService,
   ChartPreferenceService,
   ExercisePreferenceService,
-  GoalService,
+  IdempotentGoalService,
   CommentService,
   ConnectionsService,
   DeviceService,

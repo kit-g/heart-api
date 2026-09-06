@@ -1,3 +1,4 @@
+import 'package:heart/core/handler.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
@@ -18,10 +19,10 @@ const _exerciseId = '019def00-0000-7000-8000-000000000001';
 const _workoutId = '019def00-0000-7000-8000-000000000002';
 
 void main() {
-  late MockGoalService service;
+  late MockIdempotentGoalService service;
 
   setUp(() {
-    service = MockGoalService();
+    service = MockIdempotentGoalService();
   });
 
   Request wire(Request req) {
@@ -34,12 +35,20 @@ void main() {
     return wire(jsonRequest(method: Method.post, path: '/goals', body: body));
   }
 
+  // `createGoal` returns bare `Model` now that a replay can resolve to either
+  // `Created<Goal>` (201) or a bare `Goal` (200) — tests that only care about
+  // the created goal's fields unwrap through this, rather than repeating the
+  // cast at every call site.
+  Future<Goal> createdGoal(Request req) async => (await createGoal(req) as Created<Goal>).value;
+
   group('createGoal', () {
     setUp(() {
-      when(service.createGoal(any, any)).thenAnswer((i) async => i.positionalArguments[0] as Goal);
+      when(
+        service.createGoalOrExisting(any, any),
+      ).thenAnswer((i) async => (i.positionalArguments[0] as Goal, true));
     });
 
-    test('creates a frequency goal with no exercise scope', () async {
+    test('creates a frequency goal with no exercise scope, returning 201', () async {
       final req = createRequest({
         'metric': 'workouts',
         'cadence': 'week',
@@ -48,13 +57,67 @@ void main() {
         ],
       });
 
-      final goal = await createGoal(req);
+      final result = await createGoal(req);
 
+      expect(result, isA<Created<Goal>>());
+      final goal = (result as Created<Goal>).value;
       expect(goal.metric, GoalMetric.workouts);
       expect(goal.cadence, GoalCadence.week);
       expect(goal.exerciseId, isNull);
       expect(goal.stages.single.target, 3);
-      verify(service.createGoal(any, _meId)).called(1);
+      verify(service.createGoalOrExisting(any, _meId)).called(1);
+    });
+
+    test('a replayed id the service reports as not-new returns the bare goal, not Created', () async {
+      final req = createRequest({
+        'metric': 'workouts',
+        'id': _goalId,
+        'cadence': 'week',
+        'stages': [
+          {'target': 3},
+        ],
+      });
+      when(
+        service.createGoalOrExisting(any, any),
+      ).thenAnswer((i) async => (i.positionalArguments[0] as Goal, false));
+
+      final result = await createGoal(req);
+
+      expect(result, isNot(isA<Created<Goal>>()));
+      expect((result as Goal).id, _goalId);
+    });
+
+    test('an id already owned by another account is Forbidden with id_taken', () async {
+      final req = createRequest({
+        'metric': 'workouts',
+        'id': _goalId,
+        'cadence': 'week',
+        'stages': [
+          {'target': 3},
+        ],
+      });
+      when(
+        service.createGoalOrExisting(any, any),
+      ).thenThrow(const Forbidden(code: 'id_taken', reason: 'this id belongs to another account'));
+
+      await expectLater(
+        () => createGoal(req),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+      );
+    });
+
+    test('rejects a malformed client id before ever reaching the service', () async {
+      final req = createRequest({
+        'metric': 'workouts',
+        'id': 'not-a-uuid',
+        'cadence': 'week',
+        'stages': [
+          {'target': 3},
+        ],
+      });
+
+      await expectLater(() => createGoal(req), throwsA(isA<BadRequest>()));
+      verifyNever(service.createGoalOrExisting(any, any));
     });
 
     test('creates a staged strength ladder', () async {
@@ -67,7 +130,7 @@ void main() {
         ],
       });
 
-      final goal = await createGoal(req);
+      final goal = await createdGoal(req);
 
       expect(goal.metric, GoalMetric.topSetWeight);
       expect(goal.cadence, isNull);
@@ -85,7 +148,7 @@ void main() {
         ],
       });
 
-      final goal = await createGoal(req);
+      final goal = await createdGoal(req);
 
       expect(goal.metric, GoalMetric.totalVolume);
       expect(goal.cadence, GoalCadence.month);
@@ -101,7 +164,7 @@ void main() {
       });
 
       await expectLater(() => createGoal(req), throwsA(isA<BadRequest>()));
-      verifyNever(service.createGoal(any, any));
+      verifyNever(service.createGoalOrExisting(any, any));
     });
 
     test('rejects a per-exercise metric with no exercise', () async {
@@ -140,7 +203,7 @@ void main() {
         ],
       });
 
-      final goal = await createGoal(req);
+      final goal = await createdGoal(req);
       expect(goal.stages.map((s) => s.target), [140, 100]);
     });
 
