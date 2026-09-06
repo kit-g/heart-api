@@ -116,6 +116,10 @@ void main() {
 
   group('getExercisePreferences', () {
     test('lists unit-only, timer-only, and both rows, excluding chart-only and other users', () async {
+      // A profile of this test's own: `ownerId` is shared file-wide and the
+      // savePreference tests above leave rows behind for it, so a count
+      // against it depends on test order.
+      final listOwner = await h.seedProfile();
       final unitOnly = await h.seedGlobalExercise();
       final timerOnly = await h.seedGlobalExercise();
       final both = await h.seedGlobalExercise();
@@ -124,26 +128,26 @@ void main() {
 
       await h.db.savePreference(
         ExercisePreference(exerciseId: unitOnly, unitSystem: MeasurementUnit.imperial),
-        ownerId,
+        listOwner,
       );
       await h.db.savePreference(
         ExercisePreference(exerciseId: timerOnly, restTimer: 60),
-        ownerId,
+        listOwner,
       );
       await h.db.savePreference(
         ExercisePreference(exerciseId: both, unitSystem: MeasurementUnit.metric, restTimer: 90),
-        ownerId,
+        listOwner,
       );
       await h.db.saveChartPreference(
         ChartPreference.create(id: chartOnly, type: ChartPreferenceType.totalVolume),
-        ownerId,
+        listOwner,
       );
       await h.db.savePreference(
         ExercisePreference(exerciseId: otherUsersExercise, unitSystem: MeasurementUnit.imperial),
         otherId,
       );
 
-      final prefs = (await h.db.getExercisePreferences(ownerId)).toList();
+      final prefs = (await h.db.getExercisePreferences(listOwner)).toList();
 
       expect(prefs, hasLength(3));
       expect(prefs.map((p) => p.exerciseId), isNot(contains(chartOnly)));
