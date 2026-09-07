@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.2.0
+
+Gives the app a way to know its local mirror is complete before it exports —
+the gap that showed up building anonymous accounts, where the device is the
+only place the data has ever lived.
+
+- New: `AccountSummary`, `CollectionSummary` and `ExportableCollection` — the
+  body of `GET /accounts/summary`, a per-collection row count plus the newest
+  row's id. The device compares them against its own tables; a matching count
+  with a different `latestId` is a divergence a count alone reads as in sync.
+  `ExportableCollection.tryParse` returns `null` for a key this build does not
+  know, and `AccountSummary.fromJson` skips those, so an app lagging a server
+  that added a collection still parses.
+
 ## 2.1.0
 
 Supports the anonymous-to-account upsync replay (heart-api#66): the app's
