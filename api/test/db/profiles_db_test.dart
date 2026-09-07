@@ -270,7 +270,6 @@ void main() {
       expect(theirs[ExportableCollection.customExercises].count, 0);
       // The connection is counted from both ends — it belongs to both accounts.
       expect(theirs[ExportableCollection.connections].count, 1);
-
     });
   });
 
