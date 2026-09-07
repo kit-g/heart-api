@@ -63,6 +63,14 @@ Future<Model> upsertAccount(Request request) async {
   }
 }
 
+/// What the account holds server-side, one collection at a time.
+///
+/// The app's export runs off its local mirror, so before it writes a file it
+/// needs to know the mirror is whole — this is what it compares against.
+Future<AccountSummary> getAccountSummary(Request request) {
+  return request.profileService.getAccountSummary(request.userId);
+}
+
 Future<NoContent> deleteAccount(Request request) async {
   final userId = request.userId;
   final config = request.config;

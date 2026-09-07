@@ -59,4 +59,40 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
       parameters: {'userId': userId},
     );
   }
+
+  @override
+  Future<AccountSummary> getAccountSummary(String userId) async {
+    final rows = await _pool.execute(
+      _accountSummary.toSql(),
+      parameters: {'userId': userId},
+    );
+    // The query cross-joins ten one-row CTEs, so it returns exactly one row for
+    // any user id — an unknown one included, with every count zero. There is no
+    // empty-result branch to handle, and deliberately no NotFound: "you own
+    // nothing" is a true answer, not a missing account.
+    final row = rows.first.toColumnMap();
+
+    // snake_case column aliases stay in this layer; the model is camelCase.
+    CollectionSummary of(String column) {
+      return CollectionSummary(
+        count: row['${column}_count'] as int,
+        latestId: row['${column}_latest'] as String?,
+      );
+    }
+
+    return AccountSummary(
+      collections: <ExportableCollection, CollectionSummary>{
+        .customExercises: of('custom_exercises'),
+        .exercisePreferences: of('exercise_preferences'),
+        .templateFolders: of('template_folders'),
+        .templates: of('templates'),
+        .templateShares: of('template_shares'),
+        .workouts: of('workouts'),
+        .workoutImages: of('workout_images'),
+        .goals: of('goals'),
+        .comments: of('comments'),
+        .connections: of('connections'),
+      },
+    );
+  }
 }
