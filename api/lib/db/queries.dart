@@ -83,6 +83,112 @@ DELETE FROM profiles
 WHERE id = @userId
 ''';
 
+/// Per-collection totals for everything one account owns: the inventory a data
+/// export has to match, so the app can compare it against its local mirror and
+/// know the export is complete rather than assume it.
+///
+/// Ten independent counts in one round trip; the final cross join is ten
+/// one-row relations. Eight of the ten ride an existing index on their owner
+/// column. The exceptions are `comments` (no `author_id` index — the table's
+/// indexes are all on the four target columns) and `goals` (`goals_user_id_idx`
+/// is partial on `NOT archived`, and an export counts archived goals too), both
+/// of which scan. Fine for a call made once before an export; the thing to
+/// revisit first if this ever gets polled.
+///
+/// `latest` is the newest row's id. Ids are uuid v7, so `max()` is chronological
+/// and the value doubles as a high-water mark: a mirror with the same count over
+/// *different* rows reads as in-sync on the count alone and diverged on this.
+/// The cast is *inside* `max()` because Postgres has no `max(uuid)` aggregate;
+/// uuids render as canonical lowercase hex with the dashes at fixed positions,
+/// so text order and uuid order are the same thing.
+///
+/// `connections` is the one collection without it — keyed by
+/// `(initiator_id, target_id, domain)`, it has no id to be newest — so it emits
+/// a typed NULL to keep every branch the same shape for the reader.
+///
+/// Scope notes: `custom_exercises` is the user's own rows only (a global library
+/// row is not the account's to export); `template_shares` is the coach side,
+/// because a share the account *received* is already counted as the copied
+/// template it produced; `connections` counts both directions, matching
+/// `_listConnections`. Device tokens are excluded — plumbing, not user data.
+///
+/// Nothing health-derived is countable here and nothing can be: the server
+/// stores no health data at all (CLAUDE.md, the device-only health rule).
+const _accountSummary = '''
+WITH
+  _custom_exercises AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM exercises WHERE user_id = @userId
+  ),
+  _exercise_preferences AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM exercise_preferences WHERE user_id = @userId
+  ),
+  _template_folders AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM template_folders WHERE user_id = @userId
+  ),
+  _templates AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM templates WHERE user_id = @userId
+  ),
+  _template_shares AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM template_shares WHERE coach_id = @userId
+  ),
+  _workouts AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM workouts WHERE user_id = @userId
+  ),
+  _workout_images AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM workout_images WHERE user_id = @userId
+  ),
+  _goals AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM goals WHERE user_id = @userId
+  ),
+  _comments AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM comments WHERE author_id = @userId
+  ),
+  _connections AS (
+    SELECT count(*) AS n, NULL::text AS latest
+    FROM connections WHERE initiator_id = @userId OR target_id = @userId
+  )
+SELECT
+  _custom_exercises.n         AS custom_exercises_count,
+  _custom_exercises.latest    AS custom_exercises_latest,
+  _exercise_preferences.n     AS exercise_preferences_count,
+  _exercise_preferences.latest AS exercise_preferences_latest,
+  _template_folders.n         AS template_folders_count,
+  _template_folders.latest    AS template_folders_latest,
+  _templates.n                AS templates_count,
+  _templates.latest           AS templates_latest,
+  _template_shares.n          AS template_shares_count,
+  _template_shares.latest     AS template_shares_latest,
+  _workouts.n                 AS workouts_count,
+  _workouts.latest            AS workouts_latest,
+  _workout_images.n           AS workout_images_count,
+  _workout_images.latest      AS workout_images_latest,
+  _goals.n                    AS goals_count,
+  _goals.latest               AS goals_latest,
+  _comments.n                 AS comments_count,
+  _comments.latest            AS comments_latest,
+  _connections.n              AS connections_count,
+  _connections.latest         AS connections_latest
+FROM _custom_exercises,
+     _exercise_preferences,
+     _template_folders,
+     _templates,
+     _template_shares,
+     _workouts,
+     _workout_images,
+     _goals,
+     _comments,
+     _connections
+''';
+
 const _listExercises = '''
 SELECT coalesce(
   jsonb_agg(
