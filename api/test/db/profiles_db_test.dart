@@ -179,6 +179,101 @@ void main() {
     });
   });
 
+  group('getAccountSummary', () {
+    test('reports zero for every collection on an account that owns nothing', () async {
+      final id = await h.seedProfile();
+
+      final summary = await h.db.getAccountSummary(id);
+
+      // Every collection is present and zero — an absent key would mean "this
+      // server has no such collection", which is a different claim.
+      expect(summary.collections.keys, unorderedEquals(ExportableCollection.values));
+      expect(summary.total, 0);
+      for (final collection in ExportableCollection.values) {
+        expect(summary[collection].count, 0, reason: '${collection.name} should be empty');
+        expect(summary[collection].latestId, isNull, reason: '${collection.name} should have no latest id');
+      }
+    });
+
+    test('is zeroes, not a NotFound, for an id with no profile row', () async {
+      final summary = await h.db.getAccountSummary(h.uid('ghost'));
+
+      expect(summary.total, 0);
+    });
+
+    test('counts every collection the account owns, and only that account’s', () async {
+      final id = await h.seedProfile();
+      final other = await h.seedProfile();
+      final globalExercise = await h.seedGlobalExercise();
+
+      // Two workouts for the owner, one for the stranger; a global exercise is
+      // nobody's custom, so neither account may count it.
+      await h.seedWorkout(userId: id);
+      final newestWorkout = await h.seedWorkout(userId: id, withExercise: true);
+      await h.seedWorkout(userId: other);
+
+      final customExercise = await h.insertId(
+        'INSERT INTO exercises (name, category, target, user_id) VALUES (@n, @c, @t, @u) RETURNING id',
+        {'n': h.uniqueName('Custom'), 'c': 'Barbell', 't': 'Chest', 'u': id},
+      );
+      await h.exec(
+        'INSERT INTO exercise_preferences (user_id, exercise_id, unit_system) VALUES (@u, @e::uuid, @s)',
+        {'u': id, 'e': globalExercise, 's': 'metric'},
+      );
+      final folder = await h.insertId(
+        'INSERT INTO template_folders (user_id, name) VALUES (@u, @n) RETURNING id',
+        {'u': id, 'n': h.uniqueName('Folder')},
+      );
+      await h.insertId(
+        'INSERT INTO templates (user_id, name, folder_id) VALUES (@u, @n, @f::uuid) RETURNING id',
+        {'u': id, 'n': h.uniqueName('Template'), 'f': folder},
+      );
+      await h.exec(
+        'INSERT INTO goals (user_id, metric, stages) VALUES (@u, @m, @s::jsonb)',
+        {'u': id, 'm': 'workouts', 's': '[{"target": 3}]'},
+      );
+      await h.exec(
+        'INSERT INTO workout_images (workout_id, user_id, key) VALUES (@w::uuid, @u, @k)',
+        {'w': newestWorkout, 'u': id, 'k': 'images/${h.uid('img')}'},
+      );
+      await h.exec(
+        'INSERT INTO comments (author_id, body, workout_id) VALUES (@a, @b, @w::uuid)',
+        {'a': id, 'b': 'good session', 'w': newestWorkout},
+      );
+      await h.seedConnection(initiator: id, target: other);
+
+      final summary = await h.db.getAccountSummary(id);
+
+      expect(summary[ExportableCollection.workouts].count, 2);
+      expect(summary[ExportableCollection.customExercises].count, 1);
+      expect(summary[ExportableCollection.exercisePreferences].count, 1);
+      expect(summary[ExportableCollection.templateFolders].count, 1);
+      expect(summary[ExportableCollection.templates].count, 1);
+      expect(summary[ExportableCollection.goals].count, 1);
+      expect(summary[ExportableCollection.workoutImages].count, 1);
+      expect(summary[ExportableCollection.comments].count, 1);
+      expect(summary[ExportableCollection.connections].count, 1);
+      // No share was made; the coach side is the only one counted.
+      expect(summary[ExportableCollection.templateShares].count, 0);
+
+      // latestId is the newest row — uuid v7, so the second workout wins.
+      expect(summary[ExportableCollection.workouts].latestId, newestWorkout);
+      expect(summary[ExportableCollection.customExercises].latestId, customExercise);
+      expect(summary[ExportableCollection.templateFolders].latestId, folder);
+
+      // Connections are keyed by (initiator, target, domain) and have no id.
+      expect(summary[ExportableCollection.connections].latestId, isNull);
+
+      // The stranger sees only their own row, through the same query.
+      final theirs = await h.db.getAccountSummary(other);
+      expect(theirs[ExportableCollection.workouts].count, 1);
+      expect(theirs[ExportableCollection.customExercises].count, 0);
+      // The connection is counted from both ends — it belongs to both accounts.
+      expect(theirs[ExportableCollection.connections].count, 1);
+
+    });
+  });
+
   group('deleteAccount', () {
     test('removes the profile row', () async {
       // Seeded via the harness so cleanup is a harmless no-op after this delete.
