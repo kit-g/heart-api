@@ -55,4 +55,33 @@ void main() {
       verify(app.db.updateAvatarUrl(userId: 'u1', avatarUrl: null)).called(1);
     });
   });
+
+  group('GET /accounts/summary', () {
+    test('returns the caller’s per-collection counts', () async {
+      when(app.db.getAccountSummary(any)).thenAnswer(
+        (_) async => const AccountSummary(
+          collections: {
+            ExportableCollection.workouts: CollectionSummary(count: 412, latestId: '0198-workout'),
+            ExportableCollection.connections: CollectionSummary(count: 2),
+          },
+        ),
+      );
+
+      final res = await app.send('GET', '/accounts/summary');
+
+      expect(res.status, 200);
+      // camelCase keys, and latestId omitted where the collection has none.
+      expect(res.body, contains('"workouts":{"count":412,"latestId":"0198-workout"}'));
+      expect(res.body, contains('"connections":{"count":2}'));
+      verify(app.db.getAccountSummary('u1')).called(1);
+    });
+
+    test('rejects an anonymous Firebase account before it reaches the service (403)', () async {
+      final res = await app.send('GET', '/accounts/summary', token: AppHarness.anonymousToken);
+
+      expect(res.status, 403);
+      expect(res.body, contains('anonymous_account'));
+      verifyNever(app.db.getAccountSummary(any));
+    });
+  });
 }
