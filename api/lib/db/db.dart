@@ -112,6 +112,56 @@ abstract class _DatabaseBase {
   }
 }
 
+/// Constraint violations that name a specific client-supplied reference, mapped
+/// to the `code` the app branches on. Every one of these is a row the caller
+/// asked for by id; the response is the same whether that row is absent or
+/// merely someone else's, so it never confirms another account's data exists.
+const _missingReferenceCodes = <String, String>{
+  'exercise_preferences_exercise_id_fkey': 'unknown_exercise',
+  'goals_exercise_id_fkey': 'unknown_exercise',
+  'workout_exercises_exercise_id_fkey': 'unknown_exercise',
+  'template_exercises_exercise_id_fkey': 'unknown_exercise',
+  'templates_folder_fk': 'unknown_folder',
+  'comments_workout_id_fkey': 'unknown_comment_target',
+  'comments_workout_exercise_id_fkey': 'unknown_comment_target',
+  'comments_exercise_set_id_fkey': 'unknown_comment_target',
+  'comments_workout_image_id_fkey': 'unknown_comment_target',
+};
+
+/// The last line of defence for a constraint violation no statement mapped:
+/// `apiHandler` consults this before falling through to a 500.
+///
+/// The `_rethrow*` mappings above are *precise* — a specific statement opts
+/// into one and gets a specific code, and those still win, because they run at
+/// the call site long before this does. This exists for everything that opted
+/// into nothing: 62 statements reach the pool and 8 wrap themselves, so a
+/// foreign-key violation from any of the other 54 escaped as
+/// `500 server_error` (heart-api#74 — a replayed unit preference for an
+/// exercise id the account did not own killed a 358-row backup at row 26,
+/// because a 500 is indistinguishable from an outage and the app stopped).
+///
+/// A `23503` is always the caller naming a row that is not there: the statement
+/// supplies every other value itself, so the only reference that can go
+/// unsatisfied is one that arrived in the request. Known ones carry a specific
+/// code; anything else still lands on a 400 rather than a 500, so a foreign key
+/// added later cannot silently reopen this.
+ApiException? apiExceptionForDbError(Object error) {
+  if (error is! ServerException) return null;
+  final constraint = error.constraintName;
+  return switch (error.code) {
+    '23503' => switch (_missingReferenceCodes[constraint]) {
+      final String code => NotFound(type: 'Reference', id: constraint ?? 'unknown', code: code),
+      // An unmapped foreign key: still the client's reference, but we can't say
+      // which one, so it stays a 400 rather than claiming a specific 404.
+      null => const BadRequest(code: 'invalid_reference', reason: 'a referenced record does not exist'),
+    },
+    // Reached only when no call site claimed it — the specific duplicate codes
+    // (`id_taken`, the payload-id collision) are thrown at their statements.
+    '23505' => const BadRequest(code: 'duplicate', reason: 'a record with these values already exists'),
+    _ => null,
+  };
+}
+
 class Database extends _DatabaseBase
     with
         _Charts,

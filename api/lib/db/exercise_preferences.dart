@@ -7,25 +7,24 @@ mixin _ExercisePreferences on _DatabaseBase implements ApiExercisePreferenceServ
       _listExercisePreferences.toSql(),
       parameters: {'userId': userId},
     );
-    return result.map(
-      (row) {
-        final map = row.toColumnMap();
-        return ExercisePreference(
-          exerciseId: map['exercise_id'].toString(),
-          unitSystem: switch (map['unit_system']) {
-            null => null,
-            final String u => MeasurementUnit.fromString(u),
-            final other => throw ArgumentError.value(other, 'unit_system', 'unexpected exercise_preferences value'),
-          },
-          restTimer: map['rest_timer'] as int?,
-        );
+    return result.map((row) => _preferenceOf(row.toColumnMap()));
+  }
+
+  ExercisePreference _preferenceOf(Map<String, dynamic> row) {
+    return ExercisePreference(
+      exerciseId: row['exercise_id'].toString(),
+      unitSystem: switch (row['unit_system']) {
+        null => null,
+        final String u => MeasurementUnit.fromString(u),
+        final other => throw ArgumentError.value(other, 'unit_system', 'unexpected exercise_preferences value'),
       },
+      restTimer: row['rest_timer'] as int?,
     );
   }
 
   @override
   Future<ExercisePreference> savePreference(ExercisePreference preference, String userId) async {
-    await _pool.execute(
+    final rows = await _pool.execute(
       _saveExercisePreference.toSql(),
       parameters: {
         'userId': userId,
@@ -34,7 +33,13 @@ mixin _ExercisePreferences on _DatabaseBase implements ApiExercisePreferenceServ
         'restTimer': preference.restTimer,
       },
     );
-    return preference;
+    // No row means the id matched no exercise this caller may reference — it
+    // does not exist, or it is someone else's private custom. One answer for
+    // both; see `_saveExercisePreference`.
+    if (rows.isEmpty) {
+      throw NotFound(type: 'Exercise', id: preference.exerciseId, code: 'unknown_exercise');
+    }
+    return _preferenceOf(rows.first.toColumnMap());
   }
 
   @override

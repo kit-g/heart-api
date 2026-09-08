@@ -1752,13 +1752,33 @@ const _deleteDeviceToken = '''
 DELETE FROM device_tokens WHERE token = @token
 ''';
 
+/// Inserts from a visibility check rather than from the literal id, because the
+/// foreign key alone is the wrong gate twice over: it proves only that the
+/// exercise *exists*, so a plain `VALUES` insert accepts another account's
+/// private custom (heart-api#74), and an id that exists nowhere raises a raw
+/// `23503` the caller sees as a 500.
+///
+/// The `SELECT` applies the same predicate every other exercise read uses — the
+/// caller's own customs plus the shared library. An id that is neither matches
+/// no row, inserts nothing, and returns nothing, which the db layer turns into
+/// `404 unknown_exercise`. Absent and not-yours are deliberately the same
+/// answer: distinguishing them would confirm that someone else's exercise is
+/// real.
+///
+/// `RETURNING` is the merged row, not the request: a write of one field
+/// `COALESCE`s the other, so the stored preference can differ from what was
+/// sent, and the caller should be told what it actually holds.
 const _saveExercisePreference = '''
 INSERT INTO exercise_preferences (user_id, exercise_id, unit_system, rest_timer)
-VALUES (@userId, @exerciseId::uuid, @unitSystem::text, @restTimer::integer)
+SELECT @userId, e.id, @unitSystem::text, @restTimer::integer
+FROM exercises e
+WHERE e.id = @exerciseId::uuid
+  AND (e.user_id IS NULL OR e.user_id = @userId)
 ON CONFLICT (user_id, exercise_id)
 DO UPDATE SET
   unit_system = COALESCE(EXCLUDED.unit_system, exercise_preferences.unit_system),
   rest_timer  = COALESCE(EXCLUDED.rest_timer, exercise_preferences.rest_timer)
+RETURNING exercise_id, unit_system, rest_timer
 ''';
 
 const _clearUnitPreference = '''
