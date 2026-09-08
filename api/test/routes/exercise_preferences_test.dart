@@ -217,4 +217,29 @@ void main() {
       verifyNever(app.db.getExercisePreferences(any));
     });
   });
+
+  group('POST /exercise-preferences — unreferenceable exercise (heart-api#74)', () {
+    late AppHarness app;
+
+    setUp(() async => app = await AppHarness.start());
+    tearDown(() => app.stop());
+
+    test('answers 404 unknown_exercise, not 500', () async {
+      // What the db layer raises when the id is neither the caller's own custom
+      // nor a library exercise. The incident was this reaching the client as
+      // `500 server_error`, which the replay could not tell from an outage.
+      when(app.db.savePreference(any, any)).thenThrow(
+        const NotFound(type: 'Exercise', id: '01a07dfe-0bf2-7d18-a1fa-79abe2a92472', code: 'unknown_exercise'),
+      );
+
+      final res = await app.send(
+        'POST',
+        '/exercise-preferences',
+        body: {'exerciseId': '01a07dfe-0bf2-7d18-a1fa-79abe2a92472', 'unitSystem': 'metric'},
+      );
+
+      expect(res.status, 404);
+      expect(res.body, contains('"code":"unknown_exercise"'));
+    });
+  });
 }
