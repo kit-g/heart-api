@@ -1,4 +1,5 @@
 import 'package:heart/core/response.dart';
+import 'package:heart/db/db.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart';
@@ -57,6 +58,14 @@ Handler apiHandler(ModelHandler handler) {
       _logger.warning('API exception:', e.message);
       return JsonResponse.notImplemented(body: NotImplemented(reason: e.message ?? 'Not implemented'));
     } catch (e, stackTrace) {
+      // A constraint violation that no statement mapped is the caller naming a
+      // row that isn't there — a refusal, not a fault. Without this it reaches
+      // the 500 below, which the app cannot tell from an outage and so retries
+      // or aborts on (heart-api#74). See `apiExceptionForDbError`.
+      if (apiExceptionForDbError(e) case final rejected?) {
+        _logger.warning('Rejected reference:', e);
+        return JsonResponse(rejected.statusCode, body: rejected);
+      }
       _logger.severe('API server error:', e, stackTrace);
       return JsonResponse.serverError();
     }
