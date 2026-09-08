@@ -1,6 +1,7 @@
 @Tags(['db'])
 library;
 
+import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
@@ -37,6 +38,89 @@ void main() {
     );
     return rows.isEmpty ? null : rows.first.toColumnMap();
   }
+
+  group('savePreference — unreferenceable exercise ids (heart-api#74)', () {
+    test('a nonexistent exercise id is NotFound(unknown_exercise), not a raw DB error', () async {
+      // A well-formed uuid the FK cannot satisfy. Before the fix this escaped
+      // the pool as a 23503 and the route answered 500.
+      const ghost = '01a07dfe-0bf2-7d18-a1fa-79abe2a92472';
+      final pref = ExercisePreference(exerciseId: ghost, unitSystem: MeasurementUnit.metric);
+
+      await expectLater(
+        h.db.savePreference(pref, ownerId),
+        throwsA(
+          isA<NotFound>()
+              .having((e) => e.code, 'code', 'unknown_exercise')
+              .having((e) => e.statusCode, 'statusCode', 404),
+        ),
+      );
+    });
+
+    test('another user’s private custom is refused identically — existence is not leaked', () async {
+      final theirs = await h.insertId(
+        'INSERT INTO exercises (name, category, target, user_id) VALUES (@n, @c, @t, @u) RETURNING id',
+        {'n': h.uniqueName('Private'), 'c': 'Barbell', 't': 'Chest', 'u': otherId},
+      );
+      final pref = ExercisePreference(exerciseId: theirs, unitSystem: MeasurementUnit.metric);
+
+      // Same code and status as the nonexistent id above: the response must not
+      // let the caller tell "not yours" from "not there".
+      await expectLater(
+        h.db.savePreference(pref, ownerId),
+        throwsA(isA<NotFound>().having((e) => e.code, 'code', 'unknown_exercise')),
+      );
+
+      // And nothing was written for either account.
+      expect(await readPref(ownerId, theirs), isNull);
+      expect(await readPref(otherId, theirs), isNull);
+    });
+
+    test('the caller’s own custom is accepted', () async {
+      final mine = await h.insertId(
+        'INSERT INTO exercises (name, category, target, user_id) VALUES (@n, @c, @t, @u) RETURNING id',
+        {'n': h.uniqueName('Mine'), 'c': 'Barbell', 't': 'Back', 'u': ownerId},
+      );
+
+      final saved = await h.db.savePreference(
+        ExercisePreference(exerciseId: mine, restTimer: 120),
+        ownerId,
+      );
+
+      expect(saved.exerciseId, mine);
+      expect(saved.restTimer, 120);
+      expect((await readPref(ownerId, mine))?['rest_timer'], 120);
+    });
+
+    test('a shared library exercise is accepted', () async {
+      final global = await h.seedGlobalExercise();
+
+      final saved = await h.db.savePreference(
+        ExercisePreference(exerciseId: global, unitSystem: MeasurementUnit.imperial),
+        ownerId,
+      );
+
+      expect(saved.exerciseId, global);
+      expect(saved.unitSystem, MeasurementUnit.imperial);
+    });
+
+    test('the returned preference is the merged row, not the request', () async {
+      final global = await h.seedGlobalExercise();
+      await h.db.savePreference(
+        ExercisePreference(exerciseId: global, unitSystem: MeasurementUnit.metric, restTimer: 60),
+        ownerId,
+      );
+
+      // Writing only the timer COALESCEs the unit through, so the response has
+      // to report the stored state rather than echoing the partial request.
+      final merged = await h.db.savePreference(
+        ExercisePreference(exerciseId: global, restTimer: 45),
+        ownerId,
+      );
+
+      expect(merged.restTimer, 45);
+      expect(merged.unitSystem, MeasurementUnit.metric);
+    });
+  });
 
   group('savePreference', () {
     test('inserts both fields and returns the given preference', () async {
