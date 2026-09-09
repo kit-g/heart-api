@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="apple-touch-icon" href="assets/favicon.png">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="description"
+          content="Support for Heart of Yours — how to reach us, and answers to the questions the app actually gets asked."/>
+    <title>Support - Heart of Yours</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,600&display=swap"
+          rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"/>
+    <link rel="stylesheet" href="assets/site.css">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="assets/site.js"></script>
+</head>
+<body class="bg-ground text-ink font-text min-h-screen flex flex-col overflow-x-hidden selection:bg-accent selection:text-on-accent">
+<!-- Navbar -->
+<header class="w-full flex flex-col items-center pt-6 pb-2 px-6 sm:px-10 z-10">
+    <div class="w-full max-w-[1200px] flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="size-9 flex items-center justify-center bg-surface rounded overflow-hidden border">
+                <img src="assets/favicon.png" alt="Heart of Yours Logo" class="size-full object-cover"/>
+            </div>
+            <h2 class="text-lg font-title font-semibold tracking-tight">Heart of Yours</h2>
+        </a>
+        <nav class="hidden md:flex items-center gap-8">
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
+               href="terms.html">Terms of Service</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
+               href="privacy.html">Privacy</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
+               href="account.html">Account Control</a>
+        </nav>
+        <button id="menu-button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Menu"
+                class="md:hidden flex items-center justify-center size-10 rounded bg-fill text-ink">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+    </div>
+    <nav id="mobile-nav" hidden
+         class="md:hidden w-full max-w-[1200px] mt-4 flex flex-col border rounded-xl bg-surface divide-y divide-border">
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="terms.html">Terms of Service</a>
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="privacy.html">Privacy</a>
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="account.html">Account Control</a>
+    </nav>
+</header>
+
+<main class="flex-grow w-full max-w-3xl mx-auto px-6 py-12 md:py-16">
+
+    <!-- Contact — above the fold, one live address, no form -->
+    <section class="animate-fade-in opacity-0">
+        <h1 class="font-title text-4xl font-semibold tracking-tight text-ink mb-3">Support</h1>
+        <p class="text-lg text-muted leading-relaxed mb-8">
+            Something broken, something confusing, or something you'd like Heart to do? Write to us.
+        </p>
+
+        <div class="bg-surface border rounded-xl p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-5">
+                <div class="size-12 shrink-0 bg-fill text-accent-ink rounded-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined text-2xl">mail</span>
+                </div>
+                <div class="flex-grow">
+                    <a href="mailto:info@heart-of.me"
+                       class="font-title text-2xl font-semibold tracking-tight text-accent-ink underline underline-offset-4 hover:opacity-80 transition-opacity break-all">
+                        info@heart-of.me
+                    </a>
+                    <p class="text-sm text-muted mt-2">
+                        A real person reads every message. We usually reply within a few days — it's one small team, so
+                        it isn't instant, but nothing gets lost.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t flex flex-col sm:flex-row flex-wrap gap-3">
+                <a href="privacy.html"
+                   class="inline-flex items-center justify-center gap-2 h-10 px-4 rounded bg-fill text-ink text-sm font-medium hover:opacity-80 transition-opacity">
+                    <span class="material-symbols-outlined text-[18px]">shield</span>
+                    Privacy Policy
+                </a>
+                <a href="terms.html"
+                   class="inline-flex items-center justify-center gap-2 h-10 px-4 rounded bg-fill text-ink text-sm font-medium hover:opacity-80 transition-opacity">
+                    <span class="material-symbols-outlined text-[18px]">gavel</span>
+                    Terms of Use
+                </a>
+                <a href="account.html"
+                   class="inline-flex items-center justify-center gap-2 h-10 px-4 rounded bg-fill text-ink text-sm font-medium hover:opacity-80 transition-opacity">
+                    <span class="material-symbols-outlined text-[18px]">no_accounts</span>
+                    Delete your account
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Jump links -->
+    <nav aria-label="On this page"
+         class="mt-12 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted animate-fade-in opacity-0 animate-delay-100">
+        <a class="hover:text-accent-ink transition-colors underline underline-offset-4" href="#accounts">Accounts &amp; sync</a>
+        <a class="hover:text-accent-ink transition-colors underline underline-offset-4" href="#health">Health data</a>
+        <a class="hover:text-accent-ink transition-colors underline underline-offset-4" href="#your-data">Your data</a>
+        <a class="hover:text-accent-ink transition-colors underline underline-offset-4" href="#bugs">Bugs &amp; releases</a>
+        <a class="hover:text-accent-ink transition-colors underline underline-offset-4" href="#requirements">Devices &amp; languages</a>
+    </nav>
+
+    <!-- Accounts -->
+    <section id="accounts" class="mt-12 scroll-mt-8 animate-fade-in opacity-0 animate-delay-100">
+        <h2 class="font-title text-2xl font-semibold tracking-tight text-ink mb-6">Accounts &amp; sync</h2>
+
+        <div class="space-y-8">
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">Do I need an account?</h3>
+                <p class="text-muted leading-relaxed">
+                    No. Heart works fully signed out — your workouts, templates, custom exercises and goals live on the
+                    phone and nowhere else. The honest trade is this: without an account there is no backup, so if you
+                    lose the phone, you lose the data. Logging in later brings everything with it.
+                </p>
+            </article>
+
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">
+                    I signed in — what happened to what I'd already logged?
+                </h3>
+                <p class="text-muted leading-relaxed">
+                    It goes up to the account: exercises, unit preferences, folders, templates, workouts and goals, in
+                    that order, with a progress line at the top of the app while it runs. Signing in to an account that
+                    already has history <em>merges</em> — anything already up there is kept, never overwritten, and
+                    nothing is duplicated.
+                </p>
+            </article>
+
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">Why are my charts missing older workouts?</h3>
+                <p class="text-muted leading-relaxed">
+                    Because they haven't come down yet. After a fresh sign-in — or on a new phone — Heart downloads your
+                    history in the background and shows <em>Restoring your history…</em> while it does. Give it a few
+                    minutes on a decent connection; charts and records fill in as it goes.
+                </p>
+            </article>
+        </div>
+    </section>
+
+    <!-- Health -->
+    <section id="health" class="mt-12 scroll-mt-8">
+        <h2 class="font-title text-2xl font-semibold tracking-tight text-ink mb-6">Health data</h2>
+
+        <div class="space-y-8">
+            <article class="bg-surface border rounded-xl p-6">
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">Heart isn't showing my health data</h3>
+                <p class="text-muted leading-relaxed">
+                    This is the common one, and the app genuinely cannot diagnose it for you: iOS never tells an app
+                    whether read permission was granted, so as far as Heart can see, "you said no" and "there are no
+                    readings" look identical. Check it yourself, in the OS:
+                </p>
+                <dl class="mt-4 space-y-4">
+                    <div>
+                        <dt class="text-sm font-semibold text-ink uppercase tracking-wider mb-1">iPhone</dt>
+                        <dd class="text-muted leading-relaxed">
+                            Open the <strong class="text-ink">Health</strong> app, tap your profile picture, then
+                            <strong class="text-ink">Apps</strong> → <strong class="text-ink">Heart</strong>, and turn on
+                            the categories you want it to read.
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-semibold text-ink uppercase tracking-wider mb-1">Android</dt>
+                        <dd class="text-muted leading-relaxed">
+                            Permissions live in <strong class="text-ink">Health Connect</strong>. Grant the metrics
+                            there — and grant <strong class="text-ink">access to past data</strong> too. That one is a
+                            separate permission, and without it Health Connect caps every read at the last 30 days, so
+                            your charts just stop.
+                        </dd>
+                    </div>
+                </dl>
+                <p class="text-muted leading-relaxed mt-4">
+                    <strong class="text-ink">Settings → Health</strong> in the app takes you straight there.
+                </p>
+            </article>
+
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">Does my health data leave my phone?</h3>
+                <p class="text-muted leading-relaxed">
+                    No. What Heart reads from Apple Health or Health Connect stays on the device — it is not uploaded to
+                    our servers, not in analytics, not in crash reports, and not shared with anyone. There is no health
+                    data in your export or in your account, because there is none to have. The
+                    <a class="text-accent-ink underline underline-offset-2 hover:opacity-80" href="privacy.html#health">Health
+                        section of the privacy policy</a> spells out exactly what is read and where it goes.
+                </p>
+            </article>
+
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">How do I stop Heart writing workouts to Health?</h3>
+                <p class="text-muted leading-relaxed">
+                    <strong class="text-ink">Settings → Health → Save workouts to Health</strong>. It shows whether it's
+                    on and takes you to your phone's health permissions, since turning a write permission off is the
+                    platform's to offer. Off means Heart writes nothing at all. The same screen has
+                    <strong class="text-ink">Delete health data</strong>, which clears Heart's own copy and leaves your
+                    phone's health records untouched.
+                </p>
+            </article>
+        </div>
+    </section>
+
+    <!-- Your data -->
+    <section id="your-data" class="mt-12 scroll-mt-8">
+        <h2 class="font-title text-2xl font-semibold tracking-tight text-ink mb-6">Your data</h2>
+
+        <div class="space-y-8">
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">How do I export or erase my data?</h3>
+                <p class="text-muted leading-relaxed">
+                    <strong class="text-ink">Settings → Export my data</strong> writes a file through the share sheet —
+                    JSON in Heart's own format, or CSV with one row per set for a spreadsheet. It reads the phone, so it
+                    works with no account and no network, and it never includes health data.
+                </p>
+                <p class="text-muted leading-relaxed mt-3">
+                    To get rid of it: signed out, <strong class="text-ink">Settings → Erase my data</strong> wipes the
+                    device clean — and with no account behind it, that cannot be undone. With an account, use
+                    <strong class="text-ink">Settings → Account control → Delete account</strong>; deletion is scheduled
+                    30 days out, and signing in before then cancels it. After that it's permanent.
+                    <a class="text-accent-ink underline underline-offset-2 hover:opacity-80" href="account.html">More on
+                        deleting your account</a>.
+                </p>
+            </article>
+
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">Can I bring my history from another app?</h3>
+                <p class="text-muted leading-relaxed">
+                    Often, yes. Open <strong class="text-ink">Settings → Import workout history</strong> — it tells you
+                    which apps Heart can read an export from, and where to find that export in each. Save the file, pick
+                    it there, and you'll get a preview before anything is written; exercises that don't match the
+                    library come over as your own custom ones. Importing the same file twice is safe: what's already
+                    there is skipped, never duplicated. Importing needs an account, since that's where the history lands.
+                </p>
+            </article>
+        </div>
+    </section>
+
+    <!-- Bugs -->
+    <section id="bugs" class="mt-12 scroll-mt-8">
+        <h2 class="font-title text-2xl font-semibold tracking-tight text-ink mb-6">Bugs &amp; releases</h2>
+
+        <div class="space-y-8">
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">How do I report a bug?</h3>
+                <p class="text-muted leading-relaxed">
+                    From inside the app, if you can: <strong class="text-ink">Settings → Leave feedback</strong> lets you
+                    grab a screenshot, scribble on it and send a note. That beats an email, because it carries the
+                    context we'd otherwise have to ask you for. Health values and their charts are blacked out before the
+                    screenshot is taken. It needs an account to send; signed out, write to
+                    <a class="text-accent-ink underline underline-offset-2 hover:opacity-80" href="mailto:info@heart-of.me">info@heart-of.me</a>
+                    instead.
+                </p>
+            </article>
+
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">Is it fixed yet?</h3>
+                <p class="text-muted leading-relaxed">
+                    Every release is written up publicly, so you can check without asking us —
+                    <a class="text-accent-ink underline underline-offset-2 hover:opacity-80"
+                       href="https://github.com/kit-g/heart-of-yours/releases" target="_blank" rel="noopener">see the
+                        release notes</a>. If the fix is in a version newer than yours, update from the App Store or
+                    Play Store.
+                </p>
+            </article>
+        </div>
+    </section>
+
+    <!-- Requirements -->
+    <section id="requirements" class="mt-12 scroll-mt-8">
+        <h2 class="font-title text-2xl font-semibold tracking-tight text-ink mb-6">Devices &amp; languages</h2>
+
+        <div class="bg-surface border rounded-xl divide-y divide-border">
+            <div class="p-6 flex items-start gap-4">
+                <span class="material-symbols-outlined text-accent-ink mt-0.5">phone_iphone</span>
+                <div>
+                    <h3 class="font-title text-base font-semibold text-ink mb-1">iPhone</h3>
+                    <p class="text-sm text-muted leading-relaxed">iOS 15.6 or later. Health features use Apple Health.</p>
+                </div>
+            </div>
+            <div class="p-6 flex items-start gap-4">
+                <span class="material-symbols-outlined text-accent-ink mt-0.5">android</span>
+                <div>
+                    <h3 class="font-title text-base font-semibold text-ink mb-1">Android</h3>
+                    <p class="text-sm text-muted leading-relaxed">
+                        Android 8.0 or later. Health features need Health Connect, which is built into Android 14 and up
+                        and installable from the Play Store below that.
+                    </p>
+                </div>
+            </div>
+            <div class="p-6 flex items-start gap-4">
+                <span class="material-symbols-outlined text-accent-ink mt-0.5">translate</span>
+                <div>
+                    <h3 class="font-title text-base font-semibold text-ink mb-1">Languages</h3>
+                    <p class="text-sm text-muted leading-relaxed">
+                        English, Spanish, French and Russian. Heart follows your phone's language and falls back to
+                        English.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Closing contact -->
+    <section class="mt-12 bg-fill rounded-xl p-6 text-center">
+        <p class="text-muted leading-relaxed">
+            Didn't find it here? Write to
+            <a class="text-accent-ink font-medium underline underline-offset-4 hover:opacity-80"
+               href="mailto:info@heart-of.me">info@heart-of.me</a> — we usually reply within a few days.
+        </p>
+    </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="w-full py-10 px-6 border-t bg-ground mt-auto">
+    <div class="max-w-[960px] mx-auto flex flex-col items-center gap-6">
+        <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors flex items-center gap-1"
+               href="privacy.html">
+                <span class="material-symbols-outlined text-[16px]">shield</span>
+                Privacy Policy
+            </a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="terms.html">Terms of Service</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="account.html">Delete Account</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="mailto:info@heart-of.me">info@heart-of.me</a>
+        </div>
+        <p class="text-xs text-muted">
+            © <span id="footer-year"></span> Heart of Yours. All rights reserved.
+        </p>
+    </div>
+</footer>
+</body>
+</html>
