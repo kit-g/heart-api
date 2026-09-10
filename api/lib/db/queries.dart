@@ -827,6 +827,14 @@ SELECT
   ) AS exercises_matched
 ''';
 
+/// Full replace of a workout body — the children are deleted and re-inserted
+/// from `@exercises`, so ids round-trip rather than being re-minted.
+///
+/// `@replacesExercises` gates that whole limb. False (the payload never
+/// mentioned `exercises`) leaves `workout_exercises` and `exercise_sets`
+/// untouched and answers with what the workout already has, so a shallow PUT
+/// can no longer strip a session's body; true replaces, and an empty array
+/// legitimately empties. See [WorkoutRequest.replacesExercises].
 const _replaceWorkout = '''
 WITH
 _order_to_id AS (
@@ -863,14 +871,16 @@ _deleted_sets AS (
   -- trigger whose timing against the re-insert below is unspecified, and a
   -- round-tripped set id must land after its old row is already dead
   DELETE FROM exercise_sets
-  WHERE workout_exercise_id IN (
-    SELECT id FROM workout_exercises WHERE workout_id = (SELECT id FROM _workout)
-  )
+  WHERE @replacesExercises::boolean
+    AND workout_exercise_id IN (
+      SELECT id FROM workout_exercises WHERE workout_id = (SELECT id FROM _workout)
+    )
   RETURNING id
 ),
 _deleted AS (
   DELETE FROM workout_exercises
-  WHERE workout_id = (SELECT id FROM _workout)
+  WHERE @replacesExercises::boolean
+    AND workout_id = (SELECT id FROM _workout)
   RETURNING id
 ),
 _inserted_exercises AS (
@@ -962,7 +972,13 @@ _exercises_json AS (
 )
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.created_at,
-  coalesce(ej.exercises_json, '[]'::jsonb) AS exercises,
+  -- the replacing branch reads its own RETURNING, because a CTE cannot see
+  -- rows it just wrote; the preserving branch reads the table, which is
+  -- untouched in that case and so already final
+  CASE
+    WHEN @replacesExercises::boolean THEN coalesce(ej.exercises_json, '[]'::jsonb)
+    ELSE _workout_exercises(w.id)
+  END AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
      FROM workout_images wi WHERE wi.workout_id = w.id),

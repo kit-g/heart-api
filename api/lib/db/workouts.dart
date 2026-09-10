@@ -84,7 +84,11 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     try {
       final rows = await _pool.execute(
         _replaceWorkout.toSql(),
-        parameters: {'workoutId': workoutId, ...body.toParams()},
+        parameters: {
+          'workoutId': workoutId,
+          'replacesExercises': body.replacesExercises,
+          ...body.toParams(),
+        },
       );
       if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
       return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
