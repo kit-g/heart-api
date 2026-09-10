@@ -12,6 +12,7 @@ on:
       - 'database/**'
       - 'scripts/apply_migrations.sh'
       - 'scripts/db_tests.sh'
+      - 'scripts/publish_notification.sh'
       - '.github/workflows/deploy-api.yml'
       - '.github/workflows/deploy-api-dev.yml'
   push:
@@ -22,6 +23,7 @@ on:
       - 'database/**'
       - 'scripts/apply_migrations.sh'
       - 'scripts/db_tests.sh'
+      - 'scripts/publish_notification.sh'
       - '.github/workflows/deploy-api.yml'
       - '.github/workflows/deploy-api-dev.yml'
 
@@ -44,3 +46,6 @@ jobs:
       API: 'https://1y5vu7awze.execute-api.ca-central-1.amazonaws.com/v1'
       SECRETS_BUCKET: '583168578067-ca-central-1-static'
       SUPABASE_CRED_KEY: 'secrets/supabase.json'
+      ENVIRONMENT: 'dev'
+      # No notifications in dev
+      MONITORING_TOPIC_ARN: ''

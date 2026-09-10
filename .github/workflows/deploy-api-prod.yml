@@ -23,3 +23,5 @@ jobs:
       API: 'https://zn9nvduxyd.execute-api.ca-central-1.amazonaws.com/v1'
       SECRETS_BUCKET: '922419543441-ca-central-1-static'
       SUPABASE_CRED_KEY: 'secrets/supabase.json'
+      ENVIRONMENT: 'prod'
+      MONITORING_TOPIC_ARN: 'arn:aws:sns:ca-central-1:922419543441:monitoring'
