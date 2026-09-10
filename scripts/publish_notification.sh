@@ -20,12 +20,14 @@ set -euo pipefail
 
 VERSION="${VERSION:-${COMMIT:0:7}}"
 
+# No column padding: SNS email is plain text, the client picks the font, and
+# padded labels only line up in a monospaced one.
 results=(
-  "Lint           : ${LINT_RESULT:-unknown}"
-  "Dart tests     : ${DART_RESULT:-unknown}"
-  "Database tests : ${DB_RESULT:-unknown}"
-  "Deploy         : ${DEPLOY_RESULT:-unknown}"
-  "Smoke test     : ${SMOKE_RESULT:-unknown}"
+  "Lint: ${LINT_RESULT:-unknown}"
+  "Dart tests: ${DART_RESULT:-unknown}"
+  "Database tests: ${DB_RESULT:-unknown}"
+  "Deploy: ${DEPLOY_RESULT:-unknown}"
+  "Smoke test: ${SMOKE_RESULT:-unknown}"
 )
 
 # Anything short of a clean sweep is a failure worth saying so in the subject,
@@ -37,10 +39,10 @@ done
 
 subject="[$ENVIRONMENT] API deploy $outcome - $VERSION"
 
-message="Environment : $ENVIRONMENT
-Version     : $VERSION
-Commit      : $COMMIT
-${API:+API         : $API
+message="Environment: $ENVIRONMENT
+Version: $VERSION
+Commit: $COMMIT
+${API:+API: $API
 }
 $(printf '%s\n' "${results[@]}")
 ${RUN_URL:+
