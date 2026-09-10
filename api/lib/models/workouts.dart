@@ -107,6 +107,21 @@ class WorkoutRequest {
   /// rule as every other id on this payload.
   String? get id => body.uuidV7OrNull();
 
+  /// Whether this payload speaks about the workout's children at all.
+  ///
+  /// `_replaceWorkout` deletes every `workout_exercise` and `exercise_set`
+  /// before re-inserting, so a payload that simply doesn't mention `exercises`
+  /// used to empty the workout — a shallow PUT (an image step, a summary
+  /// re-save, a serializer that dropped detail) silently destroyed the
+  /// session's whole body. The client already draws this distinction on its own
+  /// mirror (heart-of-yours#85: a copy arriving without exercises keeps the
+  /// ones it has); the server now draws it too.
+  ///
+  /// A JSON array — including `[]` — is the caller asserting contents, and an
+  /// empty one legitimately empties the workout: the user took every set out.
+  /// Absent or null is the caller saying nothing, and the children survive.
+  bool get replacesExercises => body['exercises'] is List;
+
   List<Map> _exercises() {
     final source = (body['exercises'] as List? ?? []).cast<Map>();
     final out = <Map>[];

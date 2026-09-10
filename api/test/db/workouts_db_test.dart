@@ -532,6 +532,95 @@ void main() {
       );
     });
 
+    /// A shallow PUT used to destroy a session's whole body: `_replaceWorkout`
+    /// deletes every child before re-inserting from `@exercises`, and an absent
+    /// key parsed identically to `[]`. Three workouts in prod lost their
+    /// exercises to a seeding run's image step this way.
+    test('a payload with no exercises key leaves the children alone', () async {
+      final exName = h.uniqueName('Ex');
+      final exId = await h.seedGlobalExercise(name: exName);
+      final (created, _) = await h.db.createWorkout(
+        userId: ownerId,
+        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exId),
+        imageUrl: imageUrl,
+      );
+      final exerciseId = created.first.id;
+      final setId = created.first.first.id;
+
+      final updated = await h.db.updateWorkout(
+        userId: ownerId,
+        workoutId: created.id,
+        // the metadata a shallow re-save does carry, and nothing about the body
+        body: WorkoutRequest(
+          userId: ownerId,
+          body: {'name': 'V2', 'start': '2026-07-25T08:00:00Z'},
+        ),
+        imageUrl: imageUrl,
+      );
+
+      expect(updated.name, 'V2', reason: 'the metadata it did speak about still lands');
+      expect(updated.length, 1, reason: 'the response reports what survived, not what it inserted');
+      expect(updated.first.id, exerciseId);
+      expect(updated.first.first.id, setId);
+      expect(updated.first.first.weight, 100);
+
+      // and the rows really are still there — the response could have lied
+      final reread = await h.db.getWorkout(userId: ownerId, workoutId: created.id, imageUrl: imageUrl);
+      expect(reread.length, 1);
+      expect(reread.first.first.id, setId);
+    });
+
+    test('an explicit empty exercises array still empties the workout', () async {
+      final exName = h.uniqueName('Ex');
+      final exId = await h.seedGlobalExercise(name: exName);
+      final (created, _) = await h.db.createWorkout(
+        userId: ownerId,
+        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exId),
+        imageUrl: imageUrl,
+      );
+
+      // the one empty payload that is authoritative: the user took every set
+      // out, and an array is the caller asserting contents
+      final updated = await h.db.updateWorkout(
+        userId: ownerId,
+        workoutId: created.id,
+        body: WorkoutRequest(
+          userId: ownerId,
+          body: {'name': 'V2', 'start': '2026-07-25T08:00:00Z', 'exercises': <Map>[]},
+        ),
+        imageUrl: imageUrl,
+      );
+
+      expect(updated, isEmpty);
+      final reread = await h.db.getWorkout(userId: ownerId, workoutId: created.id, imageUrl: imageUrl);
+      expect(reread, isEmpty);
+    });
+
+    test('a null exercises value preserves, like an absent one', () async {
+      final exName = h.uniqueName('Ex');
+      final exId = await h.seedGlobalExercise(name: exName);
+      final (created, _) = await h.db.createWorkout(
+        userId: ownerId,
+        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exId),
+        imageUrl: imageUrl,
+      );
+
+      // a serializer that drops detail is as likely to write null as to omit
+      // the key; neither is the caller saying "this workout has no exercises"
+      final updated = await h.db.updateWorkout(
+        userId: ownerId,
+        workoutId: created.id,
+        body: WorkoutRequest(
+          userId: ownerId,
+          body: {'name': 'V2', 'start': '2026-07-25T08:00:00Z', 'exercises': null},
+        ),
+        imageUrl: imageUrl,
+      );
+
+      expect(updated.length, 1);
+      expect(updated.first.first.id, created.first.first.id);
+    });
+
     test('updating a workout you do not own throws NotFound', () async {
       final id = await h.seedWorkout(userId: ownerId);
       await expectLater(
