@@ -23,6 +23,12 @@ variable "lambda_function_prefix" {
   description = "Allow `lambda:UpdateFunctionCode` on functions whose name starts with this."
 }
 
+variable "monitoring_topic_name" {
+  type        = string
+  default     = "monitoring"
+  description = "SNS topic the deploy workflow publishes its run notification to; created by the app stack."
+}
+
 variable "web_distribution_id" {
   type        = string
   description = "Web CloudFront distribution; invalidations target this."

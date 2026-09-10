@@ -113,6 +113,23 @@ resource "aws_iam_role_policy" "exercise_library" {
   policy = data.aws_iam_policy_document.exercise_library.json
 }
 
+# The deploy workflow's notify job publishes its run report here. Publish only,
+# and only to this one topic — the role has no business reading subscriptions or
+# creating topics.
+data "aws_iam_policy_document" "monitoring" {
+  statement {
+    effect    = "Allow"
+    actions   = ["sns:Publish"]
+    resources = ["arn:aws:sns:${local.region}:${local.account_id}:${var.monitoring_topic_name}"]
+  }
+}
+
+resource "aws_iam_role_policy" "monitoring" {
+  name   = "monitoring-publish"
+  role   = aws_iam_role.deploy.id
+  policy = data.aws_iam_policy_document.monitoring.json
+}
+
 data "aws_iam_policy_document" "cloudfront" {
   statement {
     effect  = "Allow"
