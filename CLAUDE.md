@@ -49,7 +49,11 @@ change is released the moment it lands. Consequences:
 Autonomous agents (`agents/README.md`) finish by writing `HANDOFF.md` (worktree root,
 gitignored) and, when dispatched from a GitHub issue, commenting the summary on it;
 interactive sessions just meet the list. Commits and pushes are the user's, always —
-`.claude/settings.json` and `agents/hooks/guard.sh` enforce that for every session here.
+`agents/hooks/guard.sh` enforces that, wired in per tool: `.claude/settings.json` for
+Claude Code, `.codex/hooks.json` for Codex.
+
+This file is the single source of truth for both: `AGENTS.md` is a symlink to it, and
+`.agents/skills` a symlink to `.claude/skills`. Edit the originals — never a copy.
 
 `docs/style.md` is what the linter cannot say: boundaries, switch-over-cast, SQL shapes, the
 casing-by-layer rule, and the naming conventions. Every entry there is a review finding.
@@ -58,8 +62,8 @@ casing-by-layer rule, and the naming conventions. Every entry there is a review 
 
 Heart is two repositories that ship together:
 
-| Repo                                                              | Role                                                         |
-|-------------------------------------------------------------------|--------------------------------------------------------------|
+| Repo                                                        | Role                                                         |
+|-------------------------------------------------------------|--------------------------------------------------------------|
 | [`heart-api`](https://github.com/kit-g/heart-api)           | backend — Dart API, Postgres, Lambda services, shared models |
 | [`heart-of-yours`](https://github.com/kit-g/heart-of-yours) | frontend — Flutter app                                       |
 
