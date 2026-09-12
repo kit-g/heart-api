@@ -1785,16 +1785,18 @@ DELETE FROM device_tokens WHERE token = @token
 /// `COALESCE`s the other, so the stored preference can differ from what was
 /// sent, and the caller should be told what it actually holds.
 const _saveExercisePreference = '''
-INSERT INTO exercise_preferences (user_id, exercise_id, unit_system, rest_timer)
-SELECT @userId, e.id, @unitSystem::text, @restTimer::integer
+INSERT INTO exercise_preferences (user_id, exercise_id, unit_system, rest_timer, note)
+SELECT @userId, e.id, @unitSystem::text, @restTimer::integer, @note::text
 FROM exercises e
 WHERE e.id = @exerciseId::uuid
   AND (e.user_id IS NULL OR e.user_id = @userId)
 ON CONFLICT (user_id, exercise_id)
 DO UPDATE SET
   unit_system = COALESCE(EXCLUDED.unit_system, exercise_preferences.unit_system),
-  rest_timer  = COALESCE(EXCLUDED.rest_timer, exercise_preferences.rest_timer)
-RETURNING exercise_id, unit_system, rest_timer
+  rest_timer  = COALESCE(EXCLUDED.rest_timer, exercise_preferences.rest_timer),
+  -- null means "leave it", same as its siblings; unpinning is _clearExerciseNote
+  note        = COALESCE(EXCLUDED.note, exercise_preferences.note)
+RETURNING exercise_id, unit_system, rest_timer, note
 ''';
 
 const _clearUnitPreference = '''
@@ -1811,14 +1813,24 @@ WHERE exercise_id = @id::uuid
   AND user_id = @userId
 ''';
 
+/// Cancels a pinned note. The row itself stays — it may still carry a unit or a
+/// rest timer — and every note already copied onto a logged workout is
+/// untouched: those record how the exercise was actually done that day.
+const _clearExerciseNote = '''
+UPDATE exercise_preferences
+SET note = NULL
+WHERE exercise_id = @id::uuid
+  AND user_id = @userId
+''';
+
 /// Unpaginated, same as `_getChartPreferences` — `UNIQUE (user_id, exercise_id)`
 /// bounds this to a handful of rows per user. Excludes chart-only rows (those
 /// belong to `GET /charts`); ordered by `exercise_id` for a stable response.
 const _listExercisePreferences = '''
-SELECT exercise_id, unit_system, rest_timer
+SELECT exercise_id, unit_system, rest_timer, note
 FROM exercise_preferences
 WHERE user_id = @userId
-  AND (unit_system IS NOT NULL OR rest_timer IS NOT NULL)
+  AND (unit_system IS NOT NULL OR rest_timer IS NOT NULL OR note IS NOT NULL)
 ORDER BY exercise_id
 ''';
 
