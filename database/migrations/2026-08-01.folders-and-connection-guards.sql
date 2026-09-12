@@ -42,9 +42,9 @@ ALTER TABLE templates
 
 CREATE INDEX IF NOT EXISTS templates_folder_id_idx ON templates (folder_id) WHERE folder_id IS NOT NULL;
 
--- templates.order_index has been written since the initial schema and never read: `_listTemplates`
--- ordered by `id DESC` because that is what its keyset cursor walked, so the server sliced pages by
--- creation while the app displayed by the user's arrangement — a template dragged to the top could
+-- templates.order_index has been written since the initial schema and never read: the template
+-- listing ordered by `id DESC` because that is what its keyset cursor walked, so pages were sliced
+-- by creation while the user's own arrangement said otherwise — a template dragged to the top could
 -- land on page two. The listing now orders by (order_index, id) and pages on the same pair; this
 -- index is what keeps that a range scan. templates had no index on user_id at all, so the previous
 -- query was a seq scan plus a sort.

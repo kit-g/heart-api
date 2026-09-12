@@ -212,9 +212,9 @@ EXECUTE FUNCTION assert_custom_exercises_capped();
 COMMENT ON TRIGGER exercises_custom_cap ON exercises IS
     'Per-user ceiling of 2000 custom exercises; global library rows (user_id IS NULL) are unaffected';
 
--- 6-7. Templates mirror workouts: _saveTemplate/_replaceTemplate expand the
---      request body's exercise and set arrays into rows the same way, so the
---      same pair of ceilings applies.
+-- 6-7. Templates mirror workouts: template writes expand an incoming body's
+--      exercise and set arrays into rows the same way, so the same pair of
+--      ceilings applies.
 
 CREATE OR REPLACE FUNCTION assert_template_exercises_capped() RETURNS trigger
     LANGUAGE plpgsql
