@@ -36,6 +36,12 @@ Renaming a migration file is the same hazard in reverse: the new name is unrecor
 - Polymorphic "exactly one of N" → separate nullable FK columns + a `CHECK ((a IS NOT NULL)::int + (b IS NOT NULL)::int + ... = 1)`. (See `comments`.)
 - Partial indexes for the nullable-FK columns: `CREATE INDEX ... WHERE col IS NOT NULL`.
 - `COMMENT ON TABLE/COLUMN/CONSTRAINT` for every object — the codebase documents schema inline.
+- **Comments describe the schema, not its callers.** The header and every `COMMENT ON` cover what
+  the column holds, its bound, and why that bound. How the API reads or writes it, which handler
+  applies it, and which route clears it are the design doc's job. Never name a Dart constant or an
+  HTTP verb in a migration: it goes stale the day that constant is renamed, and silently — nothing
+  checks prose. Keep the header to a few lines; a long one is usually another layer's reasoning that
+  wandered in.
 - Postgres truncates identifiers to 63 chars — keep index/constraint names short.
 
 ## pgtap test
