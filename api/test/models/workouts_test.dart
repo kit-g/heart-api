@@ -170,5 +170,63 @@ void main() {
       final req = const WorkoutRequest(userId: 'u1', body: {});
       expect(req.toParams()['exercises'], '[]');
     });
+
+    /// Sets with nothing to hang them on used to be dropped as quietly as an
+    /// emptied editor row, which made a malformed payload indistinguishable
+    /// from `exercises: []` — and `_replaceWorkout` empties on that.
+    test('sets with no exercise reference are a 400, not a silent drop', () {
+      final req = const WorkoutRequest(
+        userId: 'u1',
+        body: {
+          'exercises': [
+            {
+              'order': 0,
+              'sets': [
+                {'weight': 100, 'reps': 5},
+              ],
+            },
+          ],
+        },
+      );
+
+      expect(() => req.toParams(), throwsA(isA<BadRequest>()));
+    });
+
+    test('an explicitly null exercise carrying sets is also a 400', () {
+      final req = const WorkoutRequest(
+        userId: 'u1',
+        body: {
+          'exercises': [
+            {
+              'exercise': null,
+              'order': 0,
+              'sets': [
+                {'weight': 100, 'reps': 5},
+              ],
+            },
+          ],
+        },
+      );
+
+      expect(() => req.toParams(), throwsA(isA<BadRequest>()));
+    });
+
+    test('a wholly empty row is still dropped — the app serializes one that way', () {
+      // WorkoutExercise.toMap() writes `exercise` off its first set, so a row
+      // the user emptied arrives as {id, start, sets: []} with no exercise.
+      final req = const WorkoutRequest(
+        userId: 'u1',
+        body: {
+          'exercises': [
+            {'id': '0198c1a2-b3c4-7d5e-8f60-718293a4b5aa', 'start': '2026-01-01T10:00:00Z', 'sets': []},
+            {'exercise': _bench, 'order': 1, 'sets': []},
+          ],
+        },
+      );
+
+      final exercises = jsonDecode(req.toParams()['exercises'] as String) as List;
+      expect(exercises, hasLength(1));
+      expect(exercises.first['exercise_id'], _bench);
+    });
   });
 }

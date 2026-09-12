@@ -126,9 +126,13 @@ class WorkoutRequest {
     final source = (body['exercises'] as List? ?? []).cast<Map>();
     final out = <Map>[];
     for (final (index, ex) in source.indexed) {
-      // an emptied editor row names nothing and means "no exercise here",
-      // matching the pre-cutover silent drop of nameless rows
-      if (ex['exercise'] == null) continue;
+      // An emptied editor row names nothing *and* logged nothing — dropped,
+      // the way the template path drops its own. Sets with no exercise to hang
+      // them on is a different thing: that is a malformed client, and it falls
+      // through to the 400 below. Dropping those silently made a bad payload
+      // indistinguishable from `exercises: []`, so a malformed replace emptied
+      // a healthy workout instead of being rejected.
+      if (_isEmptyExercise(ex)) continue;
       out.add({
         // The reference is the exercise's uuid — the name is localized
         // display copy and resolves nothing since the id cutover. A present
@@ -155,6 +159,19 @@ class WorkoutRequest {
       });
     }
     return out;
+  }
+
+  /// An editor row the user emptied: nothing names an exercise and nothing was
+  /// logged against it. `WorkoutExercise.toMap()` writes `exercise` null-aware
+  /// off its first set, so an emptied row serializes as `{id, start, sets: []}`
+  /// with no `exercise` at all — and an entry that *does* carry sets always
+  /// names one. Mirrors `isEmptyExercise` on the template input.
+  static bool _isEmptyExercise(Map ex) {
+    final hasSets = switch (ex['sets']) {
+      final List l => l.isNotEmpty,
+      _ => false,
+    };
+    return ex['exercise'] == null && !hasSets;
   }
 
   /// The same id round-trip for a set: keep a v7, strip anything else so the
