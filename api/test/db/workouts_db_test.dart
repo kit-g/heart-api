@@ -621,6 +621,49 @@ void main() {
       expect(updated.first.first.id, created.first.first.id);
     });
 
+    /// The repair-PUT hazard: a payload whose entries all fail to parse used to
+    /// reach the DB as `exercises: []`, which is a legitimate "empty it" — so a
+    /// malformed replace wiped a healthy workout. It is now rejected at the
+    /// boundary, and the workout is untouched.
+    test('a replace whose entries carry sets but no exercise is refused, body intact', () async {
+      final exName = h.uniqueName('Ex');
+      final exId = await h.seedGlobalExercise(name: exName);
+      final (created, _) = await h.db.createWorkout(
+        userId: ownerId,
+        body: req(ownerId, name: 'V1', start: DateTime.utc(2026, 7, 25, 8), exerciseId: exId),
+        imageUrl: imageUrl,
+      );
+
+      await expectLater(
+        h.db.updateWorkout(
+          userId: ownerId,
+          workoutId: created.id,
+          body: WorkoutRequest(
+            userId: ownerId,
+            body: {
+              'name': 'V2',
+              'start': '2026-07-25T08:00:00Z',
+              'exercises': [
+                {
+                  'order': 0,
+                  'sets': [
+                    {'weight': 100, 'reps': 5, 'completed': true},
+                  ],
+                },
+              ],
+            },
+          ),
+          imageUrl: imageUrl,
+        ),
+        throwsA(isA<BadRequest>()),
+      );
+
+      final reread = await h.db.getWorkout(userId: ownerId, workoutId: created.id, imageUrl: imageUrl);
+      expect(reread.length, 1, reason: 'the refusal must not have run the deletes');
+      expect(reread.first.first.id, created.first.first.id);
+      expect(reread.name, 'V1', reason: 'nothing about the workout changed');
+    });
+
     test('updating a workout you do not own throws NotFound', () async {
       final id = await h.seedWorkout(userId: ownerId);
       await expectLater(
