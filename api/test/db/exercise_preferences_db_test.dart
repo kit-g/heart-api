@@ -32,7 +32,7 @@ void main() {
   /// exactly what the upsert/clear wrote.
   Future<Map<String, dynamic>?> readPref(String userId, String exerciseId) async {
     final rows = await h.exec(
-      'SELECT unit_system, rest_timer FROM exercise_preferences '
+      'SELECT unit_system, rest_timer, note FROM exercise_preferences '
       'WHERE user_id = @u AND exercise_id = @e::uuid',
       {'u': userId, 'e': exerciseId},
     );
@@ -196,6 +196,57 @@ void main() {
       expect(row!['unit_system'], 'metric'); // preserved
       expect(row['rest_timer'], 30); // updated
     });
+
+    test('pins a note on its own, with no unit or timer', () async {
+      final exerciseId = await h.seedGlobalExercise();
+      final saved = await h.db.savePreference(
+        ExercisePreference(exerciseId: exerciseId, note: 'pause at the bottom'),
+        ownerId,
+      );
+
+      expect(saved.note, 'pause at the bottom');
+      final row = await readPref(ownerId, exerciseId);
+      expect(row!['note'], 'pause at the bottom');
+      expect(row['unit_system'], isNull);
+      expect(row['rest_timer'], isNull);
+    });
+
+    test('a note-only upsert preserves a stored unit and timer', () async {
+      final exerciseId = await h.seedGlobalExercise();
+      await h.db.savePreference(
+        ExercisePreference(exerciseId: exerciseId, unitSystem: MeasurementUnit.metric, restTimer: 75),
+        ownerId,
+      );
+
+      await h.db.savePreference(ExercisePreference(exerciseId: exerciseId, note: 'one hand at a time'), ownerId);
+
+      final row = await readPref(ownerId, exerciseId);
+      expect(row!['unit_system'], 'metric');
+      expect(row['rest_timer'], 75);
+      expect(row['note'], 'one hand at a time');
+    });
+
+    test('a unit-only upsert preserves a pinned note', () async {
+      final exerciseId = await h.seedGlobalExercise();
+      await h.db.savePreference(ExercisePreference(exerciseId: exerciseId, note: 'keep me'), ownerId);
+
+      await h.db.savePreference(
+        ExercisePreference(exerciseId: exerciseId, unitSystem: MeasurementUnit.imperial),
+        ownerId,
+      );
+
+      final row = await readPref(ownerId, exerciseId);
+      expect(row!['note'], 'keep me');
+      expect(row['unit_system'], 'imperial');
+    });
+
+    test('re-pinning replaces the note', () async {
+      final exerciseId = await h.seedGlobalExercise();
+      await h.db.savePreference(ExercisePreference(exerciseId: exerciseId, note: 'first'), ownerId);
+      await h.db.savePreference(ExercisePreference(exerciseId: exerciseId, note: 'second'), ownerId);
+
+      expect((await readPref(ownerId, exerciseId))!['note'], 'second');
+    });
   });
 
   group('getExercisePreferences', () {
@@ -250,6 +301,20 @@ void main() {
       expect(bothPref.restTimer, 90);
     });
 
+    test('a note-only row is listed — the filter would otherwise hide the pin', () async {
+      final noteOwner = await h.seedProfile();
+      final exerciseId = await h.seedGlobalExercise();
+      await h.db.savePreference(ExercisePreference(exerciseId: exerciseId, note: 'pause at the bottom'), noteOwner);
+
+      final prefs = await h.db.getExercisePreferences(noteOwner);
+
+      expect(prefs, hasLength(1));
+      expect(prefs.first.exerciseId, exerciseId);
+      expect(prefs.first.note, 'pause at the bottom');
+      expect(prefs.first.unitSystem, isNull);
+      expect(prefs.first.restTimer, isNull);
+    });
+
     test('returns an empty list for a user with no preferences', () async {
       final freshUser = await h.seedProfile();
       expect(await h.db.getExercisePreferences(freshUser), isEmpty);
@@ -283,6 +348,37 @@ void main() {
       final row = await readPref(ownerId, exerciseId);
       expect(row!['unit_system'], 'imperial');
       expect(row['rest_timer'], isNull);
+    });
+
+    test('note unpins only the note, leaving the unit and timer intact', () async {
+      final exerciseId = await h.seedGlobalExercise();
+      await h.db.savePreference(
+        ExercisePreference(
+          exerciseId: exerciseId,
+          unitSystem: MeasurementUnit.metric,
+          restTimer: 90,
+          note: 'pause at the bottom',
+        ),
+        ownerId,
+      );
+
+      await h.db.clearPreference(exerciseId, ownerId, ExercisePreferenceField.note);
+
+      final row = await readPref(ownerId, exerciseId);
+      expect(row!['note'], isNull);
+      expect(row['unit_system'], 'metric');
+      expect(row['rest_timer'], 90);
+    });
+
+    test('unpinning leaves the row, so a later re-pin is an update', () async {
+      final exerciseId = await h.seedGlobalExercise();
+      await h.db.savePreference(ExercisePreference(exerciseId: exerciseId, note: 'gone'), ownerId);
+      await h.db.clearPreference(exerciseId, ownerId, ExercisePreferenceField.note);
+
+      expect(await readPref(ownerId, exerciseId), isNotNull, reason: 'the row survives an unpin');
+
+      await h.db.savePreference(ExercisePreference(exerciseId: exerciseId, note: 'back'), ownerId);
+      expect((await readPref(ownerId, exerciseId))!['note'], 'back');
     });
 
     test('is a no-op when no preference row exists', () async {

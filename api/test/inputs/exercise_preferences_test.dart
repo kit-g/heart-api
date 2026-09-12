@@ -43,6 +43,7 @@ void main() {
     for (final (raw, expected) in <(String, ExercisePreferenceField)>[
       ('unitSystem', ExercisePreferenceField.unitSystem),
       ('restTimer', ExercisePreferenceField.restTimer),
+      ('note', ExercisePreferenceField.note),
     ]) {
       test('parses pref=$raw', () {
         expect(parse({'pref': raw}).field, expected);
