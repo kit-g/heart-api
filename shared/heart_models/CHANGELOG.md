@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.3.0
+
+Adds the pinned note — a note the user attaches to an exercise once, rather than
+to a single session.
+
+- New: `ExercisePreference.note` (`String?`) and `ExercisePreference.maxNoteLength`
+  (200) — a third optional field on the `{exerciseId, unitSystem?, restTimer?}`
+  body and response of `/exercise-preferences`, parsed and emitted beside the
+  other two. `fromJson` trims it, reads blank as no note, and throws
+  `ArgumentError` past the cap or on a non-string.
+- New: `ExercisePreferenceField.note`, the `?pref=note` wire value.
+
 ## 2.2.0
 
 Gives the app a way to know its local mirror is complete before it exports —

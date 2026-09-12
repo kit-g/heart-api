@@ -6,6 +6,7 @@ void main() {
     for (final (raw, expected) in <(String, ExercisePreferenceField)>[
       ('unitSystem', .unitSystem),
       ('restTimer', .restTimer),
+      ('note', .note),
     ]) {
       test('parses $raw', () {
         expect(ExercisePreferenceField.fromString(raw), expected);
@@ -23,6 +24,7 @@ void main() {
     for (final (field, column) in <(ExercisePreferenceField, String)>[
       (.unitSystem, 'unit_system'),
       (.restTimer, 'rest_timer'),
+      (.note, 'note'),
     ]) {
       test('${field.name} -> $column', () {
         expect(field.column, column);
@@ -65,6 +67,41 @@ void main() {
 
     test('rejects a body with nothing to update', () {
       expect(() => ExercisePreference.fromJson({'exerciseId': 'e-1'}), throwsArgumentError);
+    });
+
+    test('parses a note-only body — a pin is enough on its own', () {
+      final pref = ExercisePreference.fromJson({
+        'exerciseId': 'e-1',
+        'note': 'pause at the bottom',
+      });
+
+      expect(pref.note, 'pause at the bottom');
+      expect(pref.unitSystem, isNull);
+      expect(pref.restTimer, isNull);
+    });
+
+    test('trims a note', () {
+      final pref = ExercisePreference.fromJson({'exerciseId': 'e-1', 'note': '  one hand at a time  '});
+      expect(pref.note, 'one hand at a time');
+    });
+
+    test('a blank note is nothing pinned, so it is nothing to update', () {
+      // clearing a pin is the DELETE — the upsert reads null as "leave it"
+      expect(() => ExercisePreference.fromJson({'exerciseId': 'e-1', 'note': '   '}), throwsArgumentError);
+    });
+
+    test('a note at the cap is accepted', () {
+      final at = 'x' * ExercisePreference.maxNoteLength;
+      expect(ExercisePreference.fromJson({'exerciseId': 'e-1', 'note': at}).note, at);
+    });
+
+    test('a note over the cap is rejected', () {
+      final over = 'x' * (ExercisePreference.maxNoteLength + 1);
+      expect(() => ExercisePreference.fromJson({'exerciseId': 'e-1', 'note': over}), throwsArgumentError);
+    });
+
+    test('a non-string note is rejected', () {
+      expect(() => ExercisePreference.fromJson({'exerciseId': 'e-1', 'note': 42}), throwsArgumentError);
     });
 
     for (final (label, json) in <(String, Map)>[
