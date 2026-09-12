@@ -163,6 +163,27 @@ Never edit one that has been applied anywhere.
 - **Changelog entries say what a pull brings in**, for the app side that
   reads them — one line per public change, linking the ticket.
 
+## Comments stay in their own layer
+
+**Each file documents its own layer, and only that.** A migration comment covers
+the schema — what the column holds, its bound, why that bound — not the Dart that
+reads it. A package `CHANGELOG` lists the shapes a consumer gains, not endpoint
+behaviour. A route or model comment explains that boundary. Cross-layer semantics
+belong in the design doc, the one artifact whose scope is the whole feature.
+
+**Naming another layer is fine; explaining it is not.** Who writes a column, when
+it is NULL, and what the data is authoritative for are schema documentation even
+when the sentence says "the client" — `exercise_health_activity` and
+`workout_energy` both read that way on purpose. What does not belong is the other
+layer's *code*: its constants, its routes, its control flow.
+
+**Restating another layer's reasoning is worse than omitting it.** It duplicates
+what the doc already carries, drifts the moment either side changes, and names
+things the file cannot see: a migration mentioning `_replaceWorkout` or a
+`COMMENT ON COLUMN` mentioning `DELETE ?pref=…` is stale the day that constant is
+renamed or that route moves, and nothing will catch it. Write it once, where it
+belongs, and link if a reader needs it.
+
 ## Leftovers
 
 No `TODO(agent)`, no commented-out code, no debug prints, no scratch files

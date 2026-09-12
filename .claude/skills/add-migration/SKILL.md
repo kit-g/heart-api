@@ -42,6 +42,11 @@ Renaming a migration file is the same hazard in reverse: the new name is unrecor
   HTTP verb in a migration: it goes stale the day that constant is renamed, and silently — nothing
   checks prose. Keep the header to a few lines; a long one is usually another layer's reasoning that
   wandered in.
+  - Saying *who* owns a column is different from explaining *how* they use it. "NULL is the common
+    case: the client derives the activity" documents the data; "`_saveWorkout` expands the body's
+    arrays" documents Dart. The first belongs here, the second does not. Underscore names that are
+    real DB functions (`_workout_exercises`, `_exercise_sets`) are fair game — they live in this
+    layer.
 - Postgres truncates identifiers to 63 chars — keep index/constraint names short.
 
 ## pgtap test

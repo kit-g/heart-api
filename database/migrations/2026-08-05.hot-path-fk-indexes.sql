@@ -9,8 +9,8 @@ CREATE INDEX IF NOT EXISTS exercise_sets_workout_exercise_id_idx ON exercise_set
 CREATE INDEX IF NOT EXISTS template_exercises_template_id_idx ON template_exercises (template_id);
 CREATE INDEX IF NOT EXISTS template_exercise_sets_template_exercise_id_idx ON template_exercise_sets (template_exercise_id);
 
--- _listWorkouts filters on user_id and pages on (id < cursor) ORDER BY id DESC;
--- the composite makes the keyset scan a pure range scan, same shape as
+-- The workout listing filters on user_id and pages on (id < cursor) ORDER BY id
+-- DESC; the composite makes that keyset scan a pure range scan, same shape as
 -- templates_user_order_idx.
 CREATE INDEX IF NOT EXISTS workouts_user_id_idx ON workouts (user_id, id);
 
