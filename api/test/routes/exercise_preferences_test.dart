@@ -169,6 +169,18 @@ void main() {
       verify(service.clearPreference(_exerciseId, _meId, ExercisePreferenceField.unitSystem)).called(1);
     });
 
+    test('unpins only the note for the note field', () async {
+      when(service.clearPreference(any, any, any)).thenAnswer((_) async {});
+
+      final req = wire(bareRequest(method: Method.delete, path: '/exercise-preferences/$_exerciseId'));
+
+      await expectLater(
+        deleteExercisePreferenceById(req, _exerciseId, ExercisePreferenceField.note),
+        throwsA(isA<NoContent>()),
+      );
+      verify(service.clearPreference(_exerciseId, _meId, ExercisePreferenceField.note)).called(1);
+    });
+
     test('clears only the rest timer for the restTimer field', () async {
       when(service.clearPreference(any, any, any)).thenAnswer((_) async {});
 
