@@ -19,6 +19,7 @@ mixin _ExercisePreferences on _DatabaseBase implements ApiExercisePreferenceServ
         final other => throw ArgumentError.value(other, 'unit_system', 'unexpected exercise_preferences value'),
       },
       restTimer: row['rest_timer'] as int?,
+      note: row['note'] as String?,
     );
   }
 
@@ -31,6 +32,7 @@ mixin _ExercisePreferences on _DatabaseBase implements ApiExercisePreferenceServ
         'exerciseId': preference.exerciseId,
         'unitSystem': preference.unitSystem?.name,
         'restTimer': preference.restTimer,
+        'note': preference.note,
       },
     );
     // No row means the id matched no exercise this caller may reference — it
@@ -47,6 +49,7 @@ mixin _ExercisePreferences on _DatabaseBase implements ApiExercisePreferenceServ
     final query = switch (field) {
       .unitSystem => _clearUnitPreference,
       .restTimer => _clearRestTimer,
+      .note => _clearExerciseNote,
     };
     await _pool.execute(
       query.toSql(),
