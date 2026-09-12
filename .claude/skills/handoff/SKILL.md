@@ -81,7 +81,11 @@ without its anchor.
   reading the model code — invented examples encode your misreadings.
 - **`heart_models` stays additive** — the app pulls `main`, so every merge is released instantly.
 - **The ticket carries semantics; the package carries shapes; the doc carries both plus history.**
-  Don't let any artifact try to do another's job.
+  Don't let any artifact try to do another's job. The `CHANGELOG` is where this slips: endpoint
+  behaviour, a widened query filter, "the server never does X" guarantees are all doc material. The
+  entry says what shapes a pull brings in, plus how the package itself treats them (what `fromJson`
+  rejects), and links the ticket for the rest. Same rule downward — see *Comments stay in their own
+  layer* in `docs/style.md`.
 
 ## Iterating on this skill
 

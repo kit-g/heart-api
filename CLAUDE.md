@@ -56,7 +56,8 @@ This file is the single source of truth for both: `AGENTS.md` is a symlink to it
 `.agents/skills` a symlink to `.claude/skills`. Edit the originals — never a copy.
 
 `docs/style.md` is what the linter cannot say: boundaries, switch-over-cast, SQL shapes, the
-casing-by-layer rule, and the naming conventions. Every entry there is a review finding.
+casing-by-layer rule, keeping each file's comments in its own layer, and the naming conventions.
+Every entry there is a review finding.
 
 # Working across Heart's two repos
 
