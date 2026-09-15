@@ -21,9 +21,27 @@ Future<Paginated<WorkoutImage>> getGallery(Request request) async {
   return Paginated<WorkoutImage>.from(page, itemsKey: 'images', cursorOf: (i) => i.id);
 }
 
-Future<PresignedUploadResponse> presignWorkoutImage(Request request) async {
-  final workoutId = request.pathParameters.raw[#workoutId]!;
+Future<PresignedUploadResponse> presignWorkoutImage(Request request) {
+  return presignWorkoutImageById(request, request.pathParameters.raw[#workoutId]!);
+}
+
+Future<PresignedUploadResponse> presignWorkoutImageById(Request request, String workoutId) async {
   final input = await WorkoutImagePresignIn.fromRequest(request);
+
+  // Refuse before the upload rather than after it. Without this the presign
+  // succeeds for a workout the caller does not have, the client uploads
+  // happily, and the failure only surfaces in the event handler when the
+  // `workout_id` FK rejects the row — by which point the object has been
+  // copied and its source deleted, leaving an object nothing references.
+  //
+  // `getWorkout` rather than a cheaper exists-query so ownership is decided in
+  // one place (it 404s a workout belonging to someone else, same as reading
+  // it); the cost is one read of the workout blob per presign.
+  await request.workoutsService.getWorkout(
+    userId: request.userId,
+    workoutId: workoutId,
+    imageUrl: request.config.cdnAssetUrl,
+  );
 
   final imageId = uuidV7();
   final key = workoutImageKey(userId: request.userId, workoutId: workoutId, imageId: imageId, ext: input.ext);
