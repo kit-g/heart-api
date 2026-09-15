@@ -2,6 +2,7 @@ import 'package:heart/events/uploads.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
+import 'package:heart/storage/keys.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
 import 'package:relic_core/relic_core.dart';
@@ -183,7 +184,7 @@ void main() {
   });
 
   group('imageUpload — unknown tag shape', () {
-    test('skips silently with no errors', () async {
+    test('skips without copying, recording, or reporting an error', () async {
       when(imageStorage.getObjectTagging('b', 'k')).thenAnswer((_) async => {'kind': 'something-else'});
 
       await imageUpload(request, 'b', 'k', onError: onError);
@@ -191,6 +192,64 @@ void main() {
       verifyNever(imageStorage.copyObject(fromKey: anyNamed('fromKey'), toKey: anyNamed('toKey')));
       verifyNever(imageStorage.deleteObject(key: anyNamed('key')));
       expect(errors, isEmpty);
+    });
+  });
+
+  /// A copy whose row never lands is unreachable: the client only learns the
+  /// key through the row, the destination prefix has no lifecycle rule, and the
+  /// key carries a per-upload uuid so it cannot be rediscovered. The source is
+  /// already deleted by then, so there is nothing to retry from either. One of
+  /// these leaked into prod before this was handled.
+  group('imageUpload — the record fails after the copy', () {
+    const bucket = 'content-bucket';
+    const uploadKey = 'uploads/abc123.jpg';
+
+    void tagAsWorkoutImage() {
+      when(imageStorage.getObjectTagging(bucket, uploadKey)).thenAnswer(
+        (_) async => {
+          'user-id': 'u1',
+          'workout-id': 'w1',
+          'image-id': 'i1',
+          'kind': 'workout-image',
+        },
+      );
+    }
+
+    setUp(() {
+      tagAsWorkoutImage();
+      when(
+        imageDb.recordImage(
+          userId: anyNamed('userId'),
+          workoutId: anyNamed('workoutId'),
+          key: anyNamed('key'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).thenThrow(StateError('workout_images_workout_id_fkey'));
+    });
+
+    test('removes the copied object rather than leaving it unreferenced', () async {
+      final destKey = workoutImageKey(userId: 'u1', workoutId: 'w1', imageId: 'i1', ext: 'jpg');
+
+      await expectLater(
+        imageUpload(request, bucket, uploadKey, onError: onError),
+        throwsA(isA<StateError>()),
+      );
+
+      verify(imageStorage.copyObject(fromKey: uploadKey, toKey: destKey)).called(1);
+      verify(imageStorage.deleteObject(key: destKey)).called(1);
+    });
+
+    test('reports through onError, because the SQS message is gone either way', () async {
+      // The event source mapping deletes the message once the invocation
+      // returns, whatever status the handler produced — without the DLQ write a
+      // permanent failure leaves no trace at all.
+      await expectLater(
+        imageUpload(request, bucket, uploadKey, onError: onError),
+        throwsA(isA<StateError>()),
+      );
+
+      expect(errors, hasLength(1));
+      expect(errors.first, isA<StateError>());
     });
   });
 }
