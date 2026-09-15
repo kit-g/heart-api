@@ -1,6 +1,8 @@
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/middleware/s3.dart';
+import 'package:heart/models/errors.dart';
 import 'package:heart/routes/images.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -22,16 +24,22 @@ WorkoutImage _fakeImage(String id) => WorkoutImage.fromJson({
 void main() {
   late MockApiImageDbService imageDb;
   late MockAppConfig config;
+  late MockApiWorkoutService workouts;
+  late MockApiImageStorageService imageStorage;
 
   setUp(() {
     imageDb = MockApiImageDbService();
     config = MockAppConfig();
+    workouts = MockApiWorkoutService();
+    imageStorage = MockApiImageStorageService();
   });
 
   Request wire(Request req) => req
     ..user = User(id: _meId)
     ..config = config
-    ..imageDbService = imageDb;
+    ..imageDbService = imageDb
+    ..workoutsService = workouts
+    ..imageStorageService = imageStorage;
 
   void stubGetGallery(Page<WorkoutImage> page) {
     when(
@@ -46,6 +54,47 @@ void main() {
 
   Request getReq({Map<String, String> query = const {}}) =>
       wire(bareRequest(method: Method.get, path: '/workouts/images', query: query));
+
+  /// The presign used to hand out a URL for any id, so an upload against a
+  /// workout the caller does not have succeeded, transferred, and only failed
+  /// later in the event handler on the `workout_id` FK — after the object had
+  /// been copied and its source deleted. Refuse first instead.
+  group('presignWorkoutImage — the workout must exist', () {
+    setUp(() {
+      when(config.allowedMimeTypes).thenReturn(const {'image/jpeg', 'image/png'});
+    });
+
+    Request presignReq(String workoutId) => wire(
+      jsonRequest(
+        method: Method.put,
+        path: '/workouts/$workoutId/images',
+        body: const {'mimeType': 'image/jpeg'},
+      ),
+    );
+
+    test('a workout the caller does not have is a NotFound, and nothing is presigned', () async {
+      when(
+        workouts.getWorkout(
+          userId: anyNamed('userId'),
+          workoutId: anyNamed('workoutId'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).thenThrow(const NotFound(type: 'Workout', id: 'w-missing'));
+
+      await expectLater(
+        presignWorkoutImageById(presignReq('w-missing'), 'w-missing'),
+        throwsA(isA<NotFound>()),
+      );
+
+      verifyNever(
+        imageStorage.presignUpload(
+          key: anyNamed('key'),
+          mimeType: anyNamed('mimeType'),
+          tags: anyNamed('tags'),
+        ),
+      );
+    });
+  });
 
   group('getGallery', () {
     test('omits cursor when there is no next page', () async {
