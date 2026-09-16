@@ -76,7 +76,10 @@ RelicApp buildApp({
     ..use('/events', devicesDb(db: database))
     ..use('/events', exercisesDb(db: database))
     ..use('/events', events(publisher: eventPublisher))
-    ..fallback = respondWith((_) => JsonResponse.notFound());
+    // The router's own 404, distinguishable from a handler's: a client calling
+    // a path or verb this table does not carry gets `route_not_found`, so a
+    // wrong endpoint can be told apart from a missing row without guessing.
+    ..fallback = respondWith((_) => JsonResponse.noSuchRoute());
 
   for (final MapEntry(key: (route, verb), value: handler) in routes.entries) {
     app.add(verb, route, apiHandler(handler));
