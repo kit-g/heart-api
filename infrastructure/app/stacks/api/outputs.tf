@@ -28,3 +28,11 @@ output "events_queue" {
 output "events_dlq_name" {
   value = aws_sqs_queue.events_dlq.name
 }
+
+output "monitoring_topic_arn" {
+  value = aws_sns_topic.monitoring.arn
+}
+
+output "log_group_name" {
+  value = aws_cloudwatch_log_group.api.name
+}
