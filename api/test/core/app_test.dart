@@ -124,7 +124,18 @@ void main() {
 
   group('routing + path parameters', () {
     test('an unknown path falls through to 404 (once authenticated)', () async {
-      expect((await send('GET', '/does-not-exist', token: 'good')).status, 404);
+      final res = await send('GET', '/does-not-exist', token: 'good');
+      expect(res.status, 404);
+      // `route_not_found`, not the `not_found` a handler returns for a missing
+      // row: a caller asking for an endpoint that does not exist is always a
+      // bug, and the two have to be separable for anything to act on that.
+      expect(jsonDecode(res.body), containsPair('code', 'route_not_found'));
+    });
+
+    test('a known path with an unregistered verb is a 405, not a 404', () async {
+      // Relic answers this itself, above the fallback — so unlike the 404 it
+      // carries no body of ours and cannot be relabelled here.
+      expect((await send('POST', '/version', token: 'good')).status, 405);
     });
 
     test('a :pathParameter is captured and passed to the service', () async {

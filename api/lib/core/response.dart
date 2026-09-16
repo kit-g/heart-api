@@ -11,6 +11,19 @@ class _NotFound implements Model {
   }
 }
 
+/// The router's own 404: the request matched no route at all, so no handler
+/// ever ran. Kept distinct from [_NotFound] — which a handler returns when a
+/// route exists but the row behind it does not — because the two mean opposite
+/// things to a caller. A missing row is a normal outcome worth no one's
+/// attention; a missing route is always a client built against an endpoint this
+/// API does not have, and is never expected.
+class _NoSuchRoute implements Model {
+  @override
+  Map<String, dynamic> toMap() {
+    return {'error': 'no such route', 'code': 'route_not_found'};
+  }
+}
+
 class _ServerError implements Model {
   @override
   Map<String, dynamic> toMap() {
@@ -39,6 +52,14 @@ class JsonResponse<T extends Model> extends Response {
     : this(
         404,
         body: body ?? _NotFound() as T,
+        headers: headers,
+      );
+
+  /// The 404 for a path/verb that matches no route — see [_NoSuchRoute].
+  new noSuchRoute({Headers? headers})
+    : this(
+        404,
+        body: _NoSuchRoute() as T,
         headers: headers,
       );
 
