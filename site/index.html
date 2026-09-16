@@ -88,7 +88,9 @@
         <div class="relative flex justify-center lg:justify-end order-1 lg:order-2 animate-fade-in opacity-0 animate-delay-300">
             <!-- Phone mockup: a device, so it keeps its bezel radius; separated by a border, not a shadow. -->
             <div class="relative bg-[#1A1815] rounded-[2.5rem] p-3 border max-w-[320px] w-full aspect-[9/19] overflow-hidden">
-                <img src="assets/workout.png" alt="App Screenshot" class="h-full w-full object-cover rounded-[2rem]"/>
+                <img src="assets/screens/hero-dashboard.webp" width="640" height="1391" fetchpriority="high"
+                     alt="The Heart profile screen: a bar chart of workouts per week, three goals in progress, and a health section marked &quot;on this device&quot;."
+                     class="h-full w-full object-cover rounded-[2rem]"/>
             </div>
         </div>
     </div>
@@ -118,6 +120,99 @@
             <h3 class="font-title text-lg font-semibold text-ink">Your health stays on your device</h3>
             <p class="text-sm text-muted leading-relaxed">Heart rate, sleep, and body metrics never leave your phone.</p>
         </div>
+    </div>
+</section>
+
+<!-- Screens -->
+<section class="w-full py-16 px-6 border-t">
+    <div class="max-w-[1200px] mx-auto flex flex-col gap-12">
+        <div class="max-w-xl flex flex-col gap-3">
+            <h2 class="font-title text-3xl sm:text-4xl font-semibold tracking-tight text-ink">A look inside.</h2>
+            <p class="text-muted leading-relaxed">Screens from the app as it ships. Nothing here is a mockup.</p>
+        </div>
+        <!-- Screenshots are the Ink preset, so in light mode they share the page's
+             palette exactly. The bordered fill card keeps them reading as objects
+             rather than page surface once the OS switches to dark. -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6">
+            <figure class="flex flex-col gap-3">
+                <div class="rounded-xl border bg-fill p-2 sm:p-3">
+                    <img src="assets/screens/templates.webp" width="560" height="1217" loading="lazy" decoding="async"
+                         alt="The workout tab: a folder of four templates, each listing its exercises and set counts."
+                         class="w-full h-auto rounded"/>
+                </div>
+                <figcaption class="flex flex-col gap-1 px-1">
+                    <h3 class="font-title text-base font-semibold text-ink">Templates</h3>
+                    <p class="text-sm text-muted leading-relaxed">Group the sessions you repeat, in folders you name.</p>
+                </figcaption>
+            </figure>
+            <figure class="flex flex-col gap-3">
+                <div class="rounded-xl border bg-fill p-2 sm:p-3">
+                    <img src="assets/screens/rest-timer.webp" width="560" height="1217" loading="lazy" decoding="async"
+                         alt="A rest timer counting down over a workout in progress, with buttons to add or remove ten seconds."
+                         class="w-full h-auto rounded"/>
+                </div>
+                <figcaption class="flex flex-col gap-1 px-1">
+                    <h3 class="font-title text-base font-semibold text-ink">Rest timer</h3>
+                    <p class="text-sm text-muted leading-relaxed">Adjust it mid-set, or skip it, without leaving the workout.</p>
+                </figcaption>
+            </figure>
+            <figure class="flex flex-col gap-3">
+                <div class="rounded-xl border bg-fill p-2 sm:p-3">
+                    <img src="assets/screens/history.webp" width="560" height="1217" loading="lazy" decoding="async"
+                         alt="A list of past workouts grouped by month, each showing duration, total volume and every exercise."
+                         class="w-full h-auto rounded"/>
+                </div>
+                <figcaption class="flex flex-col gap-1 px-1">
+                    <h3 class="font-title text-base font-semibold text-ink">History</h3>
+                    <p class="text-sm text-muted leading-relaxed">Every session you have logged, with duration and total volume.</p>
+                </figcaption>
+            </figure>
+            <figure class="flex flex-col gap-3">
+                <div class="rounded-xl border bg-fill p-2 sm:p-3">
+                    <img src="assets/screens/records.webp" width="560" height="1217" loading="lazy" decoding="async"
+                         alt="The records tab for Bench Press: max weight, estimated one-rep max, best set volume, and a table of rep maxes."
+                         class="w-full h-auto rounded"/>
+                </div>
+                <figcaption class="flex flex-col gap-1 px-1">
+                    <h3 class="font-title text-base font-semibold text-ink">Records</h3>
+                    <p class="text-sm text-muted leading-relaxed">Max weight, estimated 1RM and rep maxes, per exercise.</p>
+                </figcaption>
+            </figure>
+            <figure class="flex flex-col gap-3">
+                <div class="rounded-xl border bg-fill p-2 sm:p-3">
+                    <img src="assets/screens/exercise.webp" width="560" height="1217" loading="lazy" decoding="async"
+                         alt="An exercise page for Bench Press showing a demonstration photo and front and back muscle diagrams."
+                         class="w-full h-auto rounded"/>
+                </div>
+                <figcaption class="flex flex-col gap-1 px-1">
+                    <h3 class="font-title text-base font-semibold text-ink">Exercise atlas</h3>
+                    <p class="text-sm text-muted leading-relaxed">A demonstration and the muscles worked, for every movement.</p>
+                </figcaption>
+            </figure>
+            <figure class="flex flex-col gap-3">
+                <div class="rounded-xl border bg-fill p-2 sm:p-3">
+                    <img src="assets/screens/health.webp" width="560" height="1217" loading="lazy" decoding="async"
+                         alt="Health cards for steps, active energy and body mass, above a chart of estimated one-rep max over time."
+                         class="w-full h-auto rounded"/>
+                </div>
+                <figcaption class="flex flex-col gap-1 px-1">
+                    <h3 class="font-title text-base font-semibold text-ink">Health and charts</h3>
+                    <p class="text-sm text-muted leading-relaxed">Read from your phone's health store, and left there.</p>
+                </figcaption>
+            </figure>
+        </div>
+        <figure class="flex flex-col gap-4 pt-2">
+            <div class="flex flex-col gap-3 max-w-xl">
+                <h3 class="font-title text-2xl font-semibold tracking-tight text-ink">Bigger screen, more of it.</h3>
+                <p class="text-muted leading-relaxed">On iPad and Android tablets the same data spreads out: navigation
+                    moves to the side, and the charts sit next to each other instead of below.</p>
+            </div>
+            <div class="rounded-xl border bg-fill p-2 sm:p-3">
+                <img src="assets/screens/tablet-dashboard.webp" width="1240" height="1223" loading="lazy" decoding="async"
+                     alt="The same profile screen on a tablet: a sidebar for navigation, workouts per week beside goals, and six health cards in two rows."
+                     class="w-full h-auto rounded"/>
+            </div>
+        </figure>
     </div>
 </section>
 
