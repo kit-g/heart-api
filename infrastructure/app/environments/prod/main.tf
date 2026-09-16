@@ -71,4 +71,6 @@ module "monitoring" {
   events_dlq_name       = module.api.events_dlq_name
   web_distribution_id   = module.cdn.web_distribution.id
   media_distribution_id = module.cdn.media_distribution.id
+  log_group_name        = module.api.log_group_name
+  alarm_topic_arn       = module.api.monitoring_topic_arn
 }

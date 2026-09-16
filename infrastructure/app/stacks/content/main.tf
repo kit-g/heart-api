@@ -10,6 +10,11 @@ terraform {
   }
 }
 
+# Deliberately unversioned. User-authored media here (avatars, workout photos)
+# is unrecoverable if a bug deletes it, but that prefix is a rounding error
+# against the exercise assets, which are reproducible from content/ anyway.
+# Revisit when workout photos carry real volume — enabling versioning is a
+# one-way door (it can be suspended, never removed), so it wants to be worth it.
 resource "aws_s3_bucket" "content" {
   bucket = "${var.account_id}-${var.region}-content"
 }

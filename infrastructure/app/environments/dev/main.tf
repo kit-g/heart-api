@@ -73,4 +73,9 @@ module "monitoring" {
   events_dlq_name       = module.api.events_dlq_name
   web_distribution_id   = module.cdn.web_distribution.id
   media_distribution_id = module.cdn.media_distribution.id
+  log_group_name        = module.api.log_group_name
+  # No alarms in dev: the topic's subscriber is a human inbox, and dev is where
+  # things are meant to break. Same opt-out as the deploy workflow's empty
+  # MONITORING_TOPIC_ARN.
+  alarm_topic_arn = ""
 }
