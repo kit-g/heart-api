@@ -330,7 +330,42 @@ jobs:
               exit 1
           fi
 
-          echo "Smoke test passed: commit matches."
+          echo "Commit matches."
+
+      # /version is public and reads two compile-time constants, so the check
+      # above proves the function boots and the router answers — and nothing
+      # else. These three cover the rest of what a deploy can break while still
+      # returning the right commit, and none of them needs a credential.
+      - name: "Check the middleware chain is intact"
+        run: |
+          set -euo pipefail
+
+          check() {
+            local name=$1 expected=$2 method=$3 path=$4
+            local status
+            status=$(curl -s -o /dev/null -w '%{http_code}' -X "$method" "$API$path")
+            if [ "$status" != "$expected" ]; then
+              echo "FAIL  $name: expected $expected from $method $path, got $status"
+              return 1
+            fi
+            echo "ok    $name ($method $path -> $status)"
+          }
+
+          # Auth middleware runs and rejects: a protected route with no bearer
+          # token is a 401. A 200 here would mean the API is open; a 500 would
+          # mean the chain is throwing before it decides.
+          check "authentication rejects an anonymous caller" 401 GET /workouts/00000000-0000-0000-0000-000000000000
+
+          # The event endpoint is reachable over HTTP but must refuse a network
+          # caller — it is invoked by the queue, not by clients. A 200 here
+          # would mean anyone can post forged events.
+          check "the event endpoint refuses an HTTP caller" 403 POST /events
+
+          # The router's fallback answers rather than the request dying
+          # somewhere upstream.
+          check "an unknown route is a 404" 404 GET /no-such-route
+
+          echo "Smoke test passed."
 
   notify:
     name: "Notify Monitoring Topic"
