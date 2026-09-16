@@ -16,7 +16,7 @@ infrastructure/
 │   │   ├── content/           # Content + static S3 buckets, lifecycle for uploads/,
 │   │   │                      # EventBridge bucket notification, Supabase project
 │   │   ├── firebase/          # Firebase-service Lambda + its queue/trigger wiring
-│   │   └── monitoring/        # CloudWatch dashboard wiring api+cdn+sqs metrics
+│   │   └── monitoring/        # CloudWatch dashboard + alarms (prod only; native tests in tests/)
 │   ├── modules/
 │   │   └── iam/               # Reusable role + inline-policies wrapper (native tests in tests/)
 │   └── environments/
@@ -30,7 +30,8 @@ infrastructure/
         └── prod/
 ```
 
-`modules/iam/tests/` and `stacks/content/tests/` hold native `terraform test` (`.tftest.hcl`) suites.
+`modules/iam/tests/`, `stacks/content/tests/` and `stacks/monitoring/tests/` hold native
+`terraform test` (`.tftest.hcl`) suites.
 
 ## Checks
 
