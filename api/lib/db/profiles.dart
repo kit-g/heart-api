@@ -21,6 +21,7 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
     required String userId,
     String? scheduleArn,
     DateTime? scheduledAt,
+    AppleGrant? appleGrant,
   }) {
     return _pool.execute(
       _scheduleAccountDeletion.toSql(),
@@ -28,8 +29,27 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
         'userId': userId,
         'schedule': scheduleArn,
         'scheduledAt': scheduledAt,
+        'appleRefreshToken': appleGrant?.refreshToken,
+        'appleClientId': appleGrant?.clientId,
       },
     );
+  }
+
+  @override
+  Future<AppleGrant?> getAppleGrant({required String userId}) async {
+    final rows = await _pool.execute(
+      _appleDeletionGrant.toSql(),
+      parameters: {'userId': userId},
+    );
+
+    return switch (rows.firstOrNull?.toColumnMap()) {
+      {'apple_refresh_token': String token, 'apple_client_id': String clientId} => (
+        refreshToken: token,
+        clientId: clientId,
+      ),
+      // Either half missing is nothing to revoke: neither works alone.
+      _ => null,
+    };
   }
 
   @override
