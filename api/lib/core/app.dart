@@ -4,6 +4,7 @@ import 'package:heart/db/db.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/firebase.dart' as firebase;
 import 'package:heart/middleware/authentication.dart';
+import 'package:heart/middleware/apple.dart';
 import 'package:heart/middleware/authenticator.dart';
 import 'package:heart/middleware/aws.dart';
 import 'package:heart/middleware/config.dart';
@@ -11,6 +12,7 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/events.dart';
 import 'package:heart/middleware/logging.dart';
 import 'package:heart/middleware/s3.dart';
+import 'package:heart/models/apple.dart';
 import 'package:heart/middleware/version.dart';
 import 'package:heart/routes/index.dart';
 import 'package:heart/storage/s3.dart';
@@ -34,6 +36,7 @@ RelicApp buildApp({
   required Database database,
   required Storage storage,
   required EventPublisher eventPublisher,
+  required AppleIdentityService apple,
   firebase.Authenticator? auth,
 }) {
   bool shouldCheckVersion(Request request) {
@@ -49,6 +52,7 @@ RelicApp buildApp({
     ..use('/', authentication(shouldAuthenticate: isPublicRoute))
     ..use('/', awsConfig(config: aws))
     ..use('/accounts', profilesDb(db: database))
+    ..use('/accounts', appleIdentity(service: apple))
     ..use('/accounts', workoutsDb(db: database))
     ..use('/accounts', goalsDb(db: database))
     ..use('/accounts', connectionsDb(db: database))
@@ -73,6 +77,7 @@ RelicApp buildApp({
     ..use('/events', imageStorageDb(db: storage))
     ..use('/events', imageDb(db: database))
     ..use('/events', profilesDb(db: database))
+    ..use('/events', appleIdentity(service: apple))
     ..use('/events', devicesDb(db: database))
     ..use('/events', exercisesDb(db: database))
     ..use('/events', events(publisher: eventPublisher))

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
+import 'package:heart/middleware/apple.dart';
 import 'package:heart/middleware/aws.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
@@ -72,8 +73,22 @@ Future<AccountSummary> getAccountSummary(Request request) {
 }
 
 Future<NoContent> deleteAccount(Request request) async {
+  final input = await AccountDeleteIn.fromRequest(request);
   final userId = request.userId;
   final config = request.config;
+
+  // Spent here rather than when the schedule fires, because Apple's
+  // authorization code expires within minutes and the deletion is days away.
+  // A failed exchange leaves nothing to revoke and is logged as such; it is
+  // never the reason a user cannot delete their account.
+  final appleGrant = switch (input.appleGrant) {
+    AppleDeletionGrant(:final authorizationCode, :final clientId) => switch (await request.apple
+        .exchangeAuthorizationCode(code: authorizationCode, clientId: clientId)) {
+      final String refreshToken => (refreshToken: refreshToken, clientId: clientId),
+      null => null,
+    },
+    null => null,
+  };
 
   final scheduledAt = DateTime.now().toUtc().add(config.accountDeletionOffset);
 
@@ -109,6 +124,7 @@ Future<NoContent> deleteAccount(Request request) async {
     userId: userId,
     scheduleArn: scheduleArn,
     scheduledAt: scheduledAt,
+    appleGrant: appleGrant,
   );
 
   throw const NoContent();

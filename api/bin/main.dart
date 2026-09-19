@@ -1,3 +1,4 @@
+import 'package:heart/apple/client.dart';
 import 'package:heart/core/app.dart';
 import 'package:heart/db/db.dart';
 import 'package:heart/globals/config.dart';
@@ -32,6 +33,13 @@ final _storage = Storage(
   contentBucket: _config.contentBucket,
 );
 
+/// Real only where the Sign in with Apple secrets are configured; elsewhere
+/// every call is a logged no-op and deletion carries on without revocation.
+final _apple = switch (_config.apple) {
+  final AppleConfig apple => AppleIdentity(config: apple),
+  null => const UnconfiguredAppleIdentity(),
+};
+
 final _events = SqsEventPublisher(
   Sqs(credentialsProvider: _credentialsProvider, region: _config.awsRegion),
 );
@@ -52,6 +60,7 @@ Future<void> main() async {
     database: _database,
     storage: _storage,
     eventPublisher: _events,
+    apple: _apple,
     auth: testAuth,
   );
 
