@@ -1,5 +1,7 @@
 import 'package:heart_models/heart_models.dart';
 
+import 'apple.dart';
+
 abstract interface class ApiProfileService {
   Future<User> upsertProfile(User user);
 
@@ -7,7 +9,13 @@ abstract interface class ApiProfileService {
     required String userId,
     String? scheduleArn,
     DateTime? scheduledAt,
+    AppleGrant? appleGrant,
   });
+
+  /// The Apple grant held for [userId]'s pending deletion, or null when there
+  /// is none — a non-Apple account, an exchange that failed, or a profile that
+  /// a retry already deleted.
+  Future<AppleGrant?> getAppleGrant({required String userId});
 
   Future<User> undoAccountDeletion({required String userId});
 
