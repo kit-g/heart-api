@@ -193,3 +193,40 @@ class _Profile implements Profile {
     };
   }
 }
+
+/// What an account deletion carries so the server can also revoke the
+/// account's Sign in with Apple grant — removing the app from the user's Apple
+/// ID and deactivating a Hide My Email relay if they used one.
+///
+/// Absent for Google and password accounts, which have no grant to revoke, and
+/// absent is not a failure: the deletion proceeds either way.
+///
+/// Apple's [authorizationCode] is single-use and expires within minutes, so it
+/// cannot be held for the days a scheduled deletion waits. The server spends it
+/// immediately on a long-lived token and revokes that when the schedule fires,
+/// which is why this travels with the deletion request rather than being
+/// collected when it runs.
+class AppleDeletionGrant implements Model {
+  /// A fresh authorization code from the re-authentication that confirmed the
+  /// deletion. It must not also be spent on the Firebase credential — that one
+  /// takes the identity token — because Apple honours it exactly once.
+  final String authorizationCode;
+
+  /// The Apple client the code was issued to: the running app's bundle id for
+  /// a native sign-in, the Services ID for the web flow.
+  ///
+  /// It differs per platform and per environment, and the server signs its
+  /// client secret for one client at a time, so the caller names it rather
+  /// than letting the server guess.
+  final String clientId;
+
+  const new({required this.authorizationCode, required this.clientId});
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'appleAuthorizationCode': authorizationCode,
+      'appleClientId': clientId,
+    };
+  }
+}

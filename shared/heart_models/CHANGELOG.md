@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.4.0
+
+Gives account deletion what it needs to revoke a Sign in with Apple grant, so
+an account deleted through the app stops being listed under the user's Apple ID
+(heart-api#78).
+
+- New: `AppleDeletionGrant` — `{authorizationCode, clientId}`, serialised as
+  `{appleAuthorizationCode, appleClientId}`. The code is single-use and expires
+  within minutes; the server spends it at once for a long-lived token and
+  revokes that when the deletion schedule fires.
+- Changed: `AccountService.deleteAccount` takes an optional `appleGrant`.
+  **Implementers must add the parameter** — it is optional to callers, not to
+  the class that implements the interface. Google and password accounts pass
+  nothing and delete exactly as before.
+
 ## 2.3.0
 
 Adds the pinned note — a note the user attaches to an exercise once, rather than
