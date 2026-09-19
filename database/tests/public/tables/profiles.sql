@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(17);
+SELECT plan(19);
 
 SELECT has_table('public'::name, 'profiles'::name);
 
@@ -15,7 +15,9 @@ SELECT columns_are(
                    'account_deletion_schedule',
                    'scheduled_for_deletion_at',
                    'updated_at',
-                   'settings'
+                   'settings',
+                   'apple_refresh_token',
+                   'apple_client_id'
                    ]
        );
 
@@ -27,6 +29,8 @@ SELECT col_type_is('public'::name, 'profiles'::name, 'account_deletion_schedule'
 SELECT col_type_is('public'::name, 'profiles'::name, 'scheduled_for_deletion_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'profiles'::name, 'updated_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'profiles'::name, 'settings'::name, 'jsonb'::name);
+SELECT col_type_is('public'::name, 'profiles'::name, 'apple_refresh_token'::name, 'text'::name);
+SELECT col_type_is('public'::name, 'profiles'::name, 'apple_client_id'::name, 'text'::name);
 
 SELECT has_pk('public'::name, 'profiles'::name, 'profiles has a primary key');
 SELECT col_is_pk('public'::name, 'profiles'::name, 'id'::name, 'id is the primary key');
