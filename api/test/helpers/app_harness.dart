@@ -18,6 +18,10 @@ import '../mocks.mocks.dart';
 /// config → auth → service bindings → router → `apiHandler` error mapping)
 /// rather than called in isolation.
 ///
+/// [apple] is the Sign in with Apple client; it is a mock like the rest, so
+/// no test reaches Apple and an un-stubbed call returns null the way a failed
+/// exchange does.
+///
 /// A single [MockDatabase] backs every db service (the real [Database]
 /// implements them all), [MockStorage] backs S3, and [config] is exposed so a
 /// test can stub the request-time knobs a given handler reads (allowed mime
@@ -27,11 +31,12 @@ class AppHarness {
   final MockDatabase db;
   final MockStorage storage;
   final MockEventPublisher events;
+  final MockAppleIdentityService apple;
   final MockAppConfig config;
   final RelicApp _app;
   final RelicServer _server;
 
-  new _(this.db, this.storage, this.events, this.config, this._app, this._server);
+  new _(this.db, this.storage, this.events, this.apple, this.config, this._app, this._server);
 
   static const goodToken = 'good';
 
@@ -43,6 +48,7 @@ class AppHarness {
     final db = MockDatabase();
     final storage = MockStorage();
     final events = MockEventPublisher();
+    final apple = MockAppleIdentityService();
     final config = MockAppConfig();
     when(config.minimalAppVersion).thenReturn('1.0.0');
     when(config.shouldCheckVersion).thenReturn(false);
@@ -61,10 +67,11 @@ class AppHarness {
       database: db,
       storage: storage,
       eventPublisher: events,
+      apple: apple,
       auth: verify,
     );
     final server = await app.serve(port: 0);
-    return AppHarness._(db, storage, events, config, app, server);
+    return AppHarness._(db, storage, events, apple, config, app, server);
   }
 
   Future<void> stop() => _app.close();

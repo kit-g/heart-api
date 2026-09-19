@@ -2,6 +2,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/models/errors.dart';
 import 'package:mockito/mockito.dart';
+import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
 
 import '../helpers/request.dart';
@@ -56,5 +57,47 @@ void main() {
       expect(input, isA<ProfileUpsertIn>());
       expect((input as ProfileUpsertIn).user.id, 'u1');
     });
+  });
+
+  group('AccountDeleteIn — the optional Apple half', () {
+    test('a bodiless delete carries no grant', () async {
+      final input = await AccountDeleteIn.fromRequest(bareRequest(method: Method.delete));
+      expect(input.appleGrant, isNull);
+    });
+
+    test('an empty JSON body carries no grant', () async {
+      final input = await AccountDeleteIn.fromRequest(jsonRequest(method: Method.delete));
+      expect(input.appleGrant, isNull);
+    });
+
+    test('parses a complete grant', () async {
+      final input = await AccountDeleteIn.fromRequest(
+        jsonRequest(
+          method: Method.delete,
+          body: {'appleAuthorizationCode': 'c0de', 'appleClientId': 'me.heart-of.ios'},
+        ),
+      );
+
+      expect(input.appleGrant?.authorizationCode, 'c0de');
+      expect(input.appleGrant?.clientId, 'me.heart-of.ios');
+    });
+
+    // Half a grant cannot be exchanged, and dropping it silently would leave
+    // the app listed under the user's Apple ID with nothing to show for it.
+    for (final (name, body) in [
+      ('a code with no client', {'appleAuthorizationCode': 'c0de'}),
+      ('a client with no code', {'appleClientId': 'me.heart-of.ios'}),
+      ('an empty code', {'appleAuthorizationCode': '', 'appleClientId': 'me.heart-of.ios'}),
+      ('a non-string code', {'appleAuthorizationCode': 7, 'appleClientId': 'me.heart-of.ios'}),
+    ]) {
+      test('$name is a 400', () {
+        expect(
+          () => AccountDeleteIn.fromRequest(jsonRequest(method: Method.delete, body: body)),
+          throwsA(
+            isA<BadRequest>().having((e) => e.code, 'code', 'incomplete_apple_grant'),
+          ),
+        );
+      });
+    }
   });
 }
