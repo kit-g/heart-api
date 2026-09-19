@@ -84,6 +84,79 @@ class PostgresConfig {
   }
 }
 
+/// Everything needed to talk to Apple's identity service on the account's
+/// behalf: the Sign in with Apple key, and which clients it may speak for.
+///
+/// Absent entirely in an environment whose Apple secrets have not been set up —
+/// see [AppConfig.apple], which is nullable for exactly that reason.
+class AppleConfig {
+  /// Apple Developer team, the `iss` of the client secret.
+  final String teamId;
+
+  /// Identifies which of the team's keys signed the client secret.
+  final String keyId;
+
+  /// The Sign in with Apple private key, PEM-wrapped PKCS#8, exactly as the
+  /// `.p8` Apple issues — the file is stored verbatim so rotating it is a
+  /// paste rather than a conversion.
+  final String privateKey;
+
+  /// The clients this key may sign a secret for, each mapped to the redirect
+  /// URI its code exchange needs, or null where none applies.
+  ///
+  /// There is more than one because Apple issues a code against whichever
+  /// client asked for it: a native sign-in names the running app's bundle id,
+  /// which differs per platform and per environment, and the web flow names a
+  /// Services ID and must echo its redirect back on the exchange.
+  final Map<String, String?> clients;
+
+  const new({
+    required this.teamId,
+    required this.keyId,
+    required this.privateKey,
+    required this.clients,
+  });
+
+  /// Parses `APPLE_CLIENT_IDS`: a comma-separated list of client ids, each
+  /// optionally carrying its redirect URI after an `=`.
+  static Map<String, String?> _clients(String raw) {
+    return Map.fromEntries(
+      raw
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .map(
+            (entry) => switch (entry.split('=')) {
+              [final clientId, final redirect] => MapEntry(clientId, redirect),
+              _ => MapEntry(entry, null),
+            },
+          ),
+    );
+  }
+
+  /// Null unless every part is present: a half-configured key cannot sign
+  /// anything, and reading it as "Apple is set up" would turn a deployment
+  /// mistake into a silent no-op at revoke time.
+  static AppleConfig? fromEnv(Map<String, String> env) {
+    return switch (env) {
+      {
+        'APPLE_TEAM_ID': String teamId,
+        'APPLE_KEY_ID': String keyId,
+        'APPLE_PRIVATE_KEY': String privateKey,
+        'APPLE_CLIENT_IDS': String clientIds,
+      }
+          when [teamId, keyId, privateKey, clientIds].every((v) => v.isNotEmpty) =>
+        AppleConfig(
+          teamId: teamId,
+          keyId: keyId,
+          privateKey: privateKey,
+          clients: _clients(clientIds),
+        ),
+      _ => null,
+    };
+  }
+}
+
 abstract interface class AppConfig {
   String get firebaseProjectId;
 
@@ -117,6 +190,10 @@ abstract interface class AppConfig {
   String get scheduleGroup;
 
   Duration get accountDeletionOffset;
+
+  /// Null where the Sign in with Apple secrets are not configured; the
+  /// deletion path then skips revocation rather than failing.
+  AppleConfig? get apple;
 
   String get schedulerRoleArn;
 
@@ -163,6 +240,7 @@ abstract interface class AppConfig {
           accountDeletionOffset: Duration(
             days: int.tryParse(env['ACCOUNT_DELETION_OFFSET_DAYS'] ?? '') ?? 30,
           ),
+          apple: AppleConfig.fromEnv(env),
           schedulerRoleArn: schedulerRoleArn,
           eventsQueueArn: eventsSqsArn,
           eventsQueueUrl: eventsQueueUrl,
@@ -219,6 +297,8 @@ class _EnvConfig implements AppConfig {
   @override
   final Duration accountDeletionOffset;
   @override
+  final AppleConfig? apple;
+  @override
   final String schedulerRoleArn;
   @override
   final String eventsQueueArn;
@@ -259,6 +339,7 @@ class _EnvConfig implements AppConfig {
     required this.monitoringTopicArn,
     required this.scheduleGroup,
     required this.accountDeletionOffset,
+    required this.apple,
     required this.schedulerRoleArn,
     required this.eventsQueueArn,
     required this.eventsQueueUrl,
