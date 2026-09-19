@@ -47,6 +47,7 @@ void main() {
       database: db,
       storage: MockStorage(),
       eventPublisher: MockEventPublisher(),
+      apple: MockAppleIdentityService(),
       auth: verifyToken,
     );
 
@@ -175,6 +176,7 @@ void main() {
         database: db,
         storage: MockStorage(),
         eventPublisher: MockEventPublisher(),
+        apple: MockAppleIdentityService(),
         auth: verifyToken,
       );
       server = await app.serve(port: 0);
