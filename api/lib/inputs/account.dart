@@ -35,3 +35,37 @@ class ProfileUpsertIn extends AccountUpsertIn {
 
   const new _({required this.user});
 }
+
+/// The optional Apple half of a deletion request.
+///
+/// `DELETE /accounts` was bodiless before Apple grants and still is for Google
+/// and password accounts, so a request without a JSON body is a deletion with
+/// no grant rather than a malformed one. Half a grant is neither: a code with
+/// no client cannot be exchanged, and silently dropping it would leave the app
+/// listed under the user's Apple ID with nothing to show for it.
+class AccountDeleteIn {
+  final AppleDeletionGrant? appleGrant;
+
+  const new _({this.appleGrant});
+
+  static Future<AccountDeleteIn> fromRequest(Request req) async {
+    final json = switch (req.body.bodyType?.mimeType) {
+      MimeType.json => await req.json(),
+      _ => const <String, dynamic>{},
+    };
+
+    return AccountDeleteIn._(
+      appleGrant: switch ((json['appleAuthorizationCode'], json['appleClientId'])) {
+        (null, null) => null,
+        (final String code, final String clientId) when code.isNotEmpty && clientId.isNotEmpty => AppleDeletionGrant(
+          authorizationCode: code,
+          clientId: clientId,
+        ),
+        _ => throw const BadRequest(
+          reason: 'appleAuthorizationCode and appleClientId are given together or not at all',
+          code: 'incomplete_apple_grant',
+        ),
+      },
+    );
+  }
+}
