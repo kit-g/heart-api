@@ -109,6 +109,35 @@ void main() {
       expect((row['scheduled_for_deletion_at'] as DateTime).toUtc(), when);
     });
 
+    test('stores the Apple grant alongside the schedule', () async {
+      final id = await upsertNew(
+        User(id: h.uid('user'), email: 'x@test.local', displayName: 'Apple'),
+      ).then((u) => u.id);
+
+      await h.db.scheduleAccountDeletion(
+        userId: id,
+        scheduleArn: 'arn:apple-$id',
+        scheduledAt: DateTime.utc(2026, 8, 4, 8),
+        appleGrant: (refreshToken: 'r-token', clientId: 'me.heart-of.ios'),
+      );
+
+      expect(await h.db.getAppleGrant(userId: id), (refreshToken: 'r-token', clientId: 'me.heart-of.ios'));
+    });
+
+    test('a grant survives a later call that carries none', () async {
+      final id = await upsertNew(
+        User(id: h.uid('user'), email: 'x@test.local', displayName: 'Apple'),
+      ).then((u) => u.id);
+      await h.db.scheduleAccountDeletion(
+        userId: id,
+        appleGrant: (refreshToken: 'r-keep', clientId: 'me.heart-of.ios'),
+      );
+
+      await h.db.scheduleAccountDeletion(userId: id, scheduleArn: 'arn:later-$id');
+
+      expect((await h.db.getAppleGrant(userId: id))?.refreshToken, 'r-keep');
+    });
+
     test('is a no-op for an unknown user id', () async {
       // UPDATE ... WHERE id = @userId matches nothing; the method returns void
       // and must not throw.
@@ -116,6 +145,35 @@ void main() {
         h.db.scheduleAccountDeletion(userId: h.uid('ghost'), scheduleArn: 'arn:none'),
         completes,
       );
+    });
+  });
+
+  group('getAppleGrant', () {
+    test('is null for an account that never signed in with Apple', () async {
+      final id = await upsertNew(
+        User(id: h.uid('user'), email: 'x@test.local', displayName: 'Google'),
+      ).then((u) => u.id);
+      await h.db.scheduleAccountDeletion(userId: id, scheduleArn: 'arn:google-$id');
+
+      expect(await h.db.getAppleGrant(userId: id), isNull);
+    });
+
+    test('is null for a profile that is already gone', () async {
+      expect(await h.db.getAppleGrant(userId: h.uid('ghost')), isNull);
+    });
+
+    // Neither half is usable without the other, so a row carrying only one
+    // reads as nothing to revoke rather than as half a grant.
+    test('is null when only the client id survived', () async {
+      final id = await upsertNew(
+        User(id: h.uid('user'), email: 'x@test.local', displayName: 'Half'),
+      ).then((u) => u.id);
+      await h.exec(
+        'UPDATE profiles SET apple_client_id = @client WHERE id = @id',
+        {'id': id, 'client': 'me.heart-of.ios'},
+      );
+
+      expect(await h.db.getAppleGrant(userId: id), isNull);
     });
   });
 
@@ -139,6 +197,20 @@ void main() {
       )).first.toColumnMap();
       expect(row['account_deletion_schedule'], isNull);
       expect(row['scheduled_for_deletion_at'], isNull);
+    });
+
+    test('drops the Apple grant — nothing was revoked and nothing needs it', () async {
+      final id = await upsertNew(User(id: h.uid('user'), email: 'x@test.local', displayName: 'Undo')).then((u) => u.id);
+      await h.db.scheduleAccountDeletion(
+        userId: id,
+        scheduleArn: 'arn:undo-apple-$id',
+        scheduledAt: DateTime.utc(2026, 8, 3, 10),
+        appleGrant: (refreshToken: 'r-token', clientId: 'me.heart-of.ios'),
+      );
+
+      await h.db.undoAccountDeletion(userId: id);
+
+      expect(await h.db.getAppleGrant(userId: id), isNull);
     });
 
     test('throws NotFound when the user does not exist', () async {

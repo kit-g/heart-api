@@ -1,6 +1,7 @@
 import 'package:heart/db/db.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/events.dart';
+import 'package:heart/models/apple.dart';
 import 'package:heart/models/creates.dart';
 import 'package:heart/models/exercise_preferences.dart';
 import 'package:heart/models/exercises.dart';
@@ -29,5 +30,6 @@ import 'package:mockito/annotations.dart';
   ConnectionsService,
   DeviceService,
   EventPublisher,
+  AppleIdentityService,
 ])
 void main() {}
