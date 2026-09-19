@@ -2,6 +2,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:heart/models/apple.dart';
 import 'package:heart/models/creates.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/exercise_preferences.dart';

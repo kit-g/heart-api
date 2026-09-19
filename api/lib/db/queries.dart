@@ -56,7 +56,21 @@ const _scheduleAccountDeletion = '''
 UPDATE profiles
 SET 
   account_deletion_schedule = coalesce(@schedule, account_deletion_schedule), 
-  scheduled_for_deletion_at = coalesce(@scheduledAt, scheduled_for_deletion_at)
+  scheduled_for_deletion_at = coalesce(@scheduledAt, scheduled_for_deletion_at),
+  apple_refresh_token = coalesce(@appleRefreshToken, apple_refresh_token),
+  apple_client_id = coalesce(@appleClientId, apple_client_id)
+WHERE id = @userId
+''';
+
+/// The Apple grant to revoke before the account goes.
+///
+/// Read on its own rather than taken from the profile delete's `RETURNING`:
+/// the delete is the point of no return, and a handler that died between it
+/// and the revoke would have nothing left to retry with. Reading first means
+/// every attempt up to the delete still finds the token.
+const _appleDeletionGrant = '''
+SELECT apple_refresh_token, apple_client_id
+FROM profiles
 WHERE id = @userId
 ''';
 
@@ -73,7 +87,11 @@ const _undoAccountDeletion = '''
 UPDATE profiles
 SET
   account_deletion_schedule = NULL,
-  scheduled_for_deletion_at = NULL
+  scheduled_for_deletion_at = NULL,
+  -- nothing was revoked and the account is staying, so the grant is a
+  -- credential with no remaining purpose
+  apple_refresh_token = NULL,
+  apple_client_id = NULL
 WHERE id = @userId
 RETURNING id, email, username, avatar_url, scheduled_for_deletion_at, settings
 ''';
