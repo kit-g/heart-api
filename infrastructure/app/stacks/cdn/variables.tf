@@ -33,14 +33,6 @@ variable "web_distribution_ssl_certificate" {
   }
 }
 
-
-variable "api" {
-  type = object({
-    domain_name = string
-    stage_path  = string
-  })
-}
-
 variable "static_bucket" {
   type = object({
     id                          = string

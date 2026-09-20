@@ -104,3 +104,25 @@ variable "apple_sign_in" {
     client_ids = list(string)
   })
 }
+
+variable "custom_domain" {
+  description = "Public DNS name for the API and the certificate that serves it. Null skips the domain and its base path mapping."
+  default     = null
+  type = object({
+    name            = string
+    certificate_arn = string
+  })
+
+  validation {
+    condition     = var.custom_domain == null || can(regex("^arn:aws:acm:[a-z]{2}-[a-z]+-[0-9]{1}:[0-9]{12}:certificate/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$", var.custom_domain.certificate_arn))
+    error_message = "Certificate ARN must be a valid AWS ACM ARN format (e.g., arn:aws:acm:ca-central-1:583168578067:certificate/297c34bc-7a74-4cb1-82c4-71bfe0114eb7)."
+  }
+
+  # A regional custom domain only accepts a certificate from its own region, and
+  # the one reflex worth guarding is reaching for a us-east-1 ARN - that is where
+  # every other certificate in this repo lives, because CloudFront demands it.
+  validation {
+    condition     = var.custom_domain == null || can(regex("^arn:aws:acm:${var.region}:", var.custom_domain.certificate_arn))
+    error_message = "Certificate must be issued in ${var.region}, the API's own region - a us-east-1 certificate is rejected by a REGIONAL domain name."
+  }
+}

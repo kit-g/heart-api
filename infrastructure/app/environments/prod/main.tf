@@ -37,6 +37,10 @@ module "api" {
   account_deletion_offset_days = 30
   monitoring_email             = "info@heart-of.me"
   media_distribution           = "media.heart-of.me"
+  custom_domain = {
+    name            = "api.heart-of.me"
+    certificate_arn = "arn:aws:acm:ca-central-1:922419543441:certificate/f5a9b784-19a5-4ef6-b284-be9fc51b79dd"
+  }
 }
 
 module "assets" {
@@ -59,7 +63,6 @@ module "cdn" {
   firebase_auth_domain               = "heart-of-yours.firebaseapp.com"
   content_bucket                     = module.content.content_bucket
   static_bucket                      = module.content.static_bucket
-  api                                = module.api.api
 }
 
 module "monitoring" {
