@@ -126,3 +126,14 @@ variable "custom_domain" {
     error_message = "Certificate must be issued in ${var.region}, the API's own region - a us-east-1 certificate is rejected by a REGIONAL domain name."
   }
 }
+
+variable "allowed_origins" {
+  description = "Browser origins allowed to call the API, as serialized origins (https://heart-of.me, no trailing slash). Empty is CORS off, which is correct for an environment with no browser client."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for o in var.allowed_origins : can(regex("^https?://[^/]+$", o))])
+    error_message = "Each origin must be scheme://host[:port] with no path or trailing slash - a browser sends exactly that, and the allowlist is matched byte for byte."
+  }
+}

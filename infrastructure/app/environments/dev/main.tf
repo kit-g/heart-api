@@ -38,6 +38,7 @@ module "api" {
   account_deletion_offset_days = 2
   monitoring_email             = "info@heart-of.me"
   media_distribution           = "dev.media.heart-of.me"
+  allowed_origins              = ["https://dev.heart-of.me", "https://www.dev.heart-of.me"]
   events_enabled               = var.events_enabled
   custom_domain = {
     name            = "dev.api.heart-of.me"
