@@ -32,7 +32,7 @@ class _ServerError implements Model {
 }
 
 class JsonResponse<T extends Model> extends Response {
-  new(super.statusCode, {T? body, Headers? headers})
+  new(super.statusCode, {T? body, super.headers})
     : super(
         body: switch (body) {
           T m => Body.fromString(jsonEncode(m.toMap()), mimeType: .json),

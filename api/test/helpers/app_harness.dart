@@ -44,7 +44,10 @@ class AppHarness {
   /// `anonymous` — exercises the 403 path without touching the network.
   static const anonymousToken = 'anonymous';
 
-  static Future<AppHarness> start({User? user}) async {
+  /// [allowedOrigins] is read once, when `buildApp` wires the CORS middleware
+  /// — the same way the minimum app version is — so it has to be passed in
+  /// here rather than stubbed on [config] after the fact.
+  static Future<AppHarness> start({User? user, Set<String> allowedOrigins = const {}}) async {
     final db = MockDatabase();
     final storage = MockStorage();
     final events = MockEventPublisher();
@@ -53,6 +56,7 @@ class AppHarness {
     when(config.minimalAppVersion).thenReturn('1.0.0');
     when(config.shouldCheckVersion).thenReturn(false);
     when(config.firebaseProjectId).thenReturn('proj');
+    when(config.allowedOrigins).thenReturn(allowedOrigins);
 
     final authenticated = user ?? User(id: 'u1', displayName: 'Sam');
     Future<User> verify(String _, String token) async {
@@ -76,28 +80,39 @@ class AppHarness {
 
   Future<void> stop() => _app.close();
 
-  /// Sends [method] [path] and returns the status and raw body. Attaches a
-  /// `Bearer` token by default (pass `token: null` to hit a route anonymously)
-  /// and JSON-encodes [body] when present.
-  Future<({int status, String body})> send(
+  /// Sends [method] [path] and returns the status, raw body, and response
+  /// headers. Attaches a `Bearer` token by default (pass `token: null` to hit
+  /// a route anonymously) and JSON-encodes [body] when present.
+  ///
+  /// [extraHeaders] sets raw request headers — `origin` and the
+  /// `access-control-request-*` pair, for anything exercising the CORS chain.
+  /// [headers] comes back lower-cased with each value joined, since that is
+  /// how a browser reads one.
+  Future<({int status, String body, Map<String, String> headers})> send(
     String method,
     String path, {
     String? token = goodToken,
     Object? body,
     String? appVersion,
+    Map<String, String> extraHeaders = const {},
   }) async {
     final client = HttpClient();
     try {
       final request = await client.openUrl(method, Uri.parse('http://127.0.0.1:${_server.port}$path'));
       if (token != null) request.headers.set('authorization', 'Bearer $token');
       if (appVersion != null) request.headers.set('x-app-version', appVersion);
+      for (final MapEntry(key: name, value: value) in extraHeaders.entries) {
+        request.headers.set(name, value);
+      }
       if (body != null) {
         request.headers.contentType = ContentType.json;
         request.write(jsonEncode(body));
       }
       final response = await request.close();
       final text = await response.transform(utf8.decoder).join();
-      return (status: response.statusCode, body: text);
+      final received = <String, String>{};
+      response.headers.forEach((name, values) => received[name.toLowerCase()] = values.join(', '));
+      return (status: response.statusCode, body: text, headers: received);
     } finally {
       client.close();
     }

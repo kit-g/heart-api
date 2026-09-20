@@ -8,6 +8,7 @@ import 'package:heart/middleware/apple.dart';
 import 'package:heart/middleware/authenticator.dart';
 import 'package:heart/middleware/aws.dart';
 import 'package:heart/middleware/config.dart';
+import 'package:heart/middleware/cors.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/events.dart';
 import 'package:heart/middleware/logging.dart';
@@ -44,8 +45,19 @@ RelicApp buildApp({
     return false;
   }
 
+  // Outermost but for the log line: a preflight carries no bearer token and no
+  // app version, so both gates below would turn one away, and the refusals
+  // they issue have to reach a browser wearing CORS headers to be read as
+  // refusals at all. Methods come from the route table so the advertised set
+  // cannot drift from the one that exists.
+  final crossOrigin = cors(
+    origins: config.allowedOrigins,
+    methods: routes.keys.map((route) => route.$2).toSet(),
+  );
+
   final app = RelicApp()
     ..use('/', requestLogging())
+    ..use('/', crossOrigin)
     ..use('/', version(minimal: config.minimalAppVersion, shouldCheckVersion: shouldCheckVersion))
     ..use('/', configuration(override: config))
     ..use('/', authenticator(implementation: auth))
@@ -84,10 +96,23 @@ RelicApp buildApp({
     // The router's own 404, distinguishable from a handler's: a client calling
     // a path or verb this table does not carry gets `route_not_found`, so a
     // wrong endpoint can be told apart from a missing row without guessing.
-    ..fallback = respondWith((_) => JsonResponse.noSuchRoute());
+    //
+    // Wrapped again because `use` maps stored routes, and the fallback is not
+    // one — it is the terminal handler the router falls through to, so nothing
+    // registered above reaches it on its own.
+    ..fallback = crossOrigin(respondWith((_) => JsonResponse.noSuchRoute()));
 
   for (final MapEntry(key: (route, verb), value: handler) in routes.entries) {
     app.add(verb, route, apiHandler(handler));
+  }
+
+  // A verb the router does not carry on a path is a 405, decided before any
+  // middleware runs — so without these a preflight would never reach `cors`
+  // and the browser would read every cross-origin call as a network failure.
+  // The handler answers only a bare `OPTIONS`, one with no `Origin` and so no
+  // preflight to compose; a real one is answered above, by `cors`.
+  for (final path in routes.keys.map((route) => route.$1).toSet()) {
+    app.add(.options, path, respondWith((_) => JsonResponse.noContent()));
   }
 
   return app;
