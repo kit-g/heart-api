@@ -33,6 +33,7 @@ module "api" {
   firebase_events_queue        = module.firebase.events_queue
   content_bucket               = module.content.content_bucket
   database                     = module.content.database
+  apple_sign_in                = local.apple_sign_in
   account_deletion_offset_days = 30
   monitoring_email             = "info@heart-of.me"
   media_distribution           = "media.heart-of.me"
@@ -73,4 +74,16 @@ module "monitoring" {
   media_distribution_id = module.cdn.media_distribution.id
   log_group_name        = module.api.log_group_name
   alarm_topic_arn       = module.api.monitoring_topic_arn
+}
+
+# Sign in with Apple, from the same S3 secrets prefix as every other credential.
+# Read here rather than in the api stack because the stack is handed values, not
+# a bucket to go looking in — the same way the Supabase connection arrives.
+data "aws_s3_object" "apple_secret" {
+  bucket = module.content.static_bucket.bucket
+  key    = "secrets/apple.json"
+}
+
+locals {
+  apple_sign_in = jsondecode(data.aws_s3_object.apple_secret.body)
 }
