@@ -24,6 +24,18 @@ class _NoSuchRoute implements Model {
   }
 }
 
+/// The 405 this API composes for itself. Relic will produce one too, but it
+/// does so from the router's own lookup — before any handler exists to wrap —
+/// so that one never reaches the middleware chain and carries neither CORS
+/// headers nor a JSON body. `buildApp` registers the verbs a path does not
+/// serve so this is returned instead.
+class _MethodNotAllowed implements Model {
+  @override
+  Map<String, dynamic> toMap() {
+    return {'error': 'method not allowed', 'code': 'method_not_allowed'};
+  }
+}
+
 class _ServerError implements Model {
   @override
   Map<String, dynamic> toMap() {
@@ -53,6 +65,17 @@ class JsonResponse<T extends Model> extends Response {
         404,
         body: body ?? _NotFound() as T,
         headers: headers,
+      );
+
+  /// The 405 for a path this API serves under some other verb — see
+  /// [_MethodNotAllowed]. [allowed] becomes the `Allow` header, which is
+  /// required of a 405 and is the only place the caller learns what it can
+  /// use instead.
+  new methodNotAllowed({required Set<Method> allowed})
+    : this(
+        405,
+        body: _MethodNotAllowed() as T,
+        headers: Headers.build((headers) => headers.allow = allowed),
       );
 
   /// The 404 for a path/verb that matches no route — see [_NoSuchRoute].
