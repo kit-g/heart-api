@@ -5,7 +5,7 @@ import 'apple.dart';
 abstract interface class ApiProfileService {
   Future<User> upsertProfile(User user);
 
-  Future<void> scheduleAccountDeletion({
+  Future<User> scheduleAccountDeletion({
     required String userId,
     String? scheduleArn,
     DateTime? scheduledAt,
