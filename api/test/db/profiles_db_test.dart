@@ -81,7 +81,15 @@ void main() {
       ).then((u) => u.id);
       final when = DateTime.utc(2026, 8, 1, 12);
 
-      await h.db.scheduleAccountDeletion(userId: id, scheduleArn: 'arn:aws:scheduler:del-$id', scheduledAt: when);
+      final scheduled = await h.db.scheduleAccountDeletion(
+        userId: id,
+        scheduleArn: 'arn:aws:scheduler:del-$id',
+        scheduledAt: when,
+      );
+
+      // the caller learns the deadline from the same round trip that set it
+      expect(scheduled.id, id);
+      expect(scheduled.scheduledForDeletionAt?.toUtc(), when);
 
       final row = (await h.exec(
         'SELECT account_deletion_schedule, scheduled_for_deletion_at FROM profiles WHERE id = @id',
@@ -138,12 +146,12 @@ void main() {
       expect((await h.db.getAppleGrant(userId: id))?.refreshToken, 'r-keep');
     });
 
-    test('is a no-op for an unknown user id', () async {
-      // UPDATE ... WHERE id = @userId matches nothing; the method returns void
-      // and must not throw.
+    test('throws NotFound when the user does not exist', () async {
+      // The UPDATE matches nothing, so RETURNING yields no row — the same
+      // shape undoAccountDeletion has always had.
       await expectLater(
         h.db.scheduleAccountDeletion(userId: h.uid('ghost'), scheduleArn: 'arn:none'),
-        completes,
+        throwsA(isA<NotFound>()),
       );
     });
   });
