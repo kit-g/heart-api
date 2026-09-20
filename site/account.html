@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <link rel="icon" type="image/png" href="assets/favicon.png">
-    <link rel="apple-touch-icon" href="assets/favicon.png">
+    <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Delete Account - Heart of Yours</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,15 @@
     <div class="w-full max-w-[1200px] flex items-center justify-between">
         <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div class="size-9 flex items-center justify-center bg-surface rounded overflow-hidden border">
-                <img src="assets/favicon.png" alt="Heart of Yours Logo" class="size-full object-cover"/>
+                <!-- The mark is drawn in --ink, so it ships as two transparent files
+                     rather than the opaque app tile: the chip's own surface shows
+                     through in either brightness. Decorative — the wordmark beside
+                     it already names the app. -->
+                <picture class="size-full">
+                    <source srcset="assets/logo-dark.png" media="(prefers-color-scheme: dark)"/>
+                    <img src="assets/logo-light.png" width="192" height="192" alt=""
+                         class="size-full object-contain"/>
+                </picture>
             </div>
             <h2 class="text-lg font-title font-semibold tracking-tight">Heart of Yours</h2>
         </a>
