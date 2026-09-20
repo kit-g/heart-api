@@ -2,23 +2,26 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/models/errors.dart';
 import 'package:mockito/mockito.dart';
-import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
 
 import '../helpers/request.dart';
 import '../mocks.mocks.dart';
 
 void main() {
+  late MockAppConfig config;
+
+  setUp(() {
+    config = MockAppConfig();
+    when(config.allowedMimeTypes).thenReturn(const {'image/jpeg', 'image/png'});
+  });
+
+  Future<AccountUpsertIn> parse(Map<String, dynamic> body) =>
+      AccountUpsertIn.fromRequest(jsonRequest(body: body)..config = config);
+
   group('AccountUpsertIn — discriminated union on action', () {
-    late MockAppConfig config;
-
-    setUp(() {
-      config = MockAppConfig();
-      when(config.allowedMimeTypes).thenReturn(const {'image/jpeg', 'image/png'});
+    test('scheduleAccountDeletion', () async {
+      expect(await parse({'action': 'scheduleAccountDeletion'}), isA<ScheduleAccountDeletionIn>());
     });
-
-    Future<AccountUpsertIn> parse(Map<String, dynamic> body) =>
-        AccountUpsertIn.fromRequest(jsonRequest(body: body)..config = config);
 
     test('undoAccountDeletion', () async {
       expect(await parse({'action': 'undoAccountDeletion'}), isA<UndoAccountDeletionIn>());
@@ -59,24 +62,20 @@ void main() {
     });
   });
 
-  group('AccountDeleteIn — the optional Apple half', () {
-    test('a bodiless delete carries no grant', () async {
-      final input = await AccountDeleteIn.fromRequest(bareRequest(method: Method.delete));
-      expect(input.appleGrant, isNull);
-    });
+  group('scheduleAccountDeletion — the optional Apple half', () {
+    Future<ScheduleAccountDeletionIn> schedule(Map<String, dynamic> body) async {
+      return await parse({'action': 'scheduleAccountDeletion', ...body}) as ScheduleAccountDeletionIn;
+    }
 
-    test('an empty JSON body carries no grant', () async {
-      final input = await AccountDeleteIn.fromRequest(jsonRequest(method: Method.delete));
-      expect(input.appleGrant, isNull);
+    test('carries no grant when none is sent', () async {
+      expect((await schedule({})).appleGrant, isNull);
     });
 
     test('parses a complete grant', () async {
-      final input = await AccountDeleteIn.fromRequest(
-        jsonRequest(
-          method: Method.delete,
-          body: {'appleAuthorizationCode': 'c0de', 'appleClientId': 'me.heart-of.ios'},
-        ),
-      );
+      final input = await schedule({
+        'appleAuthorizationCode': 'c0de',
+        'appleClientId': 'me.heart-of.ios',
+      });
 
       expect(input.appleGrant?.authorizationCode, 'c0de');
       expect(input.appleGrant?.clientId, 'me.heart-of.ios');
@@ -92,10 +91,8 @@ void main() {
     ]) {
       test('$name is a 400', () {
         expect(
-          () => AccountDeleteIn.fromRequest(jsonRequest(method: Method.delete, body: body)),
-          throwsA(
-            isA<BadRequest>().having((e) => e.code, 'code', 'incomplete_apple_grant'),
-          ),
+          () => schedule(body),
+          throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'incomplete_apple_grant')),
         );
       });
     }
