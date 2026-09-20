@@ -60,6 +60,7 @@ SET
   apple_refresh_token = coalesce(@appleRefreshToken, apple_refresh_token),
   apple_client_id = coalesce(@appleClientId, apple_client_id)
 WHERE id = @userId
+RETURNING id, email, username, avatar_url, scheduled_for_deletion_at, settings
 ''';
 
 /// The Apple grant to revoke before the account goes.
