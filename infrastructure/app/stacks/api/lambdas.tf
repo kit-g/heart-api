@@ -18,6 +18,10 @@ resource "aws_lambda_function" "api" {
   environment {
     variables = {
       ACCOUNT_DELETION_OFFSET_DAYS = tostring(var.account_deletion_offset_days)
+      APPLE_CLIENT_IDS             = join(",", var.apple_sign_in.client_ids)
+      APPLE_KEY_ID                 = var.apple_sign_in.key_id
+      APPLE_PRIVATE_KEY            = var.apple_sign_in.private_key
+      APPLE_TEAM_ID                = var.apple_sign_in.team_id
       AWS_LAMBDA_EXEC_WRAPPER      = "/opt/bootstrap"
       AWS_LWA_PORT                 = 8080
       AWS_LWA_REMOVE_BASE_PATH     = "/v1"

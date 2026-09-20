@@ -91,3 +91,16 @@ variable "media_distribution" {
   description = "Custom domain name for media CF distribution"
   type        = string
 }
+variable "apple_sign_in" {
+  description = "Sign in with Apple key material and the clients it may sign a client secret for, from secrets/apple.json"
+  sensitive   = true
+  type = object({
+    team_id     = string
+    key_id      = string
+    private_key = string
+    # Each entry is a client id, optionally `client_id=redirect_uri` where the
+    # exchange needs one. A native sign-in names the app's bundle id, which
+    # differs per platform; the web flow names a Services ID and its redirect.
+    client_ids = list(string)
+  })
+}
