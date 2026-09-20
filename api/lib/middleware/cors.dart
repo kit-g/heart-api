@@ -66,10 +66,10 @@ Middleware cors({required Set<String> origins, required Set<Method> methods}) {
 
       final allowed = origins.contains(origin);
 
-      // The route table carries no OPTIONS, so a preflight allowed through
-      // would come back as `route_not_found` — answered here instead. An
-      // OPTIONS with no Origin is not a preflight and falls through to that
-      // 404, which is the honest answer to it.
+      // No path serves OPTIONS, so a preflight allowed through would come
+      // back a 405 — which a browser reads as the request being refused.
+      // Answered here instead. An OPTIONS carrying no Origin is not a
+      // preflight and does fall through to that 405, the honest answer to it.
       if (request.method == .options) {
         return Response(
           204,
