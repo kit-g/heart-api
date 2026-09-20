@@ -157,6 +157,15 @@ class AppleConfig {
   }
 }
 
+/// Parses `ALLOWED_ORIGINS`: a comma-separated allowlist. Absent or blank is an
+/// empty set rather than a wildcard — an origin has to be named to be trusted.
+Set<String> _origins(String? raw) {
+  return switch (raw) {
+    final String value => value.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet(),
+    null => const {},
+  };
+}
+
 abstract interface class AppConfig {
   String get firebaseProjectId;
 
@@ -207,6 +216,11 @@ abstract interface class AppConfig {
 
   Set<String> get allowedMimeTypes;
 
+  /// Browser origins allowed to call this API, as serialized origins
+  /// (`https://heart-of.me`, no trailing slash). Empty in an environment with
+  /// no browser client, which is the same thing as CORS being off.
+  Set<String> get allowedOrigins;
+
   /// development flags, allows to call the /events endpoint
   bool get allowNonHttpEvents;
 
@@ -254,6 +268,7 @@ abstract interface class AppConfig {
           defaultLocale: env['DEFAULT_LOCALE'] ?? 'en',
           mediaDistribution: mediaDistribution,
           allowedMimeTypes: env['ALLOWED_MIME_TYPES']?.split(',').toSet() ?? _defaultMimeTypes,
+          allowedOrigins: _origins(env['ALLOWED_ORIGINS']),
           allowNonHttpEvents: bool.tryParse(env['ALLOW_NON_HTTP_EVENTS'] ?? '', caseSensitive: false) ?? false,
           db: PostgresConfig.fromEnv(),
         );
@@ -317,6 +332,8 @@ class _EnvConfig implements AppConfig {
   @override
   final Set<String> allowedMimeTypes;
   @override
+  final Set<String> allowedOrigins;
+  @override
   final bool allowNonHttpEvents;
 
   const new({
@@ -334,6 +351,7 @@ class _EnvConfig implements AppConfig {
     required this.mediaDistribution,
     required this.db,
     required this.allowedMimeTypes,
+    required this.allowedOrigins,
     required this.allowNonHttpEvents,
     required this.eventsDlq,
     required this.monitoringTopicArn,
