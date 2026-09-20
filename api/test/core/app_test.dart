@@ -40,6 +40,7 @@ void main() {
     when(config.minimalAppVersion).thenReturn('1.0.0');
     when(config.shouldCheckVersion).thenReturn(false);
     when(config.firebaseProjectId).thenReturn('proj');
+    when(config.allowedOrigins).thenReturn(const {});
 
     app = buildApp(
       config: config,
@@ -170,6 +171,7 @@ void main() {
       when(config.minimalAppVersion).thenReturn('2.0.0');
       when(config.shouldCheckVersion).thenReturn(true);
       when(config.firebaseProjectId).thenReturn('proj');
+      when(config.allowedOrigins).thenReturn(const {});
       app = buildApp(
         config: config,
         aws: AwsConfig(credentialsProvider: const AWSCredentialsProvider.defaultChain(), region: 'us-east-1'),

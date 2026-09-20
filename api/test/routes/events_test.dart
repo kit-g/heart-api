@@ -81,7 +81,7 @@ void main() {
       'thumbnail': {'key': 'exercises/squat/thumb.gif', 'width': 100, 'height': 75},
     });
 
-    Future<({int status, String body})> sendAsset() => app.send(
+    Future<({int status, String body, Map<String, String> headers})> sendAsset() => app.send(
       'POST',
       '/events',
       body: {
