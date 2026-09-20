@@ -17,13 +17,13 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
   }
 
   @override
-  Future<void> scheduleAccountDeletion({
+  Future<User> scheduleAccountDeletion({
     required String userId,
     String? scheduleArn,
     DateTime? scheduledAt,
     AppleGrant? appleGrant,
-  }) {
-    return _pool.execute(
+  }) async {
+    final rows = await _pool.execute(
       _scheduleAccountDeletion.toSql(),
       parameters: {
         'userId': userId,
@@ -33,6 +33,8 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
         'appleClientId': appleGrant?.clientId,
       },
     );
+    if (rows.isEmpty) throw NotFound(type: 'Profile', id: userId);
+    return User.fromRow(rows.first.toColumnMap());
   }
 
   @override
