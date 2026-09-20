@@ -175,6 +175,23 @@ void main() {
       );
     });
 
+    test('a 405 for a verb the path does not serve carries the headers, and says what does', () async {
+      // `/version` is public, so this reaches the 405 rather than stopping at
+      // authentication — a wrong verb behind the token gate is a 401 first.
+      final response = await app.send('DELETE', '/version', extraHeaders: const {'origin': _allowed});
+
+      expect(response.status, 405);
+      expect(response.headers['access-control-allow-origin'], _allowed);
+      expect(response.headers['allow'], contains('GET'));
+      expect(response.body, contains('method_not_allowed'), reason: 'the same JSON shape as every other refusal');
+    });
+
+    test('a bare OPTIONS on a real path is a 405, not a preflight', () async {
+      final response = await app.send('OPTIONS', '/version');
+
+      expect(response.status, 405);
+    });
+
     test('a refusal reaches the browser as a refusal, not as a network error', () async {
       final response = await app.send('GET', '/templates', token: null, extraHeaders: const {'origin': _allowed});
 
