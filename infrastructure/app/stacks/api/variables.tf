@@ -92,15 +92,15 @@ variable "media_distribution" {
   type        = string
 }
 variable "apple_sign_in" {
-  description = "Sign in with Apple key material and the clients it may sign a client secret for, from secrets/apple.json"
+  description = "Sign in with Apple key material and the clients it may sign a client secret for. Each environment has its own key - a key is configured against a primary App ID, so prod's does not cover the dev bundle id."
   sensitive   = true
   type = object({
     team_id     = string
     key_id      = string
     private_key = string
     # Each entry is a client id, optionally `client_id=redirect_uri` where the
-    # exchange needs one. A native sign-in names the app's bundle id, which
-    # differs per platform; the web flow names a Services ID and its redirect.
+    # exchange needs one. A code is issued against one client and the client
+    # secret must name that same one, so this is an allowlist, not a default.
     client_ids = list(string)
   })
 }
