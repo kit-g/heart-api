@@ -1,7 +1,11 @@
-output "api" {
-  value = {
-    domain_name = "${aws_api_gateway_rest_api.api.id}.execute-api.${var.region}.amazonaws.com"
-    stage_path  = aws_api_gateway_stage.v1.stage_name
+# What a Route 53 alias in the `dns` root module points at. That module holds
+# its own state and is applied separately, so these are copied across by hand,
+# the way the distribution domain names already are.
+output "custom_domain" {
+  value = var.custom_domain == null ? null : {
+    name           = aws_api_gateway_domain_name.api[0].domain_name
+    target         = aws_api_gateway_domain_name.api[0].regional_domain_name
+    hosted_zone_id = aws_api_gateway_domain_name.api[0].regional_zone_id
   }
 }
 

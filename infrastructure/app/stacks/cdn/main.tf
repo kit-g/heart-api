@@ -58,7 +58,6 @@ locals {
   content_origin                = "content-bucket"
   static_origin                 = "static-bucket"
   firebase_origin               = "firebase-auth"
-  api_origin                    = "api-gateway"
   caching_optimized             = "658327ea-f89d-4fab-a63d-7e88639e58f6" # CloudFront managed cache policy ID
   caching_disabled              = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CloudFront managed cache policy ID
   all_viewer_except_host_header = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # CloudFront managed origin request policy ID for AllViewerExceptHostHeader, needed to forward Firebase auth requests to the app, with query params
@@ -196,19 +195,6 @@ resource "aws_cloudfront_distribution" "web" {
     }
   }
 
-  origin {
-    domain_name = var.api.domain_name
-    origin_id   = local.api_origin
-    origin_path = "/${var.api.stage_path}"
-
-    custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "https-only"
-      origin_ssl_protocols   = ["TLSv1.2"]
-    }
-  }
-
   default_root_object = "index.html"
 
   default_cache_behavior {
@@ -237,16 +223,6 @@ resource "aws_cloudfront_distribution" "web" {
     target_origin_id       = local.content_origin
     viewer_protocol_policy = "https-only"
     cache_policy_id        = local.caching_optimized
-  }
-
-  ordered_cache_behavior {
-    target_origin_id         = local.api_origin
-    path_pattern             = "/api/*"
-    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods           = ["GET", "HEAD"]
-    viewer_protocol_policy   = "redirect-to-https"
-    cache_policy_id          = local.caching_disabled
-    origin_request_policy_id = local.all_viewer_except_host_header
   }
 
   viewer_certificate {

@@ -39,6 +39,10 @@ module "api" {
   monitoring_email             = "info@heart-of.me"
   media_distribution           = "dev.media.heart-of.me"
   events_enabled               = var.events_enabled
+  custom_domain = {
+    name            = "dev.api.heart-of.me"
+    certificate_arn = "arn:aws:acm:ca-central-1:583168578067:certificate/43e5a2aa-7c62-4fa4-a137-9b35df1f47b6"
+  }
 }
 
 module "assets" {
@@ -61,7 +65,6 @@ module "cdn" {
   firebase_auth_domain               = "heart-of-yours-dev.firebaseapp.com"
   content_bucket                     = module.content.content_bucket
   static_bucket                      = module.content.static_bucket
-  api                                = module.api.api
 }
 
 module "monitoring" {

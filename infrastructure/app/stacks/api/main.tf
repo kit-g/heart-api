@@ -8,6 +8,47 @@ resource "aws_sns_topic" "monitoring" {
 
 resource "aws_api_gateway_rest_api" "api" {
   name = "heart-api"
+
+  # Regional, not the provider's edge-optimized default. Edge-optimized fronts
+  # the API with an AWS-managed CloudFront distribution; every route here is
+  # authenticated and uncacheable, so all that buys is TLS termination nearer
+  # the caller, and it forces the custom domain's certificate into us-east-1.
+  # The execute-api hostname survives the switch, so builds pinned to it keep
+  # working through the cutover - they just reach the region directly.
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+}
+
+locals {
+  # The version clients carry in the path. Deliberately a separate literal from
+  # the stage name below: mapping one onto the other is what lets the stage be
+  # renamed or swapped without a client release.
+  api_base_path = "v1"
+}
+
+# Null until the certificate is issued, which keeps the stack appliable before
+# one exists - the same opt-out the monitoring stack gives `alarm_topic_arn`.
+# Without it the API is reachable only at its execute-api hostname.
+resource "aws_api_gateway_domain_name" "api" {
+  count = var.custom_domain == null ? 0 : 1
+
+  domain_name              = var.custom_domain.name
+  regional_certificate_arn = var.custom_domain.certificate_arn
+  security_policy          = "TLS_1_2"
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+}
+
+resource "aws_api_gateway_base_path_mapping" "api" {
+  count = var.custom_domain == null ? 0 : 1
+
+  api_id      = aws_api_gateway_rest_api.api.id
+  stage_name  = aws_api_gateway_stage.v1.stage_name
+  domain_name = aws_api_gateway_domain_name.api[0].domain_name
+  base_path   = local.api_base_path
 }
 
 resource "aws_lambda_permission" "api_invoke" {

@@ -97,4 +97,4 @@ DNS lives in `infrastructure/dns/` as a single env (dev account hosts the apex z
 
 Backend is S3 (`583168578067-ca-central-1-tfstate`) with DynamoDB locking (`tfstate-locks`). One state file per stack/env: `heart/<env-or-stack>/terraform.tfstate` (e.g. `heart/dev/terraform.tfstate`, `heart/prod/terraform.tfstate`, `heart/dns/terraform.tfstate`, `heart/global/terraform.tfstate`).
 
-`.terraform.lock.hcl` and any `*.tfvars` are gitignored.
+`.terraform.lock.hcl` is gitignored. The `terraform.tfvars` files are **tracked** — they hold identifiers, not secrets (distribution and API Gateway domain names, Firebase project ids), and the values every root module needs to plan. Nothing secret goes in one.
