@@ -18,7 +18,6 @@ import 'package:relic/relic.dart';
 
 final routes = <(String, Method), ModelHandler>{
   ('/accounts', .put): account.upsertAccount,
-  ('/accounts', .delete): account.deleteAccount,
   ('/accounts/summary', .get): account.getAccountSummary,
   ('/feedback', .post): feedback.submitFeedback,
   ('/accounts/:targetUserId/workouts', .get): workouts.getTargetUserWorkouts,
