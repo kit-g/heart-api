@@ -58,3 +58,23 @@ resource "aws_route53_record" "acm_prod_www" {
   ttl     = 14400
   records = ["_a8919cbb2244336f7d0a8fdc516be252.jkddzztszm.acm-validations.aws."]
 }
+
+# The API certificates are the only ones in this file issued in ca-central-1,
+# not us-east-1: a REGIONAL API Gateway domain name will not take a certificate
+# from anywhere but its own region.
+
+resource "aws_route53_record" "acm_dev_api" {
+  zone_id = aws_route53_zone.apex.id
+  name    = "_bf152e21d00845317f02302e2d6305de.dev.api.${var.apex_domain}"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["_00d645ffb60b0140b1cd3bf68de8bded.wzccmgtwzk.acm-validations.aws."]
+}
+
+resource "aws_route53_record" "acm_prod_api" {
+  zone_id = aws_route53_zone.apex.id
+  name    = "_3523e482d0ff62c690b0841ed092802a.api.${var.apex_domain}"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["_0f0e9bc3701b654928736e57354c362a.wzccmgtwzk.acm-validations.aws."]
+}

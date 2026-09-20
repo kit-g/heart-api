@@ -1,3 +1,17 @@
+resource "aws_route53_record" "prod_api" {
+  count = var.prod_api_domain_name == "" ? 0 : 1
+
+  zone_id = aws_route53_zone.apex.id
+  name    = "api.${var.apex_domain}"
+  type    = "A"
+
+  alias {
+    name                   = var.prod_api_domain_name
+    zone_id                = local.apigw_regional_zone_id
+    evaluate_target_health = false
+  }
+}
+
 resource "aws_route53_record" "prod_media" {
   zone_id = aws_route53_zone.apex.id
   name    = "media.${var.apex_domain}"

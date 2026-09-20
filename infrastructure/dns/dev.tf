@@ -22,6 +22,20 @@ resource "aws_route53_record" "dev_www" {
   }
 }
 
+resource "aws_route53_record" "dev_api" {
+  count = var.dev_api_domain_name == "" ? 0 : 1
+
+  zone_id = aws_route53_zone.apex.id
+  name    = "dev.api.${var.apex_domain}"
+  type    = "A"
+
+  alias {
+    name                   = var.dev_api_domain_name
+    zone_id                = local.apigw_regional_zone_id
+    evaluate_target_health = false
+  }
+}
+
 resource "aws_route53_record" "dev_media" {
   zone_id = aws_route53_zone.apex.id
   name    = "dev.media.${var.apex_domain}"
