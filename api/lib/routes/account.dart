@@ -17,6 +17,9 @@ Future<Model> upsertAccount(Request request) async {
   final input = await AccountUpsertIn.fromRequest(request);
 
   switch (input) {
+    case ScheduleAccountDeletionIn(:final appleGrant):
+      return _scheduleAccountDeletion(request, appleGrant);
+
     // cancellation of the account deletion schedule
     case UndoAccountDeletionIn():
       final userId = request.userId;
@@ -72,8 +75,13 @@ Future<AccountSummary> getAccountSummary(Request request) {
   return request.profileService.getAccountSummary(request.userId);
 }
 
-Future<NoContent> deleteAccount(Request request) async {
-  final input = await AccountDeleteIn.fromRequest(request);
+/// Sets the account's deletion running: an Apple grant exchanged while the user
+/// is still here to authorize it, a one-shot schedule, and both recorded on the
+/// profile in a single write.
+///
+/// Returns the updated profile rather than a bare 204, so the caller learns the
+/// deadline it is about to show from the same round trip that set it.
+Future<User> _scheduleAccountDeletion(Request request, AppleDeletionGrant? grant) async {
   final userId = request.userId;
   final config = request.config;
 
@@ -81,7 +89,7 @@ Future<NoContent> deleteAccount(Request request) async {
   // authorization code expires within minutes and the deletion is days away.
   // A failed exchange leaves nothing to revoke and is logged as such; it is
   // never the reason a user cannot delete their account.
-  final appleGrant = switch (input.appleGrant) {
+  final appleGrant = switch (grant) {
     AppleDeletionGrant(:final authorizationCode, :final clientId) => switch (await request.apple
         .exchangeAuthorizationCode(code: authorizationCode, clientId: clientId)) {
       final String refreshToken => (refreshToken: refreshToken, clientId: clientId),
@@ -120,12 +128,10 @@ Future<NoContent> deleteAccount(Request request) async {
     null => (await fallback())['Arn'],
   };
 
-  await request.profileService.scheduleAccountDeletion(
+  return request.profileService.scheduleAccountDeletion(
     userId: userId,
     scheduleArn: scheduleArn,
     scheduledAt: scheduledAt,
     appleGrant: appleGrant,
   );
-
-  throw const NoContent();
 }
