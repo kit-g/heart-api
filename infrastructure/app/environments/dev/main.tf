@@ -81,14 +81,38 @@ module "monitoring" {
   alarm_topic_arn = ""
 }
 
-# Sign in with Apple, from the same S3 secrets prefix as every other credential.
-# Read here rather than in the api stack because the stack is handed values, not
-# a bucket to go looking in — the same way the Supabase connection arrives.
-data "aws_s3_object" "apple_secret" {
+# Sign in with Apple. Only the key itself is a secret: the team, key and client
+# ids are identifiers, and already sit in plaintext beside the provisioning
+# profiles under the same prefix.
+#
+# Its own key, not prod's — a key is configured against a primary App ID, and
+# prod's does not cover `me.heart-of.ios.dev`.
+data "aws_s3_object" "apple_sign_in_key" {
   bucket = module.content.static_bucket.bucket
-  key    = "secrets/apple.json"
+  key    = "secrets/appstore/AuthKey_${local.apple_key_id}.p8"
+
+  # Terraform only populates `body` for content types it treats as text, and
+  # `aws s3 cp` types a .p8 as application/pkcs8 — so this object is stored as
+  # text/plain, unlike the App Store Connect key beside it. That is a hack, and
+  # the failure it invites is silent: an empty body ships a blank
+  # APPLE_PRIVATE_KEY, AppConfig reads the set as incomplete, and revocation
+  # stops while deletions carry on. Caught here instead, at plan time.
+  lifecycle {
+    postcondition {
+      condition     = can(regex("BEGIN PRIVATE KEY", self.body))
+      error_message = "secrets/appstore/AuthKey_${local.apple_key_id}.p8 read back empty or unparseable - re-upload it with --content-type text/plain."
+    }
+  }
 }
 
 locals {
-  apple_sign_in = jsondecode(data.aws_s3_object.apple_secret.body)
+  # The filename carries it, so rotating the key is one edit here.
+  apple_key_id = "B36L4GLHJD"
+
+  apple_sign_in = {
+    team_id     = "DFX2JYT8BM"
+    key_id      = local.apple_key_id
+    private_key = data.aws_s3_object.apple_sign_in_key.body
+    client_ids  = ["me.heart-of.ios.dev"]
+  }
 }
