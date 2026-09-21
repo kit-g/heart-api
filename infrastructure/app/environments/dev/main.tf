@@ -38,12 +38,21 @@ module "api" {
   account_deletion_offset_days = 2
   monitoring_email             = "info@heart-of.me"
   media_distribution           = "dev.media.heart-of.me"
-  allowed_origins              = ["https://dev.heart-of.me", "https://www.dev.heart-of.me"]
   events_enabled               = var.events_enabled
   custom_domain = {
     name            = "dev.api.heart-of.me"
     certificate_arn = "arn:aws:acm:ca-central-1:583168578067:certificate/43e5a2aa-7c62-4fa4-a137-9b35df1f47b6"
   }
+  # 7357 is the web port the app's local run configuration pins. That config is
+  # not checked in, so nothing here can derive the number or notice it changing
+  # — if a local browser starts being refused, this is the line to look at.
+  # `localhost` and `127.0.0.1` are separate origins to a browser, hence both.
+  allowed_origins = [
+    "https://dev.heart-of.me",
+    "https://www.dev.heart-of.me",
+    "http://localhost:7357",
+    "http://127.0.0.1:7357",
+  ]
 }
 
 module "assets" {
