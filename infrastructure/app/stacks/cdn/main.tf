@@ -63,6 +63,56 @@ locals {
   all_viewer_except_host_header = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # CloudFront managed origin request policy ID for AllViewerExceptHostHeader, needed to forward Firebase auth requests to the app, with query params
 }
 
+locals {
+  media_cors_enabled = length(var.media_cors_origins) > 0
+
+  # OPTIONS only where something will answer it. CloudFront refuses a method a
+  # behavior does not allow before any policy is consulted, and S3 has no CORS
+  # configuration to answer a forwarded preflight with.
+  media_methods = local.media_cors_enabled ? ["GET", "HEAD", "OPTIONS"] : ["GET", "HEAD"]
+}
+
+# Browser access to the media distribution. CloudFront answers the preflight
+# itself and adds these after the cache lookup, so `Origin` never enters the
+# cache key: every viewer shares one cached copy of an object with the app,
+# which sends no `Origin` at all. Configuring CORS on the bucket instead would
+# mean keying the cache on `Origin` to stay correct, and paying for it on the
+# traffic that is almost all of it.
+resource "aws_cloudfront_response_headers_policy" "media_cors" {
+  count = local.media_cors_enabled ? 1 : 0
+
+  name    = "HeartMediaCors"
+  comment = "Browser access to media assets, per environment"
+
+  cors_config {
+    access_control_allow_credentials = false
+    origin_override                  = true
+    access_control_max_age_sec       = 3600
+
+    access_control_allow_origins {
+      items = var.media_cors_origins
+    }
+
+    access_control_allow_methods {
+      items = ["GET", "HEAD", "OPTIONS"]
+    }
+
+    # None of these is CORS-safelisted, so the request carrying one preflights:
+    # `if-none-match` on the exercise library's revalidation, `cache-control`
+    # and `x-app-version` on an image fetch.
+    access_control_allow_headers {
+      items = ["accept", "cache-control", "if-none-match", "x-app-version"]
+    }
+
+    # `etag` is not a safelisted *response* header, so without this the client
+    # reads null where the library's ETag should be, never sends
+    # `If-None-Match`, and re-downloads the whole catalog on every load.
+    access_control_expose_headers {
+      items = ["etag"]
+    }
+  }
+}
+
 resource "aws_cloudfront_cache_policy" "media" {
   name        = "HeartMediaCacheWithQuery"
   comment     = "Copy of CachingOptimized policy, except it allows the 'v' query param"
@@ -104,51 +154,56 @@ resource "aws_cloudfront_distribution" "media" {
   }
 
   default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = local.content_origin
-    viewer_protocol_policy = "redirect-to-https"
-    cache_policy_id        = local.caching_optimized
+    allowed_methods            = local.media_methods
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = local.content_origin
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = local.caching_optimized
+    response_headers_policy_id = one(aws_cloudfront_response_headers_policy.media_cors[*].id)
   }
 
   ordered_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    path_pattern           = "/workouts/*"
-    target_origin_id       = local.content_origin
-    viewer_protocol_policy = "https-only"
-    cache_policy_id        = aws_cloudfront_cache_policy.media.id
+    allowed_methods            = local.media_methods
+    cached_methods             = ["GET", "HEAD"]
+    path_pattern               = "/workouts/*"
+    target_origin_id           = local.content_origin
+    viewer_protocol_policy     = "https-only"
+    cache_policy_id            = aws_cloudfront_cache_policy.media.id
+    response_headers_policy_id = one(aws_cloudfront_response_headers_policy.media_cors[*].id)
   }
 
   ordered_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    path_pattern           = "/favicon.ico"
-    target_origin_id       = local.content_origin
-    viewer_protocol_policy = "https-only"
-    cache_policy_id        = local.caching_optimized
+    allowed_methods            = local.media_methods
+    cached_methods             = ["GET", "HEAD"]
+    path_pattern               = "/favicon.ico"
+    target_origin_id           = local.content_origin
+    viewer_protocol_policy     = "https-only"
+    cache_policy_id            = local.caching_optimized
+    response_headers_policy_id = one(aws_cloudfront_response_headers_policy.media_cors[*].id)
   }
 
   ordered_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    path_pattern           = "/avatars/*"
-    target_origin_id       = local.content_origin
-    viewer_protocol_policy = "https-only"
-    cache_policy_id        = aws_cloudfront_cache_policy.media.id
+    allowed_methods            = local.media_methods
+    cached_methods             = ["GET", "HEAD"]
+    path_pattern               = "/avatars/*"
+    target_origin_id           = local.content_origin
+    viewer_protocol_policy     = "https-only"
+    cache_policy_id            = aws_cloudfront_cache_policy.media.id
+    response_headers_policy_id = one(aws_cloudfront_response_headers_policy.media_cors[*].id)
   }
 
   # Static, unauthenticated CDN objects (static/templates, static/exercises/*):
   # the only behavior on this distribution that compresses, since the exercise
   # library files are ~650 KB of instruction markdown each.
   ordered_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    path_pattern           = "/static/*"
-    target_origin_id       = local.content_origin
-    viewer_protocol_policy = "https-only"
-    compress               = true
-    cache_policy_id        = local.caching_optimized
+    allowed_methods            = local.media_methods
+    cached_methods             = ["GET", "HEAD"]
+    path_pattern               = "/static/*"
+    target_origin_id           = local.content_origin
+    viewer_protocol_policy     = "https-only"
+    compress                   = true
+    cache_policy_id            = local.caching_optimized
+    response_headers_policy_id = one(aws_cloudfront_response_headers_policy.media_cors[*].id)
   }
 
   viewer_certificate {

@@ -48,3 +48,14 @@ variable "content_bucket" {
     bucket_regional_domain_name = string
   })
 }
+
+variable "media_cors_origins" {
+  description = "Browser origins allowed to fetch media assets, as serialized origins. Empty attaches no CORS policy and leaves the distribution answering only same-origin and non-browser callers, which is every mobile client."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for o in var.media_cors_origins : can(regex("^https?://[^/]+$", o))])
+    error_message = "Each origin must be scheme://host[:port] with no path or trailing slash - it is matched against what a browser sends."
+  }
+}
