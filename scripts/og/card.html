@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!-- The link-preview card, site/assets/og.png: 1200×630, the Ink preset in light.
+     Regenerate with scripts/og/render.sh after changing the copy or the hero screenshot. -->
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,600&display=block"
+          rel="stylesheet"/>
+    <style>
+        :root {
+            --ground: #FFFFFF;
+            --fill: #F4F1EA;
+            --ink: #1A1815;
+            --muted: #5D584E;
+            --border: #E2DED4;
+            --accent-ink: #1B43A8;
+        }
+
+        * { margin: 0; box-sizing: border-box; }
+
+        body {
+            width: 1200px;
+            height: 630px;
+            overflow: hidden;
+            background: var(--ground);
+            color: var(--ink);
+            font-family: 'IBM Plex Sans', sans-serif;
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            grid-template-rows: 630px;
+            gap: 48px;
+            padding: 0 72px 0 80px;
+        }
+
+        .text { display: flex; flex-direction: column; justify-content: center; gap: 24px; }
+
+        .brand { display: flex; align-items: center; gap: 14px; }
+        .brand .chip {
+            width: 52px; height: 52px; border-radius: 6px; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .brand img { width: 100%; height: 100%; object-fit: contain; }
+        .brand span { font-family: 'Literata', serif; font-weight: 600; font-size: 26px; letter-spacing: -0.01em; }
+
+        h1 {
+            font-family: 'Literata', serif; font-weight: 600;
+            font-size: 50px; line-height: 1.1; letter-spacing: -0.02em;
+        }
+        h1 em { font-style: normal; color: var(--accent-ink); }
+
+        ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+        li { font-size: 22px; color: var(--muted); display: flex; align-items: center; gap: 12px; }
+        li::before { content: ''; width: 8px; height: 8px; border-radius: 2px; background: var(--accent-ink); }
+
+        .cta { display: flex; align-items: center; gap: 18px; margin-top: 4px; }
+        .cta .button {
+            background: #1F4EC8; color: #FFFFFF; border-radius: 6px;
+            font-size: 22px; font-weight: 600; padding: 14px 26px;
+        }
+        .cta .where { font-size: 20px; color: var(--muted); }
+
+        /* The phone sits low and runs off the bottom edge, as on the site's hero. */
+        .phone {
+            align-self: start;
+            margin-top: 64px;
+            background: #1A1815;
+            border-radius: 44px;
+            padding: 12px;
+        }
+        /* natural aspect, never cropped: the screenshot's own side margins are part of the design */
+        .phone img { width: 100%; height: auto; border-radius: 34px; display: block; }
+    </style>
+</head>
+<body>
+<div class="text">
+    <div class="brand">
+        <div class="chip"><img src="../../site/assets/logo-light.png" alt=""/></div>
+        <span>Heart of Yours</span>
+    </div>
+    <h1>A workout log that gets<br/><em>out of your way</em>.</h1>
+    <ul>
+        <li>Free, with no subscription</li>
+        <li>Start without an account</li>
+        <li>Health data stays on your phone</li>
+    </ul>
+    <div class="cta">
+        <span class="button">Download free →</span>
+        <span class="where">iPhone · iPad · Android</span>
+    </div>
+</div>
+<div class="phone"><img src="../../site/assets/screens/hero-dashboard.webp" alt=""/></div>
+</body>
+</html>
