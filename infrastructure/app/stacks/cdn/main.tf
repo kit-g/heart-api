@@ -280,6 +280,31 @@ resource "aws_cloudfront_distribution" "web" {
     cache_policy_id        = local.caching_optimized
   }
 
+  # Paths under the apex are client-side routes, not objects: nothing is keyed
+  # `/profile/settings/account`, and behind an OAC without ListBucket S3 answers
+  # a missing key 403 AccessDenied in XML — which is what a deep link opened
+  # without the app installed used to land on. 404 is mapped alongside it
+  # because which of the two S3 returns depends on the bucket policy.
+  #
+  # Distribution-wide, the only form CloudFront offers, so it reaches
+  # `/__/auth/*` and `templates` too: an error from either now surfaces as the
+  # site index with a 200. That is affordable here and would not have been
+  # while the API shared this distribution, where it would have turned
+  # `route_not_found` and the `anonymous_account` 403 into an HTML page.
+  custom_error_response {
+    error_code            = 403
+    response_code         = 200
+    response_page_path    = "/index.html"
+    error_caching_min_ttl = 10
+  }
+
+  custom_error_response {
+    error_code            = 404
+    response_code         = 200
+    response_page_path    = "/index.html"
+    error_caching_min_ttl = 10
+  }
+
   viewer_certificate {
     ssl_support_method  = "sni-only"
     acm_certificate_arn = var.web_distribution_ssl_certificate
