@@ -101,7 +101,7 @@ DB_NOTE="You were launched without --db: the database suites (make test-db, and
 the api's db-tagged tests) cannot run here — run everything else and flag
 them in the handoff for the host."
 [[ $DB == 1 ]] && DB_NOTE="The dev database is reachable (PG* are set): run
-'make test-db' and 'cd api && dart test --run-skipped -t db' when the diff
+'make test-db test-api-db' when the diff
 touches database/ or api/lib/db, and cite the results."
 
 PROMPT_PREFIX="You are an autonomous agent in an isolated worktree of this repo.

@@ -45,8 +45,8 @@ docs/handoff.md is your definition of done — work through its checklist,
 then run the review-handoff skill on your own work (self-review mode: fix what
 it finds, re-run, leave REVIEW.md describing the final tree), and only then
 write HANDOFF.md at the worktree root. You run on the host: the dev database
-is yours to use ('make db-up', then 'make test-db' and the api's db-tagged
-tests), and 'terraform plan' and read-only AWS calls in the dev account work.
+is yours to use ('make db-up', then 'make test-db test-api-db'), and
+'terraform plan' and read-only AWS calls in the dev account work.
 Never 'terraform apply', never run migrations against anything but
 localhost, never touch the prod account or profile. If this task came from a
 GitHub issue, post your closing summary as a comment on it ('gh issue
