@@ -114,7 +114,7 @@ separate ownership `SELECT` first.
 **Partial updates are `coalesce(@col, col)`.** Pass `null` for "unchanged".
 
 **Non-trivial SQL gets a `db`-tagged test** (`api/test/db/*_db_test.dart`,
-`dart test --run-skipped -t db`). Route tests mock the service and prove
+`make test-api-db`). Route tests mock the service and prove
 nothing about a query; pgtap covers schema and signatures only. A query
 with neither is untested, however obvious it looks.
 

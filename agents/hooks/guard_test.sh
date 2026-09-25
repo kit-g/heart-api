@@ -71,6 +71,7 @@ deny	terraform import aws_iam_role.agent heart-agent
 deny	terraform force-unlock 1234
 # migrations only against localhost
 allow	make test-db
+allow	make test-api-db
 allow	make db-seed
 allow	PGHOST=localhost PGDATABASE=heart ./scripts/apply_migrations.sh
 allow	PGHOST=host.docker.internal ./scripts/apply_migrations.sh

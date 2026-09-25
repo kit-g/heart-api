@@ -22,7 +22,7 @@ The API wires a route across ~8 files. Miss one and it fails late (compile error
 
 1. **Input class** — `api/lib/inputs/<domain>.dart` (a `part of 'inputs.dart'`). `<Verb><Noun>In` for bodies, `<Noun>Query` for GET query params. Private positional ctor + `static Future<T> fromRequest(Request, {pathParams})`. Use the `Map` parse extensions (`.string`, `.parsed`, `.integer`, `.mapping`). Add the `part` line to `inputs.dart` if the file is new.
 
-2. **Service interface** — `shared/heart_models/lib/src/services/<domain>.dart`, exported from `heart_models.dart`. Methods return domain models or `Page<T>`.
+2. **Service interface** — `shared/heart_models/lib/src/services/<domain>.dart`, exported from `heart_models.dart`. Methods return domain models or `Page<T>`. This is a `heart_models` change, so in the same diff bump its pubspec `version:` (minor — new public API) and prepend a `CHANGELOG.md` entry; the app pulls `main` directly.
 
 3. **SQL** — add query strings to `api/lib/db/queries.dart` (use the `.toSql()` extension).
 
@@ -36,7 +36,7 @@ The API wires a route across ~8 files. Miss one and it fails late (compile error
 
 8. **Register route** — `api/lib/routes/index.dart` (`('/path', .verb): domain.handler`) AND wire the DB middleware in `buildApp` (`api/lib/core/app.dart`), e.g. `..use('/path', <domain>Db(db: database))`. That's the single wiring spot — `bin/main.dart` just builds the real deps and calls `buildApp` + `serve()`. Add to `_publicRoutes` only if it bypasses auth.
 
-9. **Mocks** — if you added a service interface, add it to `@GenerateMocks` in `api/test/mocks.dart`, then **`cd api && dart run build_runner build`**. Skipping this is the #1 silent miss.
+9. **Mocks** — if you added a service interface, add it to `@GenerateMocks` in `api/test/mocks.dart`, then **`cd api && dart run build_runner build`** (no narrower make target; `make bootstrap` also does it, along with every other package). Skipping this is the #1 silent miss.
 
 10. **Route test** — `api/test/routes/<domain>_test.dart`. Two styles live here; both mock the service, so neither covers SQL:
     - **Direct (default).** `jsonRequest(...)`/`bareRequest(...)` from `test/helpers/request.dart`, mocks wired onto the request via the context setters, call the handler function, assert throws with `expect(() => handler(req), throwsA(isA<NoContent>()))` etc. Fast; proves the handler's own wiring. Use this for a new endpoint by default.
@@ -52,13 +52,25 @@ The API wires a route across ~8 files. Miss one and it fails late (compile error
 
     Related: a **global** exercise resolves by name for the target user rather than being copied, so a test aiming at a copy-into-library branch must seed the source as **coach-owned** or the branch never runs and the assertion silently tests nothing.
 
-12. **Verify** — `cd api && dart analyze && dart test` (both clean), then the DB tests against a local `heart` DB with migrations applied: `dart test --run-skipped -t db test/db`. CI runs the unit tests in the `dart-test` job and the DB tests in `db-test`.
+12. **Verify** — from the repo root, via the make targets (same commands CI runs):
+
+    ```sh
+    make lint           # dart analyze ×3 + ruff
+    make format-check   # CI's lint job fails on unformatted Dart
+    make test-dart      # api + heart_aws + heart_models unit tests
+    make db-up          # HEART_DB_PORT=5433 make db-up if a native Postgres holds 5432
+    make test-db        # applies unapplied migrations, then pgtap
+    make test-api-db    # the api's db-tagged integration tests
+    ```
+
+    CI runs the unit tests in the `dart-test` job; `db-test` runs pgtap and then the **full** api suite with `--run-skipped` under coverage, failing below an 82% floor (`api/tool/check_coverage.dart`) — so an untested handler or query can fail CI even when everything else is green.
 
 ## Self-check before declaring done
 
-- [ ] `dart analyze` clean, `dart test` green
-- [ ] new/changed query has a `db`-tagged integration test, passing via `dart test --run-skipped -t db test/db`
+- [ ] `make lint`, `make format-check`, `make test-dart` green
+- [ ] new/changed query has a `db`-tagged integration test, passing via `make test-db test-api-db`
 - [ ] new service (if any) is in `mocks.dart` AND build_runner re-run
+- [ ] `heart_models` touched → version bumped + `CHANGELOG.md` entry in the same diff
 - [ ] `db.dart` got all three edits (part / with / implements)
 - [ ] `database.dart` got all three edits (property / middleware / extension)
 - [ ] route registered in BOTH `index.dart` and `buildApp` (`lib/core/app.dart`, middleware)

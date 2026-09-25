@@ -14,8 +14,8 @@ feature off to the Flutter app. This file is about finishing work *here*.)
    the Terraform checks. Targeted suites are fine when the diff is narrow
    (`make test-dart` / `test-db` / `test-python` / `test-tf`), but say which
    ran. The database lives on the host: a container launched with `--db`
-   reaches it and runs `make test-db` and the api's db-tagged tests
-   (`cd api && dart test --run-skipped -t db`) like anyone else; one
+   reaches it and runs `make test-db` and `make test-api-db` (the api's
+   db-tagged tests) like anyone else; one
    launched without it runs what it can and **flags those two** for the host.
 2. **Health data never reaches the server** — no route, model, column, or
    migration gains a health-shaped field (heart rate, HRV, sleep, body mass,

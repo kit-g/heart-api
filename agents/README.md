@@ -72,7 +72,7 @@ tools, so containers run `make lint`, `make test-dart`, `make test-python`
 and `make test-tf` natively. The database needs the host: `make db-up`
 yourself, then launch with `--db` — the firewall opens to
 `host.docker.internal:5432` and `PG*` are set to the compose database, so
-`make test-db` and `cd api && dart test --run-skipped -t db` work inside.
+`make test-db` and `make test-api-db` work inside.
 Without `--db` the agent is told to flag those suites in the handoff.
 
 **Review.** Agents finish by writing `HANDOFF.md` at the worktree root
