@@ -52,6 +52,11 @@ variable "firebase_project_config" {
     android_sha_1    = list(string)
   })
 }
+variable "agent_roles" {
+  type        = list(string)
+  description = "Project roles granted to the heart-agent service account in the Firebase project."
+}
+
 
 data "aws_caller_identity" "this" {}
 data "aws_region" "this" {}

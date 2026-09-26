@@ -79,3 +79,42 @@ resource "aws_s3_object" "android_firebase_config" {
   content_type = "application/json"
 }
 
+# Terraform's calls bill to this project, not gcloud's quota project, so the
+# service account resources below fail without it. Enabled by hand once before
+# the import: imports read at plan time, ahead of any apply that could enable it.
+resource "google_project_service" "iam" {
+  provider           = google-beta
+  project            = var.firebase_project_config.project_id
+  service            = "iam.googleapis.com"
+  disable_on_destroy = false
+}
+
+# For heart-agent's calls to the GA4 Admin API (custom definitions, key events).
+# Its access to the linked GA4 property is granted in the Analytics UI, as a
+# property Editor; no Terraform resource covers that.
+resource "google_project_service" "analytics_admin" {
+  provider           = google-beta
+  project            = var.firebase_project_config.project_id
+  service            = "analyticsadmin.googleapis.com"
+  disable_on_destroy = false
+}
+
+# Identity for autonomous coding agents working on the app's Firebase side.
+# Created by hand in both projects and later imported into state.
+# Unlike the AWS agent role (environments/dev/agent.tf) it exists in prod too;
+# roles differ per project, so each environment passes its own list.
+resource "google_service_account" "agent" {
+  provider     = google-beta
+  project      = var.firebase_project_config.project_id
+  account_id   = "heart-agent"
+  display_name = "Heart agent"
+  depends_on   = [google_project_service.iam]
+}
+
+resource "google_project_iam_member" "agent" {
+  provider = google-beta
+  for_each = toset(var.agent_roles)
+  project  = var.firebase_project_config.project_id
+  role     = each.value
+  member   = google_service_account.agent.member
+}
