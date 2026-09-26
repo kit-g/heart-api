@@ -130,7 +130,7 @@ extension on Map<String, dynamic> {
       _ => throw const BadRequest(reason: 'exercises must be an array'),
     };
 
-    return [
+    final exercises = [
       for (final (index, each) in raw.indexed)
         switch (each) {
           final Map m when !m.cast<String, dynamic>().isEmptyExercise => _exercise(m.cast<String, dynamic>(), index),
@@ -138,6 +138,8 @@ extension on Map<String, dynamic> {
           _ => throw BadRequest(reason: 'exercises[$index] must be an object'),
         },
     ].nonNulls.toList();
+    _refuseDuplicateIds(exercises);
+    return exercises;
   }
 
   /// An editor row the user emptied: nothing names an exercise and nothing was
@@ -164,6 +166,7 @@ TemplateExerciseRequest _exercise(Map<String, dynamic> json, int index) {
   };
 
   return TemplateExerciseRequest(
+    id: _v7OrNull(json['id']),
     exerciseId: id,
     order: switch (json['order']) {
       null => index,
@@ -193,7 +196,14 @@ TemplateSetRequest _set(Map<String, dynamic> json, int index, int setIndex) {
     };
   }
 
+  final at = 'exercises[$index].sets[$setIndex]';
   return TemplateSetRequest(
+    id: _v7OrNull(json['id']),
+    // absent leaves a stored set's type alone; null is a normal set
+    setType: switch (json.containsKey('set_type')) {
+      true => setType(json['set_type'], at: at),
+      false => null,
+    },
     // Weight is the one measure that can legitimately go below zero — assisted
     // movements and deficit work are expressed against bodyweight — and the
     // column has never constrained it, so this layer must not start.
@@ -202,4 +212,38 @@ TemplateSetRequest _set(Map<String, dynamic> json, int index, int setIndex) {
     duration: measure('duration'),
     distance: measure('distance'),
   );
+}
+
+/// A v7 id round-trips so a save keeps the row's identity; anything else
+/// (absent, Firebase-era, garbage) is dropped and the insert mints one.
+String? _v7OrNull(Object? value) {
+  return switch (value) {
+    final String id when isUuidV7(id) => id,
+    _ => null,
+  };
+}
+
+/// A replace updates the rows it names in place, so an id named twice would
+/// have one entry win and the other's sets vanish without an error; it is
+/// refused up front instead. Sets find their exercise by its order, so a
+/// repeated order would hang one exercise's sets under both.
+void _refuseDuplicateIds(List<TemplateExerciseRequest> exercises) {
+  final ids = <String>{};
+  final orders = <int>{};
+  for (final (index, exercise) in exercises.indexed) {
+    if (!orders.add(exercise.order)) {
+      throw BadRequest(
+        code: 'duplicate_order',
+        reason: 'exercises[$index].order appears more than once in the payload',
+      );
+    }
+    for (final (id, at) in [
+      (exercise.id, 'exercises[$index]'),
+      for (final (setIndex, set) in exercise.sets.indexed) (set.id, 'exercises[$index].sets[$setIndex]'),
+    ]) {
+      if (id != null && !ids.add(id)) {
+        throw BadRequest(code: 'duplicate_id', reason: '$at.id appears more than once in the payload');
+      }
+    }
+  }
 }
