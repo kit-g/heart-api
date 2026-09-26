@@ -67,6 +67,9 @@ BEGIN
     -- template sets must NOT have completed/started_at (those are workout-side concerns)
     RETURN NEXT ok(NOT (_result -> 0 ? 'completed'), 'no completed key on template set');
     RETURN NEXT ok(NOT (_result -> 0 ? 'started_at'), 'no started_at key on template set');
+    -- nor a rating of effort: a template prescribes, it does not record
+    RETURN NEXT ok(NOT (_result -> 0 ? 'rpe'), 'no rpe key on template set');
+    RETURN NEXT is(_result -> 0 ->> 'set_type', 'normal', 'an untyped template set reads as normal');
 END
 $$ LANGUAGE plpgsql;
 

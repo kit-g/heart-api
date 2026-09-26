@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(22);
+SELECT plan(27);
 
 SELECT has_table('public'::name, 'template_exercise_sets'::name);
 
@@ -14,7 +14,8 @@ SELECT columns_are(
                    'reps',
                    'duration',
                    'distance',
-                   'set_order'
+                   'set_order',
+                   'set_type'
                    ]
        );
 
@@ -25,6 +26,7 @@ SELECT col_type_is('public'::name, 'template_exercise_sets'::name, 'reps'::name,
 SELECT col_type_is('public'::name, 'template_exercise_sets'::name, 'duration'::name, 'integer'::name);
 SELECT col_type_is('public'::name, 'template_exercise_sets'::name, 'distance'::name, 'real'::name);
 SELECT col_type_is('public'::name, 'template_exercise_sets'::name, 'set_order'::name, 'integer'::name);
+SELECT col_type_is('public'::name, 'template_exercise_sets'::name, 'set_type'::name, 'character(1)'::name);
 
 SELECT has_pk('public'::name, 'template_exercise_sets'::name, 'template_exercise_sets has a primary key');
 SELECT col_is_pk('public'::name, 'template_exercise_sets'::name, 'id'::name, 'id is the primary key');
@@ -111,6 +113,56 @@ SELECT throws_ok(
                '23514',
                NULL,
                'a negative distance is rejected'
+       );
+
+SELECT lives_ok(
+               $$
+               INSERT INTO template_exercise_sets (template_exercise_id, set_order, set_type)
+               VALUES (
+                   (SELECT te.id FROM template_exercises te JOIN templates t ON t.id = te.template_id WHERE t.name = 'tes check template'),
+                   1, 'w'
+               )
+               $$,
+               'a template can hold a warm-up'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO template_exercise_sets (template_exercise_id, set_order, set_type)
+               VALUES (
+                   (SELECT te.id FROM template_exercises te JOIN templates t ON t.id = te.template_id WHERE t.name = 'tes check template'),
+                   1, 'x'
+               )
+               $$,
+               '23514',
+               NULL,
+               'an unknown set type letter is rejected'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO template_exercise_sets (template_exercise_id, set_order, set_type)
+               VALUES (
+                   (SELECT te.id FROM template_exercises te JOIN templates t ON t.id = te.template_id WHERE t.name = 'tes check template'),
+                   1, 'n'
+               )
+               $$,
+               '23514',
+               NULL,
+               'normal has no letter: it is NULL'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO template_exercise_sets (template_exercise_id, set_order, set_type)
+               VALUES (
+                   (SELECT te.id FROM template_exercises te JOIN templates t ON t.id = te.template_id WHERE t.name = 'tes check template'),
+                   1, 'warmup'
+               )
+               $$,
+               '22001',
+               NULL,
+               'the word does not fit: the column holds the letter'
        );
 
 SELECT * FROM finish();
