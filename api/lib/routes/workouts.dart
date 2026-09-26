@@ -128,6 +128,7 @@ Future<Workout> patchWorkoutById(Request request, String workoutId) async {
     start: input.start,
     end: input.end,
     calories: input.calories,
+    note: input.note,
     imageUrl: request.config.cdnAssetUrl,
   );
 }
