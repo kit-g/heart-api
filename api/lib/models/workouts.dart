@@ -47,8 +47,9 @@ abstract interface class ApiWorkoutService {
   });
 
   /// Partial update of a workout the user owns — sets only the provided fields
-  /// (name/start/end/calories), leaving its exercises intact. A null argument
-  /// leaves that field unchanged.
+  /// (name/start/end/calories/note), leaving its exercises intact. A null
+  /// argument leaves that field unchanged; [note] is a record so that
+  /// `(value: null)` can clear the note.
   Future<Workout> patchWorkout({
     required String userId,
     required String workoutId,
@@ -57,6 +58,7 @@ abstract interface class ApiWorkoutService {
     DateTime? start,
     DateTime? end,
     double? calories,
+    ({String? value})? note,
   });
 
   Future<void> deleteWorkout({
@@ -126,6 +128,11 @@ class WorkoutRequest {
   /// Absent or null is the caller saying nothing, and the children survive.
   bool get replacesExercises => body['exercises'] is List;
 
+  /// Whether this payload speaks about the workout's note. The key is newer
+  /// than most clients, so a replace leaves the stored note alone when it is
+  /// absent; an explicit null or a blank string clears it.
+  bool get setsNote => body.containsKey('note');
+
   List<Map> _exercises() {
     final source = (body['exercises'] as List? ?? []).cast<Map>();
     final out = <Map>[];
@@ -133,6 +140,9 @@ class WorkoutRequest {
     // would have one entry win and the other's sets vanish without an error;
     // it is refused up front instead.
     final ids = <String>{};
+    // sets find their exercise by its order, so a repeated order would hang
+    // one exercise's sets under both
+    final orders = <Object?>{};
     void unique(String? id, String at) {
       if (id != null && !ids.add(id)) {
         throw BadRequest(code: 'duplicate_id', reason: '$at.id appears more than once in the payload');
@@ -172,6 +182,12 @@ class WorkoutRequest {
             _set(set, at: 'exercises[$index].sets[$setIndex]'),
         ],
       });
+      if (!orders.add(out.last['order'])) {
+        throw BadRequest(
+          code: 'duplicate_order',
+          reason: 'exercises[$index].order appears more than once in the payload',
+        );
+      }
       unique(out.last['id'] as String?, 'exercises[$index]');
       for (final (setIndex, set) in (out.last['sets'] as List).cast<Map>().indexed) {
         unique(set['id'] as String?, 'exercises[$index].sets[$setIndex]');
@@ -207,14 +223,7 @@ class WorkoutRequest {
       copy['id'] = id;
     }
     if (set.containsKey('set_type')) {
-      copy['set_type'] = switch (set['set_type']) {
-        null => null,
-        final String type when setTypeCodes.containsKey(type) => setTypeCodes[type],
-        _ => throw BadRequest(
-          code: 'invalid_set_type',
-          reason: '$at.set_type must be one of ${setTypeCodes.keys.join(', ')}, or null',
-        ),
-      };
+      copy['set_type'] = setType(set['set_type'], at: at).value;
     }
     if (set.containsKey('rpe')) {
       copy['rpe'] = switch (set['rpe']) {
@@ -236,19 +245,21 @@ class WorkoutRequest {
   /// Normalises a per-exercise note: trims, treats blank as absent (a cleared pin
   /// is no pin), and caps the length so it stays a pin, not an essay — comments
   /// are the place for prose. Over-long is a clean 400, not a raw DB CHECK error.
-  static String? _note(Object? value) {
-    if (value == null) return null;
-    if (value is! String) throw const BadRequest(reason: 'an exercise note must be a string');
-    final trimmed = value.trim();
-    if (trimmed.isEmpty) return null;
-    // counted in code points, as the column counts them
-    if (trimmed.runes.length > maxExerciseNoteLength) {
-      throw const BadRequest(
-        code: 'workout_note_too_long',
-        reason: 'an exercise note is at most $maxExerciseNoteLength characters',
-      );
-    }
-    return trimmed;
+  static String? _note(Object? value) => _boundedNote(value, maxExerciseNoteLength, 'an exercise note');
+
+  /// The workout's own note, by the same rules as an exercise's with a longer
+  /// bound; shared with `PATCH`.
+  static String? workoutNote(Object? value) => _boundedNote(value, Workout.maxNoteLength, 'a workout note');
+
+  static String? _boundedNote(Object? value, int max, String what) {
+    return switch (value) {
+      null => null,
+      final String note when note.trim().isEmpty => null,
+      // counted in code points, as the column counts them
+      final String note when note.trim().runes.length <= max => note.trim(),
+      final String _ => throw BadRequest(code: 'workout_note_too_long', reason: '$what is at most $max characters'),
+      _ => throw BadRequest(reason: '$what must be a string'),
+    };
   }
 
   /// Deliberately omits [id] — `_replaceWorkout` (unlike `_saveWorkout`) has
@@ -261,6 +272,7 @@ class WorkoutRequest {
       'startedAt': _dt(body['start']),
       'completedAt': _dt(body['end']),
       'calories': (body['calories'] as num?)?.toDouble(),
+      'note': workoutNote(body['note']),
       'exercises': jsonEncode(_exercises()),
     };
   }
