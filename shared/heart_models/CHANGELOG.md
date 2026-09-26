@@ -1,5 +1,35 @@
 # Changelog
 
+## 2.5.0
+
+Set types, RPE and the workout note reach the app (heart-api#83). The server
+has stored them since heart-api#84, from Strong imports.
+
+- New: `SetType` (`normal`, `warmup`, `drop`, `failure`; wire word in
+  `value`). `fromString` reads absent or null as `normal` and throws on an
+  unknown word. `lenient`, which `ExerciseSet.fromJson` uses, reads an
+  unknown word as `normal`, so a type added later never fails a read.
+- New: `ExerciseSet.setType` (defaults to `normal`) and `ExerciseSet.rpe`
+  (`double?`, 1–10 in half steps), read from `set_type`/`rpe`. The
+  constructor takes both.
+- New: `Workout.note` (`String?`) and `Workout.maxNoteLength` (1000), read
+  from `note` on server rows and local JSON.
+- New: `TemplateExerciseRequest.id`, `TemplateSetRequest.id` and
+  `TemplateSetRequest.setType`. Template exercises and sets now keep their ids
+  across saves. A null `setType` leaves a stored type alone, and
+  `SetType.normal` clears it.
+- Changed: `WorkoutExercise.best` and `WorkoutExercise.total` (and so
+  `Workout.total`) leave warm-ups out. Drop and failure sets count as before.
+- Changed: `ExerciseSet.copy` keeps the set type and drops the RPE.
+  `Workout.copy(sameId: true)` keeps both RPE and note, and a repeat with a
+  fresh id drops them.
+- **App must, before shipping a build on this version:** `ExerciseSet.toMap`
+  now always writes `set_type` and `rpe`, and `Workout.toMap` always writes
+  `note`, null included. The server treats a present key as the new value.
+  `toRow` is unchanged, because a new key there breaks the local inserts. So
+  the local mirror has to gain columns for all three, or a workout re-saved
+  from the mirror clears imported warm-ups, RPEs and notes.
+
 ## 2.4.0
 
 Gives account deletion what it needs to revoke a Sign in with Apple grant, so

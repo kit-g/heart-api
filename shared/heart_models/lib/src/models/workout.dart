@@ -15,6 +15,7 @@ abstract interface class WorkoutExercise
 
   Exercise get exercise;
 
+  /// The volume of the exercise's working sets; warm-ups are left out.
   double? get total;
 
   int? get order;
@@ -36,6 +37,8 @@ abstract interface class WorkoutExercise
 
   bool remove(ExerciseSet set);
 
+  /// The heaviest working set by [ExerciseSet.total]; warm-ups never count as
+  /// a record. Null when there is none.
   ExerciseSet? get best;
 
   /// whether at least one set was marked as done
@@ -95,6 +98,12 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
   /// minutes after the workout ends), so it is mutable and often null.
   abstract double? calories;
 
+  /// A free-text note on the whole session, trimmed; null when there is none.
+  /// Per-exercise notes are [WorkoutExercise.note].
+  abstract String? note;
+
+  static const maxNoteLength = 1000;
+
   Iterable<WorkoutExercise> get sets;
 
   Map<String, WorkoutImage>? get images;
@@ -147,6 +156,7 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
         _ => null,
       },
       calories: (row['calories'] as num?)?.toDouble(),
+      note: row['note'] as String?,
       // a workout read from the server's own store is, by definition, synced
       synced: true,
     );
@@ -245,11 +255,13 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
   @override
   double? get total {
     try {
-      return map((each) => each.total).reduce((a, b) => (a ?? 0) + (b ?? 0));
+      return _working.map((each) => each.total).reduce((a, b) => (a ?? 0) + (b ?? 0));
     } on StateError {
       return 0;
     }
   }
+
+  Iterable<ExerciseSet> get _working => where((set) => set.setType != .warmup);
 
   @override
   String toString() {
@@ -273,7 +285,7 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
   @override
   ExerciseSet? get best {
     try {
-      return reduce((one, two) => one >= two ? one : two);
+      return _working.reduce((one, two) => one >= two ? one : two);
     } on StateError {
       return null;
     }
@@ -409,6 +421,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   double? calories;
 
   @override
+  String? note;
+
+  @override
   final bool synced;
 
   new _({
@@ -418,6 +433,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
     List<WorkoutExercise>? exercises,
     this.end,
     this.calories,
+    this.note,
     Map<String, WorkoutImage>? images,
     this.synced = false,
   }) : _sets = exercises ?? <WorkoutExercise>[],
@@ -430,6 +446,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       id: json['id'],
       end: DateTime.tryParse(json['end'] ?? ''),
       calories: (json['calories'] as num?)?.toDouble(),
+      note: json['note'] as String?,
       exercises: switch (json['exercises']) {
         List l => l.map((each) => WorkoutExercise.fromJson(each)).toList(),
         _ => null,
@@ -478,6 +495,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       'start': start.toIso8601String(),
       'end': end?.toIso8601String(),
       'calories': ?calories,
+      // always present, so it can be cleared; a body without the key leaves
+      // the stored note alone
+      'note': note,
       'exercises': where((ex) => ex.isNotEmpty).indexed.map(asRequest).toList(),
       'images': images.values.map((img) => img.toRow()).toList(),
     };
@@ -572,27 +592,33 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
 
   @override
   Workout copy({bool sameId = false}) {
-    // calories/met are measurements of the original session, so a copy with a
-    // fresh id (repeating a past workout) must not inherit them.
+    // calories/met are measurements of the original session, and the note
+    // is about that session too, so a copy with a fresh id (repeating a past
+    // workout) must not inherit them.
     final workout = _Workout._(
       id: sameId ? id : uuidV7(),
       name: name,
       start: sameId ? start : DateTime.timestamp(),
       calories: sameId ? calories : null,
+      note: sameId ? note : null,
       images: images,
     );
 
     for (final each in this) {
       if (each.isNotEmpty) {
+        // an RPE rates the original effort: the same session keeps it, a
+        // repeat starts unrated
+        ExerciseSet copySet(ExerciseSet set) => set.copy()..rpe = sameId ? set.rpe : null;
+
         final exercise = WorkoutExercise(
-          starter: each.first.copy(),
+          starter: copySet(each.first),
         );
         // met/calories are measurements of the original session (dropped above);
         // a note is an instruction on how to do the exercise, so a repeat carries it.
         exercise.note = each.note;
 
         for (final set in each.skip(1)) {
-          exercise.add(set.copy());
+          exercise.add(copySet(set));
         }
 
         workout.append(exercise);
