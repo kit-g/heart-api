@@ -91,7 +91,9 @@ BEGIN
     );
     UPDATE exercise_sets
     SET started_at   = '2026-08-08T10:00:00Z',
-        completed_at = '2026-08-08T10:01:30Z'
+        completed_at = '2026-08-08T10:01:30Z',
+        set_type     = 'd',
+        rpe          = 8.5
     WHERE workout_exercise_id = _we_id;
 
     _result := _exercise_sets(_we_id);
@@ -113,6 +115,8 @@ BEGIN
         '2026-08-08T10:01:30Z'::timestamptz,
         'completed_at is preserved'
     );
+    RETURN NEXT is(_result -> 0 ->> 'set_type', 'drop', 'set_type is spelled out as its word');
+    RETURN NEXT is((_result -> 0 ->> 'rpe')::numeric, 8.5, 'rpe is preserved');
 END
 $$ LANGUAGE plpgsql;
 

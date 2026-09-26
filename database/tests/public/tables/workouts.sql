@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(24);
+SELECT plan(28);
 
 SELECT has_table('public'::name, 'workouts'::name);
 
@@ -15,7 +15,8 @@ SELECT columns_are(
                    'completed_at',
                    'calories',
                    'created_at',
-                   'import_id'
+                   'import_id',
+                   'note'
                    ]
        );
 
@@ -27,6 +28,7 @@ SELECT col_type_is('public'::name, 'workouts'::name, 'completed_at'::name, 'time
 SELECT col_type_is('public'::name, 'workouts'::name, 'calories'::name, 'real'::name);
 SELECT col_type_is('public'::name, 'workouts'::name, 'created_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'workouts'::name, 'import_id'::name, 'text'::name);
+SELECT col_type_is('public'::name, 'workouts'::name, 'note'::name, 'text'::name);
 
 SELECT has_pk('public'::name, 'workouts'::name, 'workouts has a primary key');
 SELECT col_is_pk('public'::name, 'workouts'::name, 'id'::name, 'id is the primary key');
@@ -62,6 +64,25 @@ SELECT throws_ok(
                '23514',
                NULL,
                'negative calories are rejected'
+       );
+
+SELECT lives_ok(
+               $$ INSERT INTO workouts (user_id, note) VALUES ('w-check-user', repeat('n', 1000)) $$,
+               'a 1000-char note is allowed'
+       );
+
+SELECT throws_ok(
+               $$ INSERT INTO workouts (user_id, note) VALUES ('w-check-user', repeat('n', 1001)) $$,
+               '23514',
+               NULL,
+               'a note over 1000 chars is rejected'
+       );
+
+SELECT throws_ok(
+               $$ INSERT INTO workouts (user_id, note) VALUES ('w-check-user', '') $$,
+               '23514',
+               NULL,
+               'an empty note is rejected; no note is NULL'
        );
 
 -- first import row for the duplicate-identity assertion below
