@@ -1032,17 +1032,17 @@ void main() {
         set(secondSetId, 100, {'set_type': 'failure', 'rpe': 10}),
       ]);
       final rows = await stored();
-      expect(rows[firstSetId], containsPair('set_type', null));
+      expect(rows[firstSetId], containsPair('set_type', 'normal'));
       expect(rows[firstSetId], containsPair('rpe', null));
       expect(rows[secondSetId], containsPair('set_type', 'failure'));
       expect(rows[secondSetId], containsPair('rpe', 10.0));
     });
 
-    test('a new set with no keys records nothing', () async {
+    test('a new set with no keys is a normal set with no RPE', () async {
       final added = uuidV7();
       await replace([set(firstSetId, 60), set(secondSetId, 100), set(added, 100)]);
       final rows = await stored();
-      expect(rows[added], containsPair('set_type', null));
+      expect(rows[added], containsPair('set_type', 'normal'));
       expect(rows[added], containsPair('rpe', null));
     });
 

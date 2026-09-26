@@ -3,6 +3,8 @@ library;
 
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/imports.dart';
+import 'package:heart/models/workouts.dart';
+import 'package:heart_models/heart_models.dart' show MeasurementUnit;
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -612,6 +614,271 @@ void main() {
         'id': owner,
       });
       expect(prefs.single.toColumnMap()['n'], 0);
+    });
+  });
+
+  group('re-import, the nasty cases', () {
+    late String dip;
+    late String row; // a second global, for two-exercise sessions
+
+    const header =
+        'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps,Distance,Seconds,Notes,Workout Notes,RPE\n';
+
+    /// One session of [dip]: a warm-up and two working sets, with RPE, notes
+    /// and rest timers when [rich].
+    String session(String date, {bool rich = true, String? exercise}) {
+      final e = exercise ?? dip;
+      return rich
+          ? '$date,Evening,1h,$e,W,20,10,0,0,slow eccentric,deload week,\n'
+                '$date,Evening,1h,$e,Rest Timer,0,0,0,90,,,\n'
+                '$date,Evening,1h,$e,1,45,8,0,0,,,8.5\n'
+                '$date,Evening,1h,$e,Rest Timer,0,0,0,120,,,\n'
+                '$date,Evening,1h,$e,2,50,6,0,0,,,9\n'
+          : '$date,Evening,1h,$e,W,20,10,0,0,,,\n'
+                '$date,Evening,1h,$e,1,45,8,0,0,,,\n'
+                '$date,Evening,1h,$e,2,50,6,0,0,,,\n';
+    }
+
+    const july = '2025-07-14 20:44:18';
+    const june = '2025-06-10 19:00:00';
+    const may = '2025-05-05 18:30:00';
+
+    Future<WorkoutImportReport> import(
+      String owner,
+      String csv, {
+      List<String>? createCustom,
+      Duration utcOffset = Duration.zero,
+      MeasurementUnit unit = MeasurementUnit.metric,
+    }) => h.db.importWorkouts(
+      userId: owner,
+      batch: WorkoutImport.fromStrongCsv(csv, utcOffset: utcOffset, unit: unit),
+      createCustom: createCustom,
+    );
+
+    Future<List<Map<String, dynamic>>> sets(String owner) async {
+      final rows = await h.exec(
+        'SELECT es.id::text AS id, we.exercise_order, es.set_order, es.weight::float8 AS weight, '
+        '       _set_type_name(es.set_type) AS set_type, es.rpe::float8 AS rpe '
+        'FROM exercise_sets es JOIN workout_exercises we ON we.id = es.workout_exercise_id '
+        'JOIN workouts w ON w.id = we.workout_id WHERE w.user_id = @id '
+        'ORDER BY w.started_at, we.exercise_order, es.set_order',
+        {'id': owner},
+      );
+      return [for (final r in rows) r.toColumnMap()];
+    }
+
+    Future<int> workoutCount(String owner) async {
+      final rows = await h.exec('SELECT count(*)::int AS n FROM workouts WHERE user_id = @id', {'id': owner});
+      return rows.single.toColumnMap()['n'] as int;
+    }
+
+    Future<void> sql(String owner, String statement) => h.exec(statement, {'id': owner});
+
+    setUpAll(() async {
+      dip = h.uniqueName('Chest Dip');
+      row = h.uniqueName('Seated Row');
+      await h.seedGlobalExercise(name: dip);
+      await h.seedGlobalExercise(name: row);
+    });
+
+    test('a mixed batch: new, enrichable and already complete workouts each counted once', () async {
+      final owner = await freshProfile();
+      await import(owner, '$header${session(july, rich: false)}${session(june)}');
+
+      final report = await import(owner, '$header${session(july)}${session(june)}${session(may)}');
+      expect(report.workoutsFound, 3);
+      expect(report.workoutsCreated, 1); // May
+      expect(report.workoutsEnriched, 1); // July
+      expect(report.workoutsSkipped, 1); // June, nothing to fill
+      expect(report.setsEnriched, 2);
+      expect(report.setsCreated, 3);
+      expect(await workoutCount(owner), 3);
+    });
+
+    test('the richer export run twice enriches once, then skips', () async {
+      final owner = await freshProfile();
+      await import(owner, '$header${session(july, rich: false)}');
+      expect((await import(owner, '$header${session(july)}')).workoutsEnriched, 1);
+
+      final again = await import(owner, '$header${session(july)}');
+      expect(again.workoutsEnriched, 0);
+      expect(again.setsEnriched, 0);
+      expect(again.restTimersSet, 0);
+      expect(again.workoutsSkipped, 1);
+    });
+
+    test('a re-export from another time zone lands on the same workout, which keeps its time', () async {
+      final owner = await freshProfile();
+      await import(owner, '$header${session(july, rich: false)}');
+      final before = await h.exec('SELECT started_at FROM workouts WHERE user_id = @id', {'id': owner});
+
+      final report = await import(owner, '$header${session(july)}', utcOffset: const Duration(hours: 2));
+      expect(report.workoutsCreated, 0);
+      expect(report.workoutsEnriched, 1);
+      expect(await workoutCount(owner), 1);
+      final after = await h.exec('SELECT started_at FROM workouts WHERE user_id = @id', {'id': owner});
+      expect(after.single.toColumnMap(), before.single.toColumnMap());
+    });
+
+    test('a re-export spelling the exercise in another case still matches', () async {
+      final owner = await freshProfile();
+      await import(owner, '$header${session(july, rich: false)}');
+      final report = await import(owner, '$header${session(july, exercise: dip.toLowerCase())}');
+      expect(report.setsEnriched, 2);
+      expect((await sets(owner)).map((s) => s['rpe']), [null, 8.5, 9.0]);
+    });
+
+    test('exercises reordered in the app take nothing from each other', () async {
+      final owner = await freshProfile();
+      await import(owner, '$header${session(july, rich: false)}${session(july, rich: false, exercise: row)}');
+      // swap the two exercises' positions, as a drag in the app would
+      await sql(
+        owner,
+        'UPDATE workout_exercises SET exercise_order = 1 - exercise_order '
+        'WHERE workout_id IN (SELECT id FROM workouts WHERE user_id = @id)',
+      );
+
+      final report = await import(owner, '$header${session(july)}${session(july, exercise: row)}');
+      expect(report.setsEnriched, 0);
+      expect((await sets(owner)).every((s) => s['rpe'] == null), isTrue);
+      final notes = await h.exec(
+        'SELECT count(*)::int AS n FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id '
+        'WHERE w.user_id = @id AND we.note IS NOT NULL',
+        {'id': owner},
+      );
+      expect(notes.single.toColumnMap()['n'], 0);
+    });
+
+    test('a set the user appended is left alone; the original ones are enriched', () async {
+      final owner = await freshProfile();
+      await import(owner, '$header${session(july, rich: false)}');
+      await sql(
+        owner,
+        'INSERT INTO exercise_sets (workout_exercise_id, set_order, weight, reps, completed) '
+        'SELECT we.id, 3, 55, 4, true FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id WHERE w.user_id = @id',
+      );
+
+      final report = await import(owner, '$header${session(july)}');
+      expect(report.setsEnriched, 2);
+      expect((await sets(owner)).map((s) => (s['weight'], s['rpe'])), [
+        (20.0, null),
+        (45.0, 8.5),
+        (50.0, 9.0),
+        (55.0, null),
+      ]);
+    });
+
+    test('an edit from today\'s app between the two imports keeps the workout enrichable', () async {
+      final owner = await freshProfile();
+      await import(owner, '$header${session(july, rich: false)}');
+      final idsBefore = [for (final s in await sets(owner)) s['id']];
+
+      // what the current app sends: the whole body, ids round-tripped, no set_type/rpe
+      final workoutId =
+          (await h.exec('SELECT id::text AS id FROM workouts WHERE user_id = @id', {
+                'id': owner,
+              })).single.toColumnMap()['id']
+              as String;
+      final stored = await h.db.getWorkout(userId: owner, workoutId: workoutId, imageUrl: (k) => k);
+      await h.db.updateWorkout(
+        userId: owner,
+        workoutId: workoutId,
+        body: WorkoutRequest(userId: owner, body: stored.toMap()),
+        imageUrl: (k) => k,
+      );
+      expect([for (final s in await sets(owner)) s['id']], idsBefore);
+      expect((await sets(owner)).map((s) => s['set_type']), ['warmup', 'normal', 'normal']);
+
+      final report = await import(owner, '$header${session(july)}');
+      expect(report.setsEnriched, 2);
+      expect((await sets(owner)).map((s) => s['rpe']), [null, 8.5, 9.0]);
+    });
+
+    test('a workout the user deleted comes back from a re-import', () async {
+      // the import identity goes with the row, so the file is its only record
+      final owner = await freshProfile();
+      await import(owner, '$header${session(july, rich: false)}');
+      await sql(owner, 'DELETE FROM workouts WHERE user_id = @id');
+
+      final report = await import(owner, '$header${session(july)}');
+      expect(report.workoutsCreated, 1);
+      expect(report.workoutsEnriched, 0);
+      expect((await sets(owner)).map((s) => s['rpe']), [null, 8.5, 9.0]);
+    });
+
+    test('someone else importing the same file never touches your workouts', () async {
+      final mine = await freshProfile();
+      final theirs = await freshProfile();
+      await import(mine, '$header${session(july, rich: false)}');
+
+      final report = await import(theirs, '$header${session(july)}');
+      expect(report.workoutsCreated, 1);
+      expect(report.workoutsEnriched, 0);
+      expect((await sets(mine)).every((s) => s['rpe'] == null), isTrue);
+      expect(await workoutCount(mine), 1);
+    });
+
+    test('an exercise declined at first is not added later; the rest of the workout is enriched', () async {
+      final owner = await freshProfile();
+      final sled = h.uniqueName('Sled Push');
+      await import(
+        owner,
+        '$header${session(july, rich: false)}${session(july, rich: false, exercise: sled)}',
+        createCustom: const [],
+      );
+      expect((await sets(owner)), hasLength(3));
+
+      final report = await import(
+        owner,
+        '$header${session(july)}${session(july, exercise: sled)}',
+        createCustom: [sled],
+      );
+      expect(report.workoutsCreated, 0);
+      expect(report.workoutsEnriched, 1);
+      expect(report.setsEnriched, 2);
+      expect(report.exercisesCreated, [sled]);
+      // enrichment never changes structure: the sled's sets stay out
+      expect(await sets(owner), hasLength(3));
+    });
+
+    test('the same unit on both exports matches after conversion', () async {
+      final owner = await freshProfile();
+      final lbs = header.replaceFirst('Weight,', 'Weight,Weight Unit,');
+      String inLbs(String rows) =>
+          rows.replaceAllMapped(RegExp(r',(W|1|2|Rest Timer),(\d+),'), (m) => ',${m[1]},${m[2]},lbs,');
+      await import(owner, '$lbs${inLbs(session(july, rich: false))}');
+
+      final report = await import(owner, '$lbs${inLbs(session(july))}');
+      expect(report.setsEnriched, 2);
+    });
+
+    test('a re-export in the other unit matches nothing and changes nothing', () async {
+      // 45 kg exports as 99.21 lb, which converts back to 45.0014 kg: not the
+      // same set by its numbers, so it is left alone rather than guessed at
+      final owner = await freshProfile();
+      await import(owner, '$header${session(july, rich: false)}');
+      final lbs = header.replaceFirst('Weight,', 'Weight,Weight Unit,');
+      final rich =
+          '$july,Evening,1h,$dip,W,44.09,lbs,10,0,0,slow eccentric,deload week,\n'
+          '$july,Evening,1h,$dip,1,99.21,lbs,8,0,0,,,8.5\n'
+          '$july,Evening,1h,$dip,2,110.23,lbs,6,0,0,,,9\n';
+
+      final report = await import(owner, '$lbs$rich');
+      expect(report.setsEnriched, 0);
+      expect((await sets(owner)).every((s) => s['rpe'] == null), isTrue);
+      // the workout note has no numbers to disagree on, so it still lands
+      expect(report.workoutsEnriched, 1);
+    });
+
+    test('the preview counts rest timers for names it cannot match yet', () async {
+      final owner = await freshProfile();
+      final sled = h.uniqueName('Sled Push');
+      final preview = await h.db.previewImport(
+        userId: owner,
+        batch: WorkoutImport.fromStrongCsv('$header${session(july)}${session(july, exercise: sled)}'),
+      );
+      expect(preview.restTimersSet, 2);
+      expect(preview.exercisesUnmatched.map((e) => e.name), [sled]);
     });
   });
 

@@ -1,16 +1,15 @@
 -- What another app's history says about a set and a session beyond its numbers:
 --
---   exercise_sets.set_type  warm-up / drop / failure / normal, as one letter
---                           (w / d / f / n, Strong's own) — two bytes a set
---                           where the words took up to eight.
+--   exercise_sets.set_type  warm-up / drop / failure as one letter (w / d / f,
+--                           Strong's own); NULL is an ordinary working set, so
+--                           the common case costs nothing.
 --   exercise_sets.rpe       rate of perceived exertion, the lifter's own rating;
 --                           REAL, since half steps are exact in binary.
 --   workouts.note           a free-text note on the whole session.
 --
--- All three are NULL when nothing was recorded — the case for every row older
--- than this migration and for any writer that does not know the field. NULL is
--- deliberately not 'normal': an unrecorded set type stays distinguishable from
--- one someone chose, so a richer copy of the same history can still fill it.
+-- A NULL set type is a normal set: every row older than this migration, every
+-- writer that doesn't know the field, and every set nobody marked. RPE and the
+-- note are NULL when there is none.
 --
 -- RPE is self-reported effort, not a body reading, so the device-only health
 -- rule does not touch it. The columns validate, never restrict: any set of any
@@ -29,16 +28,16 @@ ALTER TABLE exercise_sets
     DROP CONSTRAINT IF EXISTS exercise_sets_set_type_check,
     DROP CONSTRAINT IF EXISTS exercise_sets_rpe_check,
     ADD CONSTRAINT exercise_sets_set_type_check
-        CHECK (set_type IS NULL OR set_type IN ('n', 'w', 'd', 'f')),
+        CHECK (set_type IS NULL OR set_type IN ('w', 'd', 'f')),
     ADD CONSTRAINT exercise_sets_rpe_check
         CHECK (rpe IS NULL OR (rpe BETWEEN 1 AND 10 AND rpe * 2 = trunc(rpe * 2)));
 
 COMMENT ON COLUMN exercise_sets.set_type IS
-    'n(ormal), w(armup), d(rop) or f(ailure) — _set_type_name spells it out; NULL when not recorded, which reads as normal';
+    'w(armup), d(rop) or f(ailure) — _set_type_name spells it out; NULL is an ordinary working set';
 COMMENT ON COLUMN exercise_sets.rpe IS
     'Rate of perceived exertion as the lifter rated it, 1-10 in half steps; NULL when not rated';
 COMMENT ON CONSTRAINT exercise_sets_set_type_check ON exercise_sets IS
-    'The set types lifting apps share: warm-up, drop set, failure, and an ordinary working set.';
+    'The set types lifting apps share besides an ordinary working set, which is NULL.';
 COMMENT ON CONSTRAINT exercise_sets_rpe_check ON exercise_sets IS
     'The RPE scale is 1-10 and is rated in whole or half points; anything finer is noise.';
 
@@ -61,15 +60,15 @@ CREATE OR REPLACE FUNCTION _set_type_name(_code CHAR) RETURNS TEXT
 LANGUAGE SQL IMMUTABLE AS
 $$
 SELECT CASE _code
-    WHEN 'n' THEN 'normal'
     WHEN 'w' THEN 'warmup'
     WHEN 'd' THEN 'drop'
     WHEN 'f' THEN 'failure'
+    ELSE 'normal'
     END
 $$;
 
 COMMENT ON FUNCTION _set_type_name(CHAR) IS
-    'exercise_sets.set_type''s letter as its word (normal, warmup, drop, failure); NULL stays NULL';
+    'exercise_sets.set_type''s letter as its word (normal, warmup, drop, failure); NULL is normal';
 
 -- The set snapshot carries the new fields, so the archive of a deleted workout
 -- keeps them through the same function.

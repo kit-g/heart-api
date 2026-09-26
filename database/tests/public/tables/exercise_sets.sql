@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(37);
+SELECT plan(38);
 
 SELECT has_table('public'::name, 'exercise_sets'::name);
 
@@ -208,6 +208,19 @@ SELECT throws_ok(
                '23514',
                NULL,
                'an unknown set type letter is rejected'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO exercise_sets (workout_exercise_id, set_order, set_type)
+               VALUES (
+                   (SELECT we.id FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id WHERE w.name = 'es check workout'),
+                   1, 'n'
+               )
+               $$,
+               '23514',
+               NULL,
+               'normal has no letter: it is NULL'
        );
 
 SELECT throws_ok(
