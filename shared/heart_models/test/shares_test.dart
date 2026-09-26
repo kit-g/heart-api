@@ -58,6 +58,32 @@ void main() {
       final set = ((exercisesOf(request).single as Map)['sets'] as List).single as Map;
       expect(set, {'duration': 60});
     });
+
+    test('ids and a set type encode only when given, so an absent type stays absent', () {
+      final request = const TemplateRequest(
+        userId: 'u1',
+        exercises: [
+          TemplateExerciseRequest(
+            id: '0198c1a2-b3c4-7d5e-8f60-718293a4b5d0',
+            exerciseId: '0198c1a2-b3c4-7d5e-8f60-718293a4b5c7',
+            order: 0,
+            sets: [
+              TemplateSetRequest(id: '0198c1a2-b3c4-7d5e-8f60-718293a4b5d1', reps: 5, setType: .warmup),
+              TemplateSetRequest(reps: 5, setType: .normal),
+              TemplateSetRequest(reps: 5),
+            ],
+          ),
+        ],
+      );
+
+      final exercise = exercisesOf(request).single as Map;
+      expect(exercise['id'], '0198c1a2-b3c4-7d5e-8f60-718293a4b5d0');
+      expect(exercise['sets'], [
+        {'id': '0198c1a2-b3c4-7d5e-8f60-718293a4b5d1', 'reps': 5, 'set_type': 'warmup'},
+        {'reps': 5, 'set_type': 'normal'},
+        {'reps': 5},
+      ]);
+    });
   });
 
   group('TemplateShare', () {

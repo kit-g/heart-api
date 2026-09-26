@@ -68,6 +68,8 @@ void main() {
                 'started_at': startTime.toIso8601String(),
                 'reps': 8,
                 'weight': 100.0,
+                'set_type': 'normal',
+                'rpe': null,
               },
             ),
           );
@@ -1014,6 +1016,175 @@ void main() {
           expect(response.images, isEmpty);
         },
       );
+    },
+  );
+
+  group(
+    'set type, RPE and the workout note',
+    () {
+      const benchPress = {
+        'id': '0198c1a2-b3c4-7d5e-8f60-718293a4b5c6',
+        'name': 'Bench Press',
+        'category': 'Barbell',
+        'target': 'Chest',
+      };
+
+      Map<String, dynamic> row({Object? note, List<Map<String, dynamic>> sets = const []}) => {
+        'id': 'workout-row',
+        'name': 'Server Workout',
+        'started_at': '2025-01-21T12:00:00Z',
+        'completed_at': '2025-01-21T13:00:00Z',
+        'note': note,
+        'exercises': [
+          {'id': 'we-1', 'exercise': benchPress, 'exercise_order': 0, 'sets': sets},
+        ],
+      };
+
+      Workout read({Object? note, List<Map<String, dynamic>> sets = const []}) => Workout.fromRow(
+        row(note: note, sets: sets),
+        imageUrl: (key) => key,
+      );
+
+      test('SetType reads every wire word, and absent or null as normal', () {
+        for (final type in SetType.values) {
+          expect(SetType.fromString(type.value), type);
+        }
+        expect(SetType.fromString(null), SetType.normal);
+        expect(() => SetType.fromString('rest-pause'), throwsArgumentError);
+      });
+
+      test('a read never fails on a type newer than this build: it is a normal set', () {
+        expect(SetType.lenient('rest-pause'), SetType.normal);
+        expect(SetType.lenient('drop'), SetType.drop);
+        final workout = read(
+          sets: [
+            {'id': 's1', 'reps': 5, 'weight': 100, 'set_type': 'rest-pause'},
+          ],
+        );
+        expect(workout.first.first.setType, SetType.normal);
+      });
+
+      test('a set reads its type and RPE off the server row', () {
+        final workout = read(
+          sets: [
+            {'id': 's1', 'reps': 5, 'weight': 100, 'set_type': 'warmup', 'rpe': null},
+            {'id': 's2', 'reps': 5, 'weight': 140, 'set_type': 'failure', 'rpe': 9.5},
+            {'id': 's3', 'reps': 5, 'weight': 120, 'rpe': 8},
+          ],
+        );
+        final sets = workout.first.toList();
+
+        expect(sets.map((s) => s.setType), [SetType.warmup, SetType.failure, SetType.normal]);
+        expect(sets.map((s) => s.rpe), [null, 9.5, 8.0]);
+      });
+
+      test('a set always writes both fields, null RPE included, so they can be cleared', () {
+        final set = ExerciseSet(mockExercise, reps: 5, weight: 100, setType: .drop, rpe: 7.5);
+        expect(set.toMap(), containsPair('set_type', 'drop'));
+        expect(set.toMap(), containsPair('rpe', 7.5));
+
+        set
+          ..setType = .normal
+          ..rpe = null;
+        expect(set.toMap(), containsPair('set_type', 'normal'));
+        expect(set.toMap(), containsPair('rpe', null));
+      });
+
+      test('RPE and set type are kept on a set of any category', () {
+        when(mockExercise.category).thenReturn(Category.cardio);
+        final set = ExerciseSet(mockExercise, duration: 600, distance: 2, setType: .warmup, rpe: 4);
+        expect(set.setType, SetType.warmup);
+        expect(set.rpe, 4.0);
+      });
+
+      test('a set copy keeps the type and starts unrated', () {
+        final set = ExerciseSet(mockExercise, reps: 5, weight: 100, setType: .warmup, rpe: 6);
+        final copy = set.copy();
+        expect(copy.setType, SetType.warmup);
+        expect(copy.rpe, isNull);
+      });
+
+      test('warm-ups count toward neither the best set nor the volume', () {
+        final exercise = WorkoutExercise(
+          starter: ExerciseSet(mockExercise, reps: 10, weight: 200, setType: .warmup),
+        )..add(ExerciseSet(mockExercise, reps: 5, weight: 100));
+
+        expect(exercise.best?.weight, 100.0);
+        expect(exercise.total, 500.0);
+      });
+
+      test('drop and failure sets count like working sets', () {
+        final exercise =
+            WorkoutExercise(
+                starter: ExerciseSet(mockExercise, reps: 5, weight: 100),
+              )
+              ..add(ExerciseSet(mockExercise, reps: 10, weight: 80, setType: .drop))
+              ..add(ExerciseSet(mockExercise, reps: 2, weight: 150, setType: .failure));
+
+        expect(exercise.total, 500.0 + 800.0 + 300.0);
+        expect(exercise.best?.setType, SetType.drop);
+      });
+
+      test('an exercise of only warm-ups has no best set and no volume', () {
+        final exercise = WorkoutExercise(
+          starter: ExerciseSet(mockExercise, reps: 10, weight: 40, setType: .warmup),
+        );
+        expect(exercise.best, isNull);
+        expect(exercise.total, 0);
+      });
+
+      test('the workout note reads off the row and the local JSON', () {
+        expect(read(note: 'felt strong').note, 'felt strong');
+        expect(read().note, isNull);
+
+        final local = Workout.fromJson({
+          'id': 'workout-123',
+          'start': '2025-01-21T12:00:00Z',
+          'note': 'deload week',
+        });
+        expect(local.note, 'deload week');
+      });
+
+      test('the workout note is always written, null included, so it can be cleared', () {
+        final workout = Workout(name: 'Push')..note = 'short on time';
+        expect(workout.toMap(), containsPair('note', 'short on time'));
+
+        workout.note = null;
+        expect(workout.toMap(), containsPair('note', null));
+      });
+
+      test('the same session keeps its note and RPEs; a repeat starts without them', () {
+        final workout = read(
+          note: 'felt strong',
+          sets: [
+            {'id': 's1', 'reps': 5, 'weight': 100, 'set_type': 'warmup', 'rpe': 6},
+          ],
+        );
+
+        final same = workout.copy(sameId: true);
+        expect(same.note, 'felt strong');
+        expect(same.first.first.rpe, 6.0);
+        expect(same.first.first.setType, SetType.warmup);
+
+        final repeat = workout.copy();
+        expect(repeat.note, isNull);
+        expect(repeat.first.first.rpe, isNull);
+        expect(repeat.first.first.setType, SetType.warmup);
+      });
+
+      test('a workout that round-trips through toMap and fromJson keeps it all', () {
+        final workout = read(
+          note: 'We’re',
+          sets: [
+            {'id': 's1', 'reps': 5, 'weight': 100, 'set_type': 'drop', 'rpe': 6.5},
+          ],
+        );
+        final back = Workout.fromJson(workout.toMap());
+
+        expect(back.note, 'We’re');
+        expect(back.first.first.setType, SetType.drop);
+        expect(back.first.first.rpe, 6.5);
+      });
     },
   );
 }

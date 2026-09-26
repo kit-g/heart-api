@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'auth.dart';
+import 'exercise_set.dart';
 import 'misc.dart';
 
 /// One coach-owned master template, handed to one student.
@@ -121,20 +122,28 @@ class _TemplateShare implements TemplateShare {
 /// One set inside a [TemplateExerciseRequest]. Every measure is optional — a
 /// bodyweight set has no weight, a timed hold has no reps.
 class TemplateSetRequest {
+  /// The set's client-minted v7 id, kept across saves; null mints one.
+  final String? id;
   final num? weight;
   final num? reps;
   final num? duration;
   final num? distance;
 
-  const new({this.weight, this.reps, this.duration, this.distance});
+  /// Null when the body said nothing about the type, which leaves a stored
+  /// set's type alone; [SetType.normal] clears it.
+  final SetType? setType;
+
+  const new({this.id, this.weight, this.reps, this.duration, this.distance, this.setType});
 
   /// Keys match what `_saveTemplate` reads out of the `@exercises` jsonb.
   Map<String, dynamic> toJson() {
     return {
+      'id': ?id,
       'weight': ?weight,
       'reps': ?reps,
       'duration': ?duration,
       'distance': ?distance,
+      'set_type': ?setType?.value,
     };
   }
 }
@@ -144,11 +153,15 @@ class TemplateSetRequest {
 /// resolution onto a student's own variants happens server-side at share time,
 /// not through this reference.)
 class TemplateExerciseRequest {
+  /// The template exercise's client-minted v7 id, kept across saves; null
+  /// mints one.
+  final String? id;
   final String exerciseId;
   final int order;
   final List<TemplateSetRequest> sets;
 
   const new({
+    this.id,
     required this.exerciseId,
     required this.order,
     this.sets = const [],
@@ -156,6 +169,7 @@ class TemplateExerciseRequest {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': ?id,
       'exercise_id': exerciseId,
       'order': order,
       'sets': sets.map((s) => s.toJson()).toList(),

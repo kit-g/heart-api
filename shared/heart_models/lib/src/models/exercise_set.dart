@@ -6,6 +6,42 @@ abstract interface class Completes {
   bool get isCompleted;
 }
 
+/// What kind of set this was. Warm-ups are left out of an exercise's records
+/// and volume ([WorkoutExercise.best], [WorkoutExercise.total]); drop and
+/// failure sets count like any other. Failure and an RPE of 10 are
+/// independent: neither implies the other.
+enum SetType {
+  normal('normal'),
+  warmup('warmup'),
+  drop('drop'),
+  failure('failure');
+
+  /// The wire word, `set_type` on a set.
+  final String value;
+
+  new(this.value);
+
+  /// Absent or null is [normal], the type of every set recorded before types
+  /// existed; an unknown word is an error.
+  factory fromString(String? v) {
+    return switch (v) {
+      null => normal,
+      'normal' => normal,
+      'warmup' => warmup,
+      'drop' => drop,
+      'failure' => failure,
+      _ => throw ArgumentError.value(v, 'set_type', 'unknown set type'),
+    };
+  }
+
+  /// [fromString] for reading stored data: a word this build doesn't know (a
+  /// type added after it shipped) reads as [normal] rather than failing the
+  /// whole read.
+  factory lenient(String? v) {
+    return values.firstWhere((type) => type.value == v, orElse: () => normal);
+  }
+}
+
 /// A single set of an exercise
 abstract interface class ExerciseSet implements Completes, Model, Storable, Comparable<ExerciseSet> {
   /// Client-minted v7 uuid. Firebase-era sets used the [start] timestamp as
@@ -33,6 +69,14 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
   /// set's work window, letting clients separate work time from rest time.
   abstract DateTime? completedAt;
 
+  abstract SetType setType;
+
+  /// Rate of perceived exertion as the lifter rated it: 1–10 in whole or half
+  /// points, null when not rated. Stored as RPE whatever the user reads it as;
+  /// reps in reserve is `10 - rpe`, a display choice. Valid on a set of any
+  /// category.
+  abstract double? rpe;
+
   factory(
     Exercise exercise, {
     String? id,
@@ -41,12 +85,17 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
     double? weight,
     double? distance,
     int? duration,
+    SetType setType = .normal,
+    double? rpe,
   }) {
-    final set = _ExerciseSet(
-      id: id ?? uuidV7(),
-      exercise: exercise,
-      start: start ?? DateTime.timestamp(),
-    );
+    final set =
+        _ExerciseSet(
+            id: id ?? uuidV7(),
+            exercise: exercise,
+            start: start ?? DateTime.timestamp(),
+          )
+          ..setType = setType
+          ..rpe = rpe;
     // Only the measurements that exist for the exercise's category are kept,
     // mirroring [setMeasurements]. Legacy serializers wrote zero-valued
     // defaults into every field; dropping the inapplicable ones at
@@ -89,6 +138,8 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
           DateTime dt => dt,
           _ => DateTime.timestamp(),
         },
+        setType: SetType.lenient(json['set_type'] as String?),
+        rpe: (json['rpe'] as num?)?.toDouble(),
       )
       ..isCompleted = switch (json['completed']) {
         bool completed => completed,
@@ -116,6 +167,9 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
 
   bool operator <=(covariant ExerciseSet other);
 
+  /// A fresh set with the same measurements and type, for repeating a session
+  /// or starting one from a template. The [rpe] is a rating of the original
+  /// effort, so the copy starts unrated.
   ExerciseSet copy({DateTime? start});
 
   Duration elapsed();
@@ -161,6 +215,10 @@ class _ExerciseSet implements ExerciseSet {
       'duration': ?duration,
       'distance': ?distance,
       'weight': ?weight,
+      // always present, so a client that knows the fields can clear them; a
+      // body without the keys leaves the stored values alone
+      'set_type': setType.value,
+      'rpe': rpe,
     };
   }
 
@@ -207,6 +265,12 @@ class _ExerciseSet implements ExerciseSet {
   DateTime? completedAt;
 
   @override
+  SetType setType = .normal;
+
+  @override
+  double? rpe;
+
+  @override
   bool get canBeCompleted {
     switch (category) {
       case .assistedBodyWeight:
@@ -237,7 +301,8 @@ class _ExerciseSet implements ExerciseSet {
       ..weight = weight
       ..duration = duration
       ..distance = distance
-      ..reps = reps;
+      ..reps = reps
+      ..setType = setType;
   }
 
   @override
