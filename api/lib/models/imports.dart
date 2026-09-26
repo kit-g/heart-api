@@ -340,8 +340,8 @@ class ImportedSet {
   final int? duration;
   final double? distance;
 
-  /// `normal`, `warmup`, `drop` or `failure`; null when the export says
-  /// nothing about it.
+  /// `warmup`, `drop` or `failure`; null for an ordinary working set,
+  /// including when the export says nothing about it.
   final String? type;
 
   /// 1–10 in half steps; null when unrated or when the export's value is off
@@ -728,13 +728,12 @@ double? _rpe(String? raw) {
 }
 
 /// Strong's Set Order column: a number for a working set, a letter for the
-/// other kinds. Anything unrecognised says nothing about the set's type.
+/// other kinds. A working set, or anything unrecognised, is null — normal.
 String? _strongSetType(String order) {
   return switch (order.trim().toUpperCase()) {
     'W' => 'warmup',
     'D' => 'drop',
     'F' => 'failure',
-    final n when int.tryParse(n) != null => 'normal',
     _ => null,
   };
 }

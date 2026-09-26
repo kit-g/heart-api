@@ -255,7 +255,7 @@ void main() {
         '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Lat Pulldown (Cable)",1,60.0,12.0,0,0.0,"",,\n'
         '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Lat Pulldown (Cable)",Rest Timer,0,0.0,0,120.0,,,\n';
 
-    test('Set Order maps to a set type: a number is normal, W/D/F the other kinds', () {
+    test('Set Order maps to a set type: W/D/F their kinds, a number null — normal', () {
       const csv =
           'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
           '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),W,20,12\n'
@@ -263,10 +263,10 @@ void main() {
           '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),D,41,10\n'
           '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),F,34,12\n';
       final sets = WorkoutImport.fromStrongCsv(csv).workouts.single.exercises.single.sets;
-      expect(sets.map((s) => s.type), ['warmup', 'normal', 'drop', 'failure']);
+      expect(sets.map((s) => s.type), ['warmup', null, 'drop', 'failure']);
     });
 
-    test('an export without a Set Order column records no set type', () {
+    test('an export without a Set Order column has only normal sets', () {
       const csv =
           'Date;Workout Name;Duration;Exercise Name;Weight;Reps\n'
           '2023-01-15 17:35:12;Push;1h;Bench Press (Barbell);82,5;5\n';

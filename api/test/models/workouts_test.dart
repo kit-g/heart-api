@@ -147,10 +147,13 @@ void main() {
           sets([
             {'weight': 60, 'set_type': 'warmup', 'rpe': 6.5},
             {'weight': 100, 'set_type': null, 'rpe': null},
+            {'weight': 105, 'set_type': 'normal'},
           ]),
           [
             {'weight': 60, 'set_type': 'w', 'rpe': 6.5},
             {'weight': 100, 'set_type': null, 'rpe': null},
+            // normal is stored as no type at all
+            {'weight': 105, 'set_type': null},
           ],
         );
       });
