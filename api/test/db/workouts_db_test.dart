@@ -456,6 +456,160 @@ void main() {
       expect(updated.first.first.weight, 105);
     });
 
+    group('kept rows are updated in place', () {
+      // A delete-and-reinsert under the same id lost every set: the deleted
+      // exercise's ON DELETE CASCADE fires at the end of the statement, after
+      // the re-insert, and took the re-inserted sets with it — while the
+      // response, built from RETURNING, still showed them.
+      late String exId;
+      late String otherExId;
+      late String workoutId;
+      late String benchId; // workout_exercise ids
+      late String rowId;
+      late String set1;
+      late String set2;
+      late String set3;
+
+      Map<String, dynamic> exercise(String id, String ref, int order, List<Map<String, dynamic>> sets) => {
+        'id': id,
+        'exercise': ref,
+        'order': order,
+        'sets': sets,
+      };
+      Map<String, dynamic> set(String id, num weight) => {'id': id, 'weight': weight, 'reps': 5, 'completed': true};
+
+      Future<void> replace(List<Map<String, dynamic>> exercises) => h.db.updateWorkout(
+        userId: ownerId,
+        workoutId: workoutId,
+        body: WorkoutRequest(
+          userId: ownerId,
+          body: {'name': 'Kept', 'start': '2026-09-26T08:00:00Z', 'exercises': exercises},
+        ),
+        imageUrl: imageUrl,
+      );
+
+      Future<List<String>> storedSetIds() async {
+        final rows = await h.exec(
+          'SELECT es.id::text AS id FROM exercise_sets es JOIN workout_exercises we ON we.id = es.workout_exercise_id '
+          'WHERE we.workout_id = @w::uuid ORDER BY we.exercise_order, es.set_order',
+          {'w': workoutId},
+        );
+        return [for (final r in rows) r.toColumnMap()['id'] as String];
+      }
+
+      Future<void> comment({String? workoutExerciseId, String? setId}) => h.exec(
+        'INSERT INTO comments (author_id, body, workout_exercise_id, exercise_set_id) '
+        'VALUES (@a, @b, @we::uuid, @s::uuid)',
+        {'a': ownerId, 'b': 'nice', 'we': workoutExerciseId, 's': setId},
+      );
+
+      Future<int> comments() async {
+        final rows = await h.exec(
+          'SELECT count(*)::int AS n FROM comments WHERE workout_exercise_id = ANY(@we::uuid[]) OR exercise_set_id = ANY(@s::uuid[])',
+          {
+            'we': [benchId, rowId],
+            's': [set1, set2, set3],
+          },
+        );
+        return rows.single.toColumnMap()['n'] as int;
+      }
+
+      setUp(() async {
+        exId = await h.seedGlobalExercise(name: h.uniqueName('Bench'));
+        otherExId = await h.seedGlobalExercise(name: h.uniqueName('Row'));
+        benchId = uuidV7();
+        rowId = uuidV7();
+        set1 = uuidV7();
+        set2 = uuidV7();
+        set3 = uuidV7();
+        final (created, _) = await h.db.createWorkout(
+          userId: ownerId,
+          body: WorkoutRequest(
+            userId: ownerId,
+            body: {
+              'name': 'Kept',
+              'start': '2026-09-26T08:00:00Z',
+              'exercises': [
+                exercise(benchId, exId, 0, [set(set1, 100), set(set2, 105)]),
+                exercise(rowId, otherExId, 1, [set(set3, 60)]),
+              ],
+            },
+          ),
+          imageUrl: imageUrl,
+        );
+        workoutId = created.id;
+      });
+
+      test('a replace that round-trips every id keeps the sets in the database, not just in its response', () async {
+        await replace([
+          exercise(benchId, exId, 0, [set(set1, 100), set(set2, 107.5)]),
+          exercise(rowId, otherExId, 1, [set(set3, 60)]),
+        ]);
+        expect(await storedSetIds(), [set1, set2, set3]);
+        final reread = await h.db.getWorkout(userId: ownerId, workoutId: workoutId, imageUrl: imageUrl);
+        expect(reread.first.map((s) => s.weight), [100, 107.5]);
+      });
+
+      test('comments on a kept exercise and a kept set survive the replace', () async {
+        await comment(workoutExerciseId: benchId);
+        await comment(setId: set1);
+        await replace([
+          exercise(benchId, exId, 0, [set(set1, 100), set(set2, 105)]),
+          exercise(rowId, otherExId, 1, [set(set3, 60)]),
+        ]);
+        expect(await comments(), 2);
+      });
+
+      test('what the body drops is deleted, with its comments', () async {
+        await comment(workoutExerciseId: rowId);
+        await comment(setId: set2);
+        await replace([
+          exercise(benchId, exId, 0, [set(set1, 100)]),
+        ]);
+        expect(await storedSetIds(), [set1]);
+        expect(await comments(), 0);
+        final rows = await h.exec('SELECT count(*)::int AS n FROM workout_exercises WHERE workout_id = @w::uuid', {
+          'w': workoutId,
+        });
+        expect(rows.single.toColumnMap()['n'], 1);
+      });
+
+      test('reordering exercises and moving a set between them keeps every id', () async {
+        await replace([
+          exercise(rowId, otherExId, 0, [set(set3, 60), set(set2, 105)]),
+          exercise(benchId, exId, 1, [set(set1, 100)]),
+        ]);
+        expect(await storedSetIds(), [set3, set2, set1]);
+      });
+
+      test('a set can move onto an exercise the same replace adds', () async {
+        final added = uuidV7();
+        await replace([
+          exercise(benchId, exId, 0, [set(set1, 100)]),
+          exercise(added, otherExId, 1, [set(set2, 105), set(set3, 60)]),
+        ]);
+        expect(await storedSetIds(), [set1, set2, set3]);
+        final rows = await h.exec('SELECT count(*)::int AS n FROM workout_exercises WHERE id = @r::uuid', {'r': rowId});
+        expect(rows.single.toColumnMap()['n'], 0);
+      });
+
+      test('a set id another workout holds is still refused, and nothing is written', () async {
+        final (other, _) = await h.db.createWorkout(
+          userId: ownerId,
+          body: req(ownerId, name: 'Other', start: DateTime.utc(2026, 9, 25, 8), exerciseId: exId),
+          imageUrl: imageUrl,
+        );
+        final foreignSet = other.first.first.id;
+        await expectLater(
+          replace([
+            exercise(benchId, exId, 0, [set(set1, 100), set(foreignSet, 1)]),
+          ]),
+          throwsA(isA<BadRequest>()),
+        );
+        expect(await storedSetIds(), [set1, set2, set3]);
+      });
+    });
+
     test('a non-uuid exercise id is re-minted at the exercise start', () async {
       final exName = h.uniqueName('Ex');
       final exId = await h.seedGlobalExercise(name: exName);
@@ -782,6 +936,121 @@ void main() {
 
       expect(updated.calories, 300.5);
       expect(updated.name, 'Renamed');
+    });
+  });
+
+  group('set type and RPE', () {
+    // stored by the importer before any client can send them, so a replace
+    // from a client that doesn't know the fields must not erase them
+    late String exId;
+    late String workoutId;
+    late String firstSetId;
+    late String secondSetId;
+
+    Map<String, dynamic> set(String id, num weight, [Map<String, dynamic> extra = const {}]) => {
+      'id': id,
+      'weight': weight,
+      'reps': 5,
+      'completed': true,
+      ...extra,
+    };
+
+    Future<void> replace(List<Map<String, dynamic>> sets) async {
+      await h.db.updateWorkout(
+        userId: ownerId,
+        workoutId: workoutId,
+        body: WorkoutRequest(
+          userId: ownerId,
+          body: {
+            'name': 'Typed',
+            'start': '2026-09-26T08:00:00Z',
+            'exercises': [
+              {'exercise': exId, 'order': 0, 'sets': sets},
+            ],
+          },
+        ),
+        imageUrl: imageUrl,
+      );
+    }
+
+    Future<Map<String, Map<String, dynamic>>> stored() async {
+      final rows = await h.exec(
+        'SELECT es.id::text AS id, _set_type_name(es.set_type) AS set_type, es.rpe::float8 AS rpe FROM exercise_sets es '
+        'JOIN workout_exercises we ON we.id = es.workout_exercise_id WHERE we.workout_id = @w::uuid',
+        {'w': workoutId},
+      );
+      return {for (final r in rows) r.toColumnMap()['id'] as String: r.toColumnMap()};
+    }
+
+    setUp(() async {
+      exId = await h.seedGlobalExercise(name: h.uniqueName('Typed'));
+      firstSetId = uuidV7();
+      secondSetId = uuidV7();
+      final (created, _) = await h.db.createWorkout(
+        userId: ownerId,
+        body: WorkoutRequest(
+          userId: ownerId,
+          body: {
+            'name': 'Typed',
+            'start': '2026-09-26T08:00:00Z',
+            'exercises': [
+              {
+                'exercise': exId,
+                'order': 0,
+                'sets': [
+                  set(firstSetId, 60, {'set_type': 'warmup', 'rpe': 6.5}),
+                  set(secondSetId, 100, {'set_type': 'normal', 'rpe': 9}),
+                ],
+              },
+            ],
+          },
+        ),
+        imageUrl: imageUrl,
+      );
+      workoutId = created.id;
+    });
+
+    test('a create stores what it is sent', () async {
+      final rows = await stored();
+      expect(rows[firstSetId], containsPair('set_type', 'warmup'));
+      expect(rows[firstSetId], containsPair('rpe', 6.5));
+      expect(rows[secondSetId], containsPair('rpe', 9.0));
+    });
+
+    test('a replace whose sets leave the keys out keeps the stored values', () async {
+      await replace([set(firstSetId, 62), set(secondSetId, 102)]);
+      final rows = await stored();
+      expect(rows[firstSetId], containsPair('set_type', 'warmup'));
+      expect(rows[firstSetId], containsPair('rpe', 6.5));
+      expect(rows[secondSetId], containsPair('set_type', 'normal'));
+      expect(rows[secondSetId], containsPair('rpe', 9.0));
+    });
+
+    test('an explicit null clears, and a value replaces', () async {
+      await replace([
+        set(firstSetId, 60, {'set_type': null, 'rpe': null}),
+        set(secondSetId, 100, {'set_type': 'failure', 'rpe': 10}),
+      ]);
+      final rows = await stored();
+      expect(rows[firstSetId], containsPair('set_type', null));
+      expect(rows[firstSetId], containsPair('rpe', null));
+      expect(rows[secondSetId], containsPair('set_type', 'failure'));
+      expect(rows[secondSetId], containsPair('rpe', 10.0));
+    });
+
+    test('a new set with no keys records nothing', () async {
+      final added = uuidV7();
+      await replace([set(firstSetId, 60), set(secondSetId, 100), set(added, 100)]);
+      final rows = await stored();
+      expect(rows[added], containsPair('set_type', null));
+      expect(rows[added], containsPair('rpe', null));
+    });
+
+    test('a replace leaves the workout note alone', () async {
+      await h.exec("UPDATE workouts SET note = 'from Strong' WHERE id = @w::uuid", {'w': workoutId});
+      await replace([set(firstSetId, 60), set(secondSetId, 100)]);
+      final rows = await h.exec('SELECT note FROM workouts WHERE id = @w::uuid', {'w': workoutId});
+      expect(rows.single.toColumnMap()['note'], 'from Strong');
     });
   });
 
