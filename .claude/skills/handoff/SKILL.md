@@ -58,8 +58,16 @@ without its anchor.
    - **Behavioral semantics** — the part no schema carries. Cover at least: how the data actually
      arrives (in the response vs via normal sync afterwards), what the app must refetch or
      invalidate, idempotency/retry rules, payload ceilings (the API sits on Lambda behind API
-     Gateway: ~6–10 MB hard request limit — state it so the client fails gracefully), and what the
-     UX owes the user (e.g. an import report is designed to be shown, not swallowed).
+     Gateway: ~6–10 MB hard request limit — state it so the client fails gracefully), and what a
+     response *carries* that the app may want to surface (e.g. an import report has per-row
+     detail) — as a fact about the data, not a screen to build.
+   - **Required** — only when the change is mandatory or breaking for the app: a migration it
+     must run before a pin moves, a field it must now send, data it would otherwise lose. State
+     the consequence of skipping it. If nothing is required, say so in one line.
+   - **What becomes possible** — the capabilities the change opens up, as capabilities: "sets
+     carry a type the app can let users set", not "add a long-press to mark warm-ups". No UX
+     prescriptions, no task lists, no candidate designs. See *Capabilities, not instructions*
+     below.
    - **References** — backend ticket, design doc (full GitHub URL to the file on `main`), the
      landing commit, the `heart_models` version that carries the wire models.
    - Label `enhancement`. The frontend tracker has only GitHub default labels (as of 2026-08); if
@@ -74,6 +82,16 @@ without its anchor.
    the others. An artifact that nothing points to is one a future agent never finds.
 
 ## Rules
+
+- **Capabilities, not instructions.** The backend never tells the app what to build. A handoff
+  says what is *required* (the change is mandatory or breaking: a migration, a field that must be
+  sent, data that would be lost) and what is *possible* (new fields, new endpoints, their limits).
+  Everything else — which screens, what interaction, whether a feature is shown at all, opt-in or
+  not — is the app's call, and UX is found by iterating, not specified up front. That applies to
+  the ticket, the report and the design doc alike: no "App work" checklists, no suggested
+  widgets, no "the app should". Product decisions already settled on the backend ticket can be
+  linked, not restated as orders. Link generously instead: the design doc, the CHANGELOG, and
+  the backend ticket's decisions give the app the full picture without directing it.
 
 - **No local paths or localhost URLs in any shared artifact** (tickets, docs, CHANGELOG, PR text).
   Repo-relative paths (`api/lib/models/imports.dart`) or full GitHub URLs only.
