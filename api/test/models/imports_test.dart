@@ -3,9 +3,9 @@ import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 /// A realistic Strong export: one row per set, quoted fields with embedded
-/// commas/quotes, zeros meaning "unset", an RPE column we ignore — and a
-/// "Rest Timer" row, which Strong interleaves after any set that ran one.
-/// Every count below is blind to it: it is structure, not a set.
+/// commas/quotes, zeros meaning "unset", an RPE column — and a "Rest Timer"
+/// row, which Strong interleaves after any set that ran one. Every set count
+/// below is blind to it: it is structure, not a set.
 const _strongCsv =
     'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps,Distance,Seconds,Notes,Workout Notes,RPE\n'
     '2023-01-15 17:35:12,Push Day,1h 10m,Bench Press (Barbell),1,80,5,0,0,,,8\n'
@@ -88,7 +88,7 @@ void main() {
       expect(byName.values.every((e) => e['target'] == 'Other'), isTrue);
     });
 
-    test('drops Rest Timer rows but keeps warm-up/drop/failure sets — Set Order letters are sets', () {
+    test('Rest Timer rows are never sets; warm-up/drop/failure are — Set Order letters are sets', () {
       const csv =
           'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
           '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),W,20,12\n'
@@ -235,6 +235,241 @@ void main() {
     });
   });
 
+  group('set type, RPE, notes and rest timers (rows from real exports)', () {
+    // content/assets/strong_workouts.csv, the old comma layout
+    const oldHeader =
+        'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps,Distance,Seconds,Notes,Workout Notes,RPE\n';
+    // a 2025 export in the newer semicolon layout, which moved RPE next to Reps
+    const newHeader =
+        'Date;Workout Name;Exercise Name;Set Order;Weight;Weight Unit;Reps;RPE;Distance;Distance Unit;Seconds;Notes;Workout Notes;Workout Duration\n';
+
+    const chestDip =
+        '$oldHeader'
+        '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",W,0.0,16.0,0,0.0,"","",\n'
+        '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",1,45.0,18.0,0,0.0,,,\n'
+        '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",Rest Timer,0,0.0,0,120.0,,,\n'
+        '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",2,45.0,18.0,0,0.0,,,\n'
+        '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",Rest Timer,0,0.0,0,120.0,,,\n'
+        '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",3,45.0,25.0,0,0.0,,,\n'
+        '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",Rest Timer,0,0.0,0,25.0,,,\n'
+        '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Lat Pulldown (Cable)",1,60.0,12.0,0,0.0,"",,\n'
+        '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Lat Pulldown (Cable)",Rest Timer,0,0.0,0,120.0,,,\n';
+
+    test('Set Order maps to a set type: a number is normal, W/D/F the other kinds', () {
+      const csv =
+          'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
+          '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),W,20,12\n'
+          '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),1,48,8\n'
+          '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),D,41,10\n'
+          '2023-02-01 10:00:00,Back,45m,Lat Pulldown (Cable),F,34,12\n';
+      final sets = WorkoutImport.fromStrongCsv(csv).workouts.single.exercises.single.sets;
+      expect(sets.map((s) => s.type), ['warmup', 'normal', 'drop', 'failure']);
+    });
+
+    test('an export without a Set Order column records no set type', () {
+      const csv =
+          'Date;Workout Name;Duration;Exercise Name;Weight;Reps\n'
+          '2023-01-15 17:35:12;Push;1h;Bench Press (Barbell);82,5;5\n';
+      expect(WorkoutImport.fromStrongCsv(csv).workouts.single.exercises.single.sets.single.type, isNull);
+    });
+
+    test('RPE is read in both layouts, half steps included', () {
+      const csv =
+          '$newHeader'
+          '2025-01-13 20:55:44;"Qwer";"Bulgarian Split Squat";1;11;lbs;11;6.5;;;0;"";;6m\n';
+      final set = WorkoutImport.fromStrongCsv(csv).workouts.single.exercises.single.sets.single;
+      expect(set.rpe, 6.5);
+      expect(set.reps, 11);
+
+      final old = WorkoutImport.fromStrongCsv(_strongCsv).workouts.first.exercises.first.sets;
+      expect(old.map((s) => s.rpe), [8, 9]);
+    });
+
+    test('an RPE off the half-step 1-10 scale is dropped, and the set still imports', () {
+      const csv =
+          '$newHeader'
+          '2025-01-13 20:55:44;"Qwer";"Bulgarian Split Squat";1;11;lbs;11;8.3;;;0;"";;6m\n'
+          '2025-01-13 20:55:44;"Qwer";"Bulgarian Split Squat";2;11;lbs;11;11;;;0;"";;6m\n'
+          '2025-01-13 20:55:44;"Qwer";"Bulgarian Split Squat";3;11;lbs;11;hard;;;0;"";;6m\n';
+      final batch = WorkoutImport.fromStrongCsv(csv);
+      final sets = batch.workouts.single.exercises.single.sets;
+      expect(sets, hasLength(3));
+      expect(sets.map((s) => s.rpe), [null, null, null]);
+      expect(batch.rowsSkipped, 0);
+    });
+
+    test('a note on the first set row becomes the exercise note', () {
+      const csv =
+          '$oldHeader'
+          '2022-04-22 09:33:18,"Morning Workout",29min,"Chin Up",1,0,12.0,0,0.0,"Superset with shoulder press",,\n'
+          '2022-04-22 09:33:18,"Morning Workout",29min,"Chin Up",2,0,12.0,0,0.0,,,\n'
+          '2022-04-22 09:33:18,"Morning Workout",29min,"Chin Up",3,0,12.0,0,0.0,,,\n'
+          '2022-04-22 09:33:18,"Morning Workout",29min,"Lateral Raise (Cable)",1,9.0,14.0,0,0.0,"",,\n';
+      final workout = WorkoutImport.fromStrongCsv(csv).workouts.single;
+      expect(workout.exercises.map((e) => e.note), ['Superset with shoulder press', null]);
+      expect(workout.note, isNull);
+    });
+
+    test('distinct notes across an exercise\'s rows are kept once each, in order', () {
+      const csv =
+          '$oldHeader'
+          '2022-04-22 09:33:18,"Morning Workout",29min,"Chin Up",1,0,12.0,0,0.0,"wide grip",,\n'
+          '2022-04-22 09:33:18,"Morning Workout",29min,"Chin Up",2,0,12.0,0,0.0,"wide grip",,\n'
+          '2022-04-22 09:33:18,"Morning Workout",29min,"Chin Up",3,0,12.0,0,0.0,"then neutral",,\n';
+      expect(WorkoutImport.fromStrongCsv(csv).workouts.single.exercises.single.note, 'wide grip\nthen neutral');
+    });
+
+    test('Workout Notes becomes the workout note', () {
+      const csv =
+          '$newHeader'
+          '2025-01-13 20:55:44;"Qwer";"Ab Wheel";1;11;lbs;11;;;;0;"";"deload week";6m\n';
+      expect(WorkoutImport.fromStrongCsv(csv).workouts.single.note, 'deload week');
+    });
+
+    test('notes past the column bounds are cut, never split mid-character', () {
+      final long = '💪' * 600;
+      final csv =
+          '$oldHeader'
+          '2022-04-22 09:33:18,"Morning Workout",29min,"Chin Up",1,0,12.0,0,0.0,"$long","${'n' * 1200}",\n';
+      final workout = WorkoutImport.fromStrongCsv(csv).workouts.single;
+      expect(workout.exercises.single.note!.runes, hasLength(ImportedExercise.maxNoteLength));
+      expect(workout.exercises.single.note, '💪' * ImportedExercise.maxNoteLength);
+      expect(workout.note, hasLength(ImportedWorkout.maxNoteLength));
+    });
+
+    test('a row repaired for a runaway duration keeps its note columns aligned', () {
+      // unrepaired, Seconds ("0.0") would sit under Notes
+      const csv =
+          '$oldHeader'
+          '2024-07-22 17:45:06,"Legs",3,527h 3min,"Leg Press",1,450.0,12.0,0,0.0,"","",\n';
+      final workout = WorkoutImport.fromStrongCsv(csv).workouts.single;
+      expect(workout.exercises.single.note, isNull);
+      expect(workout.note, isNull);
+    });
+
+    test('rest timer rows feed the exercise, never its sets', () {
+      final batch = WorkoutImport.fromStrongCsv(chestDip);
+      final dip = batch.workouts.single.exercises.first;
+      expect(dip.sets, hasLength(4));
+      expect(dip.restTimers, [120, 120, 25]);
+      // including the timer after an exercise's last set
+      expect(batch.workouts.single.exercises.last.restTimers, [120]);
+      expect(batch.rowsSkipped, 0);
+    });
+
+    test('the exercise\'s timer is the most frequent one in its session, a nudged one aside', () {
+      expect(WorkoutImport.fromStrongCsv(chestDip).restTimers, {'Chest Dip': 120, 'Lat Pulldown (Cable)': 120});
+    });
+
+    test('the most recent session with timers decides, whatever the file order', () {
+      const csv =
+          '$oldHeader'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",1,45.0,18.0,0,0.0,,,\n'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",Rest Timer,0,0.0,0,120.0,,,\n'
+          '2025-05-27 19:13:27,"Evening Workout",39min,"Chest Dip",1,45.0,0.0,0,0.0,"","",\n'
+          '2025-05-27 19:13:27,"Evening Workout",39min,"Chest Dip",Rest Timer,0,0.0,0,90.0,,,\n'
+          '2025-08-01 19:00:00,"Evening Workout",40min,"Chest Dip",1,45.0,15.0,0,0.0,,,\n';
+      // the August session ran no timer, so July's is the latest that says anything
+      expect(WorkoutImport.fromStrongCsv(csv).restTimers, {'Chest Dip': 120});
+    });
+
+    test('a tie goes to the longer timer', () {
+      const csv =
+          '$oldHeader'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",1,45.0,18.0,0,0.0,,,\n'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",Rest Timer,0,0.0,0,90.0,,,\n'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",2,45.0,18.0,0,0.0,,,\n'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",Rest Timer,0,0.0,0,120.0,,,\n';
+      expect(WorkoutImport.fromStrongCsv(csv).restTimers, {'Chest Dip': 120});
+    });
+
+    test('a timer after a warm-up is Strong\'s warm-up timer, not the exercise\'s', () {
+      const csv =
+          '$oldHeader'
+          '2025-07-17 20:55:32,"Evening Workout",55min,"Calf Press on Leg Press",W,250.0,12.0,0,0.0,"",,\n'
+          '2025-07-17 20:55:32,"Evening Workout",55min,"Calf Press on Leg Press",Rest Timer,0,0.0,0,60.0,,,\n'
+          '2025-07-17 20:55:32,"Evening Workout",55min,"Calf Press on Leg Press",1,290.0,12.0,0,0.0,,,\n'
+          '2025-07-17 20:55:32,"Evening Workout",55min,"Calf Press on Leg Press",Rest Timer,0,0.0,0,120.0,,,\n';
+      final batch = WorkoutImport.fromStrongCsv(csv);
+      expect(batch.workouts.single.exercises.single.restTimers, [120]);
+      expect(batch.restTimers, {'Calf Press on Leg Press': 120});
+    });
+
+    test('a corrupt or absurd timer is ignored, never fatal', () {
+      const csv =
+          '$oldHeader'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",1,45.0,18.0,0,0.0,,,\n'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",Rest Timer,0,0.0,0,NaN,,,\n'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",2,45.0,18.0,0,0.0,,,\n'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",Rest Timer,0,0.0,0,Infinity,,,\n'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",3,45.0,18.0,0,0.0,,,\n'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",Rest Timer,0,0.0,0,9999999999,,,\n';
+      final batch = WorkoutImport.fromStrongCsv(csv);
+      expect(batch.workouts.single.exercises.single.sets, hasLength(3));
+      expect(batch.restTimers, isEmpty);
+      expect(batch.rowsSkipped, 0);
+    });
+
+    test('a NaN measurement skips its row instead of failing the import', () {
+      const csv =
+          '$oldHeader'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",1,NaN,18.0,0,0.0,,,\n'
+          '2025-07-14 20:44:18,"Evening Workout",1h 22min,"Chest Dip",2,45.0,18.0,0,0.0,,,\n';
+      final batch = WorkoutImport.fromStrongCsv(csv);
+      expect(batch.rowsSkipped, 1);
+      expect(batch.workouts.single.exercises.single.sets, hasLength(1));
+    });
+
+    test('a timer after a warm-up row is ignored even when that row failed to parse', () {
+      const csv =
+          '$oldHeader'
+          '2025-07-17 20:55:32,"Evening Workout",55min,"Calf Press on Leg Press",1,290.0,12.0,0,0.0,,,\n'
+          '2025-07-17 20:55:32,"Evening Workout",55min,"Calf Press on Leg Press",Rest Timer,0,0.0,0,120.0,,,\n'
+          '2025-07-17 20:55:32,"Evening Workout",55min,"Calf Press on Leg Press",W,garbage,12.0,0,0.0,,,\n'
+          '2025-07-17 20:55:32,"Evening Workout",55min,"Calf Press on Leg Press",Rest Timer,0,0.0,0,60.0,,,\n';
+      final batch = WorkoutImport.fromStrongCsv(csv);
+      expect(batch.rowsSkipped, 1);
+      expect(batch.workouts.single.exercises.single.restTimers, [120]);
+    });
+
+    test('case-variant spellings share one latest session', () {
+      const csv =
+          '$oldHeader'
+          '2023-01-10 18:00:00,"Push",1h,"Bench Press (Barbell)",1,80,5,0,0,,,\n'
+          '2023-01-10 18:00:00,"Push",1h,"Bench Press (Barbell)",Rest Timer,0,0,0,180,,,\n'
+          '2025-01-10 18:00:00,"Push",1h,"bench press (barbell)",1,90,5,0,0,,,\n'
+          '2025-01-10 18:00:00,"Push",1h,"bench press (barbell)",Rest Timer,0,0,0,90,,,\n';
+      expect(WorkoutImport.fromStrongCsv(csv).restTimers, {'bench press (barbell)': 90});
+    });
+
+    test('an export without rest timers gives the same sets, in the same positions', () {
+      final withoutTimers = chestDip.split('\n').where((row) => !row.contains('Rest Timer')).join('\n');
+      final a = WorkoutImport.fromStrongCsv(chestDip).workouts.single;
+      final b = WorkoutImport.fromStrongCsv(withoutTimers).workouts.single;
+      expect(b.importId, a.importId);
+      expect(
+        [
+          for (final e in b.exercises)
+            for (final s in e.sets) s.toPayload(),
+        ],
+        [
+          for (final e in a.exercises)
+            for (final s in e.sets) s.toPayload(),
+        ],
+      );
+      expect(WorkoutImport.fromStrongCsv(withoutTimers).restTimers, isEmpty);
+    });
+
+    test('the payload carries set type, RPE, notes and the rest timers', () {
+      final params = WorkoutImport.fromStrongCsv(chestDip).toParams(userId: 'u1');
+      expect(params['workouts'], contains('"setType":"w"'));
+      expect(
+        params['restTimers'],
+        '[{"name":"Chest Dip","seconds":120},{"name":"Lat Pulldown (Cable)","seconds":120}]',
+      );
+    });
+  });
+
   group('payload and report', () {
     test('toParams encodes workouts and exercises as JSON strings', () {
       final params = WorkoutImport.fromStrongCsv(_strongCsv).toParams(userId: 'u1');
@@ -247,14 +482,19 @@ void main() {
     test('set payload omits null measurements', () {
       const set = ImportedSet(weight: 80, reps: 5);
       expect(set.toPayload(), {'weight': 80, 'reps': 5});
+      const typed = ImportedSet(weight: 80, reps: 5, type: 'warmup', rpe: 6.5);
+      expect(typed.toPayload(), {'weight': 80, 'reps': 5, 'setType': 'w', 'rpe': 6.5});
     });
 
     test('report round-trips from a result row and derives workoutsSkipped', () {
       final report = WorkoutImportReport.fromRow(
         {
           'workouts_found': 3,
-          'workouts_created': 2,
+          'workouts_created': 1,
+          'workouts_enriched': 1,
           'sets_created': 5,
+          'sets_enriched': 4,
+          'rest_timers_set': 2,
           'sets_skipped': 1,
           'exercises_matched': 4,
           'exercises_created': ['Custom Curl'],
@@ -265,15 +505,19 @@ void main() {
       expect(report.toMap(), {
         'source': 'strong',
         'workoutsFound': 3,
-        'workoutsCreated': 2,
+        'workoutsCreated': 1,
+        'workoutsEnriched': 1,
+        // an enriched workout is not a skipped one
         'workoutsSkipped': 1,
         'workoutsDropped': 0,
         'setsCreated': 5,
+        'setsEnriched': 4,
         'setsSkipped': 1,
         'setsDropped': 0,
         'exercisesMatched': 4,
         'exercisesCreated': ['Custom Curl'],
         'exercisesSkipped': ['Free motion Row'],
+        'restTimersSet': 2,
         'rowsSkipped': 0,
       });
     });
@@ -290,6 +534,9 @@ void main() {
       final preview = WorkoutImportPreview.fromRow(
         {
           'workouts_already_imported': 1,
+          'workouts_enriched': 1,
+          'sets_enriched': 2,
+          'rest_timers_set': 1,
           'exercises_matched': ['Bench Press (Barbell)', 'Running'],
         },
         batch: batch,
@@ -298,8 +545,11 @@ void main() {
         'source': 'strong',
         'workoutsFound': 3,
         'workoutsAlreadyImported': 1,
+        'workoutsEnriched': 1,
         'workoutsDropped': 0,
         'setsFound': 6,
+        'setsEnriched': 2,
+        'restTimersSet': 1,
         'setsDropped': 0,
         'exercisesMatched': 2,
         'exercisesUnmatched': [
