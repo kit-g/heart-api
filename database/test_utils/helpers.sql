@@ -167,7 +167,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION validate_format_exercise_set(_set JSONB) RETURNS SETOF BOOL AS
 $$
 BEGIN
-    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_set)) = 9;
+    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_set)) = 11;
     RETURN NEXT jsonb_typeof(_set -> 'id') = 'string';
     RETURN NEXT jsonb_typeof(_set -> 'weight') = 'number' OR jsonb_typeof(_set -> 'weight') = 'null';
     RETURN NEXT jsonb_typeof(_set -> 'reps') = 'number' OR jsonb_typeof(_set -> 'reps') = 'null';
@@ -177,6 +177,8 @@ BEGIN
     RETURN NEXT jsonb_typeof(_set -> 'started_at') = 'string' OR jsonb_typeof(_set -> 'started_at') = 'null';
     RETURN NEXT jsonb_typeof(_set -> 'completed_at') = 'string' OR jsonb_typeof(_set -> 'completed_at') = 'null';
     RETURN NEXT jsonb_typeof(_set -> 'set_order') = 'number';
+    RETURN NEXT jsonb_typeof(_set -> 'set_type') = 'string' OR jsonb_typeof(_set -> 'set_type') = 'null';
+    RETURN NEXT jsonb_typeof(_set -> 'rpe') = 'number' OR jsonb_typeof(_set -> 'rpe') = 'null';
 END
 $$ LANGUAGE plpgsql;
 

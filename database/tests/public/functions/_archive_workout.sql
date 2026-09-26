@@ -22,7 +22,7 @@ DECLARE
 BEGIN
     _user_id := create_test_profile();
     _w_id    := create_test_workout(_user_id => _user_id, _name => 'archive me');
-    UPDATE workouts SET calories = 420 WHERE id = _w_id;
+    UPDATE workouts SET calories = 420, note = 'felt strong' WHERE id = _w_id;
 
     DELETE FROM workouts WHERE id = _w_id;
 
@@ -46,6 +46,11 @@ BEGIN
             420::real,
             'archive preserved calories'
         );
+    RETURN NEXT is(
+            (SELECT note FROM archive.deleted_workouts WHERE id = _w_id),
+            'felt strong',
+            'archive preserved the workout note'
+        );
 END
 $$ LANGUAGE plpgsql;
 
@@ -63,6 +68,7 @@ BEGIN
     _w_id    := create_test_workout(_user_id => _user_id);
     _we_id   := create_test_workout_exercise(_w_id, _ex_id, 0);
     PERFORM create_test_exercise_set(_we_id, 0, 135, 5);
+    UPDATE exercise_sets SET set_type = 'w', rpe = 6.5 WHERE workout_exercise_id = _we_id;
 
     DELETE FROM workouts WHERE id = _w_id;
 
@@ -71,6 +77,8 @@ BEGIN
     RETURN NEXT is(jsonb_array_length(_archived), 1, 'archived exercises array has the entry');
     RETURN NEXT is(_archived -> 0 -> 'exercise' ->> 'name', 'Bench Press', 'exercise name in snapshot');
     RETURN NEXT is(jsonb_array_length(_archived -> 0 -> 'sets'), 1, 'sets in snapshot');
+    RETURN NEXT is(_archived -> 0 -> 'sets' -> 0 ->> 'set_type', 'warmup', 'set type in snapshot');
+    RETURN NEXT is((_archived -> 0 -> 'sets' -> 0 ->> 'rpe')::numeric, 6.5, 'rpe in snapshot');
 END
 $$ LANGUAGE plpgsql;
 
