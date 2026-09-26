@@ -24,7 +24,7 @@ mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
       final row = rows.first.toColumnMap();
       return (Template.fromRow(row), row['created'] as bool);
     } on ServerException catch (e) {
-      _rethrowForeignId(e);
+      _rethrowClientIdCollision(e);
     }
   }
 
@@ -42,7 +42,7 @@ mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
       if (rows.isEmpty) throw NotFound(type: 'Template', id: templateId);
       return Template.fromRow(rows.first.toColumnMap());
     } on ServerException catch (e) {
-      _rethrowCapped(e);
+      _rethrowClientIdCollision(e);
     }
   }
 

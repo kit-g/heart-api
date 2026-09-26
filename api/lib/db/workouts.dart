@@ -87,6 +87,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
         parameters: {
           'workoutId': workoutId,
           'replacesExercises': body.replacesExercises,
+          'setsNote': body.setsNote,
           ...body.toParams(),
         },
       );
@@ -106,6 +107,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     DateTime? start,
     DateTime? end,
     double? calories,
+    ({String? value})? note,
   }) async {
     final rows = await _pool.execute(
       _patchWorkout.toSql(),
@@ -116,6 +118,8 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
         'startedAt': start,
         'completedAt': end,
         'calories': calories,
+        'patchesNote': note != null,
+        'note': note?.value,
       },
     );
     if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
