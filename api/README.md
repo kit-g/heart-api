@@ -164,6 +164,15 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
   500 a raw constraint violation would otherwise surface as. See
   [`docs/2026-09-05.upsync-replay.md`](../docs/2026-09-05.upsync-replay.md) for the full contract
   (heart-api#66).
+- **A full replace updates kept rows in place; it never deletes and re-inserts an id.** A row's
+  `ON DELETE CASCADE` fires at the end of the statement, after any re-insert, so deleting an
+  exercise and re-inserting it under its round-tripped id silently took the re-inserted sets
+  (and every comment on them) with it. `_replaceWorkout` updates the rows the body still names,
+  inserts new ids, and deletes only what the body dropped.
+- **A missing key keeps the stored value, for fields newer than the clients.** The in-place
+  update takes `CASE WHEN set_data ? 'rpe' THEN … ELSE es.rpe END`, so a client that doesn't
+  send the field keeps it and an explicit `null` clears it. See
+  [`docs/2026-09-26.import-fidelity.md`](../docs/2026-09-26.import-fidelity.md) (heart-api#84).
 
 ### Adding a new resource
 
