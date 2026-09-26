@@ -167,12 +167,17 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
 - **A full replace updates kept rows in place; it never deletes and re-inserts an id.** A row's
   `ON DELETE CASCADE` fires at the end of the statement, after any re-insert, so deleting an
   exercise and re-inserting it under its round-tripped id silently took the re-inserted sets
-  (and every comment on them) with it. `_replaceWorkout` updates the rows the body still names,
-  inserts new ids, and deletes only what the body dropped.
+  (and every comment on them) with it. `_replaceWorkout` and `_replaceTemplate` update the rows
+  the body still names, insert new ids, and delete only what the body dropped.
 - **A missing key keeps the stored value, for fields newer than the clients.** The in-place
   update takes `CASE WHEN set_data ? 'rpe' THEN … ELSE es.rpe END`, so a client that doesn't
-  send the field keeps it and an explicit `null` clears it. See
-  [`docs/2026-09-26.import-fidelity.md`](../docs/2026-09-26.import-fidelity.md) (heart-api#84).
+  send the field keeps it and an explicit `null` clears it. A scalar column does the same with
+  a flag the input sets from the key's presence (`@setsNote`). See
+  [`docs/2026-09-26.import-fidelity.md`](../docs/2026-09-26.import-fidelity.md) (heart-api#84,
+  heart-api#83).
+- **Set types go in as words.** Writers pass `normal`/`warmup`/`drop`/`failure` through
+  `_set_type_code(…)`, and reads spell the letter out with `_set_type_name(…)`. The letters
+  live only in the database.
 
 ### Adding a new resource
 
