@@ -2,8 +2,9 @@
 
 ## 2.5.0
 
-Set types, RPE and the workout note reach the app (heart-api#83). The server
-has stored them since heart-api#84, from Strong imports.
+Set types, RPE and the workout note reach the app (heart-api#83; app side
+heart-of-yours#151). The server has stored them since heart-api#84, from
+Strong imports.
 
 - New: `SetType` (`normal`, `warmup`, `drop`, `failure`; wire word in
   `value`). `fromString` reads absent or null as `normal` and throws on an
