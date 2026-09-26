@@ -90,6 +90,107 @@ void main() {
       expect(() => req.toParams(), throwsA(isA<BadRequest>()));
     });
 
+    test('a note is measured in characters, as the column measures it', () {
+      final req = WorkoutRequest(
+        userId: 'u1',
+        body: {
+          'exercises': [
+            // 500 code points, 1000 UTF-16 units
+            {'exercise': _bench, 'order': 0, 'note': '💪' * 500, 'sets': []},
+          ],
+        },
+      );
+      expect(() => req.toParams(), returnsNormally);
+    });
+
+    test('an id named twice in one payload is a 400, not a silently dropped entry', () {
+      const id = '0198c1a2-b3c4-7d5e-8f60-718293a4b5ff';
+      WorkoutRequest body(List<Map<String, dynamic>> exercises) =>
+          WorkoutRequest(userId: 'u1', body: {'exercises': exercises});
+      final twiceExercise = body([
+        {'id': id, 'exercise': _bench, 'order': 0, 'sets': <Map>[]},
+        {'id': id, 'exercise': _squat, 'order': 1, 'sets': <Map>[]},
+      ]);
+      final twiceSet = body([
+        {
+          'exercise': _bench,
+          'order': 0,
+          'sets': [
+            {'id': id, 'weight': 100},
+            {'id': id, 'weight': 105},
+          ],
+        },
+      ]);
+      for (final req in [twiceExercise, twiceSet]) {
+        expect(
+          () => req.toParams(),
+          throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'duplicate_id')),
+        );
+      }
+    });
+
+    group('set type and RPE', () {
+      List sets(List<Map<String, dynamic>> raw) {
+        final req = WorkoutRequest(
+          userId: 'u1',
+          body: {
+            'exercises': [
+              {'exercise': _bench, 'order': 0, 'sets': raw},
+            ],
+          },
+        );
+        return (jsonDecode(req.toParams()['exercises'] as String) as List).single['sets'] as List;
+      }
+
+      test('valid values are forwarded as their stored letter, explicit nulls as null', () {
+        expect(
+          sets([
+            {'weight': 60, 'set_type': 'warmup', 'rpe': 6.5},
+            {'weight': 100, 'set_type': null, 'rpe': null},
+          ]),
+          [
+            {'weight': 60, 'set_type': 'w', 'rpe': 6.5},
+            {'weight': 100, 'set_type': null, 'rpe': null},
+          ],
+        );
+      });
+
+      test('absent keys stay absent — the replace keeps what is stored', () {
+        expect(
+          sets([
+            {'weight': 100, 'reps': 5},
+          ]).single,
+          {'weight': 100, 'reps': 5},
+        );
+      });
+
+      test('an unknown set type is a 400 naming the set', () {
+        expect(
+          () => sets([
+            {'weight': 100},
+            {'weight': 100, 'set_type': 'amrap'},
+          ]),
+          throwsA(
+            isA<BadRequest>()
+                .having((e) => e.code, 'code', 'invalid_set_type')
+                .having((e) => e.reason, 'reason', contains('exercises[0].sets[1]')),
+          ),
+        );
+      });
+
+      test('an RPE off the 1-10 half-step scale is a 400', () {
+        for (final rpe in [8.3, 11, 0.5, '8']) {
+          expect(
+            () => sets([
+              {'weight': 100, 'rpe': rpe},
+            ]),
+            throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'invalid_rpe')),
+            reason: '$rpe',
+          );
+        }
+      });
+    });
+
     test('exercises encoded with the id flattened from {exercise: id} or {exercise: {id}}', () {
       final req = const WorkoutRequest(
         userId: 'u1',

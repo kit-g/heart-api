@@ -383,6 +383,238 @@ void main() {
     });
   });
 
+  group('set type, RPE, notes, rest timers and re-import enrichment', () {
+    late String dip; // a global the exports below resolve to
+
+    const header =
+        'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps,Distance,Seconds,Notes,Workout Notes,RPE\n';
+
+    // the same session exported with everything switched on ...
+    String rich() =>
+        '$header'
+        '2025-07-14 20:44:18,Evening,1h,$dip,W,20,10,0,0,slow eccentric,deload week,\n'
+        '2025-07-14 20:44:18,Evening,1h,$dip,Rest Timer,0,0,0,90,,,\n'
+        '2025-07-14 20:44:18,Evening,1h,$dip,1,45,8,0,0,,,8.5\n'
+        '2025-07-14 20:44:18,Evening,1h,$dip,Rest Timer,0,0,0,120,,,\n'
+        '2025-07-14 20:44:18,Evening,1h,$dip,2,50,6,0,0,,,9\n'
+        '2025-07-14 20:44:18,Evening,1h,$dip,Rest Timer,0,0,0,120,,,\n';
+
+    // ... and with notes, RPE and rest timers left out
+    String bare() =>
+        '$header'
+        '2025-07-14 20:44:18,Evening,1h,$dip,W,20,10,0,0,,,\n'
+        '2025-07-14 20:44:18,Evening,1h,$dip,1,45,8,0,0,,,\n'
+        '2025-07-14 20:44:18,Evening,1h,$dip,2,50,6,0,0,,,\n';
+
+    Future<WorkoutImportReport> import(String owner, String csv, {List<String>? createCustom}) =>
+        h.db.importWorkouts(userId: owner, batch: WorkoutImport.fromStrongCsv(csv), createCustom: createCustom);
+
+    Future<List<Map<String, dynamic>>> sets(String owner) async {
+      final rows = await h.exec(
+        'SELECT es.set_order, es.weight::float8 AS weight, _set_type_name(es.set_type) AS set_type, es.rpe::float8 AS rpe '
+        'FROM exercise_sets es '
+        'JOIN workout_exercises we ON we.id = es.workout_exercise_id '
+        'JOIN workouts w ON w.id = we.workout_id WHERE w.user_id = @id ORDER BY es.set_order',
+        {'id': owner},
+      );
+      return [for (final r in rows) r.toColumnMap()];
+    }
+
+    Future<Map<String, dynamic>> notes(String owner) async {
+      final rows = await h.exec(
+        'SELECT w.note AS workout_note, we.note AS exercise_note FROM workouts w '
+        'JOIN workout_exercises we ON we.workout_id = w.id WHERE w.user_id = @id',
+        {'id': owner},
+      );
+      return rows.single.toColumnMap();
+    }
+
+    Future<int?> restTimer(String owner) async {
+      final rows = await h.exec(
+        'SELECT ep.rest_timer FROM exercise_preferences ep JOIN exercises e ON e.id = ep.exercise_id '
+        'WHERE ep.user_id = @id AND e.name = @n',
+        {'id': owner, 'n': dip},
+      );
+      return rows.isEmpty ? null : rows.single.toColumnMap()['rest_timer'] as int?;
+    }
+
+    setUpAll(() async {
+      dip = h.uniqueName('Chest Dip');
+      await h.seedGlobalExercise(name: dip);
+    });
+
+    test('a rich export lands set types, RPE, notes and the rest timer', () async {
+      final owner = await freshProfile();
+      final report = await import(owner, rich());
+
+      expect(report.workoutsCreated, 1);
+      expect(report.restTimersSet, 1);
+      expect((await sets(owner)).map((s) => (s['set_type'], s['rpe'])), [
+        ('warmup', null),
+        ('normal', 8.5),
+        ('normal', 9.0),
+      ]);
+      expect(await notes(owner), {'workout_note': 'deload week', 'exercise_note': 'slow eccentric'});
+      // the timer after the warm-up is Strong's warm-up timer, not this one
+      expect(await restTimer(owner), 120);
+    });
+
+    test('a richer re-export fills the gaps a bare one left, and says so', () async {
+      final owner = await freshProfile();
+      await import(owner, bare());
+
+      final report = await import(owner, rich());
+      expect(report.workoutsCreated, 0);
+      expect(report.workoutsEnriched, 1);
+      // the W set already had its type from the bare export; the other two gain RPE
+      expect(report.setsEnriched, 2);
+      expect(report.workoutsSkipped, 0);
+      expect(report.restTimersSet, 1);
+
+      expect((await sets(owner)).map((s) => s['rpe']), [null, 8.5, 9.0]);
+      expect(await notes(owner), {'workout_note': 'deload week', 'exercise_note': 'slow eccentric'});
+      final count = await h.exec('SELECT count(*)::int AS n FROM workouts WHERE user_id = @id', {'id': owner});
+      expect(count.single.toColumnMap()['n'], 1);
+    });
+
+    test('a workout imported before any of this existed is filled in by the same file', () async {
+      final owner = await freshProfile();
+      await import(owner, rich());
+      // what an import from before these columns looks like
+      await h.exec(
+        'UPDATE exercise_sets SET set_type = NULL, rpe = NULL WHERE workout_exercise_id IN ('
+        '  SELECT we.id FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id WHERE w.user_id = @id)',
+        {'id': owner},
+      );
+      await h.exec(
+        'UPDATE workout_exercises SET note = NULL WHERE workout_id IN (SELECT id FROM workouts WHERE user_id = @id)',
+        {'id': owner},
+      );
+      await h.exec('UPDATE workouts SET note = NULL WHERE user_id = @id', {'id': owner});
+
+      final report = await import(owner, rich());
+      expect(report.workoutsEnriched, 1);
+      expect(report.setsEnriched, 3);
+      expect((await sets(owner)).map((s) => s['set_type']), ['warmup', 'normal', 'normal']);
+      expect(await notes(owner), {'workout_note': 'deload week', 'exercise_note': 'slow eccentric'});
+    });
+
+    test('a poorer re-export takes nothing away', () async {
+      final owner = await freshProfile();
+      await import(owner, rich());
+      final setsBefore = await sets(owner);
+      final notesBefore = await notes(owner);
+
+      final report = await import(owner, bare());
+      expect(report.workoutsEnriched, 0);
+      expect(report.setsEnriched, 0);
+      expect(report.workoutsSkipped, 1);
+      expect(await sets(owner), setsBefore);
+      expect(await notes(owner), notesBefore);
+      expect(await restTimer(owner), 120);
+    });
+
+    test('a value already there wins over a different incoming one', () async {
+      final owner = await freshProfile();
+      await import(owner, bare());
+      await h.exec(
+        "UPDATE workout_exercises SET note = 'my own note' WHERE workout_id IN (SELECT id FROM workouts WHERE user_id = @id)",
+        {'id': owner},
+      );
+      await h.exec(
+        'UPDATE exercise_sets SET rpe = 7 WHERE set_order = 1 AND workout_exercise_id IN ('
+        '  SELECT we.id FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id WHERE w.user_id = @id)',
+        {'id': owner},
+      );
+
+      await import(owner, rich());
+      expect((await notes(owner))['exercise_note'], 'my own note');
+      expect((await sets(owner)).map((s) => s['rpe']), [null, 7.0, 9.0]);
+    });
+
+    test('a set edited since the import is not enriched; its neighbours are', () async {
+      final owner = await freshProfile();
+      await import(owner, bare());
+      await h.exec(
+        'UPDATE exercise_sets SET weight = 47 WHERE set_order = 1 AND workout_exercise_id IN ('
+        '  SELECT we.id FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id WHERE w.user_id = @id)',
+        {'id': owner},
+      );
+
+      final report = await import(owner, rich());
+      expect(report.setsEnriched, 1);
+      expect((await sets(owner)).map((s) => (s['weight'], s['rpe'])), [(20.0, null), (47.0, null), (50.0, 9.0)]);
+    });
+
+    test('a deleted set does not hand its RPE to the set that moved into its place', () async {
+      final owner = await freshProfile();
+      await import(owner, bare());
+      // the app renumbers on delete: 45x8 goes, 50x6 becomes set_order 1
+      await h.exec(
+        'DELETE FROM exercise_sets WHERE set_order = 1 AND workout_exercise_id IN ('
+        '  SELECT we.id FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id WHERE w.user_id = @id)',
+        {'id': owner},
+      );
+      await h.exec(
+        'UPDATE exercise_sets SET set_order = 1 WHERE set_order = 2 AND workout_exercise_id IN ('
+        '  SELECT we.id FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id WHERE w.user_id = @id)',
+        {'id': owner},
+      );
+
+      await import(owner, rich());
+      expect((await sets(owner)).map((s) => (s['weight'], s['rpe'])), [(20.0, null), (50.0, null)]);
+    });
+
+    test('the preview reports exactly what the commit then does, writing nothing', () async {
+      final owner = await freshProfile();
+      await import(owner, bare());
+      final setsBefore = await sets(owner);
+      final notesBefore = await notes(owner);
+
+      final preview = await h.db.previewImport(userId: owner, batch: WorkoutImport.fromStrongCsv(rich()));
+      expect(await sets(owner), setsBefore);
+      expect(await notes(owner), notesBefore);
+      expect(await restTimer(owner), isNull);
+
+      final report = await import(owner, rich());
+      expect(
+        (preview.workoutsEnriched, preview.setsEnriched, preview.restTimersSet),
+        (report.workoutsEnriched, report.setsEnriched, report.restTimersSet),
+      );
+      expect(preview.workoutsEnriched, 1);
+    });
+
+    test('a rest timer the user already set is kept; a preference without one gains it', () async {
+      final keeps = await freshProfile();
+      await h.exec(
+        'INSERT INTO exercise_preferences (user_id, exercise_id, rest_timer) '
+        'SELECT @id, id, 60 FROM exercises WHERE name = @n',
+        {'id': keeps, 'n': dip},
+      );
+      expect((await import(keeps, rich())).restTimersSet, 0);
+      expect(await restTimer(keeps), 60);
+
+      final gains = await freshProfile();
+      await h.exec(
+        "INSERT INTO exercise_preferences (user_id, exercise_id, unit_system) SELECT @id, id, 'imperial' FROM exercises WHERE name = @n",
+        {'id': gains, 'n': dip},
+      );
+      expect((await import(gains, rich())).restTimersSet, 1);
+      expect(await restTimer(gains), 120);
+    });
+
+    test('a declined custom exercise gets no rest timer', () async {
+      final owner = await freshProfile();
+      final unknown = h.uniqueName('Sled Push');
+      final report = await import(owner, rich().replaceAll(dip, unknown), createCustom: const []);
+      expect(report.restTimersSet, 0);
+      final prefs = await h.exec('SELECT count(*)::int AS n FROM exercise_preferences WHERE user_id = @id', {
+        'id': owner,
+      });
+      expect(prefs.single.toColumnMap()['n'], 0);
+    });
+  });
+
   test('an account at the custom-exercises ceiling gets a 400 instead of import-created customs', () async {
     final collector = await freshProfile();
     await h.exec(
