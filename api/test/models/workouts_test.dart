@@ -103,6 +103,45 @@ void main() {
       expect(() => req.toParams(), returnsNormally);
     });
 
+    test('the workout note is trimmed, blank is none, and whether the key came is kept apart', () {
+      WorkoutRequest body(Map<String, dynamic> extra) => WorkoutRequest(userId: 'u1', body: {'name': 'W', ...extra});
+
+      expect(body({'note': '  felt strong '}).toParams()['note'], 'felt strong');
+      expect(body({'note': '   '}).toParams()['note'], isNull);
+      expect(body({'note': null}).setsNote, isTrue);
+      expect(body({}).setsNote, isFalse);
+      expect(body({}).toParams()['note'], isNull);
+    });
+
+    test('the workout note is at most 1000 code points', () {
+      final fits = WorkoutRequest(userId: 'u1', body: {'note': '💪' * 1000});
+      expect(() => fits.toParams(), returnsNormally);
+
+      final over = WorkoutRequest(userId: 'u1', body: {'note': 'x' * 1001});
+      expect(
+        () => over.toParams(),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'workout_note_too_long')),
+      );
+      final notText = const WorkoutRequest(userId: 'u1', body: {'note': 7});
+      expect(() => notText.toParams(), throwsA(isA<BadRequest>()));
+    });
+
+    test('two exercises at one order are a 400: sets find their exercise by it', () {
+      final req = const WorkoutRequest(
+        userId: 'u1',
+        body: {
+          'exercises': [
+            {'exercise': _bench, 'order': 0, 'sets': []},
+            {'exercise': _squat, 'order': 0, 'sets': []},
+          ],
+        },
+      );
+      expect(
+        () => req.toParams(),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'duplicate_order')),
+      );
+    });
+
     test('an id named twice in one payload is a 400, not a silently dropped entry', () {
       const id = '0198c1a2-b3c4-7d5e-8f60-718293a4b5ff';
       WorkoutRequest body(List<Map<String, dynamic>> exercises) =>
@@ -142,7 +181,7 @@ void main() {
         return (jsonDecode(req.toParams()['exercises'] as String) as List).single['sets'] as List;
       }
 
-      test('valid values are forwarded as their stored letter, explicit nulls as null', () {
+      test('valid values are forwarded as their wire word, an explicit null as normal', () {
         expect(
           sets([
             {'weight': 60, 'set_type': 'warmup', 'rpe': 6.5},
@@ -150,10 +189,10 @@ void main() {
             {'weight': 105, 'set_type': 'normal'},
           ]),
           [
-            {'weight': 60, 'set_type': 'w', 'rpe': 6.5},
-            {'weight': 100, 'set_type': null, 'rpe': null},
-            // normal is stored as no type at all
-            {'weight': 105, 'set_type': null},
+            {'weight': 60, 'set_type': 'warmup', 'rpe': 6.5},
+            // an explicit null clears the type, which is a normal set
+            {'weight': 100, 'set_type': 'normal', 'rpe': null},
+            {'weight': 105, 'set_type': 'normal'},
           ],
         );
       });

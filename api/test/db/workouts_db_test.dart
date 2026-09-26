@@ -3,7 +3,7 @@ library;
 
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/workouts.dart';
-import 'package:heart_models/heart_models.dart' show timestampOfUuidV7, uuidV7;
+import 'package:heart_models/heart_models.dart' show SetType, Workout, timestampOfUuidV7, uuidV7;
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -1051,6 +1051,185 @@ void main() {
       await replace([set(firstSetId, 60), set(secondSetId, 100)]);
       final rows = await h.exec('SELECT note FROM workouts WHERE id = @w::uuid', {'w': workoutId});
       expect(rows.single.toColumnMap()['note'], 'from Strong');
+    });
+
+    test('every read carries them to the model', () async {
+      void check(Workout workout, String read) {
+        final sets = workout.single.toList();
+        expect(sets.map((s) => s.setType), [SetType.warmup, SetType.normal], reason: read);
+        expect(sets.map((s) => s.rpe), [6.5, 9.0], reason: read);
+      }
+
+      check(await h.db.getWorkout(userId: ownerId, workoutId: workoutId, imageUrl: imageUrl), 'get');
+      check(
+        await h.db.getTargetWorkout(
+          requesterId: peerId,
+          targetUserId: ownerId,
+          workoutId: workoutId,
+          imageUrl: imageUrl,
+        ),
+        'a peer\'s get',
+      );
+      final page = await h.db.getWorkouts(userId: ownerId, targetUserId: ownerId, limit: 100, imageUrl: imageUrl);
+      check(page.items.firstWhere((w) => w.id == workoutId), 'list');
+      final patched = await h.db.patchWorkout(userId: ownerId, workoutId: workoutId, name: 'x', imageUrl: imageUrl);
+      check(patched, 'patch');
+    });
+
+    test('the replace response carries what it wrote', () async {
+      final replaced = await h.db.updateWorkout(
+        userId: ownerId,
+        workoutId: workoutId,
+        body: WorkoutRequest(
+          userId: ownerId,
+          body: {
+            'name': 'Typed',
+            'start': '2026-09-26T08:00:00Z',
+            'exercises': [
+              {
+                'exercise': exId,
+                'order': 0,
+                'sets': [
+                  set(firstSetId, 60),
+                  set(secondSetId, 100, {'set_type': 'drop', 'rpe': 7}),
+                ],
+              },
+            ],
+          },
+        ),
+        imageUrl: imageUrl,
+      );
+      final sets = replaced.single.toList();
+      expect(sets.map((s) => s.setType), [SetType.warmup, SetType.drop]);
+      expect(sets.map((s) => s.rpe), [6.5, 7.0]);
+    });
+  });
+
+  group('the workout note', () {
+    late String exId;
+
+    setUpAll(() async {
+      exId = await h.seedGlobalExercise(name: h.uniqueName('Noted'));
+    });
+
+    Map<String, dynamic> workout([Map<String, dynamic> extra = const {}]) => {
+      'name': 'Noted',
+      'start': '2026-09-26T08:00:00Z',
+      'exercises': [
+        {
+          'exercise': exId,
+          'order': 0,
+          'sets': [
+            {'weight': 100, 'reps': 5, 'completed': true},
+          ],
+        },
+      ],
+      ...extra,
+    };
+
+    Future<Workout> create(Map<String, dynamic> body) async => (await h.db.createWorkout(
+      userId: ownerId,
+      body: WorkoutRequest(userId: ownerId, body: body),
+      imageUrl: imageUrl,
+    )).$1;
+
+    Future<Workout> replace(String id, Map<String, dynamic> body) => h.db.updateWorkout(
+      userId: ownerId,
+      workoutId: id,
+      body: WorkoutRequest(userId: ownerId, body: body),
+      imageUrl: imageUrl,
+    );
+
+    Future<String?> stored(String id) async =>
+        (await h.exec('SELECT note FROM workouts WHERE id = @w::uuid', {'w': id})).single.toColumnMap()['note']
+            as String?;
+
+    test('a create stores it trimmed and every read returns it', () async {
+      final created = await create(workout({'note': '  felt strong  '}));
+      expect(created.note, 'felt strong');
+      expect(await stored(created.id), 'felt strong');
+
+      final got = await h.db.getWorkout(userId: ownerId, workoutId: created.id, imageUrl: imageUrl);
+      expect(got.note, 'felt strong');
+      final theirs = await h.db.getTargetWorkout(
+        requesterId: peerId,
+        targetUserId: ownerId,
+        workoutId: created.id,
+        imageUrl: imageUrl,
+      );
+      expect(theirs.note, 'felt strong');
+      final page = await h.db.getWorkouts(userId: ownerId, targetUserId: ownerId, limit: 100, imageUrl: imageUrl);
+      expect(page.items.firstWhere((w) => w.id == created.id).note, 'felt strong');
+    });
+
+    test('a create without one has none', () async {
+      final created = await create(workout());
+      expect(created.note, isNull);
+      expect(await stored(created.id), isNull);
+    });
+
+    test('a retried create returns the stored note, not the retry\'s', () async {
+      final id = uuidV7();
+      await create(workout({'id': id, 'note': 'first'}));
+      final again = await create(workout({'id': id, 'note': 'second'}));
+      expect(again.note, 'first');
+    });
+
+    test('a replace sets it, leaves it alone without the key, and clears it on null or blank', () async {
+      final created = await create(workout({'note': 'first'}));
+
+      expect((await replace(created.id, workout({'note': 'second'}))).note, 'second');
+      expect((await replace(created.id, workout())).note, 'second');
+      expect(await stored(created.id), 'second');
+      expect((await replace(created.id, workout({'note': null}))).note, isNull);
+      expect(await stored(created.id), isNull);
+
+      await replace(created.id, workout({'note': 'third'}));
+      expect((await replace(created.id, workout({'note': '   '}))).note, isNull);
+      expect(await stored(created.id), isNull);
+    });
+
+    test('a shallow replace without exercises still writes the note', () async {
+      final created = await create(workout());
+      final replaced = await replace(created.id, {'name': 'Noted', 'start': '2026-09-26T08:00:00Z', 'note': 'late'});
+      expect(replaced.note, 'late');
+      expect(replaced.single.length, 1);
+    });
+
+    test('a patch sets it, leaves it alone without it, and clears it', () async {
+      final created = await create(workout());
+
+      final set = await h.db.patchWorkout(
+        userId: ownerId,
+        workoutId: created.id,
+        note: (value: 'patched'),
+        imageUrl: imageUrl,
+      );
+      expect(set.note, 'patched');
+
+      final renamed = await h.db.patchWorkout(userId: ownerId, workoutId: created.id, name: 'R', imageUrl: imageUrl);
+      expect(renamed.note, 'patched');
+
+      final cleared = await h.db.patchWorkout(
+        userId: ownerId,
+        workoutId: created.id,
+        note: (value: null),
+        imageUrl: imageUrl,
+      );
+      expect(cleared.note, isNull);
+      expect(await stored(created.id), isNull);
+    });
+
+    test('a note of 1000 emoji fits: the column counts code points', () async {
+      final created = await create(workout({'note': '💪' * 1000}));
+      expect(created.note?.runes.length, 1000);
+    });
+
+    test('deleting the workout archives its note', () async {
+      final created = await create(workout({'note': 'gone'}));
+      await h.db.deleteWorkout(userId: ownerId, workoutId: created.id);
+      final rows = await h.exec('SELECT note FROM archive.deleted_workouts WHERE id = @w::uuid', {'w': created.id});
+      expect(rows.single.toColumnMap()['note'], 'gone');
     });
   });
 

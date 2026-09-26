@@ -183,6 +183,37 @@ void main() {
       ).called(1);
     });
 
+    test('the note reaches the service, a null one as a clear', () async {
+      when(
+        workouts.patchWorkout(
+          userId: anyNamed('userId'),
+          workoutId: anyNamed('workoutId'),
+          note: anyNamed('note'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).thenAnswer((_) async => _fakeWorkout('w-1'));
+
+      await patchWorkoutById(patchReq({'note': ' felt strong '}), 'w-1');
+      await patchWorkoutById(patchReq({'note': null}), 'w-1');
+
+      verify(
+        workouts.patchWorkout(
+          userId: anyNamed('userId'),
+          workoutId: anyNamed('workoutId'),
+          note: argThat(equals((value: 'felt strong')), named: 'note'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).called(1);
+      verify(
+        workouts.patchWorkout(
+          userId: anyNamed('userId'),
+          workoutId: anyNamed('workoutId'),
+          note: argThat(equals((value: null)), named: 'note'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).called(1);
+    });
+
     test('rejects an empty body (no fields to change)', () async {
       await expectLater(patchWorkoutById(patchReq({}), 'w-1'), throwsA(isA<BadRequest>()));
       verifyNever(

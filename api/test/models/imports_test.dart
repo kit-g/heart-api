@@ -462,7 +462,7 @@ void main() {
 
     test('the payload carries set type, RPE, notes and the rest timers', () {
       final params = WorkoutImport.fromStrongCsv(chestDip).toParams(userId: 'u1');
-      expect(params['workouts'], contains('"setType":"w"'));
+      expect(params['workouts'], contains('"setType":"warmup"'));
       expect(
         params['restTimers'],
         '[{"name":"Chest Dip","seconds":120},{"name":"Lat Pulldown (Cable)","seconds":120}]',
@@ -483,7 +483,7 @@ void main() {
       const set = ImportedSet(weight: 80, reps: 5);
       expect(set.toPayload(), {'weight': 80, 'reps': 5});
       const typed = ImportedSet(weight: 80, reps: 5, type: 'warmup', rpe: 6.5);
-      expect(typed.toPayload(), {'weight': 80, 'reps': 5, 'setType': 'w', 'rpe': 6.5});
+      expect(typed.toPayload(), {'weight': 80, 'reps': 5, 'setType': 'warmup', 'rpe': 6.5});
     });
 
     test('report round-trips from a result row and derives workoutsSkipped', () {

@@ -43,4 +43,33 @@ void main() {
       );
     });
   });
+
+  group('WorkoutPatchIn — the note', () {
+    Future<WorkoutPatchIn> patch(Map<String, dynamic> body) => WorkoutPatchIn.fromRequest(jsonRequest(body: body));
+
+    test('a note alone is a patch, trimmed', () async {
+      expect((await patch({'note': '  felt strong '})).note, (value: 'felt strong'));
+    });
+
+    test('null or blank clears it, and still counts as a field', () async {
+      expect((await patch({'note': null})).note, (value: null));
+      expect((await patch({'note': '   '})).note, (value: null));
+    });
+
+    test('no note key leaves it alone', () async {
+      expect((await patch({'name': 'A'})).note, isNull);
+    });
+
+    test('over 1000 code points is a 400; 1000 emoji fit', () async {
+      expect((await patch({'note': '💪' * 1000})).note?.value?.runes.length, 1000);
+      await expectLater(
+        patch({'note': 'x' * 1001}),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'workout_note_too_long')),
+      );
+    });
+
+    test('a non-string note is a 400', () async {
+      await expectLater(patch({'note': 42}), throwsA(isA<BadRequest>()));
+    });
+  });
 }

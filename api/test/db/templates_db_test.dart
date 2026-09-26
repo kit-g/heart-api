@@ -357,6 +357,354 @@ void main() {
       expect(after.items.map((s) => s.id), isNot(contains(share.id)));
     });
   });
+
+  group('ids and set types round-trip (heart-api#83)', () {
+    late String exerciseA;
+    late String exerciseB;
+
+    setUpAll(() async {
+      exerciseA = await h.seedGlobalExercise();
+      exerciseB = await h.seedGlobalExercise();
+    });
+
+    TemplateRequest body(String owner, List<TemplateExerciseRequest> exercises, {String? id}) =>
+        TemplateRequest(userId: owner, name: 'Typed', id: id, exercises: exercises);
+
+    List<ExerciseSet> setsOf(Template t, int exercise) => t.elementAt(exercise).toList();
+
+    Future<Map<String, dynamic>> stored(String setId) async => (await h.exec(
+      'SELECT template_exercise_id, set_type, weight FROM template_exercise_sets WHERE id = @id::uuid',
+      {'id': setId},
+    )).single.toColumnMap();
+
+    Future<int> rowsOf(String setId) async =>
+        (await h.exec(
+              'SELECT count(*) AS n FROM template_exercise_sets WHERE id = @id::uuid',
+              {'id': setId},
+            )).single.toColumnMap()['n']
+            as int;
+
+    test('a create keeps the payload ids and set types, and reads them back', () async {
+      final exerciseId = uuidV7();
+      final warmUp = uuidV7();
+      final working = uuidV7();
+      final created = await h.db.createTemplate(
+        userId: coachId,
+        body: body(coachId, [
+          TemplateExerciseRequest(
+            id: exerciseId,
+            exerciseId: exerciseA,
+            order: 0,
+            sets: [
+              TemplateSetRequest(id: warmUp, weight: 40, reps: 10, setType: .warmup),
+              TemplateSetRequest(id: working, weight: 100, reps: 5),
+            ],
+          ),
+        ]),
+      );
+
+      expect(created.single.id, exerciseId);
+      expect(setsOf(created, 0).map((s) => s.id), [warmUp, working]);
+      expect(setsOf(created, 0).map((s) => s.setType), [SetType.warmup, SetType.normal]);
+
+      final read = await h.db.getTemplate(userId: coachId, templateId: created.id);
+      expect(read.single.id, exerciseId);
+      expect(setsOf(read, 0).map((s) => s.id), [warmUp, working]);
+      expect(setsOf(read, 0).map((s) => s.setType), [SetType.warmup, SetType.normal]);
+      expect((await stored(working))['set_type'], isNull);
+    });
+
+    test('a replace updates kept rows in place, inserts new ones and deletes the dropped', () async {
+      final keptExercise = uuidV7();
+      final droppedExercise = uuidV7();
+      final kept = uuidV7();
+      final moved = uuidV7();
+      final dropped = uuidV7();
+      final created = await h.db.createTemplate(
+        userId: coachId,
+        body: body(coachId, [
+          TemplateExerciseRequest(
+            id: keptExercise,
+            exerciseId: exerciseA,
+            order: 0,
+            sets: [
+              TemplateSetRequest(id: kept, weight: 100, reps: 5, setType: .warmup),
+              TemplateSetRequest(id: dropped, weight: 100, reps: 5),
+            ],
+          ),
+          TemplateExerciseRequest(
+            id: droppedExercise,
+            exerciseId: exerciseB,
+            order: 1,
+            sets: [TemplateSetRequest(id: moved, weight: 20, reps: 12, setType: .drop)],
+          ),
+        ]),
+      );
+
+      final added = uuidV7();
+      final replaced = await h.db.updateTemplate(
+        userId: coachId,
+        templateId: created.id,
+        body: body(coachId, [
+          TemplateExerciseRequest(
+            id: keptExercise,
+            exerciseId: exerciseA,
+            order: 0,
+            sets: [
+              TemplateSetRequest(id: kept, weight: 105, reps: 5),
+              // moved here from the exercise this body drops
+              TemplateSetRequest(id: moved, weight: 20, reps: 12),
+              TemplateSetRequest(id: added, weight: 60, reps: 8, setType: .failure),
+            ],
+          ),
+        ]),
+      );
+
+      expect(replaced.single.id, keptExercise);
+      expect(setsOf(replaced, 0).map((s) => s.id), [kept, moved, added]);
+      // an absent set_type keeps what is stored
+      expect(setsOf(replaced, 0).map((s) => s.setType), [SetType.warmup, SetType.drop, SetType.failure]);
+      expect(setsOf(replaced, 0).first.weight, 105.0);
+
+      final read = await h.db.getTemplate(userId: coachId, templateId: created.id);
+      expect(read.single.id, keptExercise);
+      expect(setsOf(read, 0).map((s) => s.id), [kept, moved, added]);
+      expect((await stored(moved))['template_exercise_id'], keptExercise);
+      expect(await rowsOf(dropped), 0);
+      final exercises = await h.exec(
+        'SELECT id FROM template_exercises WHERE template_id = @t::uuid',
+        {'t': created.id},
+      );
+      expect(exercises.map((r) => r.toColumnMap()['id']), [keptExercise]);
+    });
+
+    test('a replace that swaps two exercises and trades their sets keeps every id and type', () async {
+      final first = uuidV7();
+      final second = uuidV7();
+      final a = uuidV7();
+      final b = uuidV7();
+      final created = await h.db.createTemplate(
+        userId: coachId,
+        body: body(coachId, [
+          TemplateExerciseRequest(
+            id: first,
+            exerciseId: exerciseA,
+            order: 0,
+            sets: [TemplateSetRequest(id: a, weight: 40, reps: 10, setType: .warmup)],
+          ),
+          TemplateExerciseRequest(
+            id: second,
+            exerciseId: exerciseB,
+            order: 1,
+            sets: [TemplateSetRequest(id: b, weight: 20, reps: 12, setType: .drop)],
+          ),
+        ]),
+      );
+
+      await h.db.updateTemplate(
+        userId: coachId,
+        templateId: created.id,
+        body: body(coachId, [
+          TemplateExerciseRequest(
+            id: second,
+            exerciseId: exerciseB,
+            order: 0,
+            sets: [TemplateSetRequest(id: a, weight: 40, reps: 10)],
+          ),
+          TemplateExerciseRequest(
+            id: first,
+            exerciseId: exerciseA,
+            order: 1,
+            sets: [TemplateSetRequest(id: b, weight: 20, reps: 12)],
+          ),
+        ]),
+      );
+
+      final read = await h.db.getTemplate(userId: coachId, templateId: created.id);
+      expect(read.map((e) => e.id), [second, first]);
+      expect(setsOf(read, 0).single.id, a);
+      expect(setsOf(read, 0).single.setType, SetType.warmup);
+      expect(setsOf(read, 1).single.id, b);
+      expect(setsOf(read, 1).single.setType, SetType.drop);
+    });
+
+    test('an explicit normal clears a stored set type', () async {
+      final setId = uuidV7();
+      final exerciseId = uuidV7();
+      TemplateRequest withType(SetType? type) => body(coachId, [
+        TemplateExerciseRequest(
+          id: exerciseId,
+          exerciseId: exerciseA,
+          order: 0,
+          sets: [TemplateSetRequest(id: setId, weight: 40, reps: 10, setType: type)],
+        ),
+      ]);
+      final created = await h.db.createTemplate(userId: coachId, body: withType(.warmup));
+
+      await h.db.updateTemplate(userId: coachId, templateId: created.id, body: withType(null));
+      expect((await stored(setId))['set_type'], 'w');
+
+      final cleared = await h.db.updateTemplate(userId: coachId, templateId: created.id, body: withType(.normal));
+      expect(setsOf(cleared, 0).single.setType, SetType.normal);
+      expect((await stored(setId))['set_type'], isNull);
+    });
+
+    test('saving the same workout as a template twice mints fresh ids for the second', () async {
+      final exerciseId = uuidV7();
+      final setId = uuidV7();
+      TemplateRequest fromWorkout() => body(coachId, [
+        TemplateExerciseRequest(
+          id: exerciseId,
+          exerciseId: exerciseA,
+          order: 0,
+          sets: [TemplateSetRequest(id: setId, weight: 100, reps: 5, setType: .warmup)],
+        ),
+      ]);
+
+      final first = await h.db.createTemplate(userId: coachId, body: fromWorkout());
+      final second = await h.db.createTemplate(userId: coachId, body: fromWorkout());
+
+      expect(first.single.id, exerciseId);
+      expect(second.single.id, isNot(exerciseId));
+      expect(setsOf(second, 0).single.id, isNot(setId));
+      expect(setsOf(second, 0).single.setType, SetType.warmup);
+      // the first template is untouched
+      final read = await h.db.getTemplate(userId: coachId, templateId: first.id);
+      expect(setsOf(read, 0).single.id, setId);
+    });
+
+    test('a replace naming another template\'s ids inserts fresh rows and leaves that template alone', () async {
+      final foreignSet = uuidV7();
+      final foreignExercise = uuidV7();
+      final other = await h.db.createTemplate(
+        userId: strangerId,
+        body: body(strangerId, [
+          TemplateExerciseRequest(
+            id: foreignExercise,
+            exerciseId: exerciseA,
+            order: 0,
+            sets: [TemplateSetRequest(id: foreignSet, weight: 1, reps: 1)],
+          ),
+        ]),
+      );
+      final mine = await h.db.createTemplate(userId: coachId, body: body(coachId, []));
+
+      final replaced = await h.db.updateTemplate(
+        userId: coachId,
+        templateId: mine.id,
+        body: body(coachId, [
+          TemplateExerciseRequest(
+            id: foreignExercise,
+            exerciseId: exerciseA,
+            order: 0,
+            sets: [TemplateSetRequest(id: foreignSet, weight: 999, reps: 1)],
+          ),
+        ]),
+      );
+
+      expect(replaced.single.id, isNot(foreignExercise));
+      expect(setsOf(replaced, 0).single.id, isNot(foreignSet));
+      final theirs = await h.db.getTemplate(userId: strangerId, templateId: other.id);
+      expect(theirs.single.id, foreignExercise);
+      expect(setsOf(theirs, 0).single.weight, 1.0);
+    });
+
+    test('a replace refused for its folder writes nothing', () async {
+      final setId = uuidV7();
+      final exerciseId = uuidV7();
+      final created = await h.db.createTemplate(
+        userId: coachId,
+        body: body(coachId, [
+          TemplateExerciseRequest(
+            id: exerciseId,
+            exerciseId: exerciseA,
+            order: 0,
+            sets: [TemplateSetRequest(id: setId, weight: 100, reps: 5)],
+          ),
+        ]),
+      );
+
+      await expectLater(
+        h.db.updateTemplate(
+          userId: coachId,
+          templateId: created.id,
+          body: TemplateRequest(
+            userId: coachId,
+            folderId: uuidV7(),
+            movesFolder: true,
+            exercises: [
+              TemplateExerciseRequest(
+                id: exerciseId,
+                exerciseId: exerciseA,
+                order: 0,
+                sets: [TemplateSetRequest(id: setId, weight: 1, reps: 1, setType: .failure)],
+              ),
+            ],
+          ),
+        ),
+        throwsA(isA<NotFound>()),
+      );
+
+      final row = await stored(setId);
+      expect(row['weight'], 100.0);
+      expect(row['set_type'], isNull);
+    });
+
+    test('a replace by someone else touches nothing', () async {
+      final setId = uuidV7();
+      final exerciseId = uuidV7();
+      final created = await h.db.createTemplate(
+        userId: coachId,
+        body: body(coachId, [
+          TemplateExerciseRequest(
+            id: exerciseId,
+            exerciseId: exerciseA,
+            order: 0,
+            sets: [TemplateSetRequest(id: setId, weight: 100, reps: 5)],
+          ),
+        ]),
+      );
+
+      await expectLater(
+        h.db.updateTemplate(
+          userId: strangerId,
+          templateId: created.id,
+          body: body(strangerId, [
+            TemplateExerciseRequest(
+              id: exerciseId,
+              exerciseId: exerciseA,
+              order: 0,
+              sets: [TemplateSetRequest(id: setId, weight: 1, reps: 1)],
+            ),
+          ]),
+        ),
+        throwsA(isA<NotFound>()),
+      );
+      expect((await stored(setId))['weight'], 100.0);
+    });
+
+    test('an assigned copy carries the master\'s set types', () async {
+      final master = await h.db.createTemplate(
+        userId: coachId,
+        body: body(coachId, [
+          TemplateExerciseRequest(
+            exerciseId: exerciseA,
+            order: 0,
+            sets: [
+              const TemplateSetRequest(weight: 40, reps: 10, setType: .warmup),
+              const TemplateSetRequest(weight: 100, reps: 5),
+            ],
+          ),
+        ]),
+      );
+
+      final share = await h.db.shareTemplate(coachId: coachId, targetUserId: studentId, masterTemplateId: master.id);
+      final copy = await h.db.getTemplate(userId: studentId, templateId: share.studentTemplateId);
+
+      expect(setsOf(copy, 0).map((s) => s.setType), [SetType.warmup, SetType.normal]);
+      expect(setsOf(copy, 0).map((s) => s.id), isNot(anyElement(isIn(setsOf(master, 0).map((s) => s.id)))));
+    });
+  });
 }
 
 class _Harness extends DatabaseTestBase;
