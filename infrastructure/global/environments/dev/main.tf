@@ -1,9 +1,17 @@
+locals {
+  agent_roles = [
+    "roles/firebase.viewer",
+    "roles/firebaseappcheck.admin",
+  ]
+}
+
 module "deploy_role" {
   source                = "../../stack"
   buckets               = ["583168578067-ca-central-1-content"]
   static_bucket         = "583168578067-ca-central-1-static"
   web_distribution_id   = "E1WWZSFXKW7BW7"
   media_distribution_id = "E28G19V18R0DYG"
+  agent_roles           = local.agent_roles
   firebase_project_config = {
     project_id       = "heart-of-yours-dev"
     region           = "us-central1"
