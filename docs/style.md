@@ -41,9 +41,14 @@ exception into a vaguer one, is a finding.
 must tell apart gets its own code (`goal_limit`, `id_taken`,
 `anonymous_account`), not a distinctive sentence.
 
-**No backwards-compat shims in `api/`.** Client and server ship together.
-The one place compatibility is a rule is `shared/heart_models`: additive
-only, bumped in the same commit — CLAUDE.md, *Package versioning*.
+**No heroic backwards compatibility in `api/` unless explicitly asked for.**
+Client and server usually ship together, so don't build version checks, dual
+code paths or shims for old clients on your own initiative. When a ticket asks
+for it (e.g. heart-api#84: a `PUT` keeps a set field an older app build
+doesn't send), keep it to the cheapest form: a missing key leaves the stored
+value alone. The one place compatibility is always a rule is
+`shared/heart_models`: additive only, bumped in the same commit — CLAUDE.md,
+*Package versioning*.
 
 **Shapes live in exactly one place.** Anything the client ever sees is a
 `heart_models` model. Anything only the server uses — service
