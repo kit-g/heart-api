@@ -49,7 +49,12 @@ abstract class _DatabaseBase {
   /// duplicate within the payload, a stale copy, or a hostile probe — surfaces
   /// as a unique violation. That's the client's mistake: reject it as a 400
   /// instead of letting the 23505 bubble up as a 500.
-  static const _clientIdConstraints = {'workout_exercises_pkey', 'exercise_sets_pkey'};
+  static const _clientIdConstraints = {
+    'workout_exercises_pkey',
+    'exercise_sets_pkey',
+    'template_exercises_pkey',
+    'template_exercise_sets_pkey',
+  };
 
   Never _rethrowClientIdCollision(ServerException e) {
     if (e.code == '23505' && _clientIdConstraints.contains(e.constraintName)) {
