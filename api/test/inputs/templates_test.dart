@@ -270,6 +270,92 @@ void main() {
     });
   });
 
+  group('TemplateCreateIn — ids and set types', () {
+    const exerciseRow = '0198c1a2-b3c4-7d5e-8f60-718293a4b510';
+    const setRow = '0198c1a2-b3c4-7d5e-8f60-718293a4b511';
+
+    Future<TemplateRequest> parse(List<Map<String, dynamic>> sets, {Object? id = exerciseRow}) async =>
+        (await TemplateCreateIn.fromRequest(
+          req(
+            body: {
+              'exercises': [
+                {'id': id, 'exercise': _bench, 'order': 0, 'sets': sets},
+              ],
+            },
+          ),
+        )).request;
+
+    test('v7 ids are kept; anything else is dropped so the insert mints one', () async {
+      final kept = await parse([
+        {'id': setRow, 'reps': 5},
+      ]);
+      expect(kept.exercises.single.id, exerciseRow);
+      expect(kept.exercises.single.sets.single.id, setRow);
+
+      final legacy = await parse([
+        {'id': '1737460800000', 'reps': 5},
+      ], id: 'we-1');
+      expect(legacy.exercises.single.id, isNull);
+      expect(legacy.exercises.single.sets.single.id, isNull);
+    });
+
+    test('set_type: absent is unsaid, null is normal, a word is that type', () async {
+      final request = await parse([
+        {'reps': 5},
+        {'reps': 5, 'set_type': null},
+        {'reps': 5, 'set_type': 'warmup'},
+      ]);
+      expect(request.exercises.single.sets.map((s) => s.setType), [null, SetType.normal, SetType.warmup]);
+    });
+
+    test('an unknown set type is a 400 naming the set', () async {
+      await expectLater(
+        parse([
+          {'reps': 5},
+          {'reps': 5, 'set_type': 'w'},
+        ]),
+        throwsA(
+          isA<BadRequest>()
+              .having((e) => e.code, 'code', 'invalid_set_type')
+              .having((e) => e.reason, 'reason', contains('exercises[0].sets[1]')),
+        ),
+      );
+    });
+
+    test('an id named twice in one body is a 400', () async {
+      await expectLater(
+        parse([
+          {'id': setRow, 'reps': 5},
+          {'id': setRow, 'reps': 6},
+        ]),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'duplicate_id')),
+      );
+      await expectLater(
+        parse([
+          {'id': exerciseRow, 'reps': 5},
+        ]),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'duplicate_id')),
+      );
+    });
+  });
+
+  test('two exercises at one order are a 400: sets find their exercise by it', () async {
+    await expectLater(
+      TemplateUpdateIn.fromRequest(
+        req(
+          body: {
+            'exercises': [
+              {'exercise': _bench, 'order': 1, 'sets': []},
+              // no order: its index, 1
+              {'exercise': _squat, 'sets': []},
+            ],
+          },
+        ),
+      ),
+      throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'duplicate_order')),
+    );
+  });
+
   group('TemplateUpdateIn — three-valued filing', () {
     test('no folderId key leaves the filing alone', () async {
       final input = await TemplateUpdateIn.fromRequest(req(body: {'name': 'Renamed'}));
