@@ -5,6 +5,7 @@ import 'package:heart_models/heart_models.dart';
 import 'errors.dart';
 import 'ids.dart';
 import 'imports.dart';
+import 'sets.dart';
 
 abstract interface class ApiWorkoutService {
   Future<Page<Workout>> getWorkouts({
@@ -65,8 +66,11 @@ abstract interface class ApiWorkoutService {
 
   /// Bulk-writes a parsed CSV export in one shot: resolves or creates the
   /// exercises it references, then inserts the workouts that aren't already
-  /// imported (matched on their deterministic import id, so re-runs are
-  /// no-ops).
+  /// imported (matched on their deterministic import id, so re-runs never
+  /// duplicate). Workouts already imported are only enriched — a note, a set
+  /// type, an RPE filled in where none is stored, nothing overwritten — and
+  /// each exercise's rest timer becomes the user's preference where they have
+  /// none.
   ///
   /// [createCustom] is the user's consent decision from the preview: the
   /// unmatched names to create as their custom exercises. Null means create
@@ -125,6 +129,16 @@ class WorkoutRequest {
   List<Map> _exercises() {
     final source = (body['exercises'] as List? ?? []).cast<Map>();
     final out = <Map>[];
+    // A replace updates the rows it names in place, so an id named twice
+    // would have one entry win and the other's sets vanish without an error;
+    // it is refused up front instead.
+    final ids = <String>{};
+    void unique(String? id, String at) {
+      if (id != null && !ids.add(id)) {
+        throw BadRequest(code: 'duplicate_id', reason: '$at.id appears more than once in the payload');
+      }
+    }
+
     for (final (index, ex) in source.indexed) {
       // An emptied editor row names nothing *and* logged nothing — dropped,
       // the way the template path drops its own. Sets with no exercise to hang
@@ -154,9 +168,14 @@ class WorkoutRequest {
         'met': ?ex['met'],
         'note': ?_note(ex['note']),
         'sets': [
-          for (final set in (ex['sets'] as List? ?? []).cast<Map>()) _set(set),
+          for (final (setIndex, set) in (ex['sets'] as List? ?? []).cast<Map>().indexed)
+            _set(set, at: 'exercises[$index].sets[$setIndex]'),
         ],
       });
+      unique(out.last['id'] as String?, 'exercises[$index]');
+      for (final (setIndex, set) in (out.last['sets'] as List).cast<Map>().indexed) {
+        unique(set['id'] as String?, 'exercises[$index].sets[$setIndex]');
+      }
     }
     return out;
   }
@@ -176,10 +195,33 @@ class WorkoutRequest {
 
   /// The same id round-trip for a set: keep a v7, strip anything else so the
   /// insert can cast-or-mint without tripping on a legacy id.
-  static Map _set(Map set) {
+  ///
+  /// `set_type` and `rpe` are newer than most clients, so their *absence* is
+  /// meaningful: a replace keeps what is stored for a set whose payload leaves
+  /// the key out (a client that doesn't know the field), while an explicit
+  /// null clears it. Present values are checked here, so a bad one is a 400
+  /// naming the set rather than a raw CHECK violation.
+  static Map _set(Map set, {required String at}) {
     final copy = {...set}..remove('id');
     if (_v7OrNull(set['id']) case String id) {
       copy['id'] = id;
+    }
+    if (set.containsKey('set_type')) {
+      copy['set_type'] = switch (set['set_type']) {
+        null => null,
+        final String type when setTypeCodes.containsKey(type) => setTypeCodes[type],
+        _ => throw BadRequest(
+          code: 'invalid_set_type',
+          reason: '$at.set_type must be one of ${setTypeCodes.keys.join(', ')}, or null',
+        ),
+      };
+    }
+    if (set.containsKey('rpe')) {
+      copy['rpe'] = switch (set['rpe']) {
+        null => null,
+        final num rpe when isRpe(rpe) => rpe,
+        _ => throw BadRequest(code: 'invalid_rpe', reason: '$at.rpe must be 1-10 in half steps, or null'),
+      };
     }
     return copy;
   }
@@ -199,16 +241,15 @@ class WorkoutRequest {
     if (value is! String) throw const BadRequest(reason: 'an exercise note must be a string');
     final trimmed = value.trim();
     if (trimmed.isEmpty) return null;
-    if (trimmed.length > _maxNoteLength) {
+    // counted in code points, as the column counts them
+    if (trimmed.runes.length > maxExerciseNoteLength) {
       throw const BadRequest(
         code: 'workout_note_too_long',
-        reason: 'an exercise note is at most $_maxNoteLength characters',
+        reason: 'an exercise note is at most $maxExerciseNoteLength characters',
       );
     }
     return trimmed;
   }
-
-  static const _maxNoteLength = 500;
 
   /// Deliberately omits [id] — `_replaceWorkout` (unlike `_saveWorkout`) has
   /// no `@id` placeholder, and the postgres client rejects a superfluous named

@@ -4,13 +4,16 @@ import 'package:crypto/crypto.dart';
 import 'package:csv/csv.dart';
 import 'package:heart_models/heart_models.dart';
 
+import 'sets.dart';
+
 /// Bulk workout import from another app's CSV export.
 ///
 /// The parser turns a one-row-per-set export into the canonical
 /// workout/exercise/set shape; the DB layer writes it in a single statement.
 /// Each workout carries a deterministic [ImportedWorkout.importId] derived
-/// from the source row, so re-running the same export is a no-op rather than
-/// a duplicate history.
+/// from the source row, so re-running the same export never duplicates a
+/// history: a workout already imported is only enriched with what a richer
+/// export adds (notes, set types, RPE), never rewritten.
 
 /// A parsed, unit-normalized import batch, ready for the DB layer.
 ///
@@ -31,6 +34,10 @@ class WorkoutImport {
   /// own ceiling (1000/workout) behind this for every write path.
   static const maxSetsPerWorkout = 500;
 
+  /// The longest rest timer taken from an export, in seconds; a longer one is
+  /// a typo or a corrupt cell, not a rest anyone configured.
+  static const maxRestTimer = 3600;
+
   final String source;
   final List<ImportedWorkout> workouts;
 
@@ -50,6 +57,30 @@ class WorkoutImport {
     required this.workoutsDropped,
     required this.setsDropped,
   });
+
+  /// The rest timer each exercise was last trained with, by exercise name —
+  /// what the user's per-exercise timer preference becomes where they have
+  /// none. Read off the most recent workout that ran a timer for the
+  /// exercise: the most frequent value there, since a timer nudged mid-rest
+  /// (±5/±15 s) leaves one-off values beside the configured one; a tie goes
+  /// to the longer timer.
+  ///
+  /// Case-variant spellings are one exercise (the database resolves names
+  /// case-insensitively), so they share one latest session.
+  Map<String, int> get restTimers {
+    final latest = <String, (String, DateTime, List<int>)>{};
+    for (final workout in workouts) {
+      for (final exercise in workout.exercises) {
+        if (exercise.restTimers.isEmpty) continue;
+        final key = exercise.name.toLowerCase();
+        if (latest[key] case (_, final start, _) when !workout.start.isAfter(start)) continue;
+        latest[key] = (exercise.name, workout.start, exercise.restTimers);
+      }
+    }
+    return {
+      for (final (name, _, timers) in latest.values) name: _mode(timers),
+    };
+  }
 
   /// Distinct exercise names across the batch, each with a category/target
   /// guess for the ones that turn out not to exist and need to be created as
@@ -91,6 +122,9 @@ class WorkoutImport {
       'userId': userId,
       'workouts': jsonEncode([for (final w in workouts) w.toPayload()]),
       'exercises': jsonEncode(exercises),
+      'restTimers': jsonEncode([
+        for (final MapEntry(key: name, value: seconds) in restTimers.entries) {'name': name, 'seconds': seconds},
+      ]),
     };
   }
 
@@ -137,6 +171,9 @@ class WorkoutImport {
     final distanceUnit = column(['distanceunit']);
     final seconds = column(['seconds']);
     final setOrder = column(['setorder']);
+    final rpe = column(['rpe']);
+    final notes = column(['notes']);
+    final workoutNotes = column(['workoutnotes']);
 
     // a unit spelled out in the header itself ("Weight (kg)") beats the fallback
     final headerWeightUnit = weight == null ? null : _unitIn(header[weight]);
@@ -161,14 +198,30 @@ class WorkoutImport {
     var skipped = 0;
     var setsDropped = 0;
     final builders = <String, _WorkoutBuilder>{};
+    // the set a "Rest Timer" row belongs to is the set row right before it —
+    // read off the raw row, so a set that was skipped or capped still counts
+    String? previousOrder;
     for (final row in rows.skip(1).map(repaired)) {
+      // Strong interleaves non-set rows with the sets: after any set that
+      // ran a rest timer comes a "Rest Timer" row, flagged in the Set Order
+      // column — real sets carry a number there, or W/D/F for
+      // warm-up/drop/failure. Structure, not a set: never counted like a bad
+      // row, only read for the timer's length (in Seconds). Warm-ups run
+      // Strong's separate warm-up timer, which is not the exercise's own.
+      if (cell(row, setOrder) case final order? when _normalized(order) == 'resttimer') {
+        final builder = builders['${cell(row, date)} ${cell(row, workoutName)}'];
+        final afterWarmUp = switch (previousOrder) {
+          final String order => _strongSetType(order) == 'warmup',
+          null => false,
+        };
+        if (_lenientNumber(cell(row, seconds))?.round() case final timer?
+            when builder != null && timer > 0 && timer <= maxRestTimer && !afterWarmUp) {
+          builder.addRestTimer(cell(row, exerciseName) ?? '', timer);
+        }
+        continue;
+      }
+      previousOrder = cell(row, setOrder);
       try {
-        // Strong interleaves non-set rows with the sets: after any set that
-        // ran a rest timer comes a "Rest Timer" row, flagged in the Set Order
-        // column — real sets carry a number there, or W/D/F for
-        // warm-up/drop/failure. Structure, not data: skipped like the header
-        // row, not counted like a bad one.
-        if (cell(row, setOrder) case final order? when _normalized(order) == 'resttimer') continue;
         final rawDate = cell(row, date) ?? (throw const FormatException('no date'));
         final exercise = cell(row, exerciseName) ?? (throw const FormatException('no exercise'));
         final name = cell(row, workoutName);
@@ -179,6 +232,11 @@ class WorkoutImport {
           reps: _count(cell(row, reps)),
           duration: _count(cell(row, seconds)),
           distance: _toKilometers(_number(cell(row, distance)), cell(row, distanceUnit) ?? headerDistanceUnit, unit),
+          type: switch (cell(row, setOrder)) {
+            final String order => _strongSetType(order),
+            null => null,
+          },
+          rpe: _rpe(cell(row, rpe)),
         );
         final builder = builders.putIfAbsent('$rawDate $name', () {
           final start = _instant(rawDate, utcOffset);
@@ -194,7 +252,8 @@ class WorkoutImport {
             },
           );
         });
-        if (!builder.add(exercise, set)) setsDropped++;
+        builder.note ??= cell(row, workoutNotes);
+        if (!builder.add(exercise, set, note: cell(row, notes))) setsDropped++;
       } on FormatException {
         skipped++;
       }
@@ -222,10 +281,14 @@ class WorkoutImport {
 }
 
 class ImportedWorkout {
+  /// The longest note a workout keeps; the column's bound.
+  static const maxNoteLength = 1000;
+
   final String importId;
   final String? name;
   final DateTime start;
   final DateTime? end;
+  final String? note;
   final List<ImportedExercise> exercises;
 
   const new({
@@ -234,6 +297,7 @@ class ImportedWorkout {
     required this.start,
     required this.end,
     required this.exercises,
+    this.note,
   });
 
   Map<String, dynamic> toPayload() {
@@ -242,11 +306,13 @@ class ImportedWorkout {
       'name': ?name,
       'start': start.toIso8601String(),
       'end': ?end?.toIso8601String(),
+      'note': ?note,
       'exercises': [
         for (final (order, exercise) in exercises.indexed)
           {
             'name': exercise.name,
             'order': order,
+            'note': ?exercise.note,
             'sets': [for (final set in exercise.sets) set.toPayload()],
           },
       ],
@@ -255,10 +321,17 @@ class ImportedWorkout {
 }
 
 class ImportedExercise {
+  static const maxNoteLength = maxExerciseNoteLength;
+
   final String name;
   final List<ImportedSet> sets;
+  final String? note;
 
-  const new({required this.name, required this.sets});
+  /// Every rest timer run after a working set of this exercise in this
+  /// workout, in file order; feeds [WorkoutImport.restTimers], never a set.
+  final List<int> restTimers;
+
+  const new({required this.name, required this.sets, this.note, this.restTimers = const []});
 }
 
 class ImportedSet {
@@ -267,10 +340,25 @@ class ImportedSet {
   final int? duration;
   final double? distance;
 
-  const new({this.weight, this.reps, this.duration, this.distance});
+  /// `normal`, `warmup`, `drop` or `failure`; null when the export says
+  /// nothing about it.
+  final String? type;
+
+  /// 1–10 in half steps; null when unrated or when the export's value is off
+  /// that scale — the set itself still imports.
+  final double? rpe;
+
+  const new({this.weight, this.reps, this.duration, this.distance, this.type, this.rpe});
 
   Map<String, dynamic> toPayload() {
-    return {'weight': ?weight, 'reps': ?reps, 'duration': ?duration, 'distance': ?distance};
+    return {
+      'weight': ?weight,
+      'reps': ?reps,
+      'duration': ?duration,
+      'distance': ?distance,
+      'setType': ?setTypeCodes[type],
+      'rpe': ?rpe,
+    };
   }
 }
 
@@ -301,11 +389,25 @@ class WorkoutImportReport implements Model {
   /// Sets beyond the per-workout cap, dropped in file order at parse time.
   final int setsDropped;
 
+  /// Already-imported workouts this run filled a gap in (a note, a set's type
+  /// or RPE) — no longer counted as skipped.
+  final int workoutsEnriched;
+
+  /// Existing sets that gained a type or an RPE.
+  final int setsEnriched;
+
+  /// Exercises whose rest timer preference the import set, where the user had
+  /// none.
+  final int restTimersSet;
+
   const new({
     required this.source,
     required this.workoutsFound,
     required this.workoutsCreated,
+    required this.workoutsEnriched,
     required this.setsCreated,
+    required this.setsEnriched,
+    required this.restTimersSet,
     required this.setsSkipped,
     required this.exercisesMatched,
     required this.exercisesCreated,
@@ -315,14 +417,17 @@ class WorkoutImportReport implements Model {
     required this.setsDropped,
   });
 
-  int get workoutsSkipped => workoutsFound - workoutsCreated;
+  int get workoutsSkipped => workoutsFound - workoutsCreated - workoutsEnriched;
 
   factory fromRow(Map<String, dynamic> row, {required WorkoutImport batch}) {
     return WorkoutImportReport(
       source: batch.source,
       workoutsFound: row['workouts_found'],
       workoutsCreated: row['workouts_created'],
+      workoutsEnriched: row['workouts_enriched'],
       setsCreated: row['sets_created'],
+      setsEnriched: row['sets_enriched'],
+      restTimersSet: row['rest_timers_set'],
       setsSkipped: row['sets_skipped'],
       exercisesMatched: row['exercises_matched'],
       exercisesCreated: (row['exercises_created'] as List).cast<String>(),
@@ -339,14 +444,17 @@ class WorkoutImportReport implements Model {
       'source': source,
       'workoutsFound': workoutsFound,
       'workoutsCreated': workoutsCreated,
+      'workoutsEnriched': workoutsEnriched,
       'workoutsSkipped': workoutsSkipped,
       'workoutsDropped': workoutsDropped,
       'setsCreated': setsCreated,
+      'setsEnriched': setsEnriched,
       'setsSkipped': setsSkipped,
       'setsDropped': setsDropped,
       'exercisesMatched': exercisesMatched,
       'exercisesCreated': exercisesCreated,
       'exercisesSkipped': exercisesSkipped,
+      'restTimersSet': restTimersSet,
       'rowsSkipped': rowsSkipped,
     };
   }
@@ -360,8 +468,18 @@ class WorkoutImportPreview implements Model {
   final int workoutsFound;
 
   /// Workouts whose import identity is already in the user's history — a
-  /// commit would skip these.
+  /// commit creates none of these again.
   final int workoutsAlreadyImported;
+
+  /// Of [workoutsAlreadyImported], the ones a commit would fill a gap in.
+  final int workoutsEnriched;
+
+  /// Existing sets a commit would give a type or an RPE.
+  final int setsEnriched;
+
+  /// Exercises a commit would set a rest timer preference for, counting every
+  /// unmatched name as approved.
+  final int restTimersSet;
   final int setsFound;
   final int exercisesMatched;
 
@@ -381,6 +499,9 @@ class WorkoutImportPreview implements Model {
     required this.source,
     required this.workoutsFound,
     required this.workoutsAlreadyImported,
+    required this.workoutsEnriched,
+    required this.setsEnriched,
+    required this.restTimersSet,
     required this.setsFound,
     required this.exercisesMatched,
     required this.exercisesUnmatched,
@@ -397,6 +518,9 @@ class WorkoutImportPreview implements Model {
       source: batch.source,
       workoutsFound: batch.workouts.length,
       workoutsAlreadyImported: row['workouts_already_imported'],
+      workoutsEnriched: row['workouts_enriched'],
+      setsEnriched: row['sets_enriched'],
+      restTimersSet: row['rest_timers_set'],
       setsFound: batch.setsFound,
       exercisesMatched: matched.length,
       exercisesUnmatched: [
@@ -415,8 +539,11 @@ class WorkoutImportPreview implements Model {
       'source': source,
       'workoutsFound': workoutsFound,
       'workoutsAlreadyImported': workoutsAlreadyImported,
+      'workoutsEnriched': workoutsEnriched,
       'workoutsDropped': workoutsDropped,
       'setsFound': setsFound,
+      'setsEnriched': setsEnriched,
+      'restTimersSet': restTimersSet,
       'setsDropped': setsDropped,
       'exercisesMatched': exercisesMatched,
       'exercisesUnmatched': [
@@ -445,17 +572,27 @@ class _WorkoutBuilder {
   final String? name;
   final DateTime start;
   final DateTime? end;
+  String? note;
   final _exercises = <String, List<ImportedSet>>{};
+  // insertion-ordered sets: a note repeated on several rows is kept once
+  final _notes = <String, Set<String>>{};
+  final _restTimers = <String, List<int>>{};
   var _totalSets = 0;
 
   new({required this.importId, required this.name, required this.start, required this.end});
 
   /// Adds the set unless the workout is already at [WorkoutImport.maxSetsPerWorkout].
-  bool add(String exercise, ImportedSet set) {
+  bool add(String exercise, ImportedSet set, {String? note}) {
     if (_totalSets >= WorkoutImport.maxSetsPerWorkout) return false;
     _totalSets++;
     _exercises.putIfAbsent(exercise, () => []).add(set);
+    if (note != null) _notes.putIfAbsent(exercise, () => {}).add(note);
     return true;
+  }
+
+  void addRestTimer(String exercise, int seconds) {
+    if (!_exercises.containsKey(exercise)) return;
+    _restTimers.putIfAbsent(exercise, () => []).add(seconds);
   }
 
   ImportedWorkout build() {
@@ -464,11 +601,38 @@ class _WorkoutBuilder {
       name: name,
       start: start,
       end: end,
+      note: _bounded(note, ImportedWorkout.maxNoteLength),
       exercises: [
-        for (final MapEntry(key: name, value: sets) in _exercises.entries) ImportedExercise(name: name, sets: sets),
+        for (final MapEntry(key: name, value: sets) in _exercises.entries)
+          ImportedExercise(
+            name: name,
+            sets: sets,
+            note: _bounded(_notes[name]?.join('\n'), ImportedExercise.maxNoteLength),
+            restTimers: _restTimers[name] ?? const [],
+          ),
       ],
     );
   }
+}
+
+/// Cuts [text] to [max] characters, counted the way the database counts them
+/// (code points, so an emoji is never split in half).
+String? _bounded(String? text, int max) {
+  if (text == null) return null;
+  final runes = text.runes;
+  return runes.length <= max ? text : String.fromCharCodes(runes.take(max));
+}
+
+/// The most frequent value; among equally frequent ones, the largest.
+int _mode(List<int> values) {
+  final counts = <int, int>{};
+  for (final v in values) {
+    counts[v] = (counts[v] ?? 0) + 1;
+  }
+  return counts.entries.reduce((best, e) {
+    final better = e.value > best.value || (e.value == best.value && e.key > best.key);
+    return better ? e : best;
+  }).key;
 }
 
 /// Deterministic opaque token for an import identity: same source row →
@@ -526,16 +690,54 @@ Duration? _parseDuration(String? raw) {
   return total;
 }
 
+/// A finite number, tolerating a decimal comma from `;`-delimited locales;
+/// `NaN` and `Infinity` parse as doubles but are no measurement.
+double? _parsed(String raw) {
+  return switch (double.tryParse(raw) ?? double.tryParse(raw.replaceAll(',', '.'))) {
+    final double v when v.isFinite => v,
+    _ => null,
+  };
+}
+
 /// Zero means "unset" in Strong exports, so it maps to null rather than a
-/// stored zero. Tolerates a decimal comma from `;`-delimited locales.
+/// stored zero.
 double? _number(String? raw) {
   if (raw == null) return null;
-  final parsed = double.tryParse(raw) ?? double.tryParse(raw.replaceAll(',', '.'));
-  if (parsed == null) throw FormatException('not a number: $raw');
+  final parsed = _parsed(raw) ?? (throw FormatException('not a number: $raw'));
   return parsed == 0 ? null : parsed;
 }
 
 int? _count(String? raw) => _number(raw)?.round();
+
+/// Like [_number] for a field whose garbage must not cost the whole row: an
+/// unreadable value is simply absent.
+double? _lenientNumber(String? raw) {
+  if (raw == null) return null;
+  final parsed = _parsed(raw);
+  return parsed == 0 ? null : parsed;
+}
+
+/// RPE on its 1–10 scale in half steps. Anything else — a typo, a value
+/// from a finer or different scale — is left out rather than guessed at or
+/// allowed to reject the set it sits on.
+double? _rpe(String? raw) {
+  return switch (_lenientNumber(raw)) {
+    final double v when isRpe(v) => v,
+    _ => null,
+  };
+}
+
+/// Strong's Set Order column: a number for a working set, a letter for the
+/// other kinds. Anything unrecognised says nothing about the set's type.
+String? _strongSetType(String order) {
+  return switch (order.trim().toUpperCase()) {
+    'W' => 'warmup',
+    'D' => 'drop',
+    'F' => 'failure',
+    final n when int.tryParse(n) != null => 'normal',
+    _ => null,
+  };
+}
 
 double? _toKilograms(double? value, String? unit, MeasurementUnit fallback) {
   if (value == null) return null;
