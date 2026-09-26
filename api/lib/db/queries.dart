@@ -598,7 +598,7 @@ _sets_input AS (
   LATERAL jsonb_array_elements(ex->'sets') WITH ORDINALITY t(s, ordinality)
 ),
 _inserted_sets AS (
-  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order)
+  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe)
   SELECT
     coalesce((si.set_data->>'id')::uuid, uuidv7()),
     ie.id,
@@ -609,10 +609,12 @@ _inserted_sets AS (
     coalesce((si.set_data->>'completed')::boolean, false),
     (si.set_data->>'started_at')::timestamptz,
     (si.set_data->>'completed_at')::timestamptz,
-    si.set_order
+    si.set_order,
+    si.set_data->>'set_type',
+    (si.set_data->>'rpe')::real
   FROM _sets_input si
   JOIN _inserted_exercises ie ON ie.exercise_order = si.exercise_order
-  RETURNING id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order
+  RETURNING id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe
 ),
 _sets_json AS (
   SELECT
@@ -627,7 +629,9 @@ _sets_json AS (
         'completed', completed,
         'started_at', started_at,
         'completed_at', completed_at,
-        'set_order', set_order
+        'set_order', set_order,
+        'set_type', _set_type_name(set_type),
+        'rpe', rpe
       ) ORDER BY set_order
     ) AS sets_json
   FROM _inserted_sets
@@ -687,31 +691,22 @@ FROM workouts w
 WHERE w.id IN (SELECT id FROM _existing_workout)
 ''';
 
-/// Whole CSV import in one atomic statement. Unlike [_saveWorkout]'s lookup —
-/// which silently drops exercises it can't resolve — unknown names are created
-/// as the user's custom exercises, gated by consent: a non-null @createCustom
-/// is the allowlist of unmatched names the user approved (NULL = approve all,
-/// the pre-consent behavior). Declined names fall out of _lookup, taking their
-/// workout_exercises and sets with them — counted in the report, never silent.
-/// Workouts left with no surviving exercise aren't created at all, so their
-/// import identity stays unclaimed and a later consenting re-import recovers
-/// them in full.
-/// Workouts land with ON CONFLICT DO NOTHING on (user_id, import_id): re-running
-/// the same export inserts nothing and the report shows it. Ids — the
-/// workout's and its exercises'/sets' alike — are uuid-v7 minted at the
-/// workout's *start* time, because history pages by id: an import of
-/// years-old workouts must land deep in pagination, not on page one, and a
-/// child id shouldn't contradict its own workout's timeline.
-const _importWorkouts = '''
-WITH
-_incoming AS (
-  SELECT w AS workout, w->>'importId' AS import_id
-  FROM jsonb_array_elements(@workouts::jsonb) w
-),
-_names AS (
-  SELECT ex->>'name' AS name, ex->>'category' AS category, ex->>'target' AS target
-  FROM jsonb_array_elements(@exercises::jsonb) ex
-),
+/// The shared, read-only half of re-import enrichment, spliced into both
+/// [_importWorkouts] and [_previewImport] so a dry run reports exactly what a
+/// commit would do. Expects `_incoming (workout, import_id)` and
+/// `_names (name)` ahead of it.
+///
+/// A re-import fills gaps and nothing else: a workout's note, an exercise's
+/// note, a set's type and RPE — each only where the stored value is NULL. A
+/// value already there wins, whoever wrote it, and structure (which exercises
+/// and sets exist, their numbers) is never touched.
+///
+/// A stored set is "the same set" only by position *and* numbers: same
+/// import identity, same exercise at the same order, same set order, equal
+/// measurements after the insert's own casts. A set the user has since edited,
+/// or one shifted by a deleted neighbour, matches nothing and is left alone —
+/// which is what stops set 1's RPE landing on the old set 2.
+const _reimportCandidates = '''
 -- keyed by the *incoming* name so downstream joins on the CSV's spelling still
 -- hit; matching is case-insensitive because that is the DB's own notion of
 -- identity (unique on (user_id, lower(name)))
@@ -722,6 +717,84 @@ _resolved AS (
   WHERE e.user_id IS NULL OR e.user_id = @userId
   ORDER BY n.name, e.user_id NULLS LAST
 ),
+_reimported AS (
+  SELECT w.id AS workout_id, w.note AS stored_note, i.workout
+  FROM _incoming i
+  JOIN workouts w ON w.user_id = @userId AND w.import_id = i.import_id
+),
+-- an existing workout only ever references exercises that already exist, so
+-- _resolved (not the consent-gated lookup) is the whole of what can match
+_reimported_exercises AS (
+  SELECT r.workout_id, we.id AS workout_exercise_id, we.note AS stored_note, ex AS exercise
+  FROM _reimported r
+  CROSS JOIN LATERAL jsonb_array_elements(r.workout->'exercises') ex
+  JOIN _resolved res ON res.name = ex->>'name'
+  JOIN workout_exercises we
+    ON we.workout_id = r.workout_id
+   AND we.exercise_order = (ex->>'order')::int
+   AND we.exercise_id = res.id
+),
+_fill_workouts AS (
+  SELECT workout_id, workout->>'note' AS note
+  FROM _reimported
+  WHERE stored_note IS NULL AND workout->>'note' IS NOT NULL
+),
+_fill_exercises AS (
+  SELECT workout_id, workout_exercise_id, exercise->>'note' AS note
+  FROM _reimported_exercises
+  WHERE stored_note IS NULL AND exercise->>'note' IS NOT NULL
+),
+_fill_sets AS (
+  SELECT re.workout_id, es.id, t.s->>'setType' AS set_type, (t.s->>'rpe')::real AS rpe
+  FROM _reimported_exercises re
+  CROSS JOIN LATERAL jsonb_array_elements(re.exercise->'sets') WITH ORDINALITY t(s, ordinality)
+  JOIN exercise_sets es
+    ON es.workout_exercise_id = re.workout_exercise_id
+   AND es.set_order = (t.ordinality - 1)::int
+   AND es.weight IS NOT DISTINCT FROM (t.s->>'weight')::real
+   AND es.reps IS NOT DISTINCT FROM (t.s->>'reps')::int
+   AND es.duration IS NOT DISTINCT FROM (t.s->>'duration')::int
+   AND es.distance IS NOT DISTINCT FROM (t.s->>'distance')::real
+  WHERE (es.set_type IS NULL AND t.s->>'setType' IS NOT NULL)
+     OR (es.rpe IS NULL AND t.s->>'rpe' IS NOT NULL)
+),
+_rest_timers_in AS (
+  SELECT rt->>'name' AS name, (rt->>'seconds')::int AS seconds
+  FROM jsonb_array_elements(@restTimers::jsonb) rt
+  WHERE (rt->>'seconds')::int > 0
+)
+''';
+
+/// Whole CSV import in one atomic statement. Unlike [_saveWorkout]'s lookup —
+/// which silently drops exercises it can't resolve — unknown names are created
+/// as the user's custom exercises, gated by consent: a non-null @createCustom
+/// is the allowlist of unmatched names the user approved (NULL = approve all,
+/// the pre-consent behavior). Declined names fall out of _lookup, taking their
+/// workout_exercises and sets with them — counted in the report, never silent.
+/// Workouts left with no surviving exercise aren't created at all, so their
+/// import identity stays unclaimed and a later consenting re-import recovers
+/// them in full.
+/// Workouts land with ON CONFLICT DO NOTHING on (user_id, import_id): re-running
+/// the same export inserts nothing and the report shows it. A workout already
+/// imported is instead *enriched* ([_reimportCandidates]): gaps filled, nothing
+/// overwritten. Rest timers become the user's per-exercise preference where
+/// they have none. Ids — the
+/// workout's and its exercises'/sets' alike — are uuid-v7 minted at the
+/// workout's *start* time, because history pages by id: an import of
+/// years-old workouts must land deep in pagination, not on page one, and a
+/// child id shouldn't contradict its own workout's timeline.
+const _importWorkouts =
+    '''
+WITH
+_incoming AS (
+  SELECT w AS workout, w->>'importId' AS import_id
+  FROM jsonb_array_elements(@workouts::jsonb) w
+),
+_names AS (
+  SELECT ex->>'name' AS name, ex->>'category' AS category, ex->>'target' AS target
+  FROM jsonb_array_elements(@exercises::jsonb) ex
+),
+$_reimportCandidates,
 _already_imported AS (
   SELECT i.import_id
   FROM _incoming i
@@ -749,8 +822,8 @@ _lookup AS (
   ) _all
 ),
 _inserted_workouts AS (
-  INSERT INTO workouts (id, user_id, name, started_at, completed_at, import_id)
-  SELECT uuidv7((i.workout->>'start')::timestamptz), @userId, NULLIF(i.workout->>'name', ''), (i.workout->>'start')::timestamptz, (i.workout->>'end')::timestamptz, i.import_id
+  INSERT INTO workouts (id, user_id, name, started_at, completed_at, import_id, note)
+  SELECT uuidv7((i.workout->>'start')::timestamptz), @userId, NULLIF(i.workout->>'name', ''), (i.workout->>'start')::timestamptz, (i.workout->>'end')::timestamptz, i.import_id, i.workout->>'note'
   FROM _incoming i
   WHERE exists (
     SELECT 1 FROM jsonb_array_elements(i.workout->'exercises') ex
@@ -767,8 +840,8 @@ _exercises_in AS (
   CROSS JOIN LATERAL jsonb_array_elements(i.workout->'exercises') ex
 ),
 _inserted_exercises AS (
-  INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order)
-  SELECT uuidv7(e.started_at), e.workout_id, l.id, e.exercise_order
+  INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, note)
+  SELECT uuidv7(e.started_at), e.workout_id, l.id, e.exercise_order, e.exercise->>'note'
   FROM _exercises_in e
   JOIN _lookup l ON l.name = lower(e.exercise->>'name')
   RETURNING id, workout_id, exercise_order
@@ -779,7 +852,7 @@ _sets_in AS (
   CROSS JOIN LATERAL jsonb_array_elements(e.exercise->'sets') WITH ORDINALITY t(s, ordinality)
 ),
 _inserted_sets AS (
-  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, set_order)
+  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, set_order, set_type, rpe)
   SELECT
     uuidv7(si.started_at),
     ie.id,
@@ -788,15 +861,61 @@ _inserted_sets AS (
     (si.set_data->>'duration')::int,
     (si.set_data->>'distance')::real,
     true,
-    si.set_order
+    si.set_order,
+    si.set_data->>'setType',
+    (si.set_data->>'rpe')::real
   FROM _sets_in si
   JOIN _inserted_exercises ie ON ie.workout_id = si.workout_id AND ie.exercise_order = si.exercise_order
   RETURNING id
+),
+-- the fills re-check NULL against the row as locked, so a write that landed
+-- between the snapshot and this statement's update still wins
+_enriched_workouts AS (
+  UPDATE workouts w
+  SET note = f.note
+  FROM _fill_workouts f
+  WHERE w.id = f.workout_id AND w.note IS NULL
+  RETURNING w.id AS workout_id
+),
+_enriched_exercises AS (
+  UPDATE workout_exercises we
+  SET note = f.note
+  FROM _fill_exercises f
+  WHERE we.id = f.workout_exercise_id AND we.note IS NULL
+  RETURNING we.workout_id
+),
+_enriched_sets AS (
+  UPDATE exercise_sets es
+  SET set_type = coalesce(es.set_type, f.set_type), rpe = coalesce(es.rpe, f.rpe)
+  FROM _fill_sets f
+  WHERE es.id = f.id
+  RETURNING f.workout_id
+),
+-- only where the user has no timer of their own for the exercise. The batch
+-- already folds case-variant names into one; DISTINCT ON guards the upsert,
+-- which cannot touch one row twice
+_rest_timers_set AS (
+  INSERT INTO exercise_preferences (user_id, exercise_id, rest_timer)
+  SELECT DISTINCT ON (l.id) @userId, l.id, r.seconds
+  FROM _rest_timers_in r
+  JOIN _lookup l ON l.name = lower(r.name)
+  ORDER BY l.id, r.seconds DESC
+  ON CONFLICT (user_id, exercise_id) DO UPDATE
+  SET rest_timer = EXCLUDED.rest_timer
+  WHERE exercise_preferences.rest_timer IS NULL
+  RETURNING exercise_id
 )
 SELECT
   (SELECT count(*) FROM _incoming)::int AS workouts_found,
   (SELECT count(*) FROM _inserted_workouts)::int AS workouts_created,
   (SELECT count(*) FROM _inserted_sets)::int AS sets_created,
+  (SELECT count(*) FROM (
+     SELECT workout_id FROM _enriched_workouts
+     UNION SELECT workout_id FROM _enriched_exercises
+     UNION SELECT workout_id FROM _enriched_sets
+   ) _any)::int AS workouts_enriched,
+  (SELECT count(*) FROM _enriched_sets)::int AS sets_enriched,
+  (SELECT count(*) FROM _rest_timers_set)::int AS rest_timers_set,
   -- sets lost to declined names, over workouts this run actually considered
   -- (already-imported ones were never going to contribute sets)
   (SELECT count(*)
@@ -818,17 +937,36 @@ SELECT
 /// The `dryRun=true` half of the import: resolves the batch's exercise names
 /// and import identities against what the user already has, writing nothing.
 /// Everything else the preview reports comes from the parsed batch in Dart.
-const _previewImport = '''
+///
+/// `rest_timers_set` counts an unmatched name as if the user approves it:
+/// consent comes after the preview, and a declined name sets no timer.
+const _previewImport =
+    '''
 WITH
 _incoming AS (
-  SELECT w->>'importId' AS import_id
+  SELECT w AS workout, w->>'importId' AS import_id
   FROM jsonb_array_elements(@workouts::jsonb) w
 ),
 _names AS (
   SELECT ex->>'name' AS name
   FROM jsonb_array_elements(@exercises::jsonb) ex
-)
+),
+$_reimportCandidates
 SELECT
+  (SELECT count(*) FROM (
+     SELECT workout_id FROM _fill_workouts
+     UNION SELECT workout_id FROM _fill_exercises
+     UNION SELECT workout_id FROM _fill_sets
+   ) _any)::int AS workouts_enriched,
+  (SELECT count(*) FROM _fill_sets)::int AS sets_enriched,
+  (SELECT count(DISTINCT lower(r.name))
+   FROM _rest_timers_in r
+   WHERE NOT EXISTS (
+     SELECT 1
+     FROM _resolved res
+     JOIN exercise_preferences ep ON ep.exercise_id = res.id AND ep.user_id = @userId
+     WHERE lower(res.name) = lower(r.name) AND ep.rest_timer IS NOT NULL
+   ))::int AS rest_timers_set,
   (SELECT count(*)
    FROM _incoming i
    WHERE EXISTS (SELECT 1 FROM workouts w WHERE w.user_id = @userId AND w.import_id = i.import_id))::int
@@ -846,8 +984,10 @@ SELECT
   ) AS exercises_matched
 ''';
 
-/// Full replace of a workout body — the children are deleted and re-inserted
-/// from `@exercises`, so ids round-trip rather than being re-minted.
+/// Full replace of a workout body from `@exercises`: children the body still
+/// names (by their round-tripped ids) are updated in place, new ones inserted,
+/// the rest deleted — so ids round-trip rather than being re-minted, and a kept
+/// row's children and comments survive the replace.
 ///
 /// `@replacesExercises` gates that whole limb. False (the payload never
 /// mentioned `exercises`) leaves `workout_exercises` and `exercise_sets`
@@ -885,23 +1025,36 @@ _workout AS (
   WHERE id = @workoutId::uuid AND user_id = @userId
   RETURNING id, name, started_at, completed_at, calories, created_at
 ),
-_deleted_sets AS (
-  -- explicit, not left to the ON DELETE CASCADE: a cascade is an AFTER
-  -- trigger whose timing against the re-insert below is unspecified, and a
-  -- round-tripped set id must land after its old row is already dead
-  DELETE FROM exercise_sets
-  WHERE @replacesExercises::boolean
-    AND workout_exercise_id IN (
-      SELECT id FROM workout_exercises WHERE workout_id = (SELECT id FROM _workout)
-    )
-  RETURNING id
+-- The body as stored, read from the statement's snapshot: every CTE sees the
+-- rows as they were before this replace, whatever the others write.
+_previous_exercises AS (
+  SELECT we.id
+  FROM workout_exercises we
+  JOIN workouts w ON w.id = we.workout_id
+  WHERE w.id = @workoutId::uuid AND w.user_id = @userId
 ),
-_deleted AS (
-  DELETE FROM workout_exercises
-  WHERE @replacesExercises::boolean
-    AND workout_id = (SELECT id FROM _workout)
-  RETURNING id
+_previous_sets AS (
+  SELECT es.id
+  FROM exercise_sets es
+  JOIN _previous_exercises pe ON pe.id = es.workout_exercise_id
 ),
+-- A row the body keeps is updated in place, never deleted and re-inserted
+-- under its round-tripped id: the ON DELETE CASCADE of a deleted exercise
+-- fires at the end of the statement, after the re-insert, and takes the
+-- re-inserted row's sets (and the comments on them) with it. Only a row the
+-- body no longer names is deleted, and its cascade is then the point.
+_updated_exercises AS (
+  UPDATE workout_exercises we
+  SET exercise_id = el.exercise_id, exercise_order = otn.exercise_order, met = otn.met, note = otn.note
+  FROM _order_to_id otn
+  JOIN _exercise_lookup el ON el.exercise_id = otn.exercise_id
+  WHERE @replacesExercises::boolean
+    AND we.id = otn.id
+    AND we.id IN (SELECT id FROM _previous_exercises)
+  RETURNING we.id, we.exercise_order, we.met, we.note
+),
+-- a new id, or one this workout doesn't hold: an id another workout holds
+-- trips the primary key here, which the caller maps to its 400/403
 _inserted_exercises AS (
   INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note)
   SELECT
@@ -914,12 +1067,21 @@ _inserted_exercises AS (
   FROM _workout w
   CROSS JOIN _order_to_id otn
   JOIN _exercise_lookup el ON el.exercise_id = otn.exercise_id
-  -- forces _deleted to run to completion first. The old form
-  -- (NOT exists(... WHERE false)) constant-folded away, which left the
-  -- delete/insert order unspecified — harmless while every insert minted a
-  -- fresh id, a duplicate-key violation now that ids round-trip.
-  WHERE (SELECT count(*) FROM _deleted) IS NOT NULL
+  WHERE @replacesExercises::boolean
+    AND (otn.id IS NULL OR otn.id NOT IN (SELECT id FROM _previous_exercises))
   RETURNING id, exercise_order, met, note
+),
+_kept_exercises AS (
+  SELECT id, exercise_order, met, note FROM _updated_exercises
+  UNION ALL
+  SELECT id, exercise_order, met, note FROM _inserted_exercises
+),
+_deleted AS (
+  DELETE FROM workout_exercises
+  WHERE @replacesExercises::boolean
+    AND id IN (SELECT id FROM _previous_exercises)
+    AND id NOT IN (SELECT id FROM _updated_exercises)
+  RETURNING id
 ),
 _sets_input AS (
   SELECT
@@ -929,24 +1091,64 @@ _sets_input AS (
   FROM jsonb_array_elements(@exercises::jsonb) ex,
   LATERAL jsonb_array_elements(ex->'sets') WITH ORDINALITY t(s, ordinality)
 ),
-_inserted_sets AS (
-  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order)
-  SELECT
-    coalesce((si.set_data->>'id')::uuid, uuidv7()),
-    ie.id,
-    (si.set_data->>'weight')::real,
-    (si.set_data->>'reps')::int,
-    (si.set_data->>'duration')::int,
-    (si.set_data->>'distance')::real,
-    COALESCE((si.set_data->>'completed')::boolean, false),
-    (si.set_data->>'started_at')::timestamptz,
-    (si.set_data->>'completed_at')::timestamptz,
-    si.set_order
+_set_rows AS (
+  SELECT (si.set_data->>'id')::uuid AS id, si.set_data, si.set_order, ke.id AS workout_exercise_id
   FROM _sets_input si
-  JOIN _inserted_exercises ie ON ie.exercise_order = si.exercise_order
-  -- sequenced after the explicit sets delete, same reason as _inserted_exercises
-  WHERE (SELECT count(*) FROM _deleted_sets) IS NOT NULL
-  RETURNING id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order
+  JOIN _kept_exercises ke ON ke.exercise_order = si.exercise_order
+),
+-- set_type and rpe are newer than most clients: a set whose payload leaves
+-- the key out (a client that doesn't know the field) keeps the stored value,
+-- while an explicit null clears it
+_updated_sets AS (
+  UPDATE exercise_sets es
+  SET
+    workout_exercise_id = sr.workout_exercise_id,
+    weight = (sr.set_data->>'weight')::real,
+    reps = (sr.set_data->>'reps')::int,
+    duration = (sr.set_data->>'duration')::int,
+    distance = (sr.set_data->>'distance')::real,
+    completed = COALESCE((sr.set_data->>'completed')::boolean, false),
+    started_at = (sr.set_data->>'started_at')::timestamptz,
+    completed_at = (sr.set_data->>'completed_at')::timestamptz,
+    set_order = sr.set_order,
+    set_type = CASE WHEN sr.set_data ? 'set_type' THEN sr.set_data->>'set_type' ELSE es.set_type END,
+    rpe = CASE WHEN sr.set_data ? 'rpe' THEN (sr.set_data->>'rpe')::real ELSE es.rpe END
+  FROM _set_rows sr
+  WHERE es.id = sr.id AND es.id IN (SELECT id FROM _previous_sets)
+  RETURNING es.id, es.workout_exercise_id, es.weight, es.reps, es.duration, es.distance, es.completed, es.started_at, es.completed_at, es.set_order, es.set_type, es.rpe
+),
+_inserted_sets AS (
+  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe)
+  SELECT
+    coalesce(sr.id, uuidv7()),
+    sr.workout_exercise_id,
+    (sr.set_data->>'weight')::real,
+    (sr.set_data->>'reps')::int,
+    (sr.set_data->>'duration')::int,
+    (sr.set_data->>'distance')::real,
+    COALESCE((sr.set_data->>'completed')::boolean, false),
+    (sr.set_data->>'started_at')::timestamptz,
+    (sr.set_data->>'completed_at')::timestamptz,
+    sr.set_order,
+    sr.set_data->>'set_type',
+    (sr.set_data->>'rpe')::real
+  FROM _set_rows sr
+  WHERE sr.id IS NULL OR sr.id NOT IN (SELECT id FROM _previous_sets)
+  RETURNING id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe
+),
+-- every stored set the body no longer names, whether its exercise stays or
+-- goes; the cascade of a dropped exercise then finds nothing left
+_deleted_sets AS (
+  DELETE FROM exercise_sets
+  WHERE @replacesExercises::boolean
+    AND id IN (SELECT id FROM _previous_sets)
+    AND id NOT IN (SELECT id FROM _updated_sets)
+  RETURNING id
+),
+_written_sets AS (
+  SELECT * FROM _updated_sets
+  UNION ALL
+  SELECT * FROM _inserted_sets
 ),
 _sets_json AS (
   SELECT
@@ -961,10 +1163,12 @@ _sets_json AS (
         'completed', completed,
         'started_at', started_at,
         'completed_at', completed_at,
-        'set_order', set_order
+        'set_order', set_order,
+        'set_type', _set_type_name(set_type),
+        'rpe', rpe
       ) ORDER BY set_order
     ) AS sets_json
-  FROM _inserted_sets
+  FROM _written_sets
   GROUP BY workout_exercise_id
 ),
 _exercises_json AS (
@@ -983,7 +1187,7 @@ _exercises_json AS (
       'sets', coalesce(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
-  FROM _inserted_exercises ie
+  FROM _kept_exercises ie
   JOIN _order_to_id otn ON otn.exercise_order = ie.exercise_order
   JOIN _exercise_lookup el ON el.exercise_id = otn.exercise_id
   JOIN exercises e ON e.id = el.exercise_id
