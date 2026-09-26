@@ -282,7 +282,7 @@ class WorkoutImport {
 
 class ImportedWorkout {
   /// The longest note a workout keeps; the column's bound.
-  static const maxNoteLength = 1000;
+  static const maxNoteLength = Workout.maxNoteLength;
 
   final String importId;
   final String? name;
@@ -356,7 +356,7 @@ class ImportedSet {
       'reps': ?reps,
       'duration': ?duration,
       'distance': ?distance,
-      'setType': ?setTypeCodes[type],
+      'setType': ?type,
       'rpe': ?rpe,
     };
   }
