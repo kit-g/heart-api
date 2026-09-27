@@ -47,7 +47,7 @@ SET
 username = EXCLUDED.username,
 email = EXCLUDED.email,
 avatar_url = EXCLUDED.avatar_url,
-settings = EXCLUDED.settings,
+settings = profiles.settings || EXCLUDED.settings,
 updated_at = now()
 RETURNING id, email, username, avatar_url, scheduled_for_deletion_at, settings
 ''';
