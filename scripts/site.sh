@@ -15,7 +15,10 @@ PROFILE=$2
 DISTRIBUTION_ID=$3
 ENV=$4
 
-aws s3 sync site "s3://$BUCKET/site" --delete --profile "$PROFILE" --exclude ".well-known/*"
+# data/ belongs to heart-of-yours: its release workflow uploads the JSON the
+# feature and changelog pages render. Excluded, --delete would wipe it.
+aws s3 sync site "s3://$BUCKET/site" --delete --profile "$PROFILE" \
+  --exclude ".well-known/*" --exclude "data/*"
 
 aws s3 cp "site/.well-known/$ENV/apple-app-site-association" \
   "s3://$BUCKET/site/.well-known/apple-app-site-association" \
