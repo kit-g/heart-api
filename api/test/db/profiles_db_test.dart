@@ -72,6 +72,64 @@ void main() {
       final rows = await h.exec('SELECT id FROM profiles WHERE id = @id', {'id': id});
       expect(rows, hasLength(1));
     });
+
+    // The app upserts on every sign-in with an empty Settings(), so a replace
+    // would wipe what other devices wrote.
+    test('an upsert with empty settings keeps the stored ones', () async {
+      final id = h.uid('user');
+      await upsertNew(
+        User(
+          id: id,
+          email: '$id@test.local',
+          displayName: 'Merge',
+          settings: const Settings(themeMode: 'dark', extra: {'a': 1}),
+        ),
+      );
+
+      final saved = await h.db.upsertProfile(User(id: id, email: '$id@test.local', displayName: 'Merge'));
+
+      expect(saved.settings.themeMode, 'dark');
+      expect(saved.settings.extra, {'a': 1});
+
+      final row = (await h.exec('SELECT settings FROM profiles WHERE id = @id', {'id': id})).first.toColumnMap();
+      expect(row['settings'], {'themeMode': 'dark', 'a': 1});
+    });
+
+    test('settings merge shallowly: sent keys win, a sent map replaces the stored one whole', () async {
+      final id = h.uid('user');
+      await upsertNew(
+        User(
+          id: id,
+          email: '$id@test.local',
+          displayName: 'Merge',
+          settings: const Settings(
+            themeMode: 'dark',
+            accentColor: '#ff0000',
+            extra: {
+              'features': {'x': true, 'y': false},
+            },
+          ),
+        ),
+      );
+
+      final saved = await h.db.upsertProfile(
+        User(
+          id: id,
+          email: '$id@test.local',
+          displayName: 'Merge',
+          settings: const Settings(
+            themeMode: 'light',
+            extra: {
+              'features': {'y': true},
+            },
+          ),
+        ),
+      );
+
+      expect(saved.settings.themeMode, 'light');
+      expect(saved.settings.accentColor, '#ff0000');
+      expect(saved.settings.extra['features'], {'y': true});
+    });
   });
 
   group('scheduleAccountDeletion', () {
