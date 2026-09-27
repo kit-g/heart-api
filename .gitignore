@@ -48,3 +48,6 @@ __pycache__/
 /.claude/worktrees
 /HANDOFF.md
 /REVIEW.md
+
+# Uploaded by heart-of-yours on release (see scripts/site.sh); never deployed from here.
+/site/data/

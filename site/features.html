@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<!-- The feature list is data, not markup: heart-of-yours uploads its
+     docs/features.json to data/features.json on release, and
+     assets/features.js renders it here in the browser. The copy is edited in
+     heart-of-yours, never here. -->
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="description"
+          content="Everything Heart of Yours does: logging, records and charts, full data export, and health data that stays on your phone."/>
+    <title>Features - Heart of Yours, a free workout log app</title>
+    <!-- Link previews: absolute URLs, because crawlers don't resolve relative ones. -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="Heart of Yours"/>
+    <meta property="og:title" content="Features - Heart of Yours, a free workout log app"/>
+    <meta property="og:description" content="Everything Heart of Yours does: logging, records and charts, full data export, and health data that stays on your phone."/>
+    <meta property="og:url" content="https://heart-of.me/features.html"/>
+    <meta property="og:image" content="https://heart-of.me/assets/og.png?v=2"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content="Heart of Yours: a workout log that gets out of your way. Free, no account needed, health data stays on your phone. Beside it, the app’s workouts-per-week chart and goals."/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,600&display=swap"
+          rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"/>
+    <link rel="stylesheet" href="assets/site.css">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="assets/site.js"></script>
+    <script src="assets/features.js" defer></script>
+</head>
+<body class="bg-ground text-ink font-text min-h-screen flex flex-col overflow-x-hidden selection:bg-accent selection:text-on-accent">
+<!-- Navbar -->
+<header class="w-full flex flex-col items-center pt-6 pb-2 px-6 sm:px-10 z-10">
+    <div class="w-full max-w-[1200px] flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="size-9 flex items-center justify-center bg-surface rounded overflow-hidden border">
+                <!-- The mark is drawn in --ink, so it ships as two transparent files
+                     rather than the opaque app tile: the chip's own surface shows
+                     through in either brightness. Decorative — the wordmark beside
+                     it already names the app. -->
+                <picture class="size-full">
+                    <source srcset="assets/logo-dark.png" media="(prefers-color-scheme: dark)"/>
+                    <img src="assets/logo-light.png" width="192" height="192" alt=""
+                         class="size-full object-contain"/>
+                </picture>
+            </div>
+            <h2 class="text-lg font-title font-semibold tracking-tight">Heart of Yours</h2>
+        </a>
+        <nav class="hidden md:flex items-center gap-8">
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
+               href="terms.html">Terms of Service</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
+               href="privacy.html">Privacy</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
+               href="account.html">Account Control</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
+               href="support.html">Support</a>
+        </nav>
+        <button id="menu-button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Menu"
+                class="md:hidden flex items-center justify-center size-10 rounded bg-fill text-ink">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+    </div>
+    <nav id="mobile-nav" hidden
+         class="md:hidden w-full max-w-[1200px] mt-4 flex flex-col border rounded-xl bg-surface divide-y divide-border">
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="terms.html">Terms of Service</a>
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="privacy.html">Privacy</a>
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="account.html">Account Control</a>
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="support.html">Support</a>
+    </nav>
+</header>
+
+<main class="flex-grow w-full max-w-[1200px] mx-auto px-6 py-12 md:py-16 flex flex-col gap-16">
+    <section class="max-w-2xl flex flex-col gap-4 animate-fade-in opacity-0">
+        <h1 class="font-title text-4xl sm:text-5xl font-semibold tracking-tight text-ink">Everything Heart does.</h1>
+        <p class="text-lg text-muted leading-relaxed">Free on iPhone, iPad and Android.</p>
+        <div class="flex flex-wrap gap-4 pt-2">
+            <a href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener"
+               class="inline-block hover:opacity-90 transition-opacity">
+                <img src="assets/appstore_button.svg" alt="Download on the App Store" class="h-10 w-auto"/>
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=me.heart.android" target="_blank" rel="noopener"
+               class="inline-block hover:opacity-90 transition-opacity">
+                <img src="assets/google_play_button.svg" alt="Get it on Google Play" class="h-10 w-auto"/>
+            </a>
+        </div>
+    </section>
+
+    <div id="features" class="flex flex-col gap-16" aria-live="polite"></div>
+    <p id="features-empty" hidden class="text-muted leading-relaxed max-w-2xl">
+        The full list is on its way. In the meantime, the <a class="text-accent-ink underline underline-offset-2"
+        href="index.html">home page</a> has the highlights.
+    </p>
+</main>
+
+<!-- Footer -->
+<footer class="w-full py-10 px-6 border-t bg-ground mt-auto">
+    <div class="max-w-[960px] mx-auto flex flex-col items-center gap-6">
+        <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors flex items-center gap-1"
+               href="privacy.html">
+                <span class="material-symbols-outlined text-[16px]">shield</span>
+                Privacy Policy
+            </a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="terms.html">Terms of Service</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="account.html">Account Control</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="support.html">Support</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="mailto:info@heart-of.me">info@heart-of.me</a>
+        </div>
+        <p class="text-xs text-muted">
+            © <span id="footer-year"></span> Heart of Yours. All rights reserved.
+        </p>
+    </div>
+</footer>
+</body>
+</html>
