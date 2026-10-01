@@ -3,17 +3,17 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.62.0"
+      version = "6.66.0"
     }
 
     archive = {
       source  = "hashicorp/archive"
-      version = "2.8.0"
+      version = "2.8.1"
     }
 
     supabase = {
       source  = "supabase/supabase"
-      version = "1.10.1"
+      version = "1.11.0"
     }
   }
 }
