@@ -92,7 +92,21 @@
         </div>
     </section>
 
-    <div id="features" class="flex flex-col gap-16" aria-live="polite"></div>
+    <!-- Hidden until there is a list to filter. The count is announced only
+         after a change, so it lives outside #features, which is re-rendered. -->
+    <div class="flex flex-col gap-10">
+        <div id="platform-filter" hidden role="group" aria-label="Platform"
+             class="self-start inline-flex gap-1 rounded border bg-surface p-1">
+            <button type="button" data-platform="all" aria-pressed="true"
+                    class="px-4 py-1.5 rounded text-sm font-medium text-muted hover:text-ink aria-pressed:bg-accent aria-pressed:text-on-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-ink">All</button>
+            <button type="button" data-platform="ios" aria-pressed="false"
+                    class="px-4 py-1.5 rounded text-sm font-medium text-muted hover:text-ink aria-pressed:bg-accent aria-pressed:text-on-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-ink">iOS</button>
+            <button type="button" data-platform="android" aria-pressed="false"
+                    class="px-4 py-1.5 rounded text-sm font-medium text-muted hover:text-ink aria-pressed:bg-accent aria-pressed:text-on-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-ink">Android</button>
+        </div>
+        <p id="features-count" role="status" class="sr-only"></p>
+        <div id="features" class="flex flex-col gap-16"></div>
+    </div>
     <p id="features-empty" hidden class="text-muted leading-relaxed max-w-2xl">
         The full list is on its way. In the meantime, the <a class="text-accent-ink underline underline-offset-2"
         href="index.html">home page</a> has the highlights.
