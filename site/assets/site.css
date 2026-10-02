@@ -39,6 +39,13 @@
     }
 }
 
+/* In-page links (Get App, the support index) slide rather than jump. */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
 body {
     background: var(--ground);
     color: var(--ink);
