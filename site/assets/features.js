@@ -147,7 +147,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (document.getElementById(id)) platform = "all";
             else show(platform);
         }
-        document.getElementById(id)?.scrollIntoView();
+        // Instant: a deep link should land, not slide down from the top.
+        document.getElementById(id)?.scrollIntoView({behavior: "instant"});
     };
     reveal();
     window.addEventListener("hashchange", reveal);
