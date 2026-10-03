@@ -1,9 +1,11 @@
 @Tags(['db'])
 library;
 
+import 'package:heart/db/db.dart' show apiExceptionForDbError;
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/workouts.dart';
-import 'package:heart_models/heart_models.dart' show SetType, Workout, timestampOfUuidV7, uuidV7;
+import 'package:heart_models/heart_models.dart' show SetType, Workout, WorkoutPause, timestampOfUuidV7, uuidV7;
+import 'package:postgres/postgres.dart' show ServerException;
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -1290,6 +1292,176 @@ void main() {
       );
       final owned = await h.db.getWorkout(userId: ownerId, workoutId: id, imageUrl: imageUrl);
       expect(owned.name, 'Original');
+    });
+  });
+
+  group('pauses', () {
+    late String exId;
+
+    setUpAll(() async {
+      exId = await h.seedGlobalExercise(name: h.uniqueName('Paused'));
+    });
+
+    const first = {'start': '2026-10-03T18:10:00Z', 'end': '2026-10-03T18:20:00Z'};
+    const second = {'start': '2026-10-03T18:40:00Z', 'end': '2026-10-03T18:50:00Z'};
+
+    Map<String, dynamic> workout([Map<String, dynamic> extra = const {}]) => {
+      'name': 'Paused',
+      'start': '2026-10-03T18:00:00Z',
+      'end': '2026-10-03T19:00:00Z',
+      'exercises': [
+        {
+          'exercise': exId,
+          'order': 0,
+          'sets': [
+            {'weight': 100, 'reps': 5, 'completed': true},
+          ],
+        },
+      ],
+      ...extra,
+    };
+
+    Future<Workout> create(Map<String, dynamic> body) async => (await h.db.createWorkout(
+      userId: ownerId,
+      body: WorkoutRequest(userId: ownerId, body: body),
+      imageUrl: imageUrl,
+    )).$1;
+
+    Future<Workout> replace(String id, Map<String, dynamic> body) => h.db.updateWorkout(
+      userId: ownerId,
+      workoutId: id,
+      body: WorkoutRequest(userId: ownerId, body: body),
+      imageUrl: imageUrl,
+    );
+
+    List<(DateTime, DateTime)> spans(Workout w) => [for (final p in w.pauses) (p.start.toUtc(), p.end.toUtc())];
+    (DateTime, DateTime) span(Map<String, String> p) => (DateTime.parse(p['start']!), DateTime.parse(p['end']!));
+
+    test('a create stores them, every read returns them, and the duration leaves them out', () async {
+      final created = await create(
+        workout({
+          'pauses': [second, first],
+        }),
+      );
+      expect(spans(created), [span(first), span(second)]);
+      expect(created.duration, const Duration(minutes: 40));
+
+      final got = await h.db.getWorkout(userId: ownerId, workoutId: created.id, imageUrl: imageUrl);
+      expect(spans(got), [span(first), span(second)]);
+      final theirs = await h.db.getTargetWorkout(
+        requesterId: peerId,
+        targetUserId: ownerId,
+        workoutId: created.id,
+        imageUrl: imageUrl,
+      );
+      expect(spans(theirs), [span(first), span(second)]);
+      final page = await h.db.getWorkouts(userId: ownerId, targetUserId: ownerId, limit: 100, imageUrl: imageUrl);
+      expect(spans(page.items.firstWhere((w) => w.id == created.id)), [span(first), span(second)]);
+    });
+
+    test('a create without them has none', () async {
+      expect((await create(workout())).pauses, isEmpty);
+    });
+
+    test('a replace sets them, leaves them alone without the key, and clears them on []', () async {
+      final created = await create(workout());
+
+      expect(
+        spans(
+          await replace(
+            created.id,
+            workout({
+              'pauses': [first],
+            }),
+          ),
+        ),
+        [span(first)],
+      );
+      expect(spans(await replace(created.id, workout())), [span(first)]);
+      expect(spans(await replace(created.id, {'name': 'Shallow', 'start': '2026-10-03T18:00:00Z'})), [
+        span(first),
+      ], reason: 'a shallow replace without an end bounds them by the start only');
+      expect((await replace(created.id, workout({'pauses': []}))).pauses, isEmpty);
+    });
+
+    test('a replace that moves the end without the key cuts the stored pauses to it', () async {
+      final created = await create(
+        workout({
+          'pauses': [first, second],
+        }),
+      );
+      final cut = await replace(created.id, workout({'end': '2026-10-03T18:15:00Z'}));
+      expect(spans(cut), [(DateTime.utc(2026, 10, 3, 18, 10), DateTime.utc(2026, 10, 3, 18, 15))]);
+      expect(cut.end, DateTime.utc(2026, 10, 3, 18, 15));
+    });
+
+    test('a patch sets them, keeps them without the key, and cuts them to a moved end', () async {
+      final created = await create(workout());
+
+      final set = await h.db.patchWorkout(
+        userId: ownerId,
+        workoutId: created.id,
+        pauses: [WorkoutPause(start: span(first).$1, end: span(first).$2)],
+        imageUrl: imageUrl,
+      );
+      expect(spans(set), [span(first)]);
+
+      final renamed = await h.db.patchWorkout(userId: ownerId, workoutId: created.id, name: 'R', imageUrl: imageUrl);
+      expect(spans(renamed), [span(first)]);
+
+      final cut = await h.db.patchWorkout(
+        userId: ownerId,
+        workoutId: created.id,
+        start: DateTime.utc(2026, 10, 3, 18, 15),
+        imageUrl: imageUrl,
+      );
+      expect(spans(cut), [(DateTime.utc(2026, 10, 3, 18, 15), DateTime.utc(2026, 10, 3, 18, 20))]);
+
+      final cleared = await h.db.patchWorkout(
+        userId: ownerId,
+        workoutId: created.id,
+        pauses: const [],
+        imageUrl: imageUrl,
+      );
+      expect(cleared.pauses, isEmpty);
+    });
+
+    test('pauses outside the workout are a 400 invalid_pauses, and nothing is written', () async {
+      final created = await create(
+        workout({
+          'pauses': [first],
+        }),
+      );
+
+      Future<void> rejected(Future<Object?> write) async {
+        try {
+          await write;
+          fail('expected the pauses check to refuse it');
+        } on ServerException catch (e) {
+          expect(apiExceptionForDbError(e), isA<BadRequest>().having((e) => e.code, 'code', 'invalid_pauses'));
+        }
+      }
+
+      await rejected(
+        h.db.patchWorkout(
+          userId: ownerId,
+          workoutId: created.id,
+          pauses: [WorkoutPause(start: DateTime.utc(2026, 10, 3, 18, 50), end: DateTime.utc(2026, 10, 3, 19, 10))],
+          imageUrl: imageUrl,
+        ),
+      );
+      await rejected(
+        replace(
+          created.id,
+          workout({
+            'pauses': [
+              {'start': '2026-10-03T17:50:00Z', 'end': '2026-10-03T18:05:00Z'},
+            ],
+          }),
+        ),
+      );
+      final kept = await h.db.getWorkout(userId: ownerId, workoutId: created.id, imageUrl: imageUrl);
+      expect(spans(kept), [span(first)]);
     });
   });
 }
