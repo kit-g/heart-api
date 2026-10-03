@@ -220,6 +220,14 @@ resource "aws_cloudfront_distribution" "media" {
   }
 }
 
+resource "aws_cloudfront_function" "www_redirect" {
+  name    = "heart-www-redirect"
+  runtime = "cloudfront-js-2.0"
+  comment = "Redirects www.<host> to the apex"
+  publish = true
+  code    = file("${path.module}/functions/www_redirect.js")
+}
+
 resource "aws_cloudfront_distribution" "web" {
   enabled = true
   comment = "Heart of yours, website and app"
@@ -258,6 +266,11 @@ resource "aws_cloudfront_distribution" "web" {
     target_origin_id       = local.static_origin
     viewer_protocol_policy = "redirect-to-https"
     cache_policy_id        = local.caching_optimized
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.www_redirect.arn
+    }
   }
 
   ordered_cache_behavior {
