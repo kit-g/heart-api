@@ -120,6 +120,8 @@ RUN_ARGS=(
   --cap-add NET_ADMIN --cap-add NET_RAW
   --env-file "$ENV_FILE"
   -e "AGENT_ALLOW_AWS=$AWS" -e "AGENT_ALLOW_HOST_DB=$DB"
+  # what hooks/guard.sh keys the never-commit rule on (it also knows a container)
+  -e "HEART_AGENT=1"
   # ${arr[@]+...}: macOS ships bash 3.2, where set -u chokes on empty arrays
   ${AWS_ENV[@]+"${AWS_ENV[@]}"}
   ${DB_ENV[@]+"${DB_ENV[@]}"}

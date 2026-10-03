@@ -1,12 +1,17 @@
 #!/bin/bash
 # PreToolUse guard for the Bash tool. Runs in every Claude session in this
 # repo — interactive, host agent, or container (hooks still fire under
-# bypassPermissions). Enforces the never-commit rule, blocks the git
-# operations that can erase uncommitted agent work, and blocks the ways an
-# agent could reach a shared environment from here: terraform apply, the
+# bypassPermissions). Enforces the agents' never-commit rule, and blocks for
+# everyone the git operations that can erase uncommitted work and the ways a
+# session could reach a shared environment from here: terraform apply, the
 # migration runner without an explicit PGHOST (it otherwise fetches Supabase
 # creds and migrates the shared dev database), the prod AWS profile, and
 # mutating AWS CLI calls.
+#
+# Commits and pushes are an agent's limit, not an interactive session's: the
+# user commits through the session they are sitting in. An agent is a session
+# launched by agents/agent or agents/host-agent, which set HEART_AGENT=1 — or
+# any session inside a container, should one start some other way.
 #
 # This is a guardrail, not a jail: a sufficiently creative command can evade
 # string matching. Real containment is the container + read-only credentials.
@@ -27,9 +32,13 @@ deny() {
   exit 0
 }
 
+agent() {
+  [[ "${HEART_AGENT:-}" == 1 || -f /.dockerenv ]]
+}
+
 # --- git ---------------------------------------------------------------------
 
-if grep -Eq '(^|[|;&(`])\s*git[^|;&]*\b(commit|push)\b' <<<"$cmd"; then
+if agent && grep -Eq '(^|[|;&(`])\s*git[^|;&]*\b(commit|push)\b' <<<"$cmd"; then
   deny "Commits and pushes are reserved for the user. Leave work in the tree; run 'git add -N .' so new files show in git diff."
 fi
 
