@@ -15,6 +15,8 @@ PROFILE=$2
 DISTRIBUTION_ID=$3
 ENV=$4
 
+"$(dirname "$0")/tailwind/build.sh"
+
 # data/ belongs to heart-of-yours: its release workflow uploads the JSON the
 # feature and changelog pages render. Excluded, --delete would wipe it.
 aws s3 sync site "s3://$BUCKET/site" --delete --profile "$PROFILE" \
