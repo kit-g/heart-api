@@ -1,0 +1,3 @@
+# dev.heart-of.me mirrors the site for testing; only heart-of.me should be indexed.
+User-agent: *
+Disallow: /
