@@ -244,3 +244,15 @@ body {
 [hidden] {
     display: none !important;
 }
+
+/* "On the roadmap" mark in the comparison table: a quiet tag, never a pill. */
+.roadmap {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: var(--fill);
+    color: var(--accent-ink);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
