@@ -1,5 +1,30 @@
 # Changelog
 
+## 2.6.0
+
+Workout pauses reach the wire (heart-api#95; app side heart-of-yours#134).
+
+- New: `WorkoutPause` (`start`, `end`, `duration`), written as UTC ISO
+  instants under `start`/`end`.
+- New: `Workout.pauses` (`List<WorkoutPause>`, mutable, empty when none) and
+  `Workout.maxPauses` (100), read from `pauses` on server rows and local JSON.
+  Absent reads as none. The list holds closed pauses only: an active
+  workout's open pause is app state until it is closed.
+- Changed: `Workout.duration` is `end − start − Σ pauses`, and `elapsed()`
+  leaves closed pauses out. `start` and `end` are never moved.
+- Changed: `Workout.copy(sameId: true)` keeps the pauses (as its own list), and
+  a repeat with a fresh id drops them.
+- The server checks what it stores: each pause has `start < end`, lies within
+  the workout's `start..end` (only after `start` while `end` is null), and
+  pauses don't overlap. Touching ends are fine. Anything else is a `400`. A
+  save that moves `start` or `end` without a `pauses` key clips the stored
+  pauses to the new window and drops any left empty.
+- **App must, before shipping a build on this version:** `Workout.toMap` now
+  always writes `pauses`, an empty list included, and the server treats a
+  present key as the new value. So the local mirror has to keep pauses on
+  every write path, or a workout re-saved from the mirror clears pauses
+  recorded on another device.
+
 ## 2.5.0
 
 Set types, RPE and the workout note reach the app (heart-api#83; app side
