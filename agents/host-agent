@@ -55,6 +55,9 @@ is. Never commit or push. End with a short summary: what changed,
 verification, open ends."
 
 cd "$REPO"
+# What hooks/guard.sh keys the never-commit rule on. On the host it is the only
+# thing that tells this session from the user's own, which may commit.
+export HEART_AGENT=1
 if [[ -n "$TASK" ]]; then
   # Plain -p is silent until the run ends. Stream the session and render it
   # with the same filter `watch` uses; the raw event stream survives in $LOG
