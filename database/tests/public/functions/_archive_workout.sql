@@ -22,7 +22,11 @@ DECLARE
 BEGIN
     _user_id := create_test_profile();
     _w_id    := create_test_workout(_user_id => _user_id, _name => 'archive me');
-    UPDATE workouts SET calories = 420, note = 'felt strong' WHERE id = _w_id;
+    UPDATE workouts
+    SET calories = 420,
+        note = 'felt strong',
+        pauses = '[{"start": "2026-10-03T18:10:00Z", "end": "2026-10-03T18:20:00Z"}]'
+    WHERE id = _w_id;
 
     DELETE FROM workouts WHERE id = _w_id;
 
@@ -50,6 +54,11 @@ BEGIN
             (SELECT note FROM archive.deleted_workouts WHERE id = _w_id),
             'felt strong',
             'archive preserved the workout note'
+        );
+    RETURN NEXT is(
+            (SELECT jsonb_array_length(pauses) FROM archive.deleted_workouts WHERE id = _w_id),
+            1,
+            'archive preserved the pauses'
         );
 END
 $$ LANGUAGE plpgsql;
