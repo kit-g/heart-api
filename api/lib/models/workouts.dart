@@ -47,9 +47,10 @@ abstract interface class ApiWorkoutService {
   });
 
   /// Partial update of a workout the user owns — sets only the provided fields
-  /// (name/start/end/calories/note), leaving its exercises intact. A null
-  /// argument leaves that field unchanged; [note] is a record so that
-  /// `(value: null)` can clear the note.
+  /// (name/start/end/calories/note/pauses), leaving its exercises intact. A
+  /// null argument leaves that field unchanged; [note] is a record so that
+  /// `(value: null)` can clear the note. Null [pauses] keeps the stored ones,
+  /// cut to the start and end the patch leaves.
   Future<Workout> patchWorkout({
     required String userId,
     required String workoutId,
@@ -59,6 +60,7 @@ abstract interface class ApiWorkoutService {
     DateTime? end,
     double? calories,
     ({String? value})? note,
+    List<WorkoutPause>? pauses,
   });
 
   Future<void> deleteWorkout({
@@ -132,6 +134,11 @@ class WorkoutRequest {
   /// than most clients, so a replace leaves the stored note alone when it is
   /// absent; an explicit null or a blank string clears it.
   bool get setsNote => body.containsKey('note');
+
+  /// Whether this payload speaks about the workout's pauses, by the same
+  /// rule: absent keeps what is stored (cut to the new start and end), and a
+  /// present list, an empty one included, is the new value.
+  bool get setsPauses => body.containsKey('pauses');
 
   List<Map> _exercises() {
     final source = (body['exercises'] as List? ?? []).cast<Map>();
@@ -262,6 +269,46 @@ class WorkoutRequest {
     };
   }
 
+  /// The workout's pauses, closed and sorted by start; null is none. Each pause
+  /// must end after it starts and none may overlap the next, so a bad one is a
+  /// 400 naming it. Whether they fit the workout's own start and end is the
+  /// column's CHECK, since a `PATCH` may leave either as stored.
+  static List<WorkoutPause> workoutPauses(Object? value) {
+    final source = switch (value) {
+      null => const [],
+      final List l when l.length <= Workout.maxPauses => l,
+      final List _ => throw const BadRequest(
+        code: 'invalid_pauses',
+        reason: 'a workout has at most ${Workout.maxPauses} pauses',
+      ),
+      _ => throw const BadRequest(code: 'invalid_pauses', reason: 'pauses must be a list'),
+    };
+    WorkoutPause pause(int index, Object? each) {
+      final (start, end) = switch (each) {
+        {'start': final String start, 'end': final String end} => (DateTime.tryParse(start), DateTime.tryParse(end)),
+        _ => (null, null),
+      };
+      return switch ((start, end)) {
+        (final DateTime start, final DateTime end) when start.isBefore(end) => WorkoutPause(start: start, end: end),
+        (DateTime _, DateTime _) => throw BadRequest(
+          code: 'invalid_pauses',
+          reason: 'pauses[$index] must end after it starts',
+        ),
+        _ => throw BadRequest(code: 'invalid_pauses', reason: 'pauses[$index] needs ISO-8601 start and end'),
+      };
+    }
+
+    final pauses = [for (final (index, each) in source.indexed) (index, pause(index, each))]
+      ..sort((a, b) => a.$2.start.compareTo(b.$2.start));
+    for (var i = 1; i < pauses.length; i++) {
+      final (index, next) = pauses[i];
+      if (next.start.isBefore(pauses[i - 1].$2.end)) {
+        throw BadRequest(code: 'invalid_pauses', reason: 'pauses[$index] overlaps another pause');
+      }
+    }
+    return [for (final (_, pause) in pauses) pause];
+  }
+
   /// Deliberately omits [id] — `_replaceWorkout` (unlike `_saveWorkout`) has
   /// no `@id` placeholder, and the postgres client rejects a superfluous named
   /// parameter, so a create merges `id` in itself rather than carrying it here.
@@ -273,6 +320,7 @@ class WorkoutRequest {
       'completedAt': _dt(body['end']),
       'calories': (body['calories'] as num?)?.toDouble(),
       'note': workoutNote(body['note']),
+      'pauses': jsonEncode(workoutPauses(body['pauses']).map((pause) => pause.toMap()).toList()),
       'exercises': jsonEncode(_exercises()),
     };
   }

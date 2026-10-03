@@ -372,4 +372,90 @@ void main() {
       expect(exercises.first['exercise_id'], _bench);
     });
   });
+
+  group('WorkoutRequest — pauses', () {
+    WorkoutRequest body(Map<String, dynamic> extra) => WorkoutRequest(userId: 'u1', body: {'name': 'W', ...extra});
+    List stored(Map<String, dynamic> extra) => jsonDecode(body(extra).toParams()['pauses'] as String) as List;
+    Matcher invalid(String reason) => throwsA(
+      isA<BadRequest>().having((e) => e.code, 'code', 'invalid_pauses').having((e) => e.reason, 'reason', reason),
+    );
+
+    test('absent or null is none, and whether the key came is kept apart', () {
+      expect(stored({}), isEmpty);
+      expect(stored({'pauses': null}), isEmpty);
+      expect(body({}).setsPauses, isFalse);
+      expect(body({'pauses': []}).setsPauses, isTrue);
+    });
+
+    test('stored as UTC instants, sorted by start; touching ends are fine', () {
+      expect(
+        stored({
+          'pauses': [
+            {'start': '2026-10-03T20:20:00+02:00', 'end': '2026-10-03T18:25:00Z'},
+            {'start': '2026-10-03T18:10:00Z', 'end': '2026-10-03T18:20:00Z'},
+          ],
+        }),
+        [
+          {'start': '2026-10-03T18:10:00.000Z', 'end': '2026-10-03T18:20:00.000Z'},
+          {'start': '2026-10-03T18:20:00.000Z', 'end': '2026-10-03T18:25:00.000Z'},
+        ],
+      );
+    });
+
+    test('a pause that does not end after it starts is a 400 naming it', () {
+      expect(
+        () => stored({
+          'pauses': [
+            {'start': '2026-10-03T18:10:00Z', 'end': '2026-10-03T18:10:00Z'},
+          ],
+        }),
+        invalid('pauses[0] must end after it starts'),
+      );
+    });
+
+    test('a malformed pause is a 400 naming it', () {
+      for (final bad in [
+        'yesterday',
+        {'start': '2026-10-03T18:10:00Z'},
+        {'start': '2026-10-03T18:10:00Z', 'end': 'later'},
+        {'start': 1, 'end': 2},
+      ]) {
+        expect(
+          () => stored({
+            'pauses': [
+              {'start': '2026-10-03T18:00:00Z', 'end': '2026-10-03T18:01:00Z'},
+              bad,
+            ],
+          }),
+          invalid('pauses[1] needs ISO-8601 start and end'),
+          reason: '$bad',
+        );
+      }
+      expect(() => stored({'pauses': {}}), invalid('pauses must be a list'));
+    });
+
+    test('overlapping pauses are a 400 naming the later one as sent', () {
+      expect(
+        () => stored({
+          'pauses': [
+            {'start': '2026-10-03T18:30:00Z', 'end': '2026-10-03T18:40:00Z'},
+            {'start': '2026-10-03T18:10:00Z', 'end': '2026-10-03T18:35:00Z'},
+          ],
+        }),
+        invalid('pauses[0] overlaps another pause'),
+      );
+    });
+
+    test('at most 100', () {
+      List<Map<String, String>> minutes(int n) => [
+        for (var i = 0; i < n; i++)
+          {
+            'start': DateTime.utc(2026, 10, 3, 18, i).toIso8601String(),
+            'end': DateTime.utc(2026, 10, 3, 18, i, 30).toIso8601String(),
+          },
+      ];
+      expect(stored({'pauses': minutes(100)}), hasLength(100));
+      expect(() => stored({'pauses': minutes(101)}), invalid('a workout has at most 100 pauses'));
+    });
+  });
 }
