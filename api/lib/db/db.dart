@@ -164,6 +164,12 @@ ApiException? apiExceptionForDbError(Object error) {
     // Reached only when no call site claimed it — the specific duplicate codes
     // (`id_taken`, the payload-id collision) are thrown at their statements.
     '23505' => const BadRequest(code: 'duplicate', reason: 'a record with these values already exists'),
+    // The request checks each pause on its own; only the column can check
+    // them against a start or end the body left as stored.
+    '23514' when constraint == 'workouts_pauses_check' => const BadRequest(
+      code: 'invalid_pauses',
+      reason: "every pause must lie within the workout's start and end",
+    ),
     _ => null,
   };
 }
