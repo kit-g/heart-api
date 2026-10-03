@@ -74,13 +74,15 @@ class ImportWorkoutsIn {
 }
 
 /// Body for `PATCH /workouts/:workoutId` — a partial update of a workout's own
-/// fields (name, start, end, calories, note), leaving its exercises untouched.
+/// fields (name, start, end, calories, note, pauses), leaving its exercises
+/// untouched.
 /// Every field is optional but at least one must be present; an omitted field
 /// is left as-is.
 ///
 /// Partial semantics come from omission: a field absent from the body isn't
 /// changed. Only the note can be *cleared* — `null` or a blank string, as on
 /// `PUT`; an empty/null `name` is rejected rather than treated as a clear.
+/// `pauses` is a whole list, as on `PUT`: `[]` clears them.
 ///
 /// `calories` exists on PATCH because wearable energy totals settle after the
 /// workout is saved: HealthKit delivers the final active-energy figure minutes
@@ -94,7 +96,10 @@ class WorkoutPatchIn {
   /// Null leaves the note alone; `(value: null)` clears it.
   final ({String? value})? note;
 
-  const new _({this.name, this.start, this.end, this.calories, this.note});
+  /// Null leaves the pauses alone; a list, an empty one included, replaces them.
+  final List<WorkoutPause>? pauses;
+
+  const new _({this.name, this.start, this.end, this.calories, this.note, this.pauses});
 
   static Future<WorkoutPatchIn> fromRequest(Request req) async {
     final json = await req.json();
@@ -112,12 +117,16 @@ class WorkoutPatchIn {
       true => (value: WorkoutRequest.workoutNote(json['note'])),
       false => null,
     };
-    if (name == null && start == null && end == null && calories == null && note == null) {
-      throw const BadRequest(reason: 'provide at least one of name, start, end, calories, note');
+    final pauses = switch (json.containsKey('pauses')) {
+      true => WorkoutRequest.workoutPauses(json['pauses']),
+      false => null,
+    };
+    if (name == null && start == null && end == null && calories == null && note == null && pauses == null) {
+      throw const BadRequest(reason: 'provide at least one of name, start, end, calories, note, pauses');
     }
     if (start != null && end != null && end.isBefore(start)) {
       throw const BadRequest(reason: 'end must not be before start');
     }
-    return WorkoutPatchIn._(name: name, start: start, end: end, calories: calories, note: note);
+    return WorkoutPatchIn._(name: name, start: start, end: end, calories: calories, note: note, pauses: pauses);
   }
 }

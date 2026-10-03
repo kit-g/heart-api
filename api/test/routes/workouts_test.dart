@@ -214,6 +214,38 @@ void main() {
       ).called(1);
     });
 
+    test('the pauses reach the service', () async {
+      when(
+        workouts.patchWorkout(
+          userId: anyNamed('userId'),
+          workoutId: anyNamed('workoutId'),
+          pauses: anyNamed('pauses'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).thenAnswer((_) async => _fakeWorkout('w-1'));
+
+      await patchWorkoutById(
+        patchReq({
+          'pauses': [
+            {'start': '2026-10-03T18:10:00Z', 'end': '2026-10-03T18:20:00Z'},
+          ],
+        }),
+        'w-1',
+      );
+
+      final pauses =
+          verify(
+                workouts.patchWorkout(
+                  userId: anyNamed('userId'),
+                  workoutId: anyNamed('workoutId'),
+                  pauses: captureAnyNamed('pauses'),
+                  imageUrl: anyNamed('imageUrl'),
+                ),
+              ).captured.single
+              as List<WorkoutPause>;
+      expect(pauses.single.end, DateTime.utc(2026, 10, 3, 18, 20));
+    });
+
     test('rejects an empty body (no fields to change)', () async {
       await expectLater(patchWorkoutById(patchReq({}), 'w-1'), throwsA(isA<BadRequest>()));
       verifyNever(
