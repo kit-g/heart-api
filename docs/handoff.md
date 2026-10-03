@@ -53,7 +53,8 @@ feature off to the Flutter app. This file is about finishing work *here*.)
    boundary, switch over cast-and-branch, one-round-trip SQL with `RETURNING`,
    casing by layer, shapes in one place, repos named without the `kit-g/`
    prefix. Every entry there is a finding.
-10. **Git** — never commit or push. Leave work in the tree and run
+10. **Git** — an agent never commits or pushes (`agents/hooks/guard.sh`
+   enforces it; the user's own interactive session may). Leave work in the tree and run
    `git add -N .` so new files appear in `git diff`.
 11. **Self-review** — run the `review-handoff` skill on the finished tree
     before writing the handoff. Fix what it finds, re-run, and leave

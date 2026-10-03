@@ -48,9 +48,9 @@ change is released the moment it lands. Consequences:
 `docs/handoff.md` is the submission checklist for any nontrivial change.
 Autonomous agents (`agents/README.md`) finish by writing `HANDOFF.md` (worktree root,
 gitignored) and, when dispatched from a GitHub issue, commenting the summary on it;
-interactive sessions just meet the list. Commits and pushes are the user's, always —
-`agents/hooks/guard.sh` enforces that, wired in per tool: `.claude/settings.json` for
-Claude Code, `.codex/hooks.json` for Codex.
+interactive sessions just meet the list. Agents never commit or push; the user's own
+interactive session may. `agents/hooks/guard.sh` enforces that, wired in per tool:
+`.claude/settings.json` for Claude Code, `.codex/hooks.json` for Codex.
 
 This file is the single source of truth for both: `AGENTS.md` is a symlink to it, and
 `.agents/skills` a symlink to `.claude/skills`. Edit the originals — never a copy.

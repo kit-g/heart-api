@@ -50,9 +50,13 @@ prompt, and a headless run cannot answer a prompt, so they fail closed.
 
 **Guardrails.** `.claude/settings.json` wires `hooks/guard.sh` as a
 PreToolUse hook for every session in this repo — hooks still fire under
-bypassPermissions. Beyond the app repo's rules (no committing or pushing,
-no work-destroying git, no recursive force-deletes outside build dirs) it
-blocks the ways an agent could reach a shared environment from here:
+bypassPermissions. Like the app repo's, it denies `git commit`/`push` to
+agents only: a session started by `agent` or `host-agent`, which set
+`HEART_AGENT=1`, or any session in a container. Your own interactive session
+commits and pushes. For everyone it denies work-destroying git and recursive
+force-deletes outside build dirs, and it blocks the ways a session could
+reach a shared environment from here (`hooks/guard_test.sh` is the
+regression matrix):
 
 | Blocked                                                                     | Why                                                                                                      |
 |-----------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
