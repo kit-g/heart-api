@@ -72,4 +72,33 @@ void main() {
       await expectLater(patch({'note': 42}), throwsA(isA<BadRequest>()));
     });
   });
+
+  group('WorkoutPatchIn — pauses', () {
+    Future<WorkoutPatchIn> patch(Map<String, dynamic> body) => WorkoutPatchIn.fromRequest(jsonRequest(body: body));
+
+    test('a list alone is a patch, an empty one included', () async {
+      final input = await patch({
+        'pauses': [
+          {'start': '2026-10-03T18:10:00Z', 'end': '2026-10-03T18:20:00Z'},
+        ],
+      });
+      expect(input.pauses?.single.start, DateTime.utc(2026, 10, 3, 18, 10));
+      expect((await patch({'pauses': []})).pauses, isEmpty);
+    });
+
+    test('no pauses key leaves them alone', () async {
+      expect((await patch({'name': 'A'})).pauses, isNull);
+    });
+
+    test('a bad pause is a 400', () async {
+      await expectLater(
+        patch({
+          'pauses': [
+            {'start': '2026-10-03T18:20:00Z', 'end': '2026-10-03T18:10:00Z'},
+          ],
+        }),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'invalid_pauses')),
+      );
+    });
+  });
 }
