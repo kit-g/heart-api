@@ -1187,6 +1187,71 @@ void main() {
       });
     },
   );
+
+  group(
+    'pauses',
+    () {
+      Map<String, dynamic> row({Object? pauses = const []}) => {
+        'id': 'workout-row',
+        'name': 'Server Workout',
+        'started_at': '2026-10-03T18:00:00Z',
+        'completed_at': '2026-10-03T19:00:00Z',
+        'exercises': const [],
+        'pauses': ?pauses,
+      };
+
+      Workout read({Object? pauses = const []}) => Workout.fromRow(row(pauses: pauses), imageUrl: (key) => key);
+
+      const pauses = [
+        {'start': '2026-10-03T18:02:11Z', 'end': '2026-10-03T18:09:40Z'},
+        {'start': '2026-10-03T18:30:00Z', 'end': '2026-10-03T18:35:00Z'},
+      ];
+
+      test('read off the row and the local JSON, absent as none', () {
+        final workout = read(pauses: pauses);
+        expect(workout.pauses, hasLength(2));
+        expect(workout.pauses.first.start, DateTime.utc(2026, 10, 3, 18, 2, 11));
+        expect(workout.pauses.first.duration, const Duration(minutes: 7, seconds: 29));
+        expect(read(pauses: null).pauses, isEmpty);
+        expect(Workout.fromJson({'id': 'w', 'start': '2026-10-03T18:00:00Z'}).pauses, isEmpty);
+      });
+
+      test('duration leaves paused time out; start and end stay as they were', () {
+        final workout = read(pauses: pauses);
+        expect(workout.duration, const Duration(hours: 1) - const Duration(minutes: 12, seconds: 29));
+        expect(workout.start, DateTime.utc(2026, 10, 3, 18));
+        expect(workout.end, DateTime.utc(2026, 10, 3, 19));
+        expect(read().duration, const Duration(hours: 1));
+      });
+
+      test('elapsed leaves closed pauses out', () {
+        final start = DateTime.now().subtract(const Duration(minutes: 30));
+        final workout = Workout.fromJson({'id': 'w', 'start': start.toIso8601String()})
+          ..pauses = [WorkoutPause(start: start, end: start.add(const Duration(minutes: 10)))];
+        expect(workout.elapsed().inMinutes, 20);
+      });
+
+      test('always written, empty included, and round-trips', () {
+        expect(Workout(name: 'Push').toMap(), containsPair('pauses', isEmpty));
+        final workout = read(pauses: pauses);
+        expect(workout.toMap()['pauses'], [
+          {'start': '2026-10-03T18:02:11.000Z', 'end': '2026-10-03T18:09:40.000Z'},
+          {'start': '2026-10-03T18:30:00.000Z', 'end': '2026-10-03T18:35:00.000Z'},
+        ]);
+        final back = Workout.fromJson(workout.toMap());
+        expect(back.duration, workout.duration);
+      });
+
+      test('the same session keeps its pauses; a repeat starts without them', () {
+        final workout = read(pauses: pauses);
+        final same = workout.copy(sameId: true);
+        expect(same.pauses, hasLength(2));
+        same.pauses.clear();
+        expect(workout.pauses, hasLength(2), reason: 'a copy owns its list');
+        expect(workout.copy().pauses, isEmpty);
+      });
+    },
+  );
 }
 
 extension on int {

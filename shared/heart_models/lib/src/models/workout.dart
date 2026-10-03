@@ -83,6 +83,48 @@ abstract interface class HasExercises {
   void append(WorkoutExercise exercise);
 }
 
+/// A stretch of a workout spent paused, as true wall-clock instants. A
+/// workout's [Workout.start] and [Workout.end] are never moved to hide one;
+/// the time is subtracted from [Workout.duration] instead.
+abstract interface class WorkoutPause implements Model {
+  DateTime get start;
+
+  DateTime get end;
+
+  Duration get duration;
+
+  factory({required DateTime start, required DateTime end}) = _WorkoutPause;
+
+  factory fromJson(Map json) {
+    DateTime instant(String key) => switch (json[key]) {
+      final String s => DateTime.parse(s),
+      final DateTime dt => dt,
+      final other => throw ArgumentError.value(other, key, 'invalid timestamp'),
+    };
+    return _WorkoutPause(start: instant('start'), end: instant('end'));
+  }
+}
+
+class _WorkoutPause implements WorkoutPause {
+  @override
+  final DateTime start;
+  @override
+  final DateTime end;
+
+  const new({required this.start, required this.end});
+
+  @override
+  Duration get duration => end.difference(start);
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'start': start.toUtc().toIso8601String(),
+      'end': end.toUtc().toIso8601String(),
+    };
+  }
+}
+
 /// A full workout
 abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid implements HasExercises, Model {
   String get id;
@@ -103,6 +145,13 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
   abstract String? note;
 
   static const maxNoteLength = 1000;
+
+  /// The stretches this workout spent paused, closed and in order; empty when
+  /// it never paused. An open pause is the active workout's own state and is
+  /// not one of these until it is closed.
+  abstract List<WorkoutPause> pauses;
+
+  static const maxPauses = 100;
 
   Iterable<WorkoutExercise> get sets;
 
@@ -157,6 +206,7 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
       },
       calories: (row['calories'] as num?)?.toDouble(),
       note: row['note'] as String?,
+      pauses: _pauses(row['pauses']),
       // a workout read from the server's own store is, by definition, synced
       synced: true,
     );
@@ -174,7 +224,7 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
   /// whether the workout was marked as complete
   bool get isCompleted;
 
-  /// how long it lasted from [start] to [end]
+  /// how long it lasted from [start] to [end], less its [pauses]
   Duration? get duration;
 
   /// whether the workout was actually started,
@@ -198,7 +248,15 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
 
   void resolveName(String defaultValue);
 
+  /// how long it has run since [start], less its closed [pauses]
   Duration elapsed();
+}
+
+List<WorkoutPause> _pauses(Object? value) {
+  return switch (value) {
+    final List l => l.map((each) => WorkoutPause.fromJson(each as Map)).toList(),
+    _ => [],
+  };
 }
 
 class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExercise {
@@ -424,6 +482,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   String? note;
 
   @override
+  List<WorkoutPause> pauses;
+
+  @override
   final bool synced;
 
   new _({
@@ -434,9 +495,11 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
     this.end,
     this.calories,
     this.note,
+    List<WorkoutPause>? pauses,
     Map<String, WorkoutImage>? images,
     this.synced = false,
   }) : _sets = exercises ?? <WorkoutExercise>[],
+       pauses = pauses ?? [],
        images = SplayTreeMap.from(images ?? {});
 
   factory fromJson(Map json) {
@@ -447,6 +510,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       end: DateTime.tryParse(json['end'] ?? ''),
       calories: (json['calories'] as num?)?.toDouble(),
       note: json['note'] as String?,
+      pauses: _pauses(json['pauses']),
       exercises: switch (json['exercises']) {
         List l => l.map((each) => WorkoutExercise.fromJson(each)).toList(),
         _ => null,
@@ -498,6 +562,8 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       // always present, so it can be cleared; a body without the key leaves
       // the stored note alone
       'note': note,
+      // always present for the same reason: an empty list is no pauses
+      'pauses': pauses.map((pause) => pause.toMap()).toList(),
       'exercises': where((ex) => ex.isNotEmpty).indexed.map(asRequest).toList(),
       'images': images.values.map((img) => img.toRow()).toList(),
     };
@@ -560,10 +626,12 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   @override
   Duration? get duration {
     return switch (end) {
-      DateTime end => end.difference(start),
+      DateTime end => end.difference(start) - _paused,
       null => null,
     };
   }
+
+  Duration get _paused => pauses.fold(Duration.zero, (sum, pause) => sum + pause.duration);
 
   @override
   bool get isStarted => any((exercise) => exercise.isStarted);
@@ -593,14 +661,15 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   @override
   Workout copy({bool sameId = false}) {
     // calories/met are measurements of the original session, and the note
-    // is about that session too, so a copy with a fresh id (repeating a past
-    // workout) must not inherit them.
+    // and pauses are about that session too, so a copy with a fresh id
+    // (repeating a past workout) must not inherit them.
     final workout = _Workout._(
       id: sameId ? id : uuidV7(),
       name: name,
       start: sameId ? start : DateTime.timestamp(),
       calories: sameId ? calories : null,
       note: sameId ? note : null,
+      pauses: sameId ? [...pauses] : null,
       images: images,
     );
 
@@ -655,7 +724,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   }
 
   @override
-  Duration elapsed() => DateTime.now().difference(start);
+  Duration elapsed() => DateTime.now().difference(start) - _paused;
 }
 
 extension on Iterable<Completes> {
