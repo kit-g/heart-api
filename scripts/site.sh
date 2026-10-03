@@ -2,7 +2,7 @@
 # Syncs site/ to S3 and invalidates the CloudFront distribution.
 #
 # Usage: scripts/site.sh <bucket> <aws-profile> <distribution-id> <env>
-#   env picks which .well-known/<env>/ association files ship.
+#   env picks which .well-known/<env>/ association files and robots/<env>.txt ship.
 set -euo pipefail
 
 if [ $# -ne 4 ]; then
@@ -18,7 +18,7 @@ ENV=$4
 # data/ belongs to heart-of-yours: its release workflow uploads the JSON the
 # feature and changelog pages render. Excluded, --delete would wipe it.
 aws s3 sync site "s3://$BUCKET/site" --delete --profile "$PROFILE" \
-  --exclude ".well-known/*" --exclude "data/*"
+  --exclude ".well-known/*" --exclude "robots/*" --exclude "robots.txt" --exclude "data/*"
 
 aws s3 cp "site/.well-known/$ENV/apple-app-site-association" \
   "s3://$BUCKET/site/.well-known/apple-app-site-association" \
@@ -27,6 +27,10 @@ aws s3 cp "site/.well-known/$ENV/apple-app-site-association" \
 aws s3 cp "site/.well-known/$ENV/assetlinks.json" \
   "s3://$BUCKET/site/.well-known/assetlinks.json" \
   --content-type application/json --profile "$PROFILE"
+
+# dev mirrors prod's pages, so it shuts crawlers out; only prod is indexed.
+aws s3 cp "site/robots/$ENV.txt" "s3://$BUCKET/site/robots.txt" \
+  --content-type text/plain --profile "$PROFILE"
 
 aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" \
   --paths "/*" \
