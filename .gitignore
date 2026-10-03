@@ -51,3 +51,5 @@ __pycache__/
 
 # Uploaded by heart-of-yours on release (see scripts/site.sh); never deployed from here.
 /site/data/
+# Compiled by scripts/tailwind/build.sh, on every deploy.
+/site/assets/tailwind.css
