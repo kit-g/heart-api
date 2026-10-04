@@ -871,6 +871,51 @@ exercises:
       - Si sientes molestias en la zona lumbar, revisa tu técnica y reduce el tiempo de la posición
     validated: false
     source_digest: f6f4e1bd5166
+  plank-weighted:
+    name: Plancha (con lastre)
+    instructions: |
+      ## Resumen
+      La plancha con lastre es una plancha sobre antebrazos con un disco apoyado en la espalda. La carga adicional hace la posición más difícil sin alargarla, de modo que puedes seguir desarrollando la fuerza del core cuando la plancha con el peso corporal deja de suponer un reto.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Colócate en plancha sobre antebrazos, con los codos bajo los hombros y las piernas extendidas hacia atrás
+      - Pide a un compañero que coloque un disco plano sobre la parte alta de tu espalda, entre los omóplatos
+      - Si entrenas solo, usa un disco ligero que puedas colocarte tú mismo con seguridad
+      - Forma una línea recta de la cabeza a los talones
+      - Activa el core y aprieta los glúteos
+
+      ### 2. Movimiento
+      1. Mantén la posición sin dejar que las caderas se hundan bajo la carga
+      2. Mantén el disco centrado e inmóvil sobre la espalda
+      3. Sigue presionando los antebrazos contra el suelo
+      4. Aguanta el tiempo objetivo
+      5. Pide que te retiren el disco o deslízalo con cuidado hacia un lado
+      6. Apoya las rodillas en el suelo para terminar
+
+      ### 3. Respiración
+      - Respira de forma constante y tranquila durante toda la posición
+      - No contengas la respiración; mantén el core activado mientras respiras
+
+      ### 4. Consejos
+      - Coloca el disco en la parte alta de la espalda, no en la zona lumbar
+      - Añade peso en pasos pequeños en lugar de dar grandes saltos
+      - Domina una plancha de 60 segundos con el peso corporal antes de añadir carga
+      - Empuja el suelo para que los omóplatos no se junten
+
+      ### 5. Errores comunes
+      - Dejar que las caderas se hundan bajo el peso adicional
+      - Elevar las caderas en pico para descargar el core
+      - Colocar el disco en la zona lumbar
+      - Mantener la posición más allá del punto en que se pierde la técnica
+
+      ### 6. Seguridad y modificaciones
+      - Pide a un compañero que coloque y retire el disco
+      - Detente si sientes tensión en la zona lumbar en lugar de esfuerzo en los abdominales
+      - Reduce el peso o el tiempo antes de que se deteriore la técnica
+      - Un chaleco lastrado es una alternativa más estable que un disco
+    validated: false
+    source_digest: 206e7f6b71db
   reverse-crunch:
     name: Crunch invertido
     instructions: |
@@ -12133,6 +12178,461 @@ exercises:
       - Este ejercicio es excelente para el acondicionamiento metabólico
     validated: false
     source_digest: e79446181d4f
+  farmers-walk:
+    name: Paseo del granjero
+    instructions: |
+      ## Resumen
+      El paseo del granjero es un acarreo con carga: levantas un peso pesado en cada mano y caminas una distancia determinada. Desarrolla la fuerza de agarre, la fuerza de la parte alta de la espalda y los trapecios, y la estabilidad del core necesaria para mantenerte erguido bajo carga, y se transfiere directamente a levantar y cargar objetos en el día a día.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Coloca un par de asas de granjero, mancuernas o pesas rusas a los lados
+      - Ponte de pie entre ellas con los pies separados al ancho de las caderas
+      - Haz una bisagra de cadera y flexiona las rodillas para alcanzar las asas con la espalda plana
+      - Sujeta cada asa por el centro para que quede equilibrada, apretando con fuerza
+      - Empuja con las piernas para ponerte erguido, con los hombros hacia atrás y abajo
+
+      ### 2. Movimiento
+      1. Activa el core y baja las costillas antes del primer paso
+      2. Camina hacia adelante con pasos cortos, rápidos y controlados
+      3. Mantén los brazos extendidos y los pesos inmóviles a los costados
+      4. Mira al frente y mantén el pecho erguido en todo momento
+      5. Recorre la distancia objetivo sin dejar que los pesos se balanceen
+      6. Detente y luego haz una bisagra de cadera y flexiona las rodillas para dejar los pesos en el suelo con control
+
+      ### 3. Respiración
+      - Inhala profundamente y activa el core antes de levantar y antes de empezar a caminar
+      - Respira en pequeñas tomas manteniendo el core activado en lugar de soltarlo por completo
+
+      ### 4. Consejos
+      - Aprieta las asas como si intentaras aplastarlas
+      - Mantén los hombros firmes y estables en lugar de dejar que el peso los arrastre hacia abajo o hacia adelante
+      - Los pasos cortos mantienen los pesos estables; las zancadas largas los hacen balancearse
+      - Dar la vuelta a mitad de la serie es más difícil que caminar en línea recta; reduce la velocidad y gira con pasos pequeños
+
+      ### 5. Errores comunes
+      - Redondear la espalda al levantar o dejar los pesos
+      - Inclinarse hacia un lado o dejar que los hombros se vayan hacia adelante
+      - Dar zancadas largas y con rebote que hacen balancearse los pesos
+      - Soltar los pesos desde arriba en lugar de dejarlos en el suelo
+      - Elegir una carga que no puedes sostener durante toda la distancia
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con un peso moderado y una distancia corta, y luego aumenta la carga o la distancia de forma gradual
+      - Usa un recorrido despejado y plano, con espacio para dejar los pesos en cualquier momento
+      - La tiza o las correas de agarre ayudan a sujetar, pero entrenar sin correas desarrolla la fuerza de agarre
+      - Si el agarre falla antes que la postura, acorta la distancia y añade series
+    validated: false
+    source_digest: 0a0666df9053
+  suitcase-carry:
+    name: Acarreo de maleta
+    instructions: |
+      ## Resumen
+      El acarreo de maleta es un acarreo con carga unilateral: caminas sosteniendo un solo peso a un costado, como si llevaras una maleta. Como la carga te empuja hacia un lado, los oblicuos y los músculos profundos del tronco trabajan intensamente para mantenerte erguido, lo que lo convierte en uno de los mejores acarreos para la estabilidad del core.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Coloca una mancuerna, una pesa rusa o un asa de granjero junto a un pie
+      - Haz una bisagra de cadera y flexiona las rodillas para sujetarla con la espalda plana
+      - Ponte erguido, sosteniendo el peso a un costado con el brazo extendido
+      - Mantén los hombros nivelados y la mano libre relajada o separada hacia un lado
+      - Activa el core antes de dar el primer paso
+
+      ### 2. Movimiento
+      1. Camina hacia adelante con pasos constantes y controlados
+      2. Mantén el torso vertical; no te inclines hacia el peso ni en sentido contrario
+      3. Mantén ambos hombros y ambas caderas nivelados en todo momento
+      4. Sostén el peso inmóvil a tu costado sin dejar que se balancee
+      5. Recorre la distancia objetivo y luego deja el peso en el suelo con control
+      6. Cambia de mano y repite la misma distancia con el otro lado
+
+      ### 3. Respiración
+      - Inhala y activa el core antes de levantar el peso y antes de empezar a caminar
+      - Sigue respirando de forma constante con el core activado; no contengas la respiración durante todo el recorrido
+
+      ### 4. Consejos
+      - Piensa en empujar hacia el suelo el lado opuesto de la cintura
+      - Un espejo o un compañero pueden indicarte si te estás inclinando
+      - Aprieta el asa con fuerza; un agarre firme ayuda a mantener tenso todo ese lado
+      - Registra cada lado como una serie independiente si un lado es notablemente más débil
+
+      ### 5. Errores comunes
+      - Inclinarse en sentido contrario al peso para compensarlo
+      - Elevar el hombro cargado hacia la oreja
+      - Dejar que el peso se desplace hacia adelante o se balancee con cada paso
+      - Entrenar solo el lado más fuerte
+      - Redondear la espalda al levantar o dejar el peso
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con menos peso que en el paseo del granjero; el reto es la carga unilateral
+      - Acorta la distancia antes de dejar que la postura se deteriore
+      - Para los principiantes, una pesa rusa es más fácil de sostener que una mancuerna
+      - Detente si sientes dolor en la zona lumbar en lugar de esfuerzo muscular en el tronco
+    validated: false
+    source_digest: 942a6dcb1a1d
+  overhead-carry:
+    name: Acarreo por encima de la cabeza
+    instructions: |
+      ## Resumen
+      El acarreo por encima de la cabeza es un acarreo con carga en el que el peso se mantiene bloqueado sobre la cabeza. Desarrolla la estabilidad de los hombros, la fuerza por encima de la cabeza y el control del core necesario para mantener las costillas abajo con los brazos elevados. Puede hacerse con dos pesos, con uno solo o con una barra.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Lleva un par de mancuernas o pesas rusas a los hombros con una cargada o un press
+      - Empújalas por encima de la cabeza hasta bloquear por completo los brazos
+      - Alinea los pesos sobre los hombros, con los bíceps cerca de las orejas
+      - Baja las costillas y aprieta los glúteos para que la zona lumbar no se arquee
+      - Mantén los pies separados al ancho de las caderas y la mirada al frente
+
+      ### 2. Movimiento
+      1. Camina hacia adelante con pasos cortos y controlados
+      2. Mantén los codos bloqueados y los pesos justo encima de los hombros
+      3. Mantén las costillas abajo y evita inclinarte hacia atrás
+      4. Mantén las muñecas rectas en lugar de dobladas hacia atrás
+      5. Recorre la distancia objetivo sin dejar que los pesos se desplacen hacia adelante
+      6. Baja los pesos a los hombros y luego al suelo, con control
+
+      ### 3. Respiración
+      - Activa el core antes de empujar por encima de la cabeza y antes de empezar a caminar
+      - Respira de forma superficial manteniendo el core activado para conservar el tronco firme
+
+      ### 4. Consejos
+      - Estírate activamente hacia arriba, como si empujaras los pesos hacia el techo
+      - La versión a un brazo añade un reto antiinclinación para el core
+      - Una barra por encima de la cabeza es menos estable de lado a lado; empieza con poco peso
+      - Si el bloqueo se afloja, termina la serie en lugar de caminar con los codos flexionados
+
+      ### 5. Errores comunes
+      - Arquear la zona lumbar para llevar los pesos por encima de la cabeza
+      - Dejar que los pesos se desplacen hacia adelante, por delante de la cabeza
+      - Caminar con los codos flexionados
+      - Encoger tanto los hombros que el cuello se tensa
+      - Usar más peso del que puedes empujar por encima de la cabeza con técnica estricta
+
+      ### 6. Seguridad y modificaciones
+      - Necesitas una movilidad completa y sin dolor por encima de la cabeza antes de cargar este movimiento
+      - Empieza con pesos ligeros y distancias cortas
+      - El acarreo en posición de rack frontal es una buena alternativa si las posiciones por encima de la cabeza te resultan incómodas
+      - Si un peso empieza a caer, apártate y déjalo caer en lugar de intentar salvarlo
+    validated: false
+    source_digest: 821a392b5a4f
+  yoke-carry:
+    name: Acarreo con yugo
+    instructions: |
+      ## Resumen
+      El acarreo con yugo es una prueba de strongman en la que llevas una estructura cargada sobre la parte alta de la espalda. Carga todo el cuerpo: las piernas desplazan el peso, mientras la espalda y el core mantienen la columna rígida bajo una fuerte compresión. Permite cargas más pesadas que cualquier acarreo con las manos.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Coloca el travesaño del yugo aproximadamente a la altura de la mitad del pecho
+      - Colócate debajo y apoya el travesaño sobre la parte alta de la espalda, como en una sentadilla trasera
+      - Sujeta el travesaño o los postes verticales con las manos
+      - Coloca los pies bajo el travesaño, activa el core con fuerza y ponte de pie para despegar el yugo del suelo
+      - Mantente erguido con la estructura nivelada y equilibrada
+
+      ### 2. Movimiento
+      1. Da pasos cortos y rápidos, manteniendo los pies bajo las caderas
+      2. Mantén el yugo nivelado; si empieza a balancearse, acorta los pasos
+      3. Mantente erguido con el pecho arriba y el core activado
+      4. Mantén la mirada al frente, en la línea de llegada
+      5. Recorre la distancia objetivo
+      6. Flexiona ligeramente las piernas para apoyar las patas del yugo en el suelo con control
+
+      ### 3. Respiración
+      - Inhala al máximo y activa el core antes de levantar el yugo
+      - En recorridos largos, toma respiraciones rápidas con el core activado, sin soltarlo nunca por completo
+
+      ### 4. Consejos
+      - Sujeta los postes verticales en lugar del travesaño para controlar mejor el balanceo
+      - Los pasos cortos y rápidos son mejores que las zancadas largas; el impulso ayuda
+      - Practica el levantamiento y la descarga con cargas ligeras antes de aumentar la distancia
+      - Entrena sobre una superficie plana y antideslizante
+
+      ### 5. Errores comunes
+      - Dar zancadas largas que hacen balancearse el yugo
+      - Dejar caer el pecho y redondear la espalda bajo la carga
+      - Perder la activación del core a mitad del acarreo
+      - Añadir peso antes de que el levantamiento y la descarga sean consistentes
+      - Hacer el acarreo sobre una superficie irregular o resbaladiza
+
+      ### 6. Seguridad y modificaciones
+      - Es un ejercicio avanzado; desarrolla antes una buena sentadilla trasera y el paseo del granjero
+      - Empieza con el yugo vacío y distancias cortas
+      - Si pierdes el equilibrio, sal de debajo de la estructura y suéltala
+      - Un acarreo con barra de seguridad o con barra desde un rack es una forma más ligera de aprender la posición
+    validated: false
+    source_digest: 9a643d333734
+  sandbag-carry:
+    name: Acarreo con saco de arena
+    instructions: |
+      ## Resumen
+      El acarreo con saco de arena es un acarreo con una carga incómoda y cambiante, abrazada contra el pecho o sostenida sobre un hombro. El saco no tiene asas y se mueve constantemente, así que la parte alta de la espalda, los brazos y el core trabajan intensamente para sujetarlo, y la fuerza que desarrollas se transfiere bien a levantar objetos reales.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ponte de pie con el saco de arena a lo largo entre los pies
+      - Agáchate y rodea el saco con los brazos por debajo y alrededor
+      - Súbelo hasta los muslos, luego ponte de pie y abrázalo alto contra el pecho
+      - Entrelaza las manos o sujétate los antebrazos alrededor del saco
+      - Mantente erguido con los hombros hacia atrás y el core activado
+
+      ### 2. Movimiento
+      1. Camina hacia adelante con pasos cortos y constantes
+      2. Mantén el saco alto y pegado al cuerpo
+      3. Mantente erguido en lugar de inclinarte hacia atrás para apoyar el saco en el abdomen
+      4. Reajusta el agarre solo si es necesario, sin detenerte
+      5. Recorre la distancia objetivo
+      6. Baja el saco agachándote, no inclinándote hacia adelante con la espalda redondeada
+
+      ### 3. Respiración
+      - Activa el core antes de levantar y antes de empezar a caminar
+      - Respira de forma corta con el core activado; el saco contra el pecho dificulta las respiraciones profundas
+
+      ### 4. Consejos
+      - Un saco que no está lleno del todo se mueve más y es más difícil de llevar
+      - El acarreo sobre el hombro es una buena variante; cambia de hombro entre series
+      - Junta los codos para mantener el saco firme
+      - Elige una carga que puedas subir al pecho con buena técnica
+
+      ### 5. Errores comunes
+      - Inclinarse hacia atrás y dejar que el saco descanse sobre las caderas
+      - Dejar que el saco se deslice hacia abajo por el cuerpo
+      - Redondear la espalda para levantar o soltar el saco
+      - Dar zancadas largas que te desequilibran
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con un saco ligero para aprender a subirlo al pecho
+      - El acarreo abrazando el saco es más fácil que llevarlo sobre un hombro
+      - Entrena en un recorrido despejado y plano
+      - Si el saco empieza a resbalar, déjalo en el suelo y vuelve a levantarlo en lugar de forcejear con él
+    validated: false
+    source_digest: 96c7ccc55fbb
+  sled-push:
+    name: Empuje de trineo
+    instructions: |
+      ## Resumen
+      El empuje de trineo consiste en desplazar un trineo cargado por el suelo con la fuerza de las piernas. Desarrolla la fuerza, la potencia y el acondicionamiento de las piernas sin fase excéntrica (de descenso), por lo que es suave con las articulaciones y provoca poco dolor muscular en relación con el trabajo realizado.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Carga el trineo y colócate detrás, de frente a los postes
+      - Sujeta las asas con los brazos extendidos (asas altas) o flexionados (asas bajas)
+      - Inclínate hacia el trineo de modo que el cuerpo forme una línea recta de la cabeza al talón trasero
+      - Activa el core y mantén la espalda plana
+      - Adelanta un pie, listo para empujar
+
+      ### 2. Movimiento
+      1. Empuja el suelo con la parte delantera del pie adelantado para poner en marcha el trineo
+      2. Da pasos cortos y potentes, empujando con cada uno
+      3. Mantén las caderas bajas y el torso en un ángulo constante
+      4. Mantén los brazos rígidos para que la fuerza de las piernas llegue al trineo
+      5. Empuja durante la distancia objetivo
+      6. Detente con control y recolócate antes de la siguiente pasada
+
+      ### 3. Respiración
+      - Activa el core antes del primer paso
+      - En empujes largos, respira de forma rítmica con los pasos
+
+      ### 4. Consejos
+      - Empuja con la parte delantera de la planta del pie, no con la punta de los dedos
+      - Las cargas pesadas con empujes cortos desarrollan fuerza; las cargas ligeras con empujes largos desarrollan acondicionamiento
+      - Las asas bajas exigen más a las piernas; las asas altas te permiten ir más erguido
+      - La superficie del suelo cambia mucho la fricción, así que compara cargas solo sobre la misma superficie
+
+      ### 5. Errores comunes
+      - Redondear la espalda o dejar que las caderas se hundan
+      - Ir demasiado erguido, lo que empuja el trineo contra el suelo en lugar de hacia adelante
+      - Dar zancadas largas y lentas
+      - Flexionar los brazos, de modo que el empuje se pierde en los codos
+      - Cargar tanto peso que el trineo solo avanza a tirones
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con poco peso para aprender el ángulo del cuerpo y la zancada
+      - Asegúrate de que el recorrido esté despejado y sea lo bastante largo para toda la distancia
+      - Usa calzado con buen agarre
+      - Un empuje más ligero y rápido es una buena alternativa para los días de acondicionamiento
+    validated: false
+    source_digest: 288d695485d2
+  sled-drag:
+    name: Arrastre de trineo
+    instructions: |
+      ## Resumen
+      El arrastre de trineo consiste en tirar de un trineo cargado con una correa, una cuerda o un arnés. Caminar hacia atrás trabaja intensamente los cuádriceps; caminar hacia adelante con un arnés trabaja los glúteos y los isquiotibiales. Al igual que el empuje de trineo, no tiene fase de descenso, por lo que desarrolla fuerza y acondicionamiento sin castigar las rodillas.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Engancha correas o una cuerda al trineo, o ponte un arnés
+      - Para el arrastre hacia atrás, colócate de frente al trineo sujetando las correas con los brazos extendidos
+      - Retrocede hasta que las correas queden tensas
+      - Lleva ligeramente las caderas hacia atrás, con el pecho erguido y el core activado
+      - Mantén los brazos extendidos en todo momento; sujetan la correa, las piernas hacen el trabajo
+
+      ### 2. Movimiento
+      1. Da un paso hacia atrás, empujando el suelo con la parte delantera del pie
+      2. Mantén las rodillas flexionadas y las caderas bajas para mantener la tensión en los cuádriceps
+      3. Da pasos cortos y constantes, manteniendo las correas tensas
+      4. Mantén el pecho erguido y la espalda plana
+      5. Arrastra el trineo durante la distancia objetivo
+      6. Detente con control, libera la tensión y recolócate
+
+      ### 3. Respiración
+      - Activa el core antes del primer paso
+      - Respira de forma rítmica con los pasos
+
+      ### 4. Consejos
+      - El arrastre hacia atrás es una forma de entrenar los cuádriceps respetuosa con las articulaciones
+      - El arrastre hacia adelante con arnés entrena los glúteos, los isquiotibiales y el acondicionamiento
+      - Mira por encima del hombro o usa un recorrido despejado y señalizado al caminar hacia atrás
+      - Mantente bajo; ponerte completamente erguido quita trabajo a las piernas
+
+      ### 5. Errores comunes
+      - Tirar con los brazos en lugar de impulsarte con las piernas
+      - Redondear la espalda o inclinarse demasiado hacia atrás
+      - Dejar que las correas se aflojen entre pasos
+      - Caminar hacia atrás sin comprobar el recorrido que tienes detrás
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con poco peso para acostumbrarte a caminar hacia atrás con carga
+      - Usa una superficie plana, despejada y con buen agarre
+      - Un arnés te deja las manos libres y facilita aprender el arrastre hacia adelante
+      - Si tienes dolor de rodilla, prueba el arrastre hacia adelante o reduce la carga antes de dejarlo por completo
+    validated: false
+    source_digest: e84b5b4ab78d
+  farmers-hold:
+    name: Sostén estático del granjero
+    instructions: |
+      ## Resumen
+      El sostén estático del granjero es un ejercicio de agarre sin desplazamiento: levantas asas pesadas, mancuernas o una barra y las sostienes durante un tiempo. Desarrolla la fuerza y la resistencia de agarre para el peso muerto, los remos, los acarreos y las dominadas, y es la versión estática del paseo del granjero.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Coloca delante de ti un par de mancuernas pesadas, asas de granjero o una barra cargada
+      - Haz una bisagra de cadera y flexiona las rodillas para sujetar los pesos con la espalda plana
+      - Sujeta cada asa por el centro para que quede equilibrada
+      - Ponte erguido con los pesos a los costados
+      - Lleva los hombros hacia atrás y abajo y activa el core
+
+      ### 2. Movimiento
+      1. Sostén los pesos inmóviles con los brazos extendidos
+      2. Aprieta las asas con toda la fuerza que puedas durante toda la posición
+      3. Mantén los hombros firmes y el pecho erguido
+      4. Mantente erguido sin inclinarte ni desplazar el peso del cuerpo
+      5. Aguanta el tiempo objetivo
+      6. Deja los pesos en el suelo con control, haciendo una bisagra de cadera y flexionando las rodillas
+
+      ### 3. Respiración
+      - Respira de forma constante durante toda la posición
+      - Activa el core antes de levantar y antes de dejar los pesos
+
+      ### 4. Consejos
+      - Las asas más gruesas o una toalla enrollada en el asa dificultan el agarre
+      - Con barra, el agarre prono con ambas manos entrena más el agarre que el agarre mixto
+      - La tiza ayuda cuando te sudan las manos
+      - Las series de 20 a 60 segundos son adecuadas para la mayoría del entrenamiento de agarre
+
+      ### 5. Errores comunes
+      - Dejar que el peso arrastre los hombros hacia abajo o los lleve hacia adelante
+      - Flexionar los codos en lugar de mantener los brazos extendidos
+      - Soltar los pesos al final en lugar de dejarlos en el suelo
+      - Usar correas de agarre, que quitan el trabajo al agarre
+
+      ### 6. Seguridad y modificaciones
+      - Levanta y deja los pesos con la espalda plana cada vez
+      - Empieza con una carga que puedas sostener 30 segundos y progresa a partir de ahí
+      - Sostén los pesos desde un rack o unos bloques para acortar el levantamiento desde el suelo
+      - Detente si sientes un dolor agudo en las muñecas, los codos o los dedos
+    validated: false
+    source_digest: 008d9fb804ce
+  dead-hang-weighted:
+    name: Colgado pasivo (con lastre)
+    instructions: |
+      ## Resumen
+      El colgado pasivo con lastre consiste en colgarse de una barra de dominadas con peso adicional sujeto mediante un cinturón de lastre, un chaleco o una mancuerna sostenida entre los pies. Desarrolla la fuerza y la resistencia de agarre, y el colgado con carga también fortalece los hombros en posición por encima de la cabeza.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ponte un cinturón de lastre con el peso enganchado, o un chaleco lastrado
+      - Súbete a un cajón o un banco bajo una barra de dominadas
+      - Sujeta la barra con agarre prono, con las manos aproximadamente al ancho de los hombros
+      - Baja del cajón y deja que el cuerpo cuelgue con los brazos extendidos
+      - Mantén las piernas juntas y el cuerpo inmóvil
+
+      ### 2. Movimiento
+      1. Cuélgate con los brazos completamente extendidos
+      2. Mantén los hombros ligeramente activados en lugar de totalmente sueltos
+      3. Mantén el cuerpo inmóvil sin balancearte
+      4. Aprieta la barra durante toda la posición
+      5. Aguanta el tiempo objetivo
+      6. Vuelve a apoyar los pies en el cajón antes de soltar la barra
+
+      ### 3. Respiración
+      - Respira de forma lenta y constante durante todo el colgado
+      - No contengas la respiración; relaja todo excepto el agarre
+
+      ### 4. Consejos
+      - Llega a aguantar 60 segundos colgado con el peso corporal antes de añadir peso
+      - Una barra más gruesa o unas toallas colgadas de la barra dificultan el agarre
+      - La tiza ayuda a que no se te resbalen las manos
+      - Añade peso en pasos pequeños
+
+      ### 5. Errores comunes
+      - Soltar la barra y caer con el peso enganchado
+      - Balancearse o dar patadas para subir a la barra o bajar de ella
+      - Encoger los hombros hasta las orejas
+      - Añadir peso antes de dominar el colgado con el peso corporal
+
+      ### 6. Seguridad y modificaciones
+      - Baja siempre apoyando los pies en un cajón; caer con peso adicional castiga las articulaciones
+      - Detente si sientes dolor en los hombros en lugar de fatiga en el agarre
+      - Una mancuerna sostenida entre los pies es una forma sencilla de empezar
+      - El colgado con el peso corporal es la progresión más sencilla
+    validated: false
+    source_digest: f5c3949b8b3d
+  wall-sit-weighted:
+    name: Sentadilla isométrica en pared (con lastre)
+    instructions: |
+      ## Resumen
+      La sentadilla isométrica en pared con lastre es una sentadilla estática con la espalda apoyada en la pared y un disco sobre los muslos. Desarrolla la fuerza y la resistencia de los cuádriceps sin movimiento y sin carga sobre la columna desde arriba.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ponte de pie con la espalda plana apoyada en la pared
+      - Separa los pies unos 60 cm de la pared, al ancho de las caderas
+      - Deslízate por la pared hasta que los muslos queden paralelos al suelo
+      - Comprueba que las rodillas estén sobre los tobillos, sin sobrepasar la punta de los pies
+      - Pide a un compañero que coloque un disco plano sobre tus muslos, o colócalo tú mismo una vez en posición
+
+      ### 2. Movimiento
+      1. Mantén la posición con la espalda y la cabeza apoyadas en la pared
+      2. Mantén el peso en los talones y el mediopié
+      3. Mantén las rodillas alineadas con la punta de los pies, sin que se vayan hacia dentro
+      4. Mantén el disco estable sobre los muslos
+      5. Aguanta el tiempo objetivo
+      6. Retira el disco y luego deslízate hacia arriba por la pared para ponerte de pie
+
+      ### 3. Respiración
+      - Respira de forma constante durante toda la posición
+      - Sigue respirando con regularidad aunque empiecen a arderte las piernas
+
+      ### 4. Consejos
+      - Coloca el disco cerca de las caderas; cuanto más cerca de las rodillas, más difícil resulta
+      - Una posición más alta (por encima del paralelo) es más fácil y un buen punto de partida
+      - Presiona suavemente la espalda contra la pared para mantener el tronco inmóvil
+      - Añade peso en pasos pequeños
+
+      ### 5. Errores comunes
+      - Dejar que las rodillas se vayan hacia dentro
+      - Subir deslizándote por la pared a medida que te cansas
+      - Apoyar las manos en el disco o en los muslos para quitarte peso
+      - Colocar los pies demasiado cerca de la pared, lo que hace que las rodillas sobrepasen la punta de los pies
+
+      ### 6. Seguridad y modificaciones
+      - Detente si sientes un dolor agudo en las rodillas en lugar de esfuerzo en los muslos
+      - Empieza con la sentadilla isométrica en pared con el peso corporal antes de añadir un disco
+      - Mantén una posición más alta si te resulta incómodo flexionar las rodillas hasta el paralelo
+      - Pide a un compañero que retire el disco si pesa demasiado para quitártelo tú mismo
+    validated: false
+    source_digest: 0fa25dce6d9f
   aerobics:
     name: Aeróbicos
     instructions: |

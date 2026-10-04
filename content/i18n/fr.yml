@@ -871,6 +871,51 @@ exercises:
       - En cas de gêne dans le bas du dos, vérifiez votre technique et réduisez la durée du maintien
     validated: false
     source_digest: f6f4e1bd5166
+  plank-weighted:
+    name: Planche (lestée)
+    instructions: |
+      ## Aperçu
+      La planche lestée est une planche sur les avant-bras avec un disque posé sur le dos. La charge supplémentaire rend le maintien plus difficile sans l'allonger, ce qui permet de continuer à développer la force de la sangle abdominale une fois que la planche au poids du corps n'est plus un défi.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Placez-vous en planche sur les avant-bras, coudes sous les épaules et jambes tendues vers l'arrière
+      - Demandez à un partenaire de poser un disque à plat sur le haut de votre dos, entre les omoplates
+      - Si vous êtes seul, utilisez un disque léger que vous pouvez placer vous-même en toute sécurité
+      - Formez une ligne droite de la tête aux talons
+      - Gainez votre sangle abdominale et serrez les fessiers
+
+      ### 2. Mouvement
+      1. Tenez la position sans laisser les hanches s'affaisser sous la charge
+      2. Gardez le disque centré et immobile sur votre dos
+      3. Continuez à pousser les avant-bras contre le sol
+      4. Tenez la durée cible
+      5. Faites retirer le disque, ou faites-le glisser prudemment sur le côté
+      6. Posez les genoux au sol pour terminer
+
+      ### 3. Respiration
+      - Respirez de façon régulière et calme pendant tout le maintien
+      - Ne retenez pas votre souffle ; gardez le gainage tout en respirant
+
+      ### 4. Conseils
+      - Placez le disque sur le haut du dos, pas sur le bas du dos
+      - Augmentez la charge par petites étapes plutôt que par grands paliers
+      - Maîtrisez une planche de 60 secondes au poids du corps avant d'ajouter de la charge
+      - Repoussez le sol pour que vos omoplates ne se rapprochent pas l'une de l'autre
+
+      ### 5. Erreurs fréquentes
+      - Laisser les hanches s'affaisser sous la charge supplémentaire
+      - Monter les hanches en pique pour soulager la sangle abdominale
+      - Placer le disque sur le bas du dos
+      - Prolonger le maintien au-delà du moment où la technique se dégrade
+
+      ### 6. Sécurité et adaptations
+      - Faites-vous aider d'un partenaire pour poser et retirer le disque
+      - Arrêtez si vous ressentez une tension dans le bas du dos plutôt qu'un effort dans les abdominaux
+      - Réduisez la charge ou la durée du maintien avant que votre technique ne se dégrade
+      - Un gilet lesté est une alternative plus stable au disque
+    validated: false
+    source_digest: 206e7f6b71db
   reverse-crunch:
     name: Crunch inversé
     instructions: |
@@ -12133,6 +12178,461 @@ exercises:
       - Cet exercice est excellent pour le conditionnement métabolique
     validated: false
     source_digest: e79446181d4f
+  farmers-walk:
+    name: Marche du fermier
+    instructions: |
+      ## Aperçu
+      La marche du fermier est un exercice de port de charge : vous saisissez une charge lourde dans chaque main et marchez sur une distance donnée. Elle développe la force de préhension, la force du haut du dos et des trapèzes, ainsi que la stabilité de la sangle abdominale nécessaire pour rester droit sous la charge, et elle se transfère directement aux gestes du quotidien où l'on soulève et porte des objets.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Placez une paire de poignées de fermier, d'haltères ou de kettlebells de chaque côté de vous
+      - Tenez-vous entre elles, pieds écartés de la largeur des hanches
+      - Basculez le bassin vers l'arrière et fléchissez les genoux pour atteindre les poignées, le dos plat
+      - Saisissez chaque poignée en son centre pour qu'elle soit équilibrée, en serrant fort
+      - Poussez sur les jambes pour vous redresser, épaules en arrière et vers le bas
+
+      ### 2. Mouvement
+      1. Gainez votre sangle abdominale et abaissez les côtes avant le premier pas
+      2. Avancez à petits pas rapides et contrôlés
+      3. Gardez les bras tendus et les charges immobiles le long du corps
+      4. Regardez droit devant vous et gardez la poitrine haute tout au long de l'exercice
+      5. Parcourez la distance cible sans laisser les charges se balancer
+      6. Arrêtez-vous, puis basculez le bassin et fléchissez les genoux pour reposer les charges de manière contrôlée
+
+      ### 3. Respiration
+      - Prenez une grande inspiration et gainez-vous avant de soulever et avant de commencer à marcher
+      - Respirez par petites gorgées tout en maintenant le gainage plutôt que de le relâcher complètement
+
+      ### 4. Conseils
+      - Serrez les poignées comme si vous vouliez les écraser
+      - Gardez les épaules verrouillées au lieu de laisser les charges les tirer vers le bas ou vers l'avant
+      - Les petits pas gardent les charges stables ; les grandes enjambées les font balancer
+      - Faire demi-tour en cours de série est plus difficile que marcher en ligne droite ; ralentissez et tournez à petits pas
+
+      ### 5. Erreurs fréquentes
+      - Arrondir le dos en soulevant ou en reposant les charges
+      - Se pencher d'un côté ou laisser les épaules s'enrouler vers l'avant
+      - Faire de grandes enjambées rebondissantes qui font balancer les charges
+      - Lâcher les charges debout au lieu de les reposer
+      - Choisir une charge que vous ne pouvez pas tenir sur toute la distance
+
+      ### 6. Sécurité et adaptations
+      - Commencez avec une charge modérée et une courte distance, puis augmentez progressivement la charge ou la distance
+      - Utilisez un parcours plat et dégagé, avec la place de reposer les charges à tout moment
+      - La magnésie ou les sangles de tirage aident la prise, mais s'entraîner sans sangles développe la force de préhension
+      - Si votre prise lâche avant votre posture, raccourcissez la distance et ajoutez des séries
+    validated: false
+    source_digest: 0a0666df9053
+  suitcase-carry:
+    name: Marche valise
+    instructions: |
+      ## Aperçu
+      La marche valise est un port de charge unilatéral : vous marchez en tenant une seule charge le long du corps, comme si vous portiez une valise. Comme la charge vous tire sur le côté, les obliques et les muscles profonds du tronc travaillent intensément pour vous maintenir droit, ce qui en fait l'un des meilleurs ports de charge pour la stabilité de la sangle abdominale.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Placez un haltère, une kettlebell ou une poignée de fermier à côté d'un pied
+      - Basculez le bassin vers l'arrière et fléchissez les genoux pour la saisir, le dos plat
+      - Redressez-vous en tenant la charge le long du corps, bras tendu
+      - Gardez les épaules à niveau et la main libre détendue ou écartée sur le côté
+      - Gainez votre sangle abdominale avant de faire un pas
+
+      ### 2. Mouvement
+      1. Avancez à pas réguliers et contrôlés
+      2. Gardez le buste vertical ; ne vous penchez ni à l'opposé ni du côté de la charge
+      3. Gardez les deux épaules et les deux hanches à niveau tout au long de l'exercice
+      4. Tenez la charge immobile le long du corps sans la laisser se balancer
+      5. Parcourez la distance cible, puis reposez la charge de manière contrôlée
+      6. Changez de main et répétez sur la même distance de l'autre côté
+
+      ### 3. Respiration
+      - Inspirez et gainez-vous avant de soulever la charge et avant de commencer à marcher
+      - Continuez à respirer régulièrement tout en maintenant le gainage ; ne retenez pas votre souffle pendant toute la marche
+
+      ### 4. Conseils
+      - Pensez à pousser le côté opposé de votre taille vers le sol
+      - Un miroir ou un partenaire peut vous indiquer si vous penchez
+      - Serrez fort la poignée ; une prise ferme aide tout le côté à rester gainé
+      - Enregistrez chaque côté comme une série distincte si un côté est nettement plus faible
+
+      ### 5. Erreurs fréquentes
+      - Se pencher à l'opposé de la charge pour faire contrepoids
+      - Hausser l'épaule chargée vers l'oreille
+      - Laisser la charge partir vers l'avant ou se balancer à chaque pas
+      - Ne travailler que le côté le plus fort
+      - Arrondir le dos en soulevant ou en reposant la charge
+
+      ### 6. Sécurité et adaptations
+      - Commencez plus léger que pour la marche du fermier ; c'est la charge unilatérale qui fait la difficulté
+      - Raccourcissez la distance avant de laisser votre posture se dégrader
+      - Une kettlebell est plus facile à tenir qu'un haltère pour les débutants
+      - Arrêtez si vous ressentez une douleur dans le bas du dos plutôt qu'un effort musculaire dans le tronc
+    validated: false
+    source_digest: 942a6dcb1a1d
+  overhead-carry:
+    name: Marche avec charge au-dessus de la tête
+    instructions: |
+      ## Aperçu
+      La marche avec charge au-dessus de la tête est un port de charge où la charge est verrouillée au-dessus de la tête. Elle développe la stabilité des épaules, la force au-dessus de la tête et le contrôle de la sangle abdominale nécessaire pour garder les côtes basses bras levés. Elle peut se faire avec deux charges, une seule charge ou une barre.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Amenez une paire d'haltères ou de kettlebells aux épaules par un épaulé ou un développé
+      - Développez-les au-dessus de la tête jusqu'à ce que les bras soient complètement verrouillés
+      - Alignez les charges au-dessus des épaules, biceps près des oreilles
+      - Abaissez les côtes et serrez les fessiers pour que le bas du dos ne se cambre pas
+      - Gardez les pieds écartés de la largeur des hanches et le regard droit devant
+
+      ### 2. Mouvement
+      1. Avancez à petits pas contrôlés
+      2. Gardez les coudes verrouillés et les charges directement au-dessus des épaules
+      3. Gardez les côtes basses et évitez de vous pencher en arrière
+      4. Gardez les poignets droits plutôt que cassés vers l'arrière
+      5. Parcourez la distance cible sans laisser les charges partir vers l'avant
+      6. Redescendez les charges aux épaules, puis au sol, de manière contrôlée
+
+      ### 3. Respiration
+      - Gainez-vous avant le développé et avant de commencer à marcher
+      - Respirez de façon superficielle tout en maintenant le gainage pour garder le tronc solide
+
+      ### 4. Conseils
+      - Poussez activement vers le haut, comme si vous repoussiez les charges vers le plafond
+      - La version à un bras ajoute un défi anti-inclinaison pour la sangle abdominale
+      - Une barre au-dessus de la tête est moins stable latéralement ; commencez léger
+      - Si votre verrouillage se relâche, terminez la série plutôt que de marcher coudes fléchis
+
+      ### 5. Erreurs fréquentes
+      - Cambrer le bas du dos pour amener les charges au-dessus de la tête
+      - Laisser les charges partir vers l'avant de la tête
+      - Marcher coudes fléchis
+      - Hausser les épaules au point de crisper la nuque
+      - Utiliser plus de charge que vous ne pouvez développer strictement au-dessus de la tête
+
+      ### 6. Sécurité et adaptations
+      - Vous devez avoir une mobilité complète et indolore au-dessus de la tête avant de charger ce mouvement
+      - Commencez avec des charges légères et de courtes distances
+      - Le port en position rack est une bonne alternative si les positions au-dessus de la tête sont inconfortables
+      - Si une charge commence à tomber, écartez-vous et laissez-la tomber plutôt que d'essayer de la rattraper
+    validated: false
+    source_digest: 821a392b5a4f
+  yoke-carry:
+    name: Marche avec joug
+    instructions: |
+      ## Aperçu
+      La marche avec joug est une épreuve de strongman où vous portez un cadre chargé sur le haut du dos. Elle sollicite tout le corps : les jambes déplacent la charge, tandis que le dos et la sangle abdominale maintiennent la colonne rigide sous une forte compression. Elle permet des charges plus lourdes que tout port de charge à la main.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Réglez la barre transversale du joug à peu près à mi-hauteur de la poitrine
+      - Passez dessous et placez la barre sur le haut du dos, comme pour un squat
+      - Saisissez la barre ou les montants avec les mains
+      - Placez les pieds sous la barre, gainez-vous fortement et redressez-vous pour décoller le joug du sol
+      - Tenez-vous droit, le cadre à niveau et équilibré
+
+      ### 2. Mouvement
+      1. Faites de petits pas rapides, en gardant les pieds sous les hanches
+      2. Gardez le joug à niveau ; s'il commence à se balancer, raccourcissez vos pas
+      3. Restez droit, poitrine haute et sangle abdominale gainée
+      4. Gardez les yeux fixés droit devant sur la ligne d'arrivée
+      5. Parcourez la distance cible
+      6. Fléchissez légèrement les jambes pour reposer les pieds du joug au sol de manière contrôlée
+
+      ### 3. Respiration
+      - Prenez une inspiration maximale et gainez-vous avant de soulever
+      - Prenez de brèves inspirations tout en maintenant le gainage sur les parcours plus longs, sans jamais le relâcher complètement
+
+      ### 4. Conseils
+      - Saisissez les montants plutôt que la barre transversale pour mieux contrôler le balancement
+      - Des pas courts et rapides valent mieux que de grandes enjambées ; l'élan aide
+      - Entraînez-vous à soulever et à reposer le joug avec des charges légères avant d'augmenter la distance
+      - Entraînez-vous sur une surface plane et antidérapante
+
+      ### 5. Erreurs fréquentes
+      - Faire de grandes enjambées qui font balancer le joug
+      - Laisser la poitrine s'affaisser et le dos s'arrondir sous la charge
+      - Perdre le gainage en cours de parcours
+      - Ajouter de la charge avant que le soulevé et la pose soient réguliers
+      - Porter sur une surface irrégulière ou glissante
+
+      ### 6. Sécurité et adaptations
+      - C'est un exercice avancé ; construisez d'abord un squat et une marche du fermier solides
+      - Commencez avec le joug à vide et de courtes distances
+      - Si vous perdez l'équilibre, sortez de sous le cadre et lâchez-le
+      - Un port avec une safety squat bar ou une barre sortie d'un rack est une façon plus légère d'apprendre la position
+    validated: false
+    source_digest: 9a643d333734
+  sandbag-carry:
+    name: Marche avec sac de sable
+    instructions: |
+      ## Aperçu
+      La marche avec sac de sable est un port de charge avec une charge encombrante et mouvante, serrée contre la poitrine ou tenue sur une épaule. Le sac n'a pas de poignées et bouge sans cesse, si bien que le haut du dos, les bras et la sangle abdominale travaillent intensément pour le tenir, et la force ainsi développée se transfère bien au soulèvement d'objets réels.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Tenez-vous debout, le sac de sable posé dans la longueur entre vos pieds
+      - Descendez en squat et passez les bras sous le sac et autour de lui
+      - Montez-le sur vos cuisses, puis redressez-vous et serrez-le haut contre la poitrine
+      - Joignez les mains ou saisissez vos avant-bras autour du sac
+      - Tenez-vous droit, épaules en arrière et sangle abdominale gainée
+
+      ### 2. Mouvement
+      1. Avancez à petits pas réguliers
+      2. Gardez le sac haut et serré contre le corps
+      3. Restez droit plutôt que de vous pencher en arrière pour poser le sac sur le ventre
+      4. Ne réajustez votre prise qu'en cas de besoin, sans vous arrêter
+      5. Parcourez la distance cible
+      6. Reposez le sac en descendant en squat, et non en vous penchant le dos arrondi
+
+      ### 3. Respiration
+      - Gainez-vous avant de soulever et avant de commencer à marcher
+      - Prenez de brèves inspirations tout en maintenant le gainage ; le sac contre la poitrine rend les inspirations profondes difficiles
+
+      ### 4. Conseils
+      - Un sac qui n'est pas rempli à fond bouge davantage et est plus difficile à porter
+      - Le port sur l'épaule est une bonne variante ; changez d'épaule entre les séries
+      - Serrez les coudes l'un vers l'autre pour garder le sac bien calé
+      - Choisissez une charge que vous pouvez monter à la poitrine avec une bonne technique
+
+      ### 5. Erreurs fréquentes
+      - Se pencher en arrière et laisser le sac reposer sur les hanches
+      - Laisser le sac glisser le long du corps
+      - Arrondir le dos pour ramasser ou lâcher le sac
+      - Faire de grandes enjambées qui font perdre l'équilibre
+
+      ### 6. Sécurité et adaptations
+      - Commencez avec un sac léger pour apprendre à le monter à la poitrine
+      - Le port serré contre la poitrine est plus facile que le port du sac sur une épaule
+      - Entraînez-vous sur un parcours plat et dégagé
+      - Si le sac commence à glisser, reposez-le et reprenez-le plutôt que de lutter avec lui
+    validated: false
+    source_digest: 96c7ccc55fbb
+  sled-push:
+    name: Poussée de traîneau
+    instructions: |
+      ## Aperçu
+      La poussée de traîneau consiste à faire avancer un traîneau lesté sur le sol par la force des jambes. Elle développe la force, la puissance et le conditionnement des jambes sans phase excentrique (de descente) ; elle ménage donc les articulations et provoque peu de courbatures pour le travail accompli.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Chargez le traîneau et placez-vous derrière lui, face aux montants
+      - Saisissez les poignées, bras tendus (poignées hautes) ou fléchis (poignées basses)
+      - Penchez-vous contre le traîneau pour que votre corps forme une ligne droite de la tête au talon arrière
+      - Gainez votre sangle abdominale et gardez le dos plat
+      - Placez un pied en avant, prêt à pousser
+
+      ### 2. Mouvement
+      1. Enfoncez l'avant du pied avant dans le sol pour mettre le traîneau en mouvement
+      2. Faites de petits pas puissants, en poussant à chacun d'eux
+      3. Gardez les hanches basses et le buste à un angle constant
+      4. Gardez les bras rigides pour que la force des jambes soit transmise au traîneau
+      5. Poussez sur la distance cible
+      6. Arrêtez-vous de manière contrôlée et replacez-vous avant le parcours suivant
+
+      ### 3. Respiration
+      - Gainez-vous avant le premier pas
+      - Respirez au rythme de vos pas pour les poussées plus longues
+
+      ### 4. Conseils
+      - Poussez avec l'avant du pied, pas avec les orteils
+      - Des charges lourdes sur de courtes poussées développent la force ; des charges légères sur de longues poussées développent le conditionnement
+      - Les poignées basses sollicitent davantage les jambes ; les poignées hautes permettent de rester plus droit
+      - La surface du sol modifie beaucoup le frottement : comparez les charges uniquement sur une même surface
+
+      ### 5. Erreurs fréquentes
+      - Arrondir le dos ou laisser les hanches s'affaisser
+      - Se tenir trop droit, ce qui pousse le traîneau vers le sol plutôt que vers l'avant
+      - Faire de grandes enjambées lentes
+      - Fléchir les bras, si bien que la poussée se perd dans les coudes
+      - Charger si lourd que le traîneau n'avance que par à-coups
+
+      ### 6. Sécurité et adaptations
+      - Commencez léger pour apprendre l'angle du corps et la foulée
+      - Assurez-vous que le parcours est dégagé et assez long pour toute la distance
+      - Portez des chaussures qui adhèrent bien
+      - Une poussée plus légère et plus rapide est une bonne alternative les jours de conditionnement
+    validated: false
+    source_digest: 288d695485d2
+  sled-drag:
+    name: Tirage de traîneau
+    instructions: |
+      ## Aperçu
+      Le tirage de traîneau consiste à tirer un traîneau lesté avec une sangle, une corde ou un harnais. Marcher à reculons sollicite fortement les quadriceps ; marcher vers l'avant avec un harnais sollicite les fessiers et les ischio-jambiers. Comme la poussée de traîneau, il n'a pas de phase de descente : il développe donc la force et le conditionnement tout en ménageant les genoux.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Fixez des sangles ou une corde au traîneau, ou enfilez un harnais
+      - Pour un tirage à reculons, faites face au traîneau en tenant les sangles bras tendus
+      - Reculez jusqu'à ce que les sangles soient tendues
+      - Reculez légèrement les hanches, poitrine haute et sangle abdominale gainée
+      - Gardez les bras tendus tout au long de l'exercice ; ils tiennent la sangle, les jambes font le travail
+
+      ### 2. Mouvement
+      1. Reculez d'un pas en repoussant le sol avec l'avant du pied
+      2. Gardez les genoux fléchis et les hanches basses pour maintenir la tension sur les quadriceps
+      3. Faites de petits pas réguliers, en gardant les sangles tendues
+      4. Gardez la poitrine haute et le dos plat
+      5. Tirez le traîneau sur la distance cible
+      6. Arrêtez-vous de manière contrôlée, relâchez la tension et replacez-vous
+
+      ### 3. Respiration
+      - Gainez-vous avant le premier pas
+      - Respirez au rythme de vos pas
+
+      ### 4. Conseils
+      - Le tirage à reculons est une façon de travailler les quadriceps qui ménage les articulations
+      - Le tirage vers l'avant avec un harnais travaille les fessiers, les ischio-jambiers et le conditionnement
+      - Regardez par-dessus votre épaule ou utilisez un parcours dégagé et balisé lorsque vous marchez à reculons
+      - Restez bas ; vous redresser complètement éloigne le travail des jambes
+
+      ### 5. Erreurs fréquentes
+      - Tirer avec les bras au lieu de pousser avec les jambes
+      - Arrondir le dos ou se pencher trop en arrière
+      - Laisser les sangles se détendre entre les pas
+      - Marcher à reculons sans vérifier le parcours derrière soi
+
+      ### 6. Sécurité et adaptations
+      - Commencez léger pour vous habituer à marcher à reculons sous charge
+      - Utilisez une surface plane, dégagée et qui adhère bien
+      - Un harnais libère les mains et rend le tirage vers l'avant plus facile à apprendre
+      - En cas de douleur aux genoux, essayez le tirage vers l'avant ou réduisez la charge avant d'arrêter complètement
+    validated: false
+    source_digest: e84b5b4ab78d
+  farmers-hold:
+    name: Maintien du fermier
+    instructions: |
+      ## Aperçu
+      Le maintien du fermier est un exercice de préhension statique : vous soulevez des poignées lourdes, des haltères ou une barre et les tenez pendant une durée donnée. Il développe la force et l'endurance de préhension pour le soulevé de terre, le rowing, les ports de charge et les tractions, et c'est l'équivalent statique de la marche du fermier.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Placez devant vous une paire d'haltères lourds, de poignées de fermier ou une barre chargée
+      - Basculez le bassin vers l'arrière et fléchissez les genoux pour saisir les charges, le dos plat
+      - Saisissez chaque poignée en son centre pour qu'elle soit équilibrée
+      - Redressez-vous, les charges le long du corps
+      - Placez les épaules en arrière et vers le bas et gainez votre sangle abdominale
+
+      ### 2. Mouvement
+      1. Tenez les charges immobiles, bras tendus
+      2. Serrez les poignées aussi fort que possible pendant tout le maintien
+      3. Gardez les épaules verrouillées et la poitrine haute
+      4. Tenez-vous droit sans vous pencher ni déplacer votre poids
+      5. Tenez la durée cible
+      6. Reposez les charges de manière contrôlée, en basculant le bassin et en fléchissant les genoux
+
+      ### 3. Respiration
+      - Respirez régulièrement pendant tout le maintien
+      - Gainez-vous avant de soulever et avant de reposer les charges
+
+      ### 4. Conseils
+      - Des poignées plus épaisses ou une serviette enroulée autour de la poignée rendent la prise plus difficile
+      - Une prise en double pronation sur une barre travaille davantage la préhension qu'une prise mixte
+      - La magnésie aide lorsque vos mains transpirent
+      - Des maintiens de 20 à 60 secondes conviennent à la plupart des entraînements de préhension
+
+      ### 5. Erreurs fréquentes
+      - Laisser les charges tirer les épaules vers le bas ou les enrouler vers l'avant
+      - Fléchir les coudes au lieu de garder les bras tendus
+      - Lâcher les charges à la fin au lieu de les reposer
+      - Utiliser des sangles, ce qui retire le travail à la préhension
+
+      ### 6. Sécurité et adaptations
+      - Soulevez et reposez les charges le dos plat à chaque fois
+      - Commencez avec une charge que vous pouvez tenir 30 secondes et progressez à partir de là
+      - Partez d'un rack ou de blocs pour raccourcir la levée depuis le sol
+      - Arrêtez si vous ressentez une douleur vive aux poignets, aux coudes ou aux doigts
+    validated: false
+    source_digest: 008d9fb804ce
+  dead-hang-weighted:
+    name: Suspension à la barre (lestée)
+    instructions: |
+      ## Aperçu
+      La suspension lestée est une suspension à une barre de traction avec une charge supplémentaire fixée à une ceinture à dips, un gilet lesté ou un haltère tenu entre les pieds. Elle développe la force et l'endurance de préhension, et la suspension chargée renforce aussi les épaules en position bras au-dessus de la tête.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Enfilez une ceinture à dips avec la charge fixée, ou un gilet lesté
+      - Montez sur une box ou un banc sous une barre de traction
+      - Saisissez la barre en pronation, mains écartées environ de la largeur des épaules
+      - Descendez de la box et laissez votre corps pendre, bras tendus
+      - Gardez les jambes serrées et le corps immobile
+
+      ### 2. Mouvement
+      1. Restez suspendu, bras complètement tendus
+      2. Gardez les épaules légèrement engagées plutôt que complètement relâchées
+      3. Gardez le corps immobile sans vous balancer
+      4. Serrez la barre pendant tout le maintien
+      5. Tenez la durée cible
+      6. Reposez les pieds sur la box avant de lâcher la barre
+
+      ### 3. Respiration
+      - Respirez lentement et régulièrement pendant toute la suspension
+      - Ne retenez pas votre souffle ; relâchez tout sauf votre prise
+
+      ### 4. Conseils
+      - Progressez jusqu'à une suspension de 60 secondes au poids du corps avant d'ajouter de la charge
+      - Une barre plus épaisse ou des serviettes drapées sur la barre rendent la prise plus difficile
+      - La magnésie aide à empêcher les mains de glisser
+      - Augmentez la charge par petites étapes
+
+      ### 5. Erreurs fréquentes
+      - Lâcher la barre et tomber avec la charge fixée
+      - Se balancer ou donner des coups de pied pour monter sur la barre ou en descendre
+      - Hausser les épaules jusqu'aux oreilles
+      - Ajouter de la charge avant que la suspension au poids du corps soit solide
+
+      ### 6. Sécurité et adaptations
+      - Redescendez toujours sur une box ; tomber avec une charge supplémentaire est éprouvant pour les articulations
+      - Arrêtez si vous ressentez une douleur aux épaules plutôt qu'une fatigue de la prise
+      - Un haltère tenu entre les pieds est une façon simple de commencer
+      - La suspension au poids du corps est la progression la plus facile
+    validated: false
+    source_digest: f5c3949b8b3d
+  wall-sit-weighted:
+    name: Chaise contre le mur (lestée)
+    instructions: |
+      ## Aperçu
+      La chaise contre le mur lestée est un squat isométrique tenu le dos contre un mur, avec un disque posé sur les cuisses. Elle développe la force et l'endurance des quadriceps sans aucun mouvement et sans charge verticale sur la colonne.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Tenez-vous debout, le dos plaqué contre un mur
+      - Avancez les pieds à environ 60 cm du mur, écartés de la largeur des hanches
+      - Glissez le long du mur jusqu'à ce que les cuisses soient parallèles au sol
+      - Vérifiez que vos genoux sont au-dessus des chevilles, sans dépasser les orteils
+      - Demandez à un partenaire de poser un disque à plat sur vos cuisses, ou posez-le vous-même une fois en position
+
+      ### 2. Mouvement
+      1. Tenez la position, le dos et la tête contre le mur
+      2. Gardez le poids sur les talons et le milieu du pied
+      3. Gardez les genoux dans l'axe des orteils, sans qu'ils rentrent vers l'intérieur
+      4. Gardez le disque stable sur vos cuisses
+      5. Tenez la durée cible
+      6. Retirez le disque, puis remontez le long du mur pour vous relever
+
+      ### 3. Respiration
+      - Respirez régulièrement pendant tout le maintien
+      - Continuez à respirer régulièrement même quand vos jambes commencent à brûler
+
+      ### 4. Conseils
+      - Placez le disque près des hanches ; plus il est proche des genoux, plus c'est difficile
+      - Une position plus haute (au-dessus de la parallèle) est plus facile et constitue un bon point de départ
+      - Poussez doucement le dos contre le mur pour garder le tronc immobile
+      - Augmentez la charge par petites étapes
+
+      ### 5. Erreurs fréquentes
+      - Laisser les genoux rentrer vers l'intérieur
+      - Remonter le long du mur à mesure que la fatigue s'installe
+      - Poser les mains sur le disque ou les cuisses pour alléger la charge
+      - Placer les pieds trop près du mur, ce qui fait dépasser les genoux au-delà des orteils
+
+      ### 6. Sécurité et adaptations
+      - Arrêtez si vous ressentez une douleur vive aux genoux plutôt qu'un effort dans les cuisses
+      - Commencez par une chaise contre le mur au poids du corps avant d'ajouter un disque
+      - Tenez une position plus haute si la flexion des genoux à la parallèle est inconfortable
+      - Demandez à un partenaire de retirer le disque s'il est trop lourd pour que vous le souleviez vous-même
+    validated: false
+    source_digest: 0fa25dce6d9f
   aerobics:
     name: Aérobic
     instructions: |
