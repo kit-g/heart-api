@@ -52,6 +52,20 @@ there's more: pass it back as `?cursor=` for the next page. No `cursor` means th
 | `/me/template-folders`    | `{folders}`                                                                                      |
 | `/me/goals`               | `{goals}`; `?archived=true` for archived ones. Goals backed by health data carry their definition only; their progress lives on your phone |
 
+## Export
+
+`GET /me/export?format=strong` downloads your whole history as a CSV in Strong's export format.
+That's the format other apps import, Heart included. Weights and distances are in your unit
+(kilograms and kilometres, or pounds and miles), and times are in UTC. A large history answers
+`303` with a link that works for 15 minutes. One export a day; a second answers
+`429 export_limit`.
+
+```sh
+curl -L "https://api.heart-of.me/v1/me/export?format=strong" -H "Authorization: Bearer hrt_…" -o heart.csv
+```
+
+## Units
+
 Weights are in kilograms and distances in kilometres, whatever your display unit. Times are
 ISO 8601 in UTC.
 

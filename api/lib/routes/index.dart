@@ -38,6 +38,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/me/templates', .get): me.getMyTemplates,
   ('/me/template-folders', .get): me.getMyFolders,
   ('/me/goals', .get): me.getMyGoals,
+  ('/me/export', .get): me.exportMe,
   ('/charts', .get): charts.getChartPreferences,
   ('/charts', .post): charts.saveChartPreference,
   ('/charts/:preferenceId', .delete): charts.deleteChartPreference,

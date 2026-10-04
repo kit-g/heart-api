@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:heart/core/handler.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
@@ -65,5 +68,82 @@ void main() {
     await getMyGoals(build('/me/goals'));
 
     verify(goals.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1')).called(1);
+  });
+
+  group('exportMe', () {
+    late MockApiTokenService tokens;
+    late MockExportStorage storage;
+
+    setUp(() {
+      tokens = MockApiTokenService();
+      storage = MockExportStorage();
+      when(profiles.getProfile('u1')).thenAnswer((_) async => User(id: 'u1'));
+      when(
+        workouts.getWorkouts(
+          userId: 'u1',
+          targetUserId: 'u1',
+          imageUrl: anyNamed('imageUrl'),
+          cursor: anyNamed('cursor'),
+          limit: 100,
+        ),
+      ).thenAnswer((_) async => const Page(items: [], hasMore: false));
+    });
+
+    Request exportRequest([Map<String, String> query = const {'format': 'strong'}]) {
+      return build('/me/export', query: query)
+        ..apiTokenService = tokens
+        ..exportStorage = storage;
+    }
+
+    test('a small export is the body, as a Strong CSV download', () async {
+      when(tokens.claimExport('u1')).thenAnswer((_) async => null);
+
+      final result = await exportMe(exportRequest());
+
+      expect(result, isA<Download>());
+      final download = result as Download;
+      expect(utf8.decode(download.bytes), startsWith('Date,Workout Name,Duration,Exercise Name,Set Order'));
+      expect(download.filename, 'heart-strong.csv');
+      verifyZeroInteractions(storage);
+    });
+
+    test('a large one goes through storage and a 303', () async {
+      when(tokens.claimExport('u1')).thenAnswer((_) async => null);
+      final link = Uri.parse('https://bucket.example/exports/x/heart-strong.csv?sig=1');
+      when(
+        storage.stash(key: anyNamed('key'), bytes: anyNamed('bytes'), mimeType: 'text/csv'),
+      ).thenAnswer((_) async => link);
+
+      final result = await exportMe(exportRequest(), inlineLimit: 10);
+
+      expect((result as SeeOther).location, link);
+      final key =
+          verify(
+                storage.stash(key: captureAnyNamed('key'), bytes: anyNamed('bytes'), mimeType: 'text/csv'),
+              ).captured.single
+              as String;
+      expect(key, startsWith('exports/'));
+    });
+
+    test('a second export the same day is a 429 export_limit', () async {
+      when(tokens.claimExport('u1')).thenAnswer(
+        (_) async => DateTime.now().toUtc().subtract(const Duration(hours: 23)),
+      );
+
+      expect(
+        () => exportMe(exportRequest()),
+        throwsA(
+          isA<TooManyRequests>()
+              .having((e) => e.code, 'code', 'export_limit')
+              .having((e) => e.retryAfter, 'retryAfter', inInclusiveRange(3500, 3600)),
+        ),
+      );
+    });
+
+    test('the format is required and must be known, before the allowance is spent', () {
+      expect(() => exportMe(exportRequest(const {})), throwsA(isA<BadRequest>()));
+      expect(() => exportMe(exportRequest(const {'format': 'hevy'})), throwsA(isA<BadRequest>()));
+      verifyNever(tokens.claimExport(any));
+    });
   });
 }

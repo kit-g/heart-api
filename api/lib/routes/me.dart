@@ -1,13 +1,18 @@
+import 'dart:convert';
+
+import 'package:heart/core/handler.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/exercises.dart';
+import 'package:heart/models/exports.dart';
 import 'package:heart/models/goals.dart';
 import 'package:heart/models/me.dart';
 import 'package:heart/models/pagination.dart';
 import 'package:heart/models/template_folders.dart';
+import 'package:heart/middleware/s3.dart';
 import 'package:heart/routes/exercises.dart' as exercises;
 import 'package:heart/routes/goals.dart' as goals;
 import 'package:heart/routes/template_folders.dart' as folders;
@@ -69,3 +74,59 @@ Future<GoalsResponse> getMyGoals(Request req) => goals.getTargetUserGoalsById(
   req.userId,
   archived: req.queryParameters.raw['archived'] == 'true',
 );
+
+/// Larger than this, an export goes out through a presigned link instead of
+/// the response body, which Lambda caps at 6 MB.
+const inlineExportLimit = 5 * 1024 * 1024;
+
+/// The whole account in another app's format: one a day, since it reads every
+/// workout. Small ones come back as the body, large ones as a `303` to a
+/// short-lived link.
+Future<Model> exportMe(Request req, {int inlineLimit = inlineExportLimit}) async {
+  final format = ExportQuery.fromRequest(req).format;
+
+  if (await req.apiTokenService.claimExport(req.userId) case final last?) {
+    final wait = last.add(const Duration(days: 1)).difference(DateTime.now().toUtc());
+    throw TooManyRequests(
+      code: 'export_limit',
+      reason: 'one export a day',
+      retryAfter: wait.inSeconds.clamp(1, 86400),
+    );
+  }
+
+  final user = await req.profileService.getProfile(req.userId);
+  final workouts = await _everyWorkout(req);
+  final csv = switch (format) {
+    .strong => strongCsv(workouts, unit: user?.settings.unitSystem ?? .metric),
+  };
+  final bytes = utf8.encode(csv);
+  final filename = 'heart-${format.name}.${format.extension}';
+
+  if (bytes.length <= inlineLimit) {
+    return Download(bytes: bytes, mimeType: .csv, filename: filename);
+  }
+  final link = await req.exportStorage.stash(
+    key: 'exports/${uuidV7()}/$filename',
+    bytes: bytes,
+    mimeType: format.mimeType,
+  );
+  return SeeOther(link);
+}
+
+/// Every workout the caller owns, oldest first, as an export file lists them.
+Future<List<Workout>> _everyWorkout(Request req) async {
+  final all = <Workout>[];
+  String? cursor;
+  do {
+    final page = await req.workoutsService.getWorkouts(
+      userId: req.userId,
+      targetUserId: req.userId,
+      limit: 100,
+      cursor: cursor,
+      imageUrl: (key) => key,
+    );
+    all.addAll(page.items);
+    cursor = page.hasMore ? page.items.last.id : null;
+  } while (cursor != null);
+  return all.reversed.toList();
+}
