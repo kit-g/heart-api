@@ -135,9 +135,11 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
 
   abstract DateTime? end;
 
-  /// Total active energy for the session in kilocalories, computed on device
-  /// from wearable data. Arrives after the fact (HealthKit finalizes energy
-  /// minutes after the workout ends), so it is mutable and often null.
+  /// Estimated energy for the session in kilocalories: MET × body weight ×
+  /// time, from the exercises' catalog MET values and a weight the user typed
+  /// in. Never a wearable reading and never health-store body mass — those stay
+  /// on the device (`CLAUDE.md`, *The device-only health rule*). Recomputed when
+  /// the session's timing changes, so it is mutable and often null.
   abstract double? calories;
 
   /// A free-text note on the whole session, trimmed; null when there is none.
@@ -660,7 +662,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
 
   @override
   Workout copy({bool sameId = false}) {
-    // calories/met are measurements of the original session, and the note
+    // calories/met describe the original session, and the note
     // and pauses are about that session too, so a copy with a fresh id
     // (repeating a past workout) must not inherit them.
     final workout = _Workout._(
@@ -682,7 +684,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         final exercise = WorkoutExercise(
           starter: copySet(each.first),
         );
-        // met/calories are measurements of the original session (dropped above);
+        // met/calories describe the original session (dropped above);
         // a note is an instruction on how to do the exercise, so a repeat carries it.
         exercise.note = each.note;
 
