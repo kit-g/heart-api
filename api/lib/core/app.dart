@@ -1,4 +1,5 @@
-import 'package:heart/core/handler.dart';
+import 'package:heart/core/me_router.dart';
+import 'package:heart/core/routing.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/db/db.dart';
 import 'package:heart/globals/config.dart';
@@ -13,10 +14,10 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/events.dart';
 import 'package:heart/middleware/logging.dart';
 import 'package:heart/middleware/s3.dart';
-import 'package:heart/middleware/tokens.dart';
 import 'package:heart/middleware/version.dart';
 import 'package:heart/models/apple.dart';
 import 'package:heart/routes/index.dart';
+import 'package:heart/routes/me_index.dart';
 import 'package:heart/storage/s3.dart';
 import 'package:relic/relic.dart' hide Logger;
 
@@ -53,7 +54,7 @@ RelicApp buildApp({
   // cannot drift from the one that exists.
   final crossOrigin = cors(
     origins: config.allowedOrigins,
-    methods: routes.keys.map((route) => route.$2).toSet(),
+    methods: {...routes.keys, ...meRoutes.keys}.map((route) => route.$2).toSet(),
   );
 
   final app = RelicApp()
@@ -73,14 +74,6 @@ RelicApp buildApp({
     ..use('/accounts', templateFoldersDb(db: database))
     ..use('/accounts', imageStorageDb(db: storage))
     ..use('/accounts', apiTokensDb(db: database))
-    ..use(tokenPrefix, apiTokensDb(db: database))
-    ..use(tokenPrefix, tokenAuthentication())
-    ..use(tokenPrefix, profilesDb(db: database))
-    ..use(tokenPrefix, workoutsDb(db: database))
-    ..use(tokenPrefix, exercisesDb(db: database))
-    ..use(tokenPrefix, templatesDb(db: database))
-    ..use(tokenPrefix, templateFoldersDb(db: database))
-    ..use(tokenPrefix, goalsDb(db: database))
     ..use('/charts', chartsDb(db: database))
     ..use('/exercise-preferences', exercisePreferencesDb(db: database))
     ..use('/connections', connectionsDb(db: database))
@@ -112,31 +105,8 @@ RelicApp buildApp({
     // nothing registered above reaches it on its own, logging included.
     ..fallback = requestLogging()(crossOrigin(respondWith((_) => JsonResponse.noSuchRoute())));
 
-  for (final MapEntry(key: (route, verb), value: handler) in routes.entries) {
-    app.add(verb, route, apiHandler(handler));
-  }
-
-  // Relic settles a method miss from the router's own lookup, before any
-  // handler exists — so the 405 it writes never enters the chain: no CORS
-  // headers on it, no log line for it, and a body unlike every other refusal
-  // here. Registering the verbs a path does not serve keeps each one inside
-  // the chain, and is also what lets a preflight reach `cors` at all, OPTIONS
-  // being one of them.
-  final verbsByPath = <String, Set<Method>>{};
-  for (final (path, verb) in routes.keys) {
-    (verbsByPath[path] ??= <Method>{}).add(verb);
-  }
-
-  for (final MapEntry(key: path, value: verbs) in verbsByPath.entries) {
-    for (final verb in _browserVerbs.difference(verbs)) {
-      app.add(verb, path, respondWith((_) => JsonResponse.methodNotAllowed(allowed: verbs)));
-    }
-  }
+  addRoutes(app, routes);
+  app.attach(tokenPrefix, buildMeRouter(database: database), consume: true);
 
   return app;
 }
-
-/// The verbs a browser can be made to send, and so the ones whose 405 a browser
-/// could ever have to read. `connect` and `trace` are forbidden method names it
-/// will never issue, and keep relic's own answer.
-const _browserVerbs = <Method>{.get, .head, .post, .put, .patch, .delete, .options};

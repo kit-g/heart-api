@@ -9,7 +9,7 @@ import 'package:heart/routes/exercise_preferences.dart' as exercise_preferences;
 import 'package:heart/routes/exercises.dart' as exercises;
 import 'package:heart/routes/feedback.dart' as feedback;
 import 'package:heart/routes/goals.dart' as goals;
-import 'package:heart/routes/me.dart' as me;
+import 'package:heart/routes/me_index.dart';
 import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
 import 'package:heart/routes/template_folders.dart' as folders;
@@ -18,6 +18,8 @@ import 'package:heart/routes/tokens.dart' as tokens;
 import 'package:heart/routes/workouts.dart' as workouts;
 import 'package:relic/relic.dart';
 
+/// The app's own routes: Firebase-authenticated, version-gated, free to
+/// change with the app.
 final routes = <(String, Method), ModelHandler>{
   ('/accounts', .put): account.upsertAccount,
   ('/accounts/summary', .get): account.getAccountSummary,
@@ -31,13 +33,6 @@ final routes = <(String, Method), ModelHandler>{
   ('/accounts/:targetUserId/templates/:templateId', .post): templates.assignTemplateToUser,
   ('/accounts/:targetUserId/folders/:folderId', .post): folders.assignFolderToUser,
   ('/version', .get): version.getVersion,
-  ('/me', .get): me.getMe,
-  ('/me/workouts', .get): me.getMyWorkouts,
-  ('/me/workouts/:workoutId', .get): me.getMyWorkout,
-  ('/me/exercises', .get): me.getMyExercises,
-  ('/me/templates', .get): me.getMyTemplates,
-  ('/me/template-folders', .get): me.getMyFolders,
-  ('/me/goals', .get): me.getMyGoals,
   ('/charts', .get): charts.getChartPreferences,
   ('/charts', .post): charts.saveChartPreference,
   ('/charts/:preferenceId', .delete): charts.deleteChartPreference,
@@ -84,9 +79,6 @@ final routes = <(String, Method), ModelHandler>{
 };
 
 const _publicRoutes = {'/version', '/events'};
-
-/// The prefix of the token-authenticated surface for scripts and assistants.
-const tokenPrefix = '/me';
 
 /// Whether [request] is for one of the app's own routes: those authenticate
 /// with a Firebase ID token and carry the app version. Public routes need

@@ -124,11 +124,13 @@ Future<Model> createGoal(Request req) async {
 ## The `/me` surface
 
 Scripts and assistants read the caller's own data under `/me` with a personal access token
-(`/accounts/tokens`), not a Firebase ID token: `tokenAuthentication` (`lib/middleware/tokens.dart`)
-authenticates, rate-limits per account and logs one `ApiUsage` line per request, and `isAppRoute`
-keeps the Firebase and version gates off it. Shapes there are published and additive-only; a `Me*`
-model decides what of an app shape is shown. The user-facing reference is `docs/me.md`; the design
-is `docs/2026-09-23.developer-api.md` at the repo root.
+(`/accounts/tokens`), not a Firebase ID token. It's a router of its own: its table is
+`lib/routes/me_index.dart`, and `buildMeRouter` (`lib/core/me_router.dart`) gives it its own chain,
+in which `tokenAuthentication` authenticates, rate-limits per account and logs one `ApiUsage` line
+per request. The app attaches it at `/me`. Middleware the app registers at `/` still wraps it, so
+`isAppRoute` keeps the Firebase and version gates off it. Shapes there are published and
+additive-only; a `Me*` model decides what of an app shape is shown. The user-facing reference is
+`docs/me.md`; the design is `docs/2026-09-23.developer-api.md` at the repo root.
 
 ## Database layer
 
