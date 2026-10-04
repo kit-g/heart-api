@@ -1,6 +1,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:heart/models/apple.dart';
 import 'package:heart/models/creates.dart';
@@ -10,6 +11,7 @@ import 'package:heart/models/exercises.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/imports.dart';
 import 'package:heart/models/profile.dart';
+import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart' hide WorkoutService, TemplateService, ExerciseService;
 import 'package:postgres/postgres.dart' hide Connection;
@@ -26,6 +28,7 @@ part 'profiles.dart';
 part 'queries.dart';
 part 'template_folders.dart';
 part 'templates.dart';
+part 'tokens.dart';
 part 'workouts.dart';
 
 abstract class _DatabaseBase {
@@ -187,7 +190,8 @@ class Database extends _DatabaseBase
         _Profiles,
         _Workouts,
         _Templates,
-        _TemplateFolders
+        _TemplateFolders,
+        _ApiTokens
     implements
         ChartPreferenceService,
         ApiExercisePreferenceService,
@@ -200,7 +204,8 @@ class Database extends _DatabaseBase
         ApiProfileService,
         ApiWorkoutService,
         IdempotentTemplateService,
-        IdempotentTemplateFolderService {
+        IdempotentTemplateFolderService,
+        ApiTokenService {
   @override
   final Pool _pool;
 
