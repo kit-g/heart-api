@@ -79,4 +79,29 @@ void main() {
   test('an unexpected error becomes 500', () async {
     expect(await status((_) async => throw StateError('boom')), 500);
   });
+
+  Future<Response> respond(ModelHandler handler) async => await apiHandler(handler)(bareRequest()) as Response;
+
+  test('a Download is its own bytes, typed and offered as a file', () async {
+    final response = await respond(
+      (_) async => const Download(bytes: [104, 105], mimeType: MimeType.csv, filename: 'heart-strong.csv'),
+    );
+    expect(response.statusCode, 200);
+    expect(await response.readAsString(), 'hi');
+    expect(response.mimeType, MimeType.csv);
+    expect(response.headers.contentDisposition?.parameters.single.value, 'heart-strong.csv');
+  });
+
+  test('SeeOther becomes a 303 with Location', () async {
+    final location = Uri.parse('https://example.com/file.csv');
+    final response = await respond((_) async => SeeOther(location));
+    expect(response.statusCode, 303);
+    expect(response.headers.location, location);
+  });
+
+  test('TooManyRequests becomes a 429 with Retry-After', () async {
+    final response = await respond((_) async => throw const TooManyRequests(reason: 'slow down', retryAfter: 42));
+    expect(response.statusCode, 429);
+    expect(response.headers.retryAfter?.delay, 42);
+  });
 }

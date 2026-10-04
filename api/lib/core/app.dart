@@ -81,6 +81,7 @@ RelicApp buildApp({
     ..use(tokenPrefix, templatesDb(db: database))
     ..use(tokenPrefix, templateFoldersDb(db: database))
     ..use(tokenPrefix, goalsDb(db: database))
+    ..use(tokenPrefix, exportStorage(storage: storage))
     ..use('/charts', chartsDb(db: database))
     ..use('/exercise-preferences', exercisePreferencesDb(db: database))
     ..use('/connections', connectionsDb(db: database))

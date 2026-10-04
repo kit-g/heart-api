@@ -1,10 +1,12 @@
 import 'package:relic/relic.dart';
 
 import '../models/exercises.dart';
+import '../models/exports.dart';
 import '../models/images.dart';
 
 final _exercisesProperty = ContextProperty<ExerciseService>('ExerciseService');
 final _imageStorageProperty = ContextProperty<ApiImageStorageService>('ApiImageStorageService');
+final _exportStorageProperty = ContextProperty<ExportStorage>('ExportStorage');
 
 Middleware exercisesDb({required ExerciseService db}) {
   return (Handler next) {
@@ -24,6 +26,15 @@ Middleware imageStorageDb({required ApiImageStorageService db}) {
   };
 }
 
+Middleware exportStorage({required ExportStorage storage}) {
+  return (Handler next) {
+    return (request) {
+      _exportStorageProperty[request] = storage;
+      return next(request);
+    };
+  };
+}
+
 extension StorageService on Request {
   ExerciseService get exerciseService => _exercisesProperty.get(this);
 
@@ -32,4 +43,8 @@ extension StorageService on Request {
   ApiImageStorageService get imageStorageService => _imageStorageProperty.get(this);
 
   set imageStorageService(ApiImageStorageService v) => _imageStorageProperty[this] = v;
+
+  ExportStorage get exportStorage => _exportStorageProperty.get(this);
+
+  set exportStorage(ExportStorage v) => _exportStorageProperty[this] = v;
 }
