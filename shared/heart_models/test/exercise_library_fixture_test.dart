@@ -28,6 +28,16 @@ void main() {
       expect(exercise.name, isNotEmpty);
       // the library view: no signed-in caller, so nothing here is "mine"
       expect(exercise.isMine, isFalse);
+      expect(exercise.aliases, entry['aliases']);
     }
+  });
+
+  test('the glossary beside the exercises parses into a SearchGlossary', () {
+    final raw = File('test/fixtures/exercise_library_es_ES.json').readAsStringSync();
+    final body = jsonDecode(raw) as Map<String, dynamic>;
+    final glossary = SearchGlossary.fromJson(body['glossary'] as Map);
+
+    expect(glossary['db']!.words, ['dumbbell']);
+    expect(glossary['dorsales']!.muscles, ['latissimus_dorsi']);
   });
 }

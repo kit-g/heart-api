@@ -8,6 +8,7 @@
       "target": "Core",
       "instructions": "The ab wheel rollout is a challenging core exercise.",
       "validated": true,
+      "aliases": [],
       "asset": null,
       "thumbnail": null,
       "muscles": null,
@@ -26,6 +27,7 @@
       "target": "Back",
       "instructions": "Pull the bar down to chest level, squeezing the lats.",
       "validated": true,
+      "aliases": [],
       "asset": null,
       "thumbnail": null,
       "muscles": null,
@@ -44,6 +46,9 @@
       "target": "Chest",
       "instructions": "Lower the bar to the chest, then press up to lockout.",
       "validated": true,
+      "aliases": [
+        "press plano"
+      ],
       "asset": null,
       "thumbnail": null,
       "muscles": null,
@@ -54,5 +59,17 @@
       "unit_system": null,
       "rest_timer": null
     }
-  ]
+  ],
+  "glossary": {
+    "db": {
+      "words": [
+        "dumbbell"
+      ]
+    },
+    "dorsales": {
+      "muscles": [
+        "latissimus_dorsi"
+      ]
+    }
+  }
 }

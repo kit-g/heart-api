@@ -1,4 +1,5 @@
 import 'misc.dart';
+import 'search.dart';
 import 'uuid.dart';
 
 abstract interface class ExerciseFilter {
@@ -596,6 +597,11 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
   /// exercises), so there is nothing to label.
   bool? get validated;
 
+  /// Other names lifters search this exercise by in the served locale
+  /// (`ohp`, `skull crusher`). Library-managed: empty for user-created
+  /// exercises.
+  Iterable<String> get aliases;
+
   bool get hasInfo;
 
   bool get isMine;
@@ -652,6 +658,13 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
 
   bool fits(Iterable<ExerciseFilter> filters);
 
+  /// How [query] matches this exercise, or null when it doesn't.
+  ///
+  /// Accent- and case-insensitive, word order free; the English slug matches
+  /// in every locale. [glossary] is the served locale's search vocabulary:
+  /// with it, a query word may also match through what it stands for.
+  SearchMatch? match(String query, {SearchGlossary? glossary});
+
   Exercise copyWith({
     Category? category,
     Target? target,
@@ -687,6 +700,8 @@ class _Exercise implements Exercise {
   @override
   final bool? validated;
   @override
+  final List<String> aliases;
+  @override
   final bool isMine;
   @override
   final bool isArchived;
@@ -711,6 +726,7 @@ class _Exercise implements Exercise {
     this.thumbnail,
     this.instructions,
     this.validated,
+    this.aliases = const [],
     this.isMine = false,
     this.isArchived = false,
     required this.muscles,
@@ -751,6 +767,10 @@ class _Exercise implements Exercise {
         0 => false, // local
         _ => null, // no library-managed copy
       },
+      aliases: switch (json['aliases']) {
+        List l => [...l.whereType<String>()],
+        _ => const [],
+      },
       isMine: switch (json['own']) {
         bool mine => mine, // API
         1 => true, // local
@@ -785,6 +805,7 @@ class _Exercise implements Exercise {
       'target': target.value,
       if (instructions != null) 'instructions': instructions,
       if (validated case bool validated) 'validated': validated ? 1 : 0,
+      if (aliases.isNotEmpty) 'aliases': aliases,
       if (asset case Asset asset) ...{
         'asset': asset.link,
         'assetHeight': asset.height,
@@ -821,6 +842,47 @@ class _Exercise implements Exercise {
     ].map((w) => w.trim());
 
     return queryWords.every((queryWord) => words.any((word) => word.contains(queryWord)));
+  }
+
+  @override
+  SearchMatch? match(String query, {SearchGlossary? glossary}) {
+    final phrase = _words(query).join(' ');
+    final nameWords = _words(name);
+    if (phrase.isEmpty || nameWords.join(' ').startsWith(phrase)) return .prefix;
+
+    final names = [...nameWords, ...?key?.split('-')];
+    final aliasWords = [for (final alias in aliases) ..._words(alias)];
+
+    bool inNames(String word) => names.any((each) => each.contains(word));
+
+    bool standsFor(String word) {
+      return switch (glossary?[word]) {
+        SearchTerm term => term.words.any((phrase) => _words(phrase).every(inNames)) || term.muscles.any(_trains),
+        null => false,
+      };
+    }
+
+    var worst = SearchMatch.words;
+    for (final word in _words(query)) {
+      final tier = switch (word) {
+        _ when inNames(word) => SearchMatch.words,
+        _ when aliasWords.any((each) => each.contains(word)) || standsFor(word) => SearchMatch.vocabulary,
+        _ when word.length >= 4 && [...names, ...aliasWords].any((each) => withinOneEdit(word, each)) =>
+          SearchMatch.typo,
+        _ => null,
+      };
+      if (tier == null) return null;
+      if (tier.compareTo(worst) > 0) worst = tier;
+    }
+    return worst;
+  }
+
+  /// Whether [muscle] — a muscle id prefix or a muscle group — is among this
+  /// exercise's primary muscles. Secondary involvement is too broad for
+  /// search: every row would answer "bis".
+  bool _trains(String muscle) {
+    return [...?muscles.primary.ids].any((id) => id.startsWith(muscle)) ||
+        [...?muscles.primary.groups].contains(muscle);
   }
 
   /// The uuid is the identity; [name] is localized display copy and two
@@ -882,6 +944,7 @@ class _Exercise implements Exercise {
       instructions: instructions ?? this.instructions,
       // library-owned provenance flag: carried, never client-mutated
       validated: validated,
+      aliases: aliases,
       isArchived: isArchived ?? this.isArchived,
       muscles: tags ?? muscles,
       movement: movement ?? this.movement,
@@ -893,6 +956,8 @@ class _Exercise implements Exercise {
 }
 
 typedef ExerciseId = String;
+
+List<String> _words(String s) => searchNormalized(s).split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
 typedef Asset = ({String link, int? width, int? height});
 
 extension on String {
