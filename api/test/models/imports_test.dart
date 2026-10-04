@@ -88,6 +88,16 @@ void main() {
       expect(byName.values.every((e) => e['target'] == 'Other'), isTrue);
     });
 
+    test('a loaded carry or hold keeps its weight in a weighted category', () {
+      const csv =
+          'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps,Distance,Seconds\n'
+          '2023-02-01 10:00:00,Strongman,45m,Farmers Walk,1,40,0,0.05,0\n'
+          '2023-02-01 10:00:00,Strongman,45m,Weighted Plank,1,20,0,0,60\n';
+      final byName = {for (final e in WorkoutImport.fromStrongCsv(csv).exercises) e['name']: e};
+      expect(byName['Farmers Walk']!['category'], 'Weighted Distance');
+      expect(byName['Weighted Plank']!['category'], 'Weighted Duration');
+    });
+
     test('Rest Timer rows are never sets; warm-up/drop/failure are — Set Order letters are sets', () {
       const csv =
           'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps\n'
