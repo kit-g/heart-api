@@ -10,7 +10,11 @@ Three layers:
      per-exercise concrete-fallback rule, so anything that would abort
      library_locales.py mid-run fails here, with every problem listed instead
      of the first one hit.
-  3. Coverage — per-locale translation counts, with missing and stale (the
+  3. Search vocabulary — per served locale: an alias is never another
+     exercise's name, a glossary word is not itself a word of the names (it
+     would shadow it), and everything a glossary word stands for reaches some
+     exercise.
+  4. Coverage — per-locale translation counts, with missing and stale (the
      fallback copy changed since translation) entries. Informational by
      default: a new exercise must not break CI until every locale catches up.
 
@@ -21,11 +25,12 @@ Run:
 
 import json
 import os
+import re
 import sys
 
 import jsonschema
 import yaml
-from library_locales import Library, content_dir, load_overlays, merge_overlays, source_digest
+from library_locales import Exercise, Library, content_dir, load_overlays, merge_overlays, source_digest
 
 MASTER_SCHEMA = os.path.join(content_dir(), 'exercise_library_schema.json')
 OVERLAY_SCHEMA = os.path.join(content_dir(), 'exercise_i18n_schema.json')
@@ -38,6 +43,76 @@ def validate_schema(document: dict, schema: dict, label: str) -> int:
         path = '/'.join(str(p) for p in error.absolute_path) or '<root>'
         print(f'schema: {label}: {path}: {error.message}', file=sys.stderr)
     return len(errors)
+
+
+# Mirrors searchNormalized in shared/heart_models (src/models/search.dart):
+# the app matches in this form, so uniqueness and shadowing are checked in it.
+_FOLDS = str.maketrans({
+    'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae',
+    'ç': 'c', 'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
+    'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i', 'ñ': 'n',
+    'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', 'ø': 'o', 'œ': 'oe',
+    'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u', 'ý': 'y', 'ÿ': 'y', 'ß': 'ss',
+    'ё': 'е',
+})
+
+
+def search_words(s: str) -> list[str]:
+    return re.sub(r'[^\w\s]|_', '', s.lower().translate(_FOLDS)).split()
+
+
+def served(exercise: Exercise, locale: str, field: str):
+    """What the library query serves for `field` in `locale`: the locale's own
+    copy, then its base language's, then the fallback's — field by field."""
+    for each in dict.fromkeys([locale, locale.split('_')[0]]):
+        loc = exercise.localizations.get(each)
+        if loc is not None and loc.is_concrete() and getattr(loc, field) is not None:
+            return getattr(loc, field)
+    return getattr(exercise.fallback_localization(), field)
+
+
+def search_problems(library: Library, muscle_groups: set[str], muscle_ids: set[str]) -> list[str]:
+    problems = []
+    for locale in library.locales:
+        names = set()
+        full_names = {}
+        aliases = []
+        primaries = []
+        for key, exercise in library.exercises.items():
+            name = search_words(served(exercise, locale, 'exercise_name'))
+            names.update(name)
+            names.update(key.split('-'))
+            full_names[' '.join(name)] = key
+            aliases.extend((key, alias) for alias in served(exercise, locale, 'aliases') or [])
+            if exercise.muscles:
+                primaries.append(exercise.muscles.primary)
+
+        # an alias shared by variants (rdl on the barbell and the dumbbell
+        # Romanian deadlift) is the point; one that names another exercise
+        # outright would send a lifter to the wrong one
+        for key, alias in aliases:
+            named = full_names.get(' '.join(search_words(alias)), key)
+            if named != key:
+                problems.append(f'{locale}: alias {alias!r} of {key} is the name of {named}')
+
+        for word, term in library.resolved_glossary(locale).items():
+            normalized = search_words(word)
+            if len(normalized) != 1 or word != word.lower():
+                problems.append(f'{locale}: glossary word {word!r} must be one lower-case word')
+                continue
+            if normalized[0] in names:
+                problems.append(f'{locale}: glossary word {word!r} is a word of the names it would shadow')
+            for phrase in term.get('words', []):
+                if not all(any(part in name for name in names) for part in search_words(phrase)):
+                    problems.append(f'{locale}: glossary word {word!r} stands for {phrase!r}, which no name has')
+            for muscle in term.get('muscles', []):
+                if muscle not in muscle_groups and not any(each.startswith(muscle) for each in muscle_ids):
+                    problems.append(f'{locale}: glossary word {word!r} names {muscle!r}, not a muscle group or id')
+                elif not any(
+                    muscle in role.groups or any(each.startswith(muscle) for each in role.ids) for role in primaries
+                ):
+                    problems.append(f'{locale}: glossary word {word!r} names {muscle!r}, no exercise\'s primary muscle')
+    return problems
 
 
 def coverage(master: dict, overlays: list[tuple[str, dict]], detailed: bool) -> None:
@@ -134,6 +209,10 @@ def main() -> int:
             exercise.fallback_localization()
         except ValueError as e:
             problems.append(str(e))
+    if not problems:
+        muscle_groups = set(master_schema['$defs']['muscleGroupList']['items']['enum'])
+        muscle_ids = set(master_schema['$defs']['muscleList']['items']['enum'])
+        problems = search_problems(library, muscle_groups, muscle_ids)
     for problem in problems:
         print(f'content: {problem}', file=sys.stderr)
     if problems:
