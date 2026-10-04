@@ -2,7 +2,8 @@
 
 ## 2.7.0
 
-Loaded carries and holds get their own categories (heart-api#85).
+Loaded carries and holds get their own categories (heart-api#85; app side
+heart-of-yours#253).
 
 - New: `Category.weightedDistance` (`Weighted Distance`: weight and distance,
   e.g. farmer's carry, sled push) and `Category.weightedDuration`
