@@ -227,6 +227,9 @@ SELECT coalesce(
         WHEN tb.exercise_id IS NOT NULL THEN tb.validated
         ELSE e.validated
       END,
+      -- NULL is "none of its own" and falls through like name; an empty
+      -- array is a translation deliberately having none
+      'aliases', COALESCE(t.aliases, tb.aliases, e.aliases, '{}'),
       'asset', e.asset,
       'thumbnail', e.thumbnail,
       'muscles', e.muscles,
@@ -239,7 +242,16 @@ SELECT coalesce(
     ) ORDER BY e.name
   ),
   '[]'::jsonb
-) AS exercises
+) AS exercises,
+-- the sync writes every served locale's glossary already resolved; a
+-- regional locale without a row of its own reads its base language's
+(
+  SELECT g.terms
+  FROM search_glossaries g
+  WHERE g.locale IN (@locale, @baseLocale)
+  ORDER BY g.locale = @locale DESC
+  LIMIT 1
+) AS glossary
 FROM exercises e
 LEFT JOIN exercise_translations t ON t.exercise_id = e.id AND t.locale = @locale
 -- the regional fallback chain (es_ES -> es -> en): a regional locale with no

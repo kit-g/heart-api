@@ -171,6 +171,72 @@ void main() {
     });
   });
 
+  group('search vocabulary', () {
+    test('aliases follow the locale ladder; NULL falls through, an empty array stops it', () async {
+      final id = await h.seedGlobalExercise();
+      await h.exec("UPDATE exercises SET aliases = '{ohp,military press}' WHERE id = @id::uuid", {'id': id});
+      await h.exec(
+        "INSERT INTO exercise_translations (exercise_id, locale, name, aliases) VALUES (@id::uuid, 'es', 'Press', '{press militar}')",
+        {'id': id},
+      );
+      await h.exec(
+        "INSERT INTO exercise_translations (exercise_id, locale, name, aliases) VALUES (@id::uuid, 'fr', 'Développé', '{}')",
+        {'id': id},
+      );
+
+      Future<Object?> aliases(String? locale) async {
+        return findEx((await h.db.getExercises(ownerId, locale: locale))['exercises'] as List, id)!['aliases'];
+      }
+
+      expect(await aliases(null), ['ohp', 'military press']);
+      expect(await aliases('es'), ['press militar']);
+      // no es_ES row: the base language's aliases, like its name
+      expect(await aliases('es_ES'), ['press militar']);
+      expect(await aliases('fr'), isEmpty);
+      // ru has no row at all: the master's
+      expect(await aliases('ru'), ['ohp', 'military press']);
+    });
+
+    test('a user-created exercise ships an empty alias list', () async {
+      final own = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('Mine'),
+        category: 'Dumbbell',
+        target: 'Arms',
+      );
+      final row = findEx((await h.db.getExercises(ownerId))['exercises'] as List, own['id'].toString());
+      expect(row!['aliases'], isEmpty);
+    });
+
+    test('the glossary is the locale\'s own row, else its base language\'s, else empty', () async {
+      // made-up locales, so the test never meets the synced library's rows
+      await h.exec(
+        "INSERT INTO search_glossaries (locale, terms) VALUES ('qa', '{\"db\": {\"words\": [\"dumbbell\"]}}'), "
+        "('qa_QB', '{\"lats\": {\"muscles\": [\"latissimus_dorsi\"]}}')",
+      );
+      addTearDown(() => h.exec("DELETE FROM search_glossaries WHERE locale IN ('qa', 'qa_QB')"));
+
+      Future<Object?> glossary(String locale) async => (await h.db.getExercises(ownerId, locale: locale))['glossary'];
+
+      expect(await glossary('qa'), {
+        'db': {
+          'words': ['dumbbell'],
+        },
+      });
+      expect(await glossary('qa_QB'), {
+        'lats': {
+          'muscles': ['latissimus_dorsi'],
+        },
+      });
+      expect(await glossary('qa_QC'), {
+        'db': {
+          'words': ['dumbbell'],
+        },
+      });
+      expect(await glossary('qz'), isEmpty);
+    });
+  });
+
   group('movement', () {
     /// The blob exactly as scripts/library_locales.py writes it — camelCase, so
     /// storage and wire are the same shape and reads ship it verbatim.
