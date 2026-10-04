@@ -2420,3 +2420,9 @@ WITH _token AS (
 SELECT user_id, scopes, purpose, minute_start, minute_count, day_start, day_count
 FROM _token JOIN _usage USING (user_id)
 ''';
+
+const _getProfile = '''
+SELECT id, username, email, avatar_url, scheduled_for_deletion_at, settings
+FROM profiles
+WHERE id = @userId
+''';

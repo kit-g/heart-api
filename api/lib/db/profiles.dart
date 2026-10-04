@@ -2,6 +2,13 @@ part of 'db.dart';
 
 mixin _Profiles on _DatabaseBase implements ApiProfileService {
   @override
+  Future<User?> getProfile(String userId) async {
+    final rows = await _pool.execute(_getProfile.toSql(), parameters: {'userId': userId});
+    if (rows.isEmpty) return null;
+    return User.fromRow(rows.first.toColumnMap());
+  }
+
+  @override
   Future<User> upsertProfile(User user) async {
     final rows = await _pool.execute(
       _updateAccount.toSql(),
