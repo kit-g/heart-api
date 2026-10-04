@@ -31,6 +31,17 @@ resource "aws_s3_bucket_lifecycle_configuration" "delete_raw_uploads" {
     expiration { days = 1 }
   }
 
+  # Account exports too large to answer inline (`GET /me/export`) are written
+  # here and handed out by a short-lived presigned link; a day is plenty.
+  rule {
+    id     = "expire-exports"
+    status = "Enabled"
+
+    filter { prefix = "exports/" }
+
+    expiration { days = 1 }
+  }
+
   # Raw exercise GIFs are redundant once the assets Lambda has copied them to
   # exercises/<name>/. Keep them a week — long enough to re-fire the pipeline
   # (e.g. after a bad deploy) before they auto-clean.
