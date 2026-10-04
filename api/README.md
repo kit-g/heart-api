@@ -121,6 +121,15 @@ Future<Model> createGoal(Request req) async {
 
 ---
 
+## The `/me` surface
+
+Scripts and assistants read the caller's own data under `/me` with a personal access token
+(`/accounts/tokens`), not a Firebase ID token: `tokenAuthentication` (`lib/middleware/tokens.dart`)
+authenticates, rate-limits per account and logs one `ApiUsage` line per request, and `isAppRoute`
+keeps the Firebase and version gates off it. Shapes there are published and additive-only; a `Me*`
+model decides what of an app shape is shown. The user-facing reference is `docs/me.md`; the design
+is `docs/2026-09-23.developer-api.md` at the repo root.
+
 ## Database layer
 
 No ORM. SQL strings in `db/queries.dart`, executed against a `Pool` from the `postgres` package. Each resource (`profiles`, `workouts`, …) gets a mixin in its own file, all `part of 'db.dart'`. The `Database` class assembles them.
