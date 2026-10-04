@@ -144,3 +144,39 @@ class NotImplemented implements ApiException {
     };
   }
 }
+
+class Unauthorized implements ApiException {
+  final String reason;
+  @override
+  final String code;
+
+  const new({required this.reason, this.code = 'unauthorized'});
+
+  @override
+  int get statusCode => 401;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {'error': 'unauthorized', 'code': code, 'reason': reason};
+  }
+}
+
+class TooManyRequests implements ApiException {
+  final String reason;
+
+  /// Whole seconds until the window that ran out restarts; the `Retry-After`.
+  final int retryAfter;
+
+  @override
+  final String code;
+
+  const new({required this.reason, required this.retryAfter, this.code = 'rate_limited'});
+
+  @override
+  int get statusCode => 429;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {'error': 'too many requests', 'code': code, 'reason': reason, 'retryAfter': retryAfter};
+  }
+}

@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:heart/models/tokens.dart';
 import 'package:postgres/postgres.dart' hide Connection;
 import 'package:relic/relic.dart';
 
@@ -224,6 +225,11 @@ abstract interface class AppConfig {
   /// development flags, allows to call the /events endpoint
   bool get allowNonHttpEvents;
 
+  /// Rate limits on the token-authenticated `/me` surface for an account
+  /// without the `api` entitlement. Raising them is always allowed; lowering
+  /// them breaks a promise.
+  ApiLimits get freeApiLimits;
+
   factory fromEnv() {
     final env = Platform.environment;
     switch (env) {
@@ -271,6 +277,10 @@ abstract interface class AppConfig {
           allowedOrigins: _origins(env['ALLOWED_ORIGINS']),
           allowNonHttpEvents: bool.tryParse(env['ALLOW_NON_HTTP_EVENTS'] ?? '', caseSensitive: false) ?? false,
           db: PostgresConfig.fromEnv(),
+          freeApiLimits: ApiLimits(
+            perMinute: int.tryParse(env['API_FREE_PER_MINUTE'] ?? '') ?? ApiLimits.free.perMinute,
+            perDay: int.tryParse(env['API_FREE_PER_DAY'] ?? '') ?? ApiLimits.free.perDay,
+          ),
         );
       default:
         final missing = _requiredConfig.where((key) => env[key] == null || env[key]!.isEmpty).toList();
@@ -335,6 +345,8 @@ class _EnvConfig implements AppConfig {
   final Set<String> allowedOrigins;
   @override
   final bool allowNonHttpEvents;
+  @override
+  final ApiLimits freeApiLimits;
 
   const new({
     required this.env,
@@ -362,6 +374,7 @@ class _EnvConfig implements AppConfig {
     required this.eventsQueueArn,
     required this.eventsQueueUrl,
     required this.firebaseEventsQueueUrl,
+    required this.freeApiLimits,
   });
 
   @override
