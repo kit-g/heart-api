@@ -32,6 +32,8 @@ void main() {
         Category.repsOnly,
         Category.cardio,
         Category.duration,
+        Category.weightedDistance,
+        Category.weightedDuration,
       };
 
       // weight <-> weight: true
