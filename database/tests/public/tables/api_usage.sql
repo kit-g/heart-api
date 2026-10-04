@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(13);
+SELECT plan(14);
 
 SELECT has_table('public'::name, 'api_usage'::name);
 
@@ -12,7 +12,8 @@ SELECT columns_are(
                    'minute_start',
                    'minute_count',
                    'day_start',
-                   'day_count'
+                   'day_count',
+                   'last_export_at'
                    ]
        );
 
@@ -21,6 +22,8 @@ SELECT col_type_is('public'::name, 'api_usage'::name, 'minute_start'::name, 'tim
 SELECT col_type_is('public'::name, 'api_usage'::name, 'minute_count'::name, 'integer'::name);
 SELECT col_type_is('public'::name, 'api_usage'::name, 'day_start'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'api_usage'::name, 'day_count'::name, 'integer'::name);
+
+SELECT col_type_is('public'::name, 'api_usage'::name, 'last_export_at'::name, 'timestamp with time zone'::name);
 
 SELECT col_is_pk('public'::name, 'api_usage'::name, 'user_id'::name);
 
