@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(13);
+SELECT plan(14);
 
 SELECT has_table('public'::name, 'exercise_translations'::name);
 
@@ -12,7 +12,8 @@ SELECT columns_are(
                    'locale',
                    'name',
                    'instructions',
-                   'validated'
+                   'validated',
+                   'aliases'
                    ]
        );
 
@@ -21,6 +22,7 @@ SELECT col_type_is('public'::name, 'exercise_translations'::name, 'locale'::name
 SELECT col_type_is('public'::name, 'exercise_translations'::name, 'name'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'exercise_translations'::name, 'instructions'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'exercise_translations'::name, 'validated'::name, 'boolean'::name);
+SELECT col_type_is('public'::name, 'exercise_translations'::name, 'aliases'::name, 'text[]'::name);
 
 SELECT has_pk('public'::name, 'exercise_translations'::name, 'exercise_translations has a primary key');
 SELECT col_is_pk('public'::name, 'exercise_translations'::name, ARRAY ['exercise_id', 'locale'], '(exercise_id, locale) is the composite primary key');
