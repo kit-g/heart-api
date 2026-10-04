@@ -1,6 +1,46 @@
 version: "2026-08-30"
 locales: [en, en_CA, ru, es, es_ES, fr, fr_CA]
 fallback_to_default: en
+# Search vocabulary, by locale: the words a lifter types that stand for
+# other words across the whole library (overlays add their own).
+glossary:
+  en:
+    db:
+      words: ["dumbbell"]
+    bb:
+      words: ["barbell"]
+    kb:
+      words: ["kettlebell"]
+    bw:
+      words: ["bodyweight"]
+    dl:
+      words: ["deadlift"]
+    sm:
+      words: ["smith machine"]
+    lats:
+      muscles: ["latissimus_dorsi"]
+    quads:
+      muscles: ["rectus_femoris", "vastus"]
+    delts:
+      muscles: ["anterior_deltoid", "lateral_deltoid", "posterior_deltoid", "shoulders"]
+    traps:
+      muscles: ["trapezius"]
+    pecs:
+      muscles: ["pectoralis_major", "chest"]
+    bis:
+      muscles: ["biceps_brachii"]
+    tris:
+      muscles: ["triceps_brachii"]
+    abs:
+      muscles: ["rectus_abdominis", "core"]
+    obliques:
+      muscles: ["external_oblique"]
+    glutes:
+      muscles: ["gluteus", "glutes"]
+    hams:
+      muscles: ["hamstrings"]
+    calves:
+      muscles: ["gastrocnemius"]
 exercises:
   ab-wheel:
     category: Weighted Body Weight
@@ -16,6 +56,7 @@ exercises:
     i18n:
       en:
         name: "Ab Wheel"
+        aliases: ["ab rollout"]
         validated: true
         instructions: |
           ## Overview
@@ -1059,6 +1100,7 @@ exercises:
     i18n:
       en:
         name: "Knees to Elbows"
+        aliases: ["k2e"]
         validated: true
         instructions: |
           ## Overview
@@ -1885,6 +1927,7 @@ exercises:
     i18n:
       en:
         name: "Sit Up"
+        aliases: ["situp"]
         validated: true
         instructions: |
           ## Overview
@@ -2022,6 +2065,7 @@ exercises:
     i18n:
       en:
         name: "Toes To Bar"
+        aliases: ["t2b", "ttb"]
         validated: true
         instructions: |
           ## Overview
@@ -2300,6 +2344,7 @@ exercises:
     i18n:
       en:
         name: "Bench Press - Close Grip (Barbell)"
+        aliases: ["cgbp"]
         validated: true
         instructions: |
           ## Overview
@@ -3067,6 +3112,7 @@ exercises:
     i18n:
       en:
         name: "Preacher Curl (Barbell)"
+        aliases: ["scott curl"]
         validated: true
         instructions: |
           ## Overview
@@ -3138,6 +3184,7 @@ exercises:
     i18n:
       en:
         name: "Preacher Curl (Dumbbell)"
+        aliases: ["scott curl"]
         instructions: |
           ## Overview
           The dumbbell preacher curl is an isolation exercise that primarily targets the biceps brachii with independent arm training. It also engages the brachialis and brachioradialis, using a preacher bench to eliminate momentum and allow for natural wrist rotation.
@@ -3278,6 +3325,7 @@ exercises:
     i18n:
       en:
         name: "Preacher Curl (Machine)"
+        aliases: ["scott curl"]
         instructions: |
           ## Overview
           The machine preacher curl is an isolation exercise that primarily targets the biceps brachii with a guided movement path. It also engages the brachialis and brachioradialis, using a fixed machine to provide stability and constant resistance throughout the curl.
@@ -3820,6 +3868,7 @@ exercises:
     i18n:
       en:
         name: "Skullcrusher (Barbell)"
+        aliases: ["skull crusher", "lying triceps extension"]
         instructions: |
           ## Overview
           The barbell skullcrusher is an isolation exercise that primarily targets the triceps, particularly the long head. It also engages the medial and lateral triceps heads, using a lying position to maximize stretch and contraction throughout the movement.
@@ -3889,6 +3938,7 @@ exercises:
     i18n:
       en:
         name: "Skullcrusher (Dumbbell)"
+        aliases: ["skull crusher", "lying triceps extension"]
         instructions: |
           ## Overview
           The dumbbell skullcrusher is an isolation exercise that primarily targets the triceps with independent arm movement. It also engages all three triceps heads, using a lying position with dumbbells to allow natural arm paths and address strength imbalances.
@@ -4650,6 +4700,7 @@ exercises:
     i18n:
       en:
         name: "Back Extension"
+        aliases: ["hyperextension"]
         instructions: |
           ## Overview
           The back extension is a bodyweight exercise that primarily targets the erector spinae and lower back muscles. It also engages the glutes and hamstrings as secondary muscles, making it effective for strengthening the posterior chain and improving spinal stability.
@@ -4717,6 +4768,7 @@ exercises:
     i18n:
       en:
         name: "Back Extension (Machine)"
+        aliases: ["hyperextension"]
         instructions: |
           ## Overview
           The machine back extension is a resistance-based exercise that primarily targets the erector spinae and lower back muscles. It also engages the glutes and hamstrings, providing guided support and adjustable resistance for safe and effective lower back strengthening.
@@ -5134,6 +5186,7 @@ exercises:
     i18n:
       en:
         name: "Chin Up"
+        aliases: ["chinup"]
         instructions: |
           ## Overview
           The chin up is a bodyweight pulling exercise that primarily targets the latissimus dorsi and biceps. It also engages the rhomboids, middle trapezius, and core, using an underhand grip that emphasizes the biceps more than traditional pull ups for effective upper body pulling strength.
@@ -5280,6 +5333,7 @@ exercises:
     i18n:
       en:
         name: "Deadlift (Barbell)"
+        aliases: ["conventional deadlift"]
         instructions: |
           ## Overview
           The barbell deadlift is a compound exercise that primarily targets the erector spinae, glutes, and hamstrings. It also engages the quadriceps, lats, traps, and grip muscles, making it one of the most effective full-body strength exercises for building overall posterior chain power.
@@ -5486,6 +5540,7 @@ exercises:
     i18n:
       en:
         name: "Inverted Row (Bodyweight)"
+        aliases: ["australian pull up", "body row"]
         instructions: |
           ## Overview
           The inverted row is a bodyweight pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the biceps, rear deltoids, and core, making it an effective horizontal pulling movement for building back strength and muscle endurance.
@@ -6361,6 +6416,7 @@ exercises:
     i18n:
       en:
         name: "Pull Up"
+        aliases: ["pullup"]
         instructions: |
           ## Overview
           The pull up is a bodyweight pulling exercise that primarily targets the latissimus dorsi. It also engages the rhomboids, middle trapezius, biceps, and core, making it one of the most effective upper body exercises for building back width and pulling strength.
@@ -6632,6 +6688,7 @@ exercises:
     i18n:
       en:
         name: "Romanian Deadlift (Barbell)"
+        aliases: ["rdl"]
         instructions: |
           ## Overview
           The Romanian deadlift is a hip hinge exercise that primarily targets the hamstrings, glutes, and erector spinae. It also engages the lats and traps as stabilizers, using a controlled lowering motion to emphasize the eccentric phase and build posterior chain strength.
@@ -6699,6 +6756,7 @@ exercises:
     i18n:
       en:
         name: "Seated Row (Cable)"
+        aliases: ["cable row", "low row"]
         instructions: |
           ## Overview
           The cable seated row is a horizontal pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the biceps and rear deltoids, using a cable machine to provide constant tension throughout the rowing motion for effective back development.
@@ -7038,6 +7096,7 @@ exercises:
     i18n:
       en:
         name: "Stiff Leg Deadlift (Barbell)"
+        aliases: ["sldl", "stiff legged deadlift"]
         instructions: |
           ## Overview
           The stiff leg barbell deadlift is a hip hinge exercise that primarily targets the hamstrings and erector spinae. It also engages the glutes and lats as stabilizers, using minimal knee bend to emphasize the posterior chain and build lower back and hamstring strength.
@@ -7175,6 +7234,7 @@ exercises:
     i18n:
       en:
         name: "T Bar Row"
+        aliases: ["landmine row"]
         instructions: |
           ## Overview
           The T-bar row is a compound pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the lower back, biceps, and rear deltoids, using a fixed pivot point to allow for heavy loading with a stable movement pattern.
@@ -7447,6 +7507,7 @@ exercises:
     i18n:
       en:
         name: "Bench Press (Barbell)"
+        aliases: ["flat bench"]
         instructions: |
           ## Overview
           The barbell bench press is a compound upper body exercise that primarily targets the pectoralis major. It also engages the front deltoids and triceps, making it one of the most effective exercises for building overall chest strength and upper body pressing power.
@@ -7595,6 +7656,7 @@ exercises:
     i18n:
       en:
         name: "Bench Press (Dumbbell)"
+        aliases: ["flat bench"]
         instructions: |
           ## Overview
           The dumbbell bench press is a compound pressing exercise that primarily targets the pectoralis major. It also engages the front deltoids and triceps, allowing for independent arm movement and a greater range of motion than the barbell variation.
@@ -7817,6 +7879,7 @@ exercises:
     i18n:
       en:
         name: "Cable Crossover"
+        aliases: ["cable fly"]
         instructions: |
           ## Overview
           The cable crossover is an isolation exercise that primarily targets the pectoralis major, particularly the inner chest. It also engages the front deltoids as stabilizers, using cables to provide constant tension throughout a wide arc of motion.
@@ -9190,6 +9253,7 @@ exercises:
     i18n:
       en:
         name: "Pec Deck (Machine)"
+        aliases: ["butterfly", "machine fly"]
         instructions: |
           ## Overview
           The pec deck is an isolation exercise that primarily targets the pectoralis major. It also engages the front deltoids minimally, using a fixed movement path with padded arms to provide stability and consistent resistance throughout the fly motion.
@@ -9392,6 +9456,7 @@ exercises:
     i18n:
       en:
         name: "Push Up"
+        aliases: ["pushup", "press up"]
         instructions: |
           ## Overview
           The push up is a bodyweight pressing exercise that primarily targets the pectoralis major. It also engages the front deltoids, triceps, and core, making it one of the most effective and versatile upper body exercises for building strength and endurance.
@@ -9735,6 +9800,7 @@ exercises:
     i18n:
       en:
         name: "Bulgarian Split Squat"
+        aliases: ["bss", "rfess", "rear foot elevated split squat"]
         instructions: |
           ## Overview
           The Bulgarian split squat is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and hip stabilizers, using an elevated rear foot position to increase range of motion and challenge balance while building single-leg strength.
@@ -10351,6 +10417,7 @@ exercises:
     i18n:
       en:
         name: "Glute Ham Raise"
+        aliases: ["ghr"]
         instructions: |
           ## Overview
           The glute ham raise is an advanced bodyweight exercise that primarily targets the hamstrings and glutes. It also engages the lower back and calves, using eccentric and concentric hamstring contraction to build posterior chain strength and injury resilience.
@@ -11343,6 +11410,7 @@ exercises:
     i18n:
       en:
         name: "Leg Extension (Machine)"
+        aliases: ["quad extension"]
         instructions: |
           ## Overview
           The machine leg extension is an isolation exercise that primarily targets the quadriceps. It uses a guided movement path with adjustable resistance to isolate and strengthen the four muscles of the front thigh.
@@ -11682,6 +11750,7 @@ exercises:
     i18n:
       en:
         name: "Step-Back Lunge"
+        aliases: ["reverse lunge"]
         instructions: |
           ## Overview
           The step-back lunge is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and stabilizers, using a backward stepping motion that reduces knee stress compared to forward lunges while building single-leg strength and balance.
@@ -11748,6 +11817,7 @@ exercises:
     i18n:
       en:
         name: "Lying Leg Curl (Machine)"
+        aliases: ["hamstring curl"]
         instructions: |
           ## Overview
           The lying leg curl is an isolation exercise that primarily targets the hamstrings. It also engages the calves, using a guided machine to isolate and strengthen the muscles on the back of the thigh through knee flexion.
@@ -11945,6 +12015,7 @@ exercises:
     i18n:
       en:
         name: "Romanian Deadlift (Dumbbell)"
+        aliases: ["rdl"]
         instructions: |
           ## Overview
           The dumbbell Romanian deadlift is a hip hinge exercise that primarily targets the hamstrings, glutes, and erector spinae. It also engages the lats and traps as stabilizers, using dumbbells for independent arm movement and a more natural hand position while emphasizing the eccentric phase.
@@ -12141,6 +12212,7 @@ exercises:
     i18n:
       en:
         name: "Seated Leg Curl (Machine)"
+        aliases: ["hamstring curl"]
         instructions: |
           ## Overview
           The seated leg curl is an isolation exercise that primarily targets the hamstrings. It also engages the calves, using a seated position with a guided machine to isolate and strengthen the muscles on the back of the thigh through knee flexion.
@@ -12406,6 +12478,7 @@ exercises:
     i18n:
       en:
         name: "Squat (Barbell)"
+        aliases: ["back squat"]
         instructions: |
           ## Overview
           The barbell squat is a compound lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core, lower back, and upper back, making it one of the most effective full-body strength exercises for building overall lower body power.
@@ -13070,6 +13143,7 @@ exercises:
     i18n:
       en:
         name: "Standing Leg Curl (Machine)"
+        aliases: ["hamstring curl"]
         validated: true
         instructions: |
           ## Overview
@@ -13393,6 +13467,7 @@ exercises:
     i18n:
       en:
         name: "Stiff Leg Deadlift (Dumbbell)"
+        aliases: ["sldl", "stiff legged deadlift"]
         instructions: |
           ## Overview
           The dumbbell stiff leg deadlift is a hip hinge exercise that primarily targets the hamstrings and erector spinae. It also engages the glutes and lats as stabilizers, using dumbbells with minimal knee bend to emphasize the posterior chain and build lower back and hamstring strength.
@@ -13592,6 +13667,7 @@ exercises:
     i18n:
       en:
         name: "Trap Bar Deadlift"
+        aliases: ["hex bar deadlift"]
         instructions: |
           ## Overview
           The trap bar deadlift is a compound exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the erector spinae, lats, and traps, using a hexagonal bar design that allows for a more neutral spine position and reduced lower back stress.
@@ -13870,6 +13946,7 @@ exercises:
     i18n:
       en:
         name: "Handstand Push Up"
+        aliases: ["hspu"]
         instructions: |
           ## Overview
           The handstand push up is an advanced bodyweight pressing exercise that primarily targets the shoulders. It also engages the triceps, upper chest, and core, using an inverted position to create maximum shoulder loading through vertical pressing.
@@ -14392,6 +14469,7 @@ exercises:
     i18n:
       en:
         name: "Lateral Raise (Band)"
+        aliases: ["side raise"]
         instructions: |
           ## Overview
           The band lateral raise is an isolation exercise that primarily targets the middle deltoids. It also engages the upper trapezius, using progressive band resistance to build shoulder width and improve the appearance of broader shoulders.
@@ -14457,6 +14535,7 @@ exercises:
     i18n:
       en:
         name: "Lateral Raise (Cable)"
+        aliases: ["side raise"]
         instructions: |
           ## Overview
           The cable lateral raise is an isolation exercise that primarily targets the middle deltoids. It also engages the upper trapezius, using a cable to provide constant tension throughout the movement for consistent shoulder activation and width development.
@@ -14522,6 +14601,7 @@ exercises:
     i18n:
       en:
         name: "Lateral Raise (Dumbbell)"
+        aliases: ["side raise"]
         instructions: |
           ## Overview
           The dumbbell lateral raise is an isolation exercise that primarily targets the middle deltoids. It also engages the upper trapezius, using dumbbells for independent arm movement to build shoulder width and create the appearance of broader shoulders.
@@ -14587,6 +14667,7 @@ exercises:
     i18n:
       en:
         name: "Lateral Raise (Machine)"
+        aliases: ["side raise"]
         instructions: |
           ## Overview
           The machine lateral raise is an isolation exercise that primarily targets the middle deltoids. It also engages the upper trapezius, using a guided machine to provide stable resistance and consistent form for building shoulder width.
@@ -14652,6 +14733,7 @@ exercises:
     i18n:
       en:
         name: "Overhead Press (Barbell)"
+        aliases: ["ohp", "shoulder press"]
         instructions: |
           ## Overview
           The barbell overhead press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps, upper chest, and core, making it one of the most effective exercises for building overall shoulder strength and upper body pressing power.
@@ -14727,6 +14809,7 @@ exercises:
     i18n:
       en:
         name: "Overhead Press (Cable)"
+        aliases: ["ohp"]
         instructions: |
           ## Overview
           The cable overhead press is a machine-based compound exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using cables to provide constant tension throughout the pressing movement.
@@ -14801,6 +14884,7 @@ exercises:
     i18n:
       en:
         name: "Overhead Press (Dumbbell)"
+        aliases: ["ohp", "shoulder press"]
         instructions: |
           ## Overview
           The dumbbell overhead press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using dumbbells for independent arm movement and a greater range of motion than barbell variations.
@@ -14875,6 +14959,7 @@ exercises:
     i18n:
       en:
         name: "Overhead Press (Smith Machine)"
+        aliases: ["ohp"]
         instructions: |
           ## Overview
           The Smith machine overhead press is a guided compound exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using a fixed vertical bar path to provide stability and allow focus on pressing power.
@@ -15023,6 +15108,7 @@ exercises:
     i18n:
       en:
         name: "Reverse Fly (Cable)"
+        aliases: ["rear delt fly"]
         instructions: |
           ## Overview
           The cable reverse fly is an isolation exercise that primarily targets the rear deltoids and upper back. It also engages the rhomboids and middle trapezius, using cables to provide constant tension for improved shoulder balance, posture, and rear delt development.
@@ -15090,6 +15176,7 @@ exercises:
     i18n:
       en:
         name: "Reverse Fly (Dumbbell)"
+        aliases: ["rear delt fly"]
         instructions: |
           ## Overview
           The dumbbell reverse fly is an isolation exercise that primarily targets the rear deltoids and upper back. It also engages the rhomboids and middle trapezius, using dumbbells with a bent-over position to build rear shoulder strength, improve posture, and balance shoulder development.
@@ -15157,6 +15244,7 @@ exercises:
     i18n:
       en:
         name: "Reverse Fly (Machine)"
+        aliases: ["rear delt fly", "reverse pec deck"]
         instructions: |
           ## Overview
           The machine reverse fly is an isolation exercise that primarily targets the rear deltoids and upper back. It also engages the rhomboids and middle trapezius, using a guided machine to provide stable resistance for improving shoulder balance and rear delt development.
@@ -15224,6 +15312,7 @@ exercises:
     i18n:
       en:
         name: "Seated Overhead Press (Barbell)"
+        aliases: ["ohp"]
         instructions: |
           ## Overview
           The seated barbell overhead press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using a seated position with back support to eliminate leg drive and isolate the shoulders.
@@ -15299,6 +15388,7 @@ exercises:
     i18n:
       en:
         name: "Seated Overhead Press (Dumbbell)"
+        aliases: ["ohp", "seated shoulder press"]
         instructions: |
           ## Overview
           The seated dumbbell overhead press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using a seated position with dumbbells for independent arm movement and strict shoulder isolation.
@@ -15651,6 +15741,7 @@ exercises:
     i18n:
       en:
         name: "Strict Military Press (Barbell)"
+        aliases: ["ohp"]
         instructions: |
           ## Overview
           The strict military press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps, upper chest, and core, using a strict standing position with no leg drive to build pure shoulder pressing strength.
@@ -15993,6 +16084,7 @@ exercises:
     i18n:
       en:
         name: "Clean and Jerk (Barbell)"
+        aliases: ["c&j"]
         instructions: |
           ## Overview
           The clean and jerk is a complete Olympic weightlifting movement that targets the entire body. It combines the clean (floor to shoulders) with the jerk (shoulders to overhead), engaging the legs, hips, back, shoulders, and core in one of the most demanding full-body exercises.
@@ -16342,6 +16434,7 @@ exercises:
     i18n:
       en:
         name: "Overhead Squat (Barbell)"
+        aliases: ["ohs"]
         instructions: |
           ## Overview
           The barbell overhead squat is an Olympic lifting accessory that targets the quadriceps, glutes, and entire core. It also requires significant shoulder mobility and stability, building full-body strength, balance, and the receiving position used in snatches.
@@ -17100,6 +17193,7 @@ exercises:
     i18n:
       en:
         name: "Kettlebell Turkish Get Up"
+        aliases: ["tgu", "turkish getup"]
         instructions: |
           ## Overview
           The Turkish get up is a complex full-body movement that targets the shoulders, core, and legs. It involves moving from lying down to standing while holding a kettlebell overhead, building shoulder stability, core strength, coordination, and full-body control.
@@ -17311,6 +17405,7 @@ exercises:
     i18n:
       en:
         name: "Sumo Deadlift High Pull (Barbell)"
+        aliases: ["sdhp"]
         instructions: |
           ## Overview
           The sumo deadlift high pull is a compound full-body exercise that combines elements of Olympic lifting. It primarily targets the legs, glutes, traps, and shoulders, using a wide sumo stance with an explosive pull to build power and full-body coordination.
@@ -17517,6 +17612,7 @@ exercises:
     i18n:
       en:
         name: "Farmer's Walk"
+        aliases: ["farmer's carry"]
         validated: true
         instructions: |
           ## Overview
@@ -18391,6 +18487,7 @@ exercises:
     i18n:
       en:
         name: "Cycling (Indoor)"
+        aliases: ["stationary bike", "exercise bike", "spin"]
         instructions: |
           ## Overview
           Indoor cycling is a cardiovascular exercise performed on a stationary bike that targets the quadriceps, hamstrings, and glutes. It provides controlled, low-impact aerobic conditioning while building leg strength and endurance in a climate-controlled environment.
@@ -18425,6 +18522,7 @@ exercises:
     i18n:
       en:
         name: "Elliptical Machine"
+        aliases: ["cross trainer"]
         instructions: |
           ## Overview
           The elliptical machine is a low-impact cardiovascular exercise that targets the legs, glutes, and cardiovascular system. It mimics running motion without impact stress on joints, providing effective aerobic conditioning with options for upper body engagement.
@@ -18528,6 +18626,7 @@ exercises:
     i18n:
       en:
         name: "Jump Rope"
+        aliases: ["skipping"]
         instructions: |
           ## Overview
           Jump rope is a high-intensity cardiovascular exercise that targets the calves, shoulders, and cardiovascular system. It builds coordination, agility, endurance, and provides an efficient full-body workout with minimal equipment.
@@ -18597,6 +18696,7 @@ exercises:
     i18n:
       en:
         name: "Rowing (Machine)"
+        aliases: ["erg", "rower"]
         instructions: |
           ## Overview
           The rowing machine is a full-body cardiovascular exercise that targets the legs, back, core, and arms. It provides low-impact aerobic conditioning while building strength and endurance through a rowing motion that engages approximately 85% of body muscles.

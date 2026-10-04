@@ -6,9 +6,29 @@
 # source_digest fingerprints the en copy each translation was made from —
 # when en changes, `validate_library.py --coverage` reports the entry stale.
 locale: fr
+glossary:
+  dc:
+    words: ["développé couché"]
+  di:
+    words: ["développé incliné"]
+  sdt:
+    words: ["soulevé de terre"]
+  abdos:
+    muscles: ["rectus_abdominis", "core"]
+  dorsaux:
+    muscles: ["latissimus_dorsi"]
+  quadris:
+    muscles: ["rectus_femoris", "vastus"]
+  ischios:
+    muscles: ["hamstrings"]
+  fessiers:
+    muscles: ["gluteus", "glutes"]
+  trapèzes:
+    muscles: ["trapezius"]
 exercises:
   ab-wheel:
     name: Roue abdominale
+    aliases: ["roulette abdominale"]
     instructions: |
       ## Aperçu
       La roue abdominale est un exercice de gainage exigeant qui cible principalement le grand droit de l'abdomen et le transverse. Elle sollicite également les obliques, les fléchisseurs de hanche et les épaules comme stabilisateurs tout au long du mouvement.
@@ -2631,6 +2651,7 @@ exercises:
     source_digest: 04d523597748
   skullcrusher-barbell:
     name: Barre au front
+    aliases: ["skull crusher", "extension triceps allongé"]
     instructions: |
       ## Aperçu
       La barre au front est un exercice d'isolation qui cible principalement les triceps, en particulier le chef long. Il sollicite également les chefs médial et latéral du triceps, la position allongée maximisant l'étirement et la contraction tout au long du mouvement.
@@ -2679,6 +2700,7 @@ exercises:
     source_digest: 078c569165ec
   skullcrusher-dumbbell:
     name: Barre au front (haltères)
+    aliases: ["skull crusher", "extension triceps allongé"]
     instructions: |
       ## Aperçu
       La barre au front avec haltères est un exercice d'isolation qui cible principalement les triceps en travaillant chaque bras indépendamment. Il sollicite également les trois chefs du triceps, la position allongée avec haltères permettant des trajectoires de bras naturelles et la correction des déséquilibres de force.
@@ -3207,6 +3229,7 @@ exercises:
     source_digest: 5056f13ec465
   back-extension:
     name: Extensions lombaires
+    aliases: ["banc lombaire"]
     instructions: |
       ## Aperçu
       L'extension lombaire est un exercice au poids du corps qui cible principalement les érecteurs du rachis et les muscles du bas du dos. Il sollicite aussi les fessiers et les ischio-jambiers comme muscles secondaires, ce qui en fait un exercice efficace pour renforcer la chaîne postérieure et améliorer la stabilité de la colonne.
@@ -6309,6 +6332,7 @@ exercises:
     source_digest: f1b123a5e6cc
   pec-deck-machine:
     name: Pec deck (machine)
+    aliases: ["butterfly"]
     instructions: |
       ## Aperçu
       Le pec deck est un exercice d'isolation qui cible principalement le grand pectoral. Il sollicite aussi, de façon minime, les deltoïdes antérieurs ; la trajectoire fixe et les bras rembourrés apportent stabilité et résistance constante tout au long du mouvement d'écarté.
@@ -6694,6 +6718,7 @@ exercises:
     source_digest: 7fe468447300
   bulgarian-split-squat:
     name: Squat bulgare
+    aliases: ["bss", "fente bulgare"]
     instructions: |
       ## Aperçu
       Le squat bulgare est un exercice unilatéral du bas du corps qui cible principalement les quadriceps, les fessiers et les ischio-jambiers. Il sollicite aussi la sangle abdominale et les stabilisateurs de hanche ; le pied arrière surélevé augmente l'amplitude et met l'équilibre à l'épreuve tout en développant la force sur une jambe.
@@ -7846,6 +7871,7 @@ exercises:
     source_digest: fe85179f0fdf
   leg-extension-machine:
     name: Extension des jambes (machine)
+    aliases: ["leg extension"]
     instructions: |
       ## Aperçu
       L'extension des jambes à la machine est un exercice d'isolation qui cible principalement les quadriceps. Elle utilise une trajectoire guidée avec une résistance réglable pour isoler et renforcer les quatre muscles de l'avant de la cuisse.
@@ -10213,6 +10239,7 @@ exercises:
     source_digest: 4585a7dcd977
   overhead-press-barbell:
     name: Développé militaire (barre)
+    aliases: ["ohp", "développé épaules"]
     instructions: |
       ## Aperçu
       Le développé militaire à la barre est un exercice polyarticulaire du haut du corps qui cible principalement les trois faisceaux des deltoïdes. Il sollicite aussi les triceps, le haut des pectoraux et la sangle abdominale, ce qui en fait l'un des exercices les plus efficaces pour développer la force globale des épaules et la puissance de poussée du haut du corps.
@@ -10310,6 +10337,7 @@ exercises:
     source_digest: 43a182c99dfc
   overhead-press-dumbbell:
     name: Développé militaire (haltères)
+    aliases: ["ohp", "développé épaules"]
     instructions: |
       ## Aperçu
       Le développé militaire avec haltères est un exercice polyarticulaire du haut du corps qui cible principalement les trois faisceaux des deltoïdes. Il sollicite aussi les triceps et le haut des pectoraux, en utilisant des haltères pour un travail indépendant des bras et une amplitude supérieure aux variantes à la barre.
@@ -10502,6 +10530,7 @@ exercises:
     source_digest: 2cf6d97f86ff
   reverse-fly-dumbbell:
     name: Écartés inversés (haltères)
+    aliases: ["oiseau"]
     instructions: |
       ## Aperçu
       Les écartés inversés avec haltères sont un exercice d'isolation qui cible principalement les deltoïdes postérieurs et le haut du dos. Ils sollicitent aussi les rhomboïdes et le trapèze moyen, en utilisant des haltères et une position buste penché pour renforcer l'arrière des épaules, améliorer la posture et équilibrer le développement des épaules.
@@ -12180,6 +12209,7 @@ exercises:
     source_digest: e79446181d4f
   farmers-walk:
     name: Marche du fermier
+    aliases: ["farmer walk"]
     instructions: |
       ## Aperçu
       La marche du fermier est un exercice de port de charge : vous saisissez une charge lourde dans chaque main et marchez sur une distance donnée. Elle développe la force de préhension, la force du haut du dos et des trapèzes, ainsi que la stabilité de la sangle abdominale nécessaire pour rester droit sous la charge, et elle se transfère directement aux gestes du quotidien où l'on soulève et porte des objets.
@@ -12754,6 +12784,7 @@ exercises:
     source_digest: 607d48819cb2
   cycling-indoor:
     name: Vélo stationnaire
+    aliases: ["vélo d'appartement", "spinning", "biking"]
     instructions: |
       ## Aperçu
       Le vélo stationnaire est un exercice cardiovasculaire pratiqué sur un vélo fixe qui cible les quadriceps, les ischio-jambiers et les fessiers. Il offre un travail aérobie contrôlé et à faible impact tout en développant force et endurance des jambes dans un environnement tempéré.
@@ -12768,6 +12799,7 @@ exercises:
     source_digest: a7bd526aee43
   elliptical-machine:
     name: Elliptique
+    aliases: ["vélo elliptique"]
     instructions: |
       ## Aperçu
       L'elliptique est un exercice cardiovasculaire à faible impact qui cible les jambes, les fessiers et le système cardiovasculaire. Il reproduit le mouvement de la course sans stress d'impact sur les articulations, offrant un travail aérobie efficace avec la possibilité de solliciter le haut du corps.
@@ -12880,6 +12912,7 @@ exercises:
     source_digest: cba52d158006
   rowing-machine:
     name: Rameur
+    aliases: ["aviron"]
     instructions: |
       ## Aperçu
       Le rameur est un exercice cardiovasculaire complet qui sollicite les jambes, le dos, la sangle abdominale et les bras. Il offre un conditionnement aérobie à faible impact tout en développant force et endurance grâce à un mouvement de rame qui engage environ 85 % des muscles du corps.
