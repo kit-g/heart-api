@@ -26,6 +26,10 @@
         "$ref": "#/$defs/entry"
       },
       "description": "Map: exercise slug (master map key) -> localized entry."
+    },
+    "glossary": {
+      "$ref": "#/$defs/glossary",
+      "description": "This locale's search vocabulary, on top of the fallback locale's (overriding it word by word)."
     }
   },
   "$defs": {
@@ -62,6 +66,56 @@
           "type": "string",
           "pattern": "^[0-9a-f]{12}$",
           "description": "source_digest() of the fallback-locale name+instructions this translation was made from; a mismatch marks the translation stale in the coverage report. Stripped during merge, never synced."
+        },
+        "aliases": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": "Other names lifters search this exercise by, in this locale's own words (ohp, skull crusher). Absent is \"none of its own\": the served copy falls through to the next locale's, like name; [] is deliberately none. Unique to one exercise within a locale."
+        }
+      }
+    },
+    "glossary": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^\\S+$",
+        "maxLength": 40
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/glossaryTerm"
+      },
+      "description": "Search vocabulary: map of word -> what it stands for across the whole library. A word is a single lower-case word (what a lifter types), and must not be a real word of the locale's exercise names."
+    },
+    "glossaryTerm": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "words": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": "Phrases the word stands for (db -> dumbbell, ez -> ez bar); a phrase matches when each of its words is in an exercise's name or slug."
+        },
+        "muscles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "description": "Muscles the word names (lats): a muscle group (hamstrings) or a muscle id prefix (latissimus_dorsi), matched against an exercise's primary muscles."
         }
       }
     }

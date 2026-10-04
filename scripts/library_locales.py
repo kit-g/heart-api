@@ -12,8 +12,11 @@ Writes:
     exercises.key, the conflict target), so renaming the fallback-locale name
     updates the row in place; fallback locale fields, muscles, movement
   - exercise_translations — one row per non-fallback locale that has its own
-    name/instructions; rows the source no longer defines are pruned (archived
-    exercises keep theirs)
+    name/instructions/aliases; rows the source no longer defines are pruned
+    (archived exercises keep theirs)
+  - search_glossaries — one row per declared locale, already resolved
+    (fallback, then base language, then the locale's own words); rows for
+    locales no longer declared are pruned
   - Archives any global exercise not in the source YAML.
 
 The exercises.asset / .thumbnail columns are NOT touched here — the assets
@@ -164,6 +167,9 @@ class ExerciseLocalization:
     # a human has reviewed this locale's copy; false is the schema default and
     # marks machine-authored copy the client labels as such (the spark icon)
     validated: bool
+    # other names this copy is searched by; None is "none of its own" (the
+    # served copy falls through to the next locale's), [] is deliberately none
+    aliases: list[str] | None
 
     @classmethod
     def parse(cls, source: dict) -> Self:
@@ -172,6 +178,7 @@ class ExerciseLocalization:
             instructions=source.get('instructions'),
             fallback_to=source.get('fallback_to'),
             validated=source.get('validated', False),
+            aliases=source.get('aliases'),
         )
 
     def is_concrete(self) -> bool:
@@ -222,6 +229,9 @@ class Library:
     locales: list[str]
     exercises: dict[str, Exercise]
     fallback_to: str
+    # locale -> its own search vocabulary (word -> {words, muscles}), as
+    # authored; resolved_glossary() is what a locale serves
+    glossaries: dict[str, dict]
 
     @classmethod
     def parse(cls, source: dict) -> Self:
@@ -234,7 +244,21 @@ class Library:
                 key: Exercise.parse(ex, key, global_fallback=fallback_to)
                 for key, ex in source['exercises'].items()
             },
+            glossaries=source.get('glossary') or {},
         )
+
+    def resolved_glossary(self, locale: str) -> dict:
+        """The vocabulary a locale serves: the fallback locale's words, then its
+        base language's, then its own, a later word replacing an earlier one.
+
+        The fallback's words apply everywhere because the slugs they expand to
+        are English in every locale: `db` finds `bench-press-dumbbell` in any
+        language."""
+        chain = dict.fromkeys([self.fallback_to, locale.split('_')[0], locale])
+        resolved = {}
+        for each in chain:
+            resolved.update(self.glossaries.get(each) or {})
+        return resolved
 
 
 def fetch_db_creds(secrets_bucket: str) -> dict:
@@ -309,6 +333,13 @@ def merge_overlays(master: dict, overlays: list[tuple[str, dict]]) -> dict:
             problems.append(f'i18n/{filename}: {locale!r} is the fallback locale and lives in the master file')
             continue
 
+        if glossary := overlay.get('glossary'):
+            glossaries = master.setdefault('glossary', {})
+            if locale in glossaries:
+                problems.append(f'i18n/{filename}: the master file already defines the {locale!r} glossary')
+            else:
+                glossaries[locale] = glossary
+
         for name, entry in (overlay.get('exercises') or {}).items():
             exercise = master['exercises'].get(name)
             if exercise is None:
@@ -333,8 +364,10 @@ def get_source() -> dict:
 
 
 UPSERT_EXERCISE = '''
-INSERT INTO exercises (key, name, category, target, instructions, muscles, movement, health, validated, archived)
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, false)
+INSERT INTO exercises (
+    key, name, category, target, instructions, muscles, movement, health, validated, aliases, archived
+)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, false)
 ON CONFLICT (key) WHERE user_id IS NULL
 DO UPDATE SET
     name = EXCLUDED.name,
@@ -345,15 +378,31 @@ DO UPDATE SET
     movement = EXCLUDED.movement,
     health = EXCLUDED.health,
     validated = EXCLUDED.validated,
+    aliases = EXCLUDED.aliases,
     archived = false
 RETURNING id
 '''
 
 UPSERT_TRANSLATION = '''
-INSERT INTO exercise_translations (exercise_id, locale, name, instructions, validated)
-VALUES (%s, %s, %s, %s, %s)
+INSERT INTO exercise_translations (exercise_id, locale, name, instructions, validated, aliases)
+VALUES (%s, %s, %s, %s, %s, %s)
 ON CONFLICT (exercise_id, locale)
-DO UPDATE SET name = EXCLUDED.name, instructions = EXCLUDED.instructions, validated = EXCLUDED.validated
+DO UPDATE SET
+    name = EXCLUDED.name,
+    instructions = EXCLUDED.instructions,
+    validated = EXCLUDED.validated,
+    aliases = EXCLUDED.aliases
+'''
+
+UPSERT_GLOSSARY = '''
+INSERT INTO search_glossaries (locale, terms)
+VALUES (%s, %s)
+ON CONFLICT (locale) DO UPDATE SET terms = EXCLUDED.terms
+'''
+
+PRUNE_GLOSSARIES = '''
+DELETE FROM search_glossaries
+WHERE locale <> ALL(%s)
 '''
 
 ARCHIVE_MISSING = '''
@@ -376,7 +425,7 @@ WHERE t.exercise_id = ANY(%s::uuid[])
 '''
 
 
-def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int, int]:
+def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int, int, int]:
     upserted = 0
     translations = 0
     exercise_ids = []
@@ -395,6 +444,7 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int, int
                 Json(exercise.movement.to_dict()) if exercise.movement else None,
                 Json(exercise.health.to_dict()) if exercise.health else None,
                 fallback.validated,
+                fallback.aliases,
             ))
             exercise_id = cur.fetchone()[0]
             exercise_ids.append(exercise_id)
@@ -405,7 +455,7 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int, int
                     continue
                 cur.execute(
                     UPSERT_TRANSLATION, (
-                        exercise_id, locale, loc.exercise_name, loc.instructions, loc.validated
+                        exercise_id, locale, loc.exercise_name, loc.instructions, loc.validated, loc.aliases
                     )
                 )
                 kept.append((exercise_id, locale))
@@ -420,6 +470,10 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int, int
         )
         pruned = cur.rowcount
 
+        for locale in library.locales:
+            cur.execute(UPSERT_GLOSSARY, (locale, Json(library.resolved_glossary(locale))))
+        cur.execute(PRUNE_GLOSSARIES, (library.locales,))
+
         cur.execute(ARCHIVE_MISSING, (list(library.exercises.keys()),))
         archived = cur.rowcount
 
@@ -430,7 +484,7 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int, int
                 f'usually a truncated or half-edited exercise_library.yml. '
                 f'If intended, re-run with MAX_ARCHIVED={archived}.'
             )
-    return upserted, translations, pruned, archived
+    return upserted, translations, pruned, archived, len(library.locales)
 
 
 def connect() -> psycopg.Connection:
@@ -465,11 +519,11 @@ def main():
     library = Library.parse(get_source())
 
     with connect() as conn:
-        upserted, translations, pruned, archived = sync(library, conn)
+        upserted, translations, pruned, archived, glossaries = sync(library, conn)
 
     print(
         f'>> Done: {upserted} exercises upserted, {translations} translations '
-        f'({pruned} pruned), {archived} archived'
+        f'({pruned} pruned), {archived} archived, {glossaries} glossaries'
     )
 
 
