@@ -9,6 +9,7 @@ import 'package:heart/routes/exercise_preferences.dart' as exercise_preferences;
 import 'package:heart/routes/exercises.dart' as exercises;
 import 'package:heart/routes/feedback.dart' as feedback;
 import 'package:heart/routes/goals.dart' as goals;
+import 'package:heart/routes/me.dart' as me;
 import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
 import 'package:heart/routes/template_folders.dart' as folders;
@@ -30,6 +31,13 @@ final routes = <(String, Method), ModelHandler>{
   ('/accounts/:targetUserId/templates/:templateId', .post): templates.assignTemplateToUser,
   ('/accounts/:targetUserId/folders/:folderId', .post): folders.assignFolderToUser,
   ('/version', .get): version.getVersion,
+  ('/me', .get): me.getMe,
+  ('/me/workouts', .get): me.getMyWorkouts,
+  ('/me/workouts/:workoutId', .get): me.getMyWorkout,
+  ('/me/exercises', .get): me.getMyExercises,
+  ('/me/templates', .get): me.getMyTemplates,
+  ('/me/template-folders', .get): me.getMyFolders,
+  ('/me/goals', .get): me.getMyGoals,
   ('/charts', .get): charts.getChartPreferences,
   ('/charts', .post): charts.saveChartPreference,
   ('/charts/:preferenceId', .delete): charts.deleteChartPreference,
