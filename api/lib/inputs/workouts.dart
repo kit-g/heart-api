@@ -84,9 +84,10 @@ class ImportWorkoutsIn {
 /// `PUT`; an empty/null `name` is rejected rather than treated as a clear.
 /// `pauses` is a whole list, as on `PUT`: `[]` clears them.
 ///
-/// `calories` exists on PATCH because wearable energy totals settle after the
-/// workout is saved: HealthKit delivers the final active-energy figure minutes
-/// later, and the device patches it in once known.
+/// `calories` is the MET-based estimate only, never a wearable reading
+/// (CLAUDE.md, *The device-only health rule*). It exists on PATCH because the
+/// estimate is a function of the session's timing: a patch that moves `start`
+/// or `end` carries the device's recomputed figure.
 class WorkoutPatchIn {
   final String? name;
   final DateTime? start;

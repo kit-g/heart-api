@@ -17,13 +17,17 @@ Consequences for API work:
 - No route may accept a health-shaped field (`heartRate`, `hrv`, `sleep`, `bodyMass`,
   `restingHeartRate`, active energy readings, …).
 - Workout `calories` is the MET-based **estimate only** (public catalog data + user-entered
-  weight). Watch-measured energy stays a device-only view in the client.
+  weight — never health-store body mass, not even as a prefilled default). Watch-measured
+  energy stays a device-only view in the client.
 - Health-backed goals sync their **definition** (target, deadline, cadence); progress for those
   kinds is computed on device and never written server-side.
 - Alerts derived from health data use contentless/silent pushes: the server stores only the
   schedule, the device evaluates and composes the notification.
 - The server's role around health features is: reference content, algorithm parameters,
   schemas, and coordination — never storage.
+- Enforced, not just stated: `Request.json()` (`api/lib/core/request.dart`) rejects a body with a
+  health-shaped key anywhere in it (`400 health_data`), and `database/tests/public/health_rule.sql`
+  fails on a health-named column. The two share one list; extend both together.
 
 ## Package versioning
 
