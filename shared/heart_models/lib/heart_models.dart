@@ -1,6 +1,7 @@
 library;
 
 export 'src/models/account_summary.dart';
+export 'src/models/api_token.dart';
 export 'src/models/act.dart';
 export 'src/models/auth.dart';
 export 'src/models/charts.dart';

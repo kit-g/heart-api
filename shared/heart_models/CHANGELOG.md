@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.9.0
+
+Personal access tokens for the developer API (heart-api#111).
+
+- New: `ApiToken`, a token as its owner lists it: `id`, `name`, optional
+  `purpose`, `hint` (the secret's last four characters), `scopes`,
+  `createdAt`, `lastUsedAt`, `expiresAt` (null until revoked), `revokedAt`,
+  and `isActive()`. `ApiToken.maxActive` (5) and `maxNameLength` (100).
+- New: `MintedApiToken`, the create response: the token's fields plus
+  `secret`, the plaintext shown only once.
+- New: `ApiTokenPurpose` (`script`, `spreadsheet`, `homeAutomation`,
+  `aiAssistant`, `other`) and `ApiTokenExpiry` (`year`, `never`).
+
 ## 2.8.0
 
 Exercise search vocabulary (heart-api#102; app side heart-of-yours#135).
