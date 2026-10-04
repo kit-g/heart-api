@@ -246,6 +246,47 @@ void main() {
       );
 
       test(
+        'a weighted distance set keeps weight and distance, ranked by their product',
+        () {
+          final carry = MockExercise();
+          when(carry.category).thenReturn(Category.weightedDistance);
+
+          final set = ExerciseSet(carry, reps: 3, weight: 40.0, duration: 45, distance: 0.05);
+          expect(set.weight, equals(40.0));
+          expect(set.distance, equals(0.05));
+          expect(set.reps, isNull);
+          expect(set.duration, isNull);
+          expect(set.total, closeTo(2.0, 1e-9));
+          expect(set.canBeCompleted, isTrue);
+
+          expect(ExerciseSet(carry, weight: 40.0).canBeCompleted, isFalse);
+          expect(ExerciseSet(carry, weight: 40.0).total, isNull);
+          expect(ExerciseSet(carry, weight: 60.0, distance: 0.05) > set, isTrue);
+        },
+      );
+
+      test(
+        'a weighted duration set keeps weight and duration, ranked by their product',
+        () {
+          final hold = MockExercise();
+          when(hold.category).thenReturn(Category.weightedDuration);
+
+          final set = ExerciseSet(hold, reps: 3, weight: 20.0, duration: 60, distance: 1.0);
+          expect(set.weight, equals(20.0));
+          expect(set.duration, equals(60));
+          expect(set.reps, isNull);
+          expect(set.distance, isNull);
+          expect(set.total, equals(1200.0));
+          expect(set.canBeCompleted, isTrue);
+
+          expect(ExerciseSet(hold, duration: 60).canBeCompleted, isFalse);
+          set.setMeasurements(duration: 90, reps: 5);
+          expect(set.duration, equals(90));
+          expect(set.reps, isNull);
+        },
+      );
+
+      test(
         'the factory drops measurements outside the category',
         () {
           final set = ExerciseSet(

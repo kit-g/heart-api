@@ -118,6 +118,14 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
           ..duration = duration;
       case .duration:
         set.duration = duration;
+      case .weightedDistance:
+        set
+          ..weight = weight
+          ..distance = distance;
+      case .weightedDuration:
+        set
+          ..weight = weight
+          ..duration = duration;
     }
     return set;
   }
@@ -155,6 +163,10 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
 
   bool get canBeCompleted;
 
+  /// The figure sets are ranked by, so what an exercise's record is: weight ×
+  /// reps for the loaded categories, weight × distance (kg·km) for
+  /// [Category.weightedDistance], weight × seconds for
+  /// [Category.weightedDuration]. Null when a measurement it needs is missing.
   double? get total;
 
   Category get category;
@@ -285,6 +297,10 @@ class _ExerciseSet implements ExerciseSet {
         return duration != null && distance != null;
       case .duration:
         return duration != null;
+      case .weightedDistance:
+        return weight != null && distance != null;
+      case .weightedDuration:
+        return weight != null && duration != null;
     }
   }
 
@@ -324,6 +340,14 @@ class _ExerciseSet implements ExerciseSet {
           ..duration = duration ?? this.duration;
       case .duration:
         this.duration = duration ?? this.duration;
+      case .weightedDistance:
+        this
+          ..weight = weight ?? this.weight
+          ..distance = distance ?? this.distance;
+      case .weightedDuration:
+        this
+          ..weight = weight ?? this.weight
+          ..duration = duration ?? this.duration;
     }
   }
 
@@ -360,6 +384,16 @@ class _ExerciseSet implements ExerciseSet {
         };
       case .duration:
         return duration?.toDouble();
+      case .weightedDistance:
+        return switch ((weight, distance)) {
+          (double w, double d) => w * d,
+          _ => null,
+        };
+      case .weightedDuration:
+        return switch ((weight, duration)) {
+          (double w, int d) => w * d,
+          _ => null,
+        };
     }
   }
 

@@ -65,5 +65,22 @@ void main() {
     test('fromString throws on invalid value', () {
       expect(() => ChartPreferenceType.fromString('invalid'), throwsArgumentError);
     });
+
+    test('every category has charts', () {
+      for (final category in Category.values) {
+        expect(ChartPreferenceType.chartsByExerciseCategory(category), isNotEmpty, reason: '$category');
+      }
+    });
+
+    test('weighted distance and duration chart the load and its distance or time', () {
+      expect(
+        ChartPreferenceType.chartsByExerciseCategory(.weightedDistance),
+        [ChartPreferenceType.topSetWeight, ChartPreferenceType.cardioDistance],
+      );
+      expect(
+        ChartPreferenceType.chartsByExerciseCategory(.weightedDuration),
+        [ChartPreferenceType.topSetWeight, ChartPreferenceType.totalTimeUnderTension],
+      );
+    });
   });
 }

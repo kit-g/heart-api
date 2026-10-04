@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.7.0
+
+Loaded carries and holds get their own categories (heart-api#85).
+
+- New: `Category.weightedDistance` (`Weighted Distance`: weight and distance,
+  e.g. farmer's carry, sled push) and `Category.weightedDuration`
+  (`Weighted Duration`: weight and duration, e.g. weighted plank).
+- `ExerciseSet` keeps `weight`+`distance` and `weight`+`duration` for them
+  respectively; `canBeCompleted` needs both. `total`, which `best` ranks by,
+  is weight × distance (kg·km) and weight × seconds.
+- `chartsByExerciseCategory`: `topSetWeight` + `cardioDistance` for weighted
+  distance, `topSetWeight` + `totalTimeUnderTension` for weighted duration.
+- Neither switches to or from another category (`canSwitchTo`).
+
 ## 2.6.0
 
 Workout pauses reach the wire (heart-api#95; app side heart-of-yours#134).
