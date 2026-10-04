@@ -14,7 +14,11 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
         'owned': owned,
       },
     );
-    return {'exercises': rows.first.toColumnMap()['exercises'] as List? ?? const []};
+    final row = rows.first.toColumnMap();
+    return {
+      'exercises': row['exercises'] as List? ?? const [],
+      'glossary': row['glossary'] as Map? ?? const {},
+    };
   }
 
   @override
