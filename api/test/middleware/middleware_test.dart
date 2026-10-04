@@ -152,17 +152,22 @@ void main() {
     });
   });
 
-  group('isPublicRoute (auth-bypass gate)', () {
-    // Named from the auth angle: returns false for exempt routes (don't
-    // authenticate), true for everything else.
-    test('public routes are exempt from auth', () {
-      expect(isPublicRoute(bareRequest(path: '/version')), isFalse);
-      expect(isPublicRoute(bareRequest(path: '/events')), isFalse);
+  group('isAppRoute (Firebase auth and version gate)', () {
+    test('public routes are exempt', () {
+      expect(isAppRoute(bareRequest(path: '/version')), isFalse);
+      expect(isAppRoute(bareRequest(path: '/events')), isFalse);
     });
 
-    test('everything else requires auth', () {
-      expect(isPublicRoute(bareRequest(path: '/workouts')), isTrue);
-      expect(isPublicRoute(bareRequest(path: '/goals')), isTrue);
+    test('the token-authenticated surface is exempt', () {
+      expect(isAppRoute(bareRequest(path: '/me')), isFalse);
+      expect(isAppRoute(bareRequest(path: '/me/workouts')), isFalse);
+    });
+
+    test('everything else is an app route', () {
+      expect(isAppRoute(bareRequest(path: '/workouts')), isTrue);
+      expect(isAppRoute(bareRequest(path: '/goals')), isTrue);
+      expect(isAppRoute(bareRequest(path: '/accounts/tokens')), isTrue);
+      expect(isAppRoute(bareRequest(path: '/meals')), isTrue);
     });
   });
 }

@@ -2,6 +2,7 @@ import 'package:heart/models/creates.dart';
 import 'package:heart/models/exercise_preferences.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/profile.dart';
+import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
@@ -14,6 +15,7 @@ final _goalsProperty = ContextProperty<IdempotentGoalService>('IdempotentGoalSer
 final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
 final _devicesProperty = ContextProperty<DeviceService>('DeviceService');
+final _apiTokensProperty = ContextProperty<ApiTokenService>('ApiTokenService');
 final _workoutsProperty = ContextProperty<ApiWorkoutService>('ApiWorkoutService');
 final _templatesProperty = ContextProperty<IdempotentTemplateService>('IdempotentTemplateService');
 final _templateFoldersProperty = ContextProperty<IdempotentTemplateFolderService>('IdempotentTemplateFolderService');
@@ -67,6 +69,15 @@ Middleware devicesDb({required DeviceService db}) {
   return (Handler next) {
     return (request) {
       _devicesProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
+Middleware apiTokensDb({required ApiTokenService db}) {
+  return (Handler next) {
+    return (request) {
+      _apiTokensProperty[request] = db;
       return next(request);
     };
   };
@@ -141,6 +152,10 @@ extension DatabaseContext on Request {
   DeviceService get deviceService => _devicesProperty.get(this);
 
   set deviceService(DeviceService v) => _devicesProperty[this] = v;
+
+  ApiTokenService get apiTokenService => _apiTokensProperty.get(this);
+
+  set apiTokenService(ApiTokenService v) => _apiTokensProperty[this] = v;
 
   CommentService get commentService => _commentsProperty.get(this);
 

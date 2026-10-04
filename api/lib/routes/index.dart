@@ -13,12 +13,16 @@ import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
 import 'package:heart/routes/template_folders.dart' as folders;
 import 'package:heart/routes/templates.dart' as templates;
+import 'package:heart/routes/tokens.dart' as tokens;
 import 'package:heart/routes/workouts.dart' as workouts;
 import 'package:relic/relic.dart';
 
 final routes = <(String, Method), ModelHandler>{
   ('/accounts', .put): account.upsertAccount,
   ('/accounts/summary', .get): account.getAccountSummary,
+  ('/accounts/tokens', .get): tokens.listApiTokens,
+  ('/accounts/tokens', .post): tokens.createApiToken,
+  ('/accounts/tokens/:tokenId', .delete): tokens.revokeApiToken,
   ('/feedback', .post): feedback.submitFeedback,
   ('/accounts/:targetUserId/workouts', .get): workouts.getTargetUserWorkouts,
   ('/accounts/:targetUserId/goals', .get): goals.getTargetUserGoals,
@@ -73,4 +77,15 @@ final routes = <(String, Method), ModelHandler>{
 
 const _publicRoutes = {'/version', '/events'};
 
-bool isPublicRoute(Request request) => !_publicRoutes.contains(request.url.path);
+/// The prefix of the token-authenticated surface for scripts and assistants.
+const tokenPrefix = '/me';
+
+/// Whether [request] is for one of the app's own routes: those authenticate
+/// with a Firebase ID token and carry the app version. Public routes need
+/// neither, and the `/me` surface authenticates with a personal access token
+/// and is called by things that have no app version to send.
+bool isAppRoute(Request request) {
+  final path = request.url.path;
+  if (_publicRoutes.contains(path)) return false;
+  return path != tokenPrefix && !path.startsWith('$tokenPrefix/');
+}

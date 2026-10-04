@@ -27,4 +27,5 @@ part 'pagination.dart';
 part 'parse.dart';
 part 'template_folders.dart';
 part 'templates.dart';
+part 'tokens.dart';
 part 'workouts.dart';
