@@ -70,8 +70,7 @@ without its anchor.
      below.
    - **References** — backend ticket, design doc (full GitHub URL to the file on `main`), the
      landing commit, the `heart_models` version that carries the wire models.
-   - Label `enhancement`. The frontend tracker has only GitHub default labels (as of 2026-08); if
-     handoff volume grows, create a dedicated `handoff` label there and record it here.
+   - Label `enhancement` and `agent-filed` (CLAUDE.md, *Tickets across the boundary*).
 
 5. **Report back to the backend ticket.** Comment with: what landed (commit, migration, endpoint),
    scope checklist (✅ / ⚠️ partial / ❌ with one line of why), validation story, remaining work,

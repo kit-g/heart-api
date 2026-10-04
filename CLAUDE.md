@@ -78,3 +78,16 @@ from git `main`.
 Refer to them as **`heart-api`** and **`heart-of-yours`**, and to issues as `heart-api#66` /
 `heart-of-yours#92` — no `kit-g/` prefix in prose, docs, comments, changelogs or tickets. The owner
 appears only where a tool needs the full slug (a `github.com` URL, `gh -R`, an OIDC `repo:` subject). 
+
+## Tickets across the boundary
+
+Each repo owns its own code. A ticket filed in the other repo is a **request**: it lists what
+needs to exist (data, fields, endpoints, behaviour, limits), to be met on a best-effort basis.
+It never says how — no file lists, schemas, migrations, method signatures, task checklists or
+UX. Hard constraints go in only when there is an objective reason (a breaking change, the
+device-only health rule, a published contract), and the reason goes with them.
+
+Reading a ticket from the other side, take its specifics as the filer's best guess, not a spec.
+Assess it as what this repo has to build to satisfy the need, briefly; don't review the ticket.
+
+Label every ticket an agent files `agent-filed`, in either repo.
