@@ -91,3 +91,7 @@ Reading a ticket from the other side, take its specifics as the filer's best gue
 Assess it as what this repo has to build to satisfy the need, briefly; don't review the ticket.
 
 Label every ticket an agent files `agent-filed`, in either repo.
+
+The roadmap is the GitHub Project "Heart roadmap" (`gh project … 1 --owner kit-g`). Issues in
+`heart-of-yours` join it automatically; issues filed in `heart-api` don't. Add them with
+`gh project item-add` and set Status, Line and Tier.
