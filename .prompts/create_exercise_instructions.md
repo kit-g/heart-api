@@ -9,7 +9,7 @@ Generate high-quality exercise instructions in Markdown for the exercise below. 
 
 INPUT (exercise metadata)
 - Exercise name: {EXERCISE_NAME}
-- Category: {CATEGORY}            (e.g., Dumbbell / Barbell / Machine / Duration / Reps Only / Weighted Body Weight)
+- Category: {CATEGORY}            (e.g., Dumbbell / Barbell / Machine / Duration / Reps Only / Weighted Body Weight / Weighted Distance / Weighted Duration)
 - Target: {TARGET}               (e.g., Core / Chest / Back / Legs / Shoulders / Arms / Full Body / Cardio / Olympic / Other)
 - Equipment available: {EQUIPMENT_OR_UNKNOWN}
 - Experience level: General audience (beginner-friendly language)
