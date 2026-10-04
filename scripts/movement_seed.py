@@ -54,6 +54,10 @@ GROUP_RULES = [
     # --- forearms before biceps: "Wrist Curl" must not match the curl rule ---
     (r'wrist',                                              None,      'forearm'),
 
+    # --- carries and sleds before legs: "Sled Push" must not match a press ---
+    (r'carry|farmer.s walk',                                None,      'loaded_carry'),
+    (r'^sled ',                                             None,      'sled_push_drag'),
+
     # --- legs ---
     (r'calf (raise|press)',                                 None,      'calf_raise'),
     (r'leg extension',                                      None,      'knee_extension'),
@@ -155,6 +159,8 @@ AXIAL_BY_GROUP = {
     'hip_extension_bridge':   'low',
     'plyometric_lower':       'low',
     'full_body_conditioning': 'low',
+    'loaded_carry':           'moderate',
+    'sled_push_drag':         'low',
     'front_raise':            'low',
     'lateral_raise':          'low',
     'knee_extension':         'none',
