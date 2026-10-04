@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.8.0
+
+Exercise search vocabulary (heart-api#102; app side heart-of-yours#135).
+
+- New: `Exercise.aliases`, the other names lifters search an exercise by in
+  the served locale (`ohp`, `skull crusher`); wire key `aliases`, empty for
+  user-created exercises, round-trips through `fromJson`/`toMap`.
+- New: `SearchGlossary` (with `SearchTerm`), a locale's search vocabulary:
+  abbreviations (`db` → dumbbell) and muscle words (`lats` → a muscle id
+  prefix or group), parsed from the `glossary` the library now publishes
+  beside `exercises`.
+- New: `Exercise.match(query, glossary:)` reports how a query matched, as a
+  `SearchMatch` tier ranked best first: `prefix`, `words`, `vocabulary`
+  (only through an alias or the glossary), `typo` (one edit, words of 4+
+  letters); null when it doesn't. Accent- and case-insensitive. `contains`
+  is unchanged.
+
 ## 2.7.0
 
 Loaded carries and holds get their own categories (heart-api#85; app side
