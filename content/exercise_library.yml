@@ -1253,6 +1253,73 @@ exercises:
         groups:
           - glutes
           - shoulders
+  plank-weighted:
+    category: Weighted Duration
+    target: Core
+    health:
+      activity: core_training
+    movement:
+      groups:
+        - core_bracing
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Plank (Weighted)"
+        validated: true
+        instructions: |
+          ## Overview
+          The weighted plank is a forearm plank with a weight plate resting on your back. The extra load makes the hold harder without making it longer, so you can keep building core strength once a bodyweight plank stops being a challenge.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Get into a forearm plank, elbows under your shoulders and legs straight back
+          - Have a partner place a weight plate flat across your upper back, between the shoulder blades
+          - If you're alone, use a light plate you can position safely yourself
+          - Form a straight line from head to heels
+          - Brace your core and squeeze your glutes
+
+          ### 2. Movement
+          1. Hold the position without letting your hips sag under the load
+          2. Keep the plate centered and still on your back
+          3. Keep pressing your forearms into the floor
+          4. Hold for the target time
+          5. Have the plate removed, or slide it off carefully to the side
+          6. Lower your knees to the floor to finish
+
+          ### 3. Breathing
+          - Breathe steadily and calmly throughout the hold
+          - Don't hold your breath; keep your brace while breathing
+
+          ### 4. Tips
+          - Place the plate on your upper back, not on your lower back
+          - Add weight in small steps rather than jumping in big increments
+          - Master a 60-second bodyweight plank before adding load
+          - Push the floor away so your shoulder blades don't collapse together
+
+          ### 5. Common Mistakes
+          - Letting the hips sag under the extra weight
+          - Piking the hips up to unload the core
+          - Positioning the plate on the lower back
+          - Holding past the point where your form breaks down
+
+          ### 6. Safety / Modifications
+          - Use a partner to load and unload the plate
+          - Stop if you feel strain in your lower back rather than effort in your abs
+          - Reduce the weight or the hold time before your form slips
+          - A weighted vest is a more stable alternative to a plate
+
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        groups:
+          - glutes
+          - shoulders
   reverse-crunch:
     category: Weighted Body Weight
     target: Core
@@ -17436,6 +17503,678 @@ exercises:
         groups:
           - core
           - glutes
+  farmers-walk:
+    category: Weighted Distance
+    target: Full Body
+    movement:
+      groups:
+        - loaded_carry
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
+    i18n:
+      en:
+        name: "Farmer's Walk"
+        validated: true
+        instructions: |
+          ## Overview
+          The farmer's walk is a loaded carry: you pick up a heavy weight in each hand and walk a set distance. It builds grip strength, upper back and trap strength, and the core stability to stay upright under load, and it carries over directly to everyday lifting and carrying.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Place a pair of farmer's handles, dumbbells, or kettlebells at your sides
+          - Stand between them with your feet hip-width apart
+          - Hinge at the hips and bend your knees to reach the handles with a flat back
+          - Grip each handle in the center so it balances, squeezing hard
+          - Drive through your legs to stand tall, shoulders back and down
+
+          ### 2. Movement
+          1. Brace your core and set your ribs down before the first step
+          2. Walk forward with short, quick, controlled steps
+          3. Keep your arms long and the weights still at your sides
+          4. Look straight ahead and keep your chest up throughout
+          5. Cover the target distance without letting the weights swing
+          6. Stop, then hinge and bend your knees to set the weights down under control
+
+          ### 3. Breathing
+          - Take a big breath and brace before you lift and before you start walking
+          - Breathe in short sips behind the brace rather than letting it go completely
+
+          ### 4. Tips
+          - Grip the handles as if you were trying to crush them
+          - Keep your shoulders packed rather than letting the weights drag them down or forward
+          - Short steps keep the weights stable; long strides make them swing
+          - Turning around mid-set is harder than walking straight; slow down and turn in small steps
+
+          ### 5. Common Mistakes
+          - Rounding the back when picking up or setting down the weights
+          - Leaning to one side or letting the shoulders roll forward
+          - Taking long, bouncing strides that make the weights swing
+          - Dropping the weights from standing instead of setting them down
+          - Choosing a load you can't hold for the whole distance
+
+          ### 6. Safety / Modifications
+          - Start with a moderate weight and a short distance, then add load or distance gradually
+          - Use a clear, flat path with room to set the weights down at any point
+          - Chalk or lifting straps help grip, but training without straps builds grip strength
+          - If your grip fails before your posture does, shorten the distance and add sets
+
+    muscles:
+      primary:
+        groups:
+          - arms
+          - back
+          - core
+      secondary:
+        groups:
+          - shoulders
+          - legs
+          - glutes
+  suitcase-carry:
+    category: Weighted Distance
+    target: Core
+    movement:
+      groups:
+        - loaded_carry
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: low
+      skill: low
+    i18n:
+      en:
+        name: "Suitcase Carry"
+        validated: true
+        instructions: |
+          ## Overview
+          The suitcase carry is a one-sided loaded carry: you walk while holding a single weight at your side, like carrying a suitcase. Because the load pulls you sideways, your obliques and the deep muscles of your trunk work hard to keep you upright, which makes it one of the best carries for core stability.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Place a dumbbell, kettlebell, or farmer's handle beside one foot
+          - Hinge at the hips and bend your knees to grip it with a flat back
+          - Stand up tall, holding the weight at your side with a long arm
+          - Keep your shoulders level and your free hand relaxed or out to the side
+          - Brace your core before you take a step
+
+          ### 2. Movement
+          1. Walk forward with steady, controlled steps
+          2. Keep your torso vertical; don't lean away from or toward the weight
+          3. Keep both shoulders and both hips level throughout
+          4. Hold the weight still at your side without letting it swing
+          5. Cover the target distance, then set the weight down under control
+          6. Switch hands and repeat for the same distance on the other side
+
+          ### 3. Breathing
+          - Breathe in and brace before you lift the weight and before you start walking
+          - Keep breathing steadily behind the brace; don't hold your breath for the whole walk
+
+          ### 4. Tips
+          - Think about pushing the opposite side of your waist down toward the floor
+          - A mirror or a partner can tell you if you're leaning
+          - Squeeze the handle hard; a strong grip helps the whole side stay tight
+          - Log each side as its own set if one side is noticeably weaker
+
+          ### 5. Common Mistakes
+          - Leaning away from the weight to counterbalance it
+          - Hiking the loaded shoulder up toward the ear
+          - Letting the weight drift forward or swing with each step
+          - Only training the stronger side
+          - Rounding the back when picking up or setting down the weight
+
+          ### 6. Safety / Modifications
+          - Start lighter than you would for a farmer's walk; the one-sided load is the challenge
+          - Shorten the distance before you let your posture break down
+          - A kettlebell is easier to hold than a dumbbell for beginners
+          - Stop if you feel pain in your lower back rather than muscular effort in your trunk
+
+    muscles:
+      primary:
+        groups:
+          - core
+          - arms
+      secondary:
+        groups:
+          - back
+          - shoulders
+          - glutes
+  overhead-carry:
+    category: Weighted Distance
+    target: Shoulders
+    movement:
+      groups:
+        - loaded_carry
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: low
+      skill: moderate
+    i18n:
+      en:
+        name: "Overhead Carry"
+        validated: true
+        instructions: |
+          ## Overview
+          The overhead carry is a loaded carry with the weight locked out above your head. It builds shoulder stability, overhead strength, and the core control to keep your ribs down while the arms are raised. It can be done with two weights, one weight, or a barbell.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Clean or press a pair of dumbbells or kettlebells to your shoulders
+          - Press them overhead until your arms are fully locked out
+          - Stack the weights over your shoulders, with your biceps close to your ears
+          - Set your ribs down and squeeze your glutes so your lower back doesn't arch
+          - Keep your feet hip-width apart and your gaze forward
+
+          ### 2. Movement
+          1. Walk forward with short, controlled steps
+          2. Keep your elbows locked and the weights directly over your shoulders
+          3. Keep your ribs down and avoid leaning back
+          4. Keep your wrists straight rather than bent back
+          5. Cover the target distance without letting the weights drift forward
+          6. Lower the weights to your shoulders, then to the floor, under control
+
+          ### 3. Breathing
+          - Brace before pressing overhead and before you start walking
+          - Breathe shallowly behind the brace to keep your trunk tight
+
+          ### 4. Tips
+          - Reach up actively, as if pushing the weights toward the ceiling
+          - A single-arm version adds an anti-lean challenge for the core
+          - A barbell overhead is less stable side to side; start light
+          - If your lockout softens, end the set rather than walking with bent elbows
+
+          ### 5. Common Mistakes
+          - Arching the lower back to get the weights overhead
+          - Letting the weights drift forward in front of the head
+          - Walking with bent elbows
+          - Shrugging so far that the neck tenses
+          - Using more weight than you can strictly press overhead
+
+          ### 6. Safety / Modifications
+          - You need full, pain-free overhead mobility before you load this movement
+          - Start with light weights and short distances
+          - A front-rack carry is a good alternative if overhead positions are uncomfortable
+          - If a weight starts to fall, step away from it and let it drop rather than trying to save it
+
+    muscles:
+      primary:
+        groups:
+          - shoulders
+          - core
+      secondary:
+        groups:
+          - arms
+          - back
+  yoke-carry:
+    category: Weighted Distance
+    target: Full Body
+    movement:
+      groups:
+        - loaded_carry
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: low
+      skill: high
+    i18n:
+      en:
+        name: "Yoke Carry"
+        validated: true
+        instructions: |
+          ## Overview
+          The yoke carry is a strongman event where you carry a loaded frame across your upper back. It loads the whole body: the legs move the weight, while the back and core hold the spine rigid under heavy compression. It allows heavier loads than any hand-held carry.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set the yoke crossbar at about mid-chest height
+          - Step under it and position the bar across your upper back, as for a back squat
+          - Grip the bar or the uprights with your hands
+          - Set your feet under the bar, brace hard, and stand up to lift the yoke off the floor
+          - Stand tall with the frame level and balanced
+
+          ### 2. Movement
+          1. Take short, quick steps, keeping your feet under your hips
+          2. Keep the yoke level; if it starts to swing, shorten your steps
+          3. Stay upright with your chest up and your core braced
+          4. Keep your eyes forward on the finish line
+          5. Cover the target distance
+          6. Squat down slightly to set the yoke's feet back on the floor under control
+
+          ### 3. Breathing
+          - Take a maximal breath and brace before the pick
+          - Take quick breaths behind the brace on longer runs, never letting the brace go completely
+
+          ### 4. Tips
+          - Grip the uprights rather than the crossbar for more control over the swing
+          - Fast, short steps beat long strides; momentum helps
+          - Practice the pick and the set-down with light loads before adding distance
+          - Train on a flat, non-slip surface
+
+          ### 5. Common Mistakes
+          - Taking long strides that set the yoke swinging
+          - Letting the chest drop and the back round under load
+          - Losing the brace mid-carry
+          - Adding weight before the pick and set-down are consistent
+          - Carrying on an uneven or slippery surface
+
+          ### 6. Safety / Modifications
+          - This is an advanced exercise; build a solid back squat and farmer's walk first
+          - Start with the empty yoke and short distances
+          - If you lose balance, step out from under the frame and let it go
+          - A safety-bar or barbell carry from a rack is a lighter way to learn the position
+
+    muscles:
+      primary:
+        groups:
+          - legs
+          - back
+          - core
+      secondary:
+        groups:
+          - glutes
+          - shoulders
+  sandbag-carry:
+    category: Weighted Distance
+    target: Full Body
+    movement:
+      groups:
+        - loaded_carry
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
+    i18n:
+      en:
+        name: "Sandbag Carry"
+        validated: true
+        instructions: |
+          ## Overview
+          The sandbag carry is a loaded carry with an awkward, shifting load hugged against the chest or held on one shoulder. The bag has no handles and keeps moving, so your upper back, arms, and core work hard to hold it, and the strength you build carries over well to lifting real objects.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with the sandbag lengthwise between your feet
+          - Squat down and wrap your arms under and around the bag
+          - Lift it to your lap, then stand up and hug it high against your chest
+          - Lock your hands or grip your forearms around the bag
+          - Stand tall with your shoulders back and core braced
+
+          ### 2. Movement
+          1. Walk forward with short, steady steps
+          2. Keep the bag high and tight to your body
+          3. Stay upright rather than leaning back to rest the bag on your belly
+          4. Re-grip only if needed, without stopping
+          5. Cover the target distance
+          6. Lower the bag by squatting down, not by bending over with a rounded back
+
+          ### 3. Breathing
+          - Brace before the lift and before you start walking
+          - Take short breaths behind the brace; the bag against your chest makes deep breaths hard
+
+          ### 4. Tips
+          - A bag that isn't packed full shifts more and is harder to carry
+          - A shoulder carry is a good variation; switch shoulders between sets
+          - Squeeze your elbows toward each other to keep the bag tight
+          - Pick a load you can lift to your chest with good form
+
+          ### 5. Common Mistakes
+          - Leaning back and letting the bag rest on the hips
+          - Letting the bag slide down the body
+          - Rounding the back to pick up or drop the bag
+          - Taking long strides that throw off your balance
+
+          ### 6. Safety / Modifications
+          - Start with a light bag to learn the lift to the chest
+          - A bear-hug carry is easier than carrying the bag on one shoulder
+          - Train on a clear, flat path
+          - If the bag starts to slip, set it down and pick it up again rather than fighting it
+
+    muscles:
+      primary:
+        groups:
+          - back
+          - core
+          - arms
+      secondary:
+        groups:
+          - legs
+          - glutes
+          - shoulders
+  sled-push:
+    category: Weighted Distance
+    target: Legs
+    movement:
+      groups:
+        - sled_push_drag
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
+    i18n:
+      en:
+        name: "Sled Push"
+        validated: true
+        instructions: |
+          ## Overview
+          The sled push drives a weighted sled across the floor with your legs. It builds leg strength, power, and conditioning without an eccentric (lowering) phase, so it is easy on the joints and causes little muscle soreness for the work done.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Load the sled and stand behind it, facing the uprights
+          - Grip the handles with your arms either straight (high handles) or bent (low handles)
+          - Lean into the sled so your body forms a straight line from head to back heel
+          - Brace your core and keep your back flat
+          - Set one foot forward, ready to drive
+
+          ### 2. Movement
+          1. Drive the ball of your front foot into the floor to start the sled moving
+          2. Take short, powerful steps, pushing through each one
+          3. Keep your hips low and your torso at a steady angle
+          4. Keep your arms rigid so the force from your legs reaches the sled
+          5. Push for the target distance
+          6. Stop with control and reset before the next run
+
+          ### 3. Breathing
+          - Brace before the first step
+          - Breathe rhythmically with your steps for longer pushes
+
+          ### 4. Tips
+          - Drive from the balls of your feet, not your toes
+          - Heavier loads with shorter pushes build strength; lighter loads with longer pushes build conditioning
+          - Low handles demand more from the legs; high handles let you stay more upright
+          - The floor surface changes the friction a lot, so compare loads only on the same surface
+
+          ### 5. Common Mistakes
+          - Rounding the back or letting the hips sag
+          - Standing too upright, which pushes the sled into the floor rather than forward
+          - Taking long, slow strides
+          - Bending the arms so the push leaks out through the elbows
+          - Loading so heavy that the sled only moves in jerks
+
+          ### 6. Safety / Modifications
+          - Start light to learn the body angle and stride
+          - Make sure the path is clear and long enough for the full distance
+          - Wear shoes with good grip
+          - A lighter, faster push is a good alternative for conditioning days
+
+    muscles:
+      primary:
+        groups:
+          - legs
+          - glutes
+      secondary:
+        groups:
+          - core
+          - shoulders
+          - arms
+  sled-drag:
+    category: Weighted Distance
+    target: Legs
+    movement:
+      groups:
+        - sled_push_drag
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
+    i18n:
+      en:
+        name: "Sled Drag"
+        validated: true
+        instructions: |
+          ## Overview
+          The sled drag pulls a weighted sled with a strap, rope, or harness. Walking backward works the quadriceps hard; walking forward with a harness works the glutes and hamstrings. Like the sled push, it has no lowering phase, so it builds strength and conditioning while staying easy on the knees.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Attach straps or a rope to the sled, or put on a harness
+          - For a backward drag, face the sled holding the straps with straight arms
+          - Step back until the straps are tight
+          - Sit your hips back slightly, chest up and core braced
+          - Keep your arms long throughout; they hold the strap, the legs do the work
+
+          ### 2. Movement
+          1. Step backward, pushing the floor away through the front of your foot
+          2. Keep your knees bent and your hips low to keep tension on the quadriceps
+          3. Take short, steady steps, keeping the straps tight
+          4. Keep your chest up and your back flat
+          5. Drag the sled for the target distance
+          6. Stop with control, release the tension, and reset
+
+          ### 3. Breathing
+          - Brace before the first step
+          - Breathe rhythmically with your steps
+
+          ### 4. Tips
+          - Backward drags are a joint-friendly way to train the quadriceps
+          - Forward drags in a harness train the glutes, hamstrings, and conditioning
+          - Check over your shoulder or use a clear, marked path when walking backward
+          - Stay low; standing up tall shifts the work away from the legs
+
+          ### 5. Common Mistakes
+          - Pulling with the arms instead of driving with the legs
+          - Rounding the back or leaning too far back
+          - Letting the straps go slack between steps
+          - Walking backward without checking the path behind you
+
+          ### 6. Safety / Modifications
+          - Start light to get used to walking backward under load
+          - Use a flat, clear surface with good grip
+          - A harness frees your hands and makes forward drags easier to learn
+          - If you have knee pain, try forward drags or reduce the load before stopping entirely
+
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - glutes
+          - back
+          - arms
+          - core
+  farmers-hold:
+    category: Weighted Duration
+    target: Arms
+    movement:
+      groups:
+        - forearm
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Farmer's Hold"
+        validated: true
+        instructions: |
+          ## Overview
+          The farmer's hold is a stationary grip exercise: you pick up heavy handles, dumbbells, or a barbell and hold them for time. It builds grip strength and endurance for deadlifts, rows, carries, and pull-ups, and it is the static counterpart to the farmer's walk.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Place a pair of heavy dumbbells, farmer's handles, or a loaded barbell in front of you
+          - Hinge at the hips and bend your knees to grip the weights with a flat back
+          - Grip each handle in the center so it balances
+          - Stand up tall with the weights at your sides
+          - Set your shoulders back and down and brace your core
+
+          ### 2. Movement
+          1. Hold the weights still with your arms long
+          2. Squeeze the handles as hard as you can for the whole hold
+          3. Keep your shoulders packed and your chest up
+          4. Stand tall without leaning or shifting your weight
+          5. Hold for the target time
+          6. Set the weights down under control, hinging and bending your knees
+
+          ### 3. Breathing
+          - Breathe steadily throughout the hold
+          - Brace before you lift and before you set the weights down
+
+          ### 4. Tips
+          - Thicker handles or a towel wrapped around the handle make the grip harder
+          - A double-overhand grip on a barbell trains the grip more than a mixed grip
+          - Chalk helps when your hands sweat
+          - Holds of 20 to 60 seconds suit most grip training
+
+          ### 5. Common Mistakes
+          - Letting the weights drag the shoulders down or roll them forward
+          - Bending the elbows instead of keeping the arms long
+          - Dropping the weights at the end instead of setting them down
+          - Using straps, which takes the work away from the grip
+
+          ### 6. Safety / Modifications
+          - Pick up and set down the weights with a flat back every time
+          - Start with a load you can hold for 30 seconds and build from there
+          - Hold from a rack or blocks to shorten the lift from the floor
+          - Stop if you feel sharp pain in your wrists, elbows, or fingers
+
+    muscles:
+      primary:
+        groups:
+          - arms
+      secondary:
+        groups:
+          - back
+          - core
+          - shoulders
+  dead-hang-weighted:
+    category: Weighted Duration
+    target: Arms
+    movement:
+      groups:
+        - forearm
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Dead Hang (Weighted)"
+        validated: true
+        instructions: |
+          ## Overview
+          The weighted dead hang is a hang from a pull-up bar with extra weight attached by a dipping belt, vest, or a dumbbell held between the feet. It builds grip strength and endurance, and the loaded hang also strengthens the shoulders in an overhead position.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Put on a dipping belt with the weight attached, or a weighted vest
+          - Stand on a box or bench under a pull-up bar
+          - Grip the bar overhand, hands about shoulder-width apart
+          - Step off the box and let your body hang with your arms straight
+          - Keep your legs together and your body still
+
+          ### 2. Movement
+          1. Hang with your arms fully straight
+          2. Keep your shoulders lightly engaged rather than completely loose
+          3. Keep your body still without swinging
+          4. Squeeze the bar for the whole hold
+          5. Hold for the target time
+          6. Step back onto the box before letting go of the bar
+
+          ### 3. Breathing
+          - Breathe slowly and steadily throughout the hang
+          - Don't hold your breath; relax everything except your grip
+
+          ### 4. Tips
+          - Build up to a 60-second bodyweight hang before adding weight
+          - A thicker bar or towels draped over the bar make the grip harder
+          - Chalk helps keep your hands from slipping
+          - Add weight in small steps
+
+          ### 5. Common Mistakes
+          - Letting go of the bar and dropping with the weight attached
+          - Swinging or kicking to get on or off the bar
+          - Shrugging the shoulders all the way up to the ears
+          - Adding weight before a bodyweight hang feels solid
+
+          ### 6. Safety / Modifications
+          - Always step down onto a box; dropping with extra weight is hard on the joints
+          - Stop if you feel pain in your shoulders rather than fatigue in your grip
+          - A dumbbell held between the feet is a simple way to start
+          - A bodyweight hang is the easier progression
+
+    muscles:
+      primary:
+        groups:
+          - arms
+      secondary:
+        groups:
+          - back
+          - shoulders
+          - core
+  wall-sit-weighted:
+    category: Weighted Duration
+    target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Wall Sit (Weighted)"
+        validated: true
+        instructions: |
+          ## Overview
+          The weighted wall sit is an isometric squat held with your back against a wall and a weight plate resting on your thighs. It builds quadriceps strength and endurance with no movement and no load on the spine from above.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with your back flat against a wall
+          - Walk your feet out about two feet from the wall, hip-width apart
+          - Slide down the wall until your thighs are parallel to the floor
+          - Check that your knees are over your ankles, not past your toes
+          - Have a partner place a weight plate flat on your thighs, or place it yourself once you're in position
+
+          ### 2. Movement
+          1. Hold the position with your back and head against the wall
+          2. Keep your weight in your heels and mid-foot
+          3. Keep your knees in line with your toes, not caving inward
+          4. Keep the plate steady on your thighs
+          5. Hold for the target time
+          6. Remove the plate, then slide up the wall to stand
+
+          ### 3. Breathing
+          - Breathe steadily throughout the hold
+          - Keep breathing even as your legs start to burn
+
+          ### 4. Tips
+          - Place the plate close to your hips; further toward the knees makes it harder
+          - A higher position (above parallel) is easier and a good starting point
+          - Push your back gently into the wall to keep your trunk still
+          - Add weight in small steps
+
+          ### 5. Common Mistakes
+          - Letting the knees cave inward
+          - Sliding up the wall as you tire
+          - Resting your hands on the plate or your thighs to take weight off
+          - Setting the feet too close to the wall, which pushes the knees past the toes
+
+          ### 6. Safety / Modifications
+          - Stop if you feel sharp pain in your knees rather than effort in your thighs
+          - Start with a bodyweight wall sit before adding a plate
+          - Hold a higher position if knee bend at parallel is uncomfortable
+          - Have a partner remove the plate if it's too heavy to lift off yourself
+
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - glutes
+          - core
   aerobics:
     category: Duration
     target: Cardio
