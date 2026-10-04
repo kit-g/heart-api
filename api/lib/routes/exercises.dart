@@ -8,9 +8,11 @@ import 'package:heart/models/exercises.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-Future<ExerciseResponse> getExercises(Request request) async {
+/// [owned] overrides the `?owned=` query, for a surface that only ever lists
+/// the caller's own exercises.
+Future<ExerciseResponse> getExercises(Request request, {bool? owned}) async {
   final locale = request.locale(request.config.supportedLocales, request.config.defaultLocale);
-  final owned = request.queryParameters.raw['owned'] == 'true';
+  owned ??= request.queryParameters.raw['owned'] == 'true';
   final response = await request.exerciseService.getExercises(
     request.userId,
     locale: locale,
