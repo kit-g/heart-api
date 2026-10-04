@@ -426,6 +426,26 @@ void main() {
       await expectLater(h.db.deleteAccount(userId: h.uid('ghost')), completes);
     });
   });
+
+  group('getProfile', () {
+    test('reads the stored profile, settings included', () async {
+      final id = await h.seedProfile();
+      await h.exec(
+        """UPDATE profiles SET username = 'Sam', settings = '{"unitSystem": "imperial"}'::jsonb WHERE id = @id""",
+        {'id': id},
+      );
+
+      final user = await h.db.getProfile(id);
+
+      expect(user?.id, id);
+      expect(user?.displayName, 'Sam');
+      expect(user?.settings.unitSystem, MeasurementUnit.imperial);
+    });
+
+    test('is null for an account with no profile', () async {
+      expect(await h.db.getProfile('no-such-${h.token}'), isNull);
+    });
+  });
 }
 
 class _Harness extends DatabaseTestBase;
