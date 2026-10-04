@@ -69,6 +69,12 @@ enum ChartPreferenceType {
       case .duration:
         return const [.totalTimeUnderTension];
 
+      case .weightedDistance:
+        return const [.topSetWeight, .cardioDistance];
+
+      case .weightedDuration:
+        return const [.topSetWeight, .totalTimeUnderTension];
+
       case .machine:
       case .dumbbell:
       case .barbell:

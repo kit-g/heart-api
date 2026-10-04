@@ -11,6 +11,13 @@ enum Category implements ExerciseFilter {
   repsOnly('Reps Only'),
   cardio('Cardio'),
   duration('Duration'),
+
+  /// A load moved over a distance: farmer's carry, sled push.
+  weightedDistance('Weighted Distance'),
+
+  /// A load held for a time: weighted plank, static hold.
+  weightedDuration('Weighted Duration'),
+
   machine('Machine'),
   dumbbell('Dumbbell'),
   barbell('Barbell');
@@ -27,6 +34,8 @@ enum Category implements ExerciseFilter {
       'Reps Only' => repsOnly,
       'Cardio' => cardio,
       'Duration' => duration,
+      'Weighted Distance' => weightedDistance,
+      'Weighted Duration' => weightedDuration,
       'Machine' => machine,
       'Dumbbell' => dumbbell,
       'Barbell' => barbell,
