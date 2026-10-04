@@ -13,6 +13,7 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/events.dart';
 import 'package:heart/middleware/logging.dart';
 import 'package:heart/middleware/s3.dart';
+import 'package:heart/middleware/tokens.dart';
 import 'package:heart/middleware/version.dart';
 import 'package:heart/models/apple.dart';
 import 'package:heart/routes/index.dart';
@@ -41,7 +42,7 @@ RelicApp buildApp({
   firebase.Authenticator? auth,
 }) {
   bool shouldCheckVersion(Request request) {
-    if (config.shouldCheckVersion) return isPublicRoute(request);
+    if (config.shouldCheckVersion) return isAppRoute(request);
     return false;
   }
 
@@ -61,7 +62,7 @@ RelicApp buildApp({
     ..use('/', version(minimal: config.minimalAppVersion, shouldCheckVersion: shouldCheckVersion))
     ..use('/', configuration(override: config))
     ..use('/', authenticator(implementation: auth))
-    ..use('/', authentication(shouldAuthenticate: isPublicRoute))
+    ..use('/', authentication(shouldAuthenticate: isAppRoute))
     ..use('/', awsConfig(config: aws))
     ..use('/accounts', profilesDb(db: database))
     ..use('/accounts', appleIdentity(service: apple))
@@ -71,6 +72,9 @@ RelicApp buildApp({
     ..use('/accounts', templatesDb(db: database))
     ..use('/accounts', templateFoldersDb(db: database))
     ..use('/accounts', imageStorageDb(db: storage))
+    ..use('/accounts', apiTokensDb(db: database))
+    ..use(tokenPrefix, apiTokensDb(db: database))
+    ..use(tokenPrefix, tokenAuthentication())
     ..use('/charts', chartsDb(db: database))
     ..use('/exercise-preferences', exercisePreferencesDb(db: database))
     ..use('/connections', connectionsDb(db: database))
