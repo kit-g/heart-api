@@ -146,6 +146,14 @@ plank:
   unilateral: false
   impact: none
   skill: low
+plank-weighted:
+  groups:
+    - core_bracing
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
 reverse-crunch:
   groups:
     - trunk_flexion
@@ -2038,6 +2046,86 @@ thruster-kettlebell:
   unilateral: false
   impact: none
   skill: moderate
+farmers-walk:
+  groups:
+    - loaded_carry
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+suitcase-carry:
+  groups:
+    - loaded_carry
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: low
+  skill: low
+overhead-carry:
+  groups:
+    - loaded_carry
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: low
+  skill: moderate
+yoke-carry:
+  groups:
+    - loaded_carry
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: low
+  skill: high
+sandbag-carry:
+  groups:
+    - loaded_carry
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+sled-push:
+  groups:
+    - sled_push_drag
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+sled-drag:
+  groups:
+    - sled_push_drag
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+farmers-hold:
+  groups:
+    - forearm
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+dead-hang-weighted:
+  groups:
+    - forearm
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+wall-sit-weighted:
+  groups:
+    - squat_bilateral
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
 aerobics:
   groups:
     - cardio_steady
