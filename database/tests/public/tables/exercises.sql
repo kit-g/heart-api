@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(38);
+SELECT plan(39);
 
 SELECT has_table('public'::name, 'exercises'::name);
 
@@ -22,7 +22,8 @@ SELECT columns_are(
                    'user_id',
                    'created_at',
                    'validated',
-                   'key'
+                   'key',
+                   'aliases'
                    ]
        );
 
@@ -41,6 +42,7 @@ SELECT col_type_is('public'::name, 'exercises'::name, 'user_id'::name, 'text'::n
 SELECT col_type_is('public'::name, 'exercises'::name, 'created_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'validated'::name, 'boolean'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'key'::name, 'text'::name);
+SELECT col_type_is('public'::name, 'exercises'::name, 'aliases'::name, 'text[]'::name);
 
 SELECT has_pk('public'::name, 'exercises'::name, 'exercises has a primary key');
 SELECT col_is_pk('public'::name, 'exercises'::name, 'id'::name, 'id is the primary key');
