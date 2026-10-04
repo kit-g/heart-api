@@ -765,8 +765,8 @@ String _category(String name, ({bool weight, bool distance, bool seconds}) shape
   if (n.contains('(barbell)')) return 'Barbell';
   if (n.contains('(dumbbell)') || n.contains('(kettlebell)')) return 'Dumbbell';
   if (n.contains('(machine)') || n.contains('(cable)') || n.contains('(smith machine)')) return 'Machine';
-  if (shape.distance) return 'Cardio';
-  if (shape.seconds && !shape.weight) return 'Duration';
+  if (shape.distance) return shape.weight ? 'Weighted Distance' : 'Cardio';
+  if (shape.seconds) return shape.weight ? 'Weighted Duration' : 'Duration';
   if (shape.weight) return 'Weighted Body Weight';
   return 'Reps Only';
 }
