@@ -6,6 +6,25 @@
 # source_digest fingerprints the en copy each translation was made from —
 # when en changes, `validate_library.py --coverage` reports the entry stale.
 locale: es
+glossary:
+  dorsales:
+    muscles: ["latissimus_dorsi"]
+  cuádriceps:
+    muscles: ["rectus_femoris", "vastus"]
+  isquios:
+    muscles: ["hamstrings"]
+  femorales:
+    muscles: ["hamstrings"]
+  gemelos:
+    muscles: ["gastrocnemius"]
+  trapecios:
+    muscles: ["trapezius"]
+  deltoides:
+    muscles: ["anterior_deltoid", "lateral_deltoid", "posterior_deltoid", "shoulders"]
+  pectorales:
+    muscles: ["pectoralis_major", "chest"]
+  oblicuos:
+    muscles: ["external_oblique"]
 exercises:
   ab-wheel:
     name: Rueda abdominal
@@ -1590,6 +1609,7 @@ exercises:
     source_digest: 393c27caa822
   bench-press-close-grip-barbell:
     name: Press de banca con agarre cerrado (barra)
+    aliases: ["press cerrado"]
     instructions: |
       ## Resumen
       El press de banca con agarre cerrado es un ejercicio con barra que trabaja principalmente los tríceps. También involucra el pecho y la parte frontal de los hombros como músculos secundarios, lo que lo convierte en un movimiento compuesto eficaz para desarrollar fuerza de empuje del tren superior con mayor énfasis en los tríceps.
@@ -2631,6 +2651,7 @@ exercises:
     source_digest: 04d523597748
   skullcrusher-barbell:
     name: Press francés (barra)
+    aliases: ["rompecráneos", "skull crusher", "extensión de tríceps tumbado"]
     instructions: |
       ## Resumen
       El press francés con barra es un ejercicio de aislamiento que trabaja principalmente los tríceps, en particular la cabeza larga. También involucra las cabezas medial y lateral del tríceps, usando una posición tumbada para maximizar el estiramiento y la contracción durante todo el movimiento.
@@ -2679,6 +2700,7 @@ exercises:
     source_digest: 078c569165ec
   skullcrusher-dumbbell:
     name: Press francés (mancuernas)
+    aliases: ["rompecráneos", "skull crusher", "extensión de tríceps tumbado"]
     instructions: |
       ## Resumen
       El press francés con mancuernas es un ejercicio de aislamiento que trabaja principalmente los tríceps con movimiento independiente de cada brazo. También involucra las tres cabezas del tríceps, usando una posición tumbada con mancuernas que permite trayectorias naturales de los brazos y corrige desequilibrios de fuerza.
@@ -3639,6 +3661,7 @@ exercises:
     source_digest: 4efae5242e5c
   deadlift-barbell:
     name: Peso muerto (barra)
+    aliases: ["peso muerto convencional"]
     instructions: |
       ## Resumen
       El peso muerto con barra es un ejercicio compuesto que trabaja principalmente los erectores espinales, los glúteos y los isquiotibiales. También involucra los cuádriceps, los dorsales, los trapecios y los músculos del agarre, lo que lo convierte en uno de los ejercicios de fuerza más eficaces para todo el cuerpo y para desarrollar la potencia de la cadena posterior.
@@ -4581,6 +4604,7 @@ exercises:
     source_digest: 8b84fe7d6bd4
   romanian-deadlift-barbell:
     name: Peso muerto rumano (barra)
+    aliases: ["rdl"]
     instructions: |
       ## Resumen
       El peso muerto rumano es un ejercicio de bisagra de cadera que trabaja principalmente los isquiotibiales, los glúteos y los erectores espinales. También involucra los dorsales y los trapecios como estabilizadores, y usa un descenso controlado para enfatizar la fase excéntrica y fortalecer la cadena posterior.
@@ -4629,6 +4653,7 @@ exercises:
     source_digest: 1dfa08ff9218
   seated-row-cable:
     name: Remo en polea baja
+    aliases: ["remo gironda", "remo sentado"]
     instructions: |
       ## Resumen
       El remo en polea baja es un ejercicio de tracción horizontal que trabaja principalmente el dorsal ancho, los romboides y el trapecio medio. También involucra los bíceps y los deltoides posteriores, y usa una polea que ofrece tensión constante durante todo el remo para un desarrollo efectivo de la espalda.
@@ -5397,6 +5422,7 @@ exercises:
     source_digest: 2e8530ce0042
   cable-crossover:
     name: Cruce de poleas
+    aliases: ["aperturas en polea"]
     instructions: |
       ## Resumen
       El cruce de poleas es un ejercicio de aislamiento que trabaja principalmente el pectoral mayor, en particular la parte interna del pecho. También involucra los deltoides frontales como estabilizadores, y utiliza poleas para ofrecer tensión constante a lo largo de un arco de movimiento amplio.
@@ -6309,6 +6335,7 @@ exercises:
     source_digest: f1b123a5e6cc
   pec-deck-machine:
     name: Pec deck (máquina)
+    aliases: ["contractora", "mariposa"]
     instructions: |
       ## Resumen
       El pec deck es un ejercicio de aislamiento que trabaja principalmente el pectoral mayor. También involucra mínimamente los deltoides frontales, y utiliza una trayectoria de movimiento fija con brazos acolchados para aportar estabilidad y resistencia constante durante todo el movimiento de apertura.
@@ -6453,6 +6480,7 @@ exercises:
     source_digest: c534df9f8f47
   push-up:
     name: Flexiones
+    aliases: ["lagartijas"]
     instructions: |
       ## Resumen
       Las flexiones son un ejercicio de empuje con el peso corporal que trabaja principalmente el pectoral mayor. También involucra los deltoides frontales, los tríceps y el core, lo que lo convierte en uno de los ejercicios más eficaces y versátiles del tren superior para desarrollar fuerza y resistencia.
@@ -6694,6 +6722,7 @@ exercises:
     source_digest: 7fe468447300
   bulgarian-split-squat:
     name: Sentadilla búlgara
+    aliases: ["bss", "zancada búlgara"]
     instructions: |
       ## Resumen
       La sentadilla búlgara es un ejercicio unilateral del tren inferior que trabaja principalmente los cuádriceps, los glúteos y los isquiotibiales. También involucra el core y los estabilizadores de la cadera, y utiliza el pie trasero elevado para aumentar el rango de movimiento y desafiar el equilibrio mientras desarrolla la fuerza a una pierna.
@@ -7846,6 +7875,7 @@ exercises:
     source_digest: fe85179f0fdf
   leg-extension-machine:
     name: Extensión de piernas (máquina)
+    aliases: ["extensión de cuádriceps", "sillón de cuádriceps"]
     instructions: |
       ## Resumen
       La extensión de piernas en máquina es un ejercicio de aislamiento que trabaja principalmente los cuádriceps. Utiliza una trayectoria de movimiento guiada con resistencia ajustable para aislar y fortalecer los cuatro músculos de la parte frontal del muslo.
@@ -8130,6 +8160,7 @@ exercises:
     source_digest: 0e7a89e03c53
   lying-leg-curl-machine:
     name: Curl femoral tumbado (máquina)
+    aliases: ["curl de isquios"]
     instructions: |
       ## Resumen
       El curl femoral tumbado es un ejercicio de aislamiento que trabaja principalmente los isquiotibiales. También activa las pantorrillas, usando una máquina guiada para aislar y fortalecer los músculos de la parte posterior del muslo mediante la flexión de rodilla.
@@ -8272,6 +8303,7 @@ exercises:
     source_digest: 3a4c0289a485
   romanian-deadlift-dumbbell:
     name: Peso muerto rumano (mancuernas)
+    aliases: ["rdl"]
     instructions: |
       ## Resumen
       El peso muerto rumano con mancuernas es un ejercicio de bisagra de cadera que trabaja principalmente los isquiotibiales, los glúteos y los erectores espinales. También activa los dorsales y los trapecios como estabilizadores, usando mancuernas para un movimiento independiente de los brazos y una posición de manos más natural, con énfasis en la fase excéntrica.
@@ -8415,6 +8447,7 @@ exercises:
     source_digest: aebaa8ed5136
   seated-leg-curl-machine:
     name: Curl femoral sentado (máquina)
+    aliases: ["curl de isquios"]
     instructions: |
       ## Resumen
       El curl femoral sentado es un ejercicio de aislamiento que trabaja principalmente los isquiotibiales. También activa las pantorrillas, usando una posición sentada en una máquina guiada para aislar y fortalecer los músculos de la parte posterior del muslo mediante la flexión de rodilla.
@@ -8606,6 +8639,7 @@ exercises:
     source_digest: 715439e6fa3f
   squat-barbell:
     name: Sentadilla (barra)
+    aliases: ["sentadilla trasera"]
     instructions: |
       ## Resumen
       La sentadilla con barra es un ejercicio compuesto de tren inferior que trabaja principalmente los cuádriceps, los glúteos y los isquiotibiales. También activa el core, la zona lumbar y la parte alta de la espalda, lo que la convierte en uno de los ejercicios de fuerza más eficaces para desarrollar la potencia general del tren inferior.
@@ -10117,6 +10151,7 @@ exercises:
     source_digest: 6aa264843394
   lateral-raise-dumbbell:
     name: Elevaciones laterales (mancuernas)
+    aliases: ["vuelos laterales"]
     instructions: |
       ## Resumen
       Las elevaciones laterales con mancuernas son un ejercicio de aislamiento que trabaja principalmente los deltoides medios. También involucran el trapecio superior, usando mancuernas para un movimiento independiente de cada brazo con el que desarrollar amplitud de hombros y crear la apariencia de unos hombros más anchos.
@@ -10213,6 +10248,7 @@ exercises:
     source_digest: 4585a7dcd977
   overhead-press-barbell:
     name: Press militar (barra)
+    aliases: ["ohp", "press de hombros"]
     instructions: |
       ## Resumen
       El press militar con barra es un ejercicio compuesto del tren superior que trabaja principalmente las tres cabezas de los deltoides. También involucra los tríceps, la parte superior del pecho y el core, lo que lo convierte en uno de los ejercicios más efectivos para desarrollar la fuerza general de los hombros y la potencia de empuje del tren superior.
@@ -10310,6 +10346,7 @@ exercises:
     source_digest: 43a182c99dfc
   overhead-press-dumbbell:
     name: Press militar (mancuernas)
+    aliases: ["ohp", "press de hombros"]
     instructions: |
       ## Resumen
       El press militar con mancuernas es un ejercicio compuesto del tren superior que trabaja principalmente las tres cabezas de los deltoides. También involucra los tríceps y la parte superior del pecho, usando mancuernas para un movimiento independiente de cada brazo y un rango de movimiento mayor que las variantes con barra.
@@ -10502,6 +10539,7 @@ exercises:
     source_digest: 2cf6d97f86ff
   reverse-fly-dumbbell:
     name: Aperturas invertidas (mancuernas)
+    aliases: ["pájaros"]
     instructions: |
       ## Resumen
       Las aperturas invertidas con mancuernas son un ejercicio de aislamiento que trabaja principalmente los deltoides posteriores y la parte alta de la espalda. También involucran los romboides y el trapecio medio, usando mancuernas en una posición inclinada para fortalecer la parte posterior del hombro, mejorar la postura y equilibrar el desarrollo de los hombros.
@@ -11120,6 +11158,7 @@ exercises:
     source_digest: eb79fe4e2953
   clean-and-jerk-barbell:
     name: Cargada y envión (barra)
+    aliases: ["dos tiempos"]
     instructions: |
       ## Resumen
       La cargada y envión es un movimiento completo de halterofilia que trabaja todo el cuerpo. Combina la cargada (del suelo a los hombros) con el envión (de los hombros a por encima de la cabeza), involucrando las piernas, las caderas, la espalda, los hombros y el core en uno de los ejercicios de cuerpo completo más exigentes.
@@ -11363,6 +11402,7 @@ exercises:
     source_digest: 76899947c63f
   overhead-squat-barbell:
     name: Sentadilla con barra sobre la cabeza
+    aliases: ["ohs"]
     instructions: |
       ## Resumen
       La sentadilla con barra sobre la cabeza es un ejercicio accesorio de halterofilia que trabaja los cuádriceps, los glúteos y todo el core. También requiere una movilidad y estabilidad de hombros considerables, desarrollando fuerza de cuerpo completo, equilibrio y la posición de recepción que se usa en los arranques.
@@ -12180,6 +12220,7 @@ exercises:
     source_digest: e79446181d4f
   farmers-walk:
     name: Paseo del granjero
+    aliases: ["caminata del granjero"]
     instructions: |
       ## Resumen
       El paseo del granjero es un acarreo con carga: levantas un peso pesado en cada mano y caminas una distancia determinada. Desarrolla la fuerza de agarre, la fuerza de la parte alta de la espalda y los trapecios, y la estabilidad del core necesaria para mantenerte erguido bajo carga, y se transfiere directamente a levantar y cargar objetos en el día a día.
@@ -12754,6 +12795,7 @@ exercises:
     source_digest: 607d48819cb2
   cycling-indoor:
     name: Bicicleta estática
+    aliases: ["spinning"]
     instructions: |
       ## Resumen
       La bicicleta estática es un ejercicio cardiovascular realizado en una bicicleta fija que trabaja los cuádriceps, los isquiotibiales y los glúteos. Ofrece un acondicionamiento aeróbico controlado y de bajo impacto mientras desarrolla fuerza y resistencia en las piernas en un entorno climatizado.
@@ -12831,6 +12873,7 @@ exercises:
     source_digest: 2906e4e21389
   jump-rope:
     name: Saltar la cuerda
+    aliases: ["comba"]
     instructions: |
       ## Resumen
       Saltar la cuerda es un ejercicio cardiovascular de alta intensidad que trabaja los gemelos, los hombros y el sistema cardiovascular. Desarrolla la coordinación, la agilidad y la resistencia, y ofrece un entrenamiento eficiente de cuerpo completo con un equipamiento mínimo.
@@ -12880,6 +12923,7 @@ exercises:
     source_digest: cba52d158006
   rowing-machine:
     name: Máquina de remo
+    aliases: ["remoergómetro"]
     instructions: |
       ## Resumen
       La máquina de remo es un ejercicio cardiovascular de cuerpo completo que trabaja las piernas, la espalda, el core y los brazos. Proporciona acondicionamiento aeróbico de bajo impacto mientras desarrolla fuerza y resistencia mediante un movimiento de remo que involucra aproximadamente el 85% de los músculos del cuerpo.
