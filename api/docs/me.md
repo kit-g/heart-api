@@ -1,0 +1,61 @@
+# Heart's developer API: reading your own training
+
+Your training log, readable by your own scripts, spreadsheets and AI assistants. It's free and
+read-only. **It has no health data in it, because Heart never has any:** heart rate, sleep, body
+weight and the rest stay on your phone, in Apple Health or Health Connect. Workout `calories` is an
+estimate from the exercises and the weight you entered, never a watch reading.
+
+```sh
+curl https://api.heart-of.me/v1/me/workouts?limit=5 \
+  -H "Authorization: Bearer hrt_…" \
+  -H "User-Agent: my-sheet-sync/1.0"
+```
+
+## Tokens
+
+Create a token in the app under Settings. You need a signed-in account; anonymous use has nothing on
+the server to read. You see a token's secret once, when you create it. Heart stores only a digest
+of it. You can hold five active tokens, each living a year or until you revoke it.
+
+Send it as a bearer token. A missing, unknown, revoked or expired token gets the same answer:
+
+```json
+401 {"error": "unauthorized", "code": "invalid_token", "reason": "…"}
+```
+
+**Please set a User-Agent that names your tool.** It isn't required, but it helps us see what
+people build.
+
+## Limits
+
+20 requests a minute and 200 a day per account, shared by all of its tokens. Past either one:
+
+```json
+429 {"error": "too many requests", "code": "rate_limited", "reason": "…", "retryAfter": 41}
+```
+
+with a `Retry-After` header in seconds. Free limits never go down.
+
+## Routes
+
+All `GET`, all about the account the token belongs to. Paginated lists carry a `cursor` while
+there's more: pass it back as `?cursor=` for the next page. No `cursor` means the last page.
+`limit` is 1–100 (default 30). Workouts come newest first.
+
+| Route                     | Returns                                                                                          |
+|---------------------------|--------------------------------------------------------------------------------------------------|
+| `/me`                     | `id`, `username`, `unitSystem` (`metric`/`imperial`, when set), and `counts` of workouts, templates, folders, goals and custom exercises |
+| `/me/workouts`            | `{workouts, cursor}`: each workout with its exercises, sets, notes and image URLs       |
+| `/me/workouts/:workoutId` | one workout                                                                                      |
+| `/me/exercises`           | `{exercises}`: your custom exercises (a `glossary` key rides along; ignore it). Library exercises come embedded in workouts and templates  |
+| `/me/templates`           | `{templates, cursor}`, in your order; `?folder=<id>`, or `?folder=none` for unfiled ones                        |
+| `/me/template-folders`    | `{folders}`                                                                                      |
+| `/me/goals`               | `{goals}`; `?archived=true` for archived ones. Goals backed by health data carry their definition only; their progress lives on your phone |
+
+Weights are in kilograms and distances in kilometres, whatever your display unit. Times are
+ISO 8601 in UTC.
+
+## Compatibility
+
+Fields and routes may be added; none will be renamed or removed under `/me`. Ignore fields you don't
+know.
