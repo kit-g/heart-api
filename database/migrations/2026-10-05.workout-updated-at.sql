@@ -8,16 +8,14 @@
 -- single event per trigger, hence three triggers per table sharing one
 -- function.
 
-ALTER TABLE workouts
-    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+ALTER TABLE IF EXISTS workouts
+    DROP COLUMN IF EXISTS updated_at,
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
 
+-- Rows that predate the column changed last when they were created, as far
+-- as anything can tell.
 UPDATE workouts
-SET updated_at = created_at
-WHERE updated_at IS NULL;
-
-ALTER TABLE workouts
-    ALTER COLUMN updated_at SET DEFAULT now(),
-    ALTER COLUMN updated_at SET NOT NULL;
+SET updated_at = created_at;
 
 COMMENT ON COLUMN workouts.updated_at IS
     'When the workout or anything in it (exercises, sets, images) last changed; created_at for rows that predate the column';
