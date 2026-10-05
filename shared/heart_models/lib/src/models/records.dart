@@ -27,9 +27,11 @@ import 'exercise.dart';
 /// Always: `sessions` (distinct workouts) and `firstAt` (ISO). Ties keep the
 /// earlier set — a record credits the first time it was hit.
 ///
-/// Each headline record also carries `previous`: the same record with its own
-/// session left out — what it beat ("was 95 kg"). Absent when no other session has a value to beat, which is how a
-/// first-ever record reads. `repMaxes` entries do not carry one.
+/// Each headline record also carries `previous`: the same record over the
+/// sessions before its own — what it beat ("was 95 kg"). Later sessions never
+/// count: a record can't have beaten a set that came after it. Absent when no
+/// earlier session has a value to beat, which is how a first-ever record
+/// reads. `repMaxes` entries do not carry one.
 Map<String, Object>? foldRecords(Category category, List<RecordSet> sets) {
   if (sets.isEmpty) return null;
 
@@ -43,7 +45,9 @@ Map<String, Object>? foldRecords(Category category, List<RecordSet> sets) {
     if (value case {'workoutId': final String holder}) {
       final others = without.putIfAbsent(
         holder,
-        () => _fold(category, sets.where((set) => set.workoutId != holder).toList()),
+        // sets arrive oldest first, a session's sets together: everything
+        // before the holder's first set is everything it could have beaten
+        () => _fold(category, sets.takeWhile((set) => set.workoutId != holder).toList()),
       );
       if (others?[key] case final Map previous) records[key] = {...value, 'previous': previous};
     }
@@ -114,8 +118,10 @@ Map<String, Object>? _fold(Category category, List<RecordSet> sets) {
               'at': repMaxes[reps]!.at,
             },
         ];
-        records['totalVolume'] = totalVolume;
       }
+      // any set with weight and reps has volume, rep max or not (a block of
+      // twelves sets none, since rep maxes stop at ten)
+      if (bestVolume != null) records['totalVolume'] = totalVolume;
 
     case .assistedBodyWeight:
       RecordSet? mostReps;

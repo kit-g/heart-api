@@ -16,6 +16,8 @@ BEGIN
     RETURN NEXT has_trigger('public'::name, 'workouts'::name, 'workouts_stamp'::name);
     RETURN NEXT has_trigger('public'::name, 'exercise_sets'::name, 'exercise_sets_stamp_update'::name);
     RETURN NEXT has_trigger('public'::name, 'workout_images'::name, 'workout_images_stamp_insert'::name);
+    RETURN NEXT has_function('public'::name, '_stamp_workouts_by_exercise'::name);
+    RETURN NEXT has_trigger('public'::name, 'exercises'::name, 'exercises_stamp_update'::name);
 END
 $$ LANGUAGE plpgsql;
 
@@ -68,6 +70,48 @@ BEGIN
 
     DELETE FROM workouts WHERE id = _w_id;
     RETURN NEXT is((SELECT count(*) FROM workouts WHERE id = _w_id), 0::bigint, 'deleting the workout still cascades cleanly');
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__stamp_workouts_follows_own_exercise_edits() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id TEXT;
+    _own     UUID;
+    _catalog UUID;
+    _with_own     UUID;
+    _with_catalog UUID;
+BEGIN
+    _user_id := create_test_profile();
+    RETURN NEXT is((SELECT count(*) FROM workouts WHERE user_id = _user_id), 0::bigint, 'no workouts yet');
+
+    _own := create_test_exercise(_user_id => _user_id);
+    _catalog := create_test_exercise();
+    _with_own := create_test_workout(_user_id => _user_id);
+    _with_catalog := create_test_workout(_user_id => _user_id);
+    PERFORM create_test_workout_exercise(_workout_id => _with_own, _exercise_id => _own);
+    PERFORM create_test_workout_exercise(_workout_id => _with_catalog, _exercise_id => _catalog);
+
+    UPDATE workouts SET updated_at = '2020-01-01T00:00:00Z' WHERE user_id = _user_id;
+    UPDATE exercises SET name = name || ' (renamed)' WHERE id = _own;
+    RETURN NEXT is((SELECT updated_at FROM workouts WHERE id = _with_own), now(), 'renaming my exercise stamps the workouts using it');
+
+    UPDATE exercises SET name = name || ' (renamed)' WHERE id = _catalog;
+    RETURN NEXT is(
+        (SELECT updated_at FROM workouts WHERE id = _with_catalog),
+        '2020-01-01T00:00:00Z'::timestamptz,
+        'a catalog edit leaves workouts alone'
+    );
+
+    UPDATE workouts SET updated_at = '2019-01-01T00:00:00Z' WHERE id = _with_own;
+    UPDATE exercises SET instructions = 'new' WHERE id = _own;
+    RETURN NEXT is(
+        (SELECT updated_at FROM workouts WHERE id = _with_own),
+        '2019-01-01T00:00:00Z'::timestamptz,
+        'a field workouts do not embed changes nothing'
+    );
+
+    DELETE FROM workouts WHERE user_id = _user_id;
 END
 $$ LANGUAGE plpgsql;
 

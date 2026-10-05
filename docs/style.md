@@ -113,6 +113,12 @@ exercise is its `id`, `key` is the content handle, `name` is display copy.
 after fetching `limit + 1`; the cursor is the last item's `id` and the
 keyset `ORDER BY` is on that same column. Never a bare `cursor` field.
 
+The one exception is a **change feed** (`GET /me/workouts/changes`): it's
+ordered by when things changed, so its cursor is an opaque
+`(changed_at, id)` (`ChangeCursor`), it's returned even on an empty page so
+a poller can keep it, and `hasMore` is explicit. Anything else that pages is
+`Paginated<T>`.
+
 ## SQL
 
 **One round trip.** Anything touching more than one table is a single

@@ -50,24 +50,38 @@ EXECUTE FUNCTION _stamp_workout();
 COMMENT ON TRIGGER workouts_stamp ON workouts IS
     'Any edit to a workout row stamps its updated_at';
 
+-- The child stamps skip workouts already stamped by this transaction: an
+-- import writes a workout, then its exercises, then its sets, and without the
+-- guard each step would rewrite every workout row again.
+--
+-- A transition table can only be read in the event that defines it, hence
+-- one branch per event.
+
 -- workout_exercises and workout_images carry workout_id directly.
 CREATE OR REPLACE FUNCTION _stamp_workouts_by_workout_id() RETURNS trigger
     LANGUAGE plpgsql
 AS
 $$
 BEGIN
-    IF TG_OP IN ('INSERT', 'UPDATE') THEN
-        UPDATE workouts SET updated_at = now() WHERE id IN (SELECT workout_id FROM new_rows);
-    END IF;
-    IF TG_OP IN ('UPDATE', 'DELETE') THEN
-        UPDATE workouts SET updated_at = now() WHERE id IN (SELECT workout_id FROM old_rows);
+    IF TG_OP = 'INSERT' THEN
+        UPDATE workouts SET updated_at = now()
+        WHERE id IN (SELECT workout_id FROM new_rows)
+          AND updated_at IS DISTINCT FROM now();
+    ELSIF TG_OP = 'UPDATE' THEN
+        UPDATE workouts SET updated_at = now()
+        WHERE id IN (SELECT workout_id FROM new_rows UNION SELECT workout_id FROM old_rows)
+          AND updated_at IS DISTINCT FROM now();
+    ELSE
+        UPDATE workouts SET updated_at = now()
+        WHERE id IN (SELECT workout_id FROM old_rows)
+          AND updated_at IS DISTINCT FROM now();
     END IF;
     RETURN NULL;
 END
 $$;
 
 COMMENT ON FUNCTION _stamp_workouts_by_workout_id() IS
-    'Statement-level AFTER trigger on tables with a workout_id: bumps workouts.updated_at of every workout the statement touched';
+    'Statement-level AFTER trigger on tables with a workout_id: stamps updated_at on every workout the statement touched, once per transaction';
 
 -- exercise_sets reach their workout through workout_exercises.
 CREATE OR REPLACE FUNCTION _stamp_workouts_by_set() RETURNS trigger
@@ -75,26 +89,65 @@ CREATE OR REPLACE FUNCTION _stamp_workouts_by_set() RETURNS trigger
 AS
 $$
 BEGIN
-    IF TG_OP IN ('INSERT', 'UPDATE') THEN
-        UPDATE workouts
-        SET updated_at = now()
-        WHERE id IN (SELECT we.workout_id
-                     FROM workout_exercises we
-                     WHERE we.id IN (SELECT workout_exercise_id FROM new_rows));
-    END IF;
-    IF TG_OP IN ('UPDATE', 'DELETE') THEN
-        UPDATE workouts
-        SET updated_at = now()
-        WHERE id IN (SELECT we.workout_id
-                     FROM workout_exercises we
-                     WHERE we.id IN (SELECT workout_exercise_id FROM old_rows));
+    IF TG_OP = 'INSERT' THEN
+        UPDATE workouts SET updated_at = now()
+        WHERE id IN (SELECT we.workout_id FROM workout_exercises we
+                     WHERE we.id IN (SELECT workout_exercise_id FROM new_rows))
+          AND updated_at IS DISTINCT FROM now();
+    ELSIF TG_OP = 'UPDATE' THEN
+        UPDATE workouts SET updated_at = now()
+        WHERE id IN (SELECT we.workout_id FROM workout_exercises we
+                     WHERE we.id IN (SELECT workout_exercise_id FROM new_rows
+                                     UNION
+                                     SELECT workout_exercise_id FROM old_rows))
+          AND updated_at IS DISTINCT FROM now();
+    ELSE
+        UPDATE workouts SET updated_at = now()
+        WHERE id IN (SELECT we.workout_id FROM workout_exercises we
+                     WHERE we.id IN (SELECT workout_exercise_id FROM old_rows))
+          AND updated_at IS DISTINCT FROM now();
     END IF;
     RETURN NULL;
 END
 $$;
 
 COMMENT ON FUNCTION _stamp_workouts_by_set() IS
-    'Statement-level AFTER trigger on exercise_sets: bumps workouts.updated_at of every workout whose sets the statement touched';
+    'Statement-level AFTER trigger on exercise_sets: stamps updated_at on every workout whose sets the statement touched, once per transaction';
+
+-- A workout embeds its exercises' name, category and target, so editing one
+-- changes every workout that uses it. Only the user's own exercises: a
+-- catalog edit would rewrite every account's history at once, and catalog
+-- content reaches clients through the library, not through workouts.
+CREATE OR REPLACE FUNCTION _stamp_workouts_by_exercise() RETURNS trigger
+    LANGUAGE plpgsql
+AS
+$$
+BEGIN
+    UPDATE workouts SET updated_at = now()
+    WHERE id IN (SELECT we.workout_id
+                 FROM workout_exercises we
+                 JOIN new_rows n ON n.id = we.exercise_id
+                 JOIN old_rows o ON o.id = n.id
+                 WHERE n.user_id IS NOT NULL
+                   AND (n.name, n.category, n.target) IS DISTINCT FROM (o.name, o.category, o.target))
+      AND updated_at IS DISTINCT FROM now();
+    RETURN NULL;
+END
+$$;
+
+COMMENT ON FUNCTION _stamp_workouts_by_exercise() IS
+    'Statement-level AFTER UPDATE on exercises: stamps updated_at on the workouts using a user''s own exercise whose name, category or target changed';
+
+DROP TRIGGER IF EXISTS exercises_stamp_update ON exercises;
+CREATE TRIGGER exercises_stamp_update
+    AFTER UPDATE
+    ON exercises
+    REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows
+    FOR EACH STATEMENT
+EXECUTE FUNCTION _stamp_workouts_by_exercise();
+
+COMMENT ON TRIGGER exercises_stamp_update ON exercises IS
+    'Stamps updated_at on the workouts whose embedded copy of a user''s own exercise a statement changed';
 
 DROP TRIGGER IF EXISTS workout_exercises_stamp_insert ON workout_exercises;
 CREATE TRIGGER workout_exercises_stamp_insert
@@ -195,9 +248,49 @@ EXECUTE FUNCTION _stamp_workouts_by_set();
 COMMENT ON TRIGGER exercise_sets_stamp_delete ON exercise_sets IS
     'Stamps updated_at on the workouts whose sets a statement removed';
 
--- The deletion half of the feed reads the archive by user, in order.
-CREATE INDEX IF NOT EXISTS deleted_workouts_user_deleted_id_idx
-    ON archive.deleted_workouts (user_id, deleted_at, id);
+-- A workout deleted, created again under the same id (a replayed create),
+-- then deleted again must archive again instead of failing on the archive's
+-- key: the newer snapshot replaces the older one.
+CREATE OR REPLACE FUNCTION _archive_workout() RETURNS TRIGGER AS
+$$
+BEGIN
+    INSERT INTO archive.deleted_workouts (
+        id,
+        user_id,
+        name,
+        started_at,
+        completed_at,
+        created_at,
+        calories,
+        note,
+        pauses,
+        exercises
+    ) VALUES (
+        OLD.id,
+        OLD.user_id,
+        OLD.name,
+        OLD.started_at,
+        OLD.completed_at,
+        OLD.created_at,
+        OLD.calories,
+        OLD.note,
+        OLD.pauses,
+        _workout_exercises(OLD.id)
+    )
+    ON CONFLICT (id) DO UPDATE
+        SET user_id      = excluded.user_id,
+            name         = excluded.name,
+            started_at   = excluded.started_at,
+            completed_at = excluded.completed_at,
+            created_at   = excluded.created_at,
+            calories     = excluded.calories,
+            note         = excluded.note,
+            pauses       = excluded.pauses,
+            exercises    = excluded.exercises,
+            deleted_at   = now();
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
 
-COMMENT ON INDEX archive.deleted_workouts_user_deleted_id_idx IS
-    'One account''s deletions in the order they happened, ties broken by id';
+COMMENT ON FUNCTION _archive_workout() IS
+    'BEFORE DELETE on workouts: snapshots the workout into archive.deleted_workouts; a re-deleted id replaces its older snapshot';

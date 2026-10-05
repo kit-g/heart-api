@@ -27,7 +27,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required String userId,
     ChangeCursor? since,
     int limit = 100,
-    Duration settle = const Duration(seconds: 30),
+    Duration settle = const Duration(seconds: 5),
     required String Function(String) imageUrl,
   }) async {
     final rows = await _pool.execute(
