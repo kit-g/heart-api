@@ -15,6 +15,7 @@ export 'src/models/goal.dart';
 export 'src/models/media.dart';
 export 'src/models/misc.dart';
 export 'src/models/pagination.dart';
+export 'src/models/records.dart';
 export 'src/models/search.dart' hide searchNormalized, withinOneEdit;
 export 'src/models/settings.dart';
 export 'src/models/shares.dart';
