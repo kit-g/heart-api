@@ -149,3 +149,14 @@ void _validate({
   // ladder (deload, then rebuild) or a zig-zagging date-ordered plan are real goals,
   // not client bugs. The only per-target rule is target > 0, enforced when parsing.
 }
+
+/// `GET …/goals?archived=` — active goals unless `archived=true`.
+class GoalsQuery {
+  final bool archived;
+
+  const new _({required this.archived});
+
+  static GoalsQuery fromRequest(Request req) {
+    return GoalsQuery._(archived: req.url.queryParameters.boolean('archived'));
+  }
+}

@@ -11,7 +11,7 @@ import '../models/errors.dart';
 Future<GoalsResponse> getTargetUserGoals(Request req) => getTargetUserGoalsById(
   req,
   req.rawPathParameters[#targetUserId]!,
-  archived: req.queryParameters.raw['archived'] == 'true',
+  archived: GoalsQuery.fromRequest(req).archived,
 );
 
 Future<GoalsResponse> getTargetUserGoalsById(
