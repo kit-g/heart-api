@@ -72,7 +72,7 @@ Future<TemplateFoldersResponse> getMyFolders(Request req) => folders.getMyFolder
 Future<GoalsResponse> getMyGoals(Request req) => goals.getTargetUserGoalsById(
   req,
   req.userId,
-  archived: req.queryParameters.raw['archived'] == 'true',
+  archived: GoalsQuery.fromRequest(req).archived,
 );
 
 /// Larger than this, an export goes out through a presigned link instead of
