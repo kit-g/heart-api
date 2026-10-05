@@ -22,7 +22,7 @@ COMMENT ON COLUMN workouts.updated_at IS
 
 CREATE INDEX IF NOT EXISTS workouts_user_updated_idx ON workouts (user_id, updated_at, id);
 
-CREATE OR REPLACE FUNCTION _touch_workout() RETURNS trigger
+CREATE OR REPLACE FUNCTION _stamp_workout() RETURNS trigger
     LANGUAGE plpgsql
 AS
 $$
@@ -34,18 +34,18 @@ BEGIN
 END
 $$;
 
-COMMENT ON FUNCTION _touch_workout() IS
+COMMENT ON FUNCTION _stamp_workout() IS
     'BEFORE UPDATE on workouts: any change to the row is a change to the workout, unless the statement sets updated_at itself (the child triggers, a backfill)';
 
-DROP TRIGGER IF EXISTS workouts_touch ON workouts;
-CREATE TRIGGER workouts_touch
+DROP TRIGGER IF EXISTS workouts_stamp ON workouts;
+CREATE TRIGGER workouts_stamp
     BEFORE UPDATE
     ON workouts
     FOR EACH ROW
-EXECUTE FUNCTION _touch_workout();
+EXECUTE FUNCTION _stamp_workout();
 
 -- workout_exercises and workout_images carry workout_id directly.
-CREATE OR REPLACE FUNCTION _touch_workouts_of_children() RETURNS trigger
+CREATE OR REPLACE FUNCTION _stamp_workouts_by_workout_id() RETURNS trigger
     LANGUAGE plpgsql
 AS
 $$
@@ -60,11 +60,11 @@ BEGIN
 END
 $$;
 
-COMMENT ON FUNCTION _touch_workouts_of_children() IS
+COMMENT ON FUNCTION _stamp_workouts_by_workout_id() IS
     'Statement-level AFTER trigger on tables with a workout_id: bumps workouts.updated_at of every workout the statement touched';
 
 -- exercise_sets reach their workout through workout_exercises.
-CREATE OR REPLACE FUNCTION _touch_workouts_of_sets() RETURNS trigger
+CREATE OR REPLACE FUNCTION _stamp_workouts_by_set() RETURNS trigger
     LANGUAGE plpgsql
 AS
 $$
@@ -87,80 +87,80 @@ BEGIN
 END
 $$;
 
-COMMENT ON FUNCTION _touch_workouts_of_sets() IS
+COMMENT ON FUNCTION _stamp_workouts_by_set() IS
     'Statement-level AFTER trigger on exercise_sets: bumps workouts.updated_at of every workout whose sets the statement touched';
 
-DROP TRIGGER IF EXISTS workout_exercises_touch_insert ON workout_exercises;
-CREATE TRIGGER workout_exercises_touch_insert
+DROP TRIGGER IF EXISTS workout_exercises_stamp_insert ON workout_exercises;
+CREATE TRIGGER workout_exercises_stamp_insert
     AFTER INSERT
     ON workout_exercises
     REFERENCING NEW TABLE AS new_rows
     FOR EACH STATEMENT
-EXECUTE FUNCTION _touch_workouts_of_children();
+EXECUTE FUNCTION _stamp_workouts_by_workout_id();
 
-DROP TRIGGER IF EXISTS workout_exercises_touch_update ON workout_exercises;
-CREATE TRIGGER workout_exercises_touch_update
+DROP TRIGGER IF EXISTS workout_exercises_stamp_update ON workout_exercises;
+CREATE TRIGGER workout_exercises_stamp_update
     AFTER UPDATE
     ON workout_exercises
     REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows
     FOR EACH STATEMENT
-EXECUTE FUNCTION _touch_workouts_of_children();
+EXECUTE FUNCTION _stamp_workouts_by_workout_id();
 
-DROP TRIGGER IF EXISTS workout_exercises_touch_delete ON workout_exercises;
-CREATE TRIGGER workout_exercises_touch_delete
+DROP TRIGGER IF EXISTS workout_exercises_stamp_delete ON workout_exercises;
+CREATE TRIGGER workout_exercises_stamp_delete
     AFTER DELETE
     ON workout_exercises
     REFERENCING OLD TABLE AS old_rows
     FOR EACH STATEMENT
-EXECUTE FUNCTION _touch_workouts_of_children();
+EXECUTE FUNCTION _stamp_workouts_by_workout_id();
 
-DROP TRIGGER IF EXISTS workout_images_touch_insert ON workout_images;
-CREATE TRIGGER workout_images_touch_insert
+DROP TRIGGER IF EXISTS workout_images_stamp_insert ON workout_images;
+CREATE TRIGGER workout_images_stamp_insert
     AFTER INSERT
     ON workout_images
     REFERENCING NEW TABLE AS new_rows
     FOR EACH STATEMENT
-EXECUTE FUNCTION _touch_workouts_of_children();
+EXECUTE FUNCTION _stamp_workouts_by_workout_id();
 
-DROP TRIGGER IF EXISTS workout_images_touch_update ON workout_images;
-CREATE TRIGGER workout_images_touch_update
+DROP TRIGGER IF EXISTS workout_images_stamp_update ON workout_images;
+CREATE TRIGGER workout_images_stamp_update
     AFTER UPDATE
     ON workout_images
     REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows
     FOR EACH STATEMENT
-EXECUTE FUNCTION _touch_workouts_of_children();
+EXECUTE FUNCTION _stamp_workouts_by_workout_id();
 
-DROP TRIGGER IF EXISTS workout_images_touch_delete ON workout_images;
-CREATE TRIGGER workout_images_touch_delete
+DROP TRIGGER IF EXISTS workout_images_stamp_delete ON workout_images;
+CREATE TRIGGER workout_images_stamp_delete
     AFTER DELETE
     ON workout_images
     REFERENCING OLD TABLE AS old_rows
     FOR EACH STATEMENT
-EXECUTE FUNCTION _touch_workouts_of_children();
+EXECUTE FUNCTION _stamp_workouts_by_workout_id();
 
-DROP TRIGGER IF EXISTS exercise_sets_touch_insert ON exercise_sets;
-CREATE TRIGGER exercise_sets_touch_insert
+DROP TRIGGER IF EXISTS exercise_sets_stamp_insert ON exercise_sets;
+CREATE TRIGGER exercise_sets_stamp_insert
     AFTER INSERT
     ON exercise_sets
     REFERENCING NEW TABLE AS new_rows
     FOR EACH STATEMENT
-EXECUTE FUNCTION _touch_workouts_of_sets();
+EXECUTE FUNCTION _stamp_workouts_by_set();
 
-DROP TRIGGER IF EXISTS exercise_sets_touch_update ON exercise_sets;
-CREATE TRIGGER exercise_sets_touch_update
+DROP TRIGGER IF EXISTS exercise_sets_stamp_update ON exercise_sets;
+CREATE TRIGGER exercise_sets_stamp_update
     AFTER UPDATE
     ON exercise_sets
     REFERENCING OLD TABLE AS old_rows NEW TABLE AS new_rows
     FOR EACH STATEMENT
-EXECUTE FUNCTION _touch_workouts_of_sets();
+EXECUTE FUNCTION _stamp_workouts_by_set();
 
-DROP TRIGGER IF EXISTS exercise_sets_touch_delete ON exercise_sets;
-CREATE TRIGGER exercise_sets_touch_delete
+DROP TRIGGER IF EXISTS exercise_sets_stamp_delete ON exercise_sets;
+CREATE TRIGGER exercise_sets_stamp_delete
     AFTER DELETE
     ON exercise_sets
     REFERENCING OLD TABLE AS old_rows
     FOR EACH STATEMENT
-EXECUTE FUNCTION _touch_workouts_of_sets();
+EXECUTE FUNCTION _stamp_workouts_by_set();
 
 -- The deletion half of the feed reads the archive by user, in order.
 CREATE INDEX IF NOT EXISTS deleted_workouts_user_deleted_id_idx
