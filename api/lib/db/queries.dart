@@ -2392,7 +2392,8 @@ RETURNING id
 ''';
 
 // Authenticates a token and counts the request in one round trip: the lookup
-// bumps `last_used_at`, and the upsert advances both rate-limit windows, each
+// bumps `last_used_at`, and the upsert advances both rate-limit windows by
+// `@count` (0 for requests that don't count, such as an MCP handshake), each
 // restarting once it has run out. Unknown, revoked and expired tokens return
 // nothing and count nothing.
 const _useApiToken = '''
@@ -2405,16 +2406,16 @@ WITH _token AS (
   RETURNING user_id, scopes, purpose
 ), _usage AS (
   INSERT INTO api_usage (user_id, minute_start, minute_count, day_start, day_count)
-  SELECT user_id, now(), 1, now(), 1 FROM _token
+  SELECT user_id, now(), @count::int, now(), @count::int FROM _token
   ON CONFLICT (user_id) DO UPDATE
   SET minute_start = CASE WHEN api_usage.minute_start > now() - interval '1 minute'
                           THEN api_usage.minute_start ELSE now() END,
       minute_count = CASE WHEN api_usage.minute_start > now() - interval '1 minute'
-                          THEN api_usage.minute_count + 1 ELSE 1 END,
+                          THEN api_usage.minute_count + @count::int ELSE @count::int END,
       day_start    = CASE WHEN api_usage.day_start > now() - interval '1 day'
                           THEN api_usage.day_start ELSE now() END,
       day_count    = CASE WHEN api_usage.day_start > now() - interval '1 day'
-                          THEN api_usage.day_count + 1 ELSE 1 END
+                          THEN api_usage.day_count + @count::int ELSE @count::int END
   RETURNING user_id, minute_start, minute_count, day_start, day_count
 )
 SELECT user_id, scopes, purpose, minute_start, minute_count, day_start, day_count
