@@ -112,6 +112,25 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION test__archive_workout_redelete_replaces_snapshot() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id TEXT;
+    _w_id    UUID;
+BEGIN
+    _user_id := create_test_profile();
+    _w_id := create_test_workout(_user_id => _user_id, _name => 'first life');
+    RETURN NEXT is((SELECT count(*) FROM archive.deleted_workouts WHERE id = _w_id), 0::bigint, 'not archived yet');
+
+    DELETE FROM workouts WHERE id = _w_id;
+    INSERT INTO workouts (id, user_id, name, started_at) VALUES (_w_id, _user_id, 'second life', now());
+    DELETE FROM workouts WHERE id = _w_id;
+
+    RETURN NEXT is((SELECT count(*) FROM archive.deleted_workouts WHERE id = _w_id), 1::bigint, 'one snapshot per id');
+    RETURN NEXT is((SELECT name FROM archive.deleted_workouts WHERE id = _w_id), 'second life', 'the newer snapshot wins');
+END
+$$ LANGUAGE plpgsql;
+
 SELECT * FROM runtests();
 
 ROLLBACK;
