@@ -77,12 +77,12 @@ Future<GoalsResponse> getMyGoals(Request req) => goals.getTargetUserGoalsById(
 
 /// Larger than this, an export goes out through a presigned link instead of
 /// the response body, which Lambda caps at 6 MB.
-const inlineExportLimit = 5 * 1024 * 1024;
+const _inlineExportLimit = 5 * 1024 * 1024;
 
 /// The whole account in another app's format: one a day, since it reads every
 /// workout. Small ones come back as the body, large ones as a `303` to a
 /// short-lived link.
-Future<Model> exportMe(Request req, {int inlineLimit = inlineExportLimit}) async {
+Future<Model> exportMe(Request req, {int inlineLimit = _inlineExportLimit}) async {
   final format = ExportQuery.fromRequest(req).format;
 
   if (await req.apiTokenService.claimExport(req.userId) case final last?) {
