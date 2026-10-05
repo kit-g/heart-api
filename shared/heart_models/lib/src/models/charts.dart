@@ -38,6 +38,30 @@ enum ChartPreferenceType {
     };
   }
 
+  /// Whether this dimension's values are durations, in seconds.
+  bool get isDuration => this == cardioDuration || this == totalTimeUnderTension;
+
+  /// How the sessions inside one period fold into the single number a
+  /// recurring goal is measured by.
+  ///
+  /// "Per week" does not mean the same arithmetic for every dimension: 2000 kg
+  /// of volume a week is a total you accumulate, while a 100 kg top set a week
+  /// is the week's best lift — summing every session's top set would say you
+  /// had pressed 300 kg.
+  PeriodAggregate get periodAggregate {
+    return switch (this) {
+      // quantities that accumulate across the period
+      .totalVolume || .totalReps || .totalTimeUnderTension || .cardioDistance || .cardioDuration => .sum,
+      // peaks: the best single session in the period, not a running total.
+      // Assistance is the odd one — less of it is the improvement — but only
+      // pace is `lowerIsBetter`, so it follows the other weights rather than
+      // inventing a second direction here.
+      .topSetWeight || .estimatedOneRepMax || .maxConsecutiveReps || .assistanceWeight => .best,
+      // already a per-session average, so the period averages those
+      .averageWorkingWeight || .averagePace => .mean,
+    };
+  }
+
   static List<ChartPreferenceType> chartsByExerciseCategory(Category category) {
     switch (category) {
       case .weightedBodyWeight:
@@ -87,6 +111,24 @@ enum ChartPreferenceType {
           .maxConsecutiveReps,
         ];
     }
+  }
+}
+
+/// How several sessions in one period become one number. See
+/// [ChartPreferenceType.periodAggregate] for which dimension folds which way.
+enum PeriodAggregate {
+  sum,
+  best,
+  mean;
+
+  /// [values] must not be empty — an empty period has no aggregate, and what
+  /// to show instead is the caller's decision.
+  num of(Iterable<num> values) {
+    return switch (this) {
+      sum => values.reduce((a, b) => a + b),
+      best => values.reduce((a, b) => a > b ? a : b),
+      mean => values.reduce((a, b) => a + b) / values.length,
+    };
   }
 }
 
