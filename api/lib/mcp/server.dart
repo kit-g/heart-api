@@ -64,8 +64,11 @@ Future<Response> mcpEndpoint(Request request) async {
     _ => const <String, dynamic>{},
   };
   final modern = meta[metaProtocolVersion];
-  final client = switch (method == 'initialize' ? params['clientInfo'] : meta[metaClientInfo]) {
-    {'name': final String name} => name,
+  // A legacy client names itself once, in initialize; a modern one in every
+  // request's _meta.
+  final client = switch ((method, params['clientInfo'], meta[metaClientInfo])) {
+    ('initialize', {'name': final String name}, _) => name,
+    (_, _, {'name': final String name}) => name,
     _ => null,
   };
   final route = switch ((method, params['name'])) {

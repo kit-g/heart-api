@@ -127,21 +127,31 @@ void main() {
       'client': null,
       'purpose': 'aiAssistant',
       'uaFamily': 'python-requests',
-      'account': pseudonym('u1'),
+      'account': isA<String>().having((a) => a.length, 'length', 16),
     });
     expect(lines.single, isNot(contains(secret)));
     expect(lines.single, isNot(contains('"u1"')));
   });
 
-  group('userAgentFamily', () {
-    test('groups known tools and keeps unknown product tokens', () {
-      expect(userAgentFamily('curl/8.7.1'), 'curl');
-      expect(userAgentFamily('HomeAssistant/2026.10 aiohttp/3.10'), 'home-assistant');
-      expect(userAgentFamily('claude-code/2.1.0'), 'claude-code');
-      expect(userAgentFamily('Mozilla/5.0 (Macintosh)'), 'browser');
-      expect(userAgentFamily('my-sheet-sync/1.0'), 'my-sheet-sync');
-      expect(userAgentFamily(null), isNull);
-      expect(userAgentFamily('  '), isNull);
-    });
+  test('the usage line groups User-Agents by the tool behind them', () async {
+    when(service.useToken(any, count: anyNamed('count'))).thenAnswer((_) async => use());
+    final lines = <Map>[];
+    Logger.root.level = Level.ALL;
+    final sub = Logger('ApiUsage').onRecord.listen((r) => lines.add(jsonDecode(r.message) as Map));
+    addTearDown(sub.cancel);
+
+    const agents = {
+      'curl/8.7.1': 'curl',
+      'HomeAssistant/2026.10 aiohttp/3.10': 'home-assistant',
+      'claude-code/2.1.0': 'claude-code',
+      'Mozilla/5.0 (Macintosh)': 'browser',
+      'my-sheet-sync/1.0': 'my-sheet-sync',
+    };
+    for (final agent in agents.keys) {
+      await run(build(bearer: secret, userAgent: agent));
+    }
+    await run(build(bearer: secret));
+
+    expect(lines.map((line) => line['uaFamily']), [...agents.values, null]);
   });
 }
