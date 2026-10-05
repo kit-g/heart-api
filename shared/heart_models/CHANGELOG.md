@@ -1,5 +1,36 @@
 # Changelog
 
+## 2.11.0
+
+Reads survive a value this build doesn't know (heart-api#125,
+heart-of-yours#277): an app in the stores keeps working when the server or the
+CDN adds a category, a set type, a metric or the like, and never deletes or
+rewrites what it could not read.
+
+- New: `readEach(items, read)` and `ReadList<T>`, a list read item by item;
+  the items `read` rejects (`ArgumentError`, `TypeError`, `FormatException`)
+  are set aside in `unread` instead of failing the list. For the lists a
+  client parses itself: the library, workouts, templates, goals, preferences.
+- New: `Workout.unread`, `Template.unread`, `WorkoutExercise.unread` — the
+  exercises or sets this build could not read, as they arrived. `fromJson`
+  and `fromRow` set them aside instead of failing; `toMap` writes them back in
+  place (a workout's with a fresh unique `order`), so a save carries them
+  untouched. A fresh-id `Workout.copy` and `Template.toWorkout` leave them
+  behind. An exercise whose only sets are unread is kept by `Workout.toMap`
+  and `removeEmptySets`.
+- New: `ExerciseSet.setTypeValue`, the `set_type` word a write carries. A set
+  with a type this build doesn't know still reads as `normal` (as before), but
+  `toMap` and `copy` now carry the original word instead of rewriting it as
+  `normal`; assigning `setType` replaces it. Writers that store a set's type
+  keep this word.
+- Changed: `Movement.fromJson` reads an unrecognised attribute word as
+  `Movement.empty()` (no substitutes, no movement filter matched) and
+  `Health.fromJson` an unrecognised activity as none (`resolve` falls back by
+  category), instead of throwing. Absent keys read as before.
+
+The `fromString` parsers stay strict: they are what the server validates
+input with.
+
 ## 2.10.0
 
 Domain rules the app kept as its own extensions (heart-api#126), so the

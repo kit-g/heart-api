@@ -424,10 +424,22 @@ void main() {
       expect(m.skill, SkillLevel.low);
     });
 
-    // Silently reading a bad axial load as "unloaded" would hand a lifter
-    // avoiding spinal load exactly the exercise they are avoiding.
-    test('throws on a present but unrecognised value', () {
-      expect(() => Movement.fromJson({'axialLoad': 'crushing'}), throwsA(isA<ArgumentError>()));
+    // Reading a word this build doesn't know as "unloaded" would hand a lifter
+    // avoiding spinal load exactly the exercise they are avoiding; failing the
+    // exercise would make it vanish from the library. So the whole annotation
+    // reads as absent: nothing claimed, nothing matched.
+    test('an unrecognised word reads the whole annotation as empty', () {
+      for (final json in [
+        {...json, 'axialLoad': 'crushing'},
+        {...json, 'stability': 'floating'},
+        {...json, 'impact': 'brutal'},
+        {...json, 'skill': 'elite'},
+      ]) {
+        final m = Movement.fromJson(json);
+        expect(m.isEmpty, isTrue, reason: json.toString());
+        expect(m.groups, isEmpty);
+        expect(m.sharesPatternWith(Movement.fromJson(json..remove('axialLoad'))), isFalse);
+      }
     });
 
     test('empty() has no groups and is isEmpty', () {
@@ -504,10 +516,14 @@ void main() {
       expect(Health.empty().activity, isNull);
     });
 
-    // Silently reading a bad activity as "unannotated" would write the wrong
-    // label into the user's own health record.
-    test('throws on a present but unrecognised value', () {
-      expect(() => Health.fromJson(const {'activity': 'parkour'}), throwsA(isA<ArgumentError>()));
+    // A word this build doesn't know reads as no annotation, so the category
+    // fallback labels the session — never a guess at what the word meant.
+    test('an unrecognised word reads as no annotation', () {
+      final health = Health.fromJson(const {'activity': 'parkour'});
+      expect(health.activity, isNull);
+      expect(health.isEmpty, isTrue);
+      expect(health.resolve(Category.cardio), HealthActivity.other);
+      expect(health.resolve(Category.barbell), HealthActivity.strength);
     });
   });
 
