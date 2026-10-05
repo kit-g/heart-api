@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.12.0
+
+Personal records as shared code (heart-api#114).
+
+- New: `List<RecordSet>.toPersonalRecords(Category)` (extension
+  `PersonalRecords`), one exercise's personal records from its completed,
+  non-warm-up sets, oldest first: per category
+  `heaviest`, `oneRepMax` (Brzycki), `bestVolume`, `repMaxes`, `mostReps`,
+  `lightestAssistance`, `longestDistance`, `longestDuration`, `bestPace`,
+  totals, `sessions` and `firstAt`; each headline record carries the set it
+  happened on and `previous`, what it beat. Ties keep the earlier set. Null
+  when nothing was ever measured.
+- New: `RecordSet`, the fold's input (`weight`, `reps`, `duration`,
+  `distance`, `workoutId`, `at`), with `fromRow` for `workout_id`/`start`
+  rows.
+
+The app's local-database fold, moved here so records read the same wherever
+they are computed, with two fixes over that copy: `totalVolume` is reported
+for any set with weight and reps, not only when a rep max (≤ 10 reps)
+exists; and `previous` folds only the sessions before the record's own, so a
+record never "beats" a set that came after it.
+
 ## 2.11.0
 
 Reads survive a value this build doesn't know (heart-api#125,
