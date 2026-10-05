@@ -67,5 +67,5 @@ Future<TemplateFoldersResponse> getMyFolders(Request req) => folders.getMyFolder
 Future<GoalsResponse> getMyGoals(Request req) => goals.getTargetUserGoalsById(
   req,
   req.userId,
-  archived: req.queryParameters.raw['archived'] == 'true',
+  archived: GoalsQuery.fromRequest(req).archived,
 );
