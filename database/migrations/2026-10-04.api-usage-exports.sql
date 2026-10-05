@@ -2,7 +2,7 @@
 -- (heart-api#113): generating one costs far more than a page of reads, so it
 -- is counted apart from the request windows.
 
-ALTER TABLE api_usage
+ALTER TABLE IF EXISTS api_usage
     DROP COLUMN IF EXISTS last_export_at,
     ADD COLUMN IF NOT EXISTS last_export_at TIMESTAMPTZ;
 
