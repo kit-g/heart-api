@@ -25,6 +25,7 @@ part 'exercise_preferences.dart';
 part 'exercises.dart';
 part 'goals.dart';
 part 'images.dart';
+part 'me.dart';
 part 'pagination.dart';
 part 'parse.dart';
 part 'template_folders.dart';
