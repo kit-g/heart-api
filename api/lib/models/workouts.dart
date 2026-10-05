@@ -2,12 +2,28 @@ import 'dart:convert';
 
 import 'package:heart_models/heart_models.dart';
 
+import 'changes.dart';
 import 'errors.dart';
 import 'ids.dart';
 import 'imports.dart';
 import 'sets.dart';
 
 abstract interface class ApiWorkoutService {
+  /// Workouts that changed or were deleted since [since], oldest change
+  /// first, at most [limit] changes. Changes younger than [settle] are held
+  /// back for a later page.
+  Future<WorkoutChanges> getWorkoutChanges({
+    required String userId,
+    ChangeCursor? since,
+    int limit,
+    Duration settle,
+    required String Function(String) imageUrl,
+  });
+
+  /// [userId]'s completed working sets grouped by exercise, oldest first;
+  /// one exercise's when [exerciseId] is given.
+  Future<List<ExerciseRecordSets>> getRecordSets({required String userId, String? exerciseId});
+
   Future<Page<Workout>> getWorkouts({
     required String userId,
     required String targetUserId,

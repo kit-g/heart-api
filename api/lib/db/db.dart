@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:heart/models/apple.dart';
+import 'package:heart/models/changes.dart';
 import 'package:heart/models/creates.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/exercise_preferences.dart';
