@@ -1,5 +1,32 @@
 # Changelog
 
+## 2.10.0
+
+Domain rules the app kept as its own extensions (heart-api#126), so the
+server and every client get the same answer.
+
+- New: `Category.isTimed`, the categories whose sets hold a time (Duration,
+  Cardio, Weighted Duration).
+- New: `Category.distanceScale` and `DistanceScale` (`short`: metres or
+  yards; `long`: kilometres or miles). Weighted Distance reads short; storage
+  stays in kilometres.
+- New: `Movement.distanceTo(Movement)`, the substitute ranking: the sum of
+  gaps on axial load, impact and skill plus a flat mismatch on stability and
+  unilateral. Only the order is meaningful.
+- New: `MovementFilter` with `PatternFilter`, `SkillCeiling` and
+  `StabilityFilter`; `Exercise.matchesMovement(filters)`, and `Exercise.fits`
+  now applies the movement dimensions too. An exercise with no movement
+  annotation never matches an active movement filter.
+- New: `Goal.toBody()`, the create/replace request body — metric,
+  exerciseId, cadence, archived, stages with their ids; never `id` or
+  `createdAt`.
+- New: `WorkoutAggregation.workoutCount`, workouts rather than weeks.
+- New: `ChartPreferenceType.periodAggregate` and `PeriodAggregate`
+  (`sum`/`best`/`mean`, with `of(values)`): how a dimension's sessions fold
+  into one number for a recurring goal.
+- New: `ChartPreferenceType.isDuration` (cardio duration, time under tension).
+- New: `Iterable<Exercise>.byId`.
+
 ## 2.9.0
 
 Personal access tokens for the developer API (heart-api#111).

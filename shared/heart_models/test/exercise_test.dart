@@ -2,6 +2,190 @@ import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('Category.isTimed', () {
+    test('a stopwatch can fill Duration, Cardio and Weighted Duration sets', () {
+      final timed = Category.values.where((each) => each.isTimed);
+      expect(timed, unorderedEquals([Category.duration, Category.cardio, Category.weightedDuration]));
+    });
+  });
+
+  group('Category.distanceScale', () {
+    test('a carry reads in metres or yards, everything else in kilometres or miles', () {
+      expect(Category.weightedDistance.distanceScale, DistanceScale.short);
+      for (final each in Category.values.where((each) => each != Category.weightedDistance)) {
+        expect(each.distanceScale, DistanceScale.long, reason: each.value);
+      }
+    });
+  });
+
+  group('Movement.distanceTo', () {
+    Movement movement({
+      String axialLoad = 'none',
+      String impact = 'none',
+      String skill = 'low',
+      String stability = 'free',
+      bool unilateral = false,
+    }) {
+      return Movement.fromJson({
+        'groups': ['squat_bilateral'],
+        'axialLoad': axialLoad,
+        'impact': impact,
+        'skill': skill,
+        'stability': stability,
+        'unilateral': unilateral,
+      });
+    }
+
+    test('identical movements are zero apart', () {
+      expect(movement().distanceTo(movement()), 0);
+    });
+
+    test('ordinal attributes contribute the gap between them', () {
+      expect(movement().distanceTo(movement(axialLoad: 'high')), 3);
+      expect(movement(axialLoad: 'low').distanceTo(movement(axialLoad: 'moderate')), 1);
+      expect(movement().distanceTo(movement(impact: 'high')), 2);
+      expect(movement().distanceTo(movement(skill: 'high')), 2);
+    });
+
+    test('unordered attributes contribute a flat mismatch', () {
+      expect(movement().distanceTo(movement(stability: 'machine')), 1);
+      expect(movement(stability: 'supported').distanceTo(movement(stability: 'machine')), 1);
+      expect(movement().distanceTo(movement(unilateral: true)), 1);
+    });
+
+    test('is symmetric and additive across dimensions', () {
+      final a = movement(axialLoad: 'high', skill: 'moderate');
+      final b = movement(impact: 'low', stability: 'machine', unilateral: true);
+      // axial 3 + impact 1 + skill 1 + stability 1 + unilateral 1
+      expect(a.distanceTo(b), 7);
+      expect(b.distanceTo(a), 7);
+    });
+
+    test('ranks a machine squat closer to a barbell squat than a pistol squat is', () {
+      final barbell = movement(axialLoad: 'high', skill: 'moderate');
+      final machine = movement(axialLoad: 'moderate', skill: 'low', stability: 'machine');
+      final pistol = movement(axialLoad: 'low', skill: 'high', impact: 'low', unilateral: true);
+      expect(barbell.distanceTo(machine), lessThan(barbell.distanceTo(pistol)));
+    });
+  });
+
+  group('MovementFilter', () {
+    final press = Movement.fromJson({
+      'groups': ['horizontal_press', 'push'],
+      'skill': 'moderate',
+      'stability': 'free',
+    });
+
+    test('PatternFilter matches any of the exercise\'s patterns', () {
+      expect(const PatternFilter('horizontal_press').matches(press), isTrue);
+      expect(const PatternFilter('push').matches(press), isTrue);
+      expect(const PatternFilter('squat_bilateral').matches(press), isFalse);
+      expect(const PatternFilter('push').dimension, 'pattern');
+      expect(const PatternFilter('push').value, 'push');
+    });
+
+    test('SkillCeiling is a ceiling, not a match', () {
+      expect(const SkillCeiling(SkillLevel.low).matches(press), isFalse);
+      expect(const SkillCeiling(SkillLevel.moderate).matches(press), isTrue);
+      expect(const SkillCeiling(SkillLevel.high).matches(press), isTrue);
+      expect(const SkillCeiling(SkillLevel.high).dimension, 'skill');
+      expect(const SkillCeiling(SkillLevel.high).value, 'high');
+    });
+
+    test('StabilityFilter is set membership', () {
+      expect(const StabilityFilter(Stability.free).matches(press), isTrue);
+      expect(const StabilityFilter(Stability.machine).matches(press), isFalse);
+      expect(const StabilityFilter(Stability.machine).dimension, 'stability');
+      expect(const StabilityFilter(Stability.machine).value, 'machine');
+    });
+
+    test('equality is by what the filter says', () {
+      expect(const PatternFilter('push'), const PatternFilter('push'));
+      expect(const PatternFilter('push').hashCode, const PatternFilter('push').hashCode);
+      expect(const PatternFilter('push'), isNot(const PatternFilter('pull')));
+      expect(const SkillCeiling(SkillLevel.low), const SkillCeiling(SkillLevel.low));
+      expect(const StabilityFilter(Stability.free), const StabilityFilter(Stability.free));
+      expect(const StabilityFilter(Stability.free), isNot(const StabilityFilter(Stability.machine)));
+    });
+  });
+
+  group('Exercise.matchesMovement', () {
+    final bench = Exercise(
+      name: 'Bench Press',
+      category: Category.barbell,
+      target: Target.chest,
+      movement: Movement.fromJson({
+        'groups': ['horizontal_press'],
+        'skill': 'moderate',
+        'stability': 'free',
+      }),
+    );
+    final machinePress = Exercise(
+      name: 'Chest Press',
+      category: Category.machine,
+      target: Target.chest,
+      movement: Movement.fromJson({
+        'groups': ['horizontal_press'],
+        'skill': 'low',
+        'stability': 'machine',
+      }),
+    );
+    final custom = Exercise(name: 'My thing', category: Category.barbell, target: Target.chest);
+
+    test('no movement filters => always true, including for an unannotated exercise', () {
+      expect(bench.matchesMovement([]), isTrue);
+      expect(bench.matchesMovement([Category.barbell, Target.chest]), isTrue);
+      expect(custom.matchesMovement([Category.barbell]), isTrue);
+    });
+
+    test('an unannotated exercise never matches an active movement filter', () {
+      // Movement.empty reads as skill: low — a ceiling it would otherwise pass
+      expect(custom.matchesMovement([const SkillCeiling(SkillLevel.high)]), isFalse);
+      expect(custom.matchesMovement([const StabilityFilter(Stability.free)]), isFalse);
+    });
+
+    test('filters in one dimension are OR-ed', () {
+      expect(
+        bench.matchesMovement([const PatternFilter('horizontal_press'), const PatternFilter('squat_bilateral')]),
+        isTrue,
+      );
+      expect(
+        bench.matchesMovement([const StabilityFilter(Stability.machine), const StabilityFilter(Stability.free)]),
+        isTrue,
+      );
+    });
+
+    test('dimensions are AND-ed', () {
+      const pressOnMachine = [PatternFilter('horizontal_press'), StabilityFilter(Stability.machine)];
+      expect(machinePress.matchesMovement(pressOnMachine), isTrue);
+      expect(bench.matchesMovement(pressOnMachine), isFalse);
+      expect(
+        bench.matchesMovement([const PatternFilter('horizontal_press'), const SkillCeiling(SkillLevel.low)]),
+        isFalse,
+      );
+    });
+
+    test('fits applies the movement dimensions alongside category and target', () {
+      expect(bench.fits([Category.barbell, const PatternFilter('horizontal_press')]), isTrue);
+      expect(bench.fits([Category.barbell, const StabilityFilter(Stability.machine)]), isFalse);
+      expect(bench.fits([Category.machine, const PatternFilter('horizontal_press')]), isFalse);
+      expect(custom.fits([Category.barbell]), isTrue);
+      expect(custom.fits([Category.barbell, const PatternFilter('horizontal_press')]), isFalse);
+    });
+  });
+
+  group('Iterable<Exercise>.byId', () {
+    test('keys every exercise by its id', () {
+      final a = Exercise(name: 'A', category: Category.barbell, target: Target.chest);
+      final b = Exercise(name: 'B', category: Category.cardio, target: Target.cardio);
+      final map = [a, b].byId;
+      expect(map, hasLength(2));
+      expect(map[a.id], same(a));
+      expect(map[b.id], same(b));
+      expect(<Exercise>[].byId, isEmpty);
+    });
+  });
+
   group('Category', () {
     test('value and toString return label', () {
       for (final c in Category.values) {
