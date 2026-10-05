@@ -146,4 +146,40 @@ void main() {
       verifyNever(tokens.claimExport(any));
     });
   });
+
+  group('changes and records', () {
+    test('a since that is not a cursor from the feed is a 400', () {
+      expect(
+        () => getMyWorkoutChanges(build('/me/workouts/changes', query: {'since': 'garbage'})),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
+    test('a malformed exerciseId is a 400', () {
+      expect(() => getMyRecords(build('/me/records', query: {'exerciseId': 'x'})), throwsA(isA<BadRequest>()));
+    });
+
+    test('records fold per exercise, by name, leaving out exercises with nothing measured', () async {
+      RecordSet set(double? weight, int? reps) => RecordSet(
+        weight: weight,
+        reps: reps,
+        duration: null,
+        distance: null,
+        workoutId: 'w1',
+        at: '2026-01-01T00:00:00.000Z',
+      );
+      when(workouts.getRecordSets(userId: 'u1', exerciseId: null)).thenAnswer(
+        (_) async => [
+          (exerciseId: 'b', name: 'squat', category: Category.barbell, sets: [set(140, 3)]),
+          (exerciseId: 'a', name: 'Bench', category: Category.barbell, sets: [set(100, 5)]),
+          (exerciseId: 'c', name: 'Empty', category: Category.barbell, sets: [set(null, null)]),
+        ],
+      );
+
+      final records = (await getMyRecords(build('/me/records'))).toMap()['records'] as List;
+
+      expect(records.map((r) => ((r as Map)['exercise'] as Map)['name']), ['Bench', 'squat']);
+      expect(((records.first as Map)['heaviest'] as Map)['weight'], 100);
+    });
+  });
 }

@@ -271,6 +271,44 @@ void main() {
       expect(((result['content'] as List).single as Map)['text'], contains('list_workouts'));
     });
 
+    test('get_personal_records narrows by name, and says so when nothing matches', () async {
+      when(app.db.getRecordSets(userId: 'u1', exerciseId: null)).thenAnswer(
+        (_) async => [
+          (
+            exerciseId: 'a',
+            name: 'Bench Press',
+            category: Category.barbell,
+            sets: [
+              const RecordSet(weight: 100, reps: 5, duration: null, distance: null, workoutId: 'w', at: '2026-01-01'),
+            ],
+          ),
+        ],
+      );
+
+      final found =
+          (await rpc(
+                'tools/call',
+                params: {
+                  'name': 'get_personal_records',
+                  'arguments': {'exercise': 'bench'},
+                },
+              )).body['result']
+              as Map;
+      final records = (found['structuredContent'] as Map)['records'] as List;
+      expect(((records.single as Map)['heaviest'] as Map)['weight'], 100);
+
+      final none =
+          (await rpc(
+                'tools/call',
+                params: {
+                  'name': 'get_personal_records',
+                  'arguments': {'exercise': 'deadlift'},
+                },
+              )).body['result']
+              as Map;
+      expect(none['isError'], isTrue);
+    });
+
     test('an unknown tool is invalid params', () async {
       final response = await rpc('tools/call', params: {'name': 'delete_everything'});
       expect((response.body['error'] as Map)['code'], -32602);
