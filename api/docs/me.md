@@ -52,6 +52,27 @@ there's more: pass it back as `?cursor=` for the next page. No `cursor` means th
 | `/me/template-folders`    | `{folders}`                                                                                      |
 | `/me/goals`               | `{goals}`; `?archived=true` for archived ones. Goals backed by health data carry their definition only; their progress lives on your phone |
 
+## AI assistants (MCP)
+
+The same token connects an AI assistant to your log over MCP, read-only, at
+`https://api.heart-of.me/v1/mcp`. In Claude Code:
+
+```sh
+claude mcp add --transport http heart https://api.heart-of.me/v1/mcp \
+  --header "Authorization: Bearer hrt_…"
+```
+
+In Cursor or any client with a JSON config:
+
+```json
+{"mcpServers": {"heart": {"url": "https://api.heart-of.me/v1/mcp", "headers": {"Authorization": "Bearer hrt_…"}}}}
+```
+
+The assistant can read your profile, workouts, templates, folders, goals and custom exercises, and
+nothing else; it can't change anything. Only its data calls count against your limits, not the
+listing it does at the start of each conversation. Connecting from Claude or ChatGPT by signing in
+instead of pasting a token is coming.
+
 ## Export
 
 `GET /me/export?format=strong` downloads your whole history as a CSV in Strong's export format.
