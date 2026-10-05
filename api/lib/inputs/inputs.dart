@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
+import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/exports.dart';
 import 'package:heart/models/ids.dart';
