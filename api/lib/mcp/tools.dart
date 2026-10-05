@@ -4,6 +4,7 @@ import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/me.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -126,6 +127,39 @@ final List<McpTool> tools = [
       } on NotFound {
         throw ToolError('No workout $id. Use list_workouts for valid ids.');
       }
+    },
+  ),
+  McpTool(
+    name: 'get_personal_records',
+    title: 'Personal records',
+    description:
+        'Personal records per exercise, the same ones the app shows: heaviest set, estimated 1RM (Brzycki), '
+        'best volume set, rep maxes, most reps, longest distance or duration, best pace (seconds per km), with '
+        'the date and workout each was set in and what it beat. Pass `exercise` to narrow to names containing '
+        'that text.',
+    inputSchema: {
+      'type': 'object',
+      'properties': {
+        'exercise': {'type': 'string', 'description': 'Part of an exercise name, case-insensitive.'},
+      },
+      'additionalProperties': false,
+    },
+    run: (request, arguments) async {
+      final filter = switch (arguments['exercise']) {
+        final String text when text.trim().isNotEmpty => text.trim().toLowerCase(),
+        null => null,
+        _ => throw const ToolError('exercise must be text, part of an exercise name.'),
+      };
+      final sets = await request.workoutsService.getRecordSets(userId: request.userId);
+      final matching = [
+        for (final exercise in sets)
+          if (filter == null || exercise.name.toLowerCase().contains(filter)) exercise,
+      ];
+      final records = MeRecords.fold(matching).toMap();
+      if (filter != null && (records['records'] as List).isEmpty) {
+        throw ToolError('No records for an exercise matching "$filter". list_workouts shows exercise names.');
+      }
+      return records;
     },
   ),
   McpTool(

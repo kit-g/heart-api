@@ -47,10 +47,24 @@ there's more: pass it back as `?cursor=` for the next page. No `cursor` means th
 | `/me`                     | `id`, `username`, `unitSystem` (`metric`/`imperial`, when set), and `counts` of workouts, templates, folders, goals and custom exercises |
 | `/me/workouts`            | `{workouts, cursor}`: each workout with its exercises, sets, notes and image URLs       |
 | `/me/workouts/:workoutId` | one workout                                                                                      |
+| `/me/workouts/changes`    | `{workouts, deleted, cursor, hasMore}`: what changed since `?since=<cursor>`, oldest first (see *Polling*) |
+| `/me/records`             | `{records}`: personal records per exercise, the same ones the app shows; `?exerciseId=` for one |
 | `/me/exercises`           | `{exercises}`: your custom exercises (a `glossary` key rides along; ignore it). Library exercises come embedded in workouts and templates  |
 | `/me/templates`           | `{templates, cursor}`, in your order; `?folder=<id>`, or `?folder=none` for unfiled ones                        |
 | `/me/template-folders`    | `{folders}`                                                                                      |
 | `/me/goals`               | `{goals}`; `?archived=true` for archived ones. Goals backed by health data carry their definition only; their progress lives on your phone |
+
+## Polling
+
+To keep a copy in sync, poll `/me/workouts/changes` instead of re-reading the history. Without
+`since` it starts from the beginning. After that, pass back the `cursor` you were given. Each change
+is a whole workout as it stands now (in `workouts`) or the id of one that was deleted (in `deleted`,
+with `deletedAt`). While `hasMore` is true, ask again straight away. When nothing changed, you get
+empty lists and the same cursor, so keep it.
+
+Changes show up about half a minute after they happen. That way a save still in flight can't land
+behind a cursor you already hold. Polling more often than every few minutes gains nothing and uses up
+the daily limit.
 
 ## AI assistants (MCP)
 

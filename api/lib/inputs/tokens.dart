@@ -34,3 +34,24 @@ class ExportQuery {
     return ExportQuery._(format: q.parsed('format', ExportFormat.fromString));
   }
 }
+
+/// `GET /me/workouts/changes?since=&limit=` — no `since` starts from the
+/// beginning; one that isn't a cursor from this feed is a 400, never a
+/// silent restart.
+class ChangesQuery {
+  final ChangeCursor? since;
+  final int limit;
+
+  const new _({required this.since, required this.limit});
+
+  static ChangesQuery fromRequest(Request req) {
+    final q = req.url.queryParameters;
+    return ChangesQuery._(
+      since: switch (q.stringOrNull('since')) {
+        final String raw => ChangeCursor.parse(raw),
+        null => null,
+      },
+      limit: q.integer('limit', defaultValue: 100, min: 1, max: 100),
+    );
+  }
+}

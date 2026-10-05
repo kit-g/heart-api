@@ -1,5 +1,7 @@
 import 'package:heart_models/heart_models.dart';
 
+import 'changes.dart';
+
 /// `GET /me`: who a token acts as, and how much history there is to read.
 abstract interface class MeProfile implements Model {
   factory({required User user, required AccountSummary summary}) = _MeProfile.new;
@@ -55,6 +57,56 @@ class _MeWorkout implements MeWorkout {
       ...map,
       'images': [
         for (final image in workout.images?.values ?? const <WorkoutImage>[]) {'id': image.id, 'url': ?image.link},
+      ],
+    };
+  }
+}
+
+/// `GET /me/workouts/changes`: one page of the change feed.
+class MeWorkoutChanges implements Model {
+  final WorkoutChanges changes;
+
+  const new(this.changes);
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'workouts': [for (final workout in changes.upserted) MeWorkout(workout).toMap()],
+      'deleted': [
+        for (final (:id, :deletedAt) in changes.deleted) {'id': id, 'deletedAt': deletedAt.toUtc().toIso8601String()},
+      ],
+      'cursor': ?changes.cursor?.toString(),
+      'hasMore': changes.hasMore,
+    };
+  }
+}
+
+/// `GET /me/records`: personal records per exercise, as `foldRecords`
+/// computes them — the same records the app shows.
+class MeRecords implements Model {
+  final List<({ExerciseRecordSets exercise, Map<String, Object> records})> entries;
+
+  const new(this.entries);
+
+  /// Folds each exercise's sets, leaving out exercises that never measured
+  /// anything, ordered by name.
+  factory fold(List<ExerciseRecordSets> exercises) {
+    final entries = [
+      for (final exercise in exercises)
+        if (foldRecords(exercise.category, exercise.sets) case final records?) (exercise: exercise, records: records),
+    ]..sort((a, b) => a.exercise.name.toLowerCase().compareTo(b.exercise.name.toLowerCase()));
+    return MeRecords(entries);
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'records': [
+        for (final (:exercise, :records) in entries)
+          {
+            'exercise': {'id': exercise.exerciseId, 'name': exercise.name, 'category': exercise.category.value},
+            ...records,
+          },
       ],
     };
   }

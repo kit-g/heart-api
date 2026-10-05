@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:heart/models/changes.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -117,5 +118,22 @@ void main() {
   test('the token routes themselves stay behind Firebase', () async {
     final response = await app.send('GET', '/accounts/tokens', token: secret);
     expect(response.status, 401);
+  });
+
+  test('/workouts/changes is the feed, not a workout id', () async {
+    when(
+      app.db.getWorkoutChanges(
+        userId: 'u1',
+        since: null,
+        limit: 100,
+        settle: anyNamed('settle'),
+        imageUrl: anyNamed('imageUrl'),
+      ),
+    ).thenAnswer((_) async => const WorkoutChanges(upserted: [], deleted: [], cursor: null, hasMore: false));
+
+    final response = await app.send('GET', '/me/workouts/changes', token: secret);
+
+    expect(response.status, 200);
+    expect(jsonDecode(response.body), {'workouts': [], 'deleted': [], 'hasMore': false});
   });
 }

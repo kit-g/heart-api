@@ -9,10 +9,12 @@ const tokenPrefix = '/me';
 final RouteTable meRoutes = {
   ('/', .get): me.getMe,
   ('/workouts', .get): me.getMyWorkouts,
+  ('/workouts/changes', .get): me.getMyWorkoutChanges,
   ('/workouts/:workoutId', .get): me.getMyWorkout,
   ('/exercises', .get): me.getMyExercises,
   ('/templates', .get): me.getMyTemplates,
   ('/template-folders', .get): me.getMyFolders,
   ('/goals', .get): me.getMyGoals,
+  ('/records', .get): me.getMyRecords,
   ('/export', .get): me.exportMe,
 };

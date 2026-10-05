@@ -130,3 +130,26 @@ Future<List<Workout>> _everyWorkout(Request req) async {
   } while (cursor != null);
   return all.reversed.toList();
 }
+
+/// The change feed: what changed or was deleted since a cursor, oldest first.
+/// Changes settle for half a minute before they're reported.
+Future<MeWorkoutChanges> getMyWorkoutChanges(Request req) async {
+  final query = ChangesQuery.fromRequest(req);
+  final changes = await req.workoutsService.getWorkoutChanges(
+    userId: req.userId,
+    since: query.since,
+    limit: query.limit,
+    imageUrl: req.config.cdnAssetUrl,
+  );
+  return MeWorkoutChanges(changes);
+}
+
+/// Personal records per exercise; one exercise's with `?exerciseId=`.
+Future<MeRecords> getMyRecords(Request req) async {
+  final exerciseId = req.url.queryParameters['exerciseId'];
+  if (exerciseId != null && !isUuidV7(exerciseId) && !RegExp(r'^[0-9a-f-]{36}$').hasMatch(exerciseId)) {
+    throw BadRequest(reason: 'exerciseId is not an exercise id: $exerciseId');
+  }
+  final sets = await req.workoutsService.getRecordSets(userId: req.userId, exerciseId: exerciseId);
+  return MeRecords.fold(sets);
+}
