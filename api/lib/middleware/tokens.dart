@@ -27,7 +27,15 @@ Middleware tokenAuthentication({DateTime Function()? clock}) {
         case TokenAccepted(:final use):
           request.user = User(id: use.userId);
           final result = await next(request);
-          logApiUsage(request, surface: 'me', status: result is Response ? result.statusCode : null, use: use);
+          logApiUsage(
+            request,
+            surface: 'me',
+            status: switch (result) {
+              Response(:final statusCode) => statusCode,
+              _ => null,
+            },
+            use: use,
+          );
           return result;
       }
     };
@@ -63,7 +71,10 @@ Future<TokenCheck> checkToken(Request request, {bool count = true, DateTime Func
 
   final TokenUse? use;
   try {
-    use = secret == null ? null : await request.apiTokenService.useToken(TokenSecret.hash(secret), count: count);
+    use = switch (secret) {
+      final String secret => await request.apiTokenService.useToken(TokenSecret.hash(secret), count: count),
+      null => null,
+    };
   } catch (e, st) {
     _logger.severe('Token lookup failed', e, st);
     return TokenRefused(JsonResponse.serverError());
@@ -130,19 +141,22 @@ void logApiUsage(
       'credential': 'pat',
       'client': client,
       'purpose': use?.purpose?.name,
-      'uaFamily': userAgentFamily(request.headers.userAgent),
-      'account': use == null ? null : pseudonym(use.userId),
+      'uaFamily': _userAgentFamily(request.headers.userAgent),
+      'account': switch (use) {
+        final TokenUse use => _pseudonym(use.userId),
+        null => null,
+      },
     }),
   );
 }
 
 /// Enough of an account id to count distinct callers without logging the id.
-String pseudonym(String userId) => sha256.convert(utf8.encode(userId)).toString().substring(0, 16);
+String _pseudonym(String userId) => sha256.convert(utf8.encode(userId)).toString().substring(0, 16);
 
 /// The tool behind a User-Agent, reduced to a family so logs group by what
 /// called rather than by version string. Unrecognised agents keep their
 /// product token, which is what a tool setting a descriptive agent sends.
-String? userAgentFamily(String? userAgent) {
+String? _userAgentFamily(String? userAgent) {
   final ua = userAgent?.trim().toLowerCase();
   if (ua == null || ua.isEmpty) return null;
   for (final (needle, family) in _families) {
