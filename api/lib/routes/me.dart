@@ -146,10 +146,7 @@ Future<MeWorkoutChanges> getMyWorkoutChanges(Request req) async {
 
 /// Personal records per exercise; one exercise's with `?exerciseId=`.
 Future<MeRecords> getMyRecords(Request req) async {
-  final exerciseId = req.url.queryParameters['exerciseId'];
-  if (exerciseId != null && !isUuidV7(exerciseId) && !RegExp(r'^[0-9a-f-]{36}$').hasMatch(exerciseId)) {
-    throw BadRequest(reason: 'exerciseId is not an exercise id: $exerciseId');
-  }
-  final sets = await req.workoutsService.getRecordSets(userId: req.userId, exerciseId: exerciseId);
+  final query = RecordsQuery.fromRequest(req);
+  final sets = await req.workoutsService.getRecordSets(userId: req.userId, exerciseId: query.exerciseId);
   return MeRecords.fold(sets);
 }

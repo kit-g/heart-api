@@ -21,7 +21,7 @@ class ChangeCursor {
     try {
       final decoded = utf8.decode(base64Url.decode(base64Url.normalize(raw)));
       final [at, id] = decoded.split('|');
-      if (!isUuidV7(id) && !_isUuid(id)) throw const FormatException();
+      if (!isUuidV7(id)) throw const FormatException();
       return ChangeCursor(at: DateTime.parse(at).toUtc(), id: id);
     } catch (_) {
       throw BadRequest(reason: 'since is not a cursor from this feed: $raw');
@@ -31,8 +31,6 @@ class ChangeCursor {
   @override
   String toString() => base64Url.encode(utf8.encode('${at.toUtc().toIso8601String()}|$id')).replaceAll('=', '');
 }
-
-bool _isUuid(String id) => RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$').hasMatch(id);
 
 /// One page of a workout change feed: the workouts that changed (whole, as
 /// they stand now) and the ids of those deleted, since a cursor.
