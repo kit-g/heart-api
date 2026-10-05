@@ -5,21 +5,21 @@ BEGIN;
 -- backdate is to a new value: writing the value a column already holds is
 -- indistinguishable from not writing it, and the trigger then stamps now().
 
-CREATE OR REPLACE FUNCTION test__touch_workouts_signatures() RETURNS SETOF TEXT AS
+CREATE OR REPLACE FUNCTION test__stamp_workouts_signatures() RETURNS SETOF TEXT AS
 $$
 BEGIN
-    RETURN NEXT has_function('public'::name, '_touch_workout'::name);
-    RETURN NEXT function_returns('public'::name, '_touch_workout'::name, 'trigger');
-    RETURN NEXT function_lang_is('public'::name, '_touch_workout'::name, 'plpgsql'::name);
-    RETURN NEXT has_function('public'::name, '_touch_workouts_of_children'::name);
-    RETURN NEXT has_function('public'::name, '_touch_workouts_of_sets'::name);
-    RETURN NEXT has_trigger('public'::name, 'workouts'::name, 'workouts_touch'::name);
-    RETURN NEXT has_trigger('public'::name, 'exercise_sets'::name, 'exercise_sets_touch_update'::name);
-    RETURN NEXT has_trigger('public'::name, 'workout_images'::name, 'workout_images_touch_insert'::name);
+    RETURN NEXT has_function('public'::name, '_stamp_workout'::name);
+    RETURN NEXT function_returns('public'::name, '_stamp_workout'::name, 'trigger');
+    RETURN NEXT function_lang_is('public'::name, '_stamp_workout'::name, 'plpgsql'::name);
+    RETURN NEXT has_function('public'::name, '_stamp_workouts_by_workout_id'::name);
+    RETURN NEXT has_function('public'::name, '_stamp_workouts_by_set'::name);
+    RETURN NEXT has_trigger('public'::name, 'workouts'::name, 'workouts_stamp'::name);
+    RETURN NEXT has_trigger('public'::name, 'exercise_sets'::name, 'exercise_sets_stamp_update'::name);
+    RETURN NEXT has_trigger('public'::name, 'workout_images'::name, 'workout_images_stamp_insert'::name);
 END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION test__touch_workouts_follows_every_part() RETURNS SETOF TEXT AS
+CREATE OR REPLACE FUNCTION test__stamp_workouts_follows_every_part() RETURNS SETOF TEXT AS
 $$
 DECLARE
     _user_id     TEXT;
