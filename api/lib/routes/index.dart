@@ -1,3 +1,4 @@
+import 'package:heart/core/mcp_router.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/routes/account.dart' as account;
 import 'package:heart/routes/charts.dart' as charts;
@@ -82,10 +83,11 @@ const _publicRoutes = {'/version', '/events'};
 
 /// Whether [request] is for one of the app's own routes: those authenticate
 /// with a Firebase ID token and carry the app version. Public routes need
-/// neither, and the `/me` surface authenticates with a personal access token
-/// and is called by things that have no app version to send.
+/// neither, and the `/me` and MCP surfaces authenticate with a personal access
+/// token and are called by things that have no app version to send.
 bool isAppRoute(Request request) {
   final path = request.url.path;
   if (_publicRoutes.contains(path)) return false;
-  return path != tokenPrefix && !path.startsWith('$tokenPrefix/');
+  bool under(String prefix) => path == prefix || path.startsWith('$prefix/');
+  return !under(tokenPrefix) && !under(mcpPrefix);
 }
