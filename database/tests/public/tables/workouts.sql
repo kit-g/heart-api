@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(36);
+SELECT plan(40);
 
 SELECT has_table('public'::name, 'workouts'::name);
 
@@ -17,7 +17,8 @@ SELECT columns_are(
                    'created_at',
                    'import_id',
                    'note',
-                   'pauses'
+                   'pauses',
+                   'updated_at'
                    ]
        );
 
@@ -47,6 +48,10 @@ SELECT col_default_is('public', 'workouts', 'pauses', '[]'::jsonb, 'pauses defau
 SELECT fk_ok('public', 'workouts', 'user_id', 'public', 'profiles', 'id');
 
 SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_id_idx'::name);
+SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_updated_idx'::name);
+SELECT col_type_is('public'::name, 'workouts'::name, 'updated_at'::name, 'timestamp with time zone'::name);
+SELECT col_not_null('public'::name, 'workouts'::name, 'updated_at'::name);
+SELECT col_default_is('public', 'workouts', 'updated_at', 'now()', 'updated_at defaults to now()');
 SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_import_id_idx'::name);
 SELECT index_is_unique('public'::name, 'workouts'::name, 'workouts_user_import_id_idx'::name);
 
