@@ -2441,3 +2441,59 @@ WITH _claim AS (
 SELECT EXISTS (SELECT 1 FROM _claim) AS claimed,
        (SELECT last_export_at FROM api_usage WHERE user_id = @userId) AS last_export_at
 ''';
+
+// The workout change feed (heart-api#114): workouts that changed and
+// workouts that were deleted, as one stream ordered by (when, id) from a
+// cursor. A deletion of an id that exists again (a replayed create) is
+// superseded by the workout itself. Changes younger than the settle window
+// are held back, so a transaction that commits late can't land behind a
+// cursor already handed out.
+const _workoutChanges = '''
+WITH _changes AS (
+  SELECT id, updated_at AS at, false AS deleted
+  FROM workouts
+  WHERE user_id = @userId
+    AND updated_at < now() - make_interval(secs => @settleSeconds)
+    AND (@sinceAt::timestamptz IS NULL OR (updated_at, id) > (@sinceAt::timestamptz, @sinceId::uuid))
+  UNION ALL
+  SELECT d.id, d.deleted_at, true
+  FROM archive.deleted_workouts d
+  WHERE d.user_id = @userId
+    AND d.deleted_at < now() - make_interval(secs => @settleSeconds)
+    AND (@sinceAt::timestamptz IS NULL OR (d.deleted_at, d.id) > (@sinceAt::timestamptz, @sinceId::uuid))
+    AND NOT EXISTS (SELECT 1 FROM workouts w WHERE w.id = d.id)
+), _page AS (
+  SELECT id, at, deleted FROM _changes ORDER BY at, id LIMIT @limit
+)
+SELECT
+  p.id, p.at, p.deleted,
+  w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.created_at,
+  CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id) END AS exercises,
+  CASE WHEN p.deleted THEN NULL ELSE COALESCE(
+    (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
+     FROM workout_images wi WHERE wi.workout_id = w.id),
+    '[]'::jsonb
+  ) END AS images
+FROM _page p
+LEFT JOIN workouts w ON NOT p.deleted AND w.id = p.id
+ORDER BY p.at, p.id
+''';
+
+// Every completed working set the user has done, per exercise, oldest
+// workout first: the input personal records are folded from. Warm-ups are no
+// one's record.
+const _recordSets = '''
+SELECT
+  e.id AS exercise_id, e.name, e.category,
+  s.weight, s.reps, s.duration, s.distance,
+  w.id AS workout_id, w.started_at
+FROM exercise_sets s
+JOIN workout_exercises we ON we.id = s.workout_exercise_id
+JOIN workouts w ON w.id = we.workout_id
+JOIN exercises e ON e.id = we.exercise_id
+WHERE w.user_id = @userId
+  AND s.completed
+  AND s.set_type IS DISTINCT FROM 'w'
+  AND (@exerciseId::uuid IS NULL OR we.exercise_id = @exerciseId::uuid)
+ORDER BY e.id, w.started_at, w.id, s.set_order
+''';

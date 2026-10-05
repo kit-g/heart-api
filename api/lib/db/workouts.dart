@@ -23,6 +23,81 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   }
 
   @override
+  Future<WorkoutChanges> getWorkoutChanges({
+    required String userId,
+    ChangeCursor? since,
+    int limit = 100,
+    Duration settle = const Duration(seconds: 30),
+    required String Function(String) imageUrl,
+  }) async {
+    final rows = await _pool.execute(
+      _workoutChanges.toSql(),
+      parameters: {
+        'userId': userId,
+        'sinceAt': since?.at,
+        'sinceId': since?.id,
+        'settleSeconds': settle.inSeconds,
+        'limit': limit + 1,
+      },
+    );
+    final changes = rows.map((row) => row.toColumnMap()).toList();
+    final hasMore = changes.length > limit;
+    final page = hasMore ? changes.sublist(0, limit) : changes;
+
+    final upserted = <Workout>[];
+    final deleted = <({String id, DateTime deletedAt})>[];
+    for (final change in page) {
+      if (change['deleted'] == true) {
+        deleted.add((id: change['id'].toString(), deletedAt: change['at'] as DateTime));
+      } else {
+        upserted.add(Workout.fromRow(change, imageUrl: imageUrl));
+      }
+    }
+    return WorkoutChanges(
+      upserted: upserted,
+      deleted: deleted,
+      cursor: switch (page.lastOrNull) {
+        final Map<String, dynamic> last => ChangeCursor(at: last['at'] as DateTime, id: last['id'].toString()),
+        null => since,
+      },
+      hasMore: hasMore,
+    );
+  }
+
+  @override
+  Future<List<ExerciseRecordSets>> getRecordSets({required String userId, String? exerciseId}) async {
+    final rows = await _pool.execute(
+      _recordSets.toSql(),
+      parameters: {'userId': userId, 'exerciseId': exerciseId},
+    );
+    final byExercise = <String, ExerciseRecordSets>{};
+    for (final row in rows) {
+      final map = row.toColumnMap();
+      final id = map['exercise_id'].toString();
+      final entry = byExercise.putIfAbsent(
+        id,
+        () => (
+          exerciseId: id,
+          name: map['name'] as String,
+          category: Category.fromString(map['category'] as String),
+          sets: <RecordSet>[],
+        ),
+      );
+      entry.sets.add(
+        RecordSet(
+          weight: (map['weight'] as num?)?.toDouble(),
+          reps: (map['reps'] as num?)?.toInt(),
+          duration: (map['duration'] as num?)?.toDouble(),
+          distance: (map['distance'] as num?)?.toDouble(),
+          workoutId: map['workout_id'].toString(),
+          at: (map['started_at'] as DateTime).toUtc().toIso8601String(),
+        ),
+      );
+    }
+    return byExercise.values.toList();
+  }
+
+  @override
   Future<Workout> getWorkout({
     required String userId,
     required String workoutId,
