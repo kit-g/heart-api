@@ -48,7 +48,7 @@ void main() {
         'reps': 3,
         'workoutId': 'w1',
         'at': '2026-01-01T10:00:00Z',
-        'previous': {'weight': 90.0, 'reps': 10, 'workoutId': 'w2', 'at': '2026-02-01T10:00:00Z'},
+        // the first session: nothing earlier to have beaten
       });
       expect(records['bestVolume'], {
         'value': 900.0,
@@ -56,9 +56,8 @@ void main() {
         'reps': 10,
         'workoutId': 'w2',
         'at': '2026-02-01T10:00:00Z',
-        // 60×15 equals it, but later: the tie stays with w2, and w3 is what
-        // w2 is measured against once it is left out
-        'previous': {'value': 900.0, 'weight': 60.0, 'reps': 15, 'workoutId': 'w3', 'at': '2026-03-01T10:00:00Z'},
+        // 60×15 equals it later: the tie stays with w2, and w2 beat w1's 300
+        'previous': {'value': 300.0, 'weight': 100.0, 'reps': 3, 'workoutId': 'w1', 'at': '2026-01-01T10:00:00Z'},
       });
 
       final oneRepMax = records['oneRepMax'] as Map;
@@ -100,6 +99,20 @@ void main() {
       expect((records['heaviest'] as Map).containsKey('reps'), isFalse);
       // volume/e1rm records need reps, so they come from the 30×8 set
       expect((records['bestVolume'] as Map)['weight'], 30.0);
+    });
+  });
+
+  group('total volume', () {
+    test('counts high-rep work that sets no rep max', () {
+      const category = 'Barbell';
+      final rows = [
+        row(weight: 60, reps: 12, workoutId: 'w1'),
+        row(weight: 50, reps: 15, workoutId: 'w2'),
+      ];
+
+      final records = fold(category, rows)!;
+      expect(records.containsKey('repMaxes'), isFalse);
+      expect(records['totalVolume'], 60.0 * 12 + 50 * 15);
     });
   });
 
@@ -189,7 +202,7 @@ void main() {
         'distance': 0.02,
         'workoutId': 'w1',
         'at': '2026-01-01T10:00:00Z',
-        'previous': {'weight': 30.0, 'distance': 0.08, 'workoutId': 'w2', 'at': '2026-02-01T10:00:00Z'},
+        // February's lighter carry came after; it can't be what January beat
       });
       expect((records['longestDistance'] as Map)['distance'], 0.08);
       expect((records['longestDistance'] as Map)['weight'], 30.0);
@@ -216,6 +229,18 @@ void main() {
   });
 
   group('previous', () {
+    test('only counts sessions before the record', () {
+      const category = 'Barbell';
+      final rows = [
+        row(weight: 100, reps: 1, workoutId: 'jan', start: '2026-01-01T10:00:00Z'),
+        row(weight: 95, reps: 1, workoutId: 'mar', start: '2026-03-01T10:00:00Z'),
+      ];
+
+      final heaviest = fold(category, rows)!['heaviest'] as Map;
+      expect(heaviest['workoutId'], 'jan');
+      expect(heaviest.containsKey('previous'), isFalse, reason: 'a record cannot have beaten a later set');
+    });
+
     test('is the record with its own session left out', () {
       const category = 'Barbell';
       final rows = [

@@ -10,8 +10,9 @@ import 'sets.dart';
 
 abstract interface class ApiWorkoutService {
   /// Workouts that changed or were deleted since [since], oldest change
-  /// first, at most [limit] changes. Changes younger than [settle] are held
-  /// back for a later page.
+  /// first, at most [limit] changes. Changes are held back while any
+  /// transaction that could still commit an earlier one is open, and for
+  /// [settle] besides.
   Future<WorkoutChanges> getWorkoutChanges({
     required String userId,
     ChangeCursor? since,

@@ -28,6 +28,21 @@ void main() {
     return h.db.getWorkoutChanges(userId: userId, since: since, limit: limit, settle: settle, imageUrl: (k) => k);
   }
 
+  /// Polls until [done] holds. The feed waits for every transaction still
+  /// writing, and the other suites run theirs in parallel against the same
+  /// database: what is due shows up once they finish, not instantly.
+  Future<WorkoutChanges> eventually(
+    Future<WorkoutChanges> Function() read,
+    bool Function(WorkoutChanges) done,
+  ) async {
+    final deadline = DateTime.now().add(const Duration(seconds: 10));
+    while (true) {
+      final result = await read();
+      if (done(result) || DateTime.now().isAfter(deadline)) return result;
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+  }
+
   Future<void> age(String workoutId, Duration ago) async {
     await h.exec(
       'UPDATE workouts SET updated_at = now() - make_interval(secs => @s) WHERE id = @id::uuid',
@@ -43,7 +58,7 @@ void main() {
       await age(older, const Duration(hours: 2));
       await age(newer, const Duration(hours: 1));
 
-      final first = await changes(user);
+      final first = await eventually(() => changes(user), (c) => c.upserted.length == 2);
       expect(first.upserted.map((w) => w.id), [older, newer]);
       expect(first.upserted.first.first.length, 1, reason: 'the workout comes whole');
       expect(first.deleted, isEmpty);
@@ -58,7 +73,7 @@ void main() {
       final user = await h.seedProfile();
       final workout = await h.seedWorkout(userId: user, withExercise: true);
       await age(workout, const Duration(hours: 1));
-      final cursor = (await changes(user)).cursor;
+      final cursor = (await eventually(() => changes(user), (c) => c.upserted.isNotEmpty)).cursor;
 
       await h.exec(
         'UPDATE exercise_sets SET reps = 6 WHERE workout_exercise_id IN '
@@ -66,7 +81,8 @@ void main() {
         {'w': workout},
       );
 
-      expect((await changes(user, since: cursor)).upserted.map((w) => w.id), [workout]);
+      final after = await eventually(() => changes(user, since: cursor), (c) => c.upserted.isNotEmpty);
+      expect(after.upserted.map((w) => w.id), [workout]);
     });
 
     test('a change inside the settle window waits for a later poll', () async {
@@ -77,7 +93,27 @@ void main() {
       expect(held.upserted, isEmpty);
       expect(held.cursor, isNull);
 
-      expect((await changes(user)).upserted, hasLength(1));
+      expect((await eventually(() => changes(user), (c) => c.upserted.isNotEmpty)).upserted, hasLength(1));
+    });
+
+    test('a transaction still writing holds back everything newer, whatever its length', () async {
+      final user = await h.seedProfile();
+      final settled = await h.seedWorkout(userId: user, name: 'settled');
+      await age(settled, const Duration(hours: 1));
+
+      await h.pool.runTx((tx) async {
+        // a long save in flight: it has written (so it has an xid) and not
+        // committed; its own rows will carry its start time when it does
+        await tx.execute('SELECT txid_current()');
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        await h.seedWorkout(userId: user, name: 'newer');
+        final during = await changes(user);
+        expect(during.upserted.map((w) => w.name), ['settled'], reason: 'newer than the open transaction');
+      });
+
+      final after = await eventually(() => changes(user), (c) => c.upserted.length == 2);
+      expect(after.upserted.map((w) => w.name), ['settled', 'newer']);
     });
 
     test('a deleted workout is reported once, by id', () async {
@@ -86,11 +122,11 @@ void main() {
       final gone = await h.seedWorkout(userId: user, name: 'gone');
       await age(kept, const Duration(hours: 2));
       await age(gone, const Duration(hours: 2));
-      final cursor = (await changes(user)).cursor;
+      final cursor = (await eventually(() => changes(user), (c) => c.upserted.length == 2)).cursor;
 
       await h.exec('DELETE FROM workouts WHERE id = @id::uuid', {'id': gone});
 
-      final after = await changes(user, since: cursor);
+      final after = await eventually(() => changes(user, since: cursor), (c) => c.deleted.isNotEmpty);
       expect(after.upserted, isEmpty);
       expect(after.deleted.map((d) => d.id), [gone]);
       expect((await changes(user, since: after.cursor)).deleted, isEmpty);
@@ -105,7 +141,7 @@ void main() {
         ids.add(id);
       }
 
-      final first = await changes(user, limit: 2);
+      final first = await eventually(() => changes(user, limit: 2), (c) => c.hasMore);
       expect(first.upserted.map((w) => w.id), ids.take(2));
       expect(first.hasMore, isTrue);
 
@@ -153,6 +189,28 @@ void main() {
       final records = foldRecords(only.category, only.sets)!;
       expect((records['heaviest']! as Map)['weight'], 105);
       expect(records['sessions'], 2);
+
+      await h.exec('DELETE FROM workouts WHERE user_id = @u', {'u': user});
+    });
+
+    test('a workout without a start counts from when it was created', () async {
+      final user = await h.seedProfile();
+      final exercise = await h.seedGlobalExercise();
+      final workout = await h.insertId(
+        'INSERT INTO workouts (user_id, name) VALUES (@u, @n) RETURNING id',
+        {'u': user, 'n': 'no start'},
+      );
+      final we = await h.insertId(
+        'INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order) VALUES (@w, @e, 0) RETURNING id',
+        {'w': workout, 'e': exercise},
+      );
+      await h.exec(
+        'INSERT INTO exercise_sets (workout_exercise_id, weight, reps, set_order, completed) VALUES (@we, 50, 5, 0, true)',
+        {'we': we},
+      );
+
+      final sets = (await h.db.getRecordSets(userId: user, exerciseId: exercise)).single.sets;
+      expect(sets.single.at, isNotEmpty);
 
       await h.exec('DELETE FROM workouts WHERE user_id = @u', {'u': user});
     });

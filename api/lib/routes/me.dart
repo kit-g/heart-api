@@ -132,7 +132,7 @@ Future<List<Workout>> _everyWorkout(Request req) async {
 }
 
 /// The change feed: what changed or was deleted since a cursor, oldest first.
-/// Changes settle for half a minute before they're reported.
+/// A change waits until no save that started before it is still running.
 Future<MeWorkoutChanges> getMyWorkoutChanges(Request req) async {
   final query = ChangesQuery.fromRequest(req);
   final changes = await req.workoutsService.getWorkoutChanges(

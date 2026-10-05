@@ -2445,21 +2445,35 @@ SELECT EXISTS (SELECT 1 FROM _claim) AS claimed,
 // The workout change feed (heart-api#114): workouts that changed and
 // workouts that were deleted, as one stream ordered by (when, id) from a
 // cursor. A deletion of an id that exists again (a replayed create) is
-// superseded by the workout itself. Changes younger than the settle window
-// are held back, so a transaction that commits late can't land behind a
-// cursor already handed out.
+// superseded by the workout itself.
+//
+// The stamps are `now()`, the writing transaction's start, not its commit.
+// So the feed only reads up to a horizon before every transaction still
+// writing (one with an xid in pg_stat_activity), and a small settle margin
+// besides: a save that commits late can't land behind a cursor already
+// handed out. pg_stat_activity shows the sessions of this role, which are
+// all the API's writers.
 const _workoutChanges = '''
-WITH _changes AS (
+WITH _horizon AS (
+  SELECT LEAST(
+    now() - make_interval(secs => @settleSeconds),
+    COALESCE(
+      (SELECT min(xact_start) FROM pg_stat_activity
+       WHERE datname = current_database() AND backend_xid IS NOT NULL AND pid <> pg_backend_pid()),
+      'infinity'
+    )
+  ) AS at
+), _changes AS (
   SELECT id, updated_at AS at, false AS deleted
   FROM workouts
   WHERE user_id = @userId
-    AND updated_at < now() - make_interval(secs => @settleSeconds)
+    AND updated_at < (SELECT at FROM _horizon)
     AND (@sinceAt::timestamptz IS NULL OR (updated_at, id) > (@sinceAt::timestamptz, @sinceId::uuid))
   UNION ALL
   SELECT d.id, d.deleted_at, true
   FROM archive.deleted_workouts d
   WHERE d.user_id = @userId
-    AND d.deleted_at < now() - make_interval(secs => @settleSeconds)
+    AND d.deleted_at < (SELECT at FROM _horizon)
     AND (@sinceAt::timestamptz IS NULL OR (d.deleted_at, d.id) > (@sinceAt::timestamptz, @sinceId::uuid))
     AND NOT EXISTS (SELECT 1 FROM workouts w WHERE w.id = d.id)
 ), _page AS (
@@ -2486,7 +2500,7 @@ const _recordSets = '''
 SELECT
   e.id AS exercise_id, e.name, e.category,
   s.weight, s.reps, s.duration, s.distance,
-  w.id AS workout_id, w.started_at
+  w.id AS workout_id, COALESCE(w.started_at, w.created_at) AS started_at
 FROM exercise_sets s
 JOIN workout_exercises we ON we.id = s.workout_exercise_id
 JOIN workouts w ON w.id = we.workout_id
@@ -2495,5 +2509,5 @@ WHERE w.user_id = @userId
   AND s.completed
   AND s.set_type IS DISTINCT FROM 'w'
   AND (@exerciseId::uuid IS NULL OR we.exercise_id = @exerciseId::uuid)
-ORDER BY e.id, w.started_at, w.id, s.set_order
+ORDER BY e.id, COALESCE(w.started_at, w.created_at), w.id, s.set_order
 ''';
