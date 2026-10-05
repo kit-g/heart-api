@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:heart_models/heart_models.dart';
 
+import 'tolerant.dart';
+
 /// A collection of sets of the same exercise performed during a single workout
 /// E.g., squats 4x10
 abstract interface class WorkoutExercise
@@ -44,6 +46,12 @@ abstract interface class WorkoutExercise
   /// whether at least one set was marked as done
   bool get isStarted;
 
+  /// Sets this build could not read — a shape it predates — as they arrived.
+  /// Not among [sets]; [toMap] writes them back in place, so a save by this
+  /// build never drops them. An exercise whose every set is unread is empty
+  /// to iterate but still carries content.
+  List<Map> get unread;
+
   factory({required ExerciseSet starter}) {
     return _WorkoutExercise._(
       id: uuidV7(),
@@ -54,12 +62,11 @@ abstract interface class WorkoutExercise
 
   factory fromJson(Map json) {
     final exercise = Exercise.fromJson(json['exercise']);
+    final sets = readIndexed(json['sets'], (e) => ExerciseSet.fromJson(exercise, e));
     return _WorkoutExercise._(
       exercise: exercise,
-      sets: switch (json['sets']) {
-        List l => l.map((e) => ExerciseSet.fromJson(exercise, e)).toList(),
-        _ => [],
-      },
+      sets: sets.items,
+      unread: sets.unread,
       id: json['id'],
       order: json['exercise_order'] ?? json['order'],
       met: (json['met'] as num?)?.toDouble(),
@@ -159,6 +166,14 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
 
   Map<String, WorkoutImage>? get images;
 
+  /// Exercises this build could not read — an exercise of a category it
+  /// doesn't know, a set shape it predates — as they arrived. Not among the
+  /// workout's exercises; [toMap] writes them back in place with a fresh
+  /// `order`, so a save by this build never drops them. A copy with a fresh
+  /// id ([copy]) leaves them behind: a repeat starts from what this build can
+  /// see.
+  List<Map> get unread;
+
   /// Whether this workout has been confirmed saved on the server. A locally
   /// finished workout starts `false` and flips to `true` once the API save
   /// succeeds; workouts read from the server are `true`. Drives retry of
@@ -183,6 +198,7 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
   }
 
   factory fromRow(Map row, {required String Function(String) imageUrl}) {
+    final exercises = _exercises(row['exercises']);
     return _Workout._(
       id: row['id'],
       name: row['name'] as String,
@@ -196,10 +212,8 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
         String s when s.isNotEmpty => DateTime.tryParse(s),
         _ => null,
       },
-      exercises: switch (row['exercises']) {
-        List l => l.map((e) => WorkoutExercise.fromJson(e)).toList(),
-        _ => [],
-      },
+      exercises: exercises.items,
+      unread: exercises.unread,
       images: switch (row['images']) {
         List l when l.isNotEmpty => {
           for (final e in l) (e as Map)['id'].toString(): WorkoutImage.fromRow(imageUrl(e['key'].toString()), e),
@@ -254,6 +268,14 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
   Duration elapsed();
 }
 
+({List<WorkoutExercise> items, List<(int, Map)> unread}) _exercises(Object? value) {
+  return readIndexed(value, (each) => WorkoutExercise.fromJson(each));
+}
+
+/// Whether [exercise] has anything a write should carry: a set this build
+/// read, or one it could not.
+bool _carriesSets(WorkoutExercise exercise) => exercise.isNotEmpty || exercise.unread.isNotEmpty;
+
 List<WorkoutPause> _pauses(Object? value) {
   return switch (value) {
     final List l => l.map((each) => WorkoutPause.fromJson(each as Map)).toList(),
@@ -265,6 +287,7 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
   @override
   final String id;
   final List<ExerciseSet> _sets;
+  final List<(int, Map)> _unread;
   final Exercise _exercise;
   final DateTime start;
 
@@ -286,8 +309,10 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
     this.note,
     required this._exercise,
     List<ExerciseSet>? sets,
+    List<(int, Map)>? unread,
   }) : start = start ?? DateTime.timestamp(),
-       _sets = sets ?? [] {
+       _sets = sets ?? [],
+       _unread = unread ?? [] {
     if (starter != null) {
       _sets.add(starter);
     }
@@ -308,6 +333,9 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
 
   @override
   Iterable<ExerciseSet> get sets => _sets;
+
+  @override
+  List<Map> get unread => [for (final (_, json) in _unread) json];
 
   @override
   Exercise get exercise => _sets.firstOrNull?.exercise ?? _exercise;
@@ -332,13 +360,13 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'exercise': ?firstOrNull?.exercise.toMap(),
+      // an emptied editor row names no exercise, which is how the server tells
+      // it from a malformed one
+      if (_carriesSets(this)) 'exercise': exercise.toMap(),
       'start': start.toIso8601String(),
       'met': ?met,
       'note': ?note,
-      'sets': [
-        for (final each in this) each.toMap(),
-      ],
+      'sets': splice([for (final each in this) each.toMap()], _unread),
     };
   }
 
@@ -465,6 +493,7 @@ class _WorkoutImage implements WorkoutImage {
 
 class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   final List<WorkoutExercise> _sets;
+  final List<(int, Map)> _unread;
   @override
   DateTime start;
   @override
@@ -494,6 +523,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
     this.name,
     required this.id,
     List<WorkoutExercise>? exercises,
+    List<(int, Map)>? unread,
     this.end,
     this.calories,
     this.note,
@@ -501,10 +531,12 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
     Map<String, WorkoutImage>? images,
     this.synced = false,
   }) : _sets = exercises ?? <WorkoutExercise>[],
+       _unread = unread ?? [],
        pauses = pauses ?? [],
        images = SplayTreeMap.from(images ?? {});
 
   factory fromJson(Map json) {
+    final exercises = _exercises(json['exercises']);
     return _Workout._(
       start: DateTime.parse(json['start']),
       name: json['name'],
@@ -513,10 +545,8 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       calories: (json['calories'] as num?)?.toDouble(),
       note: json['note'] as String?,
       pauses: _pauses(json['pauses']),
-      exercises: switch (json['exercises']) {
-        List l => l.map((each) => WorkoutExercise.fromJson(each)).toList(),
-        _ => null,
-      },
+      exercises: exercises.items,
+      unread: exercises.unread,
       images: switch (json) {
         {'images': List l} when l.isNotEmpty => SplayTreeMap<String, WorkoutImage>.fromIterables(
           l.map<String>((each) => (each as Map)['id']),
@@ -542,6 +572,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   Iterable<WorkoutExercise> get sets => _sets;
 
   @override
+  List<Map> get unread => [for (final (_, json) in _unread) json];
+
+  @override
   bool remove(WorkoutExercise exercise) {
     return _sets.remove(exercise);
   }
@@ -551,9 +584,10 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
 
   @override
   Map<String, dynamic> toMap() {
-    Map<String, dynamic> asRequest((int, WorkoutExercise) record) {
-      return {'order': record.$1, ...record.$2.toMap()};
-    }
+    // one `order` sequence over what this build read and what it could not:
+    // the server refuses a repeated order, and an unread exercise arrived
+    // with the order it had among the others
+    final exercises = splice([for (final each in where(_carriesSets)) each.toMap()], _unread);
 
     return {
       'id': id,
@@ -566,7 +600,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       'note': note,
       // always present for the same reason: an empty list is no pauses
       'pauses': pauses.map((pause) => pause.toMap()).toList(),
-      'exercises': where((ex) => ex.isNotEmpty).indexed.map(asRequest).toList(),
+      'exercises': [
+        for (final (order, each) in exercises.indexed) {...each, 'order': order},
+      ],
       'images': images.values.map((img) => img.toRow()).toList(),
     };
   }
@@ -672,6 +708,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       calories: sameId ? calories : null,
       note: sameId ? note : null,
       pauses: sameId ? [...pauses] : null,
+      unread: sameId ? [..._unread] : null,
       images: images,
     );
 
@@ -715,7 +752,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   @override
   void removeEmptySets() {
     forEach((exercise) => exercise.where((set) => !set.isCompleted).toList().forEach(exercise.remove));
-    where((exercise) => exercise.isEmpty).toList().forEach(remove);
+    where((exercise) => !_carriesSets(exercise)).toList().forEach(remove);
   }
 
   @override

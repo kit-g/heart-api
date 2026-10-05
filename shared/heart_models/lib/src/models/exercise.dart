@@ -304,16 +304,7 @@ abstract interface class Movement implements Model {
 
   factory fromJson(Map json) = _Movement.fromJson;
 
-  factory empty() {
-    return const _Movement(
-      groups: [],
-      axialLoad: .none,
-      stability: .free,
-      unilateral: false,
-      impact: .none,
-      skill: .low,
-    );
-  }
+  factory empty() => _Movement.empty;
 }
 
 class _Movement implements Movement {
@@ -339,10 +330,30 @@ class _Movement implements Movement {
     required this.skill,
   });
 
-  /// Absent keys fall back to the schema defaults; a present but unrecognised
-  /// value throws, so bad content fails loudly instead of silently reading as
-  /// "unloaded".
+  static const empty = _Movement(
+    groups: [],
+    axialLoad: .none,
+    stability: .free,
+    unilateral: false,
+    impact: .none,
+    skill: .low,
+  );
+
+  /// Absent keys fall back to the schema defaults. A present but unrecognised
+  /// word is a vocabulary this build predates, and the whole annotation then
+  /// reads as [empty]: no substitutes and no movement filter matched, which is
+  /// the honest reading of an annotation this build cannot interpret — never
+  /// "unloaded", and never a failed exercise. Content validity is the publishing
+  /// pipeline's job, not a reader's.
   factory fromJson(Map json) {
+    try {
+      return _Movement._fromJson(json);
+    } on ArgumentError {
+      return empty;
+    }
+  }
+
+  factory _fromJson(Map json) {
     return _Movement(
       groups: switch (json['groups']) {
         List l => l.cast<String>(),
@@ -619,13 +630,15 @@ class _Health implements Health {
 
   const new({required this.activity});
 
-  /// An absent key is the annotated-nowhere common case; a present but
-  /// unrecognised value throws, so bad content fails loudly instead of
-  /// silently mislabeling a workout in the user's own health record.
+  /// An absent key is the annotated-nowhere common case. A present but
+  /// unrecognised word is a vocabulary this build predates and reads as no
+  /// annotation, so [resolve] falls back by category — a workout is never
+  /// mislabeled in the user's own health record by a guess, and never failed
+  /// over a word.
   factory fromJson(Map json) {
     return _Health(
       activity: switch (json['activity']) {
-        String s => HealthActivity.fromString(s),
+        String s => HealthActivity.values.where((activity) => activity.value == s).firstOrNull,
         _ => null,
       },
     );
