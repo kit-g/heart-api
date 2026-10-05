@@ -71,6 +71,14 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
 
   abstract SetType setType;
 
+  /// The `set_type` word a write carries: [setType]'s value, or, when the set
+  /// arrived with a word this build doesn't know, that word untouched.
+  /// [setType] then reads [SetType.normal], so the set still shows and counts;
+  /// assigning [setType] replaces the word. A writer that stores a set's type
+  /// keeps this, not [setType]'s value — otherwise an older build rewrites a
+  /// newer type as `normal` on its next save.
+  String get setTypeValue;
+
   /// Rate of perceived exertion as the lifter rated it: 1–10 in whole or half
   /// points, null when not rated. Stored as RPE whatever the user reads it as;
   /// reps in reserve is `10 - rpe`, a display choice. Valid on a set of any
@@ -131,34 +139,42 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
   }
 
   factory fromJson(Exercise exercise, Map json) {
-    return ExerciseSet(
-        exercise,
-        reps: json['reps'],
-        id: json['id'],
-        weight: switch (json['weight']) {
-          num weight => weight.toDouble(),
-          _ => null,
-        },
-        duration: (json['duration'] as num?)?.toInt(),
-        distance: (json['distance'] as num?)?.toDouble(),
-        start: switch (json['started_at']) {
-          String s => DateTime.parse(s),
-          DateTime dt => dt,
-          _ => DateTime.timestamp(),
-        },
-        setType: SetType.lenient(json['set_type'] as String?),
-        rpe: (json['rpe'] as num?)?.toDouble(),
-      )
-      ..isCompleted = switch (json['completed']) {
-        bool completed => completed,
-        1 => true,
-        _ => false,
-      }
-      ..completedAt = switch (json['completed_at']) {
-        String s => DateTime.tryParse(s),
-        DateTime dt => dt,
-        _ => null,
-      };
+    final word = json['set_type'] as String?;
+    final set =
+        ExerciseSet(
+            exercise,
+            reps: json['reps'],
+            id: json['id'],
+            weight: switch (json['weight']) {
+              num weight => weight.toDouble(),
+              _ => null,
+            },
+            duration: (json['duration'] as num?)?.toInt(),
+            distance: (json['distance'] as num?)?.toDouble(),
+            start: switch (json['started_at']) {
+              String s => DateTime.parse(s),
+              DateTime dt => dt,
+              _ => DateTime.timestamp(),
+            },
+            setType: SetType.lenient(word),
+            rpe: (json['rpe'] as num?)?.toDouble(),
+          )
+          ..isCompleted = switch (json['completed']) {
+            bool completed => completed,
+            1 => true,
+            _ => false,
+          }
+          ..completedAt = switch (json['completed_at']) {
+            String s => DateTime.tryParse(s),
+            DateTime dt => dt,
+            _ => null,
+          };
+    // the factory above is this file's one implementation; a word it read as
+    // normal because it doesn't know it is carried for the next write
+    if (word != null && SetType.lenient(word).value != word) {
+      (set as _ExerciseSet)._unreadSetType = word;
+    }
+    return set;
   }
 
   bool get canBeCompleted;
@@ -229,7 +245,7 @@ class _ExerciseSet implements ExerciseSet {
       'weight': ?weight,
       // always present, so a client that knows the fields can clear them; a
       // body without the keys leaves the stored values alone
-      'set_type': setType.value,
+      'set_type': setTypeValue,
       'rpe': rpe,
     };
   }
@@ -276,8 +292,22 @@ class _ExerciseSet implements ExerciseSet {
   @override
   DateTime? completedAt;
 
+  SetType _setType = .normal;
+
+  /// A `set_type` word this build doesn't know, carried as it arrived.
+  String? _unreadSetType;
+
   @override
-  SetType setType = .normal;
+  SetType get setType => _setType;
+
+  @override
+  set setType(SetType type) {
+    _setType = type;
+    _unreadSetType = null;
+  }
+
+  @override
+  String get setTypeValue => _unreadSetType ?? _setType.value;
 
   @override
   double? rpe;
@@ -318,7 +348,8 @@ class _ExerciseSet implements ExerciseSet {
       ..duration = duration
       ..distance = distance
       ..reps = reps
-      ..setType = setType;
+      ..setType = setType
+      .._unreadSetType = _unreadSetType;
   }
 
   @override

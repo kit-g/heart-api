@@ -5,6 +5,7 @@ import 'exercise.dart';
 import 'exercise_set.dart';
 import 'misc.dart';
 import 'template_folder.dart';
+import 'tolerant.dart';
 import 'uuid.dart';
 import 'workout.dart';
 
@@ -54,6 +55,13 @@ abstract interface class Template
   /// fallback. Null only for an id from neither era.
   DateTime? get createdAt;
 
+  /// Exercises this build could not read — a category it doesn't know, a set
+  /// shape it predates — as they arrived. Not among the template's exercises;
+  /// [toMap] writes them back in place, so a save by this build never drops
+  /// them. [toWorkout] leaves them behind: a session starts from what this
+  /// build can see.
+  List<Map> get unread;
+
   Workout toWorkout();
 
   /// An otherwise identical template filed under [folder] — null unfiles it.
@@ -75,11 +83,10 @@ abstract interface class Template
   }
 
   factory fromJson(Map json) {
+    final exercises = _exercises(json['exercises']);
     return _Template(
-      exercises: switch (json['exercises']) {
-        List l => l.map((each) => WorkoutExercise.fromJson(each)).toList(),
-        _ => [],
-      },
+      exercises: exercises.items,
+      unread: exercises.unread,
       id: json['id'].toString(),
       order: json['order'],
       name: json['name'],
@@ -111,14 +118,13 @@ abstract interface class Template
   /// The folder arrives as the flat `folder_*` columns of the `LEFT JOIN` in
   /// `_listTemplates` and friends — null across the board when unfiled.
   factory fromRow(Map<String, dynamic> row) {
+    final exercises = _exercises(row['exercises']);
     return _Template(
       id: row['id'].toString(),
       name: row['name'] as String? ?? '',
       order: (row['order_index'] as num?)?.toInt() ?? 0,
-      exercises: switch (row['exercises']) {
-        List l => l.map((each) => WorkoutExercise.fromJson(each as Map)).toList(),
-        _ => [],
-      },
+      exercises: exercises.items,
+      unread: exercises.unread,
       local: false,
       folder: switch (row['folder_id']) {
         null => null,
@@ -143,6 +149,10 @@ abstract interface class Template
   }
 }
 
+({List<WorkoutExercise> items, List<(int, Map)> unread}) _exercises(Object? value) {
+  return readIndexed(value, (each) => WorkoutExercise.fromJson(each));
+}
+
 class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
   @override
   final String id;
@@ -162,9 +172,11 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
   final bool? syncEnabled;
 
   final List<WorkoutExercise> _exercises;
+  final List<(int, Map)> _unread;
 
   new({
     required this._exercises,
+    List<(int, Map)>? unread,
     this.name,
     required this.id,
     required this.order,
@@ -173,10 +185,13 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
     this.sourceTemplateId,
     this.assignedBy,
     this.syncEnabled,
-  });
+  }) : _unread = unread ?? [];
 
   @override
   String? get folderId => folder?.id;
+
+  @override
+  List<Map> get unread => [for (final (_, json) in _unread) json];
 
   @override
   bool get isAssigned => assignedBy != null;
@@ -220,6 +235,7 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
   Template copyWith({required TemplateFolder? folder}) {
     return _Template(
       exercises: List.of(_exercises),
+      unread: [..._unread],
       id: id,
       order: order,
       name: name,
@@ -261,9 +277,7 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       'sourceTemplateId': ?sourceTemplateId,
       'assignedBy': ?assignedBy?.toMap(),
       'syncEnabled': ?syncEnabled,
-      'exercises': [
-        for (final exercise in this) exercise.toMap(),
-      ],
+      'exercises': splice([for (final exercise in this) exercise.toMap()], _unread),
     };
   }
 
