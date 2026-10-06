@@ -21,3 +21,16 @@ class ApiTokenCreateIn {
     );
   }
 }
+
+/// `GET /me/export?format=` — required, so a new default can never silently
+/// change what an existing script downloads.
+class ExportQuery {
+  final ExportFormat format;
+
+  const new _({required this.format});
+
+  static ExportQuery fromRequest(Request req) {
+    final q = req.url.queryParameters;
+    return ExportQuery._(format: q.parsed('format', ExportFormat.fromString));
+  }
+}

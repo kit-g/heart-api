@@ -71,6 +71,11 @@ abstract interface class ApiTokenService {
   /// it is not theirs. Revoking twice keeps the first revocation time.
   Future<bool> revokeToken({required String userId, required String tokenId});
 
+  /// Claims [userId]'s export allowance: one full export a day. Null when
+  /// claimed; otherwise when the last export started, which is what the wait
+  /// counts from.
+  Future<DateTime?> claimExport(String userId);
+
   /// Resolves a token by its hash and counts the request against its account,
   /// in one round trip. Null when the token is unknown, revoked or expired.
   Future<TokenUse?> useToken(Uint8List tokenHash);
