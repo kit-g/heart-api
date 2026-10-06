@@ -10,7 +10,7 @@ import 'package:relic/relic.dart';
 /// of a Firebase session, its own rate limit and usage log, and only the
 /// services its routes read. The app's router attaches it at [tokenPrefix].
 RelicRouter buildMeRouter({required Database database}) {
-  final router = RelicRouter()
+  return RelicRouter()
     ..use('/', apiTokensDb(db: database))
     ..use('/', tokenAuthentication())
     ..use('/', profilesDb(db: database))
@@ -18,7 +18,6 @@ RelicRouter buildMeRouter({required Database database}) {
     ..use('/', exercisesDb(db: database))
     ..use('/', templatesDb(db: database))
     ..use('/', templateFoldersDb(db: database))
-    ..use('/', goalsDb(db: database));
-  addRoutes(router, meRoutes);
-  return router;
+    ..use('/', goalsDb(db: database))
+    ..addRoutes(meRoutes);
 }
