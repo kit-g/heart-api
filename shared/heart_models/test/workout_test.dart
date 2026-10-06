@@ -5,6 +5,77 @@ import 'package:test/test.dart';
 import 'mocks.mocks.dart';
 
 void main() {
+  group('Workout.copy', () {
+    const bench = {
+      'id': '0198c1a2-b3c4-7d5e-8f60-718293a4b5c6',
+      'name': 'Bench Press',
+      'category': 'Barbell',
+      'target': 'Chest',
+    };
+    final workout = Workout.fromJson({
+      'id': 'w-1',
+      'name': 'Push',
+      'start': '2026-10-05T10:00:00Z',
+      'end': '2026-10-05T11:00:00Z',
+      'exercises': [
+        {
+          'id': 'we-1',
+          'order': 0,
+          'exercise': bench,
+          'start': '2026-10-05T10:00:00Z',
+          'met': 6.0,
+          'note': 'pause at the bottom',
+          'sets': [
+            {
+              'id': 's-1',
+              'reps': 5,
+              'weight': 100,
+              'started_at': '2026-10-05T10:00:00Z',
+              'completed': true,
+              'completed_at': '2026-10-05T10:01:00Z',
+              'set_type': 'warmup',
+              'rpe': 6,
+            },
+          ],
+        },
+      ],
+    });
+
+    test('a same-id copy is the session as it is', () {
+      final same = workout.copy(sameId: true);
+      expect(same.toMap(), workout.toMap());
+      expect(same.single.id, 'we-1');
+      expect(same.single.met, 6.0);
+      final set = same.single.single;
+      expect(set.id, 's-1');
+      expect(set.isCompleted, isTrue);
+      expect(set.completedAt, DateTime.parse('2026-10-05T10:01:00Z'));
+      expect(set.rpe, 6.0);
+      expect(set.setType, SetType.warmup);
+    });
+
+    test('a same-id copy owns its sets', () {
+      final same = workout.copy(sameId: true);
+      same.single.single.isCompleted = false;
+      expect(workout.single.single.isCompleted, isTrue);
+    });
+
+    test('a repeat mints new ids and starts incomplete and unrated', () {
+      final repeat = workout.copy();
+      expect(repeat.id, isNot('w-1'));
+      expect(repeat.single.id, isNot('we-1'));
+      expect(repeat.single.met, isNull);
+      expect(repeat.single.note, 'pause at the bottom');
+      final set = repeat.single.single;
+      expect(set.id, isNot('s-1'));
+      expect(set.isCompleted, isFalse);
+      expect(set.completedAt, isNull);
+      expect(set.rpe, isNull);
+      expect(set.setType, SetType.warmup);
+      expect(set.reps, 5);
+    });
+  });
+
   late MockExercise mockExercise;
 
   setUp(

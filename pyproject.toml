@@ -24,8 +24,10 @@ assets = { workspace = true }
 
 [dependency-groups]
 dev = [
-    "urllib3>=2.7.0", # security override
+    "urllib3>=2.8.0", # security override
     "cryptography>=50.0.0", # security override
+    "pyjwt>=2.15.0", # security override
+    "virtualenv>=21.7.13", # security override
     "pyyaml>=6.0.3",
     "pytest>=8.3",
     "pytest-mock>=3.14",

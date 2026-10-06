@@ -46,6 +46,13 @@ abstract interface class WorkoutAggregation with Iterable<WeekSummary> {
   factory empty() = _WorkoutAggregation.empty;
 
   int get max;
+
+  /// Every workout in the aggregation, not every week.
+  ///
+  /// What a goal's reading is keyed on. `length` counts weeks, and a session
+  /// logged into a week that already exists leaves that unchanged — so a goal
+  /// keyed on it went on showing the value it had before the workout landed.
+  int get workoutCount;
 }
 
 class _WorkoutSummary implements WorkoutSummary {
@@ -109,6 +116,9 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
 
   @override
   bool get isEmpty => !any((summary) => summary.isNotEmpty);
+
+  @override
+  int get workoutCount => fold(0, (total, week) => total + week.length);
 
   factory empty() {
     return const _WorkoutAggregation(weeks: []);

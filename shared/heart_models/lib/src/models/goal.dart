@@ -333,6 +333,16 @@ abstract interface class Goal implements Model {
     List<GoalStage>? stages,
     bool? archived,
   });
+
+  /// The body a goal is created or replaced with: the definition, the ladder,
+  /// and [archived].
+  ///
+  /// [id] and [createdAt] stay the server's to mint, so unlike [toMap] this
+  /// carries neither. [archived] is sent: the client decides when a finished
+  /// goal is put away, and a body without it reads as "live", so an archive
+  /// that left it out never persisted. Stage ids are sent when known — they
+  /// are preserved, which is what keeps an offline-minted ladder addressable.
+  Map<String, dynamic> toBody();
 }
 
 class _Goal implements Goal {
@@ -402,6 +412,17 @@ class _Goal implements Goal {
       'stages': stages.map((stage) => stage.toMap()).toList(),
       'archived': archived,
       'createdAt': ?createdAt?.toUtc().toIso8601String(),
+    };
+  }
+
+  @override
+  Map<String, dynamic> toBody() {
+    return {
+      'metric': metric.value,
+      'exerciseId': ?exerciseId,
+      'cadence': ?cadence?.value,
+      'archived': archived,
+      'stages': stages.map((stage) => stage.toMap()).toList(),
     };
   }
 }

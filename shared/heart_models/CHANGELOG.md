@@ -1,5 +1,68 @@
 # Changelog
 
+## 2.11.0
+
+Reads survive a value this build doesn't know (heart-api#125,
+heart-of-yours#277): an app in the stores keeps working when the server or the
+CDN adds a category, a set type, a metric or the like, and never deletes or
+rewrites what it could not read.
+
+- New: `readEach(items, read)` and `ReadList<T>`, a list read item by item;
+  the items `read` rejects (`ArgumentError`, `TypeError`, `FormatException`)
+  are set aside in `unread` instead of failing the list. For the lists a
+  client parses itself: the library, workouts, templates, goals, preferences.
+- New: `Workout.unread`, `Template.unread`, `WorkoutExercise.unread` — the
+  exercises or sets this build could not read, as they arrived. `fromJson`
+  and `fromRow` set them aside instead of failing; `toMap` writes them back in
+  place (a workout's with a fresh unique `order`), so a save carries them
+  untouched. A fresh-id `Workout.copy` and `Template.toWorkout` leave them
+  behind. An exercise whose only sets are unread is kept by `Workout.toMap`
+  and `removeEmptySets`.
+- Changed: `Workout.copy(sameId: true)` is the same session as it is — every
+  exercise and set keeps its id, order, state and rating, and every exercise
+  and set this build could not read comes along (heart-api#131). A fresh-id
+  copy is unchanged: a repeat with new ids, unrated, readable items only.
+  `ExerciseSet.copy` gains `sameId` for the same purpose.
+- New: `ExerciseSet.setTypeValue`, the `set_type` word a write carries. A set
+  with a type this build doesn't know still reads as `normal` (as before), but
+  `toMap` and `copy` now carry the original word instead of rewriting it as
+  `normal`; assigning `setType` replaces it. Writers that store a set's type
+  keep this word.
+- Changed: `Movement.fromJson` reads an unrecognised attribute word as
+  `Movement.empty()` (no substitutes, no movement filter matched) and
+  `Health.fromJson` an unrecognised activity as none (`resolve` falls back by
+  category), instead of throwing. Absent keys read as before.
+
+The `fromString` parsers stay strict: they are what the server validates
+input with.
+
+## 2.10.0
+
+Domain rules the app kept as its own extensions (heart-api#126), so the
+server and every client get the same answer.
+
+- New: `Category.isTimed`, the categories whose sets hold a time (Duration,
+  Cardio, Weighted Duration).
+- New: `Category.distanceScale` and `DistanceScale` (`short`: metres or
+  yards; `long`: kilometres or miles). Weighted Distance reads short; storage
+  stays in kilometres.
+- New: `Movement.distanceTo(Movement)`, the substitute ranking: the sum of
+  gaps on axial load, impact and skill plus a flat mismatch on stability and
+  unilateral. Only the order is meaningful.
+- New: `MovementFilter` with `PatternFilter`, `SkillCeiling` and
+  `StabilityFilter`; `Exercise.matchesMovement(filters)`, and `Exercise.fits`
+  now applies the movement dimensions too. An exercise with no movement
+  annotation never matches an active movement filter.
+- New: `Goal.toBody()`, the create/replace request body — metric,
+  exerciseId, cadence, archived, stages with their ids; never `id` or
+  `createdAt`.
+- New: `WorkoutAggregation.workoutCount`, workouts rather than weeks.
+- New: `ChartPreferenceType.periodAggregate` and `PeriodAggregate`
+  (`sum`/`best`/`mean`, with `of(values)`): how a dimension's sessions fold
+  into one number for a recurring goal.
+- New: `ChartPreferenceType.isDuration` (cardio duration, time under tension).
+- New: `Iterable<Exercise>.byId`.
+
 ## 2.9.0
 
 Personal access tokens for the developer API (heart-api#111).
