@@ -106,8 +106,8 @@ RelicApp buildApp({
     // nothing registered above reaches it on its own, logging included.
     ..fallback = requestLogging()(crossOrigin(respondWith((_) => JsonResponse.noSuchRoute())));
 
-  addRoutes(app, routes);
   app
+    ..addRoutes(routes)
     ..attach(tokenPrefix, buildMeRouter(database: database, storage: storage), consume: true)
     ..attach(mcpPrefix, buildMcpRouter(database: database), consume: true);
 
