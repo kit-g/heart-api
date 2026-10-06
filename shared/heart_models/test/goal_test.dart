@@ -2,6 +2,45 @@ import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('Goal.toBody', () {
+    test('carries the definition, archived and the stages with their ids, never id or createdAt', () {
+      final goal = Goal(
+        id: 'g-1',
+        metric: GoalMetric.topSetWeight,
+        exerciseId: 'e-1',
+        archived: true,
+        createdAt: DateTime.utc(2026, 1, 1),
+        stages: [
+          GoalStage(id: 's-1', target: 100),
+          GoalStage(target: 140),
+        ],
+      );
+
+      expect(goal.toBody(), {
+        'metric': 'topSetWeight',
+        'exerciseId': 'e-1',
+        'archived': true,
+        'stages': [
+          {'id': 's-1', 'target': 100},
+          {'target': 140},
+        ],
+      });
+    });
+
+    test('a live recurring goal sends cadence and archived: false', () {
+      final goal = Goal(metric: GoalMetric.workouts, cadence: GoalCadence.week, stages: [GoalStage(target: 3)]);
+
+      expect(goal.toBody(), {
+        'metric': 'workouts',
+        'cadence': 'week',
+        'archived': false,
+        'stages': [
+          {'target': 3},
+        ],
+      });
+    });
+  });
+
   group('GoalMetric', () {
     test('every metric but workouts maps onto a chart metric', () {
       for (final metric in GoalMetric.values) {

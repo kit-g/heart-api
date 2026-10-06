@@ -21,6 +21,7 @@ export 'src/models/shares.dart';
 export 'src/models/stats.dart';
 export 'src/models/template.dart';
 export 'src/models/template_folder.dart';
+export 'src/models/tolerant.dart' hide readIndexed, splice;
 export 'src/models/utils.dart';
 export 'src/models/uuid.dart';
 export 'src/models/workout.dart';

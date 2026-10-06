@@ -54,6 +54,50 @@ enum Category implements ExerciseFilter {
   bool canSwitchTo(Category other) {
     return _isWeightCategory && other._isWeightCategory;
   }
+
+  /// Whether this category's sets hold a time — what a stopwatch can fill.
+  bool get isTimed {
+    return switch (this) {
+      .duration || .cardio || .weightedDuration => true,
+      .repsOnly ||
+      .barbell ||
+      .dumbbell ||
+      .machine ||
+      .weightedBodyWeight ||
+      .assistedBodyWeight ||
+      .weightedDistance => false,
+    };
+  }
+
+  /// The scale this category's distance is read on. Storage is kilometres for
+  /// every category; a carry covers a few tens of metres, which nobody types
+  /// or reads as `0.04 km`.
+  DistanceScale get distanceScale {
+    return switch (this) {
+      .weightedDistance => .short,
+      .cardio ||
+      .duration ||
+      .repsOnly ||
+      .barbell ||
+      .dumbbell ||
+      .machine ||
+      .weightedBodyWeight ||
+      .assistedBodyWeight ||
+      .weightedDuration => .long,
+    };
+  }
+}
+
+/// The scale a distance is shown and typed on. Every distance is stored in
+/// kilometres; this says only how a stored value reads — metres or yards for
+/// [short], kilometres or miles for [long] — so a 40 m carry and a 10 km run
+/// both read as the number the lifter would say aloud.
+enum DistanceScale {
+  /// Metres, or yards under imperial units.
+  short,
+
+  /// Kilometres, or miles under imperial units.
+  long,
 }
 
 enum Target implements ExerciseFilter {
@@ -246,18 +290,21 @@ abstract interface class Movement implements Model {
   /// so is a candidate substitution.
   bool sharesPatternWith(Movement other);
 
+  /// How far [other] sits from this movement across the load attributes, as a
+  /// plain sum — smaller is a closer substitute. This is the ranking behind a
+  /// substitute list; it says nothing about whether two movements are
+  /// substitutes at all, which is [sharesPatternWith].
+  ///
+  /// [axialLoad], [impact] and [skill] are ordinal, so they contribute the gap
+  /// between them; [stability] and [unilateral] are unordered, so they
+  /// contribute a flat mismatch. The dimensions are weighted equally, which is
+  /// a starting point rather than a claim: nothing downstream may depend on
+  /// the absolute numbers, only on the order they produce.
+  int distanceTo(Movement other);
+
   factory fromJson(Map json) = _Movement.fromJson;
 
-  factory empty() {
-    return const _Movement(
-      groups: [],
-      axialLoad: .none,
-      stability: .free,
-      unilateral: false,
-      impact: .none,
-      skill: .low,
-    );
-  }
+  factory empty() => _Movement.empty;
 }
 
 class _Movement implements Movement {
@@ -283,10 +330,30 @@ class _Movement implements Movement {
     required this.skill,
   });
 
-  /// Absent keys fall back to the schema defaults; a present but unrecognised
-  /// value throws, so bad content fails loudly instead of silently reading as
-  /// "unloaded".
+  static const empty = _Movement(
+    groups: [],
+    axialLoad: .none,
+    stability: .free,
+    unilateral: false,
+    impact: .none,
+    skill: .low,
+  );
+
+  /// Absent keys fall back to the schema defaults. A present but unrecognised
+  /// word is a vocabulary this build predates, and the whole annotation then
+  /// reads as [empty]: no substitutes and no movement filter matched, which is
+  /// the honest reading of an annotation this build cannot interpret — never
+  /// "unloaded", and never a failed exercise. Content validity is the publishing
+  /// pipeline's job, not a reader's.
   factory fromJson(Map json) {
+    try {
+      return _Movement._fromJson(json);
+    } on ArgumentError {
+      return empty;
+    }
+  }
+
+  factory _fromJson(Map json) {
     return _Movement(
       groups: switch (json['groups']) {
         List l => l.cast<String>(),
@@ -335,6 +402,130 @@ class _Movement implements Movement {
   bool sharesPatternWith(Movement other) {
     return groups.any(other.groups.contains);
   }
+
+  @override
+  int distanceTo(Movement other) {
+    int gap(int a, int b) => (a - b).abs();
+    int mismatch({required bool same}) => same ? 0 : 1;
+
+    return gap(axialLoad.index, other.axialLoad.index) +
+        gap(impact.index, other.impact.index) +
+        gap(skill.index, other.skill.index) +
+        mismatch(same: stability == other.stability) +
+        mismatch(same: unilateral == other.unilateral);
+  }
+}
+
+/// A filter over an exercise's [Movement], carried in the same set as
+/// [Category] and [Target] and applied by [Exercise.fits].
+///
+/// Filters sharing a [dimension] are OR-ed; different dimensions are AND-ed —
+/// the shape category and target already have. Two patterns widen the result,
+/// a pattern and a skill ceiling narrow it. Dispatch is keyed on [dimension]
+/// rather than on the runtime type, so a new dimension needs no change to
+/// [Exercise.matchesMovement].
+///
+/// [value] is an identifier, not copy: the raw pattern key or enum value. A
+/// client renders these itself — the wording differs between a sheet, where a
+/// section header names the dimension, and an active-filter row, where the
+/// chip stands alone next to "Chest" and "Barbell".
+abstract class MovementFilter implements ExerciseFilter {
+  const new();
+
+  String get dimension;
+
+  @override
+  String get value;
+
+  bool matches(Movement movement);
+}
+
+/// A movement pattern the exercise must train, e.g. `horizontal_press`.
+///
+/// Both sides are multi-valued, so this is set intersection rather than
+/// equality: an exercise annotated with two patterns matches a filter on
+/// either.
+class PatternFilter extends MovementFilter {
+  final String pattern;
+
+  const new(this.pattern);
+
+  @override
+  String get dimension => 'pattern';
+
+  @override
+  bool matches(Movement movement) => movement.groups.contains(pattern);
+
+  @override
+  String get value => pattern;
+
+  @override
+  bool operator ==(Object other) => other is PatternFilter && other.pattern == pattern;
+
+  @override
+  int get hashCode => pattern.hashCode;
+
+  @override
+  String toString() => value;
+}
+
+/// Ceiling on technical demand: [SkillLevel.moderate] admits `low` and
+/// `moderate`, never `high`.
+///
+/// [SkillLevel] is ordinal, so this is a ceiling and not set membership — a
+/// lifter asking for moderate means "nothing harder than", not "exactly
+/// moderate". Two ceilings in the same set OR to the looser one, which is the
+/// sane reading of picking both.
+class SkillCeiling extends MovementFilter {
+  final SkillLevel limit;
+
+  const new(this.limit);
+
+  @override
+  String get dimension => 'skill';
+
+  @override
+  bool matches(Movement movement) => movement.skill.atMost(limit);
+
+  @override
+  String get value => limit.value;
+
+  @override
+  bool operator ==(Object other) => other is SkillCeiling && other.limit == limit;
+
+  @override
+  int get hashCode => limit.hashCode;
+
+  @override
+  String toString() => value;
+}
+
+/// How much the movement path is constrained.
+///
+/// Categorical — `machine` is not "more" than `free` — so set membership is
+/// correct here, unlike the ordinal dimensions.
+class StabilityFilter extends MovementFilter {
+  final Stability stability;
+
+  const new(this.stability);
+
+  @override
+  String get dimension => 'stability';
+
+  @override
+  bool matches(Movement movement) => movement.stability == stability;
+
+  @override
+  String get value => stability.value;
+
+  @override
+  bool operator ==(Object other) => other is StabilityFilter && other.stability == stability;
+
+  @override
+  int get hashCode => stability.hashCode;
+
+  @override
+  String toString() => value;
 }
 
 /// Canonical activity type a session of an exercise is written to the platform
@@ -439,13 +630,15 @@ class _Health implements Health {
 
   const new({required this.activity});
 
-  /// An absent key is the annotated-nowhere common case; a present but
-  /// unrecognised value throws, so bad content fails loudly instead of
-  /// silently mislabeling a workout in the user's own health record.
+  /// An absent key is the annotated-nowhere common case. A present but
+  /// unrecognised word is a vocabulary this build predates and reads as no
+  /// annotation, so [resolve] falls back by category — a workout is never
+  /// mislabeled in the user's own health record by a guess, and never failed
+  /// over a word.
   factory fromJson(Map json) {
     return _Health(
       activity: switch (json['activity']) {
-        String s => HealthActivity.fromString(s),
+        String s => HealthActivity.values.where((activity) => activity.value == s).firstOrNull,
         _ => null,
       },
     );
@@ -656,7 +849,21 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
     );
   }
 
+  /// Whether this exercise passes every dimension present in [filters]:
+  /// category, target and the movement dimensions ([matchesMovement]).
+  /// Filters of one kind are OR-ed, kinds are AND-ed, and a kind with no
+  /// filter present passes.
   bool fits(Iterable<ExerciseFilter> filters);
+
+  /// The movement half of [fits]: whether this exercise satisfies every
+  /// [MovementFilter.dimension] present in [filters]. Filters that are not
+  /// movement filters are ignored.
+  ///
+  /// An exercise with no annotation never matches an active movement filter.
+  /// [Movement.empty] is not neutral — it reads as `skill: low`,
+  /// `stability: free`, `axialLoad: none` — so a user-created exercise would
+  /// otherwise surface under "low skill" while claiming nothing of the sort.
+  bool matchesMovement(Iterable<ExerciseFilter> filters);
 
   /// How [query] matches this exercise, or null when it doesn't.
   ///
@@ -903,7 +1110,21 @@ class _Exercise implements Exercise {
     final categoryMatches = categories.isEmpty || categories.contains(category);
     final targetMatches = targets.isEmpty || targets.contains(target);
 
-    return categoryMatches && targetMatches;
+    return categoryMatches && targetMatches && matchesMovement(filters);
+  }
+
+  @override
+  bool matchesMovement(Iterable<ExerciseFilter> filters) {
+    final movementFilters = filters.whereType<MovementFilter>();
+    if (movementFilters.isEmpty) return true;
+    if (movement.isEmpty) return false;
+
+    final byDimension = <String, List<MovementFilter>>{};
+    for (final filter in movementFilters) {
+      byDimension.putIfAbsent(filter.dimension, () => []).add(filter);
+    }
+
+    return byDimension.values.every((dimension) => dimension.any((filter) => filter.matches(movement)));
   }
 
   @override
@@ -956,6 +1177,14 @@ class _Exercise implements Exercise {
 }
 
 typedef ExerciseId = String;
+
+extension ExercisesById on Iterable<Exercise> {
+  /// Keyed by the uuid id — the identity that survives localization; `name`
+  /// is display copy.
+  Map<ExerciseId, Exercise> get byId {
+    return {for (final each in this) each.id: each};
+  }
+}
 
 List<String> _words(String s) => searchNormalized(s).split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
 typedef Asset = ({String link, int? width, int? height});
