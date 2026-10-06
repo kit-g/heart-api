@@ -105,8 +105,9 @@ RelicApp buildApp({
     // nothing registered above reaches it on its own, logging included.
     ..fallback = requestLogging()(crossOrigin(respondWith((_) => JsonResponse.noSuchRoute())));
 
-  addRoutes(app, routes);
-  app.attach(tokenPrefix, buildMeRouter(database: database, storage: storage), consume: true);
+  app
+    ..addRoutes(routes)
+    ..attach(tokenPrefix, buildMeRouter(database: database, storage: storage), consume: true);
 
   return app;
 }
