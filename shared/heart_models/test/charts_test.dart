@@ -2,6 +2,66 @@ import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('ChartPreferenceType.isDuration', () {
+    test('cardio duration and time under tension are the durations', () {
+      final durations = ChartPreferenceType.values.where((each) => each.isDuration);
+      expect(
+        durations,
+        unorderedEquals([ChartPreferenceType.cardioDuration, ChartPreferenceType.totalTimeUnderTension]),
+      );
+    });
+  });
+
+  group('ChartPreferenceType.periodAggregate', () {
+    test('totals sum, peaks take the best, averages take the mean', () {
+      const sums = [
+        ChartPreferenceType.totalVolume,
+        ChartPreferenceType.totalReps,
+        ChartPreferenceType.totalTimeUnderTension,
+        ChartPreferenceType.cardioDistance,
+        ChartPreferenceType.cardioDuration,
+      ];
+      const bests = [
+        ChartPreferenceType.topSetWeight,
+        ChartPreferenceType.estimatedOneRepMax,
+        ChartPreferenceType.maxConsecutiveReps,
+        ChartPreferenceType.assistanceWeight,
+      ];
+      const means = [ChartPreferenceType.averageWorkingWeight, ChartPreferenceType.averagePace];
+
+      for (final each in sums) {
+        expect(each.periodAggregate, PeriodAggregate.sum, reason: each.value);
+      }
+      for (final each in bests) {
+        expect(each.periodAggregate, PeriodAggregate.best, reason: each.value);
+      }
+      for (final each in means) {
+        expect(each.periodAggregate, PeriodAggregate.mean, reason: each.value);
+      }
+      expect([...sums, ...bests, ...means], unorderedEquals(ChartPreferenceType.values));
+    });
+  });
+
+  group('PeriodAggregate.of', () {
+    test('folds a period\'s sessions', () {
+      expect(PeriodAggregate.sum.of([100, 120, 80]), 300);
+      expect(PeriodAggregate.best.of([100, 120, 80]), 120);
+      expect(PeriodAggregate.mean.of([100, 120, 80]), 100);
+    });
+
+    test('a single session is its own aggregate', () {
+      for (final each in PeriodAggregate.values) {
+        expect(each.of([42]), 42, reason: each.name);
+      }
+    });
+
+    test('an empty period has no aggregate', () {
+      for (final each in PeriodAggregate.values) {
+        expect(() => each.of([]), throwsStateError, reason: each.name);
+      }
+    });
+  });
+
   group('ChartPreference', () {
     test('ChartPreference.fromRow works with topSetWeight', () {
       final row = {

@@ -2,6 +2,24 @@ import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('WorkoutAggregation.workoutCount', () {
+    test('counts workouts, not weeks', () {
+      final agg = WorkoutAggregation.fromRows([
+        {'id': 'w-1', 'name': 'Push', 'start': DateTime(2026, 8, 3, 9).toUtc().toIso8601String()},
+        {'id': 'w-2', 'name': 'Pull', 'start': DateTime(2026, 8, 5, 9).toUtc().toIso8601String()},
+        {'id': 'w-3', 'name': 'Legs', 'start': DateTime(2026, 8, 12, 9).toUtc().toIso8601String()},
+      ]);
+
+      expect(agg.workoutCount, 3);
+      // the trailing window pads empty weeks, so weeks and workouts disagree
+      expect(agg.length, isNot(3));
+    });
+
+    test('is zero when empty', () {
+      expect(WorkoutAggregation.empty().workoutCount, 0);
+    });
+  });
+
   group(
     'WorkoutSummary Tests',
     () {
