@@ -47,6 +47,25 @@ change is released the moment it lands. Consequences:
 - `api/` is not consumed as a package; its pubspec version is inert. API releases are the
   repo tags (`v*`), which drive the prod deploy.
 
+## Compatibility floor
+
+Mobile **1.12** on `heart_models` **2.11.0** is the first store release Heart promotes. Every
+build that reaches a phone stays installed for months and cannot be patched, so from that
+release on the API, the CDN content and `heart_models` are read by builds we don't control.
+
+- Additive changes are the default and are safe: new routes, new optional fields and keys,
+  new values of an existing vocabulary (2.11.0 reads an unknown value tolerantly and carries
+  it untouched — `docs/2026-10-05.tolerant-reads.md`), new package members.
+- Anything an installed build sends or reads is a contract. Removing, renaming, retyping or
+  re-meaning it, tightening what the server accepts, changing a status code or error `code`,
+  or changing a `heart_models` signature is a **breaking change**: it gets a migration plan
+  before any code (the `breaking-change` skill) and ships in phases, never in one PR.
+- Raising the minimal app version (a 426 to every older build) is a product decision,
+  announced ahead, never a shortcut for a schema change.
+- Every prod release (`v*` tag) carries a compatibility note: each contract change since the
+  last tag classified as additive or as a phase of a named plan, and the oldest app version
+  it still serves.
+
 ## Definition of done
 
 `docs/handoff.md` is the submission checklist for any nontrivial change.
