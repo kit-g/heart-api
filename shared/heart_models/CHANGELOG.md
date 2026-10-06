@@ -18,6 +18,11 @@ rewrites what it could not read.
   untouched. A fresh-id `Workout.copy` and `Template.toWorkout` leave them
   behind. An exercise whose only sets are unread is kept by `Workout.toMap`
   and `removeEmptySets`.
+- Changed: `Workout.copy(sameId: true)` is the same session as it is — every
+  exercise and set keeps its id, order, state and rating, and every exercise
+  and set this build could not read comes along (heart-api#131). A fresh-id
+  copy is unchanged: a repeat with new ids, unrated, readable items only.
+  `ExerciseSet.copy` gains `sameId` for the same purpose.
 - New: `ExerciseSet.setTypeValue`, the `set_type` word a write carries. A set
   with a type this build doesn't know still reads as `normal` (as before), but
   `toMap` and `copy` now carry the original word instead of rewriting it as

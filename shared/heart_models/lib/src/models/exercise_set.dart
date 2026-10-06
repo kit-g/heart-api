@@ -197,8 +197,12 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
 
   /// A fresh set with the same measurements and type, for repeating a session
   /// or starting one from a template. The [rpe] is a rating of the original
-  /// effort, so the copy starts unrated.
-  ExerciseSet copy({DateTime? start});
+  /// effort, so the copy starts unrated, and it starts incomplete.
+  ///
+  /// [sameId] instead duplicates the set as it is — id, [start], completion,
+  /// [rpe], and a type word this build doesn't know — for a copy of the same
+  /// session, where a re-minted id would read to the server as a new set.
+  ExerciseSet copy({DateTime? start, bool sameId = false});
 
   Duration elapsed();
 
@@ -338,18 +342,21 @@ class _ExerciseSet implements ExerciseSet {
   Category get category => exercise.category;
 
   @override
-  ExerciseSet copy({DateTime? start}) {
+  ExerciseSet copy({DateTime? start, bool sameId = false}) {
     return _ExerciseSet(
-        id: uuidV7(),
+        id: sameId ? id : uuidV7(),
         exercise: exercise,
-        start: start ?? DateTime.timestamp(),
+        start: start ?? (sameId ? this.start : DateTime.timestamp()),
       )
       ..weight = weight
       ..duration = duration
       ..distance = distance
       ..reps = reps
       ..setType = setType
-      .._unreadSetType = _unreadSetType;
+      .._unreadSetType = _unreadSetType
+      ..isCompleted = sameId && isCompleted
+      ..completedAt = sameId ? completedAt : null
+      ..rpe = sameId ? rpe : null;
   }
 
   @override

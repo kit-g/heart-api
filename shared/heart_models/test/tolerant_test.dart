@@ -226,6 +226,40 @@ void main() {
       expect(workout.copy().unread, isEmpty);
     });
 
+    test('a same-id copy carries each exercise\'s unread sets, and an exercise with only those', () {
+      final workout = Workout.fromJson({
+        ...json,
+        'exercises': [
+          exercise(
+            'we-1',
+            bench,
+            0,
+            sets: [
+              set('a'),
+              set('b', reps: 'five'),
+              set('c'),
+            ],
+          ),
+          exercise('we-2', sled, 1),
+          exercise('we-3', squat, 2, sets: [set('x', reps: 'five')]),
+        ],
+      });
+      final same = workout.copy(sameId: true);
+
+      expect(same.map((each) => each.id), ['we-1', 'we-3']);
+      expect(same.first.map((set) => set.id), ['a', 'c']);
+      expect(same.first.unread, [set('b', reps: 'five')]);
+      expect(same.last, isEmpty);
+      expect(same.last.unread, hasLength(1));
+      expect(same.unread, hasLength(1));
+      expect(same.toMap(), workout.toMap(), reason: 'a save of the copy carries what a save of the original would');
+
+      final repeat = workout.copy();
+      expect(repeat.map((each) => each.exercise.name), ['Bench Press']);
+      expect(repeat.single.unread, isEmpty);
+      expect(repeat.unread, isEmpty);
+    });
+
     test('an exercise whose only set is unread survives a save and a tidy', () {
       final workout = Workout.fromJson({
         ...json,
