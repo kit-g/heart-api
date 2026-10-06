@@ -16,6 +16,7 @@ The API wires a route across ~8 files. Miss one and it fails late (compile error
 - Route handlers are `Future<Model> Function(Request)`. Pull inputs via a typed input class, call a service, return a `Model`. No `req.json()` parsing inside handlers.
 - Control flow is throws: `throw NoContent()` → 204, `BadRequest`/`Forbidden`/`NotFound` → status. `apiHandler` (`lib/core/handler.dart`) already maps `TypeError`/`FormatException` → 400, `UnimplementedError` → 501, everything else → 500.
 - List responses use `Paginated<T>.from(page, ...)` — never emit a bare `cursor`. Service returns `Page<T>` (fetch `limit + 1` for authoritative `hasMore`). The cursor is the last item's `id`; keep the keyset ORDER BY on that same `id` so `cursorOf: (x) => x.id` is correct.
+- **An existing route is a contract with installed apps.** Changing what a route returns, accepts or rejects is not "substantially changing a route" under this skill — it is a breaking change: read the `breaking-change` skill first, and add beside rather than replace (CLAUDE.md, *Compatibility floor*).
 - Query behavior is covered by `db`-tagged **integration tests** against real Postgres — not by route tests (which mock the service) nor pgtap (schema/signatures only). Any non-trivial SQL you write is otherwise untested.
 
 ## Steps
