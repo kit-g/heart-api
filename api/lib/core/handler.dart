@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:heart/core/response.dart';
 import 'package:heart/db/db.dart';
 import 'package:heart/models/errors.dart';
@@ -22,6 +24,30 @@ class Created<T extends Model> implements Model {
   Map<String, dynamic> toMap() => value.toMap();
 }
 
+/// A file rather than JSON: `apiHandler` answers `200` with [bytes] as the
+/// body, typed [mimeType], offered for download as [filename].
+class Download implements Model {
+  final List<int> bytes;
+  final MimeType mimeType;
+  final String filename;
+
+  const new({required this.bytes, required this.mimeType, required this.filename});
+
+  @override
+  Map<String, dynamic> toMap() => throw UnsupportedError('a download has no JSON form');
+}
+
+/// `303 See Other` to [location]: the result lives elsewhere, such as a file
+/// too large to answer inline, behind a short-lived link.
+class SeeOther implements Model {
+  final Uri location;
+
+  const new(this.location);
+
+  @override
+  Map<String, dynamic> toMap() => {'location': location.toString()};
+}
+
 /// Wraps a [ModelHandler] into a Relic [Handler]: serializes the returned model
 /// as `200 JSON` (or `201` when it's a [Created]), and maps thrown
 /// control-flow/errors to status codes — `NoContent` → 204, any [ApiException]
@@ -35,10 +61,28 @@ Handler apiHandler(ModelHandler handler) {
       final response = await handler(request);
       return switch (response) {
         Created() => JsonResponse(201, body: response),
+        Download(:final bytes, :final mimeType, :final filename) => Response.ok(
+          body: Body.fromData(Uint8List.fromList(bytes), mimeType: mimeType),
+          headers: Headers.build(
+            (headers) =>
+                headers.contentDisposition = ContentDispositionHeader.parse('attachment; filename="$filename"'),
+          ),
+        ),
+        SeeOther(:final location) => JsonResponse(
+          303,
+          body: response,
+          headers: Headers.build((headers) => headers.location = location),
+        ),
         _ => JsonResponse.ok(body: response),
       };
     } on NoContent {
       return JsonResponse.noContent();
+    } on TooManyRequests catch (e) {
+      return JsonResponse(
+        e.statusCode,
+        body: e,
+        headers: Headers.build((headers) => headers.retryAfter = RetryAfterHeader(delay: e.retryAfter)),
+      );
     } on ApiException catch (e) {
       _logger.warning('API exception:', e);
       return JsonResponse(e.statusCode, body: e);

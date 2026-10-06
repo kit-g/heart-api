@@ -5,6 +5,7 @@ import 'package:heart/models/apple.dart';
 import 'package:heart/models/creates.dart';
 import 'package:heart/models/exercise_preferences.dart';
 import 'package:heart/models/exercises.dart';
+import 'package:heart/models/exports.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/tokens.dart';
@@ -33,5 +34,6 @@ import 'package:mockito/annotations.dart';
   EventPublisher,
   AppleIdentityService,
   ApiTokenService,
+  ExportStorage,
 ])
 void main() {}

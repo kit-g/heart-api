@@ -107,7 +107,7 @@ RelicApp buildApp({
 
   app
     ..addRoutes(routes)
-    ..attach(tokenPrefix, buildMeRouter(database: database), consume: true);
+    ..attach(tokenPrefix, buildMeRouter(database: database, storage: storage), consume: true);
 
   return app;
 }

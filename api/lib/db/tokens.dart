@@ -44,6 +44,14 @@ mixin _ApiTokens on _DatabaseBase implements ApiTokenService {
   }
 
   @override
+  Future<DateTime?> claimExport(String userId) async {
+    final result = await _pool.execute(_claimApiExport.toSql(), parameters: {'userId': userId});
+    final row = result.first.toColumnMap();
+    if (row['claimed'] == true) return null;
+    return row['last_export_at'] as DateTime;
+  }
+
+  @override
   Future<TokenUse?> useToken(Uint8List tokenHash) async {
     final result = await _pool.execute(
       _useApiToken.toSql(),

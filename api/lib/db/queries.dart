@@ -2426,3 +2426,17 @@ SELECT id, username, email, avatar_url, scheduled_for_deletion_at, settings
 FROM profiles
 WHERE id = @userId
 ''';
+
+// Claims the day's export allowance. The outer SELECT reads the snapshot from
+// before the UPDATE, so a refused claim reports the export it collided with.
+const _claimApiExport = '''
+WITH _claim AS (
+  UPDATE api_usage
+  SET last_export_at = now()
+  WHERE user_id = @userId
+    AND (last_export_at IS NULL OR last_export_at <= now() - interval '1 day')
+  RETURNING user_id
+)
+SELECT EXISTS (SELECT 1 FROM _claim) AS claimed,
+       (SELECT last_export_at FROM api_usage WHERE user_id = @userId) AS last_export_at
+''';
