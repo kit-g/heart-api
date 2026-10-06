@@ -255,7 +255,11 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
 
   WorkoutSummary toSummary();
 
-  /// Makes a copy of itself with a new set of IDs
+  /// A copy. With a fresh id: a repeat of this session — new exercise and set
+  /// ids, the measurements and set types, no ratings, nothing this build
+  /// could not read. With [sameId]: this session as it is — every id, every
+  /// set's state, and every exercise and set this build could not read, so a
+  /// save of the copy carries exactly what a save of the original would.
   Workout copy({bool sameId});
 
   void completeAllSets();
@@ -713,20 +717,16 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
     );
 
     for (final each in this) {
-      if (each.isNotEmpty) {
-        // an RPE rates the original effort: the same session keeps it, a
-        // repeat starts unrated
-        ExerciseSet copySet(ExerciseSet set) => set.copy()..rpe = sameId ? set.rpe : null;
-
-        final exercise = WorkoutExercise(
-          starter: copySet(each.first),
-        );
-        // met/calories describe the original session (dropped above);
+      if (sameId) {
+        workout.append(_same(each));
+      } else if (each.isNotEmpty) {
+        final exercise = WorkoutExercise(starter: each.first.copy());
+        // met describes the original session (dropped, like calories above);
         // a note is an instruction on how to do the exercise, so a repeat carries it.
         exercise.note = each.note;
 
         for (final set in each.skip(1)) {
-          exercise.add(copySet(set));
+          exercise.add(set.copy());
         }
 
         workout.append(exercise);
@@ -738,6 +738,36 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
     }
 
     return workout;
+  }
+
+  /// [exercise] as it is — id, order, met, note, every set with its id and
+  /// state, and the sets this build could not read — for the same session's
+  /// copy. The sets are copied, so the two workouts never share one.
+  static WorkoutExercise _same(WorkoutExercise exercise) {
+    final sets = [for (final set in exercise) set.copy(sameId: true)];
+    return switch (exercise) {
+      _WorkoutExercise e => _WorkoutExercise._(
+        id: e.id,
+        start: e.start,
+        order: e.order,
+        met: e.met,
+        note: e.note,
+        exercise: e._exercise,
+        sets: sets,
+        unread: [...e._unread],
+      ),
+      // another implementation: everything the interface carries; its unread
+      // sets follow the readable ones, their places unknown
+      _ => _WorkoutExercise._(
+        id: exercise.id,
+        order: exercise.order,
+        met: exercise.met,
+        note: exercise.note,
+        exercise: exercise.exercise,
+        sets: sets,
+        unread: [for (final (index, json) in exercise.unread.indexed) (sets.length + index, json)],
+      ),
+    };
   }
 
   @override
