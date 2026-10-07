@@ -112,3 +112,28 @@ class MeRecords implements Model {
     };
   }
 }
+
+/// One session in an exercise's history: its workout, when, the working sets
+/// as they were done, and the values the progress chart plots for it
+/// ([foldSession]).
+class MeExerciseSession implements Model {
+  final ExerciseSession session;
+  final Category category;
+
+  const new(this.session, this.category);
+
+  String get workoutId => session.workoutId;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'workoutId': session.workoutId,
+      'at': session.at,
+      'sets': [
+        for (final set in session.sets)
+          {'weight': ?set.weight, 'reps': ?set.reps, 'duration': ?set.duration, 'distance': ?set.distance},
+      ],
+      'metrics': foldSession(category, session.sets),
+    };
+  }
+}

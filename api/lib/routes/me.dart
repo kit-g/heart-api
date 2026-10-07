@@ -5,6 +5,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:heart/models/exports.dart';
@@ -145,6 +146,31 @@ Future<MeWorkoutChanges> getMyWorkoutChanges(Request req) async {
 }
 
 /// Personal records per exercise; one exercise's with `?exerciseId=`.
+Future<Paginated<MeExerciseSession>> getMyExerciseHistory(Request req) {
+  return getMyExerciseHistoryById(req, req.rawPathParameters[#exerciseId]!);
+}
+
+Future<Paginated<MeExerciseSession>> getMyExerciseHistoryById(Request req, String exerciseId) async {
+  final query = ExerciseHistoryQuery.fromRequest(req, exerciseId: exerciseId);
+  final history =
+      await req.workoutsService.getExerciseHistory(
+        userId: req.userId,
+        exerciseId: query.exerciseId,
+        cursor: query.cursor,
+        limit: query.limit,
+      ) ??
+      (throw NotFound(type: 'Exercise', id: exerciseId));
+  final ExerciseHistory(:category, :sessions) = history;
+  return Paginated<MeExerciseSession>.from(
+    Page(
+      items: [for (final session in sessions.items) MeExerciseSession(session, category)],
+      hasMore: sessions.hasMore,
+    ),
+    itemsKey: 'sessions',
+    cursorOf: (session) => session.workoutId,
+  );
+}
+
 Future<MeRecords> getMyRecords(Request req) async {
   final query = RecordsQuery.fromRequest(req);
   final sets = await req.workoutsService.getRecordSets(userId: req.userId, exerciseId: query.exerciseId);
