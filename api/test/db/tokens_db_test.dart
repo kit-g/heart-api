@@ -110,6 +110,17 @@ void main() {
       expect(listed.lastUsedAt, isNotNull);
     });
 
+    test('a request that does not count authenticates without moving either window', () async {
+      final user = await h.seedProfile();
+      final (_, hash) = await mint(user);
+      await h.db.useToken(hash);
+
+      final free = await h.db.useToken(hash, count: false);
+      expect(free?.userId, user);
+      expect(free?.minuteCount, 1);
+      expect(free?.dayCount, 1);
+    });
+
     test('tokens of one account share its counters', () async {
       final user = await h.seedProfile();
       final (_, a) = await mint(user);

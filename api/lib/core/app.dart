@@ -1,3 +1,4 @@
+import 'package:heart/core/mcp_router.dart';
 import 'package:heart/core/me_router.dart';
 import 'package:heart/core/routing.dart';
 import 'package:heart/core/response.dart';
@@ -107,7 +108,8 @@ RelicApp buildApp({
 
   app
     ..addRoutes(routes)
-    ..attach(tokenPrefix, buildMeRouter(database: database, storage: storage), consume: true);
+    ..attach(tokenPrefix, buildMeRouter(database: database, storage: storage), consume: true)
+    ..attach(mcpPrefix, buildMcpRouter(database: database), consume: true);
 
   return app;
 }
