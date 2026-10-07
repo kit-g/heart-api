@@ -90,6 +90,12 @@ lint catches the parameter half, this covers the rest.
 file needs them. Don't widen visibility to make a test easier; test through
 the route or the `Database`.
 
+**Conversions are extension methods, named `toX()`.** Turning one type into
+another (a model into a tool's JSON, arguments into paging) is
+`workout.toMcpSummary()`, not a top-level `_workoutSummary(workout)`. An
+unnamed `extension on T` keeps it file-private. Top-level functions are for
+what has no natural receiver.
+
 **Names carry the WHAT; comments carry the WHY.** A comment explains the
 constraint, the bug this shape avoids, the thing that looks redundant and
 isn't — the `DISTINCT` guard in a join, the reason a retry is safe. Never
