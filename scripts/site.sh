@@ -20,7 +20,7 @@ ENV=$4
 # data/ belongs to heart-of-yours: its release workflow uploads the JSON the
 # feature and changelog pages render. Excluded, --delete would wipe it.
 aws s3 sync site "s3://$BUCKET/site" --delete --profile "$PROFILE" \
-  --exclude ".well-known/*" --exclude "robots/*" --exclude "robots.txt" --exclude "data/*"
+  --exclude ".well-known/*" --exclude "connect/*" --exclude "robots/*" --exclude "robots.txt" --exclude "data/*"
 
 aws s3 cp "site/.well-known/$ENV/apple-app-site-association" \
   "s3://$BUCKET/site/.well-known/apple-app-site-association" \
@@ -31,6 +31,11 @@ aws s3 cp "site/.well-known/$ENV/assetlinks.json" \
   --content-type application/json --profile "$PROFILE"
 
 # dev mirrors prod's pages, so it shuts crawlers out; only prod is indexed.
+aws s3 cp "site/.well-known/$ENV/oauth-authorization-server" \
+  "s3://$BUCKET/site/.well-known/oauth-authorization-server" \
+  --content-type application/json --profile "$PROFILE"
+aws s3 cp "site/connect/$ENV.js" "s3://$BUCKET/site/assets/connect-config.js" \
+  --content-type text/javascript --profile "$PROFILE"
 aws s3 cp "site/robots/$ENV.txt" "s3://$BUCKET/site/robots.txt" \
   --content-type text/plain --profile "$PROFILE"
 

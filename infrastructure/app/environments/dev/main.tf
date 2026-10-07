@@ -44,6 +44,7 @@ module "api" {
     certificate_arn = "arn:aws:acm:ca-central-1:583168578067:certificate/43e5a2aa-7c62-4fa4-a137-9b35df1f47b6"
   }
   allowed_origins = local.browser_origins
+  site_origin     = "https://dev.heart-of.me"
 }
 
 locals {

@@ -137,3 +137,14 @@ variable "allowed_origins" {
     error_message = "Each origin must be scheme://host[:port] with no path or trailing slash - a browser sends exactly that, and the allowlist is matched byte for byte."
   }
 }
+
+variable "site_origin" {
+  description = "The site's origin (https://heart-of.me): the OAuth issuer, which serves the authorization server metadata and the consent page. Null keeps OAuth off; personal tokens work either way."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.site_origin == null || can(regex("^https://[^/]+$", var.site_origin))
+    error_message = "The site origin is https://host, with no path or trailing slash: it is the issuer, and clients compare it byte for byte."
+  }
+}

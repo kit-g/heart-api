@@ -189,7 +189,7 @@ class OAuthConfig {
   Uri get revocationEndpoint => Uri.parse('$apiBase/oauth/revoke');
 
   /// Where the consent page lives.
-  Uri consentPage(String requestId) => issuer.replace(path: '/connect', queryParameters: {'request': requestId});
+  Uri consentPage(String requestId) => issuer.replace(path: '/connect.html', queryParameters: {'request': requestId});
 
   /// The protected resource metadata document for the MCP server.
   Uri get mcpResourceMetadata => Uri.parse('$mcpResource/.well-known/oauth-protected-resource');

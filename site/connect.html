@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <!-- One-off authorization requests: nothing here is worth indexing. -->
+    <meta name="robots" content="noindex, nofollow"/>
+    <meta name="referrer" content="no-referrer"/>
+    <title>Connect an app - Heart of Yours</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,600&display=swap"
+          rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"/>
+    <link rel="stylesheet" href="assets/site.css">
+    <link rel="stylesheet" href="assets/tailwind.css">
+    <script src="assets/site.js"></script>
+    <!-- The environment's Firebase web config and API address, deployed per environment by scripts/site.sh. -->
+    <script src="assets/connect-config.js"></script>
+    <script type="module" src="assets/connect.js"></script>
+</head>
+<body class="bg-ground text-ink font-text min-h-screen flex flex-col overflow-x-hidden selection:bg-accent selection:text-on-accent">
+<!-- Navbar -->
+<header class="w-full flex justify-center pt-6 pb-2 px-6 sm:px-10 z-10">
+    <div class="w-full max-w-[1200px] flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="size-9 flex items-center justify-center bg-surface rounded overflow-hidden border">
+                <!-- The mark is drawn in --ink, so it ships as two transparent files
+                     rather than the opaque app tile: the chip's own surface shows
+                     through in either brightness. Decorative — the wordmark beside
+                     it already names the app. -->
+                <picture class="size-full">
+                    <source srcset="assets/logo-dark.png" media="(prefers-color-scheme: dark)"/>
+                    <img src="assets/logo-light.png" width="192" height="192" alt=""
+                         class="size-full object-contain"/>
+                </picture>
+            </div>
+            <h2 class="text-lg font-title font-semibold tracking-tight">Heart of Yours</h2>
+        </a>
+        <nav class="flex items-center gap-6 sm:gap-8">
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="terms.html">Terms of Service</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="privacy.html">Privacy</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="support.html">Support</a>
+        </nav>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="flex-grow flex flex-col items-center justify-center w-full px-6 py-12 md:py-20">
+    <div class="w-full max-w-xl bg-surface rounded-xl p-8 sm:p-12 border text-center">
+
+        <section id="state-loading">
+            <p class="text-muted">Loading…</p>
+        </section>
+
+        <section id="state-sign-in" hidden>
+            <div class="size-14 bg-fill text-accent-ink rounded-xl flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-3xl">link</span>
+            </div>
+            <h1 class="font-title text-2xl font-semibold tracking-tight text-ink mb-4">Sign in to connect an app</h1>
+            <p class="text-muted leading-relaxed mb-8">
+                Sign in with the account you use in Heart. Accounts that haven't signed in yet have nothing on the
+                server to share: sign in from the app first.
+            </p>
+            <div class="flex flex-col gap-3">
+                <button id="sign-in-google" type="button"
+                        class="inline-flex items-center justify-center gap-2 h-11 px-6 rounded bg-accent text-on-accent font-medium hover:opacity-90 transition-opacity w-full">
+                    Continue with Google
+                </button>
+                <button id="sign-in-apple" type="button"
+                        class="inline-flex items-center justify-center gap-2 h-11 px-6 rounded border text-ink font-medium hover:opacity-90 transition-opacity w-full">
+                    Continue with Apple
+                </button>
+                <form id="sign-in-email" class="flex flex-col gap-3 text-left mt-2">
+                    <input id="email" type="email" autocomplete="username" required placeholder="Email"
+                           class="h-11 px-4 rounded border bg-ground text-ink w-full"/>
+                    <input id="password" type="password" autocomplete="current-password" required placeholder="Password"
+                           class="h-11 px-4 rounded border bg-ground text-ink w-full"/>
+                    <button type="submit"
+                            class="inline-flex items-center justify-center h-11 px-6 rounded border text-ink font-medium hover:opacity-90 transition-opacity w-full">
+                        Sign in with email
+                    </button>
+                </form>
+            </div>
+            <p id="sign-in-error" class="text-sm text-destructive mt-4" hidden></p>
+        </section>
+
+        <section id="state-consent" hidden>
+            <div class="size-14 bg-fill text-accent-ink rounded-xl flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-3xl">link</span>
+            </div>
+            <h1 class="font-title text-2xl font-semibold tracking-tight text-ink mb-2">
+                <span id="client-name"></span> wants to read your training log
+            </h1>
+            <p class="text-sm text-muted mb-6">
+                It will be sent to <strong id="redirect-host" class="text-ink"></strong>.
+                Only allow apps you started connecting yourself.
+            </p>
+            <ul class="text-left text-ink bg-fill rounded p-4 mb-4 text-sm leading-relaxed">
+                <li>Your workouts, templates, folders, goals and custom exercises, through <span id="surface"></span>.</li>
+                <li>Read only: it can't change or delete anything.</li>
+            </ul>
+            <p class="text-sm text-muted text-left mb-8">
+                Heart doesn't have your heart rate, sleep or any other health data. It stays on your phone, so there
+                is none to share.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button id="deny" type="button"
+                        class="inline-flex items-center justify-center h-11 px-6 rounded border text-ink font-medium hover:opacity-90 transition-opacity w-full">
+                    Cancel
+                </button>
+                <button id="allow" type="button"
+                        class="inline-flex items-center justify-center h-11 px-6 rounded bg-accent text-on-accent font-medium hover:opacity-90 transition-opacity w-full">
+                    Allow
+                </button>
+            </div>
+            <p class="text-xs text-muted mt-6">
+                Signed in as <span id="signed-in-as"></span>.
+                <button id="sign-out" type="button" class="underline">Not you?</button>
+                You can disconnect it any time in the app.
+            </p>
+        </section>
+
+        <section id="state-message" hidden>
+            <h1 id="message-title" class="font-title text-2xl font-semibold tracking-tight text-ink mb-4"></h1>
+            <p id="message-body" class="text-muted leading-relaxed"></p>
+        </section>
+
+    </div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-10 px-6 border-t bg-ground mt-auto">
+    <div class="max-w-[960px] mx-auto flex flex-col items-center gap-6">
+        <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors flex items-center gap-1"
+               href="privacy.html">
+                <span class="material-symbols-outlined text-[16px]">shield</span>
+                Privacy Policy
+            </a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="terms.html">Terms of Service</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="support.html">Support</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="mailto:info@heart-of.me">info@heart-of.me</a>
+        </div>
+        <p class="text-xs text-muted">
+            © <span id="footer-year"></span> Heart of Yours. All rights reserved. Designed for peace of mind.
+        </p>
+    </div>
+</footer>
+</body>
+</html>
