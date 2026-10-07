@@ -214,7 +214,7 @@ void main() {
     test('an access token is bound to its resource and client, and stays out of personal tokens', () async {
       final (user, c, tokens) = await connected();
 
-      final use = await h.db.useToken(tokens.accessHash);
+      final use = await h.db.useToken(tokens.accessHash, resource: resource);
       expect(use?.userId, user);
       expect(use?.resource, resource);
       expect(use?.clientId, c.clientId);
@@ -243,16 +243,36 @@ void main() {
       );
       expect(rotated.outcome, RefreshOutcome.rotated);
       expect(rotated.scopes, ['read']);
-      expect(await h.db.useToken(second.accessHash), isNotNull);
-      expect(await h.db.useToken(first.accessHash), isNotNull, reason: 'a live access token survives rotation');
+      expect(await h.db.useToken(second.accessHash, resource: resource), isNotNull);
+      expect(
+        await h.db.useToken(first.accessHash, resource: resource),
+        isNotNull,
+        reason: 'a live access token survives rotation',
+      );
 
+      final retry = await h.db.rotateRefreshToken(
+        refreshHash: first.refreshHash,
+        clientId: c.clientId,
+        tokens: pair(),
+      );
+      expect(
+        retry.outcome,
+        RefreshOutcome.invalid,
+        reason: 'within a minute: a host retrying, refused without revoking',
+      );
+      expect(await h.db.useToken(second.accessHash, resource: resource), isNotNull);
+
+      await h.exec(
+        "UPDATE oauth_refresh_tokens SET rotated_at = now() - interval '2 minutes' WHERE token_hash = @h",
+        {'h': first.refreshHash},
+      );
       final replay = await h.db.rotateRefreshToken(
         refreshHash: first.refreshHash,
         clientId: c.clientId,
         tokens: pair(),
       );
       expect(replay.outcome, RefreshOutcome.reused);
-      expect(await h.db.useToken(second.accessHash), isNull);
+      expect(await h.db.useToken(second.accessHash, resource: resource), isNull);
       expect(await h.db.listConnectedApps(user), isEmpty);
 
       final after = await h.db.rotateRefreshToken(
@@ -279,11 +299,26 @@ void main() {
       expect(mine.outcome, RefreshOutcome.rotated);
     });
 
+    test('an access token is refused on another resource, and nothing is counted', () async {
+      final (user, _, tokens) = await connected();
+      expect(await h.db.useToken(tokens.accessHash, resource: 'https://other.example'), isNull);
+      expect(await h.db.useToken(tokens.accessHash), isNull, reason: 'no resource is not this resource');
+      final rows = await h.exec('SELECT count(*) AS n FROM api_usage WHERE user_id = @u', {'u': user});
+      expect(rows.first.toColumnMap()['n'], 0);
+    });
+
+    test("a revoked grant's tokens are refused even if their rows survive", () async {
+      final (user, _, tokens) = await connected();
+      // a token minted concurrently with a revocation escapes its delete
+      await h.exec('UPDATE oauth_grants SET revoked_at = now() WHERE user_id = @u', {'u': user});
+      expect(await h.db.useToken(tokens.accessHash, resource: resource), isNull);
+    });
+
     test('revoking an access token kills it alone; revoking a refresh token takes the grant', () async {
       final (user, c, tokens) = await connected();
 
       await h.db.revokeOAuthToken(tokenHash: tokens.accessHash, clientId: c.clientId);
-      expect(await h.db.useToken(tokens.accessHash), isNull);
+      expect(await h.db.useToken(tokens.accessHash, resource: resource), isNull);
       expect(await h.db.listConnectedApps(user), hasLength(1));
 
       await h.db.revokeOAuthToken(tokenHash: tokens.refreshHash, clientId: c.clientId);
@@ -297,7 +332,7 @@ void main() {
 
       expect(await h.db.disconnectApp(userId: other, grantId: grant.id), isFalse);
       expect(await h.db.disconnectApp(userId: user, grantId: grant.id), isTrue);
-      expect(await h.db.useToken(tokens.accessHash), isNull);
+      expect(await h.db.useToken(tokens.accessHash, resource: resource), isNull);
       expect(
         await h.db.disconnectApp(userId: user, grantId: grant.id),
         isFalse,

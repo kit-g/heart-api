@@ -84,7 +84,11 @@ Future<TokenCheck> checkToken(
   final TokenUse? use;
   try {
     use = switch (secret) {
-      final String secret => await request.apiTokenService.useToken(TokenSecret.hash(secret), count: count),
+      final String secret => await request.apiTokenService.useToken(
+        TokenSecret.hash(secret),
+        count: count,
+        resource: resource,
+      ),
       null => null,
     };
   } catch (e, st) {
@@ -92,8 +96,7 @@ Future<TokenCheck> checkToken(
     return TokenRefused(JsonResponse.serverError());
   }
 
-  final bound = use?.resource;
-  if (use == null || (bound != null && bound != resource)) {
+  if (use == null) {
     return TokenRefused(
       JsonResponse(
         401,

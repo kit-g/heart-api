@@ -243,6 +243,21 @@ void main() {
     final newAccess = refreshed['access_token'] as String;
     expect((await send('POST', '/mcp', bearer: newAccess, json: mcp('tools/list'))).status, 200);
 
+    // a replay inside a minute is a retry: refused, nothing revoked
+    final retry = await send(
+      'POST',
+      '/oauth/token',
+      form: {'grant_type': 'refresh_token', 'refresh_token': refresh, 'client_id': clientId},
+    );
+    expect(body(retry)['error'], 'invalid_grant');
+    expect((await send('POST', '/mcp', bearer: newAccess, json: mcp('tools/list'))).status, 200);
+
+    // after it, a replay means a copy exists: everything goes
+    await h.exec(
+      "UPDATE oauth_refresh_tokens SET rotated_at = now() - interval '2 minutes' WHERE rotated_at IS NOT NULL "
+      'AND grant_id IN (SELECT id FROM oauth_grants WHERE user_id = @u)',
+      {'u': user},
+    );
     final replay = await send(
       'POST',
       '/oauth/token',
@@ -289,6 +304,25 @@ void main() {
     final back = Uri.parse(response.headers.value('location')!);
     expect(back.queryParameters['error'], 'invalid_target');
     expect(back.queryParameters['state'], 's1');
+  });
+
+  test('a request without a resource means the MCP server, and foreign scopes are dropped', () async {
+    final authorize = await send(
+      'GET',
+      '/oauth/authorize?${Uri(queryParameters: {
+        'response_type': 'code',
+        'client_id': clientId,
+        'redirect_uri': redirect,
+        'code_challenge': challenge,
+        'code_challenge_method': 'S256',
+        'scope': 'read offline_access',
+      }).query}',
+    );
+    expect(authorize.status, 302);
+    final id = Uri.parse(authorize.headers.value('location')!).queryParameters['request']!;
+    final shown = body(await send('GET', '/oauth/requests/$id', bearer: firebaseToken));
+    expect(shown['resource'], 'mcp');
+    expect(shown['scopes'], ['read']);
   });
 
   test('denying returns access_denied to the client', () async {
