@@ -24,7 +24,7 @@ void main() {
   for (final MapEntry(key: env, value: oauth) in environments.entries) {
     test('$env: the site metadata matches the server', () {
       final file = File('../site/.well-known/$env/oauth-authorization-server');
-      expect(jsonDecode(file.readAsStringSync()), authorizationServerMetadata(oauth));
+      expect(jsonDecode(file.readAsStringSync()), oauth.toServerMetadata());
     });
   }
 

@@ -31,8 +31,8 @@ Future<OAuthClient> resolveClient(
   } on DocumentFetchError catch (e) {
     throw OAuthError('invalid_client', 'client metadata document: ${e.reason}');
   }
-  final client = parseClientDocument(url, document, expiresAt: at.add(documentLifetime));
-  return service.saveClient(client, knownClientMetadata(document));
+  final client = document.toClientDocument(url, expiresAt: at.add(documentLifetime));
+  return service.saveClient(client, document.toKnownClientMetadata());
 }
 
 /// Signature algorithms a client assertion may use. Never `none`.
