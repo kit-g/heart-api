@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:heart/core/handler.dart';
+import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
@@ -169,6 +170,16 @@ Future<Paginated<MeExerciseSession>> getMyExerciseHistoryById(Request req, Strin
     itemsKey: 'sessions',
     cursorOf: (session) => session.workoutId,
   );
+}
+
+Future<MeLibrarySearch> searchMyLibrary(Request req) async {
+  final config = req.config;
+  final query = LibrarySearchQuery.fromRequest(req, supportedLocales: config.supportedLocales);
+  final library = await req.exerciseService.getExercises(
+    req.userId,
+    locale: query.locale ?? req.locale(config.supportedLocales, config.defaultLocale),
+  );
+  return MeLibrarySearch.fromLibrary(library, query.query, limit: query.limit);
 }
 
 Future<MeRecords> getMyRecords(Request req) async {

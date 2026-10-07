@@ -2,6 +2,8 @@
 library;
 
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/me.dart';
+import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -553,6 +555,35 @@ void main() {
         h.db.setExerciseMedia(key: DatabaseTestBase.slug(name), asset: asset, thumbnail: thumbnail),
         throwsA(isA<NotFound>()),
       );
+    });
+  });
+
+  group('library search', () {
+    test("the library's rows parse and match through aliases and the locale's glossary", () async {
+      // a locale nothing serves, so its glossary can't collide with the synced ones
+      const locale = 'zz';
+      final word = h.uniqueName('Zork').split(' ').last;
+      final id = await h.seedGlobalExercise(name: h.uniqueName('Glimmer Press'));
+      await h.exec('UPDATE exercises SET aliases = @a WHERE id = @id::uuid', {
+        'a': ['qx$word'],
+        'id': id,
+      });
+      await h.exec('INSERT INTO search_glossaries (locale, terms) VALUES (@l, @t::jsonb)', {
+        'l': locale,
+        't': '{"gp$word": {"words": ["glimmer"]}}',
+      });
+
+      try {
+        final library = await h.db.getExercises(ownerId, locale: locale);
+        MeLibrarySearch search(String q) => MeLibrarySearch.fromLibrary(library, q, limit: 50);
+
+        final byAlias = search('qx$word').results.where((r) => r.exercise.id == id).single;
+        expect(byAlias.match, SearchMatch.vocabulary);
+        final byGlossary = search('gp$word press').results.where((r) => r.exercise.id == id);
+        expect(byGlossary, hasLength(1), reason: 'the glossary word stands for "glimmer"');
+      } finally {
+        await h.exec('DELETE FROM search_glossaries WHERE locale = @l', {'l': locale});
+      }
     });
   });
 }
