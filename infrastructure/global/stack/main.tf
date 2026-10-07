@@ -63,6 +63,22 @@ resource "aws_iam_role_policy" "lambda" {
   policy = data.aws_iam_policy_document.lambda.json
 }
 
+# The deploy asks the new API code to declare the database's pg_cron jobs, by
+# a message on the API's events queue: the app holds the database credentials.
+data "aws_iam_policy_document" "events_queue" {
+  statement {
+    effect    = "Allow"
+    actions   = ["sqs:GetQueueUrl", "sqs:SendMessage"]
+    resources = ["arn:aws:sqs:${local.region}:${local.account_id}:${var.lambda_function_prefix}api-events"]
+  }
+}
+
+resource "aws_iam_role_policy" "events_queue" {
+  name   = "events-queue"
+  role   = aws_iam_role.deploy.id
+  policy = data.aws_iam_policy_document.events_queue.json
+}
+
 data "aws_iam_policy_document" "static_bucket" {
   statement {
     effect    = "Allow"
