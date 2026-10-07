@@ -305,4 +305,86 @@ void main() {
       expect(fold(category, rows), isNull);
     });
   });
+
+  /// A session's chart values: the app's per-dimension history queries
+  /// (heart_db's metrics.dart), one session at a time.
+  group('foldSession', () {
+    Map<String, num> session(String category, List<Map<String, dynamic>> rows) {
+      return foldSession(Category.fromString(category), rows.map(RecordSet.fromRow).toList());
+    }
+
+    test('a strength session gives every strength dimension', () {
+      final metrics = session('Barbell', [row(weight: 100, reps: 5), row(weight: 110, reps: 3)]);
+
+      expect(
+        metrics.keys,
+        unorderedEquals([
+          'topSetWeight',
+          'estimatedOneRepMax',
+          'totalVolume',
+          'averageWorkingWeight',
+          'totalReps',
+          'maxConsecutiveReps',
+        ]),
+      );
+      expect(metrics['topSetWeight'], 110);
+      // the best estimate is the triple's, not the five's
+      expect(metrics['estimatedOneRepMax'], closeTo(110 / (1.0278 - .0278 * 3), 1e-9));
+      expect(metrics['totalVolume'], 830);
+      expect(metrics['averageWorkingWeight'], 830 / 8);
+      expect(metrics['totalReps'], 8);
+      expect(metrics['maxConsecutiveReps'], 5);
+    });
+
+    test('bodyweight sets weigh nothing, and leave no estimate', () {
+      final metrics = session('Weighted Body Weight', [row(reps: 12), row(reps: 10)]);
+
+      expect(metrics['topSetWeight'], 0);
+      expect(metrics['totalVolume'], 0);
+      expect(metrics['averageWorkingWeight'], 0);
+      expect(metrics['totalReps'], 22);
+      expect(metrics.containsKey('estimatedOneRepMax'), isFalse);
+    });
+
+    test('an estimate past 36 reps is left out, as the records leave it', () {
+      final metrics = session('Dumbbell', [row(weight: 10, reps: 40)]);
+
+      expect(metrics.containsKey('estimatedOneRepMax'), isFalse);
+      expect(metrics['topSetWeight'], 10);
+    });
+
+    test('sets without reps give no average or best set', () {
+      final metrics = session('Machine', [row(weight: 50)]);
+
+      expect(metrics['topSetWeight'], 50);
+      expect(metrics['totalReps'], 0);
+      expect(metrics.containsKey('averageWorkingWeight'), isFalse);
+      expect(metrics.containsKey('maxConsecutiveReps'), isFalse);
+    });
+
+    test('only the dimensions the category charts', () {
+      expect(session('Reps Only', [row(reps: 8), row(reps: 6)]), {'maxConsecutiveReps': 8, 'totalReps': 14});
+      expect(session('Duration', [row(duration: 60), row(duration: 45)]), {'totalTimeUnderTension': 105});
+    });
+
+    test('assistance is the lightest set: less is the improvement', () {
+      final metrics = session('Assisted Body Weight', [row(weight: 30, reps: 5), row(weight: 20, reps: 4)]);
+
+      expect(metrics['assistanceWeight'], 20);
+      expect(metrics['topSetWeight'], 30);
+    });
+
+    test('cardio sums, and has a pace only with distance', () {
+      expect(session('Cardio', [row(distance: 2, duration: 600), row(distance: 3, duration: 900)]), {
+        'cardioDistance': 5,
+        'cardioDuration': 1500,
+        'averagePace': 300,
+      });
+      expect(session('Cardio', [row(duration: 1200)]), {'cardioDistance': 0, 'cardioDuration': 1200});
+    });
+
+    test('no sets, no values', () {
+      expect(session('Barbell', []), isEmpty);
+    });
+  });
 }
