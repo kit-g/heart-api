@@ -2595,11 +2595,14 @@ RETURNING client_id, kind, client_name, redirect_uris, token_endpoint_auth_metho
 const _createOAuthRequest = '''
 WITH _request AS (
   INSERT INTO oauth_requests (client_id, redirect_uri, code_challenge, scopes, resource, state, expires_at)
-  VALUES (@clientId, @redirectUri, @codeChallenge, @scopes, @resource, @state,
-          now() + make_interval(secs => @ttlSeconds))
+  VALUES (
+    @clientId, @redirectUri, @codeChallenge, @scopes, @resource, @state,
+    now() + make_interval(secs => @ttlSeconds)
+  )
   RETURNING id, client_id
 ), _client AS (
-  UPDATE oauth_clients SET last_used_at = now()
+  UPDATE oauth_clients
+  SET last_used_at = now()
   WHERE client_id IN (SELECT client_id FROM _request)
   RETURNING client_id
 )
@@ -2634,9 +2637,12 @@ WITH _request AS (
 ), _grant AS (
   INSERT INTO oauth_grants (user_id, client_id, client_name, scopes, resource)
   SELECT @userId, client_id, client_name, scopes, resource FROM _named
-  ON CONFLICT (user_id, client_id, resource) WHERE revoked_at IS NULL
-  DO UPDATE SET scopes      = ARRAY(SELECT DISTINCT s FROM unnest(oauth_grants.scopes || excluded.scopes) s ORDER BY s),
-                client_name = excluded.client_name
+  ON CONFLICT (user_id, client_id, resource) WHERE revoked_at IS NULL DO UPDATE
+  SET
+    scopes = ARRAY(
+      SELECT DISTINCT s FROM unnest(oauth_grants.scopes || excluded.scopes) s ORDER BY s
+    ),
+    client_name = excluded.client_name
   RETURNING id
 )
 SELECT id, client_id, client_name, redirect_uri, scopes, resource, state
@@ -2706,10 +2712,11 @@ RETURNING id
 // a week for the check, then cleared.
 const _rotateOAuthRefresh = '''
 WITH _old AS (
-  SELECT r.token_hash, r.grant_id, r.rotated_at, r.expires_at,
-         g.user_id, g.client_id, g.client_name, g.resource, g.revoked_at,
-         (SELECT t.scopes FROM api_tokens t WHERE t.grant_id = g.id ORDER BY t.id DESC LIMIT 1) AS token_scopes,
-         g.scopes AS grant_scopes
+  SELECT
+    r.token_hash, r.grant_id, r.rotated_at, r.expires_at,
+    g.user_id, g.client_id, g.client_name, g.resource, g.revoked_at,
+    (SELECT t.scopes FROM api_tokens t WHERE t.grant_id = g.id ORDER BY t.id DESC LIMIT 1) AS token_scopes,
+    g.scopes AS grant_scopes
   FROM oauth_refresh_tokens r
   JOIN oauth_grants g ON g.id = r.grant_id
   WHERE r.token_hash = @refreshHash::bytea
@@ -2745,8 +2752,9 @@ WITH _old AS (
   RETURNING id
 ), _access AS (
   INSERT INTO api_tokens (user_id, name, token_hash, hint, scopes, expires_at, grant_id, resource)
-  SELECT l.user_id, l.client_name, @accessHash::bytea, @accessHint, coalesce(l.token_scopes, l.grant_scopes),
-         @accessExpiresAt, l.grant_id, l.resource
+  SELECT
+    l.user_id, l.client_name, @accessHash::bytea, @accessHint, coalesce(l.token_scopes, l.grant_scopes),
+    @accessExpiresAt, l.grant_id, l.resource
   FROM _live l
   JOIN _rotated USING (grant_id)
   RETURNING grant_id, scopes
@@ -2755,7 +2763,8 @@ WITH _old AS (
   SELECT @newRefreshHash::bytea, grant_id, @refreshExpiresAt FROM _access
   RETURNING grant_id
 ), _touch AS (
-  UPDATE oauth_grants SET last_used_at = now()
+  UPDATE oauth_grants
+  SET last_used_at = now()
   WHERE id IN (SELECT grant_id FROM _refresh)
   RETURNING id
 )
