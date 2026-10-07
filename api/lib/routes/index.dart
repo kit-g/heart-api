@@ -1,4 +1,5 @@
 import 'package:heart/core/mcp_router.dart';
+import 'package:heart/core/oauth_router.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/routes/account.dart' as account;
 import 'package:heart/routes/charts.dart' as charts;
@@ -13,6 +14,7 @@ import 'package:heart/routes/goals.dart' as goals;
 import 'package:heart/routes/me_index.dart';
 import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
+import 'package:heart/routes/oauth.dart' as oauth;
 import 'package:heart/routes/template_folders.dart' as folders;
 import 'package:heart/routes/templates.dart' as templates;
 import 'package:heart/routes/tokens.dart' as tokens;
@@ -24,6 +26,8 @@ import 'package:relic/relic.dart';
 final routes = <(String, Method), ModelHandler>{
   ('/accounts', .put): account.upsertAccount,
   ('/accounts/summary', .get): account.getAccountSummary,
+  ('/accounts/connected-apps', .get): oauth.listConnectedApps,
+  ('/accounts/connected-apps/:grantId', .delete): oauth.disconnectApp,
   ('/accounts/tokens', .get): tokens.listApiTokens,
   ('/accounts/tokens', .post): tokens.createApiToken,
   ('/accounts/tokens/:tokenId', .delete): tokens.revokeApiToken,
@@ -83,11 +87,12 @@ const _publicRoutes = {'/version', '/events'};
 
 /// Whether [request] is for one of the app's own routes: those authenticate
 /// with a Firebase ID token and carry the app version. Public routes need
-/// neither, and the `/me` and MCP surfaces authenticate with a personal access
-/// token and are called by things that have no app version to send.
+/// neither, the `/me` and MCP surfaces authenticate with tokens, and the
+/// authorization server's callers (clients, the consent page) have no app
+/// version to send.
 bool isAppRoute(Request request) {
   final path = request.url.path;
   if (_publicRoutes.contains(path)) return false;
   bool under(String prefix) => path == prefix || path.startsWith('$prefix/');
-  return !under(tokenPrefix) && !under(mcpPrefix);
+  return !under(tokenPrefix) && !under(mcpPrefix) && !under(oauthPrefix);
 }

@@ -5,6 +5,7 @@ import 'package:heart/globals/globals.dart';
 import 'package:heart/mcp/protocol.dart';
 import 'package:heart/mcp/tools.dart';
 import 'package:heart/middleware/tokens.dart';
+import 'package:heart/oauth/protocol.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart';
 import 'package:relic/relic.dart' hide Logger;
@@ -76,7 +77,19 @@ Future<Response> mcpEndpoint(Request request) async {
     _ => method,
   };
 
-  final check = await checkToken(request, count: method == 'tools/call');
+  final oauth = request.config.oauth;
+  final check = await checkToken(
+    request,
+    count: method == 'tools/call',
+    resource: oauth?.mcpResource,
+    // how a host that has no token learns where to get one (RFC 9728)
+    challenge: [
+      if (oauth != null) ...[
+        AuthenticationParameter('resource_metadata', oauth.mcpResourceMetadata.toString()),
+        AuthenticationParameter('scope', supportedScopes.join(' ')),
+      ],
+    ],
+  );
   switch (check) {
     case TokenRefused(:final response):
       logApiUsage(request, surface: 'mcp', status: response.statusCode, route: route, client: client);
@@ -239,4 +252,18 @@ Future<Response> mcpMethodNotAllowed(Request request) async {
     405,
     headers: .build((headers) => headers.allow = {.post}),
   );
+}
+
+/// RFC 9728 protected resource metadata: which authorization server issues
+/// tokens for this MCP server, and for what.
+Future<Response> mcpResourceMetadata(Request request) async {
+  final oauth = request.config.oauth;
+  if (oauth == null) return Response.notFound();
+  return _json(200, {
+    'resource': oauth.mcpResource,
+    'authorization_servers': [oauth.issuer.toString()],
+    'scopes_supported': [...supportedScopes],
+    'bearer_methods_supported': ['header'],
+    'resource_name': 'Heart',
+  });
 }
