@@ -20,7 +20,7 @@ final _usage = Logger('ApiUsage');
 Middleware tokenAuthentication({DateTime Function()? clock}) {
   return (Handler next) {
     return (request) async {
-      switch (await checkToken(request, clock: clock)) {
+      switch (await checkToken(request, resource: request.config.oauth?.meResource, clock: clock)) {
         case TokenRefused(:final response):
           logApiUsage(request, surface: 'me', status: response.statusCode);
           return response;
@@ -63,7 +63,19 @@ final class TokenRefused implements TokenCheck {
 /// Unknown, revoked, expired and malformed tokens all get the same
 /// `401 invalid_token`: a caller can't act on the difference, and telling them
 /// apart would reveal which tokens once existed.
-Future<TokenCheck> checkToken(Request request, {bool count = true, DateTime Function()? clock}) async {
+///
+/// [resource] is the surface being called. A personal token acts as its owner
+/// anywhere; an OAuth access token only on the resource it was issued for, so
+/// a token handed to one surface can never be replayed against another.
+/// [challenge] adds parameters to the 401's `WWW-Authenticate`, such as where
+/// a client discovers how to get a token.
+Future<TokenCheck> checkToken(
+  Request request, {
+  bool count = true,
+  String? resource,
+  List<AuthenticationParameter> challenge = const [],
+  DateTime Function()? clock,
+}) async {
   final secret = switch (request.headers.authorization) {
     BearerAuthorizationHeader(:final token) when TokenSecret.looksValid(token) => token,
     _ => null,
@@ -80,7 +92,8 @@ Future<TokenCheck> checkToken(Request request, {bool count = true, DateTime Func
     return TokenRefused(JsonResponse.serverError());
   }
 
-  if (use == null) {
+  final bound = use?.resource;
+  if (use == null || (bound != null && bound != resource)) {
     return TokenRefused(
       JsonResponse(
         401,
@@ -88,7 +101,7 @@ Future<TokenCheck> checkToken(Request request, {bool count = true, DateTime Func
         headers: .build(
           (headers) => headers.wwwAuthenticate = .new(
             scheme: 'Bearer',
-            parameters: [const .new('realm', 'heart')],
+            parameters: [const .new('realm', 'heart'), ...challenge],
           ),
         ),
       ),
@@ -138,8 +151,11 @@ void logApiUsage(
       'surface': surface,
       'route': route ?? request.url.path,
       'status': status,
-      'credential': 'pat',
-      'client': client,
+      'credential': switch (use?.clientId) {
+        String() => 'oauth',
+        null => 'pat',
+      },
+      'client': client ?? use?.clientId,
       'purpose': use?.purpose?.name,
       'uaFamily': _userAgentFamily(request.headers.userAgent),
       'account': switch (use) {

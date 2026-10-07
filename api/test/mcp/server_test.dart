@@ -18,6 +18,8 @@ void main() {
   TokenUse use({int count = 1}) {
     return (
       userId: 'u1',
+      resource: null,
+      clientId: null,
       scopes: const ['read'],
       purpose: ApiTokenPurpose.aiAssistant,
       minuteStart: now,

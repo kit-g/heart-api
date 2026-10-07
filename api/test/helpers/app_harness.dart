@@ -57,6 +57,7 @@ class AppHarness {
     when(config.shouldCheckVersion).thenReturn(false);
     when(config.firebaseProjectId).thenReturn('proj');
     when(config.allowedOrigins).thenReturn(allowedOrigins);
+    when(config.oauth).thenReturn(null);
 
     final authenticated = user ?? User(id: 'u1', displayName: 'Sam');
     Future<User> verify(String _, String token) async {

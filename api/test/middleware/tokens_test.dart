@@ -24,11 +24,14 @@ void main() {
     service = MockApiTokenService();
     config = MockAppConfig();
     when(config.freeApiLimits).thenReturn(const ApiLimits(perMinute: 20, perDay: 200));
+    when(config.oauth).thenReturn(null);
   });
 
   TokenUse use({int minute = 1, int day = 1, DateTime? minuteStart, DateTime? dayStart}) {
     return (
       userId: 'u1',
+      resource: null,
+      clientId: null,
       scopes: const ['read'],
       purpose: ApiTokenPurpose.aiAssistant,
       minuteStart: minuteStart ?? now,
