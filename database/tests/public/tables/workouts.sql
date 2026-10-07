@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(40);
+SELECT plan(43);
 
 SELECT has_table('public'::name, 'workouts'::name);
 
@@ -18,7 +18,8 @@ SELECT columns_are(
                    'import_id',
                    'note',
                    'pauses',
-                   'updated_at'
+                   'updated_at',
+                   'changed_xid'
                    ]
        );
 
@@ -48,10 +49,13 @@ SELECT col_default_is('public', 'workouts', 'pauses', '[]'::jsonb, 'pauses defau
 SELECT fk_ok('public', 'workouts', 'user_id', 'public', 'profiles', 'id');
 
 SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_id_idx'::name);
-SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_updated_idx'::name);
+SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_changed_idx'::name);
 SELECT col_type_is('public'::name, 'workouts'::name, 'updated_at'::name, 'timestamp with time zone'::name);
 SELECT col_not_null('public'::name, 'workouts'::name, 'updated_at'::name);
 SELECT col_default_is('public', 'workouts', 'updated_at', 'now()', 'updated_at defaults to now()');
+SELECT col_type_is('public'::name, 'workouts'::name, 'changed_xid'::name, 'xid8'::name);
+SELECT col_not_null('public'::name, 'workouts'::name, 'changed_xid'::name);
+SELECT col_default_is('public', 'workouts', 'changed_xid', 'pg_current_xact_id()', 'changed_xid defaults to the writing transaction');
 SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_import_id_idx'::name);
 SELECT index_is_unique('public'::name, 'workouts'::name, 'workouts_user_import_id_idx'::name);
 

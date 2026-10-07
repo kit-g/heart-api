@@ -123,11 +123,17 @@ BEGIN
     RETURN NEXT is((SELECT count(*) FROM archive.deleted_workouts WHERE id = _w_id), 0::bigint, 'not archived yet');
 
     DELETE FROM workouts WHERE id = _w_id;
+    RETURN NEXT is((SELECT deleted_xid FROM archive.deleted_workouts WHERE id = _w_id), pg_current_xact_id(),
+                   'a deletion carries its transaction');
+    -- an older deletion, as a later transaction would find it
+    UPDATE archive.deleted_workouts SET deleted_xid = '1'::xid8 WHERE id = _w_id;
     INSERT INTO workouts (id, user_id, name, started_at) VALUES (_w_id, _user_id, 'second life', now());
     DELETE FROM workouts WHERE id = _w_id;
 
     RETURN NEXT is((SELECT count(*) FROM archive.deleted_workouts WHERE id = _w_id), 1::bigint, 'one snapshot per id');
     RETURN NEXT is((SELECT name FROM archive.deleted_workouts WHERE id = _w_id), 'second life', 'the newer snapshot wins');
+    RETURN NEXT is((SELECT deleted_xid FROM archive.deleted_workouts WHERE id = _w_id), pg_current_xact_id(),
+                   'and moves to the newer deletion''s transaction');
 END
 $$ LANGUAGE plpgsql;
 

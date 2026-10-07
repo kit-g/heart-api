@@ -115,6 +115,55 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+-- Every write in this test shares one transaction, so each case first marks
+-- the workout as changed by an older one ('1'), then checks the change moved
+-- it back to this transaction.
+CREATE OR REPLACE FUNCTION test__stamp_workouts_tracks_the_changing_transaction() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id     TEXT;
+    _exercise_id UUID;
+    _w_id        UUID;
+    _other_id    UUID;
+    _we_id       UUID;
+    _set_id      UUID;
+BEGIN
+    _user_id := create_test_profile();
+    RETURN NEXT is((SELECT count(*) FROM workouts WHERE user_id = _user_id), 0::bigint, 'no workouts yet');
+
+    _exercise_id := create_test_exercise(_user_id => _user_id);
+    _w_id := create_test_workout(_user_id => _user_id, _name => 'touched');
+    _other_id := create_test_workout(_user_id => _user_id, _name => 'untouched');
+    _we_id := create_test_workout_exercise(_workout_id => _w_id, _exercise_id => _exercise_id);
+    RETURN NEXT is((SELECT changed_xid FROM workouts WHERE id = _w_id), pg_current_xact_id(),
+                   'a new workout carries its transaction');
+
+    UPDATE workouts SET changed_xid = '1'::xid8 WHERE id IN (_w_id, _other_id);
+    RETURN NEXT is((SELECT changed_xid FROM workouts WHERE id = _w_id), '1'::xid8, 'an explicit value is kept');
+
+    UPDATE workouts SET name = 'renamed' WHERE id = _w_id;
+    RETURN NEXT is((SELECT changed_xid FROM workouts WHERE id = _w_id), pg_current_xact_id(), 'editing the row moves it');
+
+    UPDATE workouts SET changed_xid = '1'::xid8 WHERE id = _w_id;
+    _set_id := create_test_exercise_set(_workout_exercise_id => _we_id, _weight => 80, _reps => 5);
+    RETURN NEXT is((SELECT changed_xid FROM workouts WHERE id = _w_id), pg_current_xact_id(), 'adding a set moves it');
+    RETURN NEXT is((SELECT changed_xid FROM workouts WHERE id = _other_id), '1'::xid8, 'and only its workout');
+
+    UPDATE workouts SET changed_xid = '1'::xid8 WHERE id = _w_id;
+    UPDATE exercise_sets SET reps = 6 WHERE id = _set_id;
+    RETURN NEXT is((SELECT changed_xid FROM workouts WHERE id = _w_id), pg_current_xact_id(), 'editing a set moves it');
+
+    UPDATE workouts SET changed_xid = '1'::xid8 WHERE id = _w_id;
+    UPDATE workout_exercises SET note = 'grip' WHERE id = _we_id;
+    RETURN NEXT is((SELECT changed_xid FROM workouts WHERE id = _w_id), pg_current_xact_id(), 'editing an exercise moves it');
+
+    UPDATE workouts SET changed_xid = '1'::xid8 WHERE id = _w_id;
+    UPDATE exercises SET name = name || ' renamed' WHERE id = _exercise_id;
+    RETURN NEXT is((SELECT changed_xid FROM workouts WHERE id = _w_id), pg_current_xact_id(),
+                   'renaming its custom exercise moves it');
+END
+$$ LANGUAGE plpgsql;
+
 SELECT * FROM runtests();
 
 ROLLBACK;
