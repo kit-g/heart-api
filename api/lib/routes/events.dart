@@ -4,10 +4,12 @@ import 'package:heart/events/account_deletion.dart';
 import 'package:heart/events/comment_notification.dart';
 import 'package:heart/events/database_jobs.dart';
 import 'package:heart/events/exercise_asset.dart';
+import 'package:heart/events/migrate.dart';
 import 'package:heart/events/uploads.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/aws.dart';
 import 'package:heart_aws/heart_aws.dart';
+import 'package:heart_models/heart_models.dart' show Model;
 import 'package:logging/logging.dart' as logging;
 import 'package:relic/relic.dart';
 
@@ -22,7 +24,7 @@ final _logger = logging.Logger('events');
 /// Since our Dart API is wrapped in lambda_web_adapter
 /// https://crates.io/crates/lambda_web_adapter
 /// it exposes that endpoint, so we route events from here.
-Future<NoContent> handler(Request request) async {
+Future<Model> handler(Request request) async {
   final requestContext = request.headers['x-amzn-request-context']?.firstOrNull;
 
   // API Gateway would have that header populated.
@@ -122,6 +124,10 @@ Future<NoContent> handler(Request request) async {
             }
         }
       }
+    // a deploy invoking the new version directly, before it takes traffic: the
+    // answer goes back to the deploy, which stops if it isn't one
+    case {'type': 'db.migrate'}:
+      return migrate(request);
     default:
       throw ArgumentError({'error': 'unexpected event', 'event': payload});
   }
