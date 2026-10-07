@@ -206,16 +206,8 @@ final List<McpTool> tools = [
             {
               'workoutId': session.workoutId,
               'at': session.at,
-              'sets': [
-                for (final set in session.sets)
-                  {
-                    'weightKg': ?set.weight,
-                    'reps': ?set.reps,
-                    'distanceKm': ?set.distance,
-                    'seconds': ?set.duration,
-                  },
-              ],
-              'metrics': foldSession(category, session.sets),
+              'sets': [for (final set in session.sets) set.toMcp()],
+              'metrics': session.sets.toSessionMetrics(category),
             },
         ],
         if (sessions.hasMore && sessions.items.isNotEmpty) 'cursor': sessions.items.last.workoutId,
@@ -393,6 +385,13 @@ extension on ExerciseSet {
       'rpe': ?rpe,
       if (!isCompleted) 'completed': false,
     };
+  }
+}
+
+extension on RecordSet {
+  /// A set in an exercise's history: its measurements alone.
+  Map<String, dynamic> toMcp() {
+    return (weight: weight, reps: reps, distance: distance, duration: duration).toMcp();
   }
 }
 

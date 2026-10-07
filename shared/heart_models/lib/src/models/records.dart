@@ -300,60 +300,64 @@ extension PersonalRecords on List<RecordSet> {
   }
 }
 
-/// Folds one session of one exercise — its completed, non-warm-up sets — into
-/// the numbers the progress chart plots for it, keyed by
-/// [ChartPreferenceType.value]: the dimensions
-/// [ChartPreferenceType.chartsByExerciseCategory] lists for [category], each
-/// present only when the sets can measure it.
-///
-/// The one definition of a session's chart values, so a chart and anything
-/// else describing the same session agree:
-///
-/// - `topSetWeight`: the heaviest set, a set without weight reading as 0
-/// - `estimatedOneRepMax`: the best Brzycki estimate among sets with weight
-///   and reps, under 37 reps, as [foldRecords] counts it
-/// - `totalVolume`: Σ weight × reps
-/// - `averageWorkingWeight`: volume over reps, among sets with reps
-/// - `assistanceWeight`: the lightest assistance
-/// - `totalReps`, `maxConsecutiveReps`: the sum, and the best single set
-/// - `cardioDistance`, `cardioDuration`, `totalTimeUnderTension`: sums
-/// - `averagePace`: seconds per unit of distance, when there is distance
-Map<String, num> foldSession(Category category, List<RecordSet> sets) {
-  if (sets.isEmpty) return const {};
+/// A session's sets, as the values its progress chart plots.
+extension SessionMetrics on List<RecordSet> {
+  /// One session of one exercise — its completed, non-warm-up sets — as the
+  /// numbers the progress chart plots for it, keyed by
+  /// [ChartPreferenceType.value]: the dimensions
+  /// [ChartPreferenceType.chartsByExerciseCategory] lists for [category], each
+  /// present only when the sets can measure it.
+  ///
+  /// The one definition of a session's chart values, so a chart and anything
+  /// else describing the same session agree:
+  ///
+  /// - `topSetWeight`: the heaviest set, a set without weight reading as 0
+  /// - `estimatedOneRepMax`: the best Brzycki estimate among sets with weight
+  ///   and reps, under 37 reps, as [foldRecords] counts it
+  /// - `totalVolume`: Σ weight × reps
+  /// - `averageWorkingWeight`: volume over reps, among sets with reps
+  /// - `assistanceWeight`: the lightest assistance
+  /// - `totalReps`, `maxConsecutiveReps`: the sum, and the best single set
+  /// - `cardioDistance`, `cardioDuration`, `totalTimeUnderTension`: sums
+  /// - `averagePace`: seconds per unit of distance, when there is distance
+  Map<String, num> toSessionMetrics(Category category) {
+    final sets = this;
+    if (sets.isEmpty) return const {};
 
-  final repSets = [
-    for (final set in sets)
-      if ((set.reps ?? 0) > 0) set,
-  ];
-  final weights = sets.map((set) => set.weight ?? 0);
-  final reps = [for (final set in sets) ?set.reps];
-  final distance = sets.fold(0.0, (sum, set) => sum + (set.distance ?? 0));
-  final duration = sets.fold(0.0, (sum, set) => sum + (set.duration ?? 0));
-  final repTotal = repSets.fold(0, (sum, set) => sum + set.reps!);
-  final estimates = [
-    for (final set in repSets)
-      if ((set.weight ?? 0) > 0 && set.reps! < 37) set.oneRepMax,
-  ];
+    final repSets = [
+      for (final set in sets)
+        if ((set.reps ?? 0) > 0) set,
+    ];
+    final weights = sets.map((set) => set.weight ?? 0);
+    final reps = [for (final set in sets) ?set.reps];
+    final distance = sets.fold(0.0, (sum, set) => sum + (set.distance ?? 0));
+    final duration = sets.fold(0.0, (sum, set) => sum + (set.duration ?? 0));
+    final repTotal = repSets.fold(0, (sum, set) => sum + set.reps!);
+    final estimates = [
+      for (final set in repSets)
+        if ((set.weight ?? 0) > 0 && set.reps! < 37) set.oneRepMax,
+    ];
 
-  num? measure(ChartPreferenceType type) {
-    return switch (type) {
-      .topSetWeight => weights.reduce(max),
-      .estimatedOneRepMax => estimates.isEmpty ? null : estimates.reduce(max),
-      .totalVolume => sets.fold<double>(0, (sum, set) => sum + set.volume),
-      .averageWorkingWeight =>
-        repSets.isEmpty ? null : repSets.fold<double>(0, (sum, set) => sum + set.volume) / repTotal,
-      .assistanceWeight => weights.reduce(min),
-      .totalReps => reps.fold<int>(0, (sum, r) => sum + r),
-      .maxConsecutiveReps => reps.isEmpty ? null : reps.reduce(max),
-      .cardioDistance => distance,
-      .cardioDuration || .totalTimeUnderTension => duration,
-      .averagePace => distance > 0 ? duration / distance : null,
+    num? measure(ChartPreferenceType type) {
+      return switch (type) {
+        .topSetWeight => weights.reduce(max),
+        .estimatedOneRepMax => estimates.isEmpty ? null : estimates.reduce(max),
+        .totalVolume => sets.fold<double>(0, (sum, set) => sum + set.volume),
+        .averageWorkingWeight =>
+          repSets.isEmpty ? null : repSets.fold<double>(0, (sum, set) => sum + set.volume) / repTotal,
+        .assistanceWeight => weights.reduce(min),
+        .totalReps => reps.fold<int>(0, (sum, r) => sum + r),
+        .maxConsecutiveReps => reps.isEmpty ? null : reps.reduce(max),
+        .cardioDistance => distance,
+        .cardioDuration || .totalTimeUnderTension => duration,
+        .averagePace => distance > 0 ? duration / distance : null,
+      };
+    }
+
+    return {
+      for (final type in ChartPreferenceType.chartsByExerciseCategory(category)) type.value: ?measure(type),
     };
   }
-
-  return {
-    for (final type in ChartPreferenceType.chartsByExerciseCategory(category)) type.value: ?measure(type),
-  };
 }
 
 /// One completed set with its workout's identity and start ([at], ISO 8601):
