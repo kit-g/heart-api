@@ -115,7 +115,7 @@ class MeRecords implements Model {
 
 /// One session in an exercise's history: its workout, when, the working sets
 /// as they were done, and the values the progress chart plots for it
-/// ([foldSession]).
+/// ([SessionMetrics.toSessionMetrics]).
 class MeExerciseSession implements Model {
   final ExerciseSession session;
   final Category category;
@@ -133,7 +133,7 @@ class MeExerciseSession implements Model {
         for (final set in session.sets)
           {'weight': ?set.weight, 'reps': ?set.reps, 'duration': ?set.duration, 'distance': ?set.distance},
       ],
-      'metrics': foldSession(category, session.sets),
+      'metrics': session.sets.toSessionMetrics(category),
     };
   }
 }

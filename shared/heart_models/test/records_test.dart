@@ -308,9 +308,9 @@ void main() {
 
   /// A session's chart values: the app's per-dimension history queries
   /// (heart_db's metrics.dart), one session at a time.
-  group('foldSession', () {
+  group('toSessionMetrics', () {
     Map<String, num> session(String category, List<Map<String, dynamic>> rows) {
-      return foldSession(Category.fromString(category), rows.map(RecordSet.fromRow).toList());
+      return rows.map(RecordSet.fromRow).toList().toSessionMetrics(Category.fromString(category));
     }
 
     test('a strength session gives every strength dimension', () {
