@@ -11,6 +11,7 @@ import 'package:heart/models/exercise_preferences.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/imports.dart';
+import 'package:heart/models/oauth.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
@@ -25,6 +26,7 @@ part 'exercise_preferences.dart';
 part 'exercises.dart';
 part 'goals.dart';
 part 'images.dart';
+part 'oauth.dart';
 part 'profiles.dart';
 part 'queries.dart';
 part 'template_folders.dart';
@@ -192,7 +194,8 @@ class Database extends _DatabaseBase
         _Workouts,
         _Templates,
         _TemplateFolders,
-        _ApiTokens
+        _ApiTokens,
+        _OAuth
     implements
         ChartPreferenceService,
         ApiExercisePreferenceService,
@@ -206,7 +209,8 @@ class Database extends _DatabaseBase
         ApiWorkoutService,
         IdempotentTemplateService,
         IdempotentTemplateFolderService,
-        ApiTokenService {
+        ApiTokenService,
+        OAuthService {
   @override
   final Pool _pool;
 

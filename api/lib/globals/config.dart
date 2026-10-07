@@ -158,6 +158,61 @@ class AppleConfig {
   }
 }
 
+/// Where OAuth lives in an environment: the issuer clients discover, the
+/// API's public address, and the resources tokens can be bound to.
+///
+/// Absent where `SITE_ORIGIN` or `API_PUBLIC_URL` isn't set: OAuth is then
+/// off, and personal tokens keep working.
+class OAuthConfig {
+  /// The site's origin (`https://heart-of.me`): the issuer, which serves the
+  /// authorization server metadata and the consent page.
+  final Uri issuer;
+
+  /// The API's public base (`https://api.heart-of.me/v1`), for the endpoint
+  /// URLs the metadata names.
+  final Uri apiBase;
+
+  /// The resource identifier of the MCP server.
+  final String mcpResource;
+
+  const new({required this.issuer, required this.apiBase, required this.mcpResource});
+
+  /// The resource identifier of the `/me` surface.
+  String get meResource => '$apiBase/me';
+
+  Uri get authorizationEndpoint => Uri.parse('$apiBase/oauth/authorize');
+
+  Uri get tokenEndpoint => Uri.parse('$apiBase/oauth/token');
+
+  Uri get registrationEndpoint => Uri.parse('$apiBase/oauth/register');
+
+  Uri get revocationEndpoint => Uri.parse('$apiBase/oauth/revoke');
+
+  /// Where the consent page lives.
+  Uri consentPage(String requestId) => issuer.replace(path: '/connect', queryParameters: {'request': requestId});
+
+  /// The protected resource metadata document for the MCP server.
+  Uri get mcpResourceMetadata => Uri.parse('$mcpResource/.well-known/oauth-protected-resource');
+
+  /// The resources a client may ask a token for.
+  Set<String> get resources => {mcpResource, meResource};
+
+  static OAuthConfig? fromEnv(Map<String, String> env) {
+    return switch (env) {
+      {'SITE_ORIGIN': final String site, 'API_PUBLIC_URL': final String api} when site.isNotEmpty && api.isNotEmpty =>
+        OAuthConfig(
+          issuer: Uri.parse(site),
+          apiBase: Uri.parse(api),
+          mcpResource: switch (env['MCP_RESOURCE']) {
+            final String resource when resource.isNotEmpty => resource,
+            _ => '$api/mcp',
+          },
+        ),
+      _ => null,
+    };
+  }
+}
+
 /// Parses `ALLOWED_ORIGINS`: a comma-separated allowlist. Absent or blank is an
 /// empty set rather than a wildcard — an origin has to be named to be trusted.
 Set<String> _origins(String? raw) {
@@ -230,6 +285,9 @@ abstract interface class AppConfig {
   /// them breaks a promise.
   ApiLimits get freeApiLimits;
 
+  /// Null where OAuth isn't configured; see [OAuthConfig].
+  OAuthConfig? get oauth;
+
   factory fromEnv() {
     final env = Platform.environment;
     switch (env) {
@@ -277,6 +335,7 @@ abstract interface class AppConfig {
           allowedOrigins: _origins(env['ALLOWED_ORIGINS']),
           allowNonHttpEvents: bool.tryParse(env['ALLOW_NON_HTTP_EVENTS'] ?? '', caseSensitive: false) ?? false,
           db: PostgresConfig.fromEnv(),
+          oauth: OAuthConfig.fromEnv(env),
           freeApiLimits: ApiLimits(
             perMinute: int.tryParse(env['API_FREE_PER_MINUTE'] ?? '') ?? ApiLimits.free.perMinute,
             perDay: int.tryParse(env['API_FREE_PER_DAY'] ?? '') ?? ApiLimits.free.perDay,
@@ -347,6 +406,8 @@ class _EnvConfig implements AppConfig {
   final bool allowNonHttpEvents;
   @override
   final ApiLimits freeApiLimits;
+  @override
+  final OAuthConfig? oauth;
 
   const new({
     required this.env,
@@ -375,6 +436,7 @@ class _EnvConfig implements AppConfig {
     required this.eventsQueueUrl,
     required this.firebaseEventsQueueUrl,
     required this.freeApiLimits,
+    required this.oauth,
   });
 
   @override
