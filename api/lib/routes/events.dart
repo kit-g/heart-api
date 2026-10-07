@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:heart/events/account_deletion.dart';
 import 'package:heart/events/comment_notification.dart';
+import 'package:heart/events/database_jobs.dart';
 import 'package:heart/events/exercise_asset.dart';
 import 'package:heart/events/uploads.dart';
 import 'package:heart/globals/config.dart';
@@ -115,6 +116,9 @@ Future<NoContent> handler(Request request) async {
               // upload — persist its link + dimensions onto the exercise row
               case {'type': 'exercise.asset.processed'}:
                 await runRecord(() => exerciseAssetProcessed(request, event));
+              // use case: a deploy finished; declare the database's pg_cron jobs
+              case {'type': 'db.schedule'}:
+                await runRecord(() => declareDatabaseJobs(request));
             }
         }
       }
