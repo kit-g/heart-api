@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="description" content="Read your own Heart of Yours training log from scripts, spreadsheets and AI assistants: personal access tokens, the read-only API, change polling, Strong-format export and MCP."/>
+    <!-- Unlisted until the app can create tokens (heart-of-yours#271): reachable, not indexed. -->
+    <meta name="robots" content="noindex"/>
+    <title>Developer API - Heart of Yours, a free workout log app</title>
+    <link rel="canonical" href="https://heart-of.me/developers.html"/>
+    <!-- Safari on iPhone shows a native "Get" bar for the app. -->
+    <meta name="apple-itunes-app" content="app-id=6777837444"/>
+    <!-- Link previews: absolute URLs, because crawlers don't resolve relative ones. -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="Heart of Yours"/>
+    <meta property="og:title" content="Developer API - Heart of Yours, a free workout log app"/>
+    <meta property="og:description" content="Read your own training log from scripts, spreadsheets and AI assistants: free, read-only, no health data."/>
+    <meta property="og:url" content="https://heart-of.me/developers.html"/>
+    <meta property="og:image" content="https://heart-of.me/assets/og.png?v=3"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content="Heart of Yours: a workout log that gets out of your way. Free, no account needed, health data stays on your phone. Beside it, the app’s workouts-per-week chart and goals."/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,600&display=swap"
+          rel="stylesheet"/>
+    <link rel="stylesheet" href="assets/site.css">
+    <link rel="stylesheet" href="assets/tailwind.css">
+    <script src="assets/site.js"></script>
+</head>
+<body class="bg-ground text-ink font-text min-h-screen flex flex-col selection:bg-accent selection:text-on-accent">
+<header class="w-full flex justify-center pt-6 pb-2 px-6 sm:px-10 z-10">
+    <div class="w-full max-w-[1200px] flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="size-9 flex items-center justify-center bg-surface rounded overflow-hidden border">
+                <!-- The mark is drawn in --ink, so it ships as two transparent files
+                     rather than the opaque app tile: the chip's own surface shows
+                     through in either brightness. Decorative — the wordmark beside
+                     it already names the app. -->
+                <picture class="size-full">
+                    <source srcset="assets/logo-dark.png" media="(prefers-color-scheme: dark)"/>
+                    <img src="assets/logo-light.png" width="192" height="192" alt=""
+                         class="size-full object-contain"/>
+                </picture>
+            </div>
+            <h2 class="text-lg font-title font-semibold tracking-tight">Heart of Yours</h2>
+        </a>
+        <nav class="flex items-center gap-8">
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="support.html">Support</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="/">Back Home</a>
+        </nav>
+    </div>
+</header>
+
+<main class="flex-grow w-full max-w-3xl mx-auto px-6 py-16 md:py-24">
+    <article class="prose prose-h1:text-4xl prose-h1:tracking-tight prose-pre:bg-fill prose-pre:text-ink prose-code:before:content-none prose-code:after:content-none max-w-none">
+        <h1>Developer API</h1>
+
+        <p>Your training log, readable by your own scripts, spreadsheets and AI assistants. It’s free and
+            read-only: it can show what you logged, and it can’t change anything.</p>
+
+        <p><strong>There’s no health data in it, because Heart never has any.</strong> Heart rate, sleep, body weight
+            and the rest stay on your phone, in Apple Health or Health Connect. A workout’s <code>calories</code> is an
+            estimate from the exercises and the weight you entered, never a watch reading.</p>
+
+        <pre><code>curl https://api.heart-of.me/v1/me/workouts?limit=5 \
+  -H "Authorization: Bearer hrt_…" \
+  -H "User-Agent: my-sheet-sync/1.0"</code></pre>
+
+        <h2 id="tokens">Tokens</h2>
+        <p>Create a token in the app under <strong>Settings</strong>. You need a signed-in account: without one, your
+            log lives only on your phone and there’s nothing on the server to read. You see a token’s secret once,
+            when you create it; Heart stores only a digest of it. You can hold five active tokens, each living a year
+            or until you revoke it.</p>
+        <p>Send it as a bearer token. A missing, unknown, revoked or expired token gets the same answer:</p>
+        <pre><code>401 {"error": "unauthorized", "code": "invalid_token", "reason": "…"}</code></pre>
+        <p><strong>Please set a User-Agent that names your tool.</strong> It isn’t required, but it helps us see what
+            people build.</p>
+
+        <h2 id="limits">Limits</h2>
+        <p>20 requests a minute and 200 a day per account, shared by all of its tokens. That covers a few questions,
+            a nightly sync and a one-off history pull with room to spare. Past either limit:</p>
+        <pre><code>429 {"error": "too many requests", "code": "rate_limited", "reason": "…", "retryAfter": 41}</code></pre>
+        <p>with a <code>Retry-After</code> header in seconds.</p>
+
+        <h2 id="routes">What you can read</h2>
+        <p>Everything is <code>GET</code>, and everything is about the account the token belongs to. Lists that
+            page carry a <code>cursor</code> while there’s more: pass it back as <code>?cursor=</code>. No
+            <code>cursor</code> means the last page. <code>limit</code> is 1–100 (30 by default).</p>
+        <!-- a narrow phone scrolls the table rather than the page -->
+        <div class="overflow-x-auto">
+        <table class="[&_td:first-child]:break-all">
+            <thead><tr><th>Route</th><th>Returns</th></tr></thead>
+            <tbody>
+            <tr><td><code>/me</code></td><td>Your username, unit system, and how many workouts, templates, folders, goals and custom exercises you have.</td></tr>
+            <tr><td><code>/me/workouts</code></td><td>Your workouts, newest first, each with its exercises, sets, notes and image links.</td></tr>
+            <tr><td><code>/me/workouts/:id</code></td><td>One workout.</td></tr>
+            <tr><td><code>/me/workouts/changes</code></td><td>What changed since a cursor: see <a href="#polling">Keeping a copy in sync</a>.</td></tr>
+            <tr><td><code>/me/records</code></td><td>Personal records per exercise, the same ones the app shows; <code>?exerciseId=</code> for one.</td></tr>
+            <tr><td><code>/me/exercises/:id/history</code></td><td>Every session of one exercise, newest first, with its working sets and the values the app’s progress chart plots.</td></tr>
+            <tr><td><code>/me/library?q=</code></td><td>The exercise library and your own exercises, searched the way the app searches: word order free, abbreviations such as <code>db</code> or <code>rdl</code>, muscle words such as <code>lats</code>, one typo a word.</td></tr>
+            <tr><td><code>/me/exercises</code></td><td>Your custom exercises.</td></tr>
+            <tr><td><code>/me/templates</code></td><td>Your templates, in your order; <code>?folder=</code> for one folder.</td></tr>
+            <tr><td><code>/me/template-folders</code></td><td>Your template folders.</td></tr>
+            <tr><td><code>/me/goals</code></td><td>Your goals. Goals backed by health data carry their definition only; their progress lives on your phone.</td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p>Weights are in kilograms and distances in kilometres, whatever unit the app shows you. Durations are in
+            seconds, and times are ISO 8601 in UTC.</p>
+
+        <h2 id="polling">Keeping a copy in sync</h2>
+        <p>To keep a spreadsheet or a home dashboard current, poll <code>/me/workouts/changes</code> instead of
+            re-reading everything. Without <code>since</code> it starts from the beginning; after that, pass back the
+            <code>cursor</code> you were given. Each change is a whole workout as it stands now, or the id of one that
+            was deleted. While <code>hasMore</code> is true, ask again straight away. When nothing changed you get
+            empty lists and the same cursor, so keep it.</p>
+        <p>Every few minutes is plenty: polling faster gains nothing and uses up the daily limit. If a poll answers
+            <code>400</code> with <code>stale_cursor</code>, start again without <code>since</code>.</p>
+
+        <h2 id="export">Export</h2>
+        <p><code>/me/export?format=strong</code> downloads your whole history as a CSV in Strong’s export format,
+            which most workout apps can import, Heart included. Weights and distances are in your unit. One export a
+            day.</p>
+        <pre><code>curl -L "https://api.heart-of.me/v1/me/export?format=strong" \
+  -H "Authorization: Bearer hrt_…" -o heart.csv</code></pre>
+        <p>You don’t need the API for this: the app exports too, under <strong>Settings → Export my data</strong>.</p>
+
+        <h2 id="mcp">AI assistants (MCP)</h2>
+        <p>The same token connects an AI assistant to your log over MCP, read-only. In Claude Code:</p>
+        <pre><code>claude mcp add --transport http heart https://api.heart-of.me/v1/mcp \
+  --header "Authorization: Bearer hrt_…"</code></pre>
+        <p>In Cursor, Claude Desktop or any client with a JSON config:</p>
+        <pre><code>{"mcpServers": {"heart": {
+  "url": "https://api.heart-of.me/v1/mcp",
+  "headers": {"Authorization": "Bearer hrt_…"}
+}}}</code></pre>
+        <p>The assistant can read your profile, workouts, templates and folders, goals, personal records, an
+            exercise’s history, your custom exercises and the exercise library. It can’t change anything. Only the
+            data it reads counts against your limits, not the tool listing it does at the start of a conversation.
+            What it reads goes to the assistant’s provider and is covered by their privacy policy, not ours.</p>
+
+        <h2 id="compatibility">Compatibility</h2>
+        <p>Fields and routes may be added; none will be renamed or removed. Ignore fields you don’t know.</p>
+
+        <h2 id="contact">Questions</h2>
+        <p>Building something, or missing something? Write to <a href="mailto:info@heart-of.me">info@heart-of.me</a>.
+            We’d love to hear what you make.</p>
+    </article>
+</main>
+
+<footer class="w-full py-10 px-6 border-t">
+    <div class="max-w-[960px] mx-auto flex flex-col items-center gap-6">
+        <p class="text-xs text-muted">
+            © <span id="footer-year"></span> Heart of Yours.
+        </p>
+    </div>
+</footer>
+</body>
+</html>
