@@ -50,6 +50,7 @@ there's more: pass it back as `?cursor=` for the next page. No `cursor` means th
 | `/me/workouts/changes`    | `{workouts, deleted, cursor, hasMore}`: what changed since `?since=<cursor>`, oldest first (see *Polling*) |
 | `/me/records`             | `{records}`: personal records per exercise, the same ones the app shows; `?exerciseId=` for one |
 | `/me/exercises/:exerciseId/history` | `{sessions, cursor}`: every session of one exercise, newest first (default 20 a page), each with its working sets and `metrics`, the values the app's progress chart plots for it (`topSetWeight`, `estimatedOneRepMax`, `totalVolume`, …, by exercise type) |
+| `/me/library?q=`          | `{exercises}`: the exercise library and your own exercises, searched the way the app searches (word order free, abbreviations such as `db` or `rdl`, muscle words such as `lats`, one typo a word), best match first, each with how it `match`ed (`prefix`, `words`, `vocabulary`, `typo`). Names in your `Accept-Language`, or `?locale=`; `limit` up to 50 (default 20) |
 | `/me/exercises`           | `{exercises}`: your custom exercises (a `glossary` key rides along; ignore it). Library exercises come embedded in workouts and templates  |
 | `/me/templates`           | `{templates, cursor}`, in your order; `?folder=<id>`, or `?folder=none` for unfiled ones                        |
 | `/me/template-folders`    | `{folders}`                                                                                      |

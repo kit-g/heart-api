@@ -76,3 +76,32 @@ class ExerciseHistoryQuery {
     );
   }
 }
+
+/// `GET /me/library?q=&locale=&limit=` — the exercise library and the
+/// user's own exercises, searched the way the app searches. [locale] is a
+/// served locale, or null for the request's `Accept-Language`.
+class LibrarySearchQuery {
+  final String query;
+  final String? locale;
+  final int limit;
+
+  const new _({required this.query, required this.locale, required this.limit});
+
+  static LibrarySearchQuery fromRequest(Request req, {required List<String> supportedLocales}) {
+    final q = req.url.queryParameters;
+    return LibrarySearchQuery._(
+      query: switch (q.stringOrNull('q')?.trim()) {
+        final String text when text.isNotEmpty && text.length <= 100 => text,
+        _ => throw const BadRequest(reason: 'q is required: what to search for, up to 100 characters'),
+      },
+      locale: switch (q.stringOrNull('locale')) {
+        null => null,
+        final String locale when supportedLocales.contains(locale) => locale,
+        final String locale => throw BadRequest(
+          reason: 'locale must be one of ${supportedLocales.join(', ')}: $locale',
+        ),
+      },
+      limit: q.integer('limit', defaultValue: 20, min: 1, max: 50),
+    );
+  }
+}

@@ -137,3 +137,62 @@ class MeExerciseSession implements Model {
     };
   }
 }
+
+/// Library search results: the exercises [SearchMatch] ranks best first,
+/// then by name, archived ones left out.
+class MeLibrarySearch implements Model {
+  final List<({Exercise exercise, SearchMatch match})> results;
+
+  const new(this.results);
+
+  /// Matches [query] against [exercises] with [glossary], the locale's
+  /// search vocabulary, keeping the best [limit].
+  factory rank(Iterable<Exercise> exercises, String query, {required SearchGlossary glossary, required int limit}) {
+    final results =
+        [
+          for (final exercise in exercises)
+            if (!exercise.isArchived)
+              if (exercise.match(query, glossary: glossary) case final match?) (exercise: exercise, match: match),
+        ]..sort(
+          (a, b) => switch (a.match.compareTo(b.match)) {
+            0 => a.exercise.name.toLowerCase().compareTo(b.exercise.name.toLowerCase()),
+            final order => order,
+          },
+        );
+    return MeLibrarySearch(results.take(limit).toList());
+  }
+
+  /// [rank] over the library as the exercise service returns it:
+  /// `{exercises, glossary}`, already in one locale.
+  factory fromLibrary(Map<String, dynamic> library, String query, {required int limit}) {
+    return MeLibrarySearch.rank(
+      // a row this build can't read (a custom exercise with a target the
+      // enum doesn't know) is left out, not a failed search
+      readEach(library['exercises'] as List? ?? const [], Exercise.fromJson),
+      query,
+      glossary: switch (library['glossary']) {
+        final Map terms => SearchGlossary.fromJson(terms),
+        _ => SearchGlossary.empty(),
+      },
+      limit: limit,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'exercises': [
+        for (final (:exercise, :match) in results)
+          {
+            'id': exercise.id,
+            'name': exercise.name,
+            'category': exercise.category.value,
+            'target': exercise.target.value,
+            if (exercise.aliases.isNotEmpty) 'aliases': [...exercise.aliases],
+            if (exercise.isMine) 'own': true,
+            'match': match.name,
+          },
+      ],
+    };
+  }
+}

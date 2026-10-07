@@ -253,4 +253,71 @@ void main() {
       expect(page['cursor'], older);
     });
   });
+
+  group('library search', () {
+    Map<String, Object?> exercise(String id, String name, {List<String> aliases = const [], bool archived = false}) {
+      return {
+        'id': id,
+        'name': name,
+        'category': 'Barbell',
+        'target': 'Legs',
+        'aliases': aliases,
+        'own': false,
+        'archived': archived,
+      };
+    }
+
+    void library(List<Map<String, Object?>> rows, {String locale = 'en'}) {
+      when(exercises.getExercises('u1', locale: locale)).thenAnswer(
+        (_) async => {
+          'exercises': rows,
+          'glossary': {
+            'bb': {
+              'words': ['barbell'],
+            },
+          },
+        },
+      );
+    }
+
+    test('q is required, and a locale must be one served', () {
+      expect(() => searchMyLibrary(build('/me/library')), throwsA(isA<BadRequest>()));
+      expect(() => searchMyLibrary(build('/me/library', query: {'q': '  '})), throwsA(isA<BadRequest>()));
+      expect(
+        () => searchMyLibrary(build('/me/library', query: {'q': 'squat', 'locale': 'de'})),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
+    test('ranks best match first, then by name, without archived exercises', () async {
+      library([
+        exercise('1', 'Romanian Deadlift', aliases: ['rdl']),
+        exercise('2', 'Barbell Squat'),
+        exercise('3', 'Squat'),
+        exercise('4', 'Squat Jump', archived: true),
+        exercise('5', 'Bench Press'),
+        // a target this build doesn't know: left out, not a failed search
+        {...exercise('6', 'Squat Curl'), 'target': 'Biceps'},
+      ]);
+
+      final squats = (await searchMyLibrary(build('/me/library', query: {'q': 'squat'}))).toMap()['exercises'] as List;
+      expect(squats.map((e) => (e as Map)['name']), ['Squat', 'Barbell Squat']);
+      expect(squats.map((e) => (e as Map)['match']), ['prefix', 'words']);
+
+      final rdl = (await searchMyLibrary(build('/me/library', query: {'q': 'rdl'}))).toMap()['exercises'] as List;
+      expect(rdl.single, containsPair('aliases', ['rdl']));
+      expect(rdl.single, containsPair('match', 'vocabulary'));
+
+      final glossary = (await searchMyLibrary(build('/me/library', query: {'q': 'bb squat'}))).toMap()['exercises'];
+      expect((glossary as List).map((e) => (e as Map)['name']), ['Barbell Squat']);
+    });
+
+    test('the locale parameter overrides the request language', () async {
+      when(config.supportedLocales).thenReturn(['en', 'es']);
+      library([exercise('3', 'Sentadilla')], locale: 'es');
+
+      final found = (await searchMyLibrary(build('/me/library', query: {'q': 'sentadila', 'locale': 'es'}))).toMap();
+      expect(((found['exercises'] as List).single as Map)['match'], 'typo');
+    });
+  });
 }
