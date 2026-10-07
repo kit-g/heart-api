@@ -68,14 +68,46 @@ bool isAcceptableRedirect(String raw) {
   return uri.scheme == 'https' || _isLoopback(uri);
 }
 
-/// Requested scopes, space-separated. Absent asks for everything supported;
-/// anything unsupported is refused rather than silently dropped.
+/// Requested scopes, space-separated, narrowed to what this server grants
+/// (RFC 6749 §3.3: the server may issue fewer, and says so in the token
+/// response). Hosts add scopes of their own, such as `offline_access`; those
+/// are dropped, not refused. Absent asks for everything supported; asking
+/// only for scopes this server has never heard of is an error.
 List<String> parseScopes(String? raw) {
   final asked = (raw ?? '').split(' ').where((s) => s.isNotEmpty).toSet();
   if (asked.isEmpty) return [...supportedScopes];
-  final unknown = asked.difference(supportedScopes);
-  if (unknown.isNotEmpty) throw OAuthError('invalid_scope', 'unsupported scope: ${unknown.join(' ')}');
-  return [...asked]..sort();
+  final granted = asked.intersection(supportedScopes);
+  if (granted.isEmpty) throw OAuthError('invalid_scope', 'none of these scopes exist here: ${asked.join(' ')}');
+  return [...granted]..sort();
+}
+
+/// A resource identifier as compared: RFC 8707 says no trailing slash, and
+/// clients don't all agree.
+String normalizeResource(String resource) {
+  return resource.endsWith('/') ? resource.substring(0, resource.length - 1) : resource;
+}
+
+/// The RFC 7591 fields worth keeping from a registration or metadata
+/// document. Whatever else a stranger sends isn't stored.
+Map<String, dynamic> knownClientMetadata(Map<String, dynamic> json) {
+  const fields = {
+    'client_id',
+    'client_name',
+    'client_uri',
+    'logo_uri',
+    'redirect_uris',
+    'grant_types',
+    'response_types',
+    'token_endpoint_auth_method',
+    'jwks_uri',
+    'scope',
+    'software_id',
+    'software_version',
+  };
+  return {
+    for (final MapEntry(:key, :value) in json.entries)
+      if (fields.contains(key)) key: value,
+  };
 }
 
 /// A Client ID Metadata Document, checked: its `client_id` must be the URL it
@@ -97,11 +129,15 @@ OAuthClient parseClientDocument(Uri url, Map<String, dynamic> document, {require
   );
 }
 
-/// An RFC 7591 registration request, checked the same way.
+/// An RFC 7591 registration request, checked the same way, except that an
+/// auth method this server doesn't speak (a client secret) is replaced with
+/// `none`, as §3.2.1 allows; the response tells the client what it got.
 ({String? name, List<String> redirectUris, ClientAuth auth, Uri? jwksUri}) parseRegistration(
   Map<String, dynamic> request,
 ) {
-  final (redirects, auth, jwks) = _clientShape(request, error: 'invalid_client_metadata');
+  final asked = {...request};
+  if (ClientAuth.tryParse(asked['token_endpoint_auth_method']) == null) asked['token_endpoint_auth_method'] = 'none';
+  final (redirects, auth, jwks) = _clientShape(asked, error: 'invalid_client_metadata');
   return (name: _name(request), redirectUris: redirects, auth: auth, jwksUri: jwks);
 }
 

@@ -2406,6 +2406,13 @@ WITH _token AS (
   WHERE token_hash = @tokenHash::bytea
     AND revoked_at IS NULL
     AND (expires_at IS NULL OR expires_at > now())
+    -- an OAuth token works only on the resource it was issued for, and only
+    -- while its grant stands: the grant's revocation is the authority, so a
+    -- token minted concurrently with it is still refused
+    AND (resource IS NULL OR resource = @resource)
+    AND (grant_id IS NULL OR EXISTS (
+      SELECT 1 FROM oauth_grants g WHERE g.id = api_tokens.grant_id AND g.revoked_at IS NULL
+    ))
   RETURNING user_id, scopes, purpose, resource, grant_id
 ), _usage AS (
   INSERT INTO api_usage (user_id, minute_start, minute_count, day_start, day_count)
@@ -2693,8 +2700,10 @@ RETURNING id
 
 // Rotation, with reuse detection (RFC 9700): a refresh token presented after
 // it was exchanged means a copy exists, so the whole grant goes. The row is
-// locked, so two concurrent exchanges can't both rotate it. Rotated tokens
-// are kept a week for that check, then cleared.
+// locked, so two concurrent exchanges can't both rotate it. Within a minute
+// of its rotation a second presentation is a host's parallel or retried
+// refresh, not theft: it's refused without revoking. Rotated tokens are kept
+// a week for the check, then cleared.
 const _rotateOAuthRefresh = '''
 WITH _old AS (
   SELECT r.token_hash, r.grant_id, r.rotated_at, r.expires_at,
@@ -2709,7 +2718,7 @@ WITH _old AS (
 ), _reused AS (
   UPDATE oauth_grants
   SET revoked_at = now()
-  WHERE id IN (SELECT grant_id FROM _old WHERE rotated_at IS NOT NULL)
+  WHERE id IN (SELECT grant_id FROM _old WHERE rotated_at < now() - make_interval(secs => @graceSeconds))
     AND revoked_at IS NULL
   RETURNING id
 ), _reused_access AS (
@@ -2753,7 +2762,7 @@ WITH _old AS (
 SELECT
   CASE
     WHEN EXISTS (SELECT 1 FROM _touch) THEN 'rotated'
-    WHEN EXISTS (SELECT 1 FROM _old WHERE rotated_at IS NOT NULL) THEN 'reused'
+    WHEN EXISTS (SELECT 1 FROM _reused) THEN 'reused'
     ELSE 'invalid'
   END AS outcome,
   (SELECT scopes FROM _access) AS scopes

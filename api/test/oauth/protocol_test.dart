@@ -46,8 +46,11 @@ void main() {
 
   group('parseScopes', () {
     test('absent asks for everything supported', () => expect(parseScopes(null), ['read']));
-    test('unknown scopes are refused, not dropped', () {
-      expect(() => parseScopes('read write:workouts'), throwsA(isA<OAuthError>()));
+    test("scopes this server doesn't grant are dropped, as hosts add their own", () {
+      expect(parseScopes('read offline_access'), ['read']);
+    });
+    test('asking only for unknown scopes is an error', () {
+      expect(() => parseScopes('openid offline_access'), throwsA(isA<OAuthError>()));
     });
   });
 
@@ -94,6 +97,29 @@ void main() {
         }, expiresAt: expiry),
         throwsA(isA<OAuthError>()),
       );
+    });
+  });
+
+  group('normalizeResource', () {
+    test('drops a trailing slash only', () {
+      expect(normalizeResource('https://api.example/v1/mcp/'), 'https://api.example/v1/mcp');
+      expect(normalizeResource('https://api.example/v1/mcp'), 'https://api.example/v1/mcp');
+    });
+  });
+
+  group('parseRegistration', () {
+    test('a client-secret method is replaced with none', () {
+      final shape = parseRegistration({
+        'redirect_uris': ['https://chatgpt.example/cb'],
+        'token_endpoint_auth_method': 'client_secret_post',
+      });
+      expect(shape.auth, ClientAuth.none);
+    });
+  });
+
+  group('knownClientMetadata', () {
+    test('keeps RFC 7591 fields and nothing else', () {
+      expect(knownClientMetadata({'client_name': 'x', 'heart_rate': 60, 'anything': 'else'}), {'client_name': 'x'});
     });
   });
 
@@ -157,18 +183,20 @@ void main() {
       return builder.build().toCompactSerialization();
     }
 
-    Map<String, dynamic> claims({String? iss, String? aud, DateTime? exp}) {
+    Map<String, dynamic> claims({String? iss, String? aud, DateTime? exp, DateTime? iat, bool withIat = true}) {
+      int seconds(DateTime d) => d.millisecondsSinceEpoch ~/ 1000;
       return {
         'iss': iss ?? clientId,
         'sub': clientId,
         'aud': aud ?? endpoint.toString(),
-        'exp': (exp ?? DateTime.now().add(const Duration(minutes: 5))).millisecondsSinceEpoch ~/ 1000,
+        'exp': seconds(exp ?? DateTime.now().add(const Duration(minutes: 4))),
+        if (withIat) 'iat': seconds(iat ?? DateTime.now()),
         'jti': 'x',
       };
     }
 
     test('accepts an assertion signed by the client for this endpoint', () async {
-      await verifyClientAssertion(sign(claims()), client, tokenEndpoint: endpoint, fetch: fetch);
+      await verifyClientAssertion(sign(claims()), client, audiences: {endpoint.toString()}, fetch: fetch);
     });
 
     test('refuses a key the client did not publish', () async {
@@ -177,21 +205,33 @@ void main() {
         verifyClientAssertion(
           sign(claims(), signer: other),
           client,
-          tokenEndpoint: endpoint,
+          audiences: {endpoint.toString()},
           fetch: fetch,
         ),
         throwsA(isA<OAuthError>()),
       );
     });
 
-    test('refuses another audience, another issuer, or an expired assertion', () async {
+    test('accepts the issuer as the audience too', () async {
+      await verifyClientAssertion(
+        sign(claims(aud: 'https://site.example')),
+        client,
+        audiences: {endpoint.toString(), 'https://site.example'},
+        fetch: fetch,
+      );
+    });
+
+    test('refuses another audience or issuer, a bad lifetime, or no iat', () async {
       for (final bad in [
         claims(aud: 'https://elsewhere.example/token'),
         claims(iss: 'https://evil.example/meta.json'),
         claims(exp: DateTime.now().subtract(const Duration(minutes: 1))),
+        claims(exp: DateTime.now().add(const Duration(days: 365))),
+        claims(iat: DateTime.now().add(const Duration(hours: 1))),
+        claims(withIat: false),
       ]) {
         await expectLater(
-          verifyClientAssertion(sign(bad), client, tokenEndpoint: endpoint, fetch: fetch),
+          verifyClientAssertion(sign(bad), client, audiences: {endpoint.toString()}, fetch: fetch),
           throwsA(isA<OAuthError>()),
         );
       }
@@ -201,7 +241,7 @@ void main() {
       String b64(Object o) => base64Url.encode(utf8.encode(jsonEncode(o))).replaceAll('=', '');
       final unsigned = '${b64({'alg': 'none'})}.${b64(claims())}.';
       await expectLater(
-        verifyClientAssertion(unsigned, client, tokenEndpoint: endpoint, fetch: fetch),
+        verifyClientAssertion(unsigned, client, audiences: {endpoint.toString()}, fetch: fetch),
         throwsA(isA<OAuthError>()),
       );
     });

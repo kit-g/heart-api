@@ -133,7 +133,8 @@ enum RefreshOutcome {
   /// revoked.
   reused,
 
-  /// Unknown, expired, revoked, or another client's.
+  /// Unknown, expired, revoked, another client's, or presented again within
+  /// a minute of its rotation (a retry, refused without revoking).
   invalid,
 }
 

@@ -87,6 +87,22 @@ CREATE INDEX IF NOT EXISTS oauth_requests_expires_idx ON oauth_requests (expires
 COMMENT ON INDEX oauth_requests_expires_idx IS
     'Finding stale requests to clear';
 
+-- Replaying this file drops the grants. Access tokens issued under them are
+-- derived and short-lived, and without their grant they must not outlive it
+-- (nor block the foreign key restored below). On a first run the column
+-- doesn't exist yet.
+DO
+$$
+    BEGIN
+        IF EXISTS (SELECT 1
+                   FROM information_schema.columns
+                   WHERE table_name = 'api_tokens'
+                     AND column_name = 'grant_id') THEN
+            DELETE FROM api_tokens WHERE grant_id IS NOT NULL;
+        END IF;
+    END
+$$;
+
 DROP TABLE IF EXISTS oauth_grants CASCADE;
 CREATE TABLE IF NOT EXISTS oauth_grants
 (
