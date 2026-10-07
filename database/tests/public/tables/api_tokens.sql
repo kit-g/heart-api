@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(25);
+SELECT plan(29);
 
 SELECT has_table('public'::name, 'api_tokens'::name);
 
@@ -18,7 +18,9 @@ SELECT columns_are(
                    'created_at',
                    'last_used_at',
                    'expires_at',
-                   'revoked_at'
+                   'revoked_at',
+                   'grant_id',
+                   'resource'
                    ]
        );
 
@@ -34,6 +36,9 @@ SELECT col_type_is('public'::name, 'api_tokens'::name, 'last_used_at'::name, 'ti
 SELECT col_type_is('public'::name, 'api_tokens'::name, 'expires_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'api_tokens'::name, 'revoked_at'::name, 'timestamp with time zone'::name);
 
+SELECT col_type_is('public'::name, 'api_tokens'::name, 'grant_id'::name, 'uuid'::name);
+SELECT col_type_is('public'::name, 'api_tokens'::name, 'resource'::name, 'text'::name);
+
 SELECT col_is_pk('public'::name, 'api_tokens'::name, 'id'::name);
 SELECT col_is_unique('public'::name, 'api_tokens'::name, 'token_hash'::name);
 
@@ -48,6 +53,8 @@ SELECT col_default_is('public', 'api_tokens', 'scopes', '{read}'::text[], 'scope
 SELECT col_default_is('public', 'api_tokens', 'created_at', 'now()', 'created_at defaults to now()');
 
 SELECT fk_ok('public', 'api_tokens', 'user_id', 'public', 'profiles', 'id');
+SELECT fk_ok('public', 'api_tokens', 'grant_id', 'public', 'oauth_grants', 'id');
+SELECT has_index('public'::name, 'api_tokens'::name, 'api_tokens_grant_idx'::name);
 SELECT has_index('public'::name, 'api_tokens'::name, 'api_tokens_user_id_idx'::name, ARRAY ['user_id']::name[]);
 
 SELECT * FROM finish();
