@@ -341,7 +341,7 @@ void main() {
     });
   });
 
-  group('cleanup', () {
+  group('cleanup (_clean_up_oauth, run by pg_cron)', () {
     // Every assertion is about rows seeded here: the cleanup is global, and
     // other suites write to the same tables in parallel.
     Future<bool> exists(String sql, Map<String, dynamic> params) async => (await h.exec(sql, params)).isNotEmpty;
@@ -437,13 +437,13 @@ void main() {
         {'u': live, 'c': inUse, 'r': resource},
       );
 
-      final deleted = await h.db.cleanUpOAuth();
-      expect(deleted.requests, greaterThanOrEqualTo(1));
-      expect(deleted.accessTokens, greaterThanOrEqualTo(1));
-      expect(deleted.refreshTokens, greaterThanOrEqualTo(2));
-      expect(deleted.grants, greaterThanOrEqualTo(1));
-      expect(deleted.documents, greaterThanOrEqualTo(1));
-      expect(deleted.registrations, greaterThanOrEqualTo(1));
+      final deleted = (await h.exec('SELECT * FROM _clean_up_oauth()', {})).single.toColumnMap();
+      expect(deleted['requests'], greaterThanOrEqualTo(1));
+      expect(deleted['access_tokens'], greaterThanOrEqualTo(1));
+      expect(deleted['refresh_tokens'], greaterThanOrEqualTo(2));
+      expect(deleted['grants'], greaterThanOrEqualTo(1));
+      expect(deleted['documents'], greaterThanOrEqualTo(1));
+      expect(deleted['registrations'], greaterThanOrEqualTo(1));
 
       Future<bool> accessExists(Uint8List hash) =>
           exists('SELECT 1 FROM api_tokens WHERE token_hash = @h', {'h': hash});
@@ -475,7 +475,7 @@ void main() {
       expect(await clientExists(inUse), isTrue, reason: 'a registration with a live grant');
       expect(await clientExists(fresh), isTrue);
 
-      expect(await h.db.cleanUpOAuth(), isNotNull, reason: 'a second run is harmless');
+      await h.exec('SELECT * FROM _clean_up_oauth()', {});
       expect(await grantExists(abandonedGrant), isTrue);
 
       await h.exec('DELETE FROM oauth_grants WHERE client_id = @c', {'c': inUse});

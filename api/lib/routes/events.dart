@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:heart/events/account_deletion.dart';
 import 'package:heart/events/comment_notification.dart';
 import 'package:heart/events/exercise_asset.dart';
-import 'package:heart/events/oauth_cleanup.dart';
 import 'package:heart/events/uploads.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/aws.dart';
@@ -116,9 +115,6 @@ Future<NoContent> handler(Request request) async {
               // upload — persist its link + dimensions onto the exercise row
               case {'type': 'exercise.asset.processed'}:
                 await runRecord(() => exerciseAssetProcessed(request, event));
-              // use case: the daily Scheduler tick that clears stale OAuth rows
-              case {'type': 'oauth.cleanup'}:
-                await runRecord(() => oauthCleanup(request));
             }
         }
       }

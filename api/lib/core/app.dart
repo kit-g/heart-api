@@ -100,7 +100,6 @@ RelicApp buildApp({
     ..use('/events', appleIdentity(service: apple))
     ..use('/events', devicesDb(db: database))
     ..use('/events', exercisesDb(db: database))
-    ..use('/events', oauthDb(db: database))
     ..use('/events', events(publisher: eventPublisher))
     // The router's own 404, distinguishable from a handler's: a client calling
     // a path or verb this table does not carry gets `route_not_found`, so a

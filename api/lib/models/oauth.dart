@@ -208,19 +208,4 @@ abstract interface class OAuthService {
   /// Revokes one of [userId]'s grants and every token under it. False when
   /// there is no such live grant.
   Future<bool> disconnectApp({required String userId, required String grantId});
-
-  /// Deletes what no flow can use any more: expired requests and tokens,
-  /// long-revoked grants, stale client documents and idle registrations.
-  /// Returns how many of each went, by kind.
-  Future<OAuthCleanup> cleanUpOAuth();
 }
-
-/// What one [OAuthService.cleanUpOAuth] run deleted.
-typedef OAuthCleanup = ({
-  int requests,
-  int accessTokens,
-  int refreshTokens,
-  int grants,
-  int documents,
-  int registrations,
-});
