@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.13.0
+
+A session's chart values as shared code (heart-api#116).
+
+- New: `foldSession(Category, List<RecordSet>)`, one session of one
+  exercise folded into the values its progress chart plots, keyed by
+  `ChartPreferenceType.value`: only the dimensions
+  `chartsByExerciseCategory` lists for the category, each present only when
+  the sets measure it. The definitions are the app's chart queries, with one
+  difference: `estimatedOneRepMax` leaves out sets past 36 reps, where the
+  Brzycki denominator crosses zero, as `foldRecords` does.
+
 ## 2.12.0
 
 Personal records as shared code (heart-api#114).
