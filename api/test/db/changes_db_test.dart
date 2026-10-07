@@ -186,7 +186,7 @@ void main() {
       expect(only.category, Category.barbell);
       expect(only.sets.map((s) => s.weight), [100, 105], reason: 'no warm-up, nothing incomplete');
 
-      final records = foldRecords(only.category, only.sets)!;
+      final records = only.sets.toPersonalRecords(only.category)!;
       expect((records['heaviest']! as Map)['weight'], 105);
       expect(records['sessions'], 2);
 

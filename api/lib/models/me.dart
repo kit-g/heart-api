@@ -81,7 +81,7 @@ class MeWorkoutChanges implements Model {
   }
 }
 
-/// `GET /me/records`: personal records per exercise, as `foldRecords`
+/// `GET /me/records`: personal records per exercise, as `toPersonalRecords`
 /// computes them — the same records the app shows.
 class MeRecords implements Model {
   final List<({ExerciseRecordSets exercise, Map<String, Object> records})> entries;
@@ -93,7 +93,8 @@ class MeRecords implements Model {
   factory fold(List<ExerciseRecordSets> exercises) {
     final entries = [
       for (final exercise in exercises)
-        if (foldRecords(exercise.category, exercise.sets) case final records?) (exercise: exercise, records: records),
+        if (exercise.sets.toPersonalRecords(exercise.category) case final records?)
+          (exercise: exercise, records: records),
     ]..sort((a, b) => a.exercise.name.toLowerCase().compareTo(b.exercise.name.toLowerCase()));
     return MeRecords(entries);
   }

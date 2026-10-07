@@ -25,7 +25,7 @@ void main() {
   }
 
   Map<String, Object>? fold(String category, List<Map<String, dynamic>> rows) {
-    return foldRecords(Category.fromString(category), rows.map(RecordSet.fromRow).toList());
+    return rows.map(RecordSet.fromRow).toList().toPersonalRecords(Category.fromString(category));
   }
 
   group('strength', () {
