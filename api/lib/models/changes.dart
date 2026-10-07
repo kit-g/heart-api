@@ -49,5 +49,5 @@ class WorkoutChanges {
 }
 
 /// One exercise's completed working sets, oldest first, ready for
-/// [foldRecords].
+/// [PersonalRecords.toPersonalRecords].
 typedef ExerciseRecordSets = ({String exerciseId, String name, Category category, List<RecordSet> sets});
