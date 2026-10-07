@@ -278,10 +278,6 @@ jobs:
       - name: "Apply migrations to Supabase"
         run: ./scripts/apply_migrations.sh
 
-      # After the migrations: jobs call functions they create.
-      - name: "Schedule database jobs"
-        run: ./scripts/schedule_jobs.sh
-
       - uses: dart-lang/setup-dart@v1
       - uses: actions/cache@v6
         with:
@@ -308,6 +304,19 @@ jobs:
           aws lambda wait function-updated \
             --function-name ${{ inputs.FUNCTION_NAME }} \
             --region ${{ inputs.AWS_REGION }}
+
+      # The new code declares the database's pg_cron jobs (api/lib/db/cron.dart);
+      # it holds the database's credentials, so the deploy only asks.
+      - name: "Ask the API to declare its database jobs"
+        run: |
+          QUEUE_URL=$(aws sqs get-queue-url \
+            --queue-name "${{ inputs.FUNCTION_NAME }}-events" \
+            --region ${{ inputs.AWS_REGION }} \
+            --query QueueUrl --output text)
+          aws sqs send-message \
+            --queue-url "$QUEUE_URL" \
+            --message-body '{"type": "db.schedule"}' \
+            --region ${{ inputs.AWS_REGION }} > /dev/null
 
     outputs:
       commit: ${{ steps.commit.outputs.commit }}
