@@ -27,6 +27,9 @@ const _refreshLifetime = Duration(days: 90);
 
 const _assertionType = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
 
+/// The largest registration request accepted, in characters.
+const _maxRegistration = 16 * 1024;
+
 /// `GET /oauth/authorize`: validates the request and hands the browser to the
 /// consent page. Until the client and its redirect check out, errors are
 /// shown here; after, they go back to the client, as RFC 6749 §4.1.2.1 asks,
@@ -62,7 +65,12 @@ Future<Response> authorize(Request req) async {
   if (q['code_challenge_method'] != 'S256' || !RegExp(r'^[A-Za-z0-9_-]{43}$').hasMatch(challenge)) {
     return back(const OAuthError('invalid_request', 'PKCE with S256 is required'));
   }
-  final resource = q['resource'] ?? '';
+  // RFC 8707 makes it optional; a host that leaves it out means the MCP
+  // server, the only thing a host connects to
+  final resource = switch (q['resource']) {
+    final String asked when asked.isNotEmpty => normalizeResource(asked),
+    _ => oauth.mcpResource,
+  };
   if (!oauth.resources.contains(resource)) {
     return back(const OAuthError('invalid_target', 'resource must be this server\'s MCP or /me surface'));
   }
@@ -92,7 +100,7 @@ Future<Response> token(Request req) async {
   if (oauth == null) return JsonResponse.noSuchRoute();
   try {
     final form = await _form(req);
-    final client = await _authenticateClient(req, form, oauth);
+    final client = await _authenticateClient(req, form, oauth, endpoint: oauth.tokenEndpoint);
     final tokens = _mint();
     final List<String> scopes;
 
@@ -106,7 +114,7 @@ Future<Response> token(Request req) async {
             verifyPkce(form['code_verifier'] ?? '', code.codeChallenge) &&
             switch (form['resource']) {
               null || '' => true,
-              final String resource => resource == code.resource,
+              final String resource => normalizeResource(resource) == code.resource,
             };
         if (!valid) throw const OAuthError('invalid_grant', 'code is invalid, expired, spent, or not this client\'s');
         final issued = await req.oauthService.issueTokens(
@@ -157,7 +165,12 @@ Future<Response> token(Request req) async {
 Future<Response> register(Request req) async {
   if (req.config.oauth == null) return JsonResponse.noSuchRoute();
   try {
-    final body = switch (jsonDecode(await req.readAsString())) {
+    final raw = await req.readAsString();
+    // unauthenticated, so bounded: a registration is a few hundred bytes
+    if (raw.length > _maxRegistration) {
+      throw const OAuthError('invalid_client_metadata', 'registration is too large');
+    }
+    final body = switch (jsonDecode(raw)) {
       final Map<String, dynamic> json => json,
       _ => throw const OAuthError('invalid_client_metadata', 'expected a JSON object'),
     };
@@ -167,7 +180,7 @@ Future<Response> register(Request req) async {
       redirectUris: shape.redirectUris,
       auth: shape.auth,
       jwksUri: shape.jwksUri,
-      metadata: body,
+      metadata: knownClientMetadata(body),
     );
     return Response(
       201,
@@ -200,7 +213,7 @@ Future<Response> revoke(Request req) async {
   if (oauth == null) return JsonResponse.noSuchRoute();
   try {
     final form = await _form(req);
-    final client = await _authenticateClient(req, form, oauth);
+    final client = await _authenticateClient(req, form, oauth, endpoint: oauth.revocationEndpoint);
     await req.oauthService.revokeOAuthToken(
       tokenHash: TokenSecret.hash(form['token'] ?? ''),
       clientId: client.clientId,
@@ -336,7 +349,12 @@ Future<Map<String, String>> _form(Request req) async {
 
 /// Who is calling the token or revocation endpoint: a public client by its
 /// `client_id`, or a `private_key_jwt` client by its signed assertion.
-Future<OAuthClient> _authenticateClient(Request req, Map<String, String> form, OAuthConfig oauth) async {
+Future<OAuthClient> _authenticateClient(
+  Request req,
+  Map<String, String> form,
+  OAuthConfig oauth, {
+  required Uri endpoint,
+}) async {
   final assertion = form['client_assertion'];
   final id = form['client_id'] ?? '';
   final client = await resolveClient(id, req.oauthService, req.jsonFetch);
@@ -344,7 +362,12 @@ Future<OAuthClient> _authenticateClient(Request req, Map<String, String> form, O
     case (.none, null):
       return client;
     case (.privateKeyJwt, final String jwt) when form['client_assertion_type'] == _assertionType:
-      await verifyClientAssertion(jwt, client, tokenEndpoint: oauth.tokenEndpoint, fetch: req.jsonFetch);
+      await verifyClientAssertion(
+        jwt,
+        client,
+        audiences: {oauth.issuer.toString(), endpoint.toString()},
+        fetch: req.jsonFetch,
+      );
       return client;
     default:
       throw const OAuthError('invalid_client', 'client authentication failed', status: 401);

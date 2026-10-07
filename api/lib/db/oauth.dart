@@ -1,5 +1,9 @@
 part of 'db.dart';
 
+/// How long after a refresh token's rotation presenting it again counts as a
+/// host's retry rather than theft.
+const reuseGrace = Duration(minutes: 1);
+
 mixin _OAuth on _DatabaseBase implements OAuthService {
   @override
   Future<OAuthClient?> getClient(String clientId) async {
@@ -152,6 +156,7 @@ mixin _OAuth on _DatabaseBase implements OAuthService {
         'clientId': clientId,
         ..._tokenParameters(tokens),
         'newRefreshHash': tokens.refreshHash,
+        'graceSeconds': reuseGrace.inSeconds,
       },
     );
     final row = rows.first.toColumnMap();

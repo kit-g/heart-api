@@ -96,10 +96,12 @@ abstract interface class ApiTokenService {
   /// counts from.
   Future<DateTime?> claimExport(String userId);
 
-  /// Resolves a token by its hash and, when [count] is set, counts the
-  /// request against its account, in one round trip. Null when the token is
-  /// unknown, revoked or expired.
-  Future<TokenUse?> useToken(Uint8List tokenHash, {bool count = true});
+  /// Resolves a token by its hash for the surface [resource] and, when
+  /// [count] is set, counts the request against its account, in one round
+  /// trip. Null when the token is unknown, revoked or expired, belongs to a
+  /// revoked grant, or is an OAuth token issued for another resource — and
+  /// then nothing is counted.
+  Future<TokenUse?> useToken(Uint8List tokenHash, {bool count = true, String? resource});
 }
 
 abstract interface class ApiTokensResponse implements Model {
