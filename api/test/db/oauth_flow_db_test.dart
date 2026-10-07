@@ -152,7 +152,7 @@ void main() {
     expect(authorize.status, 302);
     final consent = Uri.parse(authorize.headers.value('location')!);
     expect(consent.origin, 'https://site.example');
-    expect(consent.path, '/connect');
+    expect(consent.path, '/connect.html');
     final requestId = consent.queryParameters['request']!;
 
     // the consent page reads the request as the signed-in account, no app version needed
