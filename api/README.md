@@ -132,6 +132,17 @@ per request. The app attaches it at `/me`. Middleware the app registers at `/` s
 additive-only; a `Me*` model decides what of an app shape is shown. The user-facing reference is
 `docs/me.md`; the design is `docs/2026-09-23.developer-api.md` at the repo root.
 
+## The OAuth server (`/oauth`)
+
+The authorization server Claude, ChatGPT and other clients connect through: its own router
+(`buildOAuthRouter`), with its protocol logic in `lib/oauth/` and its handlers in
+`lib/routes/oauth.dart`. The protocol endpoints answer in OAuth's own shapes (`OAuthError`,
+form-encoded requests), not the API's. The consent routes are ordinary Firebase-authenticated
+routes. The issuer's metadata is a static file on the site (`site/.well-known/<env>/`), held to
+`authorizationServerMetadata` by a test. Access tokens are `api_tokens` rows bound to a resource,
+checked by `checkToken`. It is off where `SITE_ORIGIN`/`API_PUBLIC_URL` aren't set. Design:
+`docs/2026-10-04.oauth.md` at the repo root.
+
 ## Database layer
 
 No ORM. SQL strings in `db/queries.dart`, executed against a `Pool` from the `postgres` package. Each resource (`profiles`, `workouts`, …) gets a mixin in its own file, all `part of 'db.dart'`. The `Database` class assembles them.
