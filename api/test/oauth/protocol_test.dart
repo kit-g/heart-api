@@ -185,7 +185,14 @@ void main() {
       return builder.build().toCompactSerialization();
     }
 
-    Map<String, dynamic> claims({String? iss, String? aud, DateTime? exp, DateTime? iat, bool withIat = true}) {
+    Map<String, dynamic> claims({
+      String? iss,
+      String? aud,
+      DateTime? exp,
+      DateTime? iat,
+      bool withIat = true,
+      bool withJti = true,
+    }) {
       int seconds(DateTime d) => d.millisecondsSinceEpoch ~/ 1000;
       return {
         'iss': iss ?? clientId,
@@ -193,12 +200,19 @@ void main() {
         'aud': aud ?? endpoint.toString(),
         'exp': seconds(exp ?? DateTime.now().add(const Duration(minutes: 4))),
         if (withIat) 'iat': seconds(iat ?? DateTime.now()),
-        'jti': 'x',
+        if (withJti) 'jti': 'assertion-1',
       };
     }
 
     test('accepts an assertion signed by the client for this endpoint', () async {
-      await verifyClientAssertion(sign(claims()), client, audiences: {endpoint.toString()}, fetch: fetch);
+      final verified = await verifyClientAssertion(
+        sign(claims()),
+        client,
+        audiences: {endpoint.toString()},
+        fetch: fetch,
+      );
+      expect(verified.jti, 'assertion-1', reason: 'the caller records it, so the assertion works once');
+      expect(verified.expiresAt.isAfter(DateTime.now()), isTrue);
     });
 
     test('refuses a key the client did not publish', () async {
@@ -231,6 +245,7 @@ void main() {
         claims(exp: DateTime.now().add(const Duration(days: 365))),
         claims(iat: DateTime.now().add(const Duration(hours: 1))),
         claims(withIat: false),
+        claims(withJti: false),
       ]) {
         await expectLater(
           verifyClientAssertion(sign(bad), client, audiences: {endpoint.toString()}, fetch: fetch),

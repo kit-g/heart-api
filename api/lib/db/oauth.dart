@@ -122,6 +122,21 @@ mixin _OAuth on _DatabaseBase implements OAuthService {
   }
 
   @override
+  Future<bool> rememberAssertion({required String clientId, required String jti, required DateTime expiresAt}) async {
+    final rows = await _pool.execute(
+      _rememberOAuthAssertion.toSql(),
+      parameters: {'clientId': clientId, 'jti': jti, 'expiresAt': expiresAt.toUtc()},
+    );
+    return rows.isNotEmpty;
+  }
+
+  @override
+  Future<int> countRegistration(String address) async {
+    final rows = await _pool.execute(_countOAuthRegistration.toSql(), parameters: {'address': address});
+    return rows.single.toColumnMap()['count'] as int;
+  }
+
+  @override
   Future<bool> issueTokens({
     required String userId,
     required String clientId,

@@ -2662,14 +2662,70 @@ FROM _request r
 JOIN oauth_clients c USING (client_id)
 ''';
 
-// A code is single use: spending it is the same statement that reads it.
+// A code is single use: spending it is the same statement that reads it. A
+// code presented again after it was spent means a copy exists (RFC 6749
+// §4.1.2): the grant it issued under is revoked with every token under it,
+// and the replay itself gets nothing.
 const _redeemOAuthCode = '''
-UPDATE oauth_requests
-SET used_at = now()
-WHERE code_hash = @codeHash::bytea
-  AND used_at IS NULL
-  AND code_expires_at > now()
-RETURNING user_id, client_id, redirect_uri, code_challenge, scopes, resource
+WITH _code AS (
+  SELECT id, user_id, client_id, resource, used_at
+  FROM oauth_requests
+  WHERE code_hash = @codeHash::bytea
+  FOR UPDATE
+), _redeemed AS (
+  UPDATE oauth_requests r
+  SET used_at = now()
+  FROM _code c
+  WHERE r.id = c.id
+    AND c.used_at IS NULL
+    AND r.code_expires_at > now()
+  RETURNING r.user_id, r.client_id, r.redirect_uri, r.code_challenge, r.scopes, r.resource
+), _replayed AS (
+  UPDATE oauth_grants g
+  SET revoked_at = now()
+  FROM _code c
+  WHERE c.used_at IS NOT NULL
+    AND g.user_id = c.user_id
+    AND g.client_id = c.client_id
+    AND g.resource = c.resource
+    AND g.revoked_at IS NULL
+  RETURNING g.id
+), _replayed_access AS (
+  DELETE FROM api_tokens WHERE grant_id IN (SELECT id FROM _replayed) RETURNING id
+), _replayed_refresh AS (
+  DELETE FROM oauth_refresh_tokens WHERE grant_id IN (SELECT id FROM _replayed) RETURNING token_hash
+)
+SELECT * FROM _redeemed
+''';
+
+// A client assertion's jti, recorded until the assertion expires. Nothing
+// comes back when it was already there: that assertion was used before.
+const _rememberOAuthAssertion = '''
+INSERT INTO oauth_assertion_jtis (client_id, jti, expires_at)
+VALUES (@clientId, @jti, @expiresAt)
+ON CONFLICT (client_id, jti) DO NOTHING
+RETURNING jti
+''';
+
+// One more registration from a source address today, and how many that makes.
+// The address is hashed with the day's salt, made on first use; no address is
+// stored.
+const _countOAuthRegistration = '''
+WITH _salt AS (
+  INSERT INTO oauth_address_salts (day, salt)
+  VALUES (current_date, uuid_send(gen_random_uuid()))
+  ON CONFLICT (day) DO UPDATE
+  SET day = excluded.day
+  RETURNING salt
+), _count AS (
+  INSERT INTO oauth_registrations_by_address (day, address_hash)
+  SELECT current_date, sha256(salt || convert_to(@address, 'UTF8'))
+  FROM _salt
+  ON CONFLICT (day, address_hash) DO UPDATE
+  SET count = oauth_registrations_by_address.count + 1
+  RETURNING count
+)
+SELECT count FROM _count
 ''';
 
 // Issues under the live grant. The grant's expired access tokens are cleared
