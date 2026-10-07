@@ -60,7 +60,7 @@ const instructions =
     'one is returned. Everything here is read-only.';
 
 final List<McpTool> tools = [
-  .new(
+  McpTool(
     name: 'get_profile',
     title: 'Profile',
     description: "The user's name, preferred units, and how much history there is to read.",
@@ -79,7 +79,7 @@ final List<McpTool> tools = [
       };
     },
   ),
-  .new(
+  McpTool(
     name: 'list_workouts',
     title: 'List workouts',
     description:
@@ -101,7 +101,7 @@ final List<McpTool> tools = [
       };
     },
   ),
-  .new(
+  McpTool(
     name: 'get_workout',
     title: 'Get a workout',
     description: 'One workout in full: every exercise and set, with set types, RPE and notes.',
@@ -128,7 +128,7 @@ final List<McpTool> tools = [
       }
     },
   ),
-  .new(
+  McpTool(
     name: 'list_templates',
     title: 'List templates',
     description: "The user's workout templates in their own order, with each template's exercises and set count.",
@@ -158,7 +158,7 @@ final List<McpTool> tools = [
       };
     },
   ),
-  .new(
+  McpTool(
     name: 'list_template_folders',
     title: 'List template folders',
     description: 'The folders templates are filed in, with how many each holds.',
@@ -171,7 +171,7 @@ final List<McpTool> tools = [
       };
     },
   ),
-  .new(
+  McpTool(
     name: 'list_goals',
     title: 'List goals',
     description:
@@ -193,7 +193,7 @@ final List<McpTool> tools = [
       return {'goals': goals.map((goal) => goal.toMap()).toList()};
     },
   ),
-  .new(
+  McpTool(
     name: 'list_custom_exercises',
     title: 'List custom exercises',
     description:
