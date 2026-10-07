@@ -3,6 +3,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
+import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/me.dart';
 import 'package:heart_models/heart_models.dart';
@@ -163,6 +164,65 @@ final List<McpTool> tools = [
     },
   ),
   McpTool(
+    name: 'get_exercise_history',
+    title: 'Exercise history',
+    description:
+        "One exercise's sessions, newest first: the working sets of each, and the values the app's progress "
+        'chart plots for it (top set, estimated 1RM by Brzycki, volume, average working weight, reps; distance, '
+        'duration and pace for cardio). Weights in kg, distances in km, durations in seconds, pace in seconds per '
+        'km. Exercise ids come from get_workout or get_personal_records. Paged: pass the returned cursor for older '
+        'sessions.',
+    inputSchema: {
+      'type': 'object',
+      'properties': {
+        'exerciseId': {'type': 'string', 'description': 'An exercise id from get_workout or get_personal_records.'},
+        ..._pageSchema(maxLimit: 50)['properties'] as Map<String, dynamic>,
+      },
+      'required': ['exerciseId'],
+      'additionalProperties': false,
+    },
+    run: (request, arguments) async {
+      final id = arguments['exerciseId'];
+      if (id is! String || !isUuidV7(id)) {
+        throw const ToolError('exerciseId must be an id from get_workout or get_personal_records.');
+      }
+      final (limit, cursor) = arguments.toPaging(defaultLimit: 20, maxLimit: 50);
+      if (cursor != null && !isUuidV7(cursor)) {
+        throw const ToolError('cursor must be the string returned by the previous page.');
+      }
+      final history =
+          await request.workoutsService.getExerciseHistory(
+            userId: request.userId,
+            exerciseId: id,
+            cursor: cursor,
+            limit: limit,
+          ) ??
+          (throw ToolError('No exercise $id. get_personal_records lists the exercises with history.'));
+      final ExerciseHistory(:exerciseId, :name, :category, :sessions) = history;
+      return {
+        'exercise': {'id': exerciseId, 'name': name, 'category': category.value},
+        'sessions': [
+          for (final session in sessions.items)
+            {
+              'workoutId': session.workoutId,
+              'at': session.at,
+              'sets': [
+                for (final set in session.sets)
+                  {
+                    'weightKg': ?set.weight,
+                    'reps': ?set.reps,
+                    'distanceKm': ?set.distance,
+                    'seconds': ?set.duration,
+                  },
+              ],
+              'metrics': foldSession(category, session.sets),
+            },
+        ],
+        if (sessions.hasMore && sessions.items.isNotEmpty) 'cursor': sessions.items.last.workoutId,
+      };
+    },
+  ),
+  McpTool(
     name: 'list_templates',
     title: 'List templates',
     description: "The user's workout templates in their own order, with each template's exercises and set count.",
@@ -309,6 +369,7 @@ extension on Workout {
       'exercises': [
         for (final exercise in this)
           {
+            'id': exercise.exercise.id,
             'name': exercise.exercise.name,
             'note': ?exercise.note,
             'sets': [for (final set in exercise) set.toMcp()],
