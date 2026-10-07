@@ -9,15 +9,14 @@ import 'imports.dart';
 import 'sets.dart';
 
 abstract interface class ApiWorkoutService {
-  /// Workouts that changed or were deleted since [since], oldest change
-  /// first, at most [limit] changes. Changes are held back while any
-  /// transaction that could still commit an earlier one is open, and for
-  /// [settle] besides.
+  /// Workouts that changed or were deleted since [since], ordered by the
+  /// transaction that made each change, at most [limit] changes. Only finished
+  /// transactions are reported: a change still being written waits for a
+  /// later poll, and nothing reported can be passed by one.
   Future<WorkoutChanges> getWorkoutChanges({
     required String userId,
     ChangeCursor? since,
     int limit,
-    Duration settle,
     required String Function(String) imageUrl,
   });
 
