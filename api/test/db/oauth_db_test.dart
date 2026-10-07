@@ -341,6 +341,50 @@ void main() {
     });
   });
 
+  group('hardening', () {
+    test('an assertion is good once', () async {
+      final c = await client();
+      final expiry = DateTime.now().add(const Duration(minutes: 5));
+      final jti = h.uid('jti');
+      expect(await h.db.rememberAssertion(clientId: c.clientId, jti: jti, expiresAt: expiry), isTrue);
+      expect(await h.db.rememberAssertion(clientId: c.clientId, jti: jti, expiresAt: expiry), isFalse);
+      final other = await client();
+      expect(
+        await h.db.rememberAssertion(clientId: other.clientId, jti: jti, expiresAt: expiry),
+        isTrue,
+        reason: 'jti is per client',
+      );
+    });
+
+    test('registrations are counted per address, without storing the address', () async {
+      final address = '198.51.100.7-${h.uid('ip')}';
+      expect(await h.db.countRegistration(address), 1);
+      expect(await h.db.countRegistration(address), 2);
+      expect(await h.db.countRegistration('other-$address'), 1);
+      final stored = await h.exec(
+        "SELECT 1 FROM oauth_registrations_by_address WHERE encode(address_hash, 'escape') LIKE '%' || @a || '%'",
+        {'a': address},
+      );
+      expect(stored, isEmpty, reason: 'only a salted hash is kept');
+    });
+
+    test('a spent code presented again revokes the grant it issued, and its tokens', () async {
+      final (user, c, tokens) = await connected();
+      // connected() spent its code; find it and present it again
+      final codeHash =
+          (await h.exec(
+                'SELECT code_hash FROM oauth_requests WHERE client_id = @c AND used_at IS NOT NULL',
+                {'c': c.clientId},
+              )).single.toColumnMap()['code_hash']
+              as Uint8List;
+      expect(await h.db.useToken(tokens.accessHash, resource: resource), isNotNull, reason: 'connected');
+
+      expect(await h.db.redeemCode(codeHash), isNull, reason: 'a replay gets nothing');
+      expect(await h.db.listConnectedApps(user), isEmpty, reason: 'and the grant is revoked');
+      expect(await h.db.useToken(tokens.accessHash, resource: resource), isNull);
+    });
+  });
+
   group('cleanup (_clean_up_oauth, run by pg_cron)', () {
     // Every assertion is about rows seeded here: the cleanup is global, and
     // other suites write to the same tables in parallel.
