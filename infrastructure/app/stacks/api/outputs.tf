@@ -40,3 +40,8 @@ output "monitoring_topic_arn" {
 output "log_group_name" {
   value = aws_cloudwatch_log_group.api.name
 }
+
+output "mcp_distribution_domain" {
+  description = "Where to point the MCP host's DNS record (a CNAME for mcp.heart-of.me)."
+  value       = aws_cloudfront_distribution.mcp.domain_name
+}

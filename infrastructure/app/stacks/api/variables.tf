@@ -148,3 +148,35 @@ variable "site_origin" {
     error_message = "The site origin is https://host, with no path or trailing slash: it is the issuer, and clients compare it byte for byte."
   }
 }
+
+variable "mcp_concurrency" {
+  description = <<-EOT
+    Concurrent executions reserved for the MCP host's function, and its ceiling.
+    Its instances share the database pooler with the API's (see
+    api_concurrency), so the two reservations together stay within the pool.
+    Null reserves nothing, which an account at the default quota of 10 must do.
+  EOT
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.mcp_concurrency == null || try(var.mcp_concurrency >= 1, false)
+    error_message = "mcp_concurrency must be at least 1, or null for no reservation."
+  }
+}
+
+variable "mcp_domain" {
+  description = "The MCP host's public name and its CloudFront certificate. Null serves it at the distribution's own *.cloudfront.net name, and OAuth keeps naming the API's /mcp."
+  default     = null
+  type = object({
+    name            = string
+    certificate_arn = string
+  })
+
+  # CloudFront takes certificates from us-east-1 only, unlike the API's
+  # regional custom domain.
+  validation {
+    condition     = var.mcp_domain == null || can(regex("^arn:aws:acm:us-east-1:[0-9]{12}:certificate/", var.mcp_domain.certificate_arn))
+    error_message = "The MCP host's certificate must be issued in us-east-1: CloudFront accepts no other region."
+  }
+}

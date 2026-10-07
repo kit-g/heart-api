@@ -42,6 +42,9 @@ module "api" {
     name            = "api.heart-of.me"
     certificate_arn = "arn:aws:acm:ca-central-1:922419543441:certificate/f5a9b784-19a5-4ef6-b284-be9fc51b79dd"
   }
+
+  # The MCP host's share of the database pool (15): the API reserves the rest.
+  mcp_concurrency = 3
 }
 
 module "assets" {
