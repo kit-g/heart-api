@@ -52,10 +52,10 @@ mixin _ApiTokens on _DatabaseBase implements ApiTokenService {
   }
 
   @override
-  Future<TokenUse?> useToken(Uint8List tokenHash) async {
+  Future<TokenUse?> useToken(Uint8List tokenHash, {bool count = true}) async {
     final result = await _pool.execute(
       _useApiToken.toSql(),
-      parameters: {'tokenHash': tokenHash},
+      parameters: {'tokenHash': tokenHash, 'count': count ? 1 : 0},
     );
     if (result.isEmpty) return null;
     final row = result.first.toColumnMap();
