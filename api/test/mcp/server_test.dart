@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:heart/models/tokens.dart';
+import 'package:heart/models/changes.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -138,7 +139,7 @@ void main() {
 
     test('tools are listed with read-only annotations', () async {
       final tools = ((await rpc('tools/list')).body['result'] as Map)['tools'] as List;
-      expect(tools.map((t) => (t as Map)['name']), contains('list_workouts'));
+      expect(tools.map((t) => (t as Map)['name']), containsAll(['list_workouts', 'get_exercise_history']));
       for (final tool in tools.cast<Map>()) {
         final annotations = tool['annotations'] as Map;
         expect(annotations['readOnlyHint'], isTrue, reason: tool['name'] as String);
@@ -307,6 +308,60 @@ void main() {
               )).body['result']
               as Map;
       expect(none['isError'], isTrue);
+    });
+
+    test('get_exercise_history pages one exercise, and points elsewhere for ids', () async {
+      const exercise = '01900000-0000-7000-8000-000000000001';
+      const workout = '01900000-0000-7000-8000-0000000000a1';
+      when(app.db.getExerciseHistory(userId: 'u1', exerciseId: exercise, cursor: null, limit: 1)).thenAnswer(
+        (_) async => (
+          exerciseId: exercise,
+          name: 'Bench Press',
+          category: Category.barbell,
+          sessions: const Page<ExerciseSession>(
+            items: [
+              (
+                workoutId: workout,
+                at: '2026-01-01T00:00:00.000Z',
+                sets: [
+                  RecordSet(weight: 100, reps: 5, duration: null, distance: null, workoutId: workout, at: ''),
+                ],
+              ),
+            ],
+            hasMore: true,
+          ),
+        ),
+      );
+
+      final found =
+          (await rpc(
+                'tools/call',
+                params: {
+                  'name': 'get_exercise_history',
+                  'arguments': {'exerciseId': exercise, 'limit': 1},
+                },
+              )).body['result']
+              as Map;
+      final history = found['structuredContent'] as Map;
+      expect((history['exercise'] as Map)['name'], 'Bench Press');
+      final session = (history['sessions'] as List).single as Map;
+      expect(session['sets'], [
+        {'weightKg': 100, 'reps': 5},
+      ]);
+      expect((session['metrics'] as Map)['topSetWeight'], 100);
+      expect(history['cursor'], workout);
+
+      final malformed =
+          (await rpc(
+                'tools/call',
+                params: {
+                  'name': 'get_exercise_history',
+                  'arguments': {'exerciseId': 'bench'},
+                },
+              )).body['result']
+              as Map;
+      expect(malformed['isError'], isTrue);
+      expect(((malformed['content'] as List).single as Map)['text'], contains('get_personal_records'));
     });
 
     test('an unknown tool is invalid params', () async {
