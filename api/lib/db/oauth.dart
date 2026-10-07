@@ -191,4 +191,19 @@ mixin _OAuth on _DatabaseBase implements OAuthService {
     final rows = await _pool.execute(_disconnectApp.toSql(), parameters: {'userId': userId, 'grantId': grantId});
     return rows.isNotEmpty;
   }
+
+  @override
+  Future<OAuthCleanup> cleanUpOAuth() async {
+    final rows = await _pool.execute(_cleanUpOAuth.toSql());
+    final row = rows.single.toColumnMap();
+    int count(String key) => (row[key] as num).toInt();
+    return (
+      requests: count('requests'),
+      accessTokens: count('access_tokens'),
+      refreshTokens: count('refresh_tokens'),
+      grants: count('grants'),
+      documents: count('documents'),
+      registrations: count('registrations'),
+    );
+  }
 }
