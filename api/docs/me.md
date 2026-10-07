@@ -60,7 +60,8 @@ To keep a copy in sync, poll `/me/workouts/changes` instead of re-reading the hi
 `since` it starts from the beginning. After that, pass back the `cursor` you were given. Each change
 is a whole workout as it stands now (in `workouts`) or the id of one that was deleted (in `deleted`,
 with `deletedAt`). While `hasMore` is true, ask again straight away. When nothing changed, you get
-empty lists and the same cursor, so keep it.
+empty lists and the same cursor, so keep it. A `400` with `code: "stale_cursor"` means the cursor
+can't be read any more (the database behind the API was moved): start again without `since`.
 
 Changes show up as soon as they're saved, or later while a longer save (a big import) that began
 earlier is still running, so that save can't land behind a cursor you already hold. Polling more often than every few

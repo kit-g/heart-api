@@ -2,6 +2,7 @@
 library;
 
 import 'package:heart/models/changes.dart';
+import 'package:heart/models/errors.dart';
 import 'package:postgres/postgres.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
@@ -145,6 +146,17 @@ void main() {
       final second = await changes(user, since: first.cursor, limit: 2);
       expect(second.upserted.map((w) => w.id), [ids.last]);
       expect(second.hasMore, isFalse);
+    });
+
+    test('a cursor from another database (its transaction past ours) is stale, never read from', () async {
+      final user = await h.seedProfile();
+      await h.seedWorkout(userId: user);
+      const moved = ChangeCursor(xid: '9000000000000000000', id: '019a0000-0000-7000-8000-000000000001');
+
+      await expectLater(
+        changes(user, since: moved),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'stale_cursor')),
+      );
     });
 
     test("another account's changes never show", () async {
