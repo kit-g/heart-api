@@ -31,3 +31,22 @@ resource "aws_sns_topic_subscription" "monitoring_email" {
   protocol  = "email"
   endpoint  = var.monitoring_email
 }
+
+# The OAuth tables' daily garbage collection: a tick on the events queue, which
+# the API consumes like any other event. Flexible, since nothing waits on it.
+resource "aws_scheduler_schedule" "oauth_cleanup" {
+  name                = "${var.name_prefix}-oauth-cleanup"
+  schedule_expression = "rate(1 day)"
+  state               = var.events_enabled ? "ENABLED" : "DISABLED"
+
+  flexible_time_window {
+    mode                      = "FLEXIBLE"
+    maximum_window_in_minutes = 60
+  }
+
+  target {
+    arn      = aws_sqs_queue.events.arn
+    role_arn = aws_iam_role.scheduler.arn
+    input    = jsonencode({ type = "oauth.cleanup" })
+  }
+}
