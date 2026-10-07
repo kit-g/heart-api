@@ -68,7 +68,7 @@ Future<Response> authorize(Request req) async {
   // RFC 8707 makes it optional; a host that leaves it out means the MCP
   // server, the only thing a host connects to
   final resource = switch (q['resource']) {
-    final String asked when asked.isNotEmpty => normalizeResource(asked),
+    final String asked when asked.isNotEmpty => asked.toCanonicalResource(),
     _ => oauth.mcpResource,
   };
   if (!oauth.resources.contains(resource)) {
@@ -76,7 +76,7 @@ Future<Response> authorize(Request req) async {
   }
   final List<String> scopes;
   try {
-    scopes = parseScopes(q['scope']);
+    scopes = q['scope'].toScopes();
   } on OAuthError catch (e) {
     return back(e);
   }
@@ -114,7 +114,7 @@ Future<Response> token(Request req) async {
             verifyPkce(form['code_verifier'] ?? '', code.codeChallenge) &&
             switch (form['resource']) {
               null || '' => true,
-              final String resource => normalizeResource(resource) == code.resource,
+              final String resource => resource.toCanonicalResource() == code.resource,
             };
         if (!valid) throw const OAuthError('invalid_grant', 'code is invalid, expired, spent, or not this client\'s');
         final issued = await req.oauthService.issueTokens(
@@ -174,13 +174,13 @@ Future<Response> register(Request req) async {
       final Map<String, dynamic> json => json,
       _ => throw const OAuthError('invalid_client_metadata', 'expected a JSON object'),
     };
-    final shape = parseRegistration(body);
+    final shape = body.toRegistration();
     final client = await req.oauthService.registerClient(
       name: shape.name,
       redirectUris: shape.redirectUris,
       auth: shape.auth,
       jwksUri: shape.jwksUri,
-      metadata: knownClientMetadata(body),
+      metadata: body.toKnownClientMetadata(),
     );
     return Response(
       201,

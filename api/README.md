@@ -139,7 +139,7 @@ The authorization server Claude, ChatGPT and other clients connect through: its 
 `lib/routes/oauth.dart`. The protocol endpoints answer in OAuth's own shapes (`OAuthError`,
 form-encoded requests), not the API's. The consent routes are ordinary Firebase-authenticated
 routes. The issuer's metadata is a static file on the site (`site/.well-known/<env>/`), held to
-`authorizationServerMetadata` by a test. Access tokens are `api_tokens` rows bound to a resource,
+`OAuthConfig.toServerMetadata()` by a test. Access tokens are `api_tokens` rows bound to a resource,
 checked by `checkToken`. It is off where `SITE_ORIGIN`/`API_PUBLIC_URL` aren't set. Design:
 `docs/2026-10-04.oauth.md` at the repo root.
 
