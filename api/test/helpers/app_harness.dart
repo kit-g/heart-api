@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:heart/core/app.dart';
+import 'package:heart/core/mcp_app.dart';
 import 'package:heart/globals/firebase.dart';
 import 'package:heart/middleware/aws.dart';
 import 'package:heart_aws/heart_aws.dart';
@@ -47,7 +48,15 @@ class AppHarness {
   /// [allowedOrigins] is read once, when `buildApp` wires the CORS middleware
   /// — the same way the minimum app version is — so it has to be passed in
   /// here rather than stubbed on [config] after the fact.
-  static Future<AppHarness> start({User? user, Set<String> allowedOrigins = const {}}) async {
+  ///
+  /// [surface] `mcp` boots the MCP host's app ([buildMcpApp]) instead, locked
+  /// to [originSecret] when one is given.
+  static Future<AppHarness> start({
+    User? user,
+    Set<String> allowedOrigins = const {},
+    String surface = 'api',
+    String? originSecret,
+  }) async {
     final db = MockDatabase();
     final storage = MockStorage();
     final events = MockEventPublisher();
@@ -66,15 +75,18 @@ class AppHarness {
       throw AuthenticationError();
     }
 
-    final app = buildApp(
-      config: config,
-      aws: AwsConfig(credentialsProvider: const AWSCredentialsProvider.defaultChain(), region: 'us-east-1'),
-      database: db,
-      storage: storage,
-      eventPublisher: events,
-      apple: apple,
-      auth: verify,
-    );
+    final app = switch (surface) {
+      'mcp' => buildMcpApp(config: config, database: db, originSecret: originSecret),
+      _ => buildApp(
+        config: config,
+        aws: AwsConfig(credentialsProvider: const AWSCredentialsProvider.defaultChain(), region: 'us-east-1'),
+        database: db,
+        storage: storage,
+        eventPublisher: events,
+        apple: apple,
+        auth: verify,
+      ),
+    };
     final server = await app.serve(port: 0);
     return AppHarness._(db, storage, events, apple, config, app, server);
   }

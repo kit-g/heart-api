@@ -1,5 +1,9 @@
 import 'package:heart/apple/client.dart';
+
+import 'dart:io';
+
 import 'package:heart/core/app.dart';
+import 'package:heart/core/mcp_app.dart';
 import 'package:heart/db/db.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/logging.dart';
@@ -54,15 +58,23 @@ Future<void> main() async {
     null => null,
   };
 
-  final app = buildApp(
-    config: _config,
-    aws: _awsConfig,
-    database: _database,
-    storage: _storage,
-    eventPublisher: _events,
-    apple: _apple,
-    auth: testAuth,
-  );
+  // One binary, two functions: the MCP host runs this with HEART_SURFACE=mcp
+  final app = switch (Platform.environment['HEART_SURFACE']) {
+    'mcp' => buildMcpApp(
+      config: _config,
+      database: _database,
+      originSecret: Platform.environment['MCP_ORIGIN_SECRET'],
+    ),
+    _ => buildApp(
+      config: _config,
+      aws: _awsConfig,
+      database: _database,
+      storage: _storage,
+      eventPublisher: _events,
+      apple: _apple,
+      auth: testAuth,
+    ),
+  };
 
   await app.serve();
 }
