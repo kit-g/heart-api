@@ -2804,57 +2804,6 @@ WITH _access AS (
 SELECT (SELECT count(*) FROM _access) + (SELECT count(*) FROM _grant) AS revoked
 ''';
 
-// The OAuth tables' garbage collection, run daily. Live connections prune
-// their own tokens on every refresh; this clears what nothing will touch
-// again. Requests and codes go a day after they expire. Tokens of abandoned
-// connections go once expired, rotated refresh tokens after the week the
-// reuse check keeps them. Revoked grants stay 30 days, so a reuse revocation
-// can still be looked into, then go with whatever is left under them. A
-// cached metadata document goes once expired (the next use refetches it); a
-// dynamic registration, which can't be refetched, once it's had no live grant
-// for 30 days. Clients with a request in flight are left for the next run.
-// Personal access tokens are never touched.
-const _cleanUpOAuth = '''
-WITH _requests AS (
-  DELETE FROM oauth_requests
-  WHERE greatest(expires_at, coalesce(code_expires_at, expires_at)) < now() - interval '1 day'
-  RETURNING client_id
-), _grants AS (
-  DELETE FROM oauth_grants
-  WHERE revoked_at < now() - interval '30 days'
-  RETURNING id
-), _access AS (
-  DELETE FROM api_tokens
-  WHERE grant_id IS NOT NULL
-    AND grant_id NOT IN (SELECT id FROM _grants)
-    AND expires_at < now()
-  RETURNING id
-), _refresh AS (
-  DELETE FROM oauth_refresh_tokens
-  WHERE grant_id NOT IN (SELECT id FROM _grants)
-    AND (expires_at < now() OR rotated_at < now() - interval '7 days')
-  RETURNING token_hash
-), _clients AS (
-  DELETE FROM oauth_clients c
-  WHERE NOT EXISTS (SELECT 1 FROM oauth_requests r WHERE r.client_id = c.client_id)
-    AND CASE c.kind
-      WHEN 'cimd' THEN c.expires_at < now()
-      ELSE coalesce(c.last_used_at, c.fetched_at) < now() - interval '30 days'
-        AND NOT EXISTS (
-          SELECT 1 FROM oauth_grants g WHERE g.client_id = c.client_id AND g.revoked_at IS NULL
-        )
-    END
-  RETURNING kind
-)
-SELECT
-  (SELECT count(*) FROM _requests) AS requests,
-  (SELECT count(*) FROM _access) AS access_tokens,
-  (SELECT count(*) FROM _refresh) AS refresh_tokens,
-  (SELECT count(*) FROM _grants) AS grants,
-  (SELECT count(*) FROM _clients WHERE kind = 'cimd') AS documents,
-  (SELECT count(*) FROM _clients WHERE kind = 'dcr') AS registrations
-''';
-
 const _listConnectedApps = '''
 SELECT id, client_id, client_name, scopes, resource, created_at, last_used_at
 FROM oauth_grants
