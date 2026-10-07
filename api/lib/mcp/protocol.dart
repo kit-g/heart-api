@@ -14,19 +14,23 @@ const metaClientInfo = 'io.modelcontextprotocol/clientInfo';
 const metaServerInfo = 'io.modelcontextprotocol/serverInfo';
 
 /// JSON-RPC and MCP error codes this server answers with.
-abstract final class RpcCode {
-  static const parseError = -32700;
-  static const invalidRequest = -32600;
-  static const methodNotFound = -32601;
-  static const invalidParams = -32602;
-  static const internalError = -32603;
-  static const headerMismatch = -32020;
-  static const unsupportedProtocolVersion = -32022;
+enum RpcCode {
+  parseError(-32700),
+  invalidRequest(-32600),
+  methodNotFound(-32601),
+  invalidParams(-32602),
+  internalError(-32603),
+  headerMismatch(-32020),
+  unsupportedProtocolVersion(-32022);
+
+  final int value;
+
+  new(this.value);
 }
 
 /// A JSON-RPC failure, with the HTTP status the transport gives it.
 class RpcError implements Exception {
-  final int code;
+  final RpcCode code;
   final String message;
   final int status;
   final Object? data;
@@ -37,7 +41,7 @@ class RpcError implements Exception {
     return {
       'jsonrpc': '2.0',
       'id': id,
-      'error': {'code': code, 'message': message, 'data': ?data},
+      'error': {'code': code.value, 'message': message, 'data': ?data},
     };
   }
 }
