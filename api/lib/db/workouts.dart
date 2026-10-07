@@ -38,7 +38,18 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
         'limit': limit + 1,
       },
     );
-    final changes = rows.map((row) => row.toColumnMap()).toList();
+    final columns = rows.map((row) => row.toColumnMap()).toList();
+    if (columns.first['stale'] == true) {
+      throw const BadRequest(
+        code: 'stale_cursor',
+        reason: 'this cursor is from before the database moved; start again without since',
+      );
+    }
+    // the check's row stands alone when there's nothing to report
+    final changes = [
+      for (final row in columns)
+        if (row['id'] != null) row,
+    ];
     final hasMore = changes.length > limit;
     final page = hasMore ? changes.sublist(0, limit) : changes;
 

@@ -2452,8 +2452,15 @@ SELECT EXISTS (SELECT 1 FROM _claim) AS claimed,
 // statement snapshot's xmin): every one of those has finished, so nothing
 // can commit behind a cursor already handed out. A change being written
 // waits for a later poll.
+//
+// Transaction ids belong to one cluster. A cursor at or past the snapshot's
+// xmax can't have come from this one: the database was moved, and its new
+// counter started lower. That cursor is stale, never read from.
 const _workoutChanges = '''
-WITH _changes AS (
+WITH _check AS (
+  SELECT @sinceXid::text IS NOT NULL
+         AND @sinceXid::text::xid8 >= pg_snapshot_xmax(pg_current_snapshot()) AS stale
+), _changes AS (
   SELECT id, changed_xid AS xid, updated_at AS at, false AS deleted
   FROM workouts
   WHERE user_id = @userId
@@ -2470,6 +2477,7 @@ WITH _changes AS (
   SELECT id, xid, at, deleted FROM _changes ORDER BY xid, id LIMIT @limit
 )
 SELECT
+  c.stale,
   p.id, p.xid::text AS xid, p.at, p.deleted,
   w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.created_at,
   CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id) END AS exercises,
@@ -2478,7 +2486,8 @@ SELECT
      FROM workout_images wi WHERE wi.workout_id = w.id),
     '[]'::jsonb
   ) END AS images
-FROM _page p
+FROM _check c
+LEFT JOIN _page p ON NOT c.stale
 LEFT JOIN workouts w ON NOT p.deleted AND w.id = p.id
 ORDER BY p.xid, p.id
 ''';
