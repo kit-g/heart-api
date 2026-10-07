@@ -87,7 +87,7 @@ final List<McpTool> tools = [
         'completed sets and the best set. Use get_workout for every set of one workout.',
     inputSchema: _pageSchema(maxLimit: 50),
     run: (request, arguments) async {
-      final (limit, cursor) = _page(arguments, defaultLimit: 20, maxLimit: 50);
+      final (limit, cursor) = arguments.toPaging(defaultLimit: 20, maxLimit: 50);
       final page = await request.workoutsService.getWorkouts(
         userId: request.userId,
         targetUserId: request.userId,
@@ -96,7 +96,7 @@ final List<McpTool> tools = [
         imageUrl: request.config.cdnAssetUrl,
       );
       return {
-        'workouts': page.items.map(_workoutSummary).toList(),
+        'workouts': [for (final workout in page.items) workout.toMcpSummary()],
         if (page.hasMore) 'cursor': page.items.last.id,
       };
     },
@@ -122,7 +122,7 @@ final List<McpTool> tools = [
           workoutId: id,
           imageUrl: request.config.cdnAssetUrl,
         );
-        return _workoutDetail(workout);
+        return workout.toMcpDetail();
       } on NotFound {
         throw ToolError('No workout $id. Use list_workouts for valid ids.');
       }
@@ -134,7 +134,7 @@ final List<McpTool> tools = [
     description: "The user's workout templates in their own order, with each template's exercises and set count.",
     inputSchema: _pageSchema(maxLimit: 100),
     run: (request, arguments) async {
-      final (limit, cursor) = _page(arguments, defaultLimit: 50, maxLimit: 100);
+      final (limit, cursor) = arguments.toPaging(defaultLimit: 50, maxLimit: 100);
       final ordered = switch (cursor) {
         final String raw =>
           OrderedCursor.tryParse(raw) ??
@@ -227,67 +227,86 @@ Map<String, dynamic> _pageSchema({required int maxLimit}) {
   };
 }
 
-(int, String?) _page(Map<String, dynamic> arguments, {required int defaultLimit, required int maxLimit}) {
-  final limit = switch (arguments['limit']) {
-    final int n => n.clamp(1, maxLimit),
-    null => defaultLimit,
-    _ => throw const ToolError('limit must be a whole number.'),
-  };
-  final cursor = switch (arguments['cursor']) {
-    final String c when c.isNotEmpty => c,
-    null => null,
-    _ => throw const ToolError('cursor must be the string returned by the previous page.'),
-  };
-  return (limit, cursor);
+extension on Map<String, dynamic> {
+  /// A tool's `limit` and `cursor` arguments, read: the limit clamped to
+  /// [maxLimit], [defaultLimit] when absent.
+  (int, String?) toPaging({required int defaultLimit, required int maxLimit}) {
+    final limit = switch (this['limit']) {
+      final int n => n.clamp(1, maxLimit),
+      null => defaultLimit,
+      _ => throw const ToolError('limit must be a whole number.'),
+    };
+    final cursor = switch (this['cursor']) {
+      final String c when c.isNotEmpty => c,
+      null => null,
+      _ => throw const ToolError('cursor must be the string returned by the previous page.'),
+    };
+    return (limit, cursor);
+  }
 }
 
-Map<String, dynamic> _workoutSummary(Workout workout) {
-  return {
-    'id': workout.id,
-    'name': ?workout.name,
-    'start': workout.start.toUtc().toIso8601String(),
-    'minutes': ?workout.end?.difference(workout.start).inMinutes,
-    'exercises': [
-      for (final exercise in workout)
-        {
-          'name': exercise.exercise.name,
-          'completedSets': exercise.where((set) => set.isCompleted).length,
-          'best': ?switch (exercise.best) {
-            final ExerciseSet set => _set(set),
-            null => null,
+/// Workouts as the tools show them: sized for a model's context, units in
+/// the key names, nothing internal.
+extension on Workout {
+  /// A row in `list_workouts`: each exercise with its completed sets and
+  /// best set, not the sets themselves.
+  Map<String, dynamic> toMcpSummary() {
+    return {
+      ..._toMcpHeader(),
+      'minutes': ?end?.difference(start).inMinutes,
+      'exercises': [
+        for (final exercise in this)
+          {
+            'name': exercise.exercise.name,
+            'completedSets': exercise.where((set) => set.isCompleted).length,
+            'best': ?exercise.best?.toMcp(),
           },
-        },
-    ],
-  };
+      ],
+    };
+  }
+
+  /// `get_workout`: every exercise and set.
+  Map<String, dynamic> toMcpDetail() {
+    return {
+      ..._toMcpHeader(),
+      'end': ?end?.toUtc().toIso8601String(),
+      'note': ?note,
+      'caloriesEstimate': ?calories?.round(),
+      'exercises': [
+        for (final exercise in this)
+          {
+            'name': exercise.exercise.name,
+            'note': ?exercise.note,
+            'sets': [for (final set in exercise) set.toMcp()],
+          },
+      ],
+    };
+  }
+
+  Map<String, dynamic> _toMcpHeader() {
+    return {'id': id, 'name': ?name, 'start': start.toUtc().toIso8601String()};
+  }
 }
 
-Map<String, dynamic> _workoutDetail(Workout workout) {
-  return {
-    'id': workout.id,
-    'name': ?workout.name,
-    'start': workout.start.toUtc().toIso8601String(),
-    'end': ?workout.end?.toUtc().toIso8601String(),
-    'note': ?workout.note,
-    'caloriesEstimate': ?workout.calories?.round(),
-    'exercises': [
-      for (final exercise in workout)
-        {
-          'name': exercise.exercise.name,
-          'note': ?exercise.note,
-          'sets': [for (final set in exercise) _set(set)],
-        },
-    ],
-  };
+extension on ExerciseSet {
+  /// A set as the tools show it: its type only when it isn't a normal set,
+  /// `completed` only when it wasn't.
+  Map<String, dynamic> toMcp() {
+    return {
+      'type': ?(setType == .normal ? null : setType.value),
+      ...(weight: weight, reps: reps, distance: distance, duration: duration).toMcp(),
+      'rpe': ?rpe,
+      if (!isCompleted) 'completed': false,
+    };
+  }
 }
 
-Map<String, dynamic> _set(ExerciseSet set) {
-  return {
-    'type': ?(set.setType == .normal ? null : set.setType.value),
-    'weightKg': ?set.weight,
-    'reps': ?set.reps,
-    'distanceKm': ?set.distance,
-    'seconds': ?set.duration,
-    'rpe': ?set.rpe,
-    if (!set.isCompleted) 'completed': false,
-  };
+/// A set's measurements, whatever kind of set they come from.
+typedef _Measures = ({num? weight, int? reps, num? distance, num? duration});
+
+extension on _Measures {
+  /// The one place the tools name their units.
+  Map<String, dynamic> toMcp() {
+    return {'weightKg': ?weight, 'reps': ?reps, 'distanceKm': ?distance, 'seconds': ?duration};
+  }
 }
