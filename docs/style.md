@@ -121,6 +121,12 @@ a poller can keep it, and `hasMore` is explicit. Anything else that pages is
 
 ## SQL
 
+**Nesting reads like Dart.** A nested query opens with `(` at the end of
+its line, its body indents one step, and its `)` comes back to the column
+of the line that opened it. One clause per line (`UPDATE t` and `SET …`
+included); `AND` lines up with its `WHERE`. A subquery short enough to read
+at a glance (`SELECT id FROM new_rows`) may stay on one line.
+
 **One round trip.** Anything touching more than one table is a single
 multi-CTE statement (`WITH _a AS (…), _b AS (…) SELECT …`), never a
 sequence of queries with logic in Dart between them.
