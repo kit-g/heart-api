@@ -24,6 +24,16 @@ abstract interface class ApiWorkoutService {
   /// one exercise's when [exerciseId] is given.
   Future<List<ExerciseRecordSets>> getRecordSets({required String userId, String? exerciseId});
 
+  /// [userId]'s sessions of [exerciseId], newest first, [limit] at a time
+  /// after the workout id [cursor]. Null when the exercise isn't one [userId]
+  /// can see; a page of nothing when they've never done it.
+  Future<ExerciseHistory?> getExerciseHistory({
+    required String userId,
+    required String exerciseId,
+    String? cursor,
+    int limit,
+  });
+
   Future<Page<Workout>> getWorkouts({
     required String userId,
     required String targetUserId,

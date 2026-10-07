@@ -5,6 +5,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
+import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/routes/me.dart';
 import 'package:heart_models/heart_models.dart';
@@ -180,6 +181,76 @@ void main() {
 
       expect(records.map((r) => ((r as Map)['exercise'] as Map)['name']), ['Bench', 'squat']);
       expect(((records.first as Map)['heaviest'] as Map)['weight'], 100);
+    });
+  });
+
+  group('exercise history', () {
+    const exercise = '01900000-0000-7000-8000-000000000001';
+    const older = '01900000-0000-7000-8000-0000000000a1';
+    const newer = '01900000-0000-7000-8000-0000000000a2';
+
+    RecordSet set(String workoutId, double weight, int reps) {
+      return RecordSet(
+        weight: weight,
+        reps: reps,
+        duration: null,
+        distance: null,
+        workoutId: workoutId,
+        at: '2026-01-01T00:00:00.000Z',
+      );
+    }
+
+    test('a malformed exercise id is a 404, a malformed cursor a 400', () {
+      expect(
+        () => getMyExerciseHistoryById(build('/me/exercises/x/history'), 'x'),
+        throwsA(isA<NotFound>()),
+      );
+      expect(
+        () => getMyExerciseHistoryById(build('/me/exercises/$exercise/history', query: {'cursor': 'x'}), exercise),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
+    test("an exercise the user can't see is a 404", () {
+      when(
+        workouts.getExerciseHistory(userId: 'u1', exerciseId: exercise, cursor: null, limit: 20),
+      ).thenAnswer((_) async => null);
+
+      expect(
+        () => getMyExerciseHistoryById(build('/me/exercises/$exercise/history'), exercise),
+        throwsA(isA<NotFound>()),
+      );
+    });
+
+    test('sessions carry their sets and chart values, and the cursor is the last workout', () async {
+      when(workouts.getExerciseHistory(userId: 'u1', exerciseId: exercise, cursor: newer, limit: 2)).thenAnswer(
+        (_) async => (
+          exerciseId: exercise,
+          name: 'Bench',
+          category: Category.barbell,
+          sessions: Page<ExerciseSession>(
+            items: [
+              (workoutId: older, at: '2026-01-01T00:00:00.000Z', sets: [set(older, 100, 5), set(older, 110, 3)]),
+            ],
+            hasMore: true,
+          ),
+        ),
+      );
+
+      final page = (await getMyExerciseHistoryById(
+        build('/me/exercises/$exercise/history', query: {'cursor': newer, 'limit': '2'}),
+        exercise,
+      )).toMap();
+
+      final session = (page['sessions'] as List).single as Map;
+      expect(session['workoutId'], older);
+      expect(session['sets'], [
+        {'weight': 100, 'reps': 5},
+        {'weight': 110, 'reps': 3},
+      ]);
+      expect((session['metrics'] as Map)['topSetWeight'], 110);
+      expect((session['metrics'] as Map)['totalVolume'], 830);
+      expect(page['cursor'], older);
     });
   });
 }

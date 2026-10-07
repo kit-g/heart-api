@@ -12,6 +12,7 @@ final RouteTable meRoutes = {
   ('/workouts/changes', .get): me.getMyWorkoutChanges,
   ('/workouts/:workoutId', .get): me.getMyWorkout,
   ('/exercises', .get): me.getMyExercises,
+  ('/exercises/:exerciseId/history', .get): me.getMyExerciseHistory,
   ('/templates', .get): me.getMyTemplates,
   ('/template-folders', .get): me.getMyFolders,
   ('/goals', .get): me.getMyGoals,

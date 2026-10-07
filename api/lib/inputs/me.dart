@@ -52,3 +52,27 @@ class RecordsQuery {
     );
   }
 }
+
+/// `GET /me/exercises/:exerciseId/history?cursor=&limit=` — one exercise's
+/// sessions, newest first. The cursor is a workout id from the last page.
+class ExerciseHistoryQuery {
+  final String exerciseId;
+  final String? cursor;
+  final int limit;
+
+  const new _({required this.exerciseId, required this.cursor, required this.limit});
+
+  static ExerciseHistoryQuery fromRequest(Request req, {required String exerciseId}) {
+    if (!isUuidV7(exerciseId)) throw NotFound(type: 'Exercise', id: exerciseId);
+    final q = req.url.queryParameters;
+    return ExerciseHistoryQuery._(
+      exerciseId: exerciseId,
+      cursor: switch (q.stringOrNull('cursor')) {
+        null => null,
+        final String id when isUuidV7(id) => id,
+        final String id => throw BadRequest(reason: 'cursor is not one this list returned: $id'),
+      },
+      limit: q.integer('limit', defaultValue: 20, min: 1, max: 100),
+    );
+  }
+}

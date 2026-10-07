@@ -74,6 +74,51 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   }
 
   @override
+  Future<ExerciseHistory?> getExerciseHistory({
+    required String userId,
+    required String exerciseId,
+    String? cursor,
+    int limit = 20,
+  }) async {
+    final rows = await _pool.execute(
+      _exerciseHistory.toSql(),
+      parameters: {'userId': userId, 'exerciseId': exerciseId, 'cursor': cursor, 'limit': limit + 1},
+    );
+    if (rows.isEmpty) return null;
+
+    final first = rows.first.toColumnMap();
+    final sessions = <String, ExerciseSession>{};
+    for (final row in rows) {
+      final map = row.toColumnMap();
+      if (map['workout_id'] case final Object workoutId) {
+        final id = workoutId.toString();
+        final at = (map['started_at'] as DateTime).toUtc().toIso8601String();
+        sessions
+            .putIfAbsent(id, () => (workoutId: id, at: at, sets: <RecordSet>[]))
+            .sets
+            .add(
+              RecordSet(
+                weight: (map['weight'] as num?)?.toDouble(),
+                reps: (map['reps'] as num?)?.toInt(),
+                duration: (map['duration'] as num?)?.toDouble(),
+                distance: (map['distance'] as num?)?.toDouble(),
+                workoutId: id,
+                at: at,
+              ),
+            );
+      }
+    }
+    final items = sessions.values.toList();
+    final hasMore = items.length > limit;
+    return (
+      exerciseId: first['exercise_id'].toString(),
+      name: first['name'] as String,
+      category: Category.fromString(first['category'] as String),
+      sessions: Page(items: hasMore ? items.sublist(0, limit) : items, hasMore: hasMore),
+    );
+  }
+
+  @override
   Future<List<ExerciseRecordSets>> getRecordSets({required String userId, String? exerciseId}) async {
     final rows = await _pool.execute(
       _recordSets.toSql(),

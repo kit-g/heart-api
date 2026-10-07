@@ -2495,6 +2495,45 @@ ORDER BY p.xid, p.id
 // Every completed working set the user has done, per exercise, oldest
 // workout first: the input personal records are folded from. Warm-ups are no
 // one's record.
+// One exercise's sessions, newest first by workout id (ids follow start
+// times, imported ones included), each with its completed working sets. The
+// exercise row comes back even without sessions, so "never done" and "not
+// yours" stay apart.
+const _exerciseHistory = '''
+WITH _exercise AS (
+  SELECT id, name, category
+  FROM exercises
+  WHERE id = @exerciseId::uuid
+    AND (user_id IS NULL OR user_id = @userId)
+),
+_sets AS (
+  SELECT we.workout_id, we.exercise_order, s.set_order, s.weight, s.reps, s.duration, s.distance
+  FROM workouts w
+  JOIN workout_exercises we ON we.workout_id = w.id
+  JOIN exercise_sets s ON s.workout_exercise_id = we.id
+  WHERE w.user_id = @userId
+    AND we.exercise_id = @exerciseId::uuid
+    AND s.completed
+    AND s.set_type IS DISTINCT FROM 'w'
+    AND (@cursor::uuid IS NULL OR w.id < @cursor::uuid)
+),
+_sessions AS (
+  SELECT w.id, COALESCE(w.started_at, w.created_at) AS started_at
+  FROM workouts w
+  WHERE w.id IN (SELECT workout_id FROM _sets)
+  ORDER BY w.id DESC
+  LIMIT @limit
+)
+SELECT
+  x.id AS exercise_id, x.name, x.category,
+  ses.id AS workout_id, ses.started_at,
+  s.weight, s.reps, s.duration, s.distance
+FROM _exercise x
+LEFT JOIN _sessions ses ON TRUE
+LEFT JOIN _sets s ON s.workout_id = ses.id
+ORDER BY ses.id DESC NULLS LAST, s.exercise_order, s.set_order
+''';
+
 const _recordSets = '''
 SELECT
   e.id AS exercise_id, e.name, e.category,

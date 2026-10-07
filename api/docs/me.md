@@ -49,6 +49,7 @@ there's more: pass it back as `?cursor=` for the next page. No `cursor` means th
 | `/me/workouts/:workoutId` | one workout                                                                                      |
 | `/me/workouts/changes`    | `{workouts, deleted, cursor, hasMore}`: what changed since `?since=<cursor>`, oldest first (see *Polling*) |
 | `/me/records`             | `{records}`: personal records per exercise, the same ones the app shows; `?exerciseId=` for one |
+| `/me/exercises/:exerciseId/history` | `{sessions, cursor}`: every session of one exercise, newest first (default 20 a page), each with its working sets and `metrics`, the values the app's progress chart plots for it (`topSetWeight`, `estimatedOneRepMax`, `totalVolume`, …, by exercise type) |
 | `/me/exercises`           | `{exercises}`: your custom exercises (a `glossary` key rides along; ignore it). Library exercises come embedded in workouts and templates  |
 | `/me/templates`           | `{templates, cursor}`, in your order; `?folder=<id>`, or `?folder=none` for unfiled ones                        |
 | `/me/template-folders`    | `{folders}`                                                                                      |
@@ -102,8 +103,8 @@ curl -L "https://api.heart-of.me/v1/me/export?format=strong" -H "Authorization: 
 
 ## Units
 
-Weights are in kilograms and distances in kilometres, whatever your display unit. Times are
-ISO 8601 in UTC.
+Weights are in kilograms and distances in kilometres, whatever your display unit. Durations are
+in seconds, and a pace in seconds per kilometre. Times are ISO 8601 in UTC.
 
 ## Compatibility
 
