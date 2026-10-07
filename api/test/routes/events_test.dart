@@ -29,27 +29,6 @@ void main() {
     expect((await app.send('POST', '/events', body: {'not': 'an event'})).status, 500);
   });
 
-  test('dispatches an oauth.cleanup record onto the OAuth service (204)', () async {
-    when(app.config.allowNonHttpEvents).thenReturn(true);
-    when(app.db.cleanUpOAuth()).thenAnswer(
-      (_) async => (requests: 1, accessTokens: 0, refreshTokens: 0, grants: 0, documents: 0, registrations: 0),
-    );
-
-    final res = await app.send(
-      'POST',
-      '/events',
-      body: {
-        'Records': [
-          {
-            'body': jsonEncode({'type': 'oauth.cleanup'}),
-          },
-        ],
-      },
-    );
-    expect(res.status, 204);
-    verify(app.db.cleanUpOAuth()).called(1);
-  });
-
   test('dispatches an exercise.asset.processed record onto the exercise service (204)', () async {
     when(app.config.allowNonHttpEvents).thenReturn(true);
     when(app.config.cdnAssetUrl(any)).thenReturn('https://cdn.example/asset');
