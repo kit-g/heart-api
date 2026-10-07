@@ -17,5 +17,6 @@ final RouteTable meRoutes = {
   ('/template-folders', .get): me.getMyFolders,
   ('/goals', .get): me.getMyGoals,
   ('/records', .get): me.getMyRecords,
+  ('/library', .get): me.searchMyLibrary,
   ('/export', .get): me.exportMe,
 };
