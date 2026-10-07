@@ -278,6 +278,10 @@ jobs:
       - name: "Apply migrations to Supabase"
         run: ./scripts/apply_migrations.sh
 
+      # After the migrations: jobs call functions they create.
+      - name: "Schedule database jobs"
+        run: ./scripts/schedule_jobs.sh
+
       - uses: dart-lang/setup-dart@v1
       - uses: actions/cache@v6
         with:
