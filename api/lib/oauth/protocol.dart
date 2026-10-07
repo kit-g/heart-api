@@ -16,13 +16,21 @@ class OAuthError implements Exception {
   final String description;
   final int status;
 
-  const new(this.error, this.description, {this.status = 400});
+  /// Seconds until trying again is worth it: a `Retry-After` header.
+  final int? retryAfter;
+
+  const new(this.error, this.description, {this.status = 400, this.retryAfter});
 
   Response toResponse({Headers? headers}) {
-    return Response(
+    return .new(
       status,
-      body: Body.fromString(jsonEncode({'error': error, 'error_description': description}), mimeType: MimeType.json),
-      headers: headers ?? Headers.build((h) => h.cacheControl = CacheControlHeader(noStore: true)),
+      body: .fromString(jsonEncode({'error': error, 'error_description': description}), mimeType: .json),
+      headers:
+          headers ??
+          .build((h) {
+            h.cacheControl = CacheControlHeader(noStore: true);
+            if (retryAfter case final int seconds) h.retryAfter = RetryAfterHeader(delay: seconds);
+          }),
     );
   }
 

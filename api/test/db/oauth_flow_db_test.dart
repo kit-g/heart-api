@@ -92,6 +92,7 @@ void main() {
     Object? json,
     Map<String, String>? form,
     String? appVersion,
+    Map<String, String> headers = const {},
   }) async {
     final client = HttpClient();
     try {
@@ -99,6 +100,7 @@ void main() {
         ..followRedirects = false;
       if (bearer != null) request.headers.set('authorization', 'Bearer $bearer');
       if (appVersion != null) request.headers.set('x-app-version', appVersion);
+      headers.forEach(request.headers.set);
       if (json != null) {
         request.headers.contentType = ContentType.json;
         request.write(jsonEncode(json));
@@ -365,6 +367,46 @@ void main() {
       },
     );
     expect(body(bad)['error'], 'invalid_client_metadata');
+  });
+
+  test('one address registers at most 20 clients a day', () async {
+    // as API Gateway reports the caller; a client can't set this one
+    final address = '203.0.113.${DateTime.now().microsecond % 250}-${h.token}';
+    final context = {
+      'x-amzn-request-context': jsonEncode({
+        'identity': {'sourceIp': address},
+      }),
+    };
+    for (var i = 0; i < 20; i++) {
+      await h.db.countRegistration(address);
+    }
+
+    final refused = await send(
+      'POST',
+      '/oauth/register',
+      json: {
+        'redirect_uris': ['http://127.0.0.1/callback'],
+      },
+      headers: context,
+    );
+    expect(refused.status, 429);
+    expect(body(refused)['error'], 'too_many_registrations');
+    expect(int.parse(refused.headers.value('retry-after')!), inInclusiveRange(1, 86400));
+
+    final elsewhere = await send(
+      'POST',
+      '/oauth/register',
+      json: {
+        'redirect_uris': ['http://127.0.0.1/callback'],
+      },
+      headers: {
+        'x-amzn-request-context': jsonEncode({
+          'identity': {'sourceIp': 'other-$address'},
+        }),
+      },
+    );
+    expect(elsewhere.status, 201, reason: 'another address is counted on its own');
+    await h.exec('DELETE FROM oauth_clients WHERE client_id = @id', {'id': body(elsewhere)['client_id']});
   });
 }
 

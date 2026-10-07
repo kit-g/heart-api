@@ -179,8 +179,17 @@ abstract interface class OAuthService {
   /// Refuses a pending request. Null when it isn't pending.
   Future<AuthorizationRequest?> denyRequest(String requestId);
 
-  /// Spends an authorization code. Null when it is unknown, expired or spent.
+  /// Spends an authorization code. Null when it is unknown, expired or spent;
+  /// a spent one presented again also revokes the grant it issued under.
   Future<RedeemedCode?> redeemCode(Uint8List codeHash);
+
+  /// Records a client assertion's [jti] until [expiresAt]. False when it was
+  /// already recorded: the assertion is being used a second time.
+  Future<bool> rememberAssertion({required String clientId, required String jti, required DateTime expiresAt});
+
+  /// Counts one more dynamic registration from [address] today, and returns
+  /// the day's total for it. The address itself is never stored.
+  Future<int> countRegistration(String address);
 
   /// Issues the first token pair under the live grant for [userId], [clientId]
   /// and [resource]. False when there is no such grant.

@@ -127,3 +127,21 @@ extension Locale on Request {
     return [language.toLowerCase(), ...rest.map((part) => part.toUpperCase())].join('_');
   }
 }
+
+extension RequestContext on Request {
+  /// The caller's address as API Gateway saw it, from the request context the
+  /// Lambda adapter passes along. A client can't set it, unlike
+  /// `X-Forwarded-For`. Null off API Gateway (locally, in tests).
+  String? get sourceAddress {
+    final raw = headers['x-amzn-request-context']?.firstOrNull;
+    if (raw == null) return null;
+    try {
+      return switch (jsonDecode(raw)) {
+        {'identity': {'sourceIp': final String ip}} when ip.isNotEmpty => ip,
+        _ => null,
+      };
+    } on FormatException {
+      return null;
+    }
+  }
+}

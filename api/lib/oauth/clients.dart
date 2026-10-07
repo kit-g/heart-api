@@ -48,12 +48,11 @@ const _skew = Duration(minutes: 1);
 /// Verifies a `private_key_jwt` client assertion (RFC 7523 §3): signed by a
 /// key from the client's `jwks_uri`, issued and subject to the client itself,
 /// addressed to one of [audiences] (the issuer, or the endpoint being
-/// called), issued now-ish and expiring within five minutes.
+/// called), issued now-ish, expiring within five minutes, and carrying a `jti`.
 ///
-/// The assertion's `jti` isn't remembered, so one could be replayed within
-/// its few minutes of life; PKCE and the single-use code still bind every
-/// exchange it could be replayed into.
-Future<void> verifyClientAssertion(
+/// Returns the assertion's `jti` and expiry, for the caller to record: an
+/// assertion is good once.
+Future<({String jti, DateTime expiresAt})> verifyClientAssertion(
   String assertion,
   OAuthClient client, {
   required Set<String> audiences,
@@ -88,7 +87,8 @@ Future<void> verifyClientAssertion(
           !issued.isAfter(at.add(_skew)) && expiry.isAfter(at) && !expiry.isAfter(at.add(_assertionLifetime + _skew)),
         _ => false,
       };
-  if (!valid) {
-    throw const OAuthError('invalid_client', 'client_assertion claims do not match this client', status: 401);
-  }
+  return switch ((valid, claims.jwtId, claims.expiry)) {
+    (true, final String jti, final DateTime expiry) when jti.isNotEmpty => (jti: jti, expiresAt: expiry),
+    _ => throw const OAuthError('invalid_client', 'client_assertion claims do not match this client', status: 401),
+  };
 }

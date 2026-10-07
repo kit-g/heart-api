@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:heart/core/request.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
@@ -29,6 +30,11 @@ const _assertionType = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
 
 /// The largest registration request accepted, in characters.
 const _maxRegistration = 16 * 1024;
+
+/// Dynamic registrations a source address may make in a UTC day. A host
+/// registers once per install or so; a burst past this is someone filling
+/// the table.
+const _registrationsPerAddress = 20;
 
 /// `GET /oauth/authorize`: validates the request and hands the browser to the
 /// consent page. Until the client and its redirect check out, errors are
@@ -175,6 +181,18 @@ Future<Response> register(Request req) async {
       _ => throw const OAuthError('invalid_client_metadata', 'expected a JSON object'),
     };
     final shape = body.toRegistration();
+    if (req.sourceAddress case final String address) {
+      if (await req.oauthService.countRegistration(address) > _registrationsPerAddress) {
+        final now = DateTime.now().toUtc();
+        final tomorrow = DateTime.utc(now.year, now.month, now.day + 1);
+        throw OAuthError(
+          'too_many_registrations',
+          'this address has registered $_registrationsPerAddress clients today; try again tomorrow',
+          status: 429,
+          retryAfter: tomorrow.difference(now).inSeconds,
+        );
+      }
+    }
     final client = await req.oauthService.registerClient(
       name: shape.name,
       redirectUris: shape.redirectUris,
@@ -362,12 +380,14 @@ Future<OAuthClient> _authenticateClient(
     case (.none, null):
       return client;
     case (.privateKeyJwt, final String jwt) when form['client_assertion_type'] == _assertionType:
-      await verifyClientAssertion(
+      final (:jti, :expiresAt) = await verifyClientAssertion(
         jwt,
         client,
         audiences: {oauth.issuer.toString(), endpoint.toString()},
         fetch: req.jsonFetch,
       );
+      final first = await req.oauthService.rememberAssertion(clientId: client.clientId, jti: jti, expiresAt: expiresAt);
+      if (!first) throw const OAuthError('invalid_client', 'client_assertion was already used', status: 401);
       return client;
     default:
       throw const OAuthError('invalid_client', 'client authentication failed', status: 401);
