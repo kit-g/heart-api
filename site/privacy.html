@@ -56,7 +56,7 @@
 <main class="flex-grow w-full max-w-3xl mx-auto px-6 py-16 md:py-24">
     <article class="prose prose-h1:text-4xl prose-h1:tracking-tight max-w-none">
         <h1>Privacy Policy</h1>
-        <p><strong>Last updated: October 2, 2026</strong></p>
+        <p><strong>Last updated: October 7, 2026</strong></p>
         <p>Last reviewed against the app’s behaviour: October 2, 2026.</p>
 
         <p>Thanks for using Heart of Yours. This document explains what data we collect, how we use it, and what choices
@@ -130,6 +130,17 @@
         <h3>App Usage &amp; Debug Info</h3>
         <p>We collect basic analytics through Firebase Analytics (like which screens are used) and crash logs to help
             improve the app. This data is anonymous, never sold, and never includes your health data.</p>
+
+        <h3 id="api">Developer API and AI Assistants</h3>
+        <p>If you create a token to read your log from your own scripts or an AI assistant (see the
+            <a href="developers.html">developer API</a>), we log each request it makes: when, which kind of request,
+            whether it worked, what you said the token was for, and which tool sent it, reduced from its User-Agent to a
+            name such as <em>claude-code</em> or <em>my-sheet-sync</em>. Instead of your account, the log holds a
+            one-way pseudonym of it, enough to count how many people use the API but not to say who. We use this to
+            enforce the limits and to see what people build, and keep it for 30 days.</p>
+        <p>Heart stores only a digest of each token, never the token itself. The API reads; it can’t change your data,
+            and it has no health data to give, because Heart never has any. When you connect an AI assistant, what it
+            reads from Heart goes to that assistant’s provider, and their privacy policy covers it from there.</p>
 
         <h2>Your Choices</h2>
 

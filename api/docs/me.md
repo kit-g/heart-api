@@ -85,8 +85,9 @@ In Cursor or any client with a JSON config:
 {"mcpServers": {"heart": {"url": "https://api.heart-of.me/v1/mcp", "headers": {"Authorization": "Bearer hrt_…"}}}}
 ```
 
-The assistant can read your profile, workouts, templates, folders, goals and custom exercises, and
-nothing else; it can't change anything. Only its data calls count against your limits, not the
+The assistant can read your profile, workouts, templates and folders, goals, personal records, an
+exercise's history, your custom exercises and the exercise library, and nothing else; it can't change
+anything. Only its data calls count against your limits, not the
 listing it does at the start of each conversation. Connecting from Claude or ChatGPT by signing in
 instead of pasting a token is coming.
 
