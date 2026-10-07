@@ -305,6 +305,23 @@ jobs:
             --function-name ${{ inputs.FUNCTION_NAME }} \
             --region ${{ inputs.AWS_REGION }}
 
+      # The MCP host runs the same binary (HEART_SURFACE=mcp). Skipped while its
+      # function doesn't exist, so this can ship before the infrastructure does.
+      - name: "Update the MCP host's function"
+        run: |
+          MCP="${{ inputs.FUNCTION_NAME }}-mcp"
+          if ! aws lambda get-function --function-name "$MCP" --region ${{ inputs.AWS_REGION }} > /dev/null 2>&1; then
+            echo "::notice title=MCP host::$MCP doesn't exist yet; skipped"
+            exit 0
+          fi
+          aws lambda update-function-code \
+            --function-name "$MCP" \
+            --zip-file fileb://api/function.zip \
+            --region ${{ inputs.AWS_REGION }} > /dev/null
+          aws lambda wait function-updated \
+            --function-name "$MCP" \
+            --region ${{ inputs.AWS_REGION }}
+
       # The new code declares the database's pg_cron jobs (api/lib/db/cron.dart);
       # it holds the database's credentials, so the deploy only asks.
       - name: "Ask the API to declare its database jobs"

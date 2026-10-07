@@ -7,3 +7,8 @@ output "api_custom_domain" {
   value       = module.api.custom_domain
   description = "API Gateway custom domain. `target` is what the `dns` root module's <env>_api_domain_name variable takes, since that module holds its own state and is applied separately."
 }
+
+output "mcp_distribution_domain" {
+  description = "Where to point the MCP host's DNS record (a CNAME for mcp.heart-of.me)."
+  value       = module.api.mcp_distribution_domain
+}
