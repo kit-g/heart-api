@@ -85,10 +85,10 @@ Future<TokenCheck> checkToken(Request request, {bool count = true, DateTime Func
       JsonResponse(
         401,
         body: const Unauthorized(code: 'invalid_token', reason: 'missing, unknown, revoked or expired token'),
-        headers: Headers.build(
-          (headers) => headers.wwwAuthenticate = AuthenticationHeader(
+        headers: .build(
+          (headers) => headers.wwwAuthenticate = .new(
             scheme: 'Bearer',
-            parameters: [const AuthenticationParameter('realm', 'heart')],
+            parameters: [const .new('realm', 'heart')],
           ),
         ),
       ),
@@ -116,7 +116,7 @@ Future<TokenCheck> checkToken(Request request, {bool count = true, DateTime Func
       JsonResponse(
         429,
         body: TooManyRequests(reason: 'rate limit of $limit reached', retryAfter: retryAfter),
-        headers: Headers.build((headers) => headers.retryAfter = RetryAfterHeader(delay: retryAfter)),
+        headers: .build((headers) => headers.retryAfter = .new(delay: retryAfter)),
       ),
     );
   }
