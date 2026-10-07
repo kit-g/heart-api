@@ -1,5 +1,6 @@
 import 'package:heart/core/mcp_router.dart';
 import 'package:heart/core/me_router.dart';
+import 'package:heart/core/oauth_router.dart';
 import 'package:heart/core/routing.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/db/db.dart';
@@ -15,6 +16,7 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/events.dart';
 import 'package:heart/middleware/logging.dart';
 import 'package:heart/middleware/s3.dart';
+import 'package:heart/oauth/fetch.dart';
 import 'package:heart/middleware/version.dart';
 import 'package:heart/models/apple.dart';
 import 'package:heart/routes/index.dart';
@@ -42,6 +44,7 @@ RelicApp buildApp({
   required EventPublisher eventPublisher,
   required AppleIdentityService apple,
   firebase.Authenticator? auth,
+  JsonFetch fetch = guardedJsonFetch,
 }) {
   bool shouldCheckVersion(Request request) {
     if (config.shouldCheckVersion) return isAppRoute(request);
@@ -75,6 +78,7 @@ RelicApp buildApp({
     ..use('/accounts', templateFoldersDb(db: database))
     ..use('/accounts', imageStorageDb(db: storage))
     ..use('/accounts', apiTokensDb(db: database))
+    ..use('/accounts', oauthDb(db: database))
     ..use('/charts', chartsDb(db: database))
     ..use('/exercise-preferences', exercisePreferencesDb(db: database))
     ..use('/connections', connectionsDb(db: database))
@@ -109,7 +113,8 @@ RelicApp buildApp({
   app
     ..addRoutes(routes)
     ..attach(tokenPrefix, buildMeRouter(database: database, storage: storage), consume: true)
-    ..attach(mcpPrefix, buildMcpRouter(database: database), consume: true);
+    ..attach(mcpPrefix, buildMcpRouter(database: database), consume: true)
+    ..attach(oauthPrefix, buildOAuthRouter(database: database, fetch: fetch), consume: true);
 
   return app;
 }

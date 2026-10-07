@@ -1,6 +1,7 @@
 import 'package:heart/models/creates.dart';
 import 'package:heart/models/exercise_preferences.dart';
 import 'package:heart/models/images.dart';
+import 'package:heart/models/oauth.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
@@ -16,6 +17,7 @@ final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
 final _devicesProperty = ContextProperty<DeviceService>('DeviceService');
 final _apiTokensProperty = ContextProperty<ApiTokenService>('ApiTokenService');
+final _oauthProperty = ContextProperty<OAuthService>('OAuthService');
 final _workoutsProperty = ContextProperty<ApiWorkoutService>('ApiWorkoutService');
 final _templatesProperty = ContextProperty<IdempotentTemplateService>('IdempotentTemplateService');
 final _templateFoldersProperty = ContextProperty<IdempotentTemplateFolderService>('IdempotentTemplateFolderService');
@@ -78,6 +80,15 @@ Middleware apiTokensDb({required ApiTokenService db}) {
   return (Handler next) {
     return (request) {
       _apiTokensProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
+Middleware oauthDb({required OAuthService db}) {
+  return (Handler next) {
+    return (request) {
+      _oauthProperty[request] = db;
       return next(request);
     };
   };
@@ -156,6 +167,10 @@ extension DatabaseContext on Request {
   ApiTokenService get apiTokenService => _apiTokensProperty.get(this);
 
   set apiTokenService(ApiTokenService v) => _apiTokensProperty[this] = v;
+
+  OAuthService get oauthService => _oauthProperty.get(this);
+
+  set oauthService(OAuthService v) => _oauthProperty[this] = v;
 
   CommentService get commentService => _commentsProperty.get(this);
 
