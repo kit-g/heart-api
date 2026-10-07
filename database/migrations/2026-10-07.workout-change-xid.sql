@@ -56,17 +56,28 @@ AS
 $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
-        UPDATE workouts SET updated_at = now()
-        WHERE id IN (SELECT workout_id FROM new_rows)
-          AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
+        UPDATE workouts
+        SET updated_at = now()
+        WHERE id IN (
+            SELECT workout_id FROM new_rows
+        )
+        AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
     ELSIF TG_OP = 'UPDATE' THEN
-        UPDATE workouts SET updated_at = now()
-        WHERE id IN (SELECT workout_id FROM new_rows UNION SELECT workout_id FROM old_rows)
-          AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
+        UPDATE workouts
+        SET updated_at = now()
+        WHERE id IN (
+            SELECT workout_id FROM new_rows
+            UNION
+            SELECT workout_id FROM old_rows
+        )
+        AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
     ELSE
-        UPDATE workouts SET updated_at = now()
-        WHERE id IN (SELECT workout_id FROM old_rows)
-          AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
+        UPDATE workouts
+        SET updated_at = now()
+        WHERE id IN (
+            SELECT workout_id FROM old_rows
+        )
+        AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
     END IF;
     RETURN NULL;
 END
@@ -81,22 +92,40 @@ AS
 $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
-        UPDATE workouts SET updated_at = now()
-        WHERE id IN (SELECT we.workout_id FROM workout_exercises we
-                     WHERE we.id IN (SELECT workout_exercise_id FROM new_rows))
-          AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
+        UPDATE workouts
+        SET updated_at = now()
+        WHERE id IN (
+            SELECT we.workout_id
+            FROM workout_exercises we
+            WHERE we.id IN (
+                SELECT workout_exercise_id FROM new_rows
+            )
+        )
+        AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
     ELSIF TG_OP = 'UPDATE' THEN
-        UPDATE workouts SET updated_at = now()
-        WHERE id IN (SELECT we.workout_id FROM workout_exercises we
-                     WHERE we.id IN (SELECT workout_exercise_id FROM new_rows
-                                     UNION
-                                     SELECT workout_exercise_id FROM old_rows))
-          AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
+        UPDATE workouts
+        SET updated_at = now()
+        WHERE id IN (
+            SELECT we.workout_id
+            FROM workout_exercises we
+            WHERE we.id IN (
+                SELECT workout_exercise_id FROM new_rows
+                UNION
+                SELECT workout_exercise_id FROM old_rows
+            )
+        )
+        AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
     ELSE
-        UPDATE workouts SET updated_at = now()
-        WHERE id IN (SELECT we.workout_id FROM workout_exercises we
-                     WHERE we.id IN (SELECT workout_exercise_id FROM old_rows))
-          AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
+        UPDATE workouts
+        SET updated_at = now()
+        WHERE id IN (
+            SELECT we.workout_id
+            FROM workout_exercises we
+            WHERE we.id IN (
+                SELECT workout_exercise_id FROM old_rows
+            )
+        )
+        AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
     END IF;
     RETURN NULL;
 END
@@ -110,14 +139,17 @@ CREATE OR REPLACE FUNCTION _stamp_workouts_by_exercise() RETURNS trigger
 AS
 $$
 BEGIN
-    UPDATE workouts SET updated_at = now()
-    WHERE id IN (SELECT we.workout_id
-                 FROM workout_exercises we
-                 JOIN new_rows n ON n.id = we.exercise_id
-                 JOIN old_rows o ON o.id = n.id
-                 WHERE n.user_id IS NOT NULL
-                   AND (n.name, n.category, n.target) IS DISTINCT FROM (o.name, o.category, o.target))
-      AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
+    UPDATE workouts
+    SET updated_at = now()
+    WHERE id IN (
+        SELECT we.workout_id
+        FROM workout_exercises we
+        JOIN new_rows n ON n.id = we.exercise_id
+        JOIN old_rows o ON o.id = n.id
+        WHERE n.user_id IS NOT NULL
+        AND (n.name, n.category, n.target) IS DISTINCT FROM (o.name, o.category, o.target)
+    )
+    AND (changed_xid <> pg_current_xact_id() OR updated_at IS DISTINCT FROM now());
     RETURN NULL;
 END
 $$;
