@@ -13,4 +13,8 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   test: ^1.25.6
   mockito: ^5.8.1
-  build_runner: ^2.10.4
+  build_runner: ^2.16.1
+  # analyzer 14.5.0 dropped a setter build_runner 2.16.1 (the latest) still calls, and
+  # this package has no lockfile to hold it back. Lift once build_runner
+  # catches up. A dev dependency: the app never resolves it.
+  analyzer: ">=14.4.0 <14.5.0"
