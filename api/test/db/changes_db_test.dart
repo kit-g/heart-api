@@ -2,13 +2,14 @@
 library;
 
 import 'package:heart/models/changes.dart';
+import 'package:postgres/postgres.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
 
 /// The workout change feed and the record sets against a live Postgres:
-/// ordering, the cursor, deletions, the settle window, and which sets count
+/// ordering by transaction, the cursor, deletions, open transactions, and which sets count
 /// toward a record.
 ///
 /// Tagged `db` — skipped by the default `dart test`. Run with:
@@ -23,9 +24,8 @@ void main() {
     String userId, {
     ChangeCursor? since,
     int limit = 100,
-    Duration settle = Duration.zero,
   }) {
-    return h.db.getWorkoutChanges(userId: userId, since: since, limit: limit, settle: settle, imageUrl: (k) => k);
+    return h.db.getWorkoutChanges(userId: userId, since: since, limit: limit, imageUrl: (k) => k);
   }
 
   /// Polls until [done] holds. The feed waits for every transaction still
@@ -43,20 +43,11 @@ void main() {
     }
   }
 
-  Future<void> age(String workoutId, Duration ago) async {
-    await h.exec(
-      'UPDATE workouts SET updated_at = now() - make_interval(secs => @s) WHERE id = @id::uuid',
-      {'s': ago.inSeconds, 'id': workoutId},
-    );
-  }
-
   group('getWorkoutChanges', () {
     test('lists changes oldest first, and an up-to-date cursor finds nothing new', () async {
       final user = await h.seedProfile();
       final older = await h.seedWorkout(userId: user, name: 'older', withExercise: true);
       final newer = await h.seedWorkout(userId: user, name: 'newer');
-      await age(older, const Duration(hours: 2));
-      await age(newer, const Duration(hours: 1));
 
       final first = await eventually(() => changes(user), (c) => c.upserted.length == 2);
       expect(first.upserted.map((w) => w.id), [older, newer]);
@@ -72,7 +63,6 @@ void main() {
     test('an edit to a set brings its workout back', () async {
       final user = await h.seedProfile();
       final workout = await h.seedWorkout(userId: user, withExercise: true);
-      await age(workout, const Duration(hours: 1));
       final cursor = (await eventually(() => changes(user), (c) => c.upserted.isNotEmpty)).cursor;
 
       await h.exec(
@@ -85,25 +75,35 @@ void main() {
       expect(after.upserted.map((w) => w.id), [workout]);
     });
 
-    test('a change inside the settle window waits for a later poll', () async {
+    test('a transaction that reads before it writes lands after the cursor, not behind it', () async {
       final user = await h.seedProfile();
-      await h.seedWorkout(userId: user);
 
-      final held = await changes(user, settle: const Duration(minutes: 5));
-      expect(held.upserted, isEmpty);
-      expect(held.cursor, isNull);
+      final cursor = await h.pool.runTx((tx) async {
+        // started, read, but not written: no transaction id yet
+        await tx.execute('SELECT 1');
+        // meanwhile another save commits, and a poller takes the cursor past it
+        await h.seedWorkout(userId: user, name: 'meanwhile');
+        final polled = await eventually(() => changes(user), (c) => c.upserted.isNotEmpty);
+        expect(polled.upserted.map((w) => w.name), ['meanwhile']);
 
-      expect((await eventually(() => changes(user), (c) => c.upserted.isNotEmpty)).upserted, hasLength(1));
+        await tx.execute(
+          Sql.named('INSERT INTO workouts (user_id, name, started_at) VALUES (@u, @n, now())'),
+          parameters: {'u': user, 'n': 'late'},
+        );
+        return polled.cursor;
+      });
+
+      final after = await eventually(() => changes(user, since: cursor), (c) => c.upserted.isNotEmpty);
+      expect(after.upserted.map((w) => w.name), ['late'], reason: 'its stamp is its write, after the cursor');
     });
 
     test('a transaction still writing holds back everything newer, whatever its length', () async {
       final user = await h.seedProfile();
-      final settled = await h.seedWorkout(userId: user, name: 'settled');
-      await age(settled, const Duration(hours: 1));
+      await h.seedWorkout(userId: user, name: 'settled');
 
       await h.pool.runTx((tx) async {
-        // a long save in flight: it has written (so it has an xid) and not
-        // committed; its own rows will carry its start time when it does
+        // a long save in flight: it has written (so it has a transaction
+        // id) and not committed; everything after it waits
         await tx.execute('SELECT txid_current()');
         await Future<void>.delayed(const Duration(milliseconds: 50));
 
@@ -118,10 +118,8 @@ void main() {
 
     test('a deleted workout is reported once, by id', () async {
       final user = await h.seedProfile();
-      final kept = await h.seedWorkout(userId: user, name: 'kept');
+      await h.seedWorkout(userId: user, name: 'kept');
       final gone = await h.seedWorkout(userId: user, name: 'gone');
-      await age(kept, const Duration(hours: 2));
-      await age(gone, const Duration(hours: 2));
       final cursor = (await eventually(() => changes(user), (c) => c.upserted.length == 2)).cursor;
 
       await h.exec('DELETE FROM workouts WHERE id = @id::uuid', {'id': gone});
@@ -137,7 +135,6 @@ void main() {
       final ids = <String>[];
       for (var i = 0; i < 3; i++) {
         final id = await h.seedWorkout(userId: user, name: 'w$i');
-        await age(id, Duration(hours: 3 - i));
         ids.add(id);
       }
 

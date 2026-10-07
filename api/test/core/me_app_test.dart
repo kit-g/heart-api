@@ -126,7 +126,6 @@ void main() {
         userId: 'u1',
         since: null,
         limit: 100,
-        settle: anyNamed('settle'),
         imageUrl: anyNamed('imageUrl'),
       ),
     ).thenAnswer((_) async => const WorkoutChanges(upserted: [], deleted: [], cursor: null, hasMore: false));

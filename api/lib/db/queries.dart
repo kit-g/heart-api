@@ -2443,44 +2443,34 @@ SELECT EXISTS (SELECT 1 FROM _claim) AS claimed,
 ''';
 
 // The workout change feed (heart-api#114): workouts that changed and
-// workouts that were deleted, as one stream ordered by (when, id) from a
-// cursor. A deletion of an id that exists again (a replayed create) is
+// workouts that were deleted, as one stream ordered by (transaction, id) from
+// a cursor. A deletion of an id that exists again (a replayed create) is
 // superseded by the workout itself.
 //
-// The stamps are `now()`, the writing transaction's start, not its commit.
-// So the feed only reads up to a horizon before every transaction still
-// writing (one with an xid in pg_stat_activity), and a small settle margin
-// besides: a save that commits late can't land behind a cursor already
-// handed out. pg_stat_activity shows the sessions of this role, which are
-// all the API's writers.
+// Each change carries the transaction that made it. The feed reads only
+// changes from transactions older than the oldest one still running (the
+// statement snapshot's xmin): every one of those has finished, so nothing
+// can commit behind a cursor already handed out. A change being written
+// waits for a later poll.
 const _workoutChanges = '''
-WITH _horizon AS (
-  SELECT LEAST(
-    now() - make_interval(secs => @settleSeconds),
-    COALESCE(
-      (SELECT min(xact_start) FROM pg_stat_activity
-       WHERE datname = current_database() AND backend_xid IS NOT NULL AND pid <> pg_backend_pid()),
-      'infinity'
-    )
-  ) AS at
-), _changes AS (
-  SELECT id, updated_at AS at, false AS deleted
+WITH _changes AS (
+  SELECT id, changed_xid AS xid, updated_at AS at, false AS deleted
   FROM workouts
   WHERE user_id = @userId
-    AND updated_at < (SELECT at FROM _horizon)
-    AND (@sinceAt::timestamptz IS NULL OR (updated_at, id) > (@sinceAt::timestamptz, @sinceId::uuid))
+    AND changed_xid < pg_snapshot_xmin(pg_current_snapshot())
+    AND (@sinceXid::text IS NULL OR (changed_xid, id) > (@sinceXid::text::xid8, @sinceId::uuid))
   UNION ALL
-  SELECT d.id, d.deleted_at, true
+  SELECT d.id, d.deleted_xid, d.deleted_at, true
   FROM archive.deleted_workouts d
   WHERE d.user_id = @userId
-    AND d.deleted_at < (SELECT at FROM _horizon)
-    AND (@sinceAt::timestamptz IS NULL OR (d.deleted_at, d.id) > (@sinceAt::timestamptz, @sinceId::uuid))
+    AND d.deleted_xid < pg_snapshot_xmin(pg_current_snapshot())
+    AND (@sinceXid::text IS NULL OR (d.deleted_xid, d.id) > (@sinceXid::text::xid8, @sinceId::uuid))
     AND NOT EXISTS (SELECT 1 FROM workouts w WHERE w.id = d.id)
 ), _page AS (
-  SELECT id, at, deleted FROM _changes ORDER BY at, id LIMIT @limit
+  SELECT id, xid, at, deleted FROM _changes ORDER BY xid, id LIMIT @limit
 )
 SELECT
-  p.id, p.at, p.deleted,
+  p.id, p.xid::text AS xid, p.at, p.deleted,
   w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.created_at,
   CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id) END AS exercises,
   CASE WHEN p.deleted THEN NULL ELSE COALESCE(
@@ -2490,7 +2480,7 @@ SELECT
   ) END AS images
 FROM _page p
 LEFT JOIN workouts w ON NOT p.deleted AND w.id = p.id
-ORDER BY p.at, p.id
+ORDER BY p.xid, p.id
 ''';
 
 // Every completed working set the user has done, per exercise, oldest
