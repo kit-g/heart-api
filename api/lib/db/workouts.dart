@@ -27,16 +27,14 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required String userId,
     ChangeCursor? since,
     int limit = 100,
-    Duration settle = const Duration(seconds: 5),
     required String Function(String) imageUrl,
   }) async {
     final rows = await _pool.execute(
       _workoutChanges.toSql(),
       parameters: {
         'userId': userId,
-        'sinceAt': since?.at,
+        'sinceXid': since?.xid,
         'sinceId': since?.id,
-        'settleSeconds': settle.inSeconds,
         'limit': limit + 1,
       },
     );
@@ -57,7 +55,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
       upserted: upserted,
       deleted: deleted,
       cursor: switch (page.lastOrNull) {
-        final Map<String, dynamic> last => ChangeCursor(at: last['at'] as DateTime, id: last['id'].toString()),
+        final Map<String, dynamic> last => ChangeCursor(xid: last['xid'] as String, id: last['id'].toString()),
         null => since,
       },
       hasMore: hasMore,

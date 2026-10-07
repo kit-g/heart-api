@@ -62,8 +62,8 @@ is a whole workout as it stands now (in `workouts`) or the id of one that was de
 with `deletedAt`). While `hasMore` is true, ask again straight away. When nothing changed, you get
 empty lists and the same cursor, so keep it.
 
-Changes show up a few seconds after they happen, or later while a long save (a big import) is still
-running, so that save can't land behind a cursor you already hold. Polling more often than every few
+Changes show up as soon as they're saved, or later while a longer save (a big import) that began
+earlier is still running, so that save can't land behind a cursor you already hold. Polling more often than every few
 minutes gains nothing and uses up the daily limit.
 
 ## AI assistants (MCP)
