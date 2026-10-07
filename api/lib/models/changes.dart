@@ -54,3 +54,10 @@ class WorkoutChanges {
 /// One exercise's completed working sets, oldest first, ready for
 /// [PersonalRecords.toPersonalRecords].
 typedef ExerciseRecordSets = ({String exerciseId, String name, Category category, List<RecordSet> sets});
+
+/// One session of one exercise: its workout, when that started (ISO 8601),
+/// and its completed working sets in the order they were done.
+typedef ExerciseSession = ({String workoutId, String at, List<RecordSet> sets});
+
+/// One exercise and a page of its sessions, newest first.
+typedef ExerciseHistory = ({String exerciseId, String name, Category category, Page<ExerciseSession> sessions});
