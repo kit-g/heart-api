@@ -2370,6 +2370,7 @@ WHERE (
   SELECT count(*)
   FROM api_tokens
   WHERE user_id = @userId
+    AND grant_id IS NULL
     AND revoked_at IS NULL
     AND (expires_at IS NULL OR expires_at > now())
 ) < ${ApiToken.maxActive}
@@ -2380,6 +2381,7 @@ const _listApiTokens = '''
 SELECT id, name, purpose, hint, scopes, created_at, last_used_at, expires_at, revoked_at
 FROM api_tokens
 WHERE user_id = @userId
+  AND grant_id IS NULL
 ORDER BY id DESC
 ''';
 
@@ -2388,6 +2390,7 @@ UPDATE api_tokens
 SET revoked_at = coalesce(revoked_at, now())
 WHERE id = @tokenId::uuid
   AND user_id = @userId
+  AND grant_id IS NULL
 RETURNING id
 ''';
 
@@ -2403,7 +2406,7 @@ WITH _token AS (
   WHERE token_hash = @tokenHash::bytea
     AND revoked_at IS NULL
     AND (expires_at IS NULL OR expires_at > now())
-  RETURNING user_id, scopes, purpose
+  RETURNING user_id, scopes, purpose, resource, grant_id
 ), _usage AS (
   INSERT INTO api_usage (user_id, minute_start, minute_count, day_start, day_count)
   SELECT user_id, now(), @count::int, now(), @count::int FROM _token
@@ -2418,8 +2421,11 @@ WITH _token AS (
                           THEN api_usage.day_count + @count::int ELSE @count::int END
   RETURNING user_id, minute_start, minute_count, day_start, day_count
 )
-SELECT user_id, scopes, purpose, minute_start, minute_count, day_start, day_count
-FROM _token JOIN _usage USING (user_id)
+SELECT t.user_id, t.scopes, t.purpose, t.resource, g.client_id,
+       u.minute_start, u.minute_count, u.day_start, u.day_count
+FROM _token t
+JOIN _usage u USING (user_id)
+LEFT JOIN oauth_grants g ON g.id = t.grant_id
 ''';
 
 const _getProfile = '''
@@ -2548,4 +2554,258 @@ WHERE w.user_id = @userId
   AND s.set_type IS DISTINCT FROM 'w'
   AND (@exerciseId::uuid IS NULL OR we.exercise_id = @exerciseId::uuid)
 ORDER BY e.id, COALESCE(w.started_at, w.created_at), w.id, s.set_order
+''';
+
+// OAuth (heart-api#115).
+
+const _getOAuthClient = '''
+SELECT client_id, kind, client_name, redirect_uris, token_endpoint_auth_method, jwks_uri, expires_at
+FROM oauth_clients
+WHERE client_id = @clientId
+''';
+
+const _saveOAuthClient = '''
+INSERT INTO oauth_clients
+  (client_id, kind, client_name, redirect_uris, token_endpoint_auth_method, jwks_uri, metadata, expires_at)
+VALUES (@clientId, 'cimd', @name, @redirectUris, @auth, @jwksUri, @metadata::jsonb, @expiresAt)
+ON CONFLICT (client_id) DO UPDATE
+SET client_name                = excluded.client_name,
+    redirect_uris              = excluded.redirect_uris,
+    token_endpoint_auth_method = excluded.token_endpoint_auth_method,
+    jwks_uri                   = excluded.jwks_uri,
+    metadata                   = excluded.metadata,
+    fetched_at                 = now(),
+    expires_at                 = excluded.expires_at
+RETURNING client_id, kind, client_name, redirect_uris, token_endpoint_auth_method, jwks_uri, expires_at
+''';
+
+const _registerOAuthClient = '''
+INSERT INTO oauth_clients (client_id, kind, client_name, redirect_uris, token_endpoint_auth_method, jwks_uri, metadata)
+VALUES ('dcr_' || uuidv7(), 'dcr', @name, @redirectUris, @auth, @jwksUri, @metadata::jsonb)
+RETURNING client_id, kind, client_name, redirect_uris, token_endpoint_auth_method, jwks_uri, expires_at
+''';
+
+const _createOAuthRequest = '''
+WITH _request AS (
+  INSERT INTO oauth_requests (client_id, redirect_uri, code_challenge, scopes, resource, state, expires_at)
+  VALUES (@clientId, @redirectUri, @codeChallenge, @scopes, @resource, @state,
+          now() + make_interval(secs => @ttlSeconds))
+  RETURNING id, client_id
+), _client AS (
+  UPDATE oauth_clients SET last_used_at = now()
+  WHERE client_id IN (SELECT client_id FROM _request)
+  RETURNING client_id
+)
+SELECT id FROM _request
+''';
+
+const _getPendingOAuthRequest = '''
+SELECT r.id, r.client_id, c.client_name, r.redirect_uri, r.scopes, r.resource, r.state
+FROM oauth_requests r
+JOIN oauth_clients c USING (client_id)
+WHERE r.id = @requestId::uuid
+  AND r.user_id IS NULL
+  AND r.expires_at > now()
+''';
+
+// Approving records the account's consent: a new grant, or the live one for
+// the same client and resource widened by what this request asked for.
+const _approveOAuthRequest = '''
+WITH _request AS (
+  UPDATE oauth_requests
+  SET user_id = @userId,
+      code_hash = @codeHash::bytea,
+      code_expires_at = now() + make_interval(secs => @codeTtlSeconds)
+  WHERE id = @requestId::uuid
+    AND user_id IS NULL
+    AND expires_at > now()
+  RETURNING id, client_id, redirect_uri, scopes, resource, state
+), _named AS (
+  SELECT r.*, coalesce(c.client_name, r.client_id) AS client_name
+  FROM _request r
+  JOIN oauth_clients c USING (client_id)
+), _grant AS (
+  INSERT INTO oauth_grants (user_id, client_id, client_name, scopes, resource)
+  SELECT @userId, client_id, client_name, scopes, resource FROM _named
+  ON CONFLICT (user_id, client_id, resource) WHERE revoked_at IS NULL
+  DO UPDATE SET scopes      = ARRAY(SELECT DISTINCT s FROM unnest(oauth_grants.scopes || excluded.scopes) s ORDER BY s),
+                client_name = excluded.client_name
+  RETURNING id
+)
+SELECT id, client_id, client_name, redirect_uri, scopes, resource, state
+FROM _named
+WHERE EXISTS (SELECT 1 FROM _grant)
+''';
+
+const _denyOAuthRequest = '''
+WITH _request AS (
+  DELETE FROM oauth_requests
+  WHERE id = @requestId::uuid
+    AND user_id IS NULL
+  RETURNING id, client_id, redirect_uri, scopes, resource, state
+)
+SELECT r.id, r.client_id, c.client_name, r.redirect_uri, r.scopes, r.resource, r.state
+FROM _request r
+JOIN oauth_clients c USING (client_id)
+''';
+
+// A code is single use: spending it is the same statement that reads it.
+const _redeemOAuthCode = '''
+UPDATE oauth_requests
+SET used_at = now()
+WHERE code_hash = @codeHash::bytea
+  AND used_at IS NULL
+  AND code_expires_at > now()
+RETURNING user_id, client_id, redirect_uri, code_challenge, scopes, resource
+''';
+
+// Issues under the live grant. The grant's expired access tokens are cleared
+// on the way; its live ones stay, since one account can run the same client
+// on several devices.
+const _issueOAuthTokens = '''
+WITH _grant AS (
+  SELECT id, user_id, client_name, resource
+  FROM oauth_grants
+  WHERE user_id = @userId
+    AND client_id = @clientId
+    AND resource = @resource
+    AND revoked_at IS NULL
+), _expired AS (
+  DELETE FROM api_tokens
+  WHERE grant_id IN (SELECT id FROM _grant)
+    AND expires_at < now()
+  RETURNING id
+), _access AS (
+  INSERT INTO api_tokens (user_id, name, token_hash, hint, scopes, expires_at, grant_id, resource)
+  SELECT user_id, client_name, @accessHash::bytea, @accessHint, @scopes, @accessExpiresAt, id, resource
+  FROM _grant
+  RETURNING grant_id
+), _refresh AS (
+  INSERT INTO oauth_refresh_tokens (token_hash, grant_id, expires_at)
+  SELECT @refreshHash::bytea, grant_id, @refreshExpiresAt FROM _access
+  RETURNING grant_id
+)
+UPDATE oauth_grants
+SET last_used_at = now()
+WHERE id IN (SELECT grant_id FROM _refresh)
+RETURNING id
+''';
+
+// Rotation, with reuse detection (RFC 9700): a refresh token presented after
+// it was exchanged means a copy exists, so the whole grant goes. The row is
+// locked, so two concurrent exchanges can't both rotate it. Rotated tokens
+// are kept a week for that check, then cleared.
+const _rotateOAuthRefresh = '''
+WITH _old AS (
+  SELECT r.token_hash, r.grant_id, r.rotated_at, r.expires_at,
+         g.user_id, g.client_id, g.client_name, g.resource, g.revoked_at,
+         (SELECT t.scopes FROM api_tokens t WHERE t.grant_id = g.id ORDER BY t.id DESC LIMIT 1) AS token_scopes,
+         g.scopes AS grant_scopes
+  FROM oauth_refresh_tokens r
+  JOIN oauth_grants g ON g.id = r.grant_id
+  WHERE r.token_hash = @refreshHash::bytea
+    AND g.client_id = @clientId
+  FOR UPDATE OF r
+), _reused AS (
+  UPDATE oauth_grants
+  SET revoked_at = now()
+  WHERE id IN (SELECT grant_id FROM _old WHERE rotated_at IS NOT NULL)
+    AND revoked_at IS NULL
+  RETURNING id
+), _reused_access AS (
+  DELETE FROM api_tokens WHERE grant_id IN (SELECT id FROM _reused) RETURNING id
+), _live AS (
+  SELECT * FROM _old
+  WHERE rotated_at IS NULL
+    AND expires_at > now()
+    AND revoked_at IS NULL
+), _rotated AS (
+  UPDATE oauth_refresh_tokens
+  SET rotated_at = now()
+  WHERE token_hash IN (SELECT token_hash FROM _live)
+  RETURNING grant_id
+), _stale AS (
+  DELETE FROM oauth_refresh_tokens
+  WHERE grant_id IN (SELECT grant_id FROM _rotated)
+    AND rotated_at < now() - interval '7 days'
+  RETURNING token_hash
+), _expired AS (
+  DELETE FROM api_tokens
+  WHERE grant_id IN (SELECT grant_id FROM _rotated)
+    AND expires_at < now()
+  RETURNING id
+), _access AS (
+  INSERT INTO api_tokens (user_id, name, token_hash, hint, scopes, expires_at, grant_id, resource)
+  SELECT l.user_id, l.client_name, @accessHash::bytea, @accessHint, coalesce(l.token_scopes, l.grant_scopes),
+         @accessExpiresAt, l.grant_id, l.resource
+  FROM _live l
+  JOIN _rotated USING (grant_id)
+  RETURNING grant_id, scopes
+), _refresh AS (
+  INSERT INTO oauth_refresh_tokens (token_hash, grant_id, expires_at)
+  SELECT @newRefreshHash::bytea, grant_id, @refreshExpiresAt FROM _access
+  RETURNING grant_id
+), _touch AS (
+  UPDATE oauth_grants SET last_used_at = now()
+  WHERE id IN (SELECT grant_id FROM _refresh)
+  RETURNING id
+)
+SELECT
+  CASE
+    WHEN EXISTS (SELECT 1 FROM _touch) THEN 'rotated'
+    WHEN EXISTS (SELECT 1 FROM _old WHERE rotated_at IS NOT NULL) THEN 'reused'
+    ELSE 'invalid'
+  END AS outcome,
+  (SELECT scopes FROM _access) AS scopes
+''';
+
+// RFC 7009: the client revokes one of its own tokens. An access token goes
+// alone; a refresh token takes its whole grant.
+const _revokeOAuthToken = '''
+WITH _access AS (
+  DELETE FROM api_tokens t
+  USING oauth_grants g
+  WHERE t.token_hash = @tokenHash::bytea
+    AND t.grant_id = g.id
+    AND g.client_id = @clientId
+  RETURNING t.id
+), _grant AS (
+  UPDATE oauth_grants g
+  SET revoked_at = now()
+  FROM oauth_refresh_tokens r
+  WHERE r.token_hash = @tokenHash::bytea
+    AND r.grant_id = g.id
+    AND g.client_id = @clientId
+    AND g.revoked_at IS NULL
+  RETURNING g.id
+), _grant_access AS (
+  DELETE FROM api_tokens WHERE grant_id IN (SELECT id FROM _grant) RETURNING id
+), _grant_refresh AS (
+  DELETE FROM oauth_refresh_tokens WHERE grant_id IN (SELECT id FROM _grant) RETURNING token_hash
+)
+SELECT (SELECT count(*) FROM _access) + (SELECT count(*) FROM _grant) AS revoked
+''';
+
+const _listConnectedApps = '''
+SELECT id, client_id, client_name, scopes, resource, created_at, last_used_at
+FROM oauth_grants
+WHERE user_id = @userId
+  AND revoked_at IS NULL
+ORDER BY created_at DESC
+''';
+
+const _disconnectApp = '''
+WITH _grant AS (
+  UPDATE oauth_grants
+  SET revoked_at = now()
+  WHERE id = @grantId::uuid
+    AND user_id = @userId
+    AND revoked_at IS NULL
+  RETURNING id
+), _access AS (
+  DELETE FROM api_tokens WHERE grant_id IN (SELECT id FROM _grant) RETURNING id
+), _refresh AS (
+  DELETE FROM oauth_refresh_tokens WHERE grant_id IN (SELECT id FROM _grant) RETURNING token_hash
+)
+SELECT id FROM _grant
 ''';

@@ -19,6 +19,8 @@ void main() {
   TokenUse use({int minute = 1}) {
     return (
       userId: 'u1',
+      resource: null,
+      clientId: null,
       scopes: const ['read'],
       purpose: null,
       minuteStart: now,

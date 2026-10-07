@@ -61,6 +61,8 @@ mixin _ApiTokens on _DatabaseBase implements ApiTokenService {
     final row = result.first.toColumnMap();
     return (
       userId: row['user_id'] as String,
+      resource: row['resource'] as String?,
+      clientId: row['client_id'] as String?,
       scopes: (row['scopes'] as List).cast<String>(),
       purpose: switch (row['purpose']) {
         final String p => ApiTokenPurpose.fromString(p),
