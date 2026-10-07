@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.14.0
+
+Connected apps for the OAuth authorization server (heart-api#115).
+
+- New: `ConnectedApp`, an app the account approved through OAuth: `id`,
+  `clientId`, `name` (as shown on consent), `scopes`, `resource`,
+  `connectedAt`, `lastUsedAt`; `fromJson`/`toMap`, and `fromRow` over an
+  `oauth_grants` row.
+
 ## 2.13.0
 
 A session's chart values as shared code (heart-api#116).
