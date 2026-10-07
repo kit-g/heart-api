@@ -215,6 +215,43 @@ final List<McpTool> tools = [
     },
   ),
   McpTool(
+    name: 'search_exercises',
+    title: 'Search exercises',
+    description:
+        "The exercise library and the user's own exercises, searched the way the app searches: word order free, "
+        'gym abbreviations (db, rdl, ohp), muscle words (lats, quads) and one typo per word. Best matches first; '
+        '`match` says how each was found. Names come in `locale`, the language the user writes in (default '
+        'English).',
+    inputSchema: {
+      'type': 'object',
+      'properties': {
+        'query': {'type': 'string', 'description': 'What to look for, as the user would type it.'},
+        'locale': {'type': 'string', 'description': 'A language code such as es or fr; regional ones like fr_CA too.'},
+        'limit': {'type': 'integer', 'minimum': 1, 'maximum': 50},
+      },
+      'required': ['query'],
+      'additionalProperties': false,
+    },
+    run: (request, arguments) async {
+      final query = switch (arguments['query']) {
+        final String text when text.trim().isNotEmpty && text.trim().length <= 100 => text.trim(),
+        _ => throw const ToolError('query must be text, up to 100 characters.'),
+      };
+      final locale = switch (arguments['locale']) {
+        null => request.config.defaultLocale,
+        final String locale when request.config.supportedLocales.contains(locale) => locale,
+        _ => throw ToolError('locale must be one of ${request.config.supportedLocales.join(', ')}.'),
+      };
+      final (limit, _) = arguments.toPaging(defaultLimit: 20, maxLimit: 50);
+      final library = await request.exerciseService.getExercises(request.userId, locale: locale);
+      final results = MeLibrarySearch.fromLibrary(library, query, limit: limit);
+      if (results.results.isEmpty) {
+        throw ToolError('Nothing in the library matches "$query". Try fewer or more common words.');
+      }
+      return results.toMap();
+    },
+  ),
+  McpTool(
     name: 'list_templates',
     title: 'List templates',
     description: "The user's workout templates in their own order, with each template's exercises and set count.",

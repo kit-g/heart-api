@@ -139,7 +139,10 @@ void main() {
 
     test('tools are listed with read-only annotations', () async {
       final tools = ((await rpc('tools/list')).body['result'] as Map)['tools'] as List;
-      expect(tools.map((t) => (t as Map)['name']), containsAll(['list_workouts', 'get_exercise_history']));
+      expect(
+        tools.map((t) => (t as Map)['name']),
+        containsAll(['list_workouts', 'get_exercise_history', 'search_exercises']),
+      );
       for (final tool in tools.cast<Map>()) {
         final annotations = tool['annotations'] as Map;
         expect(annotations['readOnlyHint'], isTrue, reason: tool['name'] as String);
@@ -362,6 +365,38 @@ void main() {
               as Map;
       expect(malformed['isError'], isTrue);
       expect(((malformed['content'] as List).single as Map)['text'], contains('get_personal_records'));
+    });
+
+    test('search_exercises searches in the given locale, and says so when nothing matches', () async {
+      when(app.config.supportedLocales).thenReturn(['en', 'es']);
+      when(app.config.defaultLocale).thenReturn('en');
+      when(app.db.getExercises('u1', locale: 'es')).thenAnswer(
+        (_) async => {
+          'exercises': [
+            {
+              'id': 'e1',
+              'name': 'Peso muerto rumano',
+              'category': 'Barbell',
+              'target': 'Legs',
+              'aliases': ['rdl'],
+            },
+          ],
+          'glossary': <String, Object>{},
+        },
+      );
+
+      Future<Map> search(Map<String, Object> arguments) async {
+        return (await rpc('tools/call', params: {'name': 'search_exercises', 'arguments': arguments})).body['result']
+            as Map;
+      }
+
+      final found = await search({'query': 'rdl', 'locale': 'es'});
+      final exercise = ((found['structuredContent'] as Map)['exercises'] as List).single as Map;
+      expect(exercise['name'], 'Peso muerto rumano');
+      expect(exercise['match'], 'vocabulary');
+
+      expect((await search({'query': 'zzz', 'locale': 'es'}))['isError'], isTrue);
+      expect((await search({'query': 'rdl', 'locale': 'de'}))['isError'], isTrue);
     });
 
     test('an unknown tool is invalid params', () async {
