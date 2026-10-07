@@ -78,6 +78,38 @@ locals {
 # which sends no `Origin` at all. Configuring CORS on the bucket instead would
 # mean keying the cache on `Origin` to stay correct, and paying for it on the
 # traffic that is almost all of it.
+# The OAuth consent page (connect.html) asks a signed-in account to grant an
+# app access. Framed inside another site, its Allow button could be
+# clickjacked, so it is never framed. frame-ancestors can only be set by a
+# header, not a meta tag.
+resource "aws_cloudfront_response_headers_policy" "consent" {
+  name    = "HeartConsent"
+  comment = "The OAuth consent page: never framed, never cached by the browser"
+
+  security_headers_config {
+    frame_options {
+      frame_option = "DENY"
+      override     = true
+    }
+    content_security_policy {
+      content_security_policy = "frame-ancestors 'none'"
+      override                = true
+    }
+    referrer_policy {
+      referrer_policy = "no-referrer"
+      override        = true
+    }
+  }
+
+  custom_headers_config {
+    items {
+      header   = "Cache-Control"
+      value    = "no-store"
+      override = true
+    }
+  }
+}
+
 resource "aws_cloudfront_response_headers_policy" "media_cors" {
   count = local.media_cors_enabled ? 1 : 0
 
@@ -266,6 +298,21 @@ resource "aws_cloudfront_distribution" "web" {
     target_origin_id       = local.static_origin
     viewer_protocol_policy = "redirect-to-https"
     cache_policy_id        = local.caching_optimized
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.www_redirect.arn
+    }
+  }
+
+  ordered_cache_behavior {
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    path_pattern               = "/connect.html"
+    target_origin_id           = local.static_origin
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = local.caching_disabled
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.consent.id
 
     function_association {
       event_type   = "viewer-request"

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:heart/globals/config.dart';
 import 'package:heart/models/oauth.dart';
 import 'package:relic/relic.dart';
 
@@ -126,5 +127,27 @@ String? _name(Map<String, dynamic> json) {
     final String name when name.trim().isNotEmpty =>
       name.trim().length > 100 ? name.trim().substring(0, 100) : name.trim(),
     _ => null,
+  };
+}
+
+/// The authorization server metadata (RFC 8414) the issuer serves. The site
+/// hosts it as a static file per environment; a test holds those files to
+/// this, so the document and the server can't drift apart.
+Map<String, dynamic> authorizationServerMetadata(OAuthConfig oauth) {
+  return {
+    'issuer': oauth.issuer.toString(),
+    'authorization_endpoint': oauth.authorizationEndpoint.toString(),
+    'token_endpoint': oauth.tokenEndpoint.toString(),
+    'registration_endpoint': oauth.registrationEndpoint.toString(),
+    'revocation_endpoint': oauth.revocationEndpoint.toString(),
+    'scopes_supported': [...supportedScopes],
+    'response_types_supported': ['code'],
+    'grant_types_supported': ['authorization_code', 'refresh_token'],
+    'code_challenge_methods_supported': ['S256'],
+    'token_endpoint_auth_methods_supported': [for (final auth in ClientAuth.values) auth.value],
+    'token_endpoint_auth_signing_alg_values_supported': ['RS256', 'PS256', 'ES256'],
+    'revocation_endpoint_auth_methods_supported': [for (final auth in ClientAuth.values) auth.value],
+    'client_id_metadata_document_supported': true,
+    'authorization_response_iss_parameter_supported': true,
   };
 }
