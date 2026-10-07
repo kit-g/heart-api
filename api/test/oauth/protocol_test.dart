@@ -44,82 +44,84 @@ void main() {
     });
   });
 
-  group('parseScopes', () {
-    test('absent asks for everything supported', () => expect(parseScopes(null), ['read']));
+  group('toScopes', () {
+    test('absent asks for everything supported', () => expect((null as String?).toScopes(), ['read']));
     test("scopes this server doesn't grant are dropped, as hosts add their own", () {
-      expect(parseScopes('read offline_access'), ['read']);
+      expect('read offline_access'.toScopes(), ['read']);
     });
     test('asking only for unknown scopes is an error', () {
-      expect(() => parseScopes('openid offline_access'), throwsA(isA<OAuthError>()));
+      expect(() => 'openid offline_access'.toScopes(), throwsA(isA<OAuthError>()));
     });
   });
 
-  group('parseClientDocument', () {
+  group('toClientDocument', () {
     final url = Uri.parse('https://client.example/meta.json');
     final expiry = DateTime.utc(2026, 10, 6);
 
     test('reads a valid document', () {
-      final client = parseClientDocument(url, {
+      final client = <String, dynamic>{
         'client_id': url.toString(),
         'client_name': 'Claude',
         'redirect_uris': ['https://claude.ai/api/mcp/auth_callback', 'http://localhost/callback'],
-      }, expiresAt: expiry);
+      }.toClientDocument(url, expiresAt: expiry);
       expect(client.name, 'Claude');
       expect(client.auth, ClientAuth.none);
     });
 
     test('its client_id must be the URL it came from', () {
       expect(
-        () => parseClientDocument(url, {
+        () => <String, dynamic>{
           'client_id': 'https://other.example/meta.json',
           'redirect_uris': ['https://x.example/cb'],
-        }, expiresAt: expiry),
+        }.toClientDocument(url, expiresAt: expiry),
         throwsA(isA<OAuthError>()),
       );
     });
 
     test('plain http redirects outside loopback are refused', () {
       expect(
-        () => parseClientDocument(url, {
+        () => <String, dynamic>{
           'client_id': url.toString(),
           'redirect_uris': ['http://evil.example/cb'],
-        }, expiresAt: expiry),
+        }.toClientDocument(url, expiresAt: expiry),
         throwsA(isA<OAuthError>()),
       );
     });
 
     test('private_key_jwt needs an https jwks_uri', () {
       expect(
-        () => parseClientDocument(url, {
+        () => <String, dynamic>{
           'client_id': url.toString(),
           'redirect_uris': ['https://x.example/cb'],
           'token_endpoint_auth_method': 'private_key_jwt',
-        }, expiresAt: expiry),
+        }.toClientDocument(url, expiresAt: expiry),
         throwsA(isA<OAuthError>()),
       );
     });
   });
 
-  group('normalizeResource', () {
+  group('toCanonicalResource', () {
     test('drops a trailing slash only', () {
-      expect(normalizeResource('https://api.example/v1/mcp/'), 'https://api.example/v1/mcp');
-      expect(normalizeResource('https://api.example/v1/mcp'), 'https://api.example/v1/mcp');
+      expect('https://api.example/v1/mcp/'.toCanonicalResource(), 'https://api.example/v1/mcp');
+      expect('https://api.example/v1/mcp'.toCanonicalResource(), 'https://api.example/v1/mcp');
     });
   });
 
-  group('parseRegistration', () {
+  group('toRegistration', () {
     test('a client-secret method is replaced with none', () {
-      final shape = parseRegistration({
+      final shape = <String, dynamic>{
         'redirect_uris': ['https://chatgpt.example/cb'],
         'token_endpoint_auth_method': 'client_secret_post',
-      });
+      }.toRegistration();
       expect(shape.auth, ClientAuth.none);
     });
   });
 
-  group('knownClientMetadata', () {
+  group('toKnownClientMetadata', () {
     test('keeps RFC 7591 fields and nothing else', () {
-      expect(knownClientMetadata({'client_name': 'x', 'heart_rate': 60, 'anything': 'else'}), {'client_name': 'x'});
+      expect(<String, dynamic>{'client_name': 'x', 'heart_rate': 60, 'anything': 'else'}.toKnownClientMetadata(), {
+        'client_name': 'x',
+      });
     });
   });
 
