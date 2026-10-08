@@ -5,8 +5,8 @@ description: Assess and plan any change to something an installed app already se
 
 # Changing what an installed app depends on
 
-Heart's first store releases — mobile **1.12** on `heart_models` **2.11.0**, against
-the API as it stood in October 2026 — are the versions that get promoted. Every
+Heart's first store releases — mobile **1.13** against API
+**v0.9.0** (October 2026) — are the versions that get promoted. Every
 build that reaches a phone stays installed for months, and a shipped app can't
 be patched. From that release on, the API, the CDN content and `heart_models`
 are read by builds we no longer control. Until then client and server shipped

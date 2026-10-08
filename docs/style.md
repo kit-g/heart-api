@@ -42,8 +42,8 @@ must tell apart gets its own code (`goal_limit`, `id_taken`,
 `anonymous_account`), not a distinctive sentence.
 
 **Compatibility with installed apps is a rule; speculative compatibility is
-still a finding.** Since the first store release (mobile 1.12, `heart_models`
-2.11.0) client and server no longer ship together: a build in the field reads
+still a finding.** Since the first store release (mobile 1.13, API
+v0.9.0) client and server no longer ship together: a build in the field reads
 the API for months. Anything an installed build sends or reads is a contract —
 add beside it, never replace it, and a change that must break goes through the
 `breaking-change` skill's phased plan (CLAUDE.md, *Compatibility floor*). What

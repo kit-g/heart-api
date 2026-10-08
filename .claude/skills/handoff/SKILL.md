@@ -92,7 +92,7 @@ without its anchor.
   linked, not restated as orders. Link generously instead: the design doc, the CHANGELOG, and
   the backend ticket's decisions give the app the full picture without directing it.
 
-- **The floor is the store.** Since mobile 1.12 / `heart_models` 2.11.0, a change the app must
+- **The floor is the store.** Since mobile 1.13 / API v0.9.0, a change the app must
   make *before* a server deploy is safe is not a handoff note — it is a breaking change with a
   phased plan (`breaking-change` skill), and the *Required* section names the phase and its
   consequence. A handoff proper is additive: the app can take it whenever it likes.
