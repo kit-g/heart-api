@@ -72,9 +72,18 @@ each, classified as one of:
 - **tightening** — the server accepts less; say why no installed build sends what is now refused;
 - **a phase of a named plan** — a breaking change; link its plan (the `breaking-change` skill).
 
-A breaking change outside a plan is not a row; it stops the release. Then state the oldest app
-version served correctly, what older builds lose, and whether `MIN_APP_VERSION` moves (it never
-moves as a side effect).
+A breaking change outside a plan is not a row; it stops the release. Installed builds can't be
+patched, so a breaking change ships only one of two ways, and its row names which:
+
+- **The minimal supported version moves.** `MIN_APP_VERSION` rises and every build below it
+  gets a 426 on every request. It is a product decision, announced ahead, and the row names the
+  new floor.
+- **A new `v<n>/` carries the change.** The old version keeps serving the old shape to the builds
+  that read it, and the row says which version gets the change and which keeps serving. Its first use
+  is infrastructure work; the plan covers it.
+
+Then state the oldest app version served correctly, what older builds lose, and whether
+`MIN_APP_VERSION` moves (it never moves as a side effect).
 
 Database-only changes (a column no response carries) are one row marked "database only", so the
 next reader doesn't have to re-check.
