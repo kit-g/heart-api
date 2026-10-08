@@ -118,3 +118,19 @@ resource "google_project_iam_member" "agent" {
   role     = each.value
   member   = google_service_account.agent.member
 }
+
+# The OAuth consent page signs in with Firebase's web SDK. Its config is public
+# by design and is copied into site/connect/<env>.js by hand, from the
+# firebase_web_config output.
+resource "google_firebase_web_app" "web" {
+  provider     = google-beta
+  project      = var.firebase_project_config.project_id
+  display_name = "Heart Web App"
+  depends_on   = [google_firebase_project.default]
+}
+
+data "google_firebase_web_app_config" "web" {
+  provider   = google-beta
+  project    = var.firebase_project_config.project_id
+  web_app_id = google_firebase_web_app.web.app_id
+}
