@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:csv/csv.dart';
 import 'package:heart_models/heart_models.dart';
 
+import 'hevy_catalog.dart';
 import 'sets.dart';
 
 /// Bulk workout import from another app's CSV export.
@@ -147,15 +148,8 @@ class WorkoutImport {
   }) {
     final rows = parseCsv(csv);
     if (rows.isEmpty) throw const FormatException('empty file');
-
-    final header = [for (final cell in rows.first) _normalized(cell)];
-    int? column(List<String> candidates) {
-      for (final c in candidates) {
-        final i = header.indexOf(c);
-        if (i != -1) return i;
-      }
-      return null;
-    }
+    final header = _Header.of(rows.first);
+    final column = header.column;
 
     final date = column(['date']);
     final workoutName = column(['workoutname']);
@@ -176,20 +170,14 @@ class WorkoutImport {
     final workoutNotes = column(['workoutnotes']);
 
     // a unit spelled out in the header itself ("Weight (kg)") beats the fallback
-    final headerWeightUnit = weight == null ? null : _unitIn(header[weight]);
-    final headerDistanceUnit = distance == null ? null : _unitIn(header[distance]);
-
-    String? cell(List<String> row, int? index) {
-      if (index == null || index >= row.length) return null;
-      final v = row[index].trim();
-      return v.isEmpty ? null : v;
-    }
+    final headerWeightUnit = weight == null ? null : _unitIn(header.names[weight]);
+    final headerDistanceUnit = distance == null ? null : _unitIn(header.names[distance]);
 
     // Strong writes runaway durations with an unquoted thousands separator
     // ("3,527h 3min"), splitting the field and shifting the row; merging the
     // two pieces back restores the column alignment.
     List<String> repaired(List<String> row) {
-      if (duration == null || row.length <= header.length) return row;
+      if (duration == null || row.length <= header.names.length) return row;
       final merged = '${row[duration]},${row[duration + 1]}';
       if (!RegExp(r'^\d{1,3}(,\d{3})+h( \d+(m|min))?$').hasMatch(merged)) return row;
       return [...row.sublist(0, duration), merged, ...row.sublist(duration + 2)];
@@ -208,35 +196,35 @@ class WorkoutImport {
       // warm-up/drop/failure. Structure, not a set: never counted like a bad
       // row, only read for the timer's length (in Seconds). Warm-ups run
       // Strong's separate warm-up timer, which is not the exercise's own.
-      if (cell(row, setOrder) case final order? when _normalized(order) == 'resttimer') {
-        final builder = builders['${cell(row, date)} ${cell(row, workoutName)}'];
+      if (_cell(row, setOrder) case final order? when _normalized(order) == 'resttimer') {
+        final builder = builders['${_cell(row, date)} ${_cell(row, workoutName)}'];
         final afterWarmUp = switch (previousOrder) {
           final String order => _strongSetType(order) == 'warmup',
           null => false,
         };
-        if (_lenientNumber(cell(row, seconds))?.round() case final timer?
+        if (_lenientNumber(_cell(row, seconds))?.round() case final timer?
             when builder != null && timer > 0 && timer <= maxRestTimer && !afterWarmUp) {
-          builder.addRestTimer(cell(row, exerciseName) ?? '', timer);
+          builder.addRestTimer(_cell(row, exerciseName) ?? '', timer);
         }
         continue;
       }
-      previousOrder = cell(row, setOrder);
+      previousOrder = _cell(row, setOrder);
       try {
-        final rawDate = cell(row, date) ?? (throw const FormatException('no date'));
-        final exercise = cell(row, exerciseName) ?? (throw const FormatException('no exercise'));
-        final name = cell(row, workoutName);
+        final rawDate = _cell(row, date) ?? (throw const FormatException('no date'));
+        final exercise = _cell(row, exerciseName) ?? (throw const FormatException('no exercise'));
+        final name = _cell(row, workoutName);
         // parse the entire row before touching the builders, so a bad row
         // can't leave a half-built workout behind
         final set = ImportedSet(
-          weight: _toKilograms(_number(cell(row, weight)), cell(row, weightUnit) ?? headerWeightUnit, unit),
-          reps: _count(cell(row, reps)),
-          duration: _count(cell(row, seconds)),
-          distance: _toKilometers(_number(cell(row, distance)), cell(row, distanceUnit) ?? headerDistanceUnit, unit),
-          type: switch (cell(row, setOrder)) {
+          weight: _toKilograms(_number(_cell(row, weight)), _cell(row, weightUnit) ?? headerWeightUnit, unit),
+          reps: _count(_cell(row, reps)),
+          duration: _count(_cell(row, seconds)),
+          distance: _toKilometers(_number(_cell(row, distance)), _cell(row, distanceUnit) ?? headerDistanceUnit, unit),
+          type: switch (_cell(row, setOrder)) {
             final String order => _strongSetType(order),
             null => null,
           },
-          rpe: _rpe(cell(row, rpe)),
+          rpe: _rpe(_cell(row, rpe)),
         );
         final builder = builders.putIfAbsent('$rawDate $name', () {
           final start = _instant(rawDate, utcOffset);
@@ -246,30 +234,19 @@ class WorkoutImport {
             start: start,
             // a "duration" past 24h is a workout left running, not a window
             // worth storing
-            end: switch (_parseDuration(cell(row, duration))) {
+            end: switch (_parseDuration(_cell(row, duration))) {
               Duration d when d > Duration.zero && d <= const Duration(hours: 24) => start.add(d),
               _ => null,
             },
           );
         });
-        builder.note ??= cell(row, workoutNotes);
-        if (!builder.add(exercise, set, note: cell(row, notes))) setsDropped++;
+        builder.note ??= _cell(row, workoutNotes);
+        if (!builder.add(exercise, set, note: _cell(row, notes))) setsDropped++;
       } on FormatException {
         skipped++;
       }
     }
-    var workouts = [for (final b in builders.values) b.build()];
-    var dropped = 0;
-    if (workouts.length > maxWorkouts) {
-      final byRecency = [...workouts]..sort((a, b) => b.start.compareTo(a.start));
-      final kept = Set<ImportedWorkout>.identity()..addAll(byRecency.take(maxWorkouts));
-      dropped = workouts.length - maxWorkouts;
-      // filter rather than take the sorted list, preserving file order
-      workouts = [
-        for (final w in workouts)
-          if (kept.contains(w)) w,
-      ];
-    }
+    final (workouts, dropped) = _capped([for (final b in builders.values) b.build()]);
     return WorkoutImport._(
       source: 'strong',
       workouts: workouts,
@@ -277,6 +254,179 @@ class WorkoutImport {
       workoutsDropped: dropped,
       setsDropped: setsDropped,
     );
+  }
+
+  /// Parses a Hevy CSV export (one row per set).
+  ///
+  /// Hevy has two exporters with one column layout. The app
+  /// (`workout_data.csv`) writes dates as `d MMM yyyy, HH:mm` with the month
+  /// token in the app's language, translates catalog exercise titles into that
+  /// language, escapes a line break inside a field as the two characters `\n`
+  /// and mixes CRLF with bare LF row endings. The web (`workouts.csv`) writes
+  /// `Intl`'s medium date in the browser's language and keeps every title in
+  /// English. Both are naive local time at minute precision with no offset;
+  /// [utcOffset] pins them. The app's dates parse in every language
+  /// ([hevyMonths]); of the web's, only English does, and a file none of whose
+  /// rows parse is rejected whole so the user can be sent to the app's export
+  /// rather than told every row was skipped.
+  ///
+  /// Translated titles map back to Hevy's English ([hevyTitles]) so a history
+  /// resolves to the same exercises whichever exporter wrote it; a custom
+  /// exercise keeps its typed name.
+  ///
+  /// A workout is a contiguous run of rows with equal title, start, end and
+  /// description. `title` + `start_time` does not identify one — two sessions
+  /// can share both at minute precision — so the import id adds the end and
+  /// the run's ordinal among equal keys. An exercise logged twice in one
+  /// session stays two exercises, as the lifter had it. Hevy exports zero as
+  /// blank, so blank is null; a set with nothing in it or a negative number is
+  /// a skipped row. Supersets are not kept. Weight and distance columns name
+  /// their unit (`weight_kg`/`weight_lbs`, `distance_km`/`distance_miles`);
+  /// [unit] is the fallback for a bare header.
+  ///
+  /// Throws [FormatException] when the text isn't recognizable as a Hevy
+  /// export; individual bad rows are skipped and counted instead.
+  factory fromHevyCsv(
+    String csv, {
+    MeasurementUnit unit = .metric,
+    Duration utcOffset = .zero,
+  }) {
+    final rows = parseCsv(csv);
+    if (rows.isEmpty) throw const FormatException('empty file');
+    final header = _Header.of(rows.first);
+    final column = header.column;
+
+    final title = column(['title']);
+    final start = column(['starttime']);
+    final end = column(['endtime']);
+    final exerciseTitle = column(['exercisetitle']);
+    if (title == null || start == null || exerciseTitle == null) {
+      throw const FormatException('expected Hevy columns: title, start_time, exercise_title');
+    }
+    final description = column(['description']);
+    final exerciseNotes = column(['exercisenotes']);
+    final setIndex = column(['setindex']);
+    final setType = column(['settype']);
+    final weight = column(['weightkg', 'weightlbs', 'weight']);
+    final reps = column(['reps']);
+    final distance = column(['distancekm', 'distancemiles', 'distance']);
+    final seconds = column(['durationseconds']);
+    final rpe = column(['rpe']);
+    final weightUnit = weight == null ? null : _unitIn(header.names[weight]);
+    final distanceUnit = distance == null ? null : _unitIn(header.names[distance]);
+
+    var skipped = 0;
+    var setsDropped = 0;
+    String? firstFailure;
+    final builders = <_WorkoutBuilder>[];
+    // how many runs have carried each identity so far: the ordinal that tells
+    // two sessions with the same title, start and end apart
+    final runs = <String, int>{};
+    _WorkoutBuilder? current;
+    List<String?>? currentKey;
+    String? previousExercise;
+    for (final row in rows.skip(1)) {
+      try {
+        final rawStart = _cell(row, start) ?? (throw const FormatException('no start_time'));
+        final exercise = switch (_cell(row, exerciseTitle)) {
+          final String typed => hevyTitles[typed] ?? typed,
+          null => throw const FormatException('no exercise_title'),
+        };
+        final key = [_cell(row, title), rawStart, _cell(row, end), _cell(row, description)];
+        // parse the entire row before touching the builders, so a bad row
+        // can't leave a half-built workout behind
+        final set = ImportedSet(
+          weight: _toKilograms(_nonNegative(_cell(row, weight)), weightUnit, unit),
+          reps: _nonNegative(_cell(row, reps))?.round(),
+          duration: _nonNegative(_cell(row, seconds))?.round(),
+          distance: _toKilometers(_nonNegative(_cell(row, distance)), distanceUnit, unit),
+          type: _hevySetType(_cell(row, setType)),
+          rpe: _rpe(_cell(row, rpe)),
+        );
+        if (set.isEmpty) throw const FormatException('a set with nothing in it');
+        if (current == null || !_sameKey(key, currentKey)) {
+          final startLocal = _hevyLocal(rawStart);
+          final endLocal = switch (_cell(row, end)) {
+            final String raw => _hevyLocal(raw),
+            null => null,
+          };
+          final name = _cell(row, title);
+          final identity = '${_minute(startLocal)}|${endLocal == null ? '' : _minute(endLocal)}|${name ?? ''}';
+          final run = runs[identity] = (runs[identity] ?? 0) + 1;
+          current = _WorkoutBuilder(
+            importId: 'hevy:${_opaque('$identity|$run')}',
+            name: name,
+            start: startLocal.subtract(utcOffset),
+            // an end before the start, or past 24h, is a window not worth
+            // storing, as with Strong
+            end: switch (endLocal?.difference(startLocal)) {
+              Duration d when d > Duration.zero && d <= const Duration(hours: 24) => endLocal!.subtract(utcOffset),
+              _ => null,
+            },
+          )..note = _unescaped(_cell(row, description));
+          currentKey = key;
+          previousExercise = null;
+          builders.add(current);
+        }
+        // set_index restarts at 0 for every exercise block, so a 0 after a run
+        // of the same exercise is that exercise logged a second time
+        final newBlock = exercise != previousExercise || _cell(row, setIndex) == '0';
+        if (!current.add(exercise, set, note: _unescaped(_cell(row, exerciseNotes)), newBlock: newBlock)) {
+          setsDropped++;
+        }
+        previousExercise = exercise;
+      } on FormatException catch (e) {
+        skipped++;
+        firstFailure ??= e.message;
+      }
+    }
+    // the layout is Hevy's but no row parsed: a date format this parser
+    // doesn't read (a web export in another language), not a bad row
+    if (builders.isEmpty && firstFailure != null) throw FormatException(firstFailure);
+    final (workouts, dropped) = _capped([for (final b in builders) b.build()]);
+    return WorkoutImport._(
+      source: 'hevy',
+      workouts: workouts,
+      rowsSkipped: skipped,
+      workoutsDropped: dropped,
+      setsDropped: setsDropped,
+    );
+  }
+
+  /// Keeps the most recent [maxWorkouts] by start time, in file order, and
+  /// counts the rest.
+  static (List<ImportedWorkout>, int) _capped(List<ImportedWorkout> workouts) {
+    if (workouts.length <= maxWorkouts) return (workouts, 0);
+    final byRecency = [...workouts]..sort((a, b) => b.start.compareTo(a.start));
+    final kept = Set<ImportedWorkout>.identity()..addAll(byRecency.take(maxWorkouts));
+    // filter rather than take the sorted list, preserving file order
+    return (
+      [
+        for (final w in workouts)
+          if (kept.contains(w)) w,
+      ],
+      workouts.length - maxWorkouts,
+    );
+  }
+}
+
+/// The apps whose exports the importer reads: the `source` query parameter's
+/// vocabulary.
+enum ImportSource {
+  strong('Strong'),
+  hevy('Hevy');
+
+  /// The app's name as the user knows it, for error messages.
+  final String label;
+
+  new(this.label);
+
+  /// Parses [csv] with this source's parser into the one canonical batch.
+  WorkoutImport parse(String csv, {MeasurementUnit unit = .metric, Duration utcOffset = .zero}) {
+    return switch (this) {
+      .strong => WorkoutImport.fromStrongCsv(csv, unit: unit, utcOffset: utcOffset),
+      .hevy => WorkoutImport.fromHevyCsv(csv, unit: unit, utcOffset: utcOffset),
+    };
   }
 }
 
@@ -349,6 +499,9 @@ class ImportedSet {
   final double? rpe;
 
   const new({this.weight, this.reps, this.duration, this.distance, this.type, this.rpe});
+
+  /// No measurement at all — a row that records nothing.
+  bool get isEmpty => weight == null && reps == null && duration == null && distance == null;
 
   Map<String, dynamic> toPayload() {
     return {
@@ -567,32 +720,81 @@ List<List<String>> parseCsv(String text, {String? delimiter}) {
   ];
 }
 
+/// The CSV header, normalized, and the lookup every parser starts with.
+class _Header {
+  final List<String> names;
+
+  new(this.names);
+
+  factory of(List<String> raw) => _Header([for (final cell in raw) _normalized(cell)]);
+
+  /// The index of the first of [candidates] present, in normalized form.
+  int? column(List<String> candidates) {
+    for (final c in candidates) {
+      final i = names.indexOf(c);
+      if (i != -1) return i;
+    }
+    return null;
+  }
+}
+
+/// A row's cell by column index: null when the column is absent, short or
+/// blank.
+String? _cell(List<String> row, int? index) {
+  if (index == null || index >= row.length) return null;
+  final v = row[index].trim();
+  return v.isEmpty ? null : v;
+}
+
+/// One exercise's run of sets within a workout.
+class _ExerciseBlock {
+  final String name;
+  final sets = <ImportedSet>[];
+  // insertion-ordered: a note repeated on several rows is kept once
+  final notes = <String>{};
+  final restTimers = <int>[];
+
+  new(this.name);
+}
+
 class _WorkoutBuilder {
   final String importId;
   final String? name;
   final DateTime start;
   final DateTime? end;
   String? note;
-  final _exercises = <String, List<ImportedSet>>{};
-  // insertion-ordered sets: a note repeated on several rows is kept once
-  final _notes = <String, Set<String>>{};
-  final _restTimers = <String, List<int>>{};
+  final _blocks = <_ExerciseBlock>[];
   var _totalSets = 0;
 
   new({required this.importId, required this.name, required this.start, required this.end});
 
-  /// Adds the set unless the workout is already at [WorkoutImport.maxSetsPerWorkout].
-  bool add(String exercise, ImportedSet set, {String? note}) {
+  /// Adds the set unless the workout is already at
+  /// [WorkoutImport.maxSetsPerWorkout]. With [newBlock] null the set joins the
+  /// exercise's one block wherever it is (Strong lists an exercise once per
+  /// workout); true opens a block even for a name already present, false
+  /// continues the latest one (Hevy keeps an exercise's second appearance
+  /// separate, as the lifter logged it).
+  bool add(String exercise, ImportedSet set, {String? note, bool? newBlock}) {
     if (_totalSets >= WorkoutImport.maxSetsPerWorkout) return false;
     _totalSets++;
-    _exercises.putIfAbsent(exercise, () => []).add(set);
-    if (note != null) _notes.putIfAbsent(exercise, () => {}).add(note);
+    final block = switch (newBlock) {
+      null => _blocks.firstWhere((b) => b.name == exercise, orElse: () => _open(exercise)),
+      true => _open(exercise),
+      false => _blocks.last,
+    };
+    block.sets.add(set);
+    if (note != null) block.notes.add(note);
     return true;
   }
 
   void addRestTimer(String exercise, int seconds) {
-    if (!_exercises.containsKey(exercise)) return;
-    _restTimers.putIfAbsent(exercise, () => []).add(seconds);
+    _blocks.lastWhereOrNull((b) => b.name == exercise)?.restTimers.add(seconds);
+  }
+
+  _ExerciseBlock _open(String exercise) {
+    final block = _ExerciseBlock(exercise);
+    _blocks.add(block);
+    return block;
   }
 
   ImportedWorkout build() {
@@ -603,15 +805,24 @@ class _WorkoutBuilder {
       end: end,
       note: _bounded(note, ImportedWorkout.maxNoteLength),
       exercises: [
-        for (final MapEntry(key: name, value: sets) in _exercises.entries)
+        for (final block in _blocks)
           ImportedExercise(
-            name: name,
-            sets: sets,
-            note: _bounded(_notes[name]?.join('\n'), ImportedExercise.maxNoteLength),
-            restTimers: _restTimers[name] ?? const [],
+            name: block.name,
+            sets: block.sets,
+            note: _bounded(block.notes.isEmpty ? null : block.notes.join('\n'), ImportedExercise.maxNoteLength),
+            restTimers: block.restTimers,
           ),
       ],
     );
+  }
+}
+
+extension<T> on List<T> {
+  T? lastWhereOrNull(bool Function(T) test) {
+    for (final item in reversed) {
+      if (test(item)) return item;
+    }
+    return null;
   }
 }
 
@@ -650,6 +861,100 @@ String? _unitIn(String normalizedHeader) {
     if (normalizedHeader.endsWith(unit)) return unit;
   }
   return null;
+}
+
+/// Two workout keys from consecutive rows: equal when the rows belong to one
+/// contiguous run.
+bool _sameKey(List<String?> a, List<String?>? b) {
+  if (b == null || a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}
+
+/// A wall-clock minute as text: `2026-09-22T06:00`.
+String _minute(DateTime local) => local.toIso8601String().substring(0, 16);
+
+final _hevyAppDate = RegExp(r'^(\d{1,2}) (\S+) (\d{4}), (\d{1,2}):(\d{2})$');
+final _hevyWebDate = RegExp(r'^([A-Za-z]+)\.? (\d{1,2}), (\d{4}), (\d{1,2}):(\d{2}) ([AP]M)$', caseSensitive: false);
+
+/// A Hevy timestamp as the wall clock it shows, in a UTC [DateTime] that
+/// stands in for naive local time: the app's `1 Sept. 2026, 07:30` in any
+/// language, or the web's `Sep 1, 2026, 7:30 AM` in English.
+DateTime _hevyLocal(String raw) {
+  final text = raw.trim();
+  if (_hevyAppDate.firstMatch(text) case final m?) {
+    return _wallClock(
+      raw,
+      year: int.parse(m[3]!),
+      month: _hevyMonth(m[2]!, raw),
+      day: int.parse(m[1]!),
+      hour: int.parse(m[4]!),
+      minute: int.parse(m[5]!),
+    );
+  }
+  if (_hevyWebDate.firstMatch(text) case final m?) {
+    final pm = m[6]!.toUpperCase() == 'PM';
+    return _wallClock(
+      raw,
+      year: int.parse(m[3]!),
+      month: _hevyMonth(m[1]!, raw),
+      day: int.parse(m[2]!),
+      hour: int.parse(m[4]!) % 12 + (pm ? 12 : 0),
+      minute: int.parse(m[5]!),
+    );
+  }
+  throw FormatException('unreadable date "$raw": export from the Hevy app, or from hevy.com in English');
+}
+
+int _hevyMonth(String token, String raw) {
+  return hevyMonths[token.toLowerCase().replaceFirst(RegExp(r'\.+$'), '')] ??
+      (throw FormatException('unreadable month in "$raw"'));
+}
+
+/// [DateTime.utc] normalizes an impossible date (Feb 30) into a possible one;
+/// an export never has one, so it's a misread, not a day.
+DateTime _wallClock(
+  String raw, {
+  required int year,
+  required int month,
+  required int day,
+  required int hour,
+  required int minute,
+}) {
+  final local = DateTime.utc(year, month, day, hour, minute);
+  if (local.day != day || local.hour != hour || local.minute != minute) {
+    throw FormatException('impossible date "$raw"');
+  }
+  return local;
+}
+
+/// The Hevy app escapes a line break inside a field as the two characters
+/// `\n` (a typed backslash-n is indistinguishable, and far rarer than a
+/// multi-line note); the web keeps real CRLFs. Both come out as LF so the
+/// same note reads the same from either exporter.
+String? _unescaped(String? text) => text?.replaceAll(r'\n', '\n').replaceAll('\r\n', '\n');
+
+/// `warmup`, `dropset`, `failure` or `normal`, in English whatever the
+/// export's language.
+String? _hevySetType(String? raw) {
+  return switch (raw?.trim().toLowerCase()) {
+    'warmup' => 'warmup',
+    'dropset' => 'drop',
+    'failure' => 'failure',
+    _ => null,
+  };
+}
+
+/// Like [_number], and a negative value — which no measurement is — costs the
+/// row: the database would reject it, and silently dropping the sign would
+/// invent a set.
+double? _nonNegative(String? raw) {
+  return switch (_number(raw)) {
+    final double v when v < 0 => throw FormatException('negative measurement: $raw'),
+    final v => v,
+  };
 }
 
 /// Strong timestamps are naive local time (`2023-01-15 17:35:12`); pins one
