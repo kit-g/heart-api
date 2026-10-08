@@ -43,8 +43,17 @@ module "api" {
     certificate_arn = "arn:aws:acm:ca-central-1:922419543441:certificate/f5a9b784-19a5-4ef6-b284-be9fc51b79dd"
   }
 
-  # The MCP host's share of the database pool (15): the API reserves the rest.
+  # Supabase's session pooler holds 15 (checked 2026-10-06), one per instance:
+  # the API reserves 12 and the MCP host the other 3. The throttle sits under
+  # the API's reservation so the gateway's 429 comes before Lambda's: 60 x
+  # ~0.15 s is about 9 busy, leaving room for slow requests, and the burst
+  # can't outrun 12. Still about 30 times the busiest minute seen.
+  api_concurrency = 12
   mcp_concurrency = 3
+  throttle = {
+    rate  = 60
+    burst = 12
+  }
 }
 
 module "assets" {

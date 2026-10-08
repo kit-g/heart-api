@@ -91,6 +91,7 @@ resource "aws_api_gateway_deployment" "deployment" {
           aws_api_gateway_resource.proxy.id,
           aws_api_gateway_method.proxy.id,
           aws_api_gateway_integration.proxy.id,
+          aws_api_gateway_gateway_response.throttled,
         ]
       )
     )
@@ -105,6 +106,41 @@ resource "aws_api_gateway_stage" "v1" {
   deployment_id = aws_api_gateway_deployment.deployment.id
   rest_api_id   = aws_api_gateway_rest_api.api.id
   stage_name    = "v1"
+}
+
+# A backstop, not a quota: per-account limits are the API's own job, and a
+# flood of requests with invalid tokens never reaches them. With one
+# {proxy+} resource the ceiling can only be stage-wide.
+resource "aws_api_gateway_method_settings" "throttle" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  stage_name  = aws_api_gateway_stage.v1.stage_name
+  method_path = "*/*"
+
+  settings {
+    throttling_rate_limit  = var.throttle.rate
+    throttling_burst_limit = var.throttle.burst
+  }
+}
+
+# The throttle's refusal in the API's own error shape, with the Retry-After
+# AWS's default leaves out: scripts and MCP hosts back off by it.
+resource "aws_api_gateway_gateway_response" "throttled" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  response_type = "THROTTLED"
+  status_code   = "429"
+
+  response_parameters = {
+    "gatewayresponse.header.Retry-After" = "'1'"
+  }
+
+  response_templates = {
+    "application/json" = jsonencode({
+      error      = "too many requests"
+      code       = "throttled"
+      reason     = "the API is busy; try again shortly"
+      retryAfter = 1
+    })
+  }
 }
 
 resource "aws_sqs_queue" "events_dlq" {

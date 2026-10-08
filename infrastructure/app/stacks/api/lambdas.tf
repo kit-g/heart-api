@@ -54,6 +54,11 @@ resource "aws_lambda_function" "api" {
   timeout          = 120
   depends_on       = [aws_cloudwatch_log_group.api]
 
+  # Each instance holds one database connection, so instances past the
+  # pooler's size fail to connect. Reserving the cap also keeps the other
+  # functions' share of the account; -1 is no reservation.
+  reserved_concurrent_executions = coalesce(var.api_concurrency, -1)
+
   layers = [
     "arn:aws:lambda:${var.region}:753240598075:layer:LambdaAdapterLayerArm64:25"
   ]

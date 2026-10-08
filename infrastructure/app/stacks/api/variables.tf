@@ -180,3 +180,47 @@ variable "mcp_domain" {
     error_message = "The MCP host's certificate must be issued in us-east-1: CloudFront accepts no other region."
   }
 }
+
+variable "api_concurrency" {
+  description = <<-EOT
+    Concurrent executions reserved for the API function, and its ceiling.
+    Every instance holds one database connection in session mode, so this and
+    mcp_concurrency together stay within the pooler's pool size. Null
+    reserves nothing, which an account at the default quota of 10 must do:
+    AWS keeps 10 unreserved.
+  EOT
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.api_concurrency == null || try(var.api_concurrency >= 1, false)
+    error_message = "api_concurrency must be at least 1, or null for no reservation."
+  }
+}
+
+variable "throttle" {
+  description = <<-EOT
+    Stage-wide ceiling: steady requests per second, and the burst above it.
+
+    The default suits an account at Lambda's starting quota of 10 concurrent
+    executions shared by every function: the API averages 149 ms an
+    invocation (prod, the 14 days to 2026-10-06), so 25 a second holds it to
+    about 4, while the busiest minute was 107 requests. An environment that
+    reserves `api_concurrency` sizes this under it, so the gateway refuses
+    (a 429 with Retry-After) before Lambda does (a 500): rate x 0.15 s with
+    room for slow requests, and a burst no larger than the reservation.
+  EOT
+  type = object({
+    rate  = number
+    burst = number
+  })
+  default = {
+    rate  = 25
+    burst = 50
+  }
+
+  validation {
+    condition     = var.throttle.rate > 0 && var.throttle.burst >= 1 && floor(var.throttle.burst) == var.throttle.burst
+    error_message = "rate must be positive and burst a whole number of at least 1 - zero on either refuses every request."
+  }
+}
