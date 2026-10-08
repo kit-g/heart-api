@@ -524,9 +524,37 @@ void main() {
 
     test('rejects an unsupported source', () async {
       await expectLater(
-        importWorkouts(importReq(query: {'source': 'hevy'})),
+        importWorkouts(importReq(query: {'source': 'fitnotes'})),
         throwsA(isA<BadRequest>()),
       );
+    });
+
+    test('parses a Hevy export when source says so', () async {
+      // a row from a real Hevy app export (test/fixtures/hevy/app-en.csv)
+      const hevy =
+          '"title","start_time","end_time","description","exercise_title","superset_id","exercise_notes","set_index","set_type","weight_lbs","reps","distance_km","duration_seconds","rpe"\r\n'
+          '"P millis","3 Oct 2026, 05:30","3 Oct 2026, 06:00","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,';
+      when(
+        workouts.importWorkouts(
+          userId: anyNamed('userId'),
+          batch: anyNamed('batch'),
+          createCustom: anyNamed('createCustom'),
+        ),
+      ).thenAnswer((_) async => report);
+
+      await importWorkouts(importReq(body: hevy, query: {'source': 'hevy'}));
+
+      final batch =
+          verify(
+                workouts.importWorkouts(userId: _meId, batch: captureAnyNamed('batch'), createCustom: null),
+              ).captured.single
+              as WorkoutImport;
+      expect(batch.source, 'hevy');
+      expect(batch.workouts.single.name, 'P millis');
+    });
+
+    test('rejects a Strong body sent as a Hevy export', () async {
+      await expectLater(importWorkouts(importReq(query: {'source': 'hevy'})), throwsA(isA<BadRequest>()));
     });
 
     test('rejects a body that is not a Strong export', () async {

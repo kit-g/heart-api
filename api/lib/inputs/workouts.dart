@@ -1,8 +1,8 @@
 part of 'inputs.dart';
 
-/// `POST /workouts/imports?source=strong` — a Strong CSV export, parsed and
-/// unit-normalized here so the route layer only ever sees the canonical
-/// [WorkoutImport] batch.
+/// `POST /workouts/imports?source=strong|hevy` — a Strong or Hevy CSV export,
+/// parsed and unit-normalized here so the route layer only ever sees the
+/// canonical [WorkoutImport] batch.
 ///
 /// Two body shapes:
 /// - raw CSV (`text/csv` or anything non-JSON): the one-shot import — every
@@ -13,13 +13,13 @@ part of 'inputs.dart';
 ///   (even empty) means exactly those and no others.
 ///
 /// Query params:
-/// - `source` (required): the exporting app; only `strong` so far.
+/// - `source` (required): the exporting app, `strong` or `hevy`.
 /// - `dryRun` (optional, default `false`): parse and resolve only — write
 ///   nothing, respond with the would-be report.
 /// - `unit` (optional, `metric`|`imperial`, default `metric`): fallback for
 ///   exports that carry no unit columns of their own.
 /// - `tzOffset` (optional, `±HH:MM`): the exporting device's UTC offset —
-///   Strong timestamps are naive local time.
+///   both apps' timestamps are naive local time.
 class ImportWorkoutsIn {
   final WorkoutImport batch;
   final bool dryRun;
@@ -29,10 +29,12 @@ class ImportWorkoutsIn {
 
   static Future<ImportWorkoutsIn> fromRequest(Request req) async {
     final q = req.url.queryParameters;
-    final source = q.string('source');
-    if (source != 'strong') {
-      throw BadRequest(reason: 'unsupported source: $source (supported: strong)');
-    }
+    final source = switch (q.string('source')) {
+      final s when ImportSource.values.asNameMap().containsKey(s) => ImportSource.values.byName(s),
+      final s => throw BadRequest(
+        reason: 'unsupported source: $s (supported: ${ImportSource.values.map((v) => v.name).join(', ')})',
+      ),
+    };
     final dryRun = q.boolean('dryRun');
     final unit = switch (q.stringOrNull('unit')) {
       null => MeasurementUnit.metric,
@@ -45,12 +47,12 @@ class ImportWorkoutsIn {
     final (csv, createCustom) = await _body(req);
     try {
       return ImportWorkoutsIn._(
-        WorkoutImport.fromStrongCsv(csv, unit: unit, utcOffset: offset),
+        source.parse(csv, unit: unit, utcOffset: offset),
         dryRun: dryRun,
         createCustom: createCustom,
       );
     } on FormatException catch (e) {
-      throw BadRequest(reason: 'not a readable Strong export: ${e.message}');
+      throw BadRequest(reason: 'not a readable ${source.label} export: ${e.message}');
     }
   }
 
