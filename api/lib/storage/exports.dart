@@ -7,21 +7,7 @@ mixin _Exports on _StorageBase implements ExportStorage {
 
   @override
   Future<Uri> stash({required String key, required List<int> bytes, required String mimeType}) async {
-    final upload = await getUploadUrl(contentBucket, key);
-    final client = HttpClient();
-    try {
-      final request = await client.putUrl(upload);
-      request.headers.contentType = ContentType.parse(mimeType);
-      request.contentLength = bytes.length;
-      request.add(bytes);
-      final response = await request.close();
-      await response.drain<void>();
-      if (response.statusCode != HttpStatus.ok) {
-        throw HttpException('export upload failed: ${response.statusCode}', uri: upload);
-      }
-    } finally {
-      client.close();
-    }
+    await _upload(key, bytes, mimeType);
     return getDownloadUrl(contentBucket, key, expiresIn: _linkLifetime);
   }
 }

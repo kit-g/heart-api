@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:heart/core/handler.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/imports.dart';
 import 'package:heart/routes/workouts.dart';
@@ -375,8 +378,9 @@ void main() {
       setsDropped: 0,
     );
 
+    final imports = MockImportStorage();
     Request importReq({String body = csv, Map<String, String> query = const {'source': 'strong'}}) =>
-        wire(textRequest(path: '/workouts/imports', body: body, query: query));
+        wire(textRequest(path: '/workouts/imports', body: body, query: query))..importStorage = imports;
 
     test('parses the CSV and hands the batch to the service under the caller id', () async {
       when(
@@ -524,13 +528,77 @@ void main() {
 
     test('rejects an unsupported source', () async {
       await expectLater(
-        importWorkouts(importReq(query: {'source': 'hevy'})),
+        importWorkouts(importReq(query: {'source': 'fitnotes'})),
         throwsA(isA<BadRequest>()),
       );
     });
 
-    test('rejects a body that is not a Strong export', () async {
-      await expectLater(importWorkouts(importReq(body: 'a,b\n1,2\n')), throwsA(isA<BadRequest>()));
+    test('parses a Hevy export when source says so', () async {
+      // a row from a real Hevy app export (test/fixtures/hevy/app-en.csv)
+      const hevy =
+          '"title","start_time","end_time","description","exercise_title","superset_id","exercise_notes","set_index","set_type","weight_lbs","reps","distance_km","duration_seconds","rpe"\r\n'
+          '"P millis","3 Oct 2026, 05:30","3 Oct 2026, 06:00","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,';
+      when(
+        workouts.importWorkouts(
+          userId: anyNamed('userId'),
+          batch: anyNamed('batch'),
+          createCustom: anyNamed('createCustom'),
+        ),
+      ).thenAnswer((_) async => report);
+
+      await importWorkouts(importReq(body: hevy, query: {'source': 'hevy'}));
+
+      final batch =
+          verify(
+                workouts.importWorkouts(userId: _meId, batch: captureAnyNamed('batch'), createCustom: null),
+              ).captured.single
+              as WorkoutImport;
+      expect(batch.source, 'hevy');
+      expect(batch.workouts.single.name, 'P millis');
+    });
+
+    test('keeps a body no parser reads and answers 202 with a parked note', () async {
+      when(
+        imports.park(userId: anyNamed('userId'), source: anyNamed('source'), bytes: anyNamed('bytes')),
+      ).thenAnswer((_) async => 'imports/parked/abc/strong-def.csv');
+
+      final result = await importWorkouts(importReq(body: 'a,b\n1,2\n'));
+
+      expect(result, isA<Accepted<WorkoutImportParked>>());
+      final body = result.toMap();
+      expect(body['status'], 'parked');
+      expect(body['source'], 'strong');
+      expect(body['reason'], contains('Strong columns'));
+      expect(body['message'], contains('message you'));
+      final bytes =
+          verify(
+                imports.park(userId: _meId, source: ImportSource.strong, bytes: captureAnyNamed('bytes')),
+              ).captured.single
+              as List<int>;
+      expect(utf8.decode(bytes), 'a,b\n1,2\n');
+      verifyNever(
+        workouts.importWorkouts(
+          userId: anyNamed('userId'),
+          batch: anyNamed('batch'),
+          createCustom: anyNamed('createCustom'),
+        ),
+      );
+    });
+
+    test('parks a Strong body sent as a Hevy export, as a Hevy file', () async {
+      when(
+        imports.park(userId: anyNamed('userId'), source: anyNamed('source'), bytes: anyNamed('bytes')),
+      ).thenAnswer((_) async => 'imports/parked/abc/hevy-def.csv');
+
+      final result = await importWorkouts(importReq(query: {'source': 'hevy', 'dryRun': 'true'}));
+
+      expect(result.toMap()['source'], 'hevy');
+      expect(result.toMap()['reason'], contains('Hevy columns'));
+      verify(imports.park(userId: _meId, source: ImportSource.hevy, bytes: anyNamed('bytes'))).called(1);
+    });
+
+    test('rejects an empty body, which is nothing to keep', () async {
+      await expectLater(importWorkouts(importReq(body: ' \n')), throwsA(isA<BadRequest>()));
     });
 
     test('rejects a malformed tzOffset', () async {

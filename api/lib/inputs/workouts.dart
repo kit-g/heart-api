@@ -1,8 +1,11 @@
 part of 'inputs.dart';
 
-/// `POST /workouts/imports?source=strong` — a Strong CSV export, parsed and
-/// unit-normalized here so the route layer only ever sees the canonical
-/// [WorkoutImport] batch.
+/// `POST /workouts/imports?source=strong|hevy` — a Strong or Hevy CSV export,
+/// parsed and unit-normalized here so the route layer only ever sees the
+/// canonical [WorkoutImport] batch. A file the parser can't read is still an
+/// accepted input: [batch] is null, [unreadable] says why, and [csv] is the
+/// file itself, for the route to keep. Only an empty body is a 400 — there is
+/// nothing to keep.
 ///
 /// Two body shapes:
 /// - raw CSV (`text/csv` or anything non-JSON): the one-shot import — every
@@ -13,26 +16,42 @@ part of 'inputs.dart';
 ///   (even empty) means exactly those and no others.
 ///
 /// Query params:
-/// - `source` (required): the exporting app; only `strong` so far.
+/// - `source` (required): the exporting app, `strong` or `hevy`.
 /// - `dryRun` (optional, default `false`): parse and resolve only — write
 ///   nothing, respond with the would-be report.
 /// - `unit` (optional, `metric`|`imperial`, default `metric`): fallback for
 ///   exports that carry no unit columns of their own.
 /// - `tzOffset` (optional, `±HH:MM`): the exporting device's UTC offset —
-///   Strong timestamps are naive local time.
+///   both apps' timestamps are naive local time.
 class ImportWorkoutsIn {
-  final WorkoutImport batch;
+  final ImportSource source;
+  final String csv;
+
+  /// The parsed export, or null when the parser could not read [csv].
+  final WorkoutImport? batch;
+
+  /// Why [batch] is null: the parser's own words.
+  final String? unreadable;
   final bool dryRun;
   final List<String>? createCustom;
 
-  const new _(this.batch, {required this.dryRun, this.createCustom});
+  const new _({
+    required this.source,
+    required this.csv,
+    required this.batch,
+    required this.unreadable,
+    required this.dryRun,
+    this.createCustom,
+  });
 
   static Future<ImportWorkoutsIn> fromRequest(Request req) async {
     final q = req.url.queryParameters;
-    final source = q.string('source');
-    if (source != 'strong') {
-      throw BadRequest(reason: 'unsupported source: $source (supported: strong)');
-    }
+    final source = switch (q.string('source')) {
+      final s when ImportSource.values.asNameMap().containsKey(s) => ImportSource.values.byName(s),
+      final s => throw BadRequest(
+        reason: 'unsupported source: $s (supported: ${ImportSource.values.map((v) => v.name).join(', ')})',
+      ),
+    };
     final dryRun = q.boolean('dryRun');
     final unit = switch (q.stringOrNull('unit')) {
       null => MeasurementUnit.metric,
@@ -43,14 +62,29 @@ class ImportWorkoutsIn {
       _ => q.parsed('tzOffset', _tzOffset),
     };
     final (csv, createCustom) = await _body(req);
+    if (csv.trim().isEmpty) throw const BadRequest(reason: 'the export is empty');
+    final (batch, unreadable) = _parsed(source, csv, unit: unit, utcOffset: offset);
+    return ImportWorkoutsIn._(
+      source: source,
+      csv: csv,
+      batch: batch,
+      unreadable: unreadable,
+      dryRun: dryRun,
+      createCustom: createCustom,
+    );
+  }
+
+  /// The batch, or the parser's refusal in its own words.
+  static (WorkoutImport?, String?) _parsed(
+    ImportSource source,
+    String csv, {
+    required MeasurementUnit unit,
+    required Duration utcOffset,
+  }) {
     try {
-      return ImportWorkoutsIn._(
-        WorkoutImport.fromStrongCsv(csv, unit: unit, utcOffset: offset),
-        dryRun: dryRun,
-        createCustom: createCustom,
-      );
+      return (source.parse(csv, unit: unit, utcOffset: utcOffset), null);
     } on FormatException catch (e) {
-      throw BadRequest(reason: 'not a readable Strong export: ${e.message}');
+      return (null, e.message);
     }
   }
 
