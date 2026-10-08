@@ -21,7 +21,7 @@ infrastructure/
 │   │   ├── certificate/       # ACM certificate + its validation records, one apply (native tests in tests/)
 │   │   └── iam/               # Reusable role + inline-policies wrapper (native tests in tests/)
 │   └── environments/
-│       ├── dev/               # Wires the stacks for the dev account; its zones and certificates
+│       ├── dev/               # Wires the stacks for the dev account; its zone and certificates
 │       └── prod/              # Same, prod account; the apex zone
 ├── dns/                       # The old apex zone in the dev account, kept until the registrar
 │                              # points at prod (heart-api#142; its README is the runbook)
@@ -93,7 +93,7 @@ Certificates are `modules/certificate`: the request, its validation records in t
 
 ### DNS
 
-Each account owns the DNS for its environment, in `environments/<env>/dns.tf`. Prod holds the apex zone `heart-of.me`: its names, the domain's mail, and NS delegations for dev's names. Dev holds three zones on one delegation set — `dev.heart-of.me`, `dev.api.heart-of.me`, `dev.media.heart-of.me` — because the last two are siblings of `dev`, not children, and a single `dev` zone could not carry them. Alias records point at the stack outputs (`module.cdn.web_distribution`, `module.api.custom_domain`, …) directly, so no distribution name is copied between roots. The design and the move are `docs/2026-10-08.dns-split.md`; `infrastructure/dns/` is the zone being retired.
+Each account owns the DNS for its environment, in `environments/<env>/dns.tf`. Prod holds the apex zone `heart-of.me`: its names, the domain's mail, and the NS delegation of `dev.heart-of.me`. Dev holds that zone, with every dev name under it (`api.dev.heart-of.me`, `media.dev.heart-of.me`, `www.dev.heart-of.me`). Alias records point at the stack outputs (`module.cdn.web_distribution`, `module.api.custom_domain`, …) directly, so no distribution name is copied between roots. The design and the move are `docs/2026-10-08.dns-split.md`; `infrastructure/dns/` is the zone being retired.
 
 ## State
 

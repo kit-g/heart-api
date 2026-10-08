@@ -2,37 +2,72 @@
 
 This root manages the single `heart-of.me` zone in the **dev** account, which served both
 environments until heart-api#142. Its replacement is in place: prod's apex zone in
-`app/environments/prod/dns.tf`, dev's three zones in `app/environments/dev/dns.tf`, and every
-certificate issued by its own environment (`docs/2026-10-08.dns-split.md`). This zone keeps
-answering until the registrar points at prod's; then this directory goes.
+`app/environments/prod/dns.tf`, dev's zone `dev.heart-of.me` in `app/environments/dev/dns.tf`,
+and every certificate issued by its own environment (`docs/2026-10-08.dns-split.md`). This zone
+keeps answering the apex until the registrar points at prod's; then this directory goes.
 
-**Do not change records here while the move is in flight.** Both zones have to serve identical
-answers for the switch to be invisible, and this one is the copy.
+The move is in two halves. The dev subtree moves first, live, by delegating `dev.heart-of.me`
+from this zone (phases 1–3): that is where dev's hosts are renamed, and dev builds break until
+their env files follow. The apex moves second (phases 4–7), and nothing public changes there until
+the registrar switch, which swaps between two zones serving the same answers.
 
-## The move
-
-Phases 1–2 change nothing public: no delegation exists yet, and the registrar still names this
-zone's servers. The NS switch (phase 4) is the only step that is live, and it is a swap between two
-zones serving the same answers.
-
-### 1. dev — its zones, its certificates
+## 1. dev — the zone, and what it can carry before it is delegated
 
 ```bash
 cd infrastructure/app/environments/dev
-terraform plan      # 3 to import, 18 to add, 3 to change (tags on the certificates), 0 to destroy
-terraform apply
+terraform apply \
+  -target=aws_route53_zone.dev \
+  -target='aws_route53_record.alias["dev.heart-of.me"]' \
+  -target='aws_route53_record.alias["www.dev.heart-of.me"]' \
+  -target=aws_route53_record.firebase_txt \
+  -target=aws_route53_record.firebase_dkim
 terraform output name_servers
 ```
 
-Creates the delegation set, the zones `dev.heart-of.me`, `dev.api.heart-of.me` and
-`dev.media.heart-of.me`, their alias and Firebase records, and imports the three dev certificates
-with their validation records beside them. Nothing in `module.cdn` or `module.api` changes: the
-distributions and the domain name keep the certificates they hold.
+Creates the zone with the records whose targets already exist — the web aliases and Firebase's
+mail records — and imports the web certificate (its names survived the rename) with its validation
+records beside it. Nothing public changes: nothing delegates to the zone yet. The api and media
+certificates are not in this pass on purpose: they are new names, and ACM can validate them only
+once the zone answers publicly.
 
-### 2. prod — the apex, its certificates, the delegations
+## 2. this root — delegate dev, drop its records
 
-Put the four servers from dev's `name_servers` into `dev_name_servers` in
-`app/environments/prod/terraform.tfvars`, then:
+Put the four servers from dev's `name_servers` into `dev_name_servers` in `terraform.tfvars`, then:
+
+```bash
+cd infrastructure/dns
+terraform plan      # 1 to add (the NS record), 12 to destroy (dev's records and the dev validation CNAMEs)
+terraform apply
+```
+
+From here `dev.heart-of.me` and `www.dev.heart-of.me` answer from the new zone, with the same
+targets, and Firebase's dev mail records with them. `dev.api.heart-of.me` and
+`dev.media.heart-of.me` stop resolving: that is the accepted break, and they come back under
+their new names in the next phase.
+
+## 3. dev — the rest
+
+```bash
+cd infrastructure/app/environments/dev
+terraform plan      # 19 to add in total with phase 1, 4 to change, 2 to destroy (the API domain name and its mapping, replaced)
+terraform apply
+```
+
+Requests and validates the certificates for `api.dev.heart-of.me` and `media.dev.heart-of.me`
+(ACM issues within minutes once the records resolve), recreates the API's domain name and base
+path mapping under the new name, re-aliases the media distribution, and points both aliases.
+The Lambda functions pick up the new names in their environment.
+
+Then, outside this repo: the app's `env/dev.json`, `env/new-dev.json` and `env/local.json`
+(gitignored) name `API` and `MEDIA_LINK`; change them to `api.dev.heart-of.me` and
+`media.dev.heart-of.me`. Dev builds made before that cannot reach the API or media again. The
+site's dev config and OAuth metadata (`site/connect/dev.js`, `site/.well-known/dev/`) are in this
+change and ship with the next site deploy.
+
+## 4. prod — the apex, its certificates, the delegation
+
+Put the same four servers into `dev_name_servers` in `app/environments/prod/terraform.tfvars`,
+then:
 
 ```bash
 cd infrastructure/app/environments/prod
@@ -42,54 +77,49 @@ terraform output name_servers
 ```
 
 Creates the apex zone (not yet authoritative for anyone), its alias, mail and verification records,
-the three NS delegations, and imports the four prod certificates. The plan's only changes to
-existing resources are the default tags landing on the certificates.
+the NS delegation for `dev.heart-of.me`, and imports the four prod certificates. The plan's only
+changes to existing resources are the default tags landing on the certificates.
 
 ACM's renewal of `media.heart-of.me` and `heart-of.me` is due to start around 2026-10-11 (sixty
 days before expiry on 2026-12-10). It validates against whichever zone the public resolvers reach,
 and both carry the records, so the move does not need to wait for it or hurry past it.
 
-### 3. Compare the two zones
+## 5. Compare the two apex zones
 
-Every name, from the old servers and from the new, before the switch. The dev names are delegated
-in prod's zone, so they are asked of dev's servers directly.
+Every apex name, from the old servers and from the new, before the switch. The dev names are not
+listed: both zones delegate them to the same place by now.
 
 ```bash
 OLD=ns-466.awsdns-58.com
 NEW=$(cd infrastructure/app/environments/prod && terraform output -json name_servers | jq -r '.[0]')
-DEV=$(cd infrastructure/app/environments/dev && terraform output -json name_servers | jq -r '.[0]')
 
-while read -r name type server; do
-  printf '%-40s %-5s old: %s\n%-46s new: %s\n' "$name" "$type" \
+while read -r name type; do
+  printf '%-36s %-5s old: %s\n%-42s new: %s\n' "$name" "$type" \
     "$(dig +short @"$OLD" "$name" "$type" | sort | tr '\n' ' ')" "" \
-    "$(dig +short @"$server" "$name" "$type" | sort | tr '\n' ' ')"
+    "$(dig +short @"$NEW" "$name" "$type" | sort | tr '\n' ' ')"
 done <<LIST
-heart-of.me                       A     $NEW
-heart-of.me                       MX    $NEW
-heart-of.me                       TXT   $NEW
-_dmarc.heart-of.me                TXT   $NEW
-firebase1._domainkey.heart-of.me  CNAME $NEW
-firebase2._domainkey.heart-of.me  CNAME $NEW
-www.heart-of.me                   A     $NEW
-api.heart-of.me                   A     $NEW
-media.heart-of.me                 A     $NEW
-mcp.heart-of.me                   A     $NEW
-dev.heart-of.me                   A     $DEV
-dev.heart-of.me                   TXT   $DEV
-www.dev.heart-of.me               A     $DEV
-dev.api.heart-of.me               A     $DEV
-dev.media.heart-of.me             A     $DEV
-firebase1._domainkey.dev.heart-of.me CNAME $DEV
-firebase2._domainkey.dev.heart-of.me CNAME $DEV
+heart-of.me                       A
+heart-of.me                       MX
+heart-of.me                       TXT
+heart-of.me                       NS
+dev.heart-of.me                   NS
+_dmarc.heart-of.me                TXT
+firebase1._domainkey.heart-of.me  CNAME
+firebase2._domainkey.heart-of.me  CNAME
+www.heart-of.me                   A
+api.heart-of.me                   A
+media.heart-of.me                 A
+mcp.heart-of.me                   A
 LIST
 ```
 
 The alias records answer with CloudFront or API Gateway addresses, which rotate between queries;
-for those, both sides answering with the same kind of address is the match. Everything else has to
-be byte-for-byte. The ACM validation CNAMEs are not listed: the certificate modules put them in the
-new zones from the certificates themselves, and the apply would have failed otherwise.
+for those, both sides answering with the same kind of address is the match. The apex `NS` differs
+by design (each zone names its own servers); everything else has to be byte-for-byte. The ACM
+validation CNAMEs are not listed: the certificate modules put them in the new zone from the
+certificates themselves, and the apply would have failed otherwise.
 
-### 4. The registrar
+## 6. The registrar
 
 At Gandi, replace the domain's name servers with prod's four. Then:
 
@@ -100,14 +130,16 @@ dig +trace heart-of.me NS | tail -6     # the .me servers now answer with prod's
 Resolvers pick up the change as the `.me` delegation's TTL expires (a day), and some cache beyond
 it. Nothing blinks in between: both zones answer the same.
 
-### 5. Retire this zone
+## 7. Retire this zone
 
 No sooner than 48 hours after the switch:
 
 1. Remove the `prevent_destroy` lifecycle from `main.tf`.
-2. `terraform destroy` here. It takes the old zone and every record in it, including the
-   validation CNAME for the unused `media.dev.heart-of.me` certificate, which nothing imported.
+2. `terraform destroy` here. It takes the old zone and every record still in it.
 3. Delete `infrastructure/dns/`, its line in `infrastructure/README.md`, and this file with it.
    The state object `heart/dns/terraform.tfstate` in the dev state bucket can go too.
-4. In the dev account's ACM (us-east-1), delete that unused `media.dev.heart-of.me` certificate;
-   it is renewal-ineligible and expires 2026-11-23 regardless.
+4. In the dev account's ACM, delete the certificates nothing uses any more: in us-east-1 the
+   `media.dev.heart-of.me` one issued by hand in September with the wrong set of names
+   (`725a40da…`, renewal-ineligible, expires 2026-11-23) and the old `dev.media.heart-of.me` one
+   (`297c34bc…`); in ca-central-1 the old `dev.api.heart-of.me` one (`43e5a2aa…`). Phase 3
+   detached all three.
