@@ -49,6 +49,12 @@ variable "prod_api_domain_name" {
   description = "Regional endpoint behind the prod API Gateway custom domain. Empty until the app environment has created it: this zone has to carry the certificate validation record before that apply can succeed, so the alias lands on a second pass. Update when the domain name is recreated."
 }
 
+variable "prod_mcp_distribution_domain_name" {
+  type        = string
+  default     = ""
+  description = "Domain name of the prod MCP host's CloudFront distribution (the api stack's `mcp_distribution_domain` output). Empty until the app environment has created it: this zone has to carry the certificate validation record before that apply can succeed, so the alias lands on a second pass. Update when the distribution is recreated."
+}
+
 # Fixed AWS-wide CloudFront alias zone — same for all distributions.
 locals {
   cloudfront_zone_id = "Z2FDTNDATAQYW2"

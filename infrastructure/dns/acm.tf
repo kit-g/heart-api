@@ -78,3 +78,12 @@ resource "aws_route53_record" "acm_prod_api" {
   ttl     = 300
   records = ["_0f0e9bc3701b654928736e57354c362a.wzccmgtwzk.acm-validations.aws."]
 }
+
+# CloudFront takes certificates only from us-east-1, so the MCP host's is there.
+resource "aws_route53_record" "acm_prod_mcp" {
+  zone_id = aws_route53_zone.apex.id
+  name    = "_18c6874c203eee78de4873d6b8417b5e.mcp.${var.apex_domain}"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["_5a474671b16c00ebcdbd860e14dc6bac.wzccmgtwzk.acm-validations.aws."]
+}

@@ -42,6 +42,10 @@ module "api" {
     name            = "api.heart-of.me"
     certificate_arn = "arn:aws:acm:ca-central-1:922419543441:certificate/f5a9b784-19a5-4ef6-b284-be9fc51b79dd"
   }
+  mcp_domain = {
+    name            = "mcp.heart-of.me"
+    certificate_arn = "arn:aws:acm:us-east-1:922419543441:certificate/45ae4eb4-8cc9-40af-a9e2-9b6f06c8084a"
+  }
 
   # Supabase's session pooler holds 15 (checked 2026-10-06), one per instance:
   # the API reserves 12 and the MCP host the other 3. The throttle sits under

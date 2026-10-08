@@ -39,6 +39,7 @@ terraform apply
 | `A dev.media.heart-of.me`                        | alias → media CloudFront                 |
 | `A api.heart-of.me`                              | alias → prod API Gateway (regional)      |
 | `A dev.api.heart-of.me`                          | alias → dev API Gateway (regional)       |
+| `A mcp.heart-of.me`                              | alias → prod MCP host CloudFront         |
 | `TXT dev.heart-of.me`                            | Firebase mail SPF + project verification |
 | `CNAME firebase{1,2}._domainkey.dev.heart-of.me` | Firebase mail DKIM                       |
 | `CNAME _<hash>.dev.heart-of.me` (×4)             | ACM cert validation                      |
