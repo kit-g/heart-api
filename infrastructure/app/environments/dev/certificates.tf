@@ -33,3 +33,11 @@ import {
   to = module.web_certificate.aws_acm_certificate.this
   id = "arn:aws:acm:us-east-1:583168578067:certificate/2ac33117-c985-4f4d-a382-d2c8bad1766a"
 }
+
+module "mcp_certificate" {
+  source    = "../../modules/certificate"
+  providers = { aws = aws.us_east_1 }
+
+  domain_name = local.mcp_host
+  zone_id     = aws_route53_zone.dev.zone_id
+}

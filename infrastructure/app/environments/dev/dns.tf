@@ -9,6 +9,7 @@ locals {
   www_host   = "www.dev.heart-of.me"
   api_host   = "api.dev.heart-of.me"
   media_host = "media.dev.heart-of.me"
+  mcp_host   = "mcp.dev.heart-of.me"
 
   aliases = {
     for name, target in {
@@ -16,6 +17,7 @@ locals {
       (local.www_host)   = module.cdn.web_distribution
       (local.api_host)   = module.api.custom_domain
       (local.media_host) = module.cdn.media_distribution
+      (local.mcp_host)   = module.api.mcp_distribution
       } : name => {
       domain_name    = target.domain_name
       hosted_zone_id = target.hosted_zone_id
