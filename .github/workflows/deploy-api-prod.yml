@@ -25,3 +25,27 @@ jobs:
       SUPABASE_CRED_KEY: 'secrets/supabase.json'
       ENVIRONMENT: 'prod'
       MONITORING_TOPIC_ARN: 'arn:aws:sns:ca-central-1:922419543441:monitoring'
+  # The tag's notes are committed beside the code (release_notes/<tag>.md, the
+  # `release` skill); a deployed tag becomes a GitHub release carrying them.
+  release:
+    name: "GitHub release"
+    needs: prod
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Publish the release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          notes="release_notes/${TAG}.md"
+          if [ ! -f "$notes" ]; then
+            echo "::error::$notes is missing: the release notes are committed before the tag"
+            exit 1
+          fi
+          title=$(head -n 1 "$notes" | sed 's/^# //')
+          tail -n +3 "$notes" > "$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" --verify-tag --title "$title" --notes-file "$RUNNER_TEMP/notes.md"
