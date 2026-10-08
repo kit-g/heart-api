@@ -7,6 +7,7 @@ import 'package:heart/models/exercise_preferences.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:heart/models/exports.dart';
 import 'package:heart/models/images.dart';
+import 'package:heart/models/imports.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
@@ -35,5 +36,6 @@ import 'package:mockito/annotations.dart';
   AppleIdentityService,
   ApiTokenService,
   ExportStorage,
+  ImportStorage,
 ])
 void main() {}
