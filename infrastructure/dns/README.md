@@ -1,75 +1,113 @@
-# DNS
+# DNS — the old apex zone, and the runbook for leaving it
 
-Terraform for the `heart-of.me` Route 53 zone and all its records.
+This root manages the single `heart-of.me` zone in the **dev** account, which served both
+environments until heart-api#142. Its replacement is in place: prod's apex zone in
+`app/environments/prod/dns.tf`, dev's three zones in `app/environments/dev/dns.tf`, and every
+certificate issued by its own environment (`docs/2026-10-08.dns-split.md`). This zone keeps
+answering until the registrar points at prod's; then this directory goes.
 
-Single-environment by design: the apex zone lives in the dev account today and stays there even when a prod account exists later (an apex zone can only live in one place — moving it would require a registrar NS rotation). For this reason there's no `environments/` split here, just a flat stack.
+**Do not change records here while the move is in flight.** Both zones have to serve identical
+answers for the switch to be invisible, and this one is the copy.
 
-## Layout
+## The move
 
-```
-infrastructure/dns/
-├── providers.tf       # AWS provider, profile = heart-dev
-├── backend.tf         # S3 backend, separate state file
-├── variables.tf       # apex domain, CloudFront distribution names
-├── main.tf            # apex zone + MX/SPF/DMARC
-├── dev.tf             # dev subdomain — web/media/www aliases, Firebase DKIM/SPF
-├── acm.tf             # ACM cert validation CNAMEs
-└── outputs.tf         # zone_id, name_servers
-```
+Phases 1–2 change nothing public: no delegation exists yet, and the registrar still names this
+zone's servers. The NS switch (phase 4) is the only step that is live, and it is a swap between two
+zones serving the same answers.
 
-## Apply
+### 1. dev — its zones, its certificates
 
 ```bash
-cd infrastructure/dns
-terraform init
-terraform plan       # should show zero drift
+cd infrastructure/app/environments/dev
+terraform plan      # 3 to import, 18 to add, 3 to change (tags on the certificates), 0 to destroy
 terraform apply
+terraform output name_servers
 ```
 
-## What's managed
+Creates the delegation set, the zones `dev.heart-of.me`, `dev.api.heart-of.me` and
+`dev.media.heart-of.me`, their alias and Firebase records, and imports the three dev certificates
+with their validation records beside them. Nothing in `module.cdn` or `module.api` changes: the
+distributions and the domain name keep the certificates they hold.
 
-| Record                                           | Purpose                                  |
-|--------------------------------------------------|------------------------------------------|
-| Zone `heart-of.me`                               | The hosted zone itself                   |
-| `MX heart-of.me`                                 | improvmx mail routing                    |
-| `TXT heart-of.me`                                | apex SPF + Google site verification      |
-| `TXT _dmarc.heart-of.me`                         | DMARC policy                             |
-| `A dev.heart-of.me`                              | alias → web CloudFront                   |
-| `A www.dev.heart-of.me`                          | alias → web CloudFront                   |
-| `A dev.media.heart-of.me`                        | alias → media CloudFront                 |
-| `A api.heart-of.me`                              | alias → prod API Gateway (regional)      |
-| `A dev.api.heart-of.me`                          | alias → dev API Gateway (regional)       |
-| `A mcp.heart-of.me`                              | alias → prod MCP host CloudFront         |
-| `TXT dev.heart-of.me`                            | Firebase mail SPF + project verification |
-| `CNAME firebase{1,2}._domainkey.dev.heart-of.me` | Firebase mail DKIM                       |
-| `CNAME _<hash>.dev.heart-of.me` (×4)             | ACM cert validation                      |
+### 2. prod — the apex, its certificates, the delegations
 
-## Distribution domains
+Put the four servers from dev's `name_servers` into `dev_name_servers` in
+`app/environments/prod/terraform.tfvars`, then:
 
-The web and media CloudFront distribution domain names, and the two API Gateway regional endpoints, are set in `terraform.tfvars` — the variables themselves carry no defaults. Update them when CloudFront recreates a distribution or an API Gateway domain name is recreated (both rare — alias/cert changes are in-place updates).
+```bash
+cd infrastructure/app/environments/prod
+terraform plan      # 4 to import, 0 to destroy; nothing in module.cdn or module.api
+terraform apply
+terraform output name_servers
+```
 
-## ACM
+Creates the apex zone (not yet authoritative for anyone), its alias, mail and verification records,
+the three NS delegations, and imports the four prod certificates. The plan's only changes to
+existing resources are the default tags landing on the certificates.
 
-ACM certs themselves are not in TF (cross-region us-east-1 + provider aliases is fiddly for little benefit). Validation CNAMEs **are** in TF — when issuing/rotating a cert, copy its validation record into `acm.tf`.
+ACM's renewal of `media.heart-of.me` and `heart-of.me` is due to start around 2026-10-11 (sixty
+days before expiry on 2026-12-10). It validates against whichever zone the public resolvers reach,
+and both carry the records, so the move does not need to wait for it or hurry past it.
 
-The two API certs are the exception to "everything is us-east-1": a REGIONAL API Gateway domain name only accepts a cert from its own region, so those live in `ca-central-1`, one per account. The api stack refuses any other region at plan time.
+### 3. Compare the two zones
 
-## Standing up an API domain
+Every name, from the old servers and from the new, before the switch. The dev names are delegated
+in prod's zone, so they are asked of dev's servers directly.
 
-The zone and the app environment each hold a piece the other needs, so it is two passes:
+```bash
+OLD=ns-466.awsdns-58.com
+NEW=$(cd infrastructure/app/environments/prod && terraform output -json name_servers | jq -r '.[0]')
+DEV=$(cd infrastructure/app/environments/dev && terraform output -json name_servers | jq -r '.[0]')
 
-1. Request the cert in `ca-central-1`, in that environment's account, and put its validation CNAME in `acm.tf`. Apply here; ACM issues once the record resolves.
-2. Set `custom_domain` on the api module and apply that environment. It creates the domain name and the `v1` base path mapping.
-3. Copy the `custom_domain.target` output into `<env>_api_domain_name` and apply here again — that is the record that makes the name resolve. Until it is set, the alias is skipped rather than half-built.
+while read -r name type server; do
+  printf '%-40s %-5s old: %s\n%-46s new: %s\n' "$name" "$type" \
+    "$(dig +short @"$OLD" "$name" "$type" | sort | tr '\n' ' ')" "" \
+    "$(dig +short @"$server" "$name" "$type" | sort | tr '\n' ' ')"
+done <<LIST
+heart-of.me                       A     $NEW
+heart-of.me                       MX    $NEW
+heart-of.me                       TXT   $NEW
+_dmarc.heart-of.me                TXT   $NEW
+firebase1._domainkey.heart-of.me  CNAME $NEW
+firebase2._domainkey.heart-of.me  CNAME $NEW
+www.heart-of.me                   A     $NEW
+api.heart-of.me                   A     $NEW
+media.heart-of.me                 A     $NEW
+mcp.heart-of.me                   A     $NEW
+dev.heart-of.me                   A     $DEV
+dev.heart-of.me                   TXT   $DEV
+www.dev.heart-of.me               A     $DEV
+dev.api.heart-of.me               A     $DEV
+dev.media.heart-of.me             A     $DEV
+firebase1._domainkey.dev.heart-of.me CNAME $DEV
+firebase2._domainkey.dev.heart-of.me CNAME $DEV
+LIST
+```
 
-## DNS migration plan (future)
+The alias records answer with CloudFront or API Gateway addresses, which rotate between queries;
+for those, both sides answering with the same kind of address is the match. Everything else has to
+be byte-for-byte. The ACM validation CNAMEs are not listed: the certificate modules put them in the
+new zones from the certificates themselves, and the apply would have failed otherwise.
 
-Once a prod account stands up:
+### 4. The registrar
 
-1. The dev subdomain (`dev.heart-of.me`) becomes a delegated subzone in the dev account
-2. dev's records move to that subzone, with the apex adding a single `NS dev.heart-of.me` delegation
-3. Aliases rename: `dev.media.heart-of.me` → `media.dev.heart-of.me`, `www.dev.heart-of.me` drops
-4. Apex stays in this account — prod records (`heart-of.me`, `media.heart-of.me`, etc.) get added here
+At Gandi, replace the domain's name servers with prod's four. Then:
 
-Until then, this single stack manages everything.
+```bash
+dig +trace heart-of.me NS | tail -6     # the .me servers now answer with prod's four
+```
 
+Resolvers pick up the change as the `.me` delegation's TTL expires (a day), and some cache beyond
+it. Nothing blinks in between: both zones answer the same.
+
+### 5. Retire this zone
+
+No sooner than 48 hours after the switch:
+
+1. Remove the `prevent_destroy` lifecycle from `main.tf`.
+2. `terraform destroy` here. It takes the old zone and every record in it, including the
+   validation CNAME for the unused `media.dev.heart-of.me` certificate, which nothing imported.
+3. Delete `infrastructure/dns/`, its line in `infrastructure/README.md`, and this file with it.
+   The state object `heart/dns/terraform.tfstate` in the dev state bucket can go too.
+4. In the dev account's ACM (us-east-1), delete that unused `media.dev.heart-of.me` certificate;
+   it is renewal-ineligible and expires 2026-11-23 regardless.

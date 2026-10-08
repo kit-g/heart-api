@@ -18,11 +18,13 @@ infrastructure/
 │   │   ├── firebase/          # Firebase-service Lambda + its queue/trigger wiring
 │   │   └── monitoring/        # CloudWatch dashboard + alarms (prod only; native tests in tests/)
 │   ├── modules/
+│   │   ├── certificate/       # ACM certificate + its validation records, one apply (native tests in tests/)
 │   │   └── iam/               # Reusable role + inline-policies wrapper (native tests in tests/)
 │   └── environments/
-│       ├── dev/               # Wires the stacks for the dev account
-│       └── prod/              # Same, prod account
-├── dns/                       # Route53 zone + records (single env, dev account hosts apex)
+│       ├── dev/               # Wires the stacks for the dev account; its zones and certificates
+│       └── prod/              # Same, prod account; the apex zone
+├── dns/                       # The old apex zone in the dev account, kept until the registrar
+│                              # points at prod (heart-api#142; its README is the runbook)
 └── global/                    # Per-account once-only resources (OIDC provider + deploy role)
     ├── stack/
     └── environments/
@@ -30,7 +32,7 @@ infrastructure/
         └── prod/
 ```
 
-`modules/iam/tests/`, `stacks/content/tests/` and `stacks/monitoring/tests/` hold native
+`modules/certificate/tests/`, `modules/iam/tests/`, `stacks/content/tests/` and `stacks/monitoring/tests/` hold native
 `terraform test` (`.tftest.hcl`) suites.
 
 ## Checks
@@ -87,11 +89,11 @@ Cross-service `iam:PassRole` is required when the API Lambda creates a schedule 
 
 ### ACM
 
-Certificate ARNs are passed in as variables, not managed in TF. Cross-region ACM (us-east-1 for CloudFront) provider aliases are fiddly, and certs change rarely — keep them out.
+Certificates are `modules/certificate`: the request, its validation records in the environment's own zone, and the validation that hands the ARN on once issued. Each environment declares its own in `certificates.tf` — CloudFront's with `providers = { aws = aws.us_east_1 }`, since CloudFront takes certificates from that region only; the API's regional one with the default provider. The stacks still take an ARN, so a certificate reaches them as `module.<name>_certificate.arn`, never as a literal. Adding a host is a module call and an alias record: no console, no ARN pasted anywhere.
 
 ### DNS
 
-DNS lives in `infrastructure/dns/` as a single env (dev account hosts the apex zone). When prod exists, the split will be: apex zone in prod managing email + delegations, `dev.heart-of.me` as a delegated subzone in dev.
+Each account owns the DNS for its environment, in `environments/<env>/dns.tf`. Prod holds the apex zone `heart-of.me`: its names, the domain's mail, and NS delegations for dev's names. Dev holds three zones on one delegation set — `dev.heart-of.me`, `dev.api.heart-of.me`, `dev.media.heart-of.me` — because the last two are siblings of `dev`, not children, and a single `dev` zone could not carry them. Alias records point at the stack outputs (`module.cdn.web_distribution`, `module.api.custom_domain`, …) directly, so no distribution name is copied between roots. The design and the move are `docs/2026-10-08.dns-split.md`; `infrastructure/dns/` is the zone being retired.
 
 ## State
 
