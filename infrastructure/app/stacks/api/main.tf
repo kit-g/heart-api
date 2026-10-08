@@ -91,7 +91,7 @@ resource "aws_api_gateway_deployment" "deployment" {
           aws_api_gateway_resource.proxy.id,
           aws_api_gateway_method.proxy.id,
           aws_api_gateway_integration.proxy.id,
-          aws_api_gateway_gateway_response.throttled,
+          aws_api_gateway_gateway_response.errors,
         ]
       )
     )
@@ -122,25 +122,61 @@ resource "aws_api_gateway_method_settings" "throttle" {
   }
 }
 
-# The throttle's refusal in the API's own error shape, with the Retry-After
-# AWS's default leaves out: scripts and MCP hosts back off by it.
-resource "aws_api_gateway_gateway_response" "throttled" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  response_type = "THROTTLED"
-  status_code   = "429"
-
-  response_parameters = {
-    "gatewayresponse.header.Retry-After" = "'1'"
+# Errors API Gateway answers itself, before or instead of the function, in the
+# API's own error shape ({error, code, reason}): a caller reads one shape
+# whichever layer refused it. Types not listed here fall back to the two
+# defaults. A refusal at the custom domain (a path outside /v1) happens before
+# the stage and keeps AWS's {"message": "Forbidden"}.
+locals {
+  gateway_errors = {
+    # The throttle, with the Retry-After AWS's default leaves out: scripts and
+    # MCP hosts back off by it.
+    THROTTLED = {
+      status  = "429"
+      headers = { "gatewayresponse.header.Retry-After" = "'1'" }
+      body    = { error = "too many requests", code = "throttled", reason = "the API is busy; try again shortly", retryAfter = 1 }
+    }
+    # A path with no method: only the stage root, since {proxy+} takes the
+    # rest. AWS calls it a missing token; it is a missing route.
+    MISSING_AUTHENTICATION_TOKEN = {
+      status = "404"
+      body   = { error = "no such route", code = "route_not_found" }
+    }
+    INTEGRATION_TIMEOUT = {
+      status = "504"
+      body   = { error = "timed out", code = "timeout", reason = "the request took longer than API Gateway's 29 seconds" }
+    }
+    REQUEST_TOO_LARGE = {
+      status = "413"
+      body   = { error = "request too large", code = "request_too_large", reason = "a request body is at most 10 MB" }
+    }
+    # Everything else, AWS's own message as the reason. A crashed or throttled
+    # function lands here as a 5xx.
+    DEFAULT_4XX = {
+      body = { error = "bad request", code = "gateway_rejected", reason = "$context.error.message" }
+    }
+    DEFAULT_5XX = {
+      body = { error = "server error", code = "server_error", reason = "$context.error.message" }
+    }
   }
+}
+
+resource "aws_api_gateway_gateway_response" "errors" {
+  for_each = local.gateway_errors
+
+  rest_api_id         = aws_api_gateway_rest_api.api.id
+  response_type       = each.key
+  status_code         = lookup(each.value, "status", null)
+  response_parameters = lookup(each.value, "headers", null)
 
   response_templates = {
-    "application/json" = jsonencode({
-      error      = "too many requests"
-      code       = "throttled"
-      reason     = "the API is busy; try again shortly"
-      retryAfter = 1
-    })
+    "application/json" = jsonencode(each.value.body)
   }
+}
+
+moved {
+  from = aws_api_gateway_gateway_response.throttled
+  to   = aws_api_gateway_gateway_response.errors["THROTTLED"]
 }
 
 resource "aws_sqs_queue" "events_dlq" {
