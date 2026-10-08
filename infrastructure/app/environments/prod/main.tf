@@ -36,16 +36,16 @@ module "api" {
   apple_sign_in                = local.apple_sign_in
   account_deletion_offset_days = 30
   monitoring_email             = "info@heart-of.me"
-  media_distribution           = "media.heart-of.me"
+  media_distribution           = local.media_host
   allowed_origins              = ["https://heart-of.me", "https://www.heart-of.me"]
   site_origin                  = "https://heart-of.me"
   custom_domain = {
-    name            = "api.heart-of.me"
-    certificate_arn = "arn:aws:acm:ca-central-1:922419543441:certificate/f5a9b784-19a5-4ef6-b284-be9fc51b79dd"
+    name            = local.api_host
+    certificate_arn = module.api_certificate.arn
   }
   mcp_domain = {
-    name            = "mcp.heart-of.me"
-    certificate_arn = "arn:aws:acm:us-east-1:922419543441:certificate/45ae4eb4-8cc9-40af-a9e2-9b6f06c8084a"
+    name            = local.mcp_host
+    certificate_arn = module.mcp_certificate.arn
   }
 
   # Supabase's session pooler holds 15 (checked 2026-10-06), one per instance:
@@ -74,10 +74,10 @@ module "assets" {
 
 module "cdn" {
   source                             = "../../stacks/cdn"
-  media_distribution_ssl_certificate = "arn:aws:acm:us-east-1:922419543441:certificate/a91ae5f9-d156-465b-9ea4-d3564a7175d6"
-  media_distribution_aliases         = ["media.heart-of.me"]
-  web_distribution_ssl_certificate   = "arn:aws:acm:us-east-1:922419543441:certificate/60a653e8-c734-4d9a-bd92-747e9f4e994a"
-  web_distribution_aliases           = ["heart-of.me", "www.heart-of.me"]
+  media_distribution_ssl_certificate = module.media_certificate.arn
+  media_distribution_aliases         = [local.media_host]
+  web_distribution_ssl_certificate   = module.web_certificate.arn
+  web_distribution_aliases           = [local.apex_domain, local.www_host]
   firebase_auth_domain               = "heart-of-yours.firebaseapp.com"
   content_bucket                     = module.content.content_bucket
   static_bucket                      = module.content.static_bucket

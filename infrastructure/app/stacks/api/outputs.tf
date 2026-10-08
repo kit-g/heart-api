@@ -1,10 +1,8 @@
-# What a Route 53 alias in the `dns` root module points at. That module holds
-# its own state and is applied separately, so these are copied across by hand,
-# the way the distribution domain names already are.
+# What the environment's Route 53 alias for the API points at.
 output "custom_domain" {
   value = var.custom_domain == null ? null : {
     name           = aws_api_gateway_domain_name.api[0].domain_name
-    target         = aws_api_gateway_domain_name.api[0].regional_domain_name
+    domain_name    = aws_api_gateway_domain_name.api[0].regional_domain_name
     hosted_zone_id = aws_api_gateway_domain_name.api[0].regional_zone_id
   }
 }
@@ -41,7 +39,10 @@ output "log_group_name" {
   value = aws_cloudwatch_log_group.api.name
 }
 
-output "mcp_distribution_domain" {
-  description = "Where to point the MCP host's DNS record (a CNAME for mcp.heart-of.me)."
-  value       = aws_cloudfront_distribution.mcp.domain_name
+output "mcp_distribution" {
+  description = "What the MCP host's Route 53 alias points at."
+  value = {
+    domain_name    = aws_cloudfront_distribution.mcp.domain_name
+    hosted_zone_id = aws_cloudfront_distribution.mcp.hosted_zone_id
+  }
 }
