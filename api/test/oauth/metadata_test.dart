@@ -11,8 +11,8 @@ void main() {
   final environments = {
     'dev': OAuthConfig(
       issuer: Uri.parse('https://dev.heart-of.me'),
-      apiBase: Uri.parse('https://dev.api.heart-of.me/v1'),
-      mcpResource: 'https://dev.api.heart-of.me/v1/mcp',
+      apiBase: Uri.parse('https://api.dev.heart-of.me/v1'),
+      mcpResource: 'https://api.dev.heart-of.me/v1/mcp',
     ),
     'prod': OAuthConfig(
       issuer: Uri.parse('https://heart-of.me'),
