@@ -43,6 +43,10 @@ module "api" {
     name            = local.api_host
     certificate_arn = module.api_certificate.arn
   }
+  mcp_domain = {
+    name            = local.mcp_host
+    certificate_arn = module.mcp_certificate.arn
+  }
   allowed_origins = local.browser_origins
   site_origin     = "https://dev.heart-of.me"
 }
