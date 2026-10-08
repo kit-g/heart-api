@@ -38,3 +38,13 @@ provider "supabase" {
   access_token = jsondecode(data.aws_s3_object.supabase_creds.body).api_token
 }
 
+# CloudFront takes its certificates from us-east-1 only; everything else in
+# the environment is in the default region.
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = var.tags
+  }
+}

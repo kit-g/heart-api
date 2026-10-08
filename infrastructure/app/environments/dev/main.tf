@@ -37,11 +37,11 @@ module "api" {
   apple_sign_in                = local.apple_sign_in
   account_deletion_offset_days = 2
   monitoring_email             = "info@heart-of.me"
-  media_distribution           = "dev.media.heart-of.me"
+  media_distribution           = local.media_host
   events_enabled               = var.events_enabled
   custom_domain = {
-    name            = "dev.api.heart-of.me"
-    certificate_arn = "arn:aws:acm:ca-central-1:583168578067:certificate/43e5a2aa-7c62-4fa4-a137-9b35df1f47b6"
+    name            = local.api_host
+    certificate_arn = module.api_certificate.arn
   }
   allowed_origins = local.browser_origins
   site_origin     = "https://dev.heart-of.me"
@@ -77,11 +77,11 @@ module "assets" {
 
 module "cdn" {
   source                             = "../../stacks/cdn"
-  media_distribution_ssl_certificate = "arn:aws:acm:us-east-1:583168578067:certificate/297c34bc-7a74-4cb1-82c4-71bfe0114eb7"
-  media_distribution_aliases         = ["dev.media.heart-of.me"]
+  media_distribution_ssl_certificate = module.media_certificate.arn
+  media_distribution_aliases         = [local.media_host]
   media_cors_origins                 = local.browser_origins
-  web_distribution_ssl_certificate   = "arn:aws:acm:us-east-1:583168578067:certificate/2ac33117-c985-4f4d-a382-d2c8bad1766a"
-  web_distribution_aliases           = ["dev.heart-of.me", "www.dev.heart-of.me"]
+  web_distribution_ssl_certificate   = module.web_certificate.arn
+  web_distribution_aliases           = [local.web_host, local.www_host]
   firebase_auth_domain               = "heart-of-yours-dev.firebaseapp.com"
   content_bucket                     = module.content.content_bucket
   static_bucket                      = module.content.static_bucket
