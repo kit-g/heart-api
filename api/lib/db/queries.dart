@@ -727,13 +727,17 @@ WHERE w.id IN (SELECT id FROM _existing_workout)
 const _reimportCandidates = '''
 -- keyed by the *incoming* name so downstream joins on the CSV's spelling still
 -- hit; matching is case-insensitive because that is the DB's own notion of
--- identity (unique on (user_id, lower(name)))
+-- identity (unique on (user_id, lower(name))). A name another app's catalog
+-- uses for a library exercise arrives through its aliases; the user's own
+-- exercise wins over the library's, and a name over an alias
 _resolved AS (
   SELECT DISTINCT ON (n.name) n.name, e.id
   FROM exercises e
-  JOIN _names n ON lower(n.name) = lower(e.name)
+  JOIN _names n
+    ON lower(n.name) = lower(e.name)
+    OR lower(n.name) IN (SELECT lower(a) FROM unnest(e.aliases) a)
   WHERE e.user_id IS NULL OR e.user_id = @userId
-  ORDER BY n.name, e.user_id NULLS LAST
+  ORDER BY n.name, e.user_id NULLS LAST, lower(n.name) = lower(e.name) DESC
 ),
 _reimported AS (
   SELECT w.id AS workout_id, w.note AS stored_note, i.workout
@@ -991,15 +995,7 @@ SELECT
     AS workouts_already_imported,
   -- the *incoming* spellings that matched: the caller set-subtracts these from
   -- the batch's names, so DB-cased names would misreport case-variant matches
-  COALESCE(
-    (SELECT jsonb_agg(DISTINCT n.name)
-     FROM _names n
-     WHERE EXISTS (
-       SELECT 1 FROM exercises e
-       WHERE lower(e.name) = lower(n.name) AND (e.user_id IS NULL OR e.user_id = @userId)
-     )),
-    '[]'::jsonb
-  ) AS exercises_matched
+  COALESCE((SELECT jsonb_agg(DISTINCT name) FROM _resolved), '[]'::jsonb) AS exercises_matched
 ''';
 
 /// Full replace of a workout body from `@exercises`: children the body still
