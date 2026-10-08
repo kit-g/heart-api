@@ -38,6 +38,7 @@ module "api" {
   monitoring_email             = "info@heart-of.me"
   media_distribution           = "media.heart-of.me"
   allowed_origins              = ["https://heart-of.me", "https://www.heart-of.me"]
+  site_origin                  = "https://heart-of.me"
   custom_domain = {
     name            = "api.heart-of.me"
     certificate_arn = "arn:aws:acm:ca-central-1:922419543441:certificate/f5a9b784-19a5-4ef6-b284-be9fc51b79dd"
