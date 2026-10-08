@@ -17,18 +17,17 @@ the registrar switch, which swaps between two zones serving the same answers.
 cd infrastructure/app/environments/dev
 terraform apply \
   -target=aws_route53_zone.dev \
-  -target='aws_route53_record.alias["dev.heart-of.me"]' \
-  -target='aws_route53_record.alias["www.dev.heart-of.me"]' \
   -target=aws_route53_record.firebase_txt \
   -target=aws_route53_record.firebase_dkim
 terraform output name_servers
 ```
 
-Creates the zone with the records whose targets already exist — the web aliases and Firebase's
-mail records — and imports the web certificate (its names survived the rename) with its validation
-records beside it. Nothing public changes: nothing delegates to the zone yet. The api and media
-certificates are not in this pass on purpose: they are new names, and ACM can validate them only
-once the zone answers publicly.
+Creates the zone with Firebase's mail records. Nothing public changes: nothing delegates to the
+zone yet. Only these three targets: the alias records share one `for_each` over every stack
+output, so targeting any one of them drags in the API domain name and with it the api
+certificate, whose validation record only this zone carries — the apply then waits on a record
+nobody can resolve. If that has happened, do not cancel: run phase 2 in another terminal (its
+state is separate), and the wait ends by itself once the delegation is live.
 
 ## 2. this root — delegate dev, drop its records
 
@@ -40,10 +39,10 @@ terraform plan      # 1 to add (the NS record), 12 to destroy (dev's records and
 terraform apply
 ```
 
-From here `dev.heart-of.me` and `www.dev.heart-of.me` answer from the new zone, with the same
-targets, and Firebase's dev mail records with them. `dev.api.heart-of.me` and
-`dev.media.heart-of.me` stop resolving: that is the accepted break, and they come back under
-their new names in the next phase.
+From here the dev subtree is the new zone's. Firebase's dev mail records are already there;
+`dev.heart-of.me` and `www.dev.heart-of.me` are dark until the next phase puts their aliases in,
+minutes. `dev.api.heart-of.me` and `dev.media.heart-of.me` stop resolving for good: that is the
+accepted break, and they come back under their new names in the next phase.
 
 ## 3. dev — the rest
 
@@ -54,7 +53,7 @@ terraform apply
 ```
 
 Requests and validates the certificates for `api.dev.heart-of.me` and `media.dev.heart-of.me`
-(ACM issues within minutes once the records resolve), recreates the API's domain name and base
+(ACM issues within minutes once the records resolve), puts the web aliases in, recreates the API's domain name and base
 path mapping under the new name, re-aliases the media distribution, and points both aliases.
 The Lambda functions pick up the new names in their environment.
 
