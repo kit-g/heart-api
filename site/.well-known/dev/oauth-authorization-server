@@ -1,9 +1,9 @@
 {
   "issuer": "https://dev.heart-of.me",
-  "authorization_endpoint": "https://dev.api.heart-of.me/v1/oauth/authorize",
-  "token_endpoint": "https://dev.api.heart-of.me/v1/oauth/token",
-  "registration_endpoint": "https://dev.api.heart-of.me/v1/oauth/register",
-  "revocation_endpoint": "https://dev.api.heart-of.me/v1/oauth/revoke",
+  "authorization_endpoint": "https://api.dev.heart-of.me/v1/oauth/authorize",
+  "token_endpoint": "https://api.dev.heart-of.me/v1/oauth/token",
+  "registration_endpoint": "https://api.dev.heart-of.me/v1/oauth/register",
+  "revocation_endpoint": "https://api.dev.heart-of.me/v1/oauth/revoke",
   "scopes_supported": [
     "read"
   ],

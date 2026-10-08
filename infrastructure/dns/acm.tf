@@ -3,38 +3,6 @@
 # a one-time validation token; ACM stops needing them once issued, but
 # leaving them in place is the standard practice.
 
-resource "aws_route53_record" "acm_dev_apex" {
-  zone_id = aws_route53_zone.apex.id
-  name    = "_b7feebaf597a5b3dfa112fb63ad76a40.dev.${var.apex_domain}"
-  type    = "CNAME"
-  ttl     = 14400
-  records = ["_f3c60a3d8cc31b91fd49ea5e969c15f8.xlfgrmvvlj.acm-validations.aws."]
-}
-
-resource "aws_route53_record" "acm_dev_www" {
-  zone_id = aws_route53_zone.apex.id
-  name    = "_323f7b7de154eed3a1faa0f26192a320.www.dev.${var.apex_domain}"
-  type    = "CNAME"
-  ttl     = 14400
-  records = ["_2b937ce14a76052f45b0f5e3e792251d.xlfgrmvvlj.acm-validations.aws."]
-}
-
-resource "aws_route53_record" "acm_dev_media" {
-  zone_id = aws_route53_zone.apex.id
-  name    = "_a66f9b14b2fe79100de8da2794bbda3e.dev.media.${var.apex_domain}"
-  type    = "CNAME"
-  ttl     = 14400
-  records = ["_1d9796af82610f64321c6d4ffc014691.xlfgrmvvlj.acm-validations.aws."]
-}
-
-resource "aws_route53_record" "acm_media_dev" {
-  zone_id = aws_route53_zone.apex.id
-  name    = "_1c6dd197c647ba02cd8dda34a34d7744.media.dev.${var.apex_domain}"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["_26e7f763e4573a5ec13911b32027b655.jkddzztszm.acm-validations.aws."]
-}
-
 resource "aws_route53_record" "acm_media_prod" {
   zone_id = aws_route53_zone.apex.id
   name    = "_ec65c8830e75069be3ce96cacab5afe4.media.${var.apex_domain}"
@@ -59,17 +27,9 @@ resource "aws_route53_record" "acm_prod_www" {
   records = ["_a8919cbb2244336f7d0a8fdc516be252.jkddzztszm.acm-validations.aws."]
 }
 
-# The API certificates are the only ones in this file issued in ca-central-1,
+# The API certificate is the only one in this file issued in ca-central-1,
 # not us-east-1: a REGIONAL API Gateway domain name will not take a certificate
 # from anywhere but its own region.
-
-resource "aws_route53_record" "acm_dev_api" {
-  zone_id = aws_route53_zone.apex.id
-  name    = "_bf152e21d00845317f02302e2d6305de.dev.api.${var.apex_domain}"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["_00d645ffb60b0140b1cd3bf68de8bded.wzccmgtwzk.acm-validations.aws."]
-}
 
 resource "aws_route53_record" "acm_prod_api" {
   zone_id = aws_route53_zone.apex.id
