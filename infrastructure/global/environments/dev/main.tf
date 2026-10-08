@@ -37,3 +37,9 @@ module "deploy_role" {
     ]
   }
 }
+
+# Created by hand for the consent page before the stack managed it.
+import {
+  to = module.deploy_role.google_firebase_web_app.web
+  id = "projects/heart-of-yours-dev/webApps/1:547445170683:web:93d9ecd705fe873f2e6b5e"
+}
