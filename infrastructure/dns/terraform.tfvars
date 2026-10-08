@@ -3,3 +3,9 @@ prod_web_distribution_domain_name   = "d1owc73xlyegzt.cloudfront.net"
 firebase_prod_project_id            = "heart-of-yours"
 prod_api_domain_name                = "d-xlaoclzncj.execute-api.ca-central-1.amazonaws.com"
 prod_mcp_distribution_domain_name   = "dechah25v67t4.cloudfront.net"
+dev_name_servers = [
+  "ns-1148.awsdns-15.org",
+  "ns-243.awsdns-30.com",
+  "ns-744.awsdns-29.net",
+  "ns-1580.awsdns-05.co.uk"
+]
