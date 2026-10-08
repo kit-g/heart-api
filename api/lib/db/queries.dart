@@ -726,14 +726,19 @@ WHERE w.id IN (SELECT id FROM _existing_workout)
 /// which is what stops set 1's RPE landing on the old set 2.
 const _reimportCandidates = '''
 -- keyed by the *incoming* name so downstream joins on the CSV's spelling still
--- hit; matching is case-insensitive because that is the DB's own notion of
--- identity (unique on (user_id, lower(name)))
+-- hit, matched by its canonical form (the English title behind a translated
+-- one, see _names); matching is case-insensitive because that is the DB's own
+-- notion of identity (unique on (user_id, lower(name))). A name another app's
+-- catalog uses for a library exercise arrives through its aliases; the user's
+-- own exercise wins over the library's, and a name over an alias
 _resolved AS (
   SELECT DISTINCT ON (n.name) n.name, e.id
   FROM exercises e
-  JOIN _names n ON lower(n.name) = lower(e.name)
+  JOIN _names n
+    ON lower(n.canonical) = lower(e.name)
+    OR lower(n.canonical) IN (SELECT lower(a) FROM unnest(e.aliases) a)
   WHERE e.user_id IS NULL OR e.user_id = @userId
-  ORDER BY n.name, e.user_id NULLS LAST
+  ORDER BY n.name, e.user_id NULLS LAST, lower(n.canonical) = lower(e.name) DESC
 ),
 _reimported AS (
   SELECT w.id AS workout_id, w.note AS stored_note, i.workout
@@ -808,9 +813,13 @@ _incoming AS (
   SELECT w AS workout, w->>'importId' AS import_id
   FROM jsonb_array_elements(@workouts::jsonb) w
 ),
+-- canonical: the English title behind a title the source app writes in
+-- another language (import_names), else the name itself
 _names AS (
-  SELECT ex->>'name' AS name, ex->>'category' AS category, ex->>'target' AS target
+  SELECT ex->>'name' AS name, ex->>'category' AS category, ex->>'target' AS target,
+         COALESCE(im.name, ex->>'name') AS canonical
   FROM jsonb_array_elements(@exercises::jsonb) ex
+  LEFT JOIN import_names im ON im.source = @source AND lower(im.title) = lower(ex->>'name')
 ),
 $_reimportCandidates,
 _already_imported AS (
@@ -818,25 +827,29 @@ _already_imported AS (
   FROM _incoming i
   WHERE exists (SELECT 1 FROM workouts w WHERE w.user_id = @userId AND w.import_id = i.import_id)
 ),
+-- a custom is created under its canonical name, so the same history exported
+-- in two languages makes one custom, not two
 _created_exercises AS (
   INSERT INTO exercises (name, category, target, user_id)
   -- DISTINCT ON folds case-variant spellings of one exercise into a single
   -- custom; inserting both would trip unique (user_id, lower(name))
-  SELECT DISTINCT ON (lower(n.name)) n.name, n.category, n.target, @userId
+  SELECT DISTINCT ON (lower(n.canonical)) n.canonical, n.category, n.target, @userId
   FROM _names n
   WHERE NOT exists (SELECT 1 FROM _resolved r WHERE lower(r.name) = lower(n.name))
     AND (@createCustom::jsonb IS NULL OR n.name IN (SELECT jsonb_array_elements_text(@createCustom::jsonb)))
-  ORDER BY lower(n.name), n.name
+  ORDER BY lower(n.canonical), n.canonical
   RETURNING id, name
 ),
--- case-folded name -> exercise id; DISTINCT because two case-variant incoming
--- names resolve to the same id and must not fan out the joins below
+-- case-folded incoming name -> exercise id; DISTINCT because two case-variant
+-- incoming names resolve to the same id and must not fan out the joins below
 _lookup AS (
   SELECT DISTINCT lower(name) AS name, id
   FROM (
     SELECT name, id FROM _resolved
     UNION ALL
-    SELECT name, id FROM _created_exercises
+    SELECT n.name, c.id
+    FROM _names n
+    JOIN _created_exercises c ON lower(c.name) = lower(n.canonical)
   ) _all
 ),
 _inserted_workouts AS (
@@ -966,8 +979,9 @@ _incoming AS (
   FROM jsonb_array_elements(@workouts::jsonb) w
 ),
 _names AS (
-  SELECT ex->>'name' AS name
+  SELECT ex->>'name' AS name, COALESCE(im.name, ex->>'name') AS canonical
   FROM jsonb_array_elements(@exercises::jsonb) ex
+  LEFT JOIN import_names im ON im.source = @source AND lower(im.title) = lower(ex->>'name')
 ),
 $_reimportCandidates
 SELECT
@@ -991,15 +1005,7 @@ SELECT
     AS workouts_already_imported,
   -- the *incoming* spellings that matched: the caller set-subtracts these from
   -- the batch's names, so DB-cased names would misreport case-variant matches
-  COALESCE(
-    (SELECT jsonb_agg(DISTINCT n.name)
-     FROM _names n
-     WHERE EXISTS (
-       SELECT 1 FROM exercises e
-       WHERE lower(e.name) = lower(n.name) AND (e.user_id IS NULL OR e.user_id = @userId)
-     )),
-    '[]'::jsonb
-  ) AS exercises_matched
+  COALESCE((SELECT jsonb_agg(DISTINCT name) FROM _resolved), '[]'::jsonb) AS exercises_matched
 ''';
 
 /// Full replace of a workout body from `@exercises`: children the body still
