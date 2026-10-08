@@ -1,5 +1,5 @@
-# The apex zone: prod's names, the domain's mail, and the delegations to dev's
-# zones. The registrar (Gandi) points at the `name_servers` output.
+# The apex zone: prod's names, the domain's mail, and the delegation of dev's
+# zone. The registrar (Gandi) points at the `name_servers` output.
 
 locals {
   apex_domain = "heart-of.me"
@@ -21,10 +21,8 @@ locals {
     }
   }
 
-  # dev's names live in the dev account, each as a zone of its own: `dev.api`
-  # and `dev.media` are siblings of `dev`, not children, so one delegation
-  # could not carry them. All three share dev's delegation set.
-  delegations = toset(["dev.heart-of.me", "dev.api.heart-of.me", "dev.media.heart-of.me"])
+  # Every dev name is under this one, in the dev account.
+  dev_zone = "dev.heart-of.me"
 }
 
 resource "aws_route53_zone" "apex" {
@@ -51,10 +49,8 @@ resource "aws_route53_record" "alias" {
 }
 
 resource "aws_route53_record" "delegation" {
-  for_each = local.delegations
-
   zone_id = aws_route53_zone.apex.zone_id
-  name    = each.key
+  name    = local.dev_zone
   type    = "NS"
   ttl     = 172800
   records = var.dev_name_servers

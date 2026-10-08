@@ -39,9 +39,9 @@ variable "log_retention" {
 
 variable "dev_name_servers" {
   type        = list(string)
-  description = "The dev account's name servers, which the apex delegates dev's names to: the dev environment's `name_servers` output. That state is in another account, so the value crosses by hand."
+  description = "The dev account's name servers, which the apex delegates dev.heart-of.me to: the dev environment's `name_servers` output. That state is in another account, so the value crosses by hand."
 
-  # A Route 53 delegation set is four servers; anything else is a half-pasted list.
+  # A Route 53 zone has four servers; anything else is a half-pasted list.
   validation {
     condition     = length(var.dev_name_servers) == 4
     error_message = "dev_name_servers is the dev environment's name_servers output, all four of them."
