@@ -120,11 +120,18 @@ certificates themselves, and the apply would have failed otherwise.
 
 ## 6. The registrar
 
-At Gandi, replace the domain's name servers with prod's four. Then:
+The domain is registered through Route 53 Domains in the dev account (Gandi is the registrar AWS
+uses for `.me`, which is what WHOIS shows). Point it at prod's four:
 
 ```bash
+aws route53domains update-domain-nameservers --profile heart-dev --region us-east-1 \
+  --domain-name heart-of.me \
+  --nameservers Name=<ns1> Name=<ns2> Name=<ns3> Name=<ns4>
 dig +trace heart-of.me NS | tail -6     # the .me servers now answer with prod's four
 ```
+
+The registration itself stays in the dev account; moving it to prod is a separate transfer, for
+another day.
 
 Resolvers pick up the change as the `.me` delegation's TTL expires (a day), and some cache beyond
 it. Nothing blinks in between: both zones answer the same.
