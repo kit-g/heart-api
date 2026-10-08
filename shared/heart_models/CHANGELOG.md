@@ -108,7 +108,8 @@ server and every client get the same answer.
 
 ## 2.9.0
 
-Personal access tokens for the developer API (heart-api#111).
+Personal access tokens for the developer API (heart-api#111; app side
+heart-of-yours#271).
 
 - New: `ApiToken`, a token as its owner lists it: `id`, `name`, optional
   `purpose`, `hint` (the secret's last four characters), `scopes`,
