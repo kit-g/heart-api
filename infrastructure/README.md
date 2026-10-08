@@ -23,8 +23,8 @@ infrastructure/
 │   └── environments/
 │       ├── dev/               # Wires the stacks for the dev account; its zone and certificates
 │       └── prod/              # Same, prod account; the apex zone
-├── dns/                       # The old apex zone in the dev account, kept until the registrar
-│                              # points at prod (heart-api#142; its README is the runbook)
+├── dns/                       # The old apex zone in the dev account, kept until resolvers have
+│                              # dropped it, 2026-10-10 (heart-api#142; its README is the runbook)
 └── global/                    # Per-account once-only resources (OIDC provider + deploy role)
     ├── stack/
     └── environments/

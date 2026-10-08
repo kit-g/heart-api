@@ -11,6 +11,11 @@ from this zone (phases 1–3): that is where dev's hosts are renamed, and dev bu
 their env files follow. The apex moves second (phases 4–7), and nothing public changes there until
 the registrar switch, which swaps between two zones serving the same answers.
 
+**Where it stands:** phases 1–6 ran on 2026-10-08; the registry handed `heart-of.me` to prod's
+servers at about 20:10 UTC that day, and every host resolves through the new chain. Phase 7 is due
+no sooner than 2026-10-10 20:00 UTC. Until then this zone keeps answering for resolvers that
+cached the old delegation, with the same records prod serves.
+
 ## 1. dev — the zone, and what it can carry before it is delegated
 
 ```bash
