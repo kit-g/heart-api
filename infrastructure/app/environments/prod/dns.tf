@@ -1,5 +1,6 @@
 # The apex zone: prod's names, the domain's mail, and the delegation of dev's
-# zone. The registrar (Gandi) points at the `name_servers` output.
+# zone. The registration (Route 53 Domains, in the dev account) points at the
+# `name_servers` output.
 
 locals {
   apex_domain = "heart-of.me"
