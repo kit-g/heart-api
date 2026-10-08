@@ -24,6 +24,17 @@ class Created<T extends Model> implements Model {
   Map<String, dynamic> toMap() => value.toMap();
 }
 
+/// Taken, not done: `apiHandler` responds `202` for one of these. The body is
+/// [value]'s, which says what was kept and what happens next.
+class Accepted<T extends Model> implements Model {
+  final T value;
+
+  const new(this.value);
+
+  @override
+  Map<String, dynamic> toMap() => value.toMap();
+}
+
 /// A file rather than JSON: `apiHandler` answers `200` with [bytes] as the
 /// body, typed [mimeType], offered for download as [filename].
 class Download implements Model {
@@ -49,7 +60,7 @@ class SeeOther implements Model {
 }
 
 /// Wraps a [ModelHandler] into a Relic [Handler]: serializes the returned model
-/// as `200 JSON` (or `201` when it's a [Created]), and maps thrown
+/// as `200 JSON` (`201` for a [Created], `202` for an [Accepted]), and maps thrown
 /// control-flow/errors to status codes — `NoContent` → 204, any [ApiException]
 /// → its status, sloppy client input (`TypeError`/`FormatException`) → 400,
 /// `UnimplementedError` → 501, and anything else → 500. This is the single
@@ -61,6 +72,7 @@ Handler apiHandler(ModelHandler handler) {
       final response = await handler(request);
       return switch (response) {
         Created() => JsonResponse(201, body: response),
+        Accepted() => JsonResponse(202, body: response),
         Download(:final bytes, :final mimeType, :final filename) => Response.ok(
           body: Body.fromData(Uint8List.fromList(bytes), mimeType: mimeType),
           headers: Headers.build(

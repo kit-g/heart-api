@@ -92,6 +92,7 @@ RelicApp buildApp({
     ..use('/workouts', workoutsDb(db: database))
     ..use('/workouts', imageDb(db: database))
     ..use('/workouts', imageStorageDb(db: storage))
+    ..use('/workouts', importStorage(storage: storage))
     ..use('/templates', templatesDb(db: database))
     ..use('/template-folders', templateFoldersDb(db: database))
     ..use('/events', imageStorageDb(db: storage))
