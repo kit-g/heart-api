@@ -320,8 +320,11 @@ resource "aws_cloudfront_distribution" "web" {
     }
   }
 
+  # Sign in with Apple returns to the handler by form POST (response_mode
+  # form_post), so this path takes every method; GET alone turned Apple's
+  # answer into a 403, which the error mapping below served as the index.
   ordered_cache_behavior {
-    allowed_methods          = ["GET", "HEAD"]
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods           = ["GET", "HEAD"]
     path_pattern             = "/__/auth/*"
     target_origin_id         = local.firebase_origin
