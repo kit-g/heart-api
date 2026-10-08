@@ -49,7 +49,7 @@ change is released the moment it lands. Consequences:
 
 ## Compatibility floor
 
-Mobile **1.12** on `heart_models` **2.11.0** is the first store release Heart promotes. Every
+Mobile **1.13** against API **v0.9.0** is the first store release Heart promotes. Every
 build that reaches a phone stays installed for months and cannot be patched, so from that
 release on the API, the CDN content and `heart_models` are read by builds we don't control.
 
