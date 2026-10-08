@@ -64,7 +64,8 @@ release on the API, the CDN content and `heart_models` are read by builds we don
   announced ahead, never a shortcut for a schema change.
 - Every prod release (`v*` tag) carries a compatibility note: each contract change since the
   last tag classified as additive or as a phase of a named plan, and the oldest app version
-  it still serves.
+  it still serves. It lives in `release_notes/v<version>.md`, drafted by the `release` skill,
+  committed before the tag, and published as the GitHub release.
 
 ## Definition of done
 
