@@ -36,6 +36,24 @@ people build.
 
 with a `Retry-After` header in seconds. Free limits never go down.
 
+The whole API also has a ceiling, shared by everyone. Past it you get the same shape with `"code":
+"throttled"` and `Retry-After: 1`. Back off and retry; it isn't held against your account.
+
+## Errors
+
+Every error, from the API or the gateway in front of it, is JSON in one shape:
+`{"error": "…", "code": "…", "reason": "…"}`. `reason` is optional. Branch on the status and
+`code`; `error` and `reason` are for people. From the gateway:
+
+| Status | `code`              | When                                       |
+|--------|---------------------|--------------------------------------------|
+| 404    | `route_not_found`   | no such route                              |
+| 413    | `request_too_large` | a body over 10 MB                          |
+| 429    | `throttled`         | the API-wide ceiling                       |
+| 504    | `timeout`           | a request ran past 29 seconds              |
+| 5xx    | `server_error`      | anything else on our side; retry later     |
+| 4xx    | `gateway_rejected`  | any other refusal before the API saw it    |
+
 ## Routes
 
 All `GET`, all about the account the token belongs to. Paginated lists carry a `cursor` while
