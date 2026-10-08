@@ -1,0 +1,4 @@
+# Real exports read byte for byte by the import tests: the Hevy app mixes CRLF
+# rows with bare LF ones and the web file keeps CRLF inside quoted notes, and a
+# parser that survives that must be tested on the original bytes.
+api/test/fixtures/hevy/*.csv -text
