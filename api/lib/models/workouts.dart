@@ -21,17 +21,26 @@ abstract interface class ApiWorkoutService {
   });
 
   /// [userId]'s completed working sets grouped by exercise, oldest first;
-  /// one exercise's when [exerciseId] is given.
-  Future<List<ExerciseRecordSets>> getRecordSets({required String userId, String? exerciseId});
+  /// one exercise's when [exerciseId] is given. [from] (inclusive) and [to]
+  /// (exclusive) bound the workouts' start times.
+  Future<List<ExerciseRecordSets>> getRecordSets({
+    required String userId,
+    String? exerciseId,
+    DateTime? from,
+    DateTime? to,
+  });
 
   /// [userId]'s sessions of [exerciseId], newest first, [limit] at a time
-  /// after the workout id [cursor]. Null when the exercise isn't one [userId]
-  /// can see; a page of nothing when they've never done it.
+  /// after the workout id [cursor], within [from] (inclusive) and [to]
+  /// (exclusive) by start time. Null when the exercise isn't one [userId] can
+  /// see; a page of nothing when they've never done it.
   Future<ExerciseHistory?> getExerciseHistory({
     required String userId,
     required String exerciseId,
     String? cursor,
     int limit,
+    DateTime? from,
+    DateTime? to,
   });
 
   Future<Page<Workout>> getWorkouts({
@@ -349,5 +358,15 @@ class WorkoutRequest {
       'pauses': jsonEncode(workoutPauses(body['pauses']).map((pause) => pause.toMap()).toList()),
       'exercises': jsonEncode(_exercises()),
     };
+  }
+}
+
+/// One edge of a window of workout start times, as a caller writes it.
+extension WindowEdge on String {
+  /// A date (`2026-01-01`, that day's start in UTC) or an ISO moment; null
+  /// when it is neither.
+  DateTime? toWindowEdge() {
+    final moment = RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(this) ? '${this}T00:00:00Z' : this;
+    return DateTime.tryParse(moment)?.toUtc();
   }
 }

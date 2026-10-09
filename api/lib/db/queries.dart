@@ -2505,13 +2505,10 @@ LEFT JOIN workouts w ON NOT p.deleted AND w.id = p.id
 ORDER BY p.xid, p.id
 ''';
 
-// Every completed working set the user has done, per exercise, oldest
-// workout first: the input personal records are folded from. Warm-ups are no
-// one's record.
 // One exercise's sessions, newest first by workout id (ids follow start
 // times, imported ones included), each with its completed working sets. The
 // exercise row comes back even without sessions, so "never done" and "not
-// yours" stay apart.
+// yours" stay apart. The window bounds start times like the records'.
 const _exerciseHistory = '''
 WITH _exercise AS (
   SELECT id, name, category
@@ -2529,6 +2526,8 @@ _sets AS (
     AND s.completed
     AND s.set_type IS DISTINCT FROM 'w'
     AND (@cursor::uuid IS NULL OR w.id < @cursor::uuid)
+    AND (@from::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) >= @from::timestamptz)
+    AND (@to::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) < @to::timestamptz)
 ),
 _sessions AS (
   SELECT w.id, COALESCE(w.started_at, w.created_at) AS started_at
@@ -2547,6 +2546,10 @@ LEFT JOIN _sets s ON s.workout_id = ses.id
 ORDER BY ses.id DESC NULLS LAST, s.exercise_order, s.set_order
 ''';
 
+// Every completed working set the user has done, per exercise, oldest
+// workout first: the input personal records are folded from. Warm-ups are no
+// one's record. The window, from inclusive and to exclusive, bounds workout
+// start times, so a fold over it is the records of that span.
 const _recordSets = '''
 SELECT
   e.id AS exercise_id, e.name, e.category,
@@ -2560,6 +2563,8 @@ WHERE w.user_id = @userId
   AND s.completed
   AND s.set_type IS DISTINCT FROM 'w'
   AND (@exerciseId::uuid IS NULL OR we.exercise_id = @exerciseId::uuid)
+  AND (@from::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) >= @from::timestamptz)
+  AND (@to::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) < @to::timestamptz)
 ORDER BY e.id, COALESCE(w.started_at, w.created_at), w.id, s.set_order
 ''';
 
