@@ -301,7 +301,7 @@ void main() {
               )).body['result']
               as Map;
       final records = (found['structuredContent'] as Map)['records'] as List;
-      expect(((records.single as Map)['heaviest'] as Map)['weight'], 100);
+      expect(((records.single as Map)['heaviest'] as Map)['weightKg'], 100);
 
       final none =
           (await rpc(
@@ -399,6 +399,97 @@ void main() {
 
       expect((await search({'query': 'zzz', 'locale': 'es'}))['isError'], isTrue);
       expect((await search({'query': 'rdl', 'locale': 'de'}))['isError'], isTrue);
+    });
+
+    Future<Map> call(String name, [Map<String, dynamic> arguments = const {}]) async {
+      final response = await rpc('tools/call', params: {'name': name, 'arguments': arguments});
+      expect(response.status, 200);
+      return response.body['result'] as Map;
+    }
+
+    String text(Map result) => ((result['content'] as List).single as Map)['text'] as String;
+
+    test('a malformed cursor or an out-of-range limit is a tool error, not an internal one', () async {
+      final cursor = await call('list_workouts', {'cursor': 'garbage'});
+      expect(cursor['isError'], isTrue);
+      expect(text(cursor), contains('cursor'));
+
+      final limit = await call('list_workouts', {'limit': 500});
+      expect(limit['isError'], isTrue);
+      expect(text(limit), contains('1 to 50'));
+      verifyNever(
+        app.db.getWorkouts(
+          userId: anyNamed('userId'),
+          targetUserId: anyNamed('targetUserId'),
+          imageUrl: anyNamed('imageUrl'),
+          cursor: anyNamed('cursor'),
+          limit: anyNamed('limit'),
+        ),
+      );
+    });
+
+    test('get_personal_records pages by exercise name, in the tools\' units and rounded', () async {
+      ExerciseRecordSets exercise(String id, String name, double weight) => (
+        exerciseId: id,
+        name: name,
+        category: Category.barbell,
+        sets: [RecordSet(weight: weight, reps: 5, duration: null, distance: null, workoutId: 'w', at: '2026-01-01')],
+      );
+      when(app.db.getRecordSets(userId: 'u1', exerciseId: null)).thenAnswer(
+        (_) async => [
+          exercise('c', 'Squat', 140),
+          exercise('a', 'Bench Press', 81.6466293334961),
+          exercise('b', 'Deadlift', 180),
+        ],
+      );
+
+      final first = (await call('get_personal_records', {'limit': 2}))['structuredContent'] as Map;
+      final names = [for (final entry in first['records'] as List) ((entry as Map)['exercise'] as Map)['name']];
+      expect(names, ['Bench Press', 'Deadlift']);
+      final bench = (first['records'] as List).first as Map;
+      expect((bench['heaviest'] as Map)['weightKg'], 81.647);
+      expect((bench['heaviest'] as Map).containsKey('weight'), isFalse);
+      expect(first['cursor'], 'b');
+
+      final last = (await call('get_personal_records', {'limit': 2, 'cursor': 'b'}))['structuredContent'] as Map;
+      expect([for (final entry in last['records'] as List) ((entry as Map)['exercise'] as Map)['name']], ['Squat']);
+      expect(last.containsKey('cursor'), isFalse);
+
+      expect((await call('get_personal_records', {'cursor': 'nope'}))['isError'], isTrue);
+    });
+
+    test('list_goals names the exercise a goal is on', () async {
+      const bench = '01900000-0000-7000-8000-000000000001';
+      when(app.db.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1', archived: false)).thenAnswer(
+        (_) async => [
+          Goal.fromJson({
+            'id': 'g1',
+            'metric': 'topSetWeight',
+            'exerciseId': bench,
+            'stages': [
+              {'target': 100},
+            ],
+          }),
+          Goal.fromJson({
+            'id': 'g2',
+            'metric': 'workouts',
+            'stages': [
+              {'target': 3},
+            ],
+          }),
+        ],
+      );
+      when(app.db.getExercises('u1')).thenAnswer(
+        (_) async => {
+          'exercises': [
+            {'id': bench, 'name': 'Bench Press'},
+          ],
+        },
+      );
+
+      final goals = ((await call('list_goals'))['structuredContent'] as Map)['goals'] as List;
+      expect((goals.first as Map)['exerciseName'], 'Bench Press');
+      expect((goals.last as Map).containsKey('exerciseName'), isFalse);
     });
 
     test('an unknown tool is invalid params', () async {
