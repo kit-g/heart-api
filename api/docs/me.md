@@ -48,11 +48,13 @@ Every error, from the API or the gateway in front of it, is JSON in one shape:
 | Status | `code`              | When                                       |
 |--------|---------------------|--------------------------------------------|
 | 404    | `route_not_found`   | no such route                              |
-| 413    | `request_too_large` | a body over 10 MB                          |
 | 429    | `throttled`         | the API-wide ceiling                       |
 | 504    | `timeout`           | a request ran past 29 seconds              |
 | 5xx    | `server_error`      | anything else on our side; retry later     |
 | 4xx    | `gateway_rejected`  | any other refusal before the API saw it    |
+
+Two refusals happen before even the gateway and keep AWS's own body: a path outside `/v1`
+(`403 {"message": "Forbidden"}`), and a body over 10 MB (`413`, plain text).
 
 ## Routes
 

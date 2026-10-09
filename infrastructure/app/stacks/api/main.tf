@@ -125,8 +125,9 @@ resource "aws_api_gateway_method_settings" "throttle" {
 # Errors API Gateway answers itself, before or instead of the function, in the
 # API's own error shape ({error, code, reason}): a caller reads one shape
 # whichever layer refused it. Types not listed here fall back to the two
-# defaults. A refusal at the custom domain (a path outside /v1) happens before
-# the stage and keeps AWS's {"message": "Forbidden"}.
+# defaults. Two refusals come before any of this and keep AWS's own body: a
+# path outside /v1, at the custom domain ({"message": "Forbidden"}), and a body
+# over 10 MB (a plain-text 413), so REQUEST_TOO_LARGE is never used.
 locals {
   gateway_errors = {
     # The throttle, with the Retry-After AWS's default leaves out: scripts and
@@ -145,10 +146,6 @@ locals {
     INTEGRATION_TIMEOUT = {
       status = "504"
       body   = { error = "timed out", code = "timeout", reason = "the request took longer than API Gateway's 29 seconds" }
-    }
-    REQUEST_TOO_LARGE = {
-      status = "413"
-      body   = { error = "request too large", code = "request_too_large", reason = "a request body is at most 10 MB" }
     }
     # Everything else, AWS's own message as the reason. A crashed or throttled
     # function lands here as a 5xx.
