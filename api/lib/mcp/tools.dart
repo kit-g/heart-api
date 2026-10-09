@@ -90,6 +90,9 @@ final List<McpTool> tools = [
     inputSchema: _pageSchema(maxLimit: 50),
     run: (request, arguments) async {
       final (limit, cursor) = arguments.toPaging(defaultLimit: 20, maxLimit: 50);
+      if (cursor != null && !isUuidV7(cursor)) {
+        throw const ToolError('cursor must be the string returned by the previous page.');
+      }
       final page = await request.workoutsService.getWorkouts(
         userId: request.userId,
         targetUserId: request.userId,
@@ -136,12 +139,15 @@ final List<McpTool> tools = [
     description:
         'Personal records per exercise, the same ones the app shows: heaviest set, estimated 1RM (Brzycki), '
         'best volume set, rep maxes, most reps, longest distance or duration, best pace (seconds per km), with '
-        'the date and workout each was set in and what it beat. Pass `exercise` to narrow to names containing '
-        'that text.',
+        'the date and workout each was set in and what it beat. A rep max is the heaviest set of exactly that '
+        'many reps, so a higher count can be heavier. Weights in kg, distances in km, durations in seconds. '
+        'Exercises come by name, a page at a time: pass `exercise` to narrow to names containing that text, or '
+        'the returned cursor for the next page.',
     inputSchema: {
       'type': 'object',
       'properties': {
         'exercise': {'type': 'string', 'description': 'Part of an exercise name, case-insensitive.'},
+        ..._pageSchema(maxLimit: 50)['properties'] as Map<String, dynamic>,
       },
       'additionalProperties': false,
     },
@@ -151,16 +157,34 @@ final List<McpTool> tools = [
         null => null,
         _ => throw const ToolError('exercise must be text, part of an exercise name.'),
       };
+      final (limit, cursor) = arguments.toPaging(defaultLimit: 20, maxLimit: 50);
       final sets = await request.workoutsService.getRecordSets(userId: request.userId);
       final matching = [
         for (final exercise in sets)
           if (filter == null || exercise.name.toLowerCase().contains(filter)) exercise,
       ];
-      final records = MeRecords.fold(matching).toMap();
-      if (filter != null && (records['records'] as List).isEmpty) {
+      final MeRecords(:entries) = MeRecords.fold(matching);
+      if (filter != null && entries.isEmpty) {
         throw ToolError('No records for an exercise matching "$filter". list_workouts shows exercise names.');
       }
-      return records;
+      final start = switch (cursor) {
+        null => 0,
+        final id => switch (entries.indexWhere((entry) => entry.exercise.exerciseId == id)) {
+          -1 => throw const ToolError('cursor must be the string returned by the previous page.'),
+          final index => index + 1,
+        },
+      };
+      final page = entries.skip(start).take(limit).toList();
+      return {
+        'records': [
+          for (final (:exercise, :records) in page)
+            {
+              'exercise': {'id': exercise.exerciseId, 'name': exercise.name, 'category': exercise.category.value},
+              ...records.toMcpUnits() as Map<String, dynamic>,
+            },
+        ],
+        if (start + page.length < entries.length) 'cursor': page.last.exercise.exerciseId,
+      };
     },
   ),
   McpTool(
@@ -207,7 +231,7 @@ final List<McpTool> tools = [
               'workoutId': session.workoutId,
               'at': session.at,
               'sets': [for (final set in session.sets) set.toMcp()],
-              'metrics': session.sets.toSessionMetrics(category),
+              'metrics': session.sets.toSessionMetrics(category).toMcpUnits(),
             },
         ],
         if (sessions.hasMore && sessions.items.isNotEmpty) 'cursor': sessions.items.last.workoutId,
@@ -221,7 +245,7 @@ final List<McpTool> tools = [
         "The exercise library and the user's own exercises, searched the way the app searches: word order free, "
         'gym abbreviations (db, rdl, ohp), muscle words (lats, quads) and one typo per word. Best matches first; '
         '`match` says how each was found. Names come in `locale`, the language the user writes in (default '
-        'English).',
+        'English); category and target are fixed English identifiers in every locale.',
     inputSchema: {
       'type': 'object',
       'properties': {
@@ -298,8 +322,9 @@ final List<McpTool> tools = [
     name: 'list_goals',
     title: 'List goals',
     description:
-        "The user's goals: what is measured, the targets and deadlines, and which stages are achieved. Goals on "
-        'health metrics carry their definition only; their progress lives on the phone.',
+        "The user's goals: what is measured, the targets and deadlines, and which stages are achieved (a stage "
+        'carries achievedAt only once it is). A goal on an exercise names it. Goals on health metrics carry their '
+        'definition only; their progress lives on the phone.',
     inputSchema: {
       'type': 'object',
       'properties': {
@@ -313,7 +338,15 @@ final List<McpTool> tools = [
         targetUserId: request.userId,
         archived: arguments['archived'] == true,
       );
-      return {'goals': goals.map((goal) => goal.toMap()).toList()};
+      final names = switch (goals.any((goal) => goal.exerciseId != null)) {
+        true => (await request.exerciseService.getExercises(request.userId)).toExerciseNames(),
+        false => const <String, String>{},
+      };
+      return {
+        'goals': [
+          for (final goal in goals) {...goal.toMap(), 'exerciseName': ?names[goal.exerciseId]},
+        ],
+      };
     },
   ),
   McpTool(
@@ -351,13 +384,13 @@ Map<String, dynamic> _pageSchema({required int maxLimit}) {
 }
 
 extension on Map<String, dynamic> {
-  /// A tool's `limit` and `cursor` arguments, read: the limit clamped to
-  /// [maxLimit], [defaultLimit] when absent.
+  /// A tool's `limit` and `cursor` arguments, read: [defaultLimit] when the
+  /// limit is absent, refused outside 1 to [maxLimit] like any bad argument.
   (int, String?) toPaging({required int defaultLimit, required int maxLimit}) {
     final limit = switch (this['limit']) {
-      final int n => n.clamp(1, maxLimit),
+      final int n when n >= 1 && n <= maxLimit => n,
       null => defaultLimit,
-      _ => throw const ToolError('limit must be a whole number.'),
+      _ => throw ToolError('limit must be a whole number from 1 to $maxLimit.'),
     };
     final cursor = switch (this['cursor']) {
       final String c when c.isNotEmpty => c,
@@ -438,6 +471,46 @@ typedef _Measures = ({num? weight, int? reps, num? distance, num? duration});
 extension on _Measures {
   /// The one place the tools name their units.
   Map<String, dynamic> toMcp() {
-    return {'weightKg': ?weight, 'reps': ?reps, 'distanceKm': ?distance, 'seconds': ?duration};
+    return {
+      'weightKg': ?weight?.toMcpMeasure(),
+      'reps': ?reps,
+      'distanceKm': ?distance?.toMcpMeasure(),
+      'seconds': ?duration?.toMcpMeasure(),
+    };
+  }
+}
+
+/// The unit-bearing keys of a shared fold's output, renamed as the tools
+/// name them everywhere else.
+const _unitKeys = {'weight': 'weightKg', 'distance': 'distanceKm', 'duration': 'seconds'};
+
+extension on num {
+  /// Three decimals: grams and metres, and a weight entered in pounds still
+  /// converts back whole. Stored weights carry float noise past that.
+  num toMcpMeasure() => this is int ? this : (this * 1000).round() / 1000;
+}
+
+extension on Object? {
+  /// A fold's output (records, chart values) as the tools show it: unit keys
+  /// renamed and every decimal rounded, at any depth.
+  Object? toMcpUnits() {
+    return switch (this) {
+      final Map<dynamic, dynamic> map => <String, dynamic>{
+        for (final MapEntry(:key, value: Object? value) in map.entries) _unitKeys[key] ?? '$key': value.toMcpUnits(),
+      },
+      final List<dynamic> list => [for (final Object? value in list) value.toMcpUnits()],
+      final num n => n.toMcpMeasure(),
+      final other => other,
+    };
+  }
+}
+
+extension on Map<String, dynamic> {
+  /// The library's exercises by id, for naming what a goal points at.
+  Map<String, String> toExerciseNames() {
+    return {
+      for (final row in this['exercises'] as List? ?? const [])
+        if (row case {'id': final String id, 'name': final String name}) id: name,
+    };
   }
 }
