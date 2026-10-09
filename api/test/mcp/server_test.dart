@@ -458,6 +458,19 @@ void main() {
       expect((await call('get_personal_records', {'cursor': 'nope'}))['isError'], isTrue);
     });
 
+    test('a span narrows records and history, and a bad one is a tool error', () async {
+      when(
+        app.db.getRecordSets(userId: 'u1', exerciseId: null, from: DateTime.utc(2025), to: DateTime.utc(2026)),
+      ).thenAnswer((_) async => []);
+
+      final records = await call('get_personal_records', {'from': '2025-01-01', 'to': '2026-01-01'});
+      expect(records['isError'], isFalse);
+      expect((records['structuredContent'] as Map)['records'], isEmpty);
+
+      expect((await call('get_personal_records', {'from': 'last year'}))['isError'], isTrue);
+      expect((await call('get_personal_records', {'from': '2026-01-01', 'to': '2025-01-01'}))['isError'], isTrue);
+    });
+
     test('list_goals names the exercise a goal is on', () async {
       const bench = '01900000-0000-7000-8000-000000000001';
       when(app.db.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1', archived: false)).thenAnswer(

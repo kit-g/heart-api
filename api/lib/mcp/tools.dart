@@ -6,6 +6,7 @@ import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/me.dart';
+import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -142,11 +143,13 @@ final List<McpTool> tools = [
         'the date and workout each was set in and what it beat. A rep max is the heaviest set of exactly that '
         'many reps, so a higher count can be heavier. Weights in kg, distances in km, durations in seconds. '
         'Exercises come by name, a page at a time: pass `exercise` to narrow to names containing that text, or '
-        'the returned cursor for the next page.',
+        'the returned cursor for the next page. Pass `from` and `to` for the records of a span ("heaviest this '
+        'year"): only workouts started in it count, and what a record beat is from the same span.',
     inputSchema: {
       'type': 'object',
       'properties': {
         'exercise': {'type': 'string', 'description': 'Part of an exercise name, case-insensitive.'},
+        ..._windowSchema,
         ..._pageSchema(maxLimit: 50)['properties'] as Map<String, dynamic>,
       },
       'additionalProperties': false,
@@ -158,7 +161,8 @@ final List<McpTool> tools = [
         _ => throw const ToolError('exercise must be text, part of an exercise name.'),
       };
       final (limit, cursor) = arguments.toPaging(defaultLimit: 20, maxLimit: 50);
-      final sets = await request.workoutsService.getRecordSets(userId: request.userId);
+      final (:from, :to) = arguments.toWindow();
+      final sets = await request.workoutsService.getRecordSets(userId: request.userId, from: from, to: to);
       final matching = [
         for (final exercise in sets)
           if (filter == null || exercise.name.toLowerCase().contains(filter)) exercise,
@@ -195,11 +199,12 @@ final List<McpTool> tools = [
         'chart plots for it (top set, estimated 1RM by Brzycki, volume, average working weight, reps; distance, '
         'duration and pace for cardio). Weights in kg, distances in km, durations in seconds, pace in seconds per '
         'km. Exercise ids come from get_workout or get_personal_records. Paged: pass the returned cursor for older '
-        'sessions.',
+        'sessions. `from` and `to` keep to workouts started in that span.',
     inputSchema: {
       'type': 'object',
       'properties': {
         'exerciseId': {'type': 'string', 'description': 'An exercise id from get_workout or get_personal_records.'},
+        ..._windowSchema,
         ..._pageSchema(maxLimit: 50)['properties'] as Map<String, dynamic>,
       },
       'required': ['exerciseId'],
@@ -214,12 +219,15 @@ final List<McpTool> tools = [
       if (cursor != null && !isUuidV7(cursor)) {
         throw const ToolError('cursor must be the string returned by the previous page.');
       }
+      final (:from, :to) = arguments.toWindow();
       final history =
           await request.workoutsService.getExerciseHistory(
             userId: request.userId,
             exerciseId: id,
             cursor: cursor,
             limit: limit,
+            from: from,
+            to: to,
           ) ??
           (throw ToolError('No exercise $id. get_personal_records lists the exercises with history.'));
       final ExerciseHistory(:exerciseId, :name, :category, :sessions) = history;
@@ -383,7 +391,30 @@ Map<String, dynamic> _pageSchema({required int maxLimit}) {
   };
 }
 
+/// `from` and `to`, a span of workout start times.
+const _windowSchema = {
+  'from': {'type': 'string', 'description': 'Start of the span, inclusive: a date (2026-01-01, UTC) or an ISO moment.'},
+  'to': {'type': 'string', 'description': 'End of the span, exclusive: a date (2026-01-01, UTC) or an ISO moment.'},
+};
+
 extension on Map<String, dynamic> {
+  /// A tool's `from` and `to` arguments, read: either may be absent; one that
+  /// isn't a date or moment, or a `from` not before `to`, is refused.
+  ({DateTime? from, DateTime? to}) toWindow() {
+    DateTime? edge(String key) {
+      return switch (this[key]) {
+        null => null,
+        final String raw =>
+          raw.toWindowEdge() ?? (throw ToolError('$key must be a date like 2026-01-01 or an ISO moment.')),
+        _ => throw ToolError('$key must be a date like 2026-01-01 or an ISO moment.'),
+      };
+    }
+
+    final (from, to) = (edge('from'), edge('to'));
+    if (from != null && to != null && !from.isBefore(to)) throw const ToolError('from must be before to.');
+    return (from: from, to: to);
+  }
+
   /// A tool's `limit` and `cursor` arguments, read: [defaultLimit] when the
   /// limit is absent, refused outside 1 to [maxLimit] like any bad argument.
   (int, String?) toPaging({required int defaultLimit, required int maxLimit}) {
