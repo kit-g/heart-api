@@ -116,12 +116,14 @@ An ordered checklist with a box per step, written so it can be followed cold:
 
 1. Commit `release_notes/v<version>.md` to a branch, open a PR, merge. The notes are reviewed
    like code. The user's call on wording wins.
-2. Tag the merge, with the file as the message. `--cleanup=verbatim` keeps the lines starting
-   with `#`, which git would otherwise strip as comments, title and headings included:
+2. Tag the merge, with the file as the message. The message comes from `origin/main`, not the
+   working tree, so the command works from any checkout, however far behind. `--cleanup=verbatim`
+   keeps the lines starting with `#`, which git would otherwise strip as comments, title and
+   headings included:
 
    ```sh
-   git tag -a v<version> --cleanup=verbatim -F release_notes/v<version>.md origin/main
-   git push origin v<version>
+   git fetch && git show origin/main:release_notes/v<version>.md \
+     | git tag -a v<version> --cleanup=verbatim -F - origin/main && git push origin v<version>
    ```
 
    Tags and prod are the user's: draft, never push a tag unasked.
