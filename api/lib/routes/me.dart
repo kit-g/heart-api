@@ -146,7 +146,7 @@ Future<MeWorkoutChanges> getMyWorkoutChanges(Request req) async {
   return MeWorkoutChanges(changes);
 }
 
-/// Personal records per exercise; one exercise's with `?exerciseId=`.
+/// One exercise's sessions, newest first, optionally within `?from=&to=`.
 Future<Paginated<MeExerciseSession>> getMyExerciseHistory(Request req) {
   return getMyExerciseHistoryById(req, req.rawPathParameters[#exerciseId]!);
 }
@@ -159,6 +159,8 @@ Future<Paginated<MeExerciseSession>> getMyExerciseHistoryById(Request req, Strin
         exerciseId: query.exerciseId,
         cursor: query.cursor,
         limit: query.limit,
+        from: query.from,
+        to: query.to,
       ) ??
       (throw NotFound(type: 'Exercise', id: exerciseId));
   final ExerciseHistory(:category, :sessions) = history;
@@ -182,8 +184,15 @@ Future<MeLibrarySearch> searchMyLibrary(Request req) async {
   return MeLibrarySearch.fromLibrary(library, query.query, limit: query.limit);
 }
 
+/// Personal records per exercise; one exercise's with `?exerciseId=`, those
+/// of a span with `?from=&to=`.
 Future<MeRecords> getMyRecords(Request req) async {
   final query = RecordsQuery.fromRequest(req);
-  final sets = await req.workoutsService.getRecordSets(userId: req.userId, exerciseId: query.exerciseId);
+  final sets = await req.workoutsService.getRecordSets(
+    userId: req.userId,
+    exerciseId: query.exerciseId,
+    from: query.from,
+    to: query.to,
+  );
   return MeRecords.fold(sets);
 }
