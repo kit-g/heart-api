@@ -79,10 +79,19 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required String exerciseId,
     String? cursor,
     int limit = 20,
+    DateTime? from,
+    DateTime? to,
   }) async {
     final rows = await _pool.execute(
       _exerciseHistory.toSql(),
-      parameters: {'userId': userId, 'exerciseId': exerciseId, 'cursor': cursor, 'limit': limit + 1},
+      parameters: {
+        'userId': userId,
+        'exerciseId': exerciseId,
+        'cursor': cursor,
+        'limit': limit + 1,
+        'from': from,
+        'to': to,
+      },
     );
     if (rows.isEmpty) return null;
 
@@ -119,10 +128,15 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   }
 
   @override
-  Future<List<ExerciseRecordSets>> getRecordSets({required String userId, String? exerciseId}) async {
+  Future<List<ExerciseRecordSets>> getRecordSets({
+    required String userId,
+    String? exerciseId,
+    DateTime? from,
+    DateTime? to,
+  }) async {
     final rows = await _pool.execute(
       _recordSets.toSql(),
-      parameters: {'userId': userId, 'exerciseId': exerciseId},
+      parameters: {'userId': userId, 'exerciseId': exerciseId, 'from': from, 'to': to},
     );
     final byExercise = <String, ExerciseRecordSets>{};
     for (final row in rows) {
