@@ -160,6 +160,31 @@ void main() {
       expect(() => getMyRecords(build('/me/records', query: {'exerciseId': 'x'})), throwsA(isA<BadRequest>()));
     });
 
+    test('a window that is not dates, or runs backwards, is a 400', () {
+      expect(() => getMyRecords(build('/me/records', query: {'from': 'last year'})), throwsA(isA<BadRequest>()));
+      expect(
+        () => getMyRecords(build('/me/records', query: {'from': '2026-02-01', 'to': '2026-01-01'})),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
+    test('records read the window: a date is that day from midnight UTC, a moment as written', () async {
+      when(
+        workouts.getRecordSets(
+          userId: 'u1',
+          exerciseId: null,
+          from: DateTime.utc(2026),
+          to: DateTime.utc(2026, 6, 1, 12),
+        ),
+      ).thenAnswer((_) async => []);
+
+      final records = await getMyRecords(
+        build('/me/records', query: {'from': '2026-01-01', 'to': '2026-06-01T12:00:00Z'}),
+      );
+
+      expect(records.toMap()['records'], isEmpty);
+    });
+
     test('records fold per exercise, by name, leaving out exercises with nothing measured', () async {
       RecordSet set(double? weight, int? reps) => RecordSet(
         weight: weight,

@@ -36,35 +36,52 @@ class ChangesQuery {
   }
 }
 
-/// `GET /me/records?exerciseId=` — every exercise's records, or one's.
+/// `GET /me/records?exerciseId=&from=&to=` — every exercise's records, or
+/// one's; within a window of workout start times when one is given.
 class RecordsQuery {
   final String? exerciseId;
+  final DateTime? from;
+  final DateTime? to;
 
-  const new _({required this.exerciseId});
+  const new _({required this.exerciseId, required this.from, required this.to});
 
   static RecordsQuery fromRequest(Request req) {
+    final q = req.url.queryParameters;
+    final (:from, :to) = q.window();
     return RecordsQuery._(
-      exerciseId: switch (req.url.queryParameters.stringOrNull('exerciseId')) {
+      exerciseId: switch (q.stringOrNull('exerciseId')) {
         null => null,
         final String id when isUuidV7(id) => id,
         final String id => throw BadRequest(reason: 'exerciseId is not an exercise id: $id'),
       },
+      from: from,
+      to: to,
     );
   }
 }
 
-/// `GET /me/exercises/:exerciseId/history?cursor=&limit=` — one exercise's
-/// sessions, newest first. The cursor is a workout id from the last page.
+/// `GET /me/exercises/:exerciseId/history?cursor=&limit=&from=&to=` — one
+/// exercise's sessions, newest first. The cursor is a workout id from the
+/// last page.
 class ExerciseHistoryQuery {
   final String exerciseId;
   final String? cursor;
   final int limit;
+  final DateTime? from;
+  final DateTime? to;
 
-  const new _({required this.exerciseId, required this.cursor, required this.limit});
+  const new _({
+    required this.exerciseId,
+    required this.cursor,
+    required this.limit,
+    required this.from,
+    required this.to,
+  });
 
   static ExerciseHistoryQuery fromRequest(Request req, {required String exerciseId}) {
     if (!isUuidV7(exerciseId)) throw NotFound(type: 'Exercise', id: exerciseId);
     final q = req.url.queryParameters;
+    final (:from, :to) = q.window();
     return ExerciseHistoryQuery._(
       exerciseId: exerciseId,
       cursor: switch (q.stringOrNull('cursor')) {
@@ -73,7 +90,28 @@ class ExerciseHistoryQuery {
         final String id => throw BadRequest(reason: 'cursor is not one this list returned: $id'),
       },
       limit: q.integer('limit', defaultValue: 20, min: 1, max: 100),
+      from: from,
+      to: to,
     );
+  }
+}
+
+extension on Map<String, String> {
+  /// `from` and `to`: a window of workout start times, from inclusive and to
+  /// exclusive, either open. Each is a date (`2026-01-01`, UTC) or an ISO
+  /// moment.
+  ({DateTime? from, DateTime? to}) window() {
+    DateTime? edge(String key) {
+      return switch (stringOrNull(key)) {
+        null => null,
+        final String raw =>
+          raw.toWindowEdge() ?? (throw BadRequest(reason: '$key must be a date (2026-01-01) or an ISO moment: $raw')),
+      };
+    }
+
+    final (from, to) = (edge('from'), edge('to'));
+    if (from != null && to != null && !from.isBefore(to)) throw const BadRequest(reason: 'from must be before to');
+    return (from: from, to: to);
   }
 }
 
