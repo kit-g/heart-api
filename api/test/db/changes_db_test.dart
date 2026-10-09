@@ -202,6 +202,44 @@ void main() {
       await h.exec('DELETE FROM workouts WHERE user_id = @u', {'u': user});
     });
 
+    test('a window keeps to workouts started in it, from inclusive, to exclusive', () async {
+      final user = await h.seedProfile();
+      final exercise = await h.seedGlobalExercise();
+      for (final (month, weight) in [(1, 100.0), (2, 120.0), (3, 110.0)]) {
+        final start = DateTime.utc(2026, month);
+        final workout = await h.seedWorkout(userId: user, start: start, end: start.add(const Duration(hours: 1)));
+        final we = await h.insertId(
+          'INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order) VALUES (@w, @e, 0) RETURNING id',
+          {'w': workout, 'e': exercise},
+        );
+        await h.exec(
+          'INSERT INTO exercise_sets (workout_exercise_id, weight, reps, set_order, completed) VALUES (@we, @w, 5, 0, true)',
+          {'we': we, 'w': weight},
+        );
+      }
+
+      Future<List<double?>> weights({DateTime? from, DateTime? to}) async {
+        final sets = await h.db.getRecordSets(userId: user, exerciseId: exercise, from: from, to: to);
+        return [for (final set in sets.singleOrNull?.sets ?? const <RecordSet>[]) set.weight];
+      }
+
+      expect(await weights(), [100, 120, 110]);
+      expect(await weights(from: DateTime.utc(2026, 2)), [120, 110], reason: 'from is inclusive');
+      expect(await weights(to: DateTime.utc(2026, 3)), [100, 120], reason: 'to is exclusive');
+      expect(await weights(from: DateTime.utc(2026, 3), to: DateTime.utc(2026, 4)), [110]);
+      expect(await weights(from: DateTime.utc(2027)), isEmpty);
+
+      final history = (await h.db.getExerciseHistory(
+        userId: user,
+        exerciseId: exercise,
+        from: DateTime.utc(2026, 2),
+        to: DateTime.utc(2026, 3),
+      ))!;
+      expect([for (final session in history.sessions.items) session.at], ['2026-02-01T00:00:00.000Z']);
+
+      await h.exec('DELETE FROM workouts WHERE user_id = @u', {'u': user});
+    });
+
     test('a workout without a start counts from when it was created', () async {
       final user = await h.seedProfile();
       final exercise = await h.seedGlobalExercise();
