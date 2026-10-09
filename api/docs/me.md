@@ -48,13 +48,18 @@ there's more: pass it back as `?cursor=` for the next page. No `cursor` means th
 | `/me/workouts`            | `{workouts, cursor}`: each workout with its exercises, sets, notes and image URLs       |
 | `/me/workouts/:workoutId` | one workout                                                                                      |
 | `/me/workouts/changes`    | `{workouts, deleted, cursor, hasMore}`: what changed since `?since=<cursor>`, oldest first (see *Polling*) |
-| `/me/records`             | `{records}`: personal records per exercise, the same ones the app shows; `?exerciseId=` for one |
-| `/me/exercises/:exerciseId/history` | `{sessions, cursor}`: every session of one exercise, newest first (default 20 a page), each with its working sets and `metrics`, the values the app's progress chart plots for it (`topSetWeight`, `estimatedOneRepMax`, `totalVolume`, …, by exercise type) |
+| `/me/records`             | `{records}`: personal records per exercise, the same ones the app shows; `?exerciseId=` for one; `?from=&to=` for the records of a span (see below) |
+| `/me/exercises/:exerciseId/history` | `{sessions, cursor}`: every session of one exercise, newest first (default 20 a page), each with its working sets and `metrics`, the values the app's progress chart plots for it (`topSetWeight`, `estimatedOneRepMax`, `totalVolume`, …, by exercise type); `?from=&to=` keeps to a span |
 | `/me/library?q=`          | `{exercises}`: the exercise library and your own exercises, searched the way the app searches (word order free, abbreviations such as `db` or `rdl`, muscle words such as `lats`, one typo a word), best match first, each with how it `match`ed (`prefix`, `words`, `vocabulary`, `typo`). Names in your `Accept-Language`, or `?locale=`; `limit` up to 50 (default 20) |
 | `/me/exercises`           | `{exercises}`: your custom exercises (a `glossary` key rides along; ignore it). Library exercises come embedded in workouts and templates  |
 | `/me/templates`           | `{templates, cursor}`, in your order; `?folder=<id>`, or `?folder=none` for unfiled ones                        |
 | `/me/template-folders`    | `{folders}`                                                                                      |
 | `/me/goals`               | `{goals}`; `?archived=true` for archived ones. Goals backed by health data carry their definition only; their progress lives on your phone |
+
+**Spans.** `?from=` and `?to=` bound workouts by when they started: `from` inclusive, `to`
+exclusive, either one optional. Each is a date (`2026-01-01`, that day from midnight UTC) or an ISO
+moment. Records over a span are the best of that span ("heaviest this year"), and what a record
+beat comes from the same span. A `from` that isn't before `to` is a 400.
 
 ## Polling
 
