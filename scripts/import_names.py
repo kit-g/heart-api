@@ -20,8 +20,30 @@ A title shared by two catalog exercises (Hevy has eleven) resolves to the
 first live one in catalog order; the choice is printed, and the user can
 re-point a wrongly guessed history afterwards (heart-api#140).
 
-    uv run scripts/import_names.py --source hevy \\
-        --catalog s3://583168578067-ca-central-1-static/imports/hevy/2026-10-04/catalog/hevy-catalog-i18n.json
+Running it, per environment (the table is empty until it has run there, and
+a translated title imports as a custom meanwhile):
+
+  1. Copy the catalog out of the dev static bucket with the dev profile; the
+     other account cannot read that bucket:
+
+         aws s3 cp s3://583168578067-ca-central-1-static/imports/hevy/2026-10-04/catalog/hevy-catalog-i18n.json \\
+             /tmp/hevy-catalog.json --profile heart-dev
+
+  2. Run with the environment's AWS profile and SECRETS_BUCKET set to that
+     account's static bucket (the one the deploy workflows name), so the
+     database credentials come from there, as for library_locales.py:
+
+         AWS_PROFILE=<profile> SECRETS_BUCKET=<account>-ca-central-1-static \\
+             uv run scripts/import_names.py --source hevy --catalog /tmp/hevy-catalog.json
+
+     Without SECRETS_BUCKET it talks to the local database (PG* env, `make db-up`).
+
+  3. The run ends with `6531 titles for hevy, 0 pruned`. A second run says the
+     same; a pruned count means the catalog file changed. An empty or
+     wrong-shaped catalog refuses to run rather than prune the table.
+
+Dev was loaded 2026-10-10; prod needs the run after the deploy that applies
+2026-10-08.import-names.sql.
 """
 
 import argparse
