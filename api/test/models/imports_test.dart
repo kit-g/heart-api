@@ -243,6 +243,40 @@ void main() {
       final batch = WorkoutImport.fromStrongCsv(csv);
       expect(batch.workouts.single.exercises.single.sets.single.weight, 82.5);
     });
+
+    test('a declared unit wins over the fallback however it is spelled: Strong\'s "mi." is miles', () {
+      // the 2025 semicolon layout as a real export writes it (heart-api#162):
+      // Weight Unit is `lbs`, Distance Unit is `mi.`, with the period
+      const csv =
+          'Date;Workout Name;Exercise Name;Set Order;Weight;Weight Unit;Reps;RPE;Distance;Distance Unit;Seconds;Notes;Workout Notes;Workout Duration\n'
+          '2025-09-02 07:10:00;"Morning Ride";"Cycling";1;0.0;lbs;0.0;;10.0;mi.;1800.0;"";"";35m\n'
+          '2025-09-02 07:10:00;"Morning Ride";"Bench Press (Barbell)";1;135.0;lbs;5.0;;0.0;mi.;0.0;"";"";35m\n';
+      final batch = WorkoutImport.fromStrongCsv(csv);
+      final (ride, bench) = (
+        batch.workouts.single.exercises.first.sets.single,
+        batch.workouts.single.exercises.last.sets.single,
+      );
+      expect(ride.distance, closeTo(16.09, 0.01));
+      expect(bench.weight, closeTo(61.23, 0.01));
+
+      final asImperial = WorkoutImport.fromStrongCsv(csv, unit: MeasurementUnit.imperial);
+      expect(asImperial.workouts.single.exercises.first.sets.single.distance, closeTo(16.09, 0.01));
+    });
+
+    test('Kilometers, kms, metres and KM. all read as what they say', () {
+      String csv(String unit) =>
+          'Date,Workout Name,Exercise Name,Distance,Distance Unit\n'
+          '2023-01-15 17:35:12,Run,Running,5,$unit\n';
+      double distance(String unit) => WorkoutImport.fromStrongCsv(
+        csv(unit),
+        unit: MeasurementUnit.imperial,
+      ).workouts.single.exercises.single.sets.single.distance!;
+      expect(distance('Kilometers'), 5);
+      expect(distance('kms'), 5);
+      expect(distance('KM.'), 5);
+      expect(distance('metres'), 0.005);
+      expect(distance('mile'), closeTo(8.05, 0.01));
+    });
   });
 
   group('set type, RPE, notes and rest timers (rows from real exports)', () {

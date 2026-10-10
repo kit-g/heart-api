@@ -738,21 +738,26 @@ String? _strongSetType(String order) {
   };
 }
 
+/// A unit as an export spells it — `lbs`, `mi.`, `Kilometers` — reduced to its
+/// letters, so a trailing period or a capital never sends a declared unit to
+/// the fallback (Strong writes `mi.`).
+String? _unitWord(String? unit) => unit?.toLowerCase().replaceAll(RegExp('[^a-z]'), '');
+
 double? _toKilograms(double? value, String? unit, MeasurementUnit fallback) {
   if (value == null) return null;
-  return switch (unit?.trim().toLowerCase()) {
-    'kg' || 'kgs' || 'kilograms' => value,
-    'lb' || 'lbs' || 'pounds' => value.asKilograms,
+  return switch (_unitWord(unit)) {
+    'kg' || 'kgs' || 'kilogram' || 'kilograms' => value,
+    'lb' || 'lbs' || 'pound' || 'pounds' => value.asKilograms,
     _ => fallback == MeasurementUnit.imperial ? value.asKilograms : value,
   };
 }
 
 double? _toKilometers(double? value, String? unit, MeasurementUnit fallback) {
   if (value == null) return null;
-  return switch (unit?.trim().toLowerCase()) {
-    'km' || 'kilometers' => value,
-    'meters' || 'm' => value / 1000,
-    'miles' || 'mi' => value.asKilometers,
+  return switch (_unitWord(unit)) {
+    'km' || 'kms' || 'kilometer' || 'kilometers' || 'kilometre' || 'kilometres' => value,
+    'm' || 'meter' || 'meters' || 'metre' || 'metres' => value / 1000,
+    'mi' || 'mile' || 'miles' => value.asKilometers,
     _ => fallback == MeasurementUnit.imperial ? value.asKilometers : value,
   };
 }
