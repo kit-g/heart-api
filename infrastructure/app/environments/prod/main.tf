@@ -36,10 +36,9 @@ module "api" {
   apple_sign_in                = local.apple_sign_in
   account_deletion_offset_days = 30
   # 1.13 is the first store release (CLAUDE.md, Compatibility floor); every
-  # earlier build is a tester's. Enforcement waits until 1.13 is in both stores,
-  # or the 426 would send today's builds to an update that isn't there yet.
+  # earlier build is a tester's and is told to update (a 426 on every app route).
   minimal_app_version = "1.13.0"
-  enforce_app_version = false
+  enforce_app_version = true
   monitoring_email    = "info@heart-of.me"
   media_distribution  = local.media_host
   allowed_origins     = ["https://heart-of.me", "https://www.heart-of.me"]
