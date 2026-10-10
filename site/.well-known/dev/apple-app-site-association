@@ -4,7 +4,32 @@
     "details": [
       {
         "appID": "DFX2JYT8BM.me.heart-of.ios.dev",
-        "paths": [ "NOT /__/auth/*", "*" ]
+        "paths": [
+          "/workout",
+          "/workout/*",
+          "/activeWorkout",
+          "/activeWorkout/*",
+          "/history",
+          "/history/*",
+          "/exercises",
+          "/exercises/*",
+          "/profile",
+          "/profile/*",
+          "/gallery",
+          "/gallery/*",
+          "/avatar",
+          "/avatar/*",
+          "/login",
+          "/login/*",
+          "/restoreAccount",
+          "/restoreAccount/*",
+          "/apple",
+          "/apple/*",
+          "/done",
+          "/done/*",
+          "/upgradeApp",
+          "/upgradeApp/*"
+        ]
       }
     ]
   }
