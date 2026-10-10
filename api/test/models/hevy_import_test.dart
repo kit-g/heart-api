@@ -369,16 +369,64 @@ void main() {
       },
     );
 
-    test('rejects a file whose dates it cannot read, naming the way out', () {
+    test('refuses a file whose dates it cannot read as unreadable, naming the way out', () {
       expect(
         () => WorkoutImport.fromHevyCsv(_webDe),
         throwsA(
-          isA<FormatException>().having(
+          isA<UnreadableExport>().having(
             (e) => e.message,
             'message',
             contains('export from the Hevy app'),
           ),
         ),
+      );
+    });
+
+    test('a file whose rows are all empty sets is a batch with nothing in it, not unreadable', () {
+      // the real "a set with nothing in it" row, alone
+      final rows = _appEn.split('\r\n');
+      final batch = WorkoutImport.fromHevyCsv([rows[0], rows[10]].join('\r\n'));
+      expect(batch.workouts, isEmpty);
+      expect(batch.rowsSkipped, 1);
+    });
+
+    test("reads the web export's dates with the narrow no-break space newer browsers write", () {
+      // the real en-US rows with U+202F before AM/PM, as ICU 72+ formats them
+      final csv = _webEnUs.replaceAll(' AM"', ' AM"').replaceAll(' PM"', ' PM"');
+      final web = WorkoutImport.fromHevyCsv(csv);
+      expect(web.rowsSkipped, 0);
+      expect(workout(web, '15c US fall-back 2025').start, DateTime.utc(2025, 11, 2, 1, 30));
+      expect(
+        web.workouts.singleWhere((w) => w.start == DateTime.utc(2026, 9, 22, 17)).end,
+        DateTime.utc(2026, 9, 22, 17, 45),
+      );
+    });
+
+    test('a skipped row that would have opened a block still opens it', () {
+      // the real "09 Same exercise twice" rows, with the back-off block's first
+      // row emptied: the set after it must not join the first squat block
+      final rows = _appEn.split('\r\n');
+      final emptied = rows[14].replaceFirst(',0,"normal",176.37,10,,,', ',0,"normal",,,,,');
+      final csv = [
+        rows[0],
+        rows[11],
+        rows[12],
+        rows[13],
+        emptied,
+        rows[14].replaceFirst(',0,"normal",', ',1,"normal",'),
+      ].join('\r\n');
+      final twice = WorkoutImport.fromHevyCsv(csv).workouts.single;
+      expect(twice.exercises.map((e) => e.name), ['Squat (Barbell)', 'Leg Press (Machine)', 'Squat (Barbell)']);
+      expect(twice.exercises.first.sets, hasLength(2));
+      expect(twice.exercises.last.sets, hasLength(1));
+    });
+
+    test('a huge cell is cut short in the reason, which travels into a response', () {
+      final rows = _appEn.split('\r\n');
+      final csv = [rows[0], rows[2].replaceFirst('22 Sep 2026, 17:00', 'x' * 5000)].join('\r\n');
+      expect(
+        () => WorkoutImport.fromHevyCsv(csv),
+        throwsA(isA<UnreadableExport>().having((e) => e.message.length, 'message length', lessThan(200))),
       );
     });
 

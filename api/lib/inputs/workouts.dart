@@ -2,10 +2,12 @@ part of 'inputs.dart';
 
 /// `POST /workouts/imports?source=strong|hevy` — a Strong or Hevy CSV export,
 /// parsed and unit-normalized here so the route layer only ever sees the
-/// canonical [WorkoutImport] batch. A file the parser can't read is still an
-/// accepted input: [batch] is null, [unreadable] says why, and [csv] is the
-/// file itself, for the route to keep. Only an empty body is a 400 — there is
-/// nothing to keep.
+/// canonical [WorkoutImport] batch. A file in a known layout whose rows the
+/// parser can't read ([UnreadableExport]: a date format it doesn't know) is
+/// still an accepted input: [batch] is null, [unreadable] says why, and [csv]
+/// is the file itself, for the route to keep. A file in no known layout, or an
+/// empty one, is a 400 as before: there is nothing a person could import from
+/// it either, and nothing the installed app doesn't already expect.
 ///
 /// Two body shapes:
 /// - raw CSV (`text/csv` or anything non-JSON): the one-shot import — every
@@ -74,7 +76,8 @@ class ImportWorkoutsIn {
     );
   }
 
-  /// The batch, or the parser's refusal in its own words.
+  /// The batch, or — for a file worth keeping — the parser's refusal in its
+  /// own words.
   static (WorkoutImport?, String?) _parsed(
     ImportSource source,
     String csv, {
@@ -83,8 +86,10 @@ class ImportWorkoutsIn {
   }) {
     try {
       return (source.parse(csv, unit: unit, utcOffset: utcOffset), null);
-    } on FormatException catch (e) {
+    } on UnreadableExport catch (e) {
       return (null, e.message);
+    } on FormatException catch (e) {
+      throw BadRequest(reason: 'not a readable ${source.label} export: ${e.message}');
     }
   }
 

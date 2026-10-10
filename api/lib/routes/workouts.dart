@@ -70,10 +70,12 @@ Future<Model> createWorkout(Request request) async {
 /// were created as the user's customs. With `dryRun=true`, writes nothing and
 /// responds with the preview instead — the input for the consent step.
 ///
-/// A file the parser can't read is not refused: it is kept for a person to
-/// import by hand, answered `202` with a note saying so, and the owner is
-/// alerted. A switcher's whole history is worth a manual pass; a 400 would
-/// send them away with it.
+/// A file in a known layout whose rows the parser can't read is not refused:
+/// it is kept for a person to import by hand, answered `202` with a note
+/// saying so, and the owner is alerted. A switcher's whole history is worth a
+/// manual pass; a 400 would send them away with it. An import that skipped
+/// rows is kept too, quietly, for whoever wants to see what the parser
+/// refused.
 Future<Model> importWorkouts(Request request) async {
   final input = await ImportWorkoutsIn.fromRequest(request);
   return switch (input.batch) {
@@ -91,6 +93,7 @@ Future<Model> _importBatch(Request request, ImportWorkoutsIn input, WorkoutImpor
     batch: batch,
     createCustom: input.createCustom,
   );
+  if (batch.rowsSkipped > 0) await _keepPartial(request, input);
   if (report.workoutsCreated >= 500 || report.setsCreated >= 5000) {
     // a big import is legitimate exactly once per user per source app —
     // worth a human glance either way
@@ -106,19 +109,39 @@ Future<Model> _importBatch(Request request, ImportWorkoutsIn input, WorkoutImpor
 }
 
 Future<Model> _parkExport(Request request, ImportWorkoutsIn input) async {
-  final key = await request.importStorage.park(
+  final (:key, :already) = await request.importStorage.keep(
     userId: request.userId,
     source: input.source,
     bytes: utf8.encode(input.csv),
+    as: .parked,
   );
-  await _alertOwner(
-    request,
-    subject: 'Parked workout import',
-    message:
-        'User ${request.userId} sent a ${input.source.label} export the parser could not read '
-        '(${input.unreadable}). It is at $key, waiting for a manual import.',
-  );
+  // the same file sent again (a retry, a dry run then a commit) is one object
+  // and one alert
+  if (!already) {
+    await _alertOwner(
+      request,
+      subject: 'Parked workout import',
+      message:
+          'User ${request.userId} sent a ${input.source.label} export the parser could not read '
+          '(${input.unreadable}). It is at $key, waiting for a manual import.',
+    );
+  }
   return Accepted(WorkoutImportParked(source: input.source, key: key, reason: input.unreadable!));
+}
+
+/// Keeps an export the parser read only in part, best-effort: the import has
+/// already happened, and a failure here is a lost sample, not a lost import.
+Future<void> _keepPartial(Request request, ImportWorkoutsIn input) async {
+  try {
+    await request.importStorage.keep(
+      userId: request.userId,
+      source: input.source,
+      bytes: utf8.encode(input.csv),
+      as: .partial,
+    );
+  } catch (e, st) {
+    _logger.warning('failed to keep a partially read ${input.source.label} export', e, st);
+  }
 }
 
 /// Tells the owner, best-effort: an alert must never fail the request it is

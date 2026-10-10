@@ -557,44 +557,108 @@ void main() {
       expect(batch.workouts.single.name, 'P millis');
     });
 
-    test('keeps a body no parser reads and answers 202 with a parked note', () async {
-      when(
-        imports.park(userId: anyNamed('userId'), source: anyNamed('source'), bytes: anyNamed('bytes')),
-      ).thenAnswer((_) async => 'imports/parked/abc/strong-def.csv');
+    // Hevy's layout with the dates as hevy.com writes them in German: a file
+    // a person could import, which the parser can't
+    const hevyUnreadable =
+        '"title","start_time","end_time","description","exercise_title","superset_id","exercise_notes","set_index","set_type","weight_lbs","reps","distance_km","duration_seconds","rpe"\n'
+        '"Morning Lift","22.09.2026, 17:00","22.09.2026, 17:45","","Overhead Press (Barbell)",,"",0,"normal",93.7,8,,,\n';
 
-      final result = await importWorkouts(importReq(body: 'a,b\n1,2\n'));
+    test('keeps a Hevy file whose dates it cannot read and answers 202 with a parked note', () async {
+      when(
+        imports.keep(
+          userId: anyNamed('userId'),
+          source: anyNamed('source'),
+          bytes: anyNamed('bytes'),
+          as: anyNamed('as'),
+        ),
+      ).thenAnswer((_) async => (key: 'imports/parked/abc/hevy-def.csv', already: false));
+
+      final result = await importWorkouts(importReq(body: hevyUnreadable, query: {'source': 'hevy', 'dryRun': 'true'}));
 
       expect(result, isA<Accepted<WorkoutImportParked>>());
       final body = result.toMap();
       expect(body['status'], 'parked');
-      expect(body['source'], 'strong');
-      expect(body['reason'], contains('Strong columns'));
+      expect(body['source'], 'hevy');
+      expect(body['reason'], contains('export from the Hevy app'));
       expect(body['message'], contains('message you'));
       final bytes =
           verify(
-                imports.park(userId: _meId, source: ImportSource.strong, bytes: captureAnyNamed('bytes')),
+                imports.keep(
+                  userId: _meId,
+                  source: ImportSource.hevy,
+                  bytes: captureAnyNamed('bytes'),
+                  as: KeptImport.parked,
+                ),
               ).captured.single
               as List<int>;
-      expect(utf8.decode(bytes), 'a,b\n1,2\n');
+      expect(utf8.decode(bytes), hevyUnreadable);
+      verifyNever(workouts.previewImport(userId: anyNamed('userId'), batch: anyNamed('batch')));
+    });
+
+    test('a body in no known layout is still a 400, for Strong and for Hevy', () async {
+      await expectLater(importWorkouts(importReq(body: 'a,b\n1,2\n')), throwsA(isA<BadRequest>()));
+      await expectLater(importWorkouts(importReq(query: {'source': 'hevy'})), throwsA(isA<BadRequest>()));
       verifyNever(
+        imports.keep(
+          userId: anyNamed('userId'),
+          source: anyNamed('source'),
+          bytes: anyNamed('bytes'),
+          as: anyNamed('as'),
+        ),
+      );
+    });
+
+    test('an import that skipped rows is kept as partial on commit, not on a dry run', () async {
+      // the real Strong row with a NaN weight the parser skips
+      const partial =
+          '$csv'
+          '2023-01-15 17:35:12,Push Day,1h,Squat (Barbell),2,NaN,5,0,0\n';
+      when(
+        imports.keep(
+          userId: anyNamed('userId'),
+          source: anyNamed('source'),
+          bytes: anyNamed('bytes'),
+          as: anyNamed('as'),
+        ),
+      ).thenAnswer((_) async => (key: 'imports/partial/abc/strong-def.csv', already: false));
+      when(
         workouts.importWorkouts(
           userId: anyNamed('userId'),
           batch: anyNamed('batch'),
           createCustom: anyNamed('createCustom'),
         ),
+      ).thenAnswer((_) async => report);
+      when(workouts.previewImport(userId: anyNamed('userId'), batch: anyNamed('batch'))).thenAnswer(
+        (_) async => const WorkoutImportPreview(
+          source: 'strong',
+          workoutsFound: 1,
+          workoutsAlreadyImported: 0,
+          workoutsEnriched: 0,
+          setsEnriched: 0,
+          restTimersSet: 0,
+          setsFound: 1,
+          exercisesMatched: 1,
+          exercisesUnmatched: [],
+          rowsSkipped: 1,
+          workoutsDropped: 0,
+          setsDropped: 0,
+        ),
       );
-    });
 
-    test('parks a Strong body sent as a Hevy export, as a Hevy file', () async {
-      when(
-        imports.park(userId: anyNamed('userId'), source: anyNamed('source'), bytes: anyNamed('bytes')),
-      ).thenAnswer((_) async => 'imports/parked/abc/hevy-def.csv');
+      await importWorkouts(importReq(body: partial, query: {'source': 'strong', 'dryRun': 'true'}));
+      verifyNever(
+        imports.keep(
+          userId: anyNamed('userId'),
+          source: anyNamed('source'),
+          bytes: anyNamed('bytes'),
+          as: anyNamed('as'),
+        ),
+      );
 
-      final result = await importWorkouts(importReq(query: {'source': 'hevy', 'dryRun': 'true'}));
-
-      expect(result.toMap()['source'], 'hevy');
-      expect(result.toMap()['reason'], contains('Hevy columns'));
-      verify(imports.park(userId: _meId, source: ImportSource.hevy, bytes: anyNamed('bytes'))).called(1);
+      await importWorkouts(importReq(body: partial));
+      verify(
+        imports.keep(userId: _meId, source: ImportSource.strong, bytes: anyNamed('bytes'), as: KeptImport.partial),
+      ).called(1);
     });
 
     test('rejects an empty body, which is nothing to keep', () async {
