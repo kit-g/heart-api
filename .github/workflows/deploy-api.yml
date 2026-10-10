@@ -127,6 +127,10 @@ jobs:
   db-test:
     name: "Database Tests & Coverage"
     runs-on: ubuntu-latest
+    # A healthy run takes about 5 minutes. The coverage run has hung mid-suite
+    # with no error (heart-api#168), and a hung job is worse than a red one: it
+    # holds the deploy until someone notices and cancels it.
+    timeout-minutes: 15
     env:
       PGHOST: localhost
       PGPORT: "5432"
