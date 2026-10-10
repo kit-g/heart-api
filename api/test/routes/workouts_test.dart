@@ -585,9 +585,9 @@ void main() {
           verify(
                 imports.keep(
                   userId: _meId,
-                  source: ImportSource.hevy,
+                  source: .hevy,
                   bytes: captureAnyNamed('bytes'),
-                  as: KeptImport.parked,
+                  as: .parked,
                 ),
               ).captured.single
               as List<int>;
@@ -657,7 +657,7 @@ void main() {
 
       await importWorkouts(importReq(body: partial));
       verify(
-        imports.keep(userId: _meId, source: ImportSource.strong, bytes: anyNamed('bytes'), as: KeptImport.partial),
+        imports.keep(userId: _meId, source: .strong, bytes: anyNamed('bytes'), as: .partial),
       ).called(1);
     });
 
