@@ -1,13 +1,10 @@
-# Apex zone — single hosted zone for heart-of.me, lives in this dev account today
-# and will keep doing so even after a prod account exists (apex doesn't move).
+# The old apex zone, retired: prod's zone has been authoritative for heart-of.me
+# since 2026-10-08, and the 48 hours the old delegation could stay cached have
+# passed. This root exists only to be destroyed (README, phase 7).
 
 resource "aws_route53_zone" "apex" {
   name    = var.apex_domain
   comment = "${var.apex_domain} hosted zone"
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "aws_route53_record" "apex_mx" {
