@@ -41,6 +41,16 @@ class AppHarness {
 
   static const goodToken = 'good';
 
+  /// relic registers every served app with the VM's isolate-reload stream when a
+  /// VM service is on (CI runs the suite under coverage, which turns it on) and
+  /// drops the registration on close. Its broadcast stream subscribes to the VM
+  /// service when its listener count goes from zero to one and unsubscribes on
+  /// the way back, so a start right after a stop races the previous cancel and
+  /// the VM answers `(103) Stream already subscribed`, reported against whatever
+  /// test just finished. One idle app per isolate, never closed, keeps the count
+  /// above zero: no harness start ever re-subscribes.
+  static final _keepAlive = RelicApp().serve(port: 0);
+
   /// A valid, correctly-signed Firebase token whose `sign_in_provider` is
   /// `anonymous` — exercises the 403 path without touching the network.
   static const anonymousToken = 'anonymous';
@@ -87,6 +97,7 @@ class AppHarness {
         auth: verify,
       ),
     };
+    await _keepAlive;
     final server = await app.serve(port: 0);
     return AppHarness._(db, storage, events, apple, config, app, server);
   }
