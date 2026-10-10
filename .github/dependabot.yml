@@ -34,7 +34,6 @@ updates:
     directories:
       - /infrastructure/app/environments/dev
       - /infrastructure/app/environments/prod
-      - /infrastructure/dns
       - /infrastructure/global/environments/dev
       - /infrastructure/global/environments/prod
     schedule:

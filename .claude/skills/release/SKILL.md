@@ -42,7 +42,7 @@ git diff --stat <tag>..origin/main -- api/lib/routes api/lib/core api/lib/models
 git diff <tag>..origin/main -- api/lib/routes/index.dart api/lib/core/app.dart   # routes added or gone
 git diff <tag>..origin/main -- shared/heart_models/CHANGELOG.md                  # what the app's pull gets
 git diff --name-only <tag>..origin/main -- database/migrations                   # what the deploy applies
-git diff <tag>..origin/main -- infrastructure/app/environments/prod infrastructure/app/stacks infrastructure/global infrastructure/dns
+git diff <tag>..origin/main -- infrastructure/app/environments/prod infrastructure/app/stacks infrastructure/global
 ```
 
 Where a change landed tells you its reader:
