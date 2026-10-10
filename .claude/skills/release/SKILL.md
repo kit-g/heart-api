@@ -128,7 +128,13 @@ An ordered checklist with a box per step, written so it can be followed cold:
 
    Tags and prod are the user's: draft, never push a tag unasked.
 3. `deploy-api-prod.yml` deploys, then creates the GitHub release from the same file (title from
-   its first line). A missing file fails that job loudly. It doesn't undo the deploy.
+   its first line). A missing file skips that job with a warning and the run stays green: the
+   deploy is never failed for a shipped tag. Commit the notes, then create the release by hand:
+
+   ```sh
+   gh release create v<version> --verify-tag --title "$(head -n 1 release_notes/v<version>.md | sed 's/^# //')" \
+     --notes-file <(tail -n +3 release_notes/v<version>.md)
+   ```
 4. Walk the *after the deploy* checks, and record anything that went differently in the file
    on `main`. The GitHub release can be edited to match.
 
