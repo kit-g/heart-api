@@ -121,6 +121,17 @@ mixin Signer {
     );
   }
 
+  /// Sends an authenticated HTTP HEAD request and returns the status code,
+  /// whatever it is: a HEAD asks a question, and 404 is an answer, not an
+  /// error.
+  Future<int> head({required Uri uri, Map<String, String>? headers}) async {
+    final request = AWSHttpRequest(method: .head, uri: uri, headers: {...?headers});
+    final signedRequest = await _signer.sign(request, credentialScope: _scope, serviceConfiguration: config);
+    final response = await signedRequest.send().response;
+    await response.decodeBody();
+    return response.statusCode;
+  }
+
   /// Sends an authenticated HTTP GET request to the specified URI.
   ///
   /// Parameters:
