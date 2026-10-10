@@ -55,3 +55,8 @@ def test_a_shared_title_takes_the_first_live_exercise_in_catalog_order():
 def test_case_variants_are_one_title_unless_they_name_different_exercises():
     assert case_conflicts({'Squat (Langhantel)': 'Squat (Barbell)', 'Squat (langhantel)': 'Squat (Barbell)'}) == []
     assert case_conflicts({'Brzuszki': 'Crunch', 'brzuszki': 'Sit Up'}) == [('Brzuszki', 'brzuszki')]
+
+
+def test_an_entry_without_the_archived_flag_counts_as_live():
+    table, _ = hevy_names([{'title': 'Crunch', 'pl_title': 'Brzuszki'}])
+    assert table == {'Brzuszki': 'Crunch'}

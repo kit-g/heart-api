@@ -83,7 +83,7 @@ def hevy_names(catalog: list[dict]) -> tuple[dict[str, str], list[tuple[str, lis
     ambiguous: list[tuple[str, list[str], str]] = []
     for title, indices in carriers.items():
         names = sorted({catalog[i]['title'] for i in indices})
-        pick = min(indices, key=lambda i: (catalog[i]['is_archived'], i))
+        pick = min(indices, key=lambda i: (catalog[i].get('is_archived', False), i))
         table[title] = catalog[pick]['title']
         if len(names) > 1:
             ambiguous.append((title, names, catalog[pick]['title']))
@@ -131,6 +131,10 @@ def main() -> None:
     names, ambiguous = hevy_names(read_catalog(args.catalog))
     for title, candidates, pick in ambiguous:
         print(f'   {title!r} is {" / ".join(candidates)}: taking {pick}')
+    if not names:
+        raise SystemExit(
+            'the catalog yielded no titles: not the catalog, or not its shape; nothing loaded, nothing pruned'
+        )
     if conflicts := case_conflicts(names):
         raise SystemExit(f'titles equal but for case name different exercises: {conflicts}')
 
