@@ -725,20 +725,37 @@ WHERE w.id IN (SELECT id FROM _existing_workout)
 /// or one shifted by a deleted neighbour, matches nothing and is left alone —
 /// which is what stops set 1's RPE landing on the old set 2.
 const _reimportCandidates = '''
--- keyed by the *incoming* name so downstream joins on the CSV's spelling still
--- hit, matched by its canonical form (the English title behind a translated
--- one, see _names); matching is case-insensitive because that is the DB's own
--- notion of identity (unique on (user_id, lower(name))). A name another app's
--- catalog uses for a library exercise arrives through its aliases; the user's
--- own exercise wins over the library's, and a name over an alias
-_resolved AS (
-  SELECT DISTINCT ON (n.name) n.name, e.id
+-- every name an exercise answers to, case-folded, one row each: its own name
+-- and each alias, over the library and the user's customs. Flat so the
+-- resolution below is one equi-join, not an OR over an unnest per pair
+_library AS (
+  SELECT id, user_id, lower(name) AS key, true AS by_name
+  FROM exercises
+  WHERE user_id IS NULL OR user_id = @userId
+  UNION ALL
+  SELECT e.id, e.user_id, lower(a), false
   FROM exercises e
-  JOIN _names n
-    ON lower(n.canonical) = lower(e.name)
-    OR lower(n.canonical) IN (SELECT lower(a) FROM unnest(e.aliases) a)
+  CROSS JOIN LATERAL unnest(e.aliases) a
   WHERE e.user_id IS NULL OR e.user_id = @userId
-  ORDER BY n.name, e.user_id NULLS LAST, lower(n.canonical) = lower(e.name) DESC
+),
+-- the two spellings an incoming name is looked up by: as written (an exercise
+-- the user already owns under that very name, say from an import made before
+-- its translation was known) and canonical (the English title behind it)
+_keys AS (
+  SELECT name, lower(name) AS key, 0 AS pref FROM _names
+  UNION ALL
+  SELECT name, lower(canonical), 1 FROM _names
+),
+-- keyed by the *incoming* name so downstream joins on the CSV's spelling still
+-- hit; matching is case-insensitive because that is the DB's own notion of
+-- identity (unique on (user_id, lower(name))). The user's own exercise wins
+-- over the library's, the name as written over its canonical form, and a
+-- name over an alias
+_resolved AS (
+  SELECT DISTINCT ON (k.name) k.name, l.id
+  FROM _keys k
+  JOIN _library l ON l.key = k.key
+  ORDER BY k.name, l.user_id NULLS LAST, k.pref, l.by_name DESC
 ),
 _reimported AS (
   SELECT w.id AS workout_id, w.note AS stored_note, i.workout
@@ -837,11 +854,15 @@ _created_exercises AS (
   FROM _names n
   WHERE NOT exists (SELECT 1 FROM _resolved r WHERE lower(r.name) = lower(n.name))
     AND (@createCustom::jsonb IS NULL OR n.name IN (SELECT jsonb_array_elements_text(@createCustom::jsonb)))
-  ORDER BY lower(n.canonical), n.canonical
+  -- the spelling decides which row's category guess the custom gets, so the
+  -- same file makes the same custom everywhere
+  ORDER BY lower(n.canonical), n.canonical, n.name
   RETURNING id, name
 ),
 -- case-folded incoming name -> exercise id; DISTINCT because two case-variant
--- incoming names resolve to the same id and must not fan out the joins below
+-- incoming names resolve to the same id and must not fan out the joins below.
+-- A created custom answers only to the incoming names the user approved: two
+-- spellings can fold to one canonical, one approved and one declined
 _lookup AS (
   SELECT DISTINCT lower(name) AS name, id
   FROM (
@@ -850,6 +871,7 @@ _lookup AS (
     SELECT n.name, c.id
     FROM _names n
     JOIN _created_exercises c ON lower(c.name) = lower(n.canonical)
+    WHERE @createCustom::jsonb IS NULL OR n.name IN (SELECT jsonb_array_elements_text(@createCustom::jsonb))
   ) _all
 ),
 _inserted_workouts AS (

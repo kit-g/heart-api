@@ -11,7 +11,10 @@ import 'db_test_utility.dart';
 /// name matches the library by name or alias, a translated title the library
 /// lacks becomes one custom under its English name, and the `hevy:` import
 /// ids hold under the (user_id, import_id) index so a second run of the same
-/// export creates nothing.
+/// export creates nothing. Two edges of the canonical fold: a title the user
+/// already owns verbatim resolves to that exercise before anything the
+/// translation points at, and declining one spelling of a canonical name
+/// declines that spelling even when another spelling of it was approved.
 ///
 /// Tagged `db` — skipped by the default `dart test`. Run with:
 ///   dart test --run-skipped -t db
@@ -55,13 +58,23 @@ void main() {
     );
   });
 
+  final extraProfiles = <String>[];
+
+  Future<String> freshProfile() async {
+    final id = await h.seedProfile();
+    extraProfiles.add(id);
+    return id;
+  }
+
   tearDownAll(() async {
     await h.exec('DELETE FROM import_names WHERE title = ANY(@titles)', {
       'titles': [benchDe, pistolDe],
     });
     // workout_exercises.exercise_id is ON DELETE RESTRICT; drop the imported
     // workouts before the profile cascade takes the custom exercises with it
-    await h.exec('DELETE FROM workouts WHERE user_id = @id', {'id': ownerId});
+    await h.exec('DELETE FROM workouts WHERE user_id = ANY(@ids)', {
+      'ids': [ownerId, ...extraProfiles],
+    });
     await h.teardownDatabase();
   });
 
@@ -122,6 +135,42 @@ void main() {
 
     final count = await h.exec('SELECT count(*) AS n FROM workouts WHERE user_id = @id', {'id': ownerId});
     expect(count.single.toColumnMap()['n'], 3);
+  });
+
+  test('a title the user already owns verbatim resolves to that exercise, not to its translation', () async {
+    // a custom from an import made before the translation was known
+    final user = await freshProfile();
+    final owned = await h.insertId(
+      'INSERT INTO exercises (name, category, target, user_id) VALUES (@n, @c, @t, @u) RETURNING id',
+      {'n': benchDe, 'c': 'Barbell', 't': 'Chest', 'u': user},
+    );
+    final batch = WorkoutImport.fromHevyCsv(csv());
+    final report = await h.db.importWorkouts(userId: user, batch: batch);
+
+    expect(report.exercisesMatched, 3);
+    final rows = await h.exec(
+      'SELECT DISTINCT we.exercise_id::text AS id FROM workouts w JOIN workout_exercises we ON we.workout_id = w.id '
+      'WHERE w.user_id = @u AND w.name = @name',
+      {'u': user, 'name': 'Morning Lift'},
+    );
+    expect(rows.map((r) => r.toColumnMap()['id']), contains(owned));
+  });
+
+  test('declining one spelling of a canonical name declines that spelling, whatever happened to the other', () async {
+    // two spellings of one name the library lacks: approved as typed in
+    // English, declined as the German app wrote it
+    final user = await freshProfile();
+    final pistolBatch = WorkoutImport.fromHevyCsv(
+      '"title","start_time","end_time","description","exercise_title","superset_id","exercise_notes","set_index","set_type","weight_lbs","reps","distance_km","duration_seconds","rpe"\r\n'
+      '"06 Custom exercises, every type","11 Sep 2026, 19:00","11 Sep 2026, 20:15","","$pistolEn",,"",0,"normal",,6,,,\r\n'
+      '"06 Custom exercises, every type","11 Sep 2026, 19:00","11 Sep 2026, 20:15","","$pistolDe",,"",0,"normal",,5,,,',
+    );
+    final report = await h.db.importWorkouts(userId: user, batch: pistolBatch, createCustom: [pistolEn]);
+
+    expect(report.exercisesCreated, [pistolEn]);
+    expect(report.exercisesSkipped, [pistolDe]);
+    expect(report.setsCreated, 1);
+    expect(report.setsSkipped, 1);
   });
 }
 
