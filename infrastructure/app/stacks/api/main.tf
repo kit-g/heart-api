@@ -83,6 +83,10 @@ resource "aws_api_gateway_integration" "proxy" {
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 
+  # Hashed from what we configure, never from a whole resource object: a
+  # resource's attributes are the provider's, and a provider bump that adds or
+  # renormalizes one (6.68 did) changes the hash and redeploys the stage with
+  # nothing of ours changed. The gateway responses go in as their definition.
   triggers = {
     redeployment = sha1(
       jsonencode(
@@ -91,7 +95,7 @@ resource "aws_api_gateway_deployment" "deployment" {
           aws_api_gateway_resource.proxy.id,
           aws_api_gateway_method.proxy.id,
           aws_api_gateway_integration.proxy.id,
-          aws_api_gateway_gateway_response.errors,
+          local.gateway_errors,
         ]
       )
     )
