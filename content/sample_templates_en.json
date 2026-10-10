@@ -21,19 +21,19 @@
               "id": "04627d15-ba25-4cf8-959e-c65a7673c1b6",
               "completed": false,
               "reps": 5,
-              "weight": 135
+              "weight": 60
             },
             {
               "id": "c6bcd158-525d-4936-ba44-147f68ccc9e6",
               "completed": false,
               "reps": 5,
-              "weight": 135
+              "weight": 60
             },
             {
               "id": "eb84f65f-372a-4848-9c9f-c1a82e82b23b",
               "completed": false,
               "reps": 5,
-              "weight": 135
+              "weight": 60
             }
           ]
         },
@@ -48,19 +48,19 @@
               "id": "983c7e59-1d76-4259-ae08-896b85c86d34",
               "completed": false,
               "reps": 5,
-              "weight": 95
+              "weight": 40
             },
             {
               "id": "70ee8733-aeb2-4324-82ed-a096203c897a",
               "completed": false,
               "reps": 5,
-              "weight": 95
+              "weight": 40
             },
             {
               "id": "758fc718-9b19-40db-a7a7-03d2b0c8138b",
               "completed": false,
               "reps": 5,
-              "weight": 95
+              "weight": 40
             }
           ]
         },
@@ -75,19 +75,19 @@
               "id": "e358bc95-943e-4b51-812a-d852cd7a09f5",
               "completed": false,
               "reps": 10,
-              "weight": 50
+              "weight": 22.5
             },
             {
               "id": "7610afb6-7ed1-42d5-a884-4b1709025323",
               "completed": false,
               "reps": 10,
-              "weight": 50
+              "weight": 22.5
             },
             {
               "id": "30a43242-8d98-40ff-8301-66e9bfb278d2",
               "completed": false,
               "reps": 10,
-              "weight": 50
+              "weight": 22.5
             }
           ]
         },
@@ -102,19 +102,19 @@
               "id": "b45fe309-25a0-4ea5-a70f-57e651c04af1",
               "completed": false,
               "reps": 12,
-              "weight": 15
+              "weight": 7.5
             },
             {
               "id": "03d0e9c1-a728-483e-b1ca-e44f9fae2eee",
               "completed": false,
               "reps": 12,
-              "weight": 15
+              "weight": 7.5
             },
             {
               "id": "a6d66680-b613-4135-a881-c5cbda573767",
               "completed": false,
               "reps": 12,
-              "weight": 15
+              "weight": 7.5
             }
           ]
         },
@@ -129,19 +129,19 @@
               "id": "f55bf8ec-8d61-4b8b-9778-7cbf5fb5f879",
               "completed": false,
               "reps": 12,
-              "weight": 50
+              "weight": 22.5
             },
             {
               "id": "f1eb89bf-5af9-4adf-af28-bb95fd1c04d4",
               "completed": false,
               "reps": 12,
-              "weight": 50
+              "weight": 22.5
             },
             {
               "id": "cd2c180e-229a-438c-9f25-d823288c2d0a",
               "completed": false,
               "reps": 12,
-              "weight": 50
+              "weight": 22.5
             }
           ]
         }
@@ -168,19 +168,19 @@
               "id": "187dc7b3-33f3-42ce-a882-21b904c5a7bd",
               "completed": false,
               "reps": 5,
-              "weight": 225
+              "weight": 100
             },
             {
               "id": "7eacddd6-6c81-4163-8fd4-cdb00733477f",
               "completed": false,
               "reps": 5,
-              "weight": 225
+              "weight": 100
             },
             {
               "id": "b5e897f2-6945-4396-ac50-ddc1951e1d58",
               "completed": false,
               "reps": 5,
-              "weight": 225
+              "weight": 100
             }
           ]
         },
@@ -222,19 +222,19 @@
               "id": "654a3ea5-8563-41e7-96ee-3e86c509bd73",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             },
             {
               "id": "421e1c89-e497-49de-ba44-6797164ea74d",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             },
             {
               "id": "9b592830-ae44-466f-bf76-548c649b6ab0",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             }
           ]
         },
@@ -249,19 +249,19 @@
               "id": "29ce48eb-7c7b-4c60-828f-cf5a3095d88a",
               "completed": false,
               "reps": 10,
-              "weight": 120
+              "weight": 55
             },
             {
               "id": "7cf3ca94-0a96-4e59-8df1-fb0cb9371da8",
               "completed": false,
               "reps": 10,
-              "weight": 120
+              "weight": 55
             },
             {
               "id": "5a40c9fc-314e-4076-af48-f946cd0725f7",
               "completed": false,
               "reps": 10,
-              "weight": 120
+              "weight": 55
             }
           ]
         },
@@ -276,19 +276,19 @@
               "id": "e4d82ad0-1c8d-4fdd-8cd9-e23b134640b4",
               "completed": false,
               "reps": 10,
-              "weight": 25
+              "weight": 12.5
             },
             {
               "id": "a4276f8d-5ac4-41d2-8240-286977d458d2",
               "completed": false,
               "reps": 10,
-              "weight": 25
+              "weight": 12.5
             },
             {
               "id": "bf7a9e39-1c22-4308-81e7-29a35d6c7010",
               "completed": false,
               "reps": 10,
-              "weight": 25
+              "weight": 12.5
             }
           ]
         }
@@ -315,19 +315,19 @@
               "id": "be450a47-fc4c-42d8-9dd7-f654ace2b67a",
               "completed": false,
               "reps": 5,
-              "weight": 185
+              "weight": 85
             },
             {
               "id": "da5c59b9-a321-457d-93e6-44b46b721e50",
               "completed": false,
               "reps": 5,
-              "weight": 185
+              "weight": 85
             },
             {
               "id": "a86c05df-a3fd-4e2e-8ae9-3c5eaca9cfeb",
               "completed": false,
               "reps": 5,
-              "weight": 185
+              "weight": 85
             }
           ]
         },
@@ -342,19 +342,19 @@
               "id": "7a266d50-4fb4-42c7-a782-fa538fef1cac",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             },
             {
               "id": "e097c704-29ea-4e95-b3a4-71b711727e62",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             },
             {
               "id": "a3898b13-f2c2-49ae-86b7-9388de0aed50",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             }
           ]
         },
@@ -369,19 +369,19 @@
               "id": "b9758180-8fd9-4ddb-87e8-13abe2d7b90c",
               "completed": false,
               "reps": 10,
-              "weight": 360
+              "weight": 160
             },
             {
               "id": "a84a0778-1795-489a-b25c-6db350728adb",
               "completed": false,
               "reps": 10,
-              "weight": 360
+              "weight": 160
             },
             {
               "id": "c010f915-190e-4c47-a5a7-4e74319b817e",
               "completed": false,
               "reps": 10,
-              "weight": 360
+              "weight": 160
             }
           ]
         },
@@ -396,19 +396,19 @@
               "id": "56805c48-058e-4e3d-8d17-1cb14a088348",
               "completed": false,
               "reps": 12,
-              "weight": 100
+              "weight": 45
             },
             {
               "id": "fab0de40-f845-4902-800a-0112bedff988",
               "completed": false,
               "reps": 12,
-              "weight": 100
+              "weight": 45
             },
             {
               "id": "840ff9b3-5587-4873-abe6-9f0ef0372caa",
               "completed": false,
               "reps": 12,
-              "weight": 100
+              "weight": 45
             }
           ]
         },
@@ -423,19 +423,19 @@
               "id": "9848e6ee-9005-4144-894c-1d621b0ab579",
               "completed": false,
               "reps": 12,
-              "weight": 80
+              "weight": 35
             },
             {
               "id": "f1f8883b-878e-492d-977c-2f5dd7cc2b4b",
               "completed": false,
               "reps": 12,
-              "weight": 80
+              "weight": 35
             },
             {
               "id": "b3622c93-5145-4654-807a-01996f5e5f3a",
               "completed": false,
               "reps": 12,
-              "weight": 80
+              "weight": 35
             }
           ]
         },
@@ -486,19 +486,19 @@
               "id": "edb117f1-ad6a-4ce0-bb86-4d107fabd3b2",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             },
             {
               "id": "b360348c-4449-4610-b1fe-b801a4b6b9da",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             },
             {
               "id": "c935a0cb-157d-4e30-a5ac-fb5f1b72feac",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             }
           ]
         },
@@ -513,19 +513,19 @@
               "id": "604107da-9b59-4599-ae86-cc35697669b3",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             },
             {
               "id": "16f7d1e2-f63c-41ed-9113-7e83dd5dada9",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             },
             {
               "id": "dcf482a7-a4bb-4f60-b590-2351fca40aaf",
               "completed": false,
               "reps": 8,
-              "weight": 135
+              "weight": 60
             }
           ]
         },
@@ -540,19 +540,19 @@
               "id": "0e565725-0560-4750-a3ba-2840eaff0799",
               "completed": false,
               "reps": 8,
-              "weight": 95
+              "weight": 40
             },
             {
               "id": "361d191d-572a-424e-ab69-fcc19cca4332",
               "completed": false,
               "reps": 8,
-              "weight": 95
+              "weight": 40
             },
             {
               "id": "ea75ba2e-fe77-4129-b4dd-f5555e637fdb",
               "completed": false,
               "reps": 8,
-              "weight": 95
+              "weight": 40
             }
           ]
         },
@@ -567,19 +567,19 @@
               "id": "57a529c2-8173-4c7d-abf3-9df86940b99e",
               "completed": false,
               "reps": 10,
-              "weight": 120
+              "weight": 55
             },
             {
               "id": "bc3a9f69-9c84-4bb3-aa44-33c63d84329f",
               "completed": false,
               "reps": 10,
-              "weight": 120
+              "weight": 55
             },
             {
               "id": "25080716-08bb-414c-8a4f-39d1a3af32c6",
               "completed": false,
               "reps": 10,
-              "weight": 120
+              "weight": 55
             }
           ]
         },
@@ -594,19 +594,19 @@
               "id": "e6c88a13-0e96-4a18-a00a-8ccb6dc21278",
               "completed": false,
               "reps": 10,
-              "weight": 25
+              "weight": 12.5
             },
             {
               "id": "203dd932-6816-499a-9bcd-fbc4538ac32b",
               "completed": false,
               "reps": 10,
-              "weight": 25
+              "weight": 12.5
             },
             {
               "id": "04a77f96-0cb0-471d-a16f-7c4c87abc841",
               "completed": false,
               "reps": 10,
-              "weight": 25
+              "weight": 12.5
             }
           ]
         },
@@ -621,19 +621,19 @@
               "id": "1b7fa169-bc4f-4df5-854a-5d1f205a374f",
               "completed": false,
               "reps": 12,
-              "weight": 50
+              "weight": 22.5
             },
             {
               "id": "9c07f4a8-6d0d-4b8b-a779-db97b6fbfd15",
               "completed": false,
               "reps": 12,
-              "weight": 50
+              "weight": 22.5
             },
             {
               "id": "3b688c03-150a-4324-a188-742b628ae3f8",
               "completed": false,
               "reps": 12,
-              "weight": 50
+              "weight": 22.5
             }
           ]
         }
@@ -660,19 +660,19 @@
               "id": "d669e896-9736-4a1a-9e4f-643d4e3936d8",
               "completed": false,
               "reps": 5,
-              "weight": 95
+              "weight": 40
             },
             {
               "id": "cbe2d261-d988-4cf2-9321-738151f3d66a",
               "completed": false,
               "reps": 5,
-              "weight": 95
+              "weight": 40
             },
             {
               "id": "771a6459-6d52-4c39-a558-481ba72195c0",
               "completed": false,
               "reps": 5,
-              "weight": 95
+              "weight": 40
             }
           ]
         },
@@ -687,19 +687,19 @@
               "id": "554e2d7e-aa30-4802-aed0-680a0c45893e",
               "completed": false,
               "reps": 5,
-              "weight": 95
+              "weight": 40
             },
             {
               "id": "d0ec1b60-1b0c-4577-8228-2141d71a9ac2",
               "completed": false,
               "reps": 5,
-              "weight": 95
+              "weight": 40
             },
             {
               "id": "061601fb-25f0-4a2f-8081-06504525c2cc",
               "completed": false,
               "reps": 5,
-              "weight": 95
+              "weight": 40
             }
           ]
         },
@@ -714,19 +714,19 @@
               "id": "67aac938-1397-47d8-803e-2d333bc50f93",
               "completed": false,
               "reps": 5,
-              "weight": 65
+              "weight": 30
             },
             {
               "id": "49f98acd-91c6-44d9-8d03-325972bdcfc4",
               "completed": false,
               "reps": 5,
-              "weight": 65
+              "weight": 30
             },
             {
               "id": "247aa79e-a6e0-40d3-9ee1-35285fd60395",
               "completed": false,
               "reps": 5,
-              "weight": 65
+              "weight": 30
             }
           ]
         },
