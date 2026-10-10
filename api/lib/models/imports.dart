@@ -361,7 +361,7 @@ class WorkoutImport {
             // an end before the start, or past 24h, is a window not worth
             // storing, as with Strong
             end: switch (endLocal?.difference(startLocal)) {
-              Duration d when d > Duration.zero && d <= const Duration(hours: 24) => endLocal!.subtract(utcOffset),
+              Duration d when d > .zero && d <= const Duration(hours: 24) => endLocal!.subtract(utcOffset),
               _ => null,
             },
           )..note = _unescaped(_cell(row, description));

@@ -22,10 +22,10 @@ abstract class _StorageBase extends S3Api {
     final upload = await getUploadUrl(contentBucket, key);
     final client = HttpClient();
     try {
-      final request = await client.putUrl(upload);
-      request.headers.contentType = ContentType.parse(mimeType);
-      request.contentLength = bytes.length;
-      request.add(bytes);
+      final request = await client.putUrl(upload)
+        ..headers.contentType = .parse(mimeType)
+        ..contentLength = bytes.length
+        ..add(bytes);
       final response = await request.close();
       await response.drain<void>();
       if (response.statusCode != HttpStatus.ok) {

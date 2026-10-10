@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:heart/models/imports.dart';
-import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
 /// Rows copied byte for byte from real Hevy exports of one test account (see
@@ -558,7 +557,7 @@ void main() {
         'strong',
       );
       expect(
-        ImportSource.hevy.parse(_appKo, unit: MeasurementUnit.imperial).workouts,
+        ImportSource.hevy.parse(_appKo, unit: .imperial).workouts,
         hasLength(1),
       );
     });
