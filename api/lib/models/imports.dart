@@ -316,7 +316,7 @@ class WorkoutImport {
 
     var skipped = 0;
     var setsDropped = 0;
-    String? firstFailure;
+    String? firstUnreadableDate;
     final builders = <_WorkoutBuilder>[];
     // how many runs have carried each identity so far: the ordinal that tells
     // two sessions with the same title, start and end apart
@@ -324,10 +324,15 @@ class WorkoutImport {
     _WorkoutBuilder? current;
     List<String?>? currentKey;
     String? previousExercise;
+    // a skipped row that would have opened an exercise block still opens it
+    // for the rows after it, or they would join the block before
+    var blockPending = false;
     for (final row in rows.skip(1)) {
+      final exercise = _cell(row, exerciseTitle);
+      final index = _cell(row, setIndex);
       try {
         final rawStart = _cell(row, start) ?? (throw const FormatException('no start_time'));
-        final exercise = _cell(row, exerciseTitle) ?? (throw const FormatException('no exercise_title'));
+        if (exercise == null) throw const FormatException('no exercise_title');
         final key = [_cell(row, title), rawStart, _cell(row, end), _cell(row, description)];
         // parse the entire row before touching the builders, so a bad row
         // can't leave a half-built workout behind
@@ -362,23 +367,29 @@ class WorkoutImport {
           )..note = _unescaped(_cell(row, description));
           currentKey = key;
           previousExercise = null;
+          blockPending = false;
           builders.add(current);
         }
         // set_index restarts at 0 for every exercise block, so a 0 after a run
         // of the same exercise is that exercise logged a second time
-        final newBlock = exercise != previousExercise || _cell(row, setIndex) == '0';
+        final newBlock = blockPending || exercise != previousExercise || index == '0';
         if (!current.add(exercise, set, note: _unescaped(_cell(row, exerciseNotes)), newBlock: newBlock)) {
           setsDropped++;
         }
         previousExercise = exercise;
+        blockPending = false;
       } on FormatException catch (e) {
         skipped++;
-        firstFailure ??= e.message;
+        if (e is _UnreadableDate) firstUnreadableDate ??= e.message;
+        if (exercise != null) {
+          blockPending = blockPending || exercise != previousExercise || index == '0';
+          previousExercise = exercise;
+        }
       }
     }
-    // the layout is Hevy's but no row parsed: a date format this parser
-    // doesn't read (a web export in another language), not a bad row
-    if (builders.isEmpty && firstFailure != null) throw FormatException(firstFailure);
+    // the layout is Hevy's but no row's date parsed: a format this parser
+    // doesn't read (a web export in another language), not a file of bad rows
+    if (builders.isEmpty && firstUnreadableDate != null) throw UnreadableExport(firstUnreadableDate);
     final (workouts, dropped) = _capped([for (final b in builders) b.build()]);
     return WorkoutImport._(
       source: 'hevy',
@@ -426,11 +437,29 @@ enum ImportSource {
   }
 }
 
-/// Where an export no parser could read is kept until a person imports it.
+/// Why an export is kept after the request that carried it.
+enum KeptImport {
+  /// No parser could read it; a person imports it by hand.
+  parked,
+
+  /// It imported, but rows were skipped; worth a look at what the parser
+  /// refused, and maybe a parser change.
+  partial,
+}
+
+/// Where an export is kept for the owner's eyes: parked for a manual import,
+/// or partially read and worth a look.
 abstract interface class ImportStorage {
-  /// Keeps [bytes] as the user's parked [source] export; returns the object
-  /// key, which is what the owner's alert points at.
-  Future<String> park({required String userId, required ImportSource source, required List<int> bytes});
+  /// Keeps [bytes] as the user's [source] export, [as] parked or partial;
+  /// returns the object key, which is what an alert points at, and whether
+  /// the same file was already there (the key is a hash of the content, so a
+  /// retry is the same object and not another alert).
+  Future<({String key, bool already})> keep({
+    required String userId,
+    required ImportSource source,
+    required List<int> bytes,
+    required KeptImport as,
+  });
 }
 
 /// The `202` answer to an export the parser could not read: nothing was
@@ -905,8 +934,30 @@ bool _sameKey(List<String?> a, List<String?>? b) {
 /// A wall-clock minute as text: `2026-09-22T06:00`.
 String _minute(DateTime local) => local.toIso8601String().substring(0, 16);
 
+/// The file has a known layout but not one row's date could be read: a date
+/// format the parser doesn't know, not a bad row. Where a plain
+/// [FormatException] is a file the import can do nothing with, this one is
+/// worth keeping for a person to import by hand.
+class UnreadableExport extends FormatException {
+  const new(super.message);
+}
+
+/// A row's date in a form the parser doesn't read; the whole file is one of
+/// these when none of its rows parse.
+class _UnreadableDate extends FormatException {
+  const new(super.message);
+}
+
 final _hevyAppDate = RegExp(r'^(\d{1,2}) (\S+) (\d{4}), (\d{1,2}):(\d{2})$');
-final _hevyWebDate = RegExp(r'^([A-Za-z]+)\.? (\d{1,2}), (\d{4}), (\d{1,2}):(\d{2}) ([AP]M)$', caseSensitive: false);
+// ICU 72+ (Chrome 110, Node 20) puts a narrow no-break space before the meridiem
+final _hevyWebDate = RegExp(
+  r'^([A-Za-z]+)\.? (\d{1,2}), (\d{4}), (\d{1,2}):(\d{2})[   ]([AP]M)$',
+  caseSensitive: false,
+);
+
+/// The start of a cell for an error message: a cell can be anything, and the
+/// message travels into a response and an alert.
+String _excerpt(String raw) => raw.length <= 80 ? raw : '${raw.substring(0, 80)}…';
 
 /// A Hevy timestamp as the wall clock it shows, in a UTC [DateTime] that
 /// stands in for naive local time: the app's `1 Sept. 2026, 07:30` in any
@@ -934,12 +985,12 @@ DateTime _hevyLocal(String raw) {
       minute: int.parse(m[5]!),
     );
   }
-  throw FormatException('unreadable date "$raw": export from the Hevy app, or from hevy.com in English');
+  throw _UnreadableDate('unreadable date "${_excerpt(raw)}": export from the Hevy app, or from hevy.com in English');
 }
 
 int _hevyMonth(String token, String raw) {
   return hevyMonths[token.toLowerCase().replaceFirst(RegExp(r'\.+$'), '')] ??
-      (throw FormatException('unreadable month in "$raw"'));
+      (throw _UnreadableDate('unreadable month in "${_excerpt(raw)}"'));
 }
 
 /// [DateTime.utc] normalizes an impossible date (Feb 30) into a possible one;
@@ -954,7 +1005,7 @@ DateTime _wallClock(
 }) {
   final local = DateTime.utc(year, month, day, hour, minute);
   if (local.day != day || local.hour != hour || local.minute != minute) {
-    throw FormatException('impossible date "$raw"');
+    throw FormatException('impossible date "${_excerpt(raw)}"');
   }
   return local;
 }

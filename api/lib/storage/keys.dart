@@ -20,11 +20,17 @@ String workoutImageKey({
   return 'workouts/$hash/$imageId.$ext';
 }
 
-/// Where an export the parser could not read waits for a manual import. The
-/// content hash makes a retry of the same file the same object; the user
-/// lives in the key only hashed, as for images.
-String parkedImportKey({required String userId, required ImportSource source, required List<int> bytes}) {
+/// Where a kept export lives: `imports/parked/` waits for a manual import,
+/// `imports/partial/` is there to be looked at. The content hash makes a retry
+/// of the same file the same object; the user lives in the key only hashed,
+/// as for images.
+String keptImportKey({
+  required String userId,
+  required ImportSource source,
+  required List<int> bytes,
+  required KeptImport as,
+}) {
   final user = sha256.convert(utf8.encode(userId)).toString().substring(0, 16);
   final content = sha256.convert(bytes).toString().substring(0, 16);
-  return 'imports/parked/$user/${source.name}-$content.csv';
+  return 'imports/${as.name}/$user/${source.name}-$content.csv';
 }
