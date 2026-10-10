@@ -26,7 +26,9 @@ jobs:
       ENVIRONMENT: 'prod'
       MONITORING_TOPIC_ARN: 'arn:aws:sns:ca-central-1:922419543441:monitoring'
   # The tag's notes are committed beside the code (release_notes/<tag>.md, the
-  # `release` skill); a deployed tag becomes a GitHub release carrying them.
+  # `release` skill); a deployed tag becomes a GitHub release carrying them. A
+  # tag without notes still deploys: the release is skipped with a warning and
+  # created by hand once the notes land, never a failed run for a shipped tag.
   release:
     name: "GitHub release"
     needs: prod
@@ -43,8 +45,8 @@ jobs:
         run: |
           notes="release_notes/${TAG}.md"
           if [ ! -f "$notes" ]; then
-            echo "::error::$notes is missing: the release notes are committed before the tag"
-            exit 1
+            echo "::warning::$notes is missing: no GitHub release for $TAG. Commit the notes, then create it by hand (the release skill, Ship it)."
+            exit 0
           fi
           title=$(head -n 1 "$notes" | sed 's/^# //')
           tail -n +3 "$notes" > "$RUNNER_TEMP/notes.md"
