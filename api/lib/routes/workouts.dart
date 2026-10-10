@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:heart/core/handler.dart';
 import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
@@ -67,39 +69,69 @@ Future<Model> createWorkout(Request request) async {
 /// was created, skipped (already imported or declined), and which exercises
 /// were created as the user's customs. With `dryRun=true`, writes nothing and
 /// responds with the preview instead — the input for the consent step.
+///
+/// A file the parser can't read is not refused: it is kept for a person to
+/// import by hand, answered `202` with a note saying so, and the owner is
+/// alerted. A switcher's whole history is worth a manual pass; a 400 would
+/// send them away with it.
 Future<Model> importWorkouts(Request request) async {
   final input = await ImportWorkoutsIn.fromRequest(request);
+  return switch (input.batch) {
+    final WorkoutImport batch => _importBatch(request, input, batch),
+    null => _parkExport(request, input),
+  };
+}
+
+Future<Model> _importBatch(Request request, ImportWorkoutsIn input, WorkoutImport batch) async {
   if (input.dryRun) {
-    return request.workoutsService.previewImport(userId: request.userId, batch: input.batch);
+    return request.workoutsService.previewImport(userId: request.userId, batch: batch);
   }
   final report = await request.workoutsService.importWorkouts(
     userId: request.userId,
-    batch: input.batch,
+    batch: batch,
     createCustom: input.createCustom,
   );
-  await _monitorLargeImport(request, report);
-  return report;
-}
-
-/// A big import is legitimate exactly once per user per source app — worth a
-/// human glance either way. Best-effort: monitoring must never fail the
-/// import that just succeeded.
-Future<void> _monitorLargeImport(Request request, WorkoutImportReport report) async {
-  if (report.workoutsCreated < 500 && report.setsCreated < 5000) return;
-  try {
-    final sns = Sns(
-      credentialsProvider: request.awsConfig.credentialsProvider,
-      region: request.awsConfig.region,
-    );
-    await sns.publish(
-      topicArn: request.config.monitoringTopicArn,
+  if (report.workoutsCreated >= 500 || report.setsCreated >= 5000) {
+    // a big import is legitimate exactly once per user per source app —
+    // worth a human glance either way
+    await _alertOwner(
+      request,
       subject: 'Large workout import',
       message:
           'User ${request.userId} just imported ${report.workoutsCreated} workouts '
           '(${report.setsCreated} sets) from ${report.source}.',
     );
+  }
+  return report;
+}
+
+Future<Model> _parkExport(Request request, ImportWorkoutsIn input) async {
+  final key = await request.importStorage.park(
+    userId: request.userId,
+    source: input.source,
+    bytes: utf8.encode(input.csv),
+  );
+  await _alertOwner(
+    request,
+    subject: 'Parked workout import',
+    message:
+        'User ${request.userId} sent a ${input.source.label} export the parser could not read '
+        '(${input.unreadable}). It is at $key, waiting for a manual import.',
+  );
+  return Accepted(WorkoutImportParked(source: input.source, key: key, reason: input.unreadable!));
+}
+
+/// Tells the owner, best-effort: an alert must never fail the request it is
+/// about.
+Future<void> _alertOwner(Request request, {required String subject, required String message}) async {
+  try {
+    final sns = Sns(
+      credentialsProvider: request.awsConfig.credentialsProvider,
+      region: request.awsConfig.region,
+    );
+    await sns.publish(topicArn: request.config.monitoringTopicArn, subject: subject, message: message);
   } catch (e, st) {
-    _logger.warning('failed to publish the large-import alert', e, st);
+    _logger.warning('failed to publish the alert "$subject"', e, st);
   }
 }
 
