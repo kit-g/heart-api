@@ -77,13 +77,13 @@ allow	terraform -chdir=infrastructure/app/environments/dev init -backend=false
 allow	terraform validate
 allow	terraform fmt -check -recursive infrastructure
 allow	terraform providers lock -platform=linux_amd64
-allow	terraform -chdir=infrastructure/dns state list
-allow	terraform -chdir=infrastructure/dns state show aws_route53_zone.this
+allow	terraform -chdir=infrastructure/app/environments/prod state list
+allow	terraform -chdir=infrastructure/app/environments/prod state show aws_route53_zone.apex
 allow	make test-tf
 deny	terraform apply
 deny	terraform -chdir=infrastructure/app/environments/dev apply -auto-approve
 deny	terraform destroy -target=aws_sqs_queue.events
-deny	terraform -chdir=infrastructure/dns state rm aws_route53_record.a
+deny	terraform -chdir=infrastructure/app/environments/prod state rm aws_route53_record.alias
 deny	terraform import aws_iam_role.agent heart-agent
 deny	terraform force-unlock 1234
 # migrations only against localhost

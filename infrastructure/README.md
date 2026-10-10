@@ -23,8 +23,6 @@ infrastructure/
 │   └── environments/
 │       ├── dev/               # Wires the stacks for the dev account; its zone and certificates
 │       └── prod/              # Same, prod account; the apex zone
-├── dns/                       # The old apex zone in the dev account, kept until resolvers have
-│                              # dropped it, 2026-10-10 (heart-api#142; its README is the runbook)
 └── global/                    # Per-account once-only resources (OIDC provider + deploy role)
     ├── stack/
     └── environments/
@@ -93,10 +91,10 @@ Certificates are `modules/certificate`: the request, its validation records in t
 
 ### DNS
 
-Each account owns the DNS for its environment, in `environments/<env>/dns.tf`. Prod holds the apex zone `heart-of.me`: its names, the domain's mail, and the NS delegation of `dev.heart-of.me`. Dev holds that zone, with every dev name under it (`api.dev.heart-of.me`, `media.dev.heart-of.me`, `www.dev.heart-of.me`). Alias records point at the stack outputs (`module.cdn.web_distribution`, `module.api.custom_domain`, …) directly, so no distribution name is copied between roots. The design and the move are `docs/2026-10-08.dns-split.md`; `infrastructure/dns/` is the zone being retired.
+Each account owns the DNS for its environment, in `environments/<env>/dns.tf`. Prod holds the apex zone `heart-of.me`: its names, the domain's mail, and the NS delegation of `dev.heart-of.me`. Dev holds that zone, with every dev name under it (`api.dev.heart-of.me`, `media.dev.heart-of.me`, `www.dev.heart-of.me`). Alias records point at the stack outputs (`module.cdn.web_distribution`, `module.api.custom_domain`, …) directly, so no distribution name is copied between roots. The design and the move are `docs/2026-10-08.dns-split.md`.
 
 ## State
 
-Backend is S3 (`583168578067-ca-central-1-tfstate`) with DynamoDB locking (`tfstate-locks`). One state file per stack/env: `heart/<env-or-stack>/terraform.tfstate` (e.g. `heart/dev/terraform.tfstate`, `heart/prod/terraform.tfstate`, `heart/dns/terraform.tfstate`, `heart/global/terraform.tfstate`).
+Backend is S3 (`583168578067-ca-central-1-tfstate`) with DynamoDB locking (`tfstate-locks`). One state file per stack/env: `heart/<env-or-stack>/terraform.tfstate` (e.g. `heart/dev/terraform.tfstate`, `heart/prod/terraform.tfstate`, `heart/global/terraform.tfstate`).
 
 `.terraform.lock.hcl` is gitignored. The `terraform.tfvars` files are **tracked** — they hold identifiers, not secrets (distribution and API Gateway domain names, Firebase project ids), and the values every root module needs to plan. Nothing secret goes in one.
