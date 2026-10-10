@@ -110,7 +110,10 @@ An ordered checklist with a box per step, written so it can be followed cold:
 3. Anything the deploy does after the code lands (the `db.schedule` message for pg_cron jobs).
 4. Anything that is broken between an apply and the tag. Example: a new Lambda carries the
    Terraform placeholder until the deploy, so its surface is down until the tag.
-5. After the deploy: the checks that prove it worked, as commands or log lines.
+5. After the deploy: the checks that prove it worked, one line each. A procedure (a loader to
+   run, a file to upload, a verification request) is not written here: it lives with the thing
+   it operates (the script's docstring, the nearest README) and the check points at it. The
+   notes are the record of a release, not a runbook.
 
 ## 4. Ship it
 
