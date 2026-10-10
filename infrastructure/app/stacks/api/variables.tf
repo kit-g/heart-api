@@ -224,3 +224,20 @@ variable "throttle" {
     error_message = "rate must be positive and burst a whole number of at least 1 - zero on either refuses every request."
   }
 }
+
+# The oldest app build the API serves. A build below it gets a 426 on every
+# app route, so raising it is a product decision announced in the app first
+# (CLAUDE.md, Compatibility floor), and it only bites while enforce_app_version
+# is on: the two are separate so the floor can be set ahead of the build that
+# meets it being in the stores.
+variable "minimal_app_version" {
+  description = "Oldest app version served (semver with three parts)"
+  type        = string
+  default     = "1.0.0"
+}
+
+variable "enforce_app_version" {
+  description = "Whether app routes answer 426 to builds below minimal_app_version"
+  type        = bool
+  default     = false
+}

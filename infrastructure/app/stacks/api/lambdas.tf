@@ -26,7 +26,7 @@ locals {
     # API's own /mcp
     MCP_RESOURCE         = var.mcp_domain == null ? "" : "https://${var.mcp_domain.name}"
     MEDIA_DISTRIBUTION   = var.media_distribution
-    MIN_APP_VERSION      = "1.0.0"
+    MIN_APP_VERSION      = var.minimal_app_version
     MONITORING_TOPIC_ARN = aws_sns_topic.monitoring.arn
     PG_DATABASE          = var.database.database
     PG_HOST              = var.database.host
@@ -37,6 +37,7 @@ locals {
     SCHEDULE_GROUP       = aws_scheduler_schedule_group.accounts.name
     SCHEDULER_ROLE_ARN   = aws_iam_role.scheduler.arn
     SITE_ORIGIN          = var.site_origin == null ? "" : var.site_origin
+    SHOULD_CHECK_VERSION = tostring(var.enforce_app_version)
     SUPPORTED_LOCALES    = "en,en_CA,ru,es,es_ES,fr,fr_CA"
   }
 }

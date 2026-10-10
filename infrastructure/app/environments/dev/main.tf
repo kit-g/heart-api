@@ -36,9 +36,13 @@ module "api" {
   database                     = module.content.database
   apple_sign_in                = local.apple_sign_in
   account_deletion_offset_days = 2
-  monitoring_email             = "info@heart-of.me"
-  media_distribution           = local.media_host
-  events_enabled               = var.events_enabled
+  # 1.13 is the first store release (CLAUDE.md, Compatibility floor); every
+  # earlier build is a tester's and is told to update (a 426 on every app route).
+  minimal_app_version = "1.13.0"
+  enforce_app_version = true
+  monitoring_email    = "info@heart-of.me"
+  media_distribution  = local.media_host
+  events_enabled      = var.events_enabled
   custom_domain = {
     name            = local.api_host
     certificate_arn = module.api_certificate.arn
