@@ -96,6 +96,15 @@ abstract class S3Api with Signer {
     return (url: 'https://$bucket.s3.$region.amazonaws.com/', fields: formFields);
   }
 
+  /// Whether [key] exists in [bucket]. Any answer but 200 or 404 is an error.
+  Future<bool> exists(String bucket, String key) async {
+    return switch (await head(uri: s3Uri(bucket, key))) {
+      200 => true,
+      404 => false,
+      final status => throw StateError('HEAD s3://$bucket/$key answered $status'),
+    };
+  }
+
   Future<Map<String, String>> getObjectTagging(String bucket, String key) async {
     final uri = s3Uri(bucket, key).replace(query: 'tagging');
     final responseStr = await get(uri: uri);
