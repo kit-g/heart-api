@@ -36,8 +36,8 @@ module "api" {
   apple_sign_in                = local.apple_sign_in
   account_deletion_offset_days = 30
   # 1.13 is the first store release (CLAUDE.md, Compatibility floor). Enforcement
-  # is off again: with it on, 1.13.0 builds were met with the 426 (2026-10-11),
-  # and the cause is not yet known; it comes back once that is understood.
+  # waits until 1.13 is in both stores: 1.9.0 builds were still in the field on
+  # 2026-10-11 (Sentry), and the 426 would send them to an update that isn't there.
   minimal_app_version = "1.13.0"
   enforce_app_version = false
   monitoring_email    = "info@heart-of.me"
