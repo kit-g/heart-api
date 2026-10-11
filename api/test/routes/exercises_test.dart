@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:heart/models/errors.dart';
-import 'package:heart/models/exercises.dart';
+import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.15.0
+
+Moving an exercise's history onto another exercise (heart-api#140, heart-of-yours#338).
+
+- New: `ExerciseMoveReport`, the answer of `POST /exercises/:exerciseId/moves`:
+  `sourceId`, `targetId`, `dryRun`, the counts `workoutExercises`,
+  `templateExercises`, `preferences`, `preferencesDropped`, `chartPreferences`,
+  `goals`, and `sourceDeleted`; `fromJson`/`toMap` (every field required), and
+  `fromRow` over the database function's row with the ids and the mode passed in.
+
 ## 2.14.0
 
 Connected apps for the OAuth authorization server (heart-api#115).
