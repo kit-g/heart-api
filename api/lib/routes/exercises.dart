@@ -53,3 +53,16 @@ Future<ExerciseModel> updateExercise(Request request) async {
   );
   return ExerciseModel(row);
 }
+
+/// One action, one transaction: afterwards the user's history, routines,
+/// preferences and goals read as if the target had been used all along, and a
+/// custom source is gone. The same route with `?dryRun=true` is the preview.
+Future<ExerciseMoveReport> moveExerciseHistory(Request request) async {
+  final input = await ExerciseMoveIn.fromRequest(request, sourceId: request.pathParameters.raw[#exerciseId]!);
+  return request.exerciseService.moveExerciseHistory(
+    userId: request.userId,
+    sourceId: input.sourceId,
+    targetId: input.targetId,
+    dryRun: input.dryRun,
+  );
+}
