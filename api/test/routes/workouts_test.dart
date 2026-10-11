@@ -557,11 +557,12 @@ void main() {
       expect(batch.workouts.single.name, 'P millis');
     });
 
-    // Hevy's layout with the dates as hevy.com writes them in German: a file
-    // a person could import, which the parser can't
+    // Hevy's layout with the dates in a shape hevy.com writes in none of its
+    // languages (en-GB's numeric medium date): a file a person could import,
+    // which the parser can't
     const hevyUnreadable =
         '"title","start_time","end_time","description","exercise_title","superset_id","exercise_notes","set_index","set_type","weight_lbs","reps","distance_km","duration_seconds","rpe"\n'
-        '"Morning Lift","22.09.2026, 17:00","22.09.2026, 17:45","","Overhead Press (Barbell)",,"",0,"normal",93.7,8,,,\n';
+        '"Morning Lift","22/09/2026, 17:00","22/09/2026, 17:45","","Overhead Press (Barbell)",,"",0,"normal",93.7,8,,,\n';
 
     test('keeps a Hevy file whose dates it cannot read and answers 202 with a parked note', () async {
       when(
@@ -579,7 +580,7 @@ void main() {
       final body = result.toMap();
       expect(body['status'], 'parked');
       expect(body['source'], 'hevy');
-      expect(body['reason'], contains('export from the Hevy app'));
+      expect(body['reason'], contains('Hevy app or hevy.com'));
       expect(body['message'], contains('message you'));
       final bytes =
           verify(

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:heart/models/hevy_dates.dart';
 import 'package:heart/models/imports.dart';
 import 'package:test/test.dart';
 
@@ -106,12 +107,17 @@ const _kgMiles =
     '"05 Carries","Sep 9, 2026, 5:00 PM","Sep 9, 2026, 5:40 PM","","Farmers Walk",,"",0,"normal",32,,0.02,,\n';
 
 /// A real web row with its date as hevy.com writes it in German
-/// (`Intl.DateTimeFormat('de', {dateStyle: 'medium', timeStyle: 'short'})`):
-/// the one web format verified on a real German export, which isn't in the
-/// fixtures.
+/// (`Intl.DateTimeFormat('de', {dateStyle: 'medium', timeStyle: 'short'})`).
 const _webDe =
     '"title","start_time","end_time","description","exercise_title","superset_id","exercise_notes","set_index","set_type","weight_lbs","reps","distance_km","duration_seconds","rpe"\n'
     '"Morning Lift","22.09.2026, 17:00","22.09.2026, 17:45","","Overhead Press (Barbell)",,"",0,"normal",93.7,8,,,\n';
+
+/// The same row with its date in a shape hevy.com does not write in any of its
+/// 13 languages (`en-GB`'s numeric medium date): the only lines here not copied
+/// from a file.
+const _webUnknown =
+    '"title","start_time","end_time","description","exercise_title","superset_id","exercise_notes","set_index","set_type","weight_lbs","reps","distance_km","duration_seconds","rpe"\n'
+    '"Morning Lift","22/09/2026, 17:00","22/09/2026, 17:45","","Overhead Press (Barbell)",,"",0,"normal",93.7,8,,,\n';
 
 void main() {
   group('WorkoutImport.fromHevyCsv', () {
@@ -368,14 +374,37 @@ void main() {
       },
     );
 
-    test('refuses a file whose dates it cannot read as unreadable, naming the way out', () {
+    test('reads a web date in another language to the instant the English file gives it', () {
+      final de = WorkoutImport.fromHevyCsv(_webDe).workouts.single;
+      final enUs = WorkoutImport.fromHevyCsv(_webEnUs).workouts.singleWhere(
+        (w) => w.start == DateTime.utc(2026, 9, 22, 17),
+      );
+      expect(de.start, enUs.start);
+      expect(de.end, enUs.end);
+      expect(de.importId, enUs.importId);
+    });
+
+    test('a numeric month past 12 or a 12-hour clock past 12 is a skipped row, not a rolled-over day', () {
+      for (final date in [
+        '22.13.2026, 17:00',
+        '22.00.2026, 17:00',
+        'Sep 22, 2026, 13:00 PM',
+        'Sep 22, 2026, 0:30 AM',
+      ]) {
+        final batch = WorkoutImport.fromHevyCsv(_webDe.replaceAll('22.09.2026, 17:00', date));
+        expect(batch.workouts, isEmpty, reason: date);
+        expect(batch.rowsSkipped, 1, reason: date);
+      }
+    });
+
+    test('refuses a file whose dates it cannot read as unreadable, naming the exporters it reads', () {
       expect(
-        () => WorkoutImport.fromHevyCsv(_webDe),
+        () => WorkoutImport.fromHevyCsv(_webUnknown),
         throwsA(
           isA<UnreadableExport>().having(
             (e) => e.message,
             'message',
-            contains('export from the Hevy app'),
+            contains('Hevy app or hevy.com'),
           ),
         ),
       );
@@ -542,6 +571,61 @@ void main() {
         en.workouts.singleWhere((w) => w.name == '16 Five hour session').end,
         DateTime.utc(2026, 9, 26, 13),
       );
+    });
+  });
+
+  group('WorkoutImport.fromHevyCsv on hevy.com\'s 13 languages', () {
+    // the same account exported from hevy.com in each of the site's 13
+    // languages, from one Chrome in America/Toronto, trimmed to one row subset
+    // (whole workouts, the same rows in every file): every month, one- and
+    // two-digit days, every day period, the DST sessions, the duplicate keys
+    // and a multi-line note. The files are byte-identical outside the two date
+    // columns, so each must parse to the English one, instant for instant
+    const fixtures = 'test/fixtures/hevy';
+    const toronto = Duration(hours: -4);
+    final texts = {
+      for (final lang in ['en', 'de', 'es', 'fr', 'it', 'pt', 'pt_br', 'tr', 'ru', 'ja', 'ko', 'zh_cn', 'zh_tw'])
+        lang: File('$fixtures/web-$lang.csv').readAsStringSync(),
+    };
+    final batches = {
+      for (final MapEntry(key: lang, value: text) in texts.entries)
+        lang: WorkoutImport.fromHevyCsv(text, utcOffset: toronto),
+    };
+    final en = batches['en']!;
+
+    test('the fixtures cover every month, both halves of the day and every day period', () {
+      expect({for (final w in en.workouts) w.start.add(toronto).month}, {for (var m = 1; m <= 12; m++) m});
+      expect({for (final w in en.workouts) w.start.add(toronto).hour < 12}, {true, false});
+      final words = (texts['en']! + texts['ko']! + texts['zh_tw']!).toLowerCase();
+      for (final word in hevyDayPeriods.keys) {
+        expect(words, contains(word));
+      }
+    });
+
+    test('every language is the English file, workout for workout', () {
+      expect(en.workouts, hasLength(38));
+      expect(en.rowsSkipped, 3);
+      for (final MapEntry(key: lang, value: batch) in batches.entries) {
+        expect(batch.workouts, hasLength(en.workouts.length), reason: lang);
+        expect(batch.rowsSkipped, en.rowsSkipped, reason: lang);
+        for (var i = 0; i < en.workouts.length; i++) {
+          expect(batch.workouts[i].importId, en.workouts[i].importId, reason: lang);
+          expect(batch.workouts[i].toPayload(), en.workouts[i].toPayload(), reason: '$lang ${en.workouts[i].name}');
+        }
+      }
+    });
+
+    test('the instants are the wall clock minus the offset, whichever way the hour is written', () {
+      // 1:30 AM / 凌晨1:30 / 오전 1:30 / 01:30
+      expect(en.workouts.singleWhere((w) => w.name == '15c US fall-back 2025').start, DateTime.utc(2025, 11, 2, 5, 30));
+      // 12:00 PM / 中午12:00 / 오후 12:00 / 12:00
+      expect(en.workouts.singleWhere((w) => w.name == 'A archived Box Squat').start, DateTime.utc(2025, 1, 20, 16));
+      // 11:30 PM / 晚上11:30 / 오후 11:30 / 23:30, ending at 1:10 AM the next day
+      final midnight = en.workouts.singleWhere((w) => w.name == '11 Crosses midnight');
+      expect(midnight.start, DateTime.utc(2026, 9, 21, 3, 30));
+      expect(midnight.end, DateTime.utc(2026, 9, 21, 5, 10));
+      // 9:00 AM / 上午9:00 / 오전 9:00 / 9:00 with the hour unpadded in ja
+      expect(en.workouts.singleWhere((w) => w.name == 'P future workout').start, DateTime.utc(2027, 1, 1, 13));
     });
   });
 

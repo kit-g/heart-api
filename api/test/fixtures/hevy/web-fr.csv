@@ -1,0 +1,77 @@
+"title","start_time","end_time","description","exercise_title","superset_id","exercise_notes","set_index","set_type","weight_lbs","reps","distance_km","duration_seconds","rpe"
+"A archived Farmers Walk (Distance Duration)","20 janv. 2025, 12:00","20 janv. 2025, 12:30","","Farmers Walk (Distance Duration)",,"",0,"normal",,,1,300,
+"A archived Box Squat","20 janv. 2025, 12:00","20 janv. 2025, 12:30","","Box Squat",,"",0,"normal",44.09,10,,,
+"A archived Stair Machine","20 janv. 2025, 12:00","20 janv. 2025, 12:30","","Stair Machine",,"",0,"normal",,,1,300,
+"M Dec: month coverage","23 déc. 2025, 18:00","23 déc. 2025, 18:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M Aug: month coverage","18 août 2026, 18:00","18 août 2026, 18:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M Jul: month coverage","21 juil. 2026, 18:00","21 juil. 2026, 18:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M Jun: month coverage","16 juin 2026, 18:00","16 juin 2026, 18:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M May: month coverage","12 mai 2026, 18:00","12 mai 2026, 18:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M Apr: month coverage","14 avr. 2026, 18:00","14 avr. 2026, 18:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M Feb: month coverage","10 févr. 2026, 18:00","10 févr. 2026, 18:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"P long title (was 300 L)","3 oct. 2026, 16:20","3 oct. 2026, 16:30","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P lone superset","3 oct. 2026, 16:00","3 oct. 2026, 16:10","","Bench Press (Barbell)",7,"",0,"normal",110.23,5,,,
+"P millis","3 oct. 2026, 05:30","3 oct. 2026, 06:00","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P date only","2 oct. 2026, 20:00","2 oct. 2026, 20:00","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P naive timestamp","3 oct. 2026, 10:20","3 oct. 2026, 10:30","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"","3 oct. 2026, 13:00","3 oct. 2026, 13:10","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P future workout","1 janv. 2027, 09:00","1 janv. 2027, 10:00","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P end before start","3 oct. 2026, 12:00","3 oct. 2026, 12:30","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P weight 61.2349","3 oct. 2026, 10:20","3 oct. 2026, 10:30","","Bench Press (Barbell)",,"",0,"normal",135,5,,,
+"P negative weight","3 oct. 2026, 10:00","3 oct. 2026, 10:10","","Bench Press (Barbell)",,"",0,"normal",-22.05,5,,,
+"21 Odd fields on a lift","3 oct. 2026, 07:00","3 oct. 2026, 07:30","distance and duration on a weight_reps exercise","Bench Press (Barbell)",,"",0,"normal",132.28,5,0.1,30,
+"x","2 oct. 2026, 07:00","2 oct. 2026, 07:30","","Kettlebell Swing",,"",0,"normal",52.91,20,,,
+"20 Empty description","1 oct. 2026, 07:00","1 oct. 2026, 07:30","","Kettlebell Swing",,"",0,"normal",52.91,20,,,
+"17 Private workout","28 sept. 2026, 19:00","28 sept. 2026, 19:30","","Hip Thrust (Barbell)",,"",0,"normal",220.46,10,,,
+"16b Zero length","27 sept. 2026, 08:00","27 sept. 2026, 08:00","","Deadlift (Barbell)",,"",0,"normal",308.65,3,,,
+"16 Five hour session","26 sept. 2026, 08:00","26 sept. 2026, 13:00","","Deadlift (Barbell)",,"",0,"normal",308.65,3,,,
+"15c US fall-back 2025","2 nov. 2025, 01:30","2 nov. 2025, 01:45","spans the repeated 01:00-02:00 hour","Squat (Barbell)",,"",0,"normal",209.44,5,,,
+"15b US DST gap 2025","9 mars 2025, 01:30","9 mars 2025, 03:30","02:30 local does not exist in New York","Squat (Barbell)",,"",0,"normal",209.44,5,,,
+"15 EU DST night 2018","24 mars 2018, 20:30","24 mars 2018, 21:45","","Squat (Barbell)",,"",0,"normal",198.42,5,,,
+"14b UTC Z timestamp","25 sept. 2026, 08:00","25 sept. 2026, 08:40","","Seated Cable Row - V Grip (Cable)",,"",0,"normal",132.28,10,,,
+"14 Tokyo trip (+09:00)","24 sept. 2026, 05:00","24 sept. 2026, 06:00","","Lat Pulldown (Cable)",,"",0,"normal",110.23,12,,,
+"Morning Lift","22 sept. 2026, 06:00","22 sept. 2026, 06:50","exact title+start duplicate of the first Morning Lift","Overhead Press (Barbell)",,"",0,"normal",82.67,8,,,
+"Morning Lift","22 sept. 2026, 17:00","22 sept. 2026, 17:45","","Overhead Press (Barbell)",,"",0,"normal",93.7,8,,,
+"Morning Lift","22 sept. 2026, 06:00","22 sept. 2026, 06:45","","Overhead Press (Barbell)",,"",0,"normal",88.18,8,,,
+"11 Crosses midnight","20 sept. 2026, 23:30","21 sept. 2026, 01:10","","Squat (Barbell)",,"",0,"normal",132.28,10,,,
+"10 Degenerate sets","19 sept. 2026, 09:00","19 sept. 2026, 09:30","","Bench Press (Barbell)",,"",0,"normal",,0,,,
+"10 Degenerate sets","19 sept. 2026, 09:00","19 sept. 2026, 09:30","","Bench Press (Barbell)",,"",1,"normal",,10,,,
+"10 Degenerate sets","19 sept. 2026, 09:00","19 sept. 2026, 09:30","","Bench Press (Barbell)",,"",2,"normal",132.28,0,,,
+"10 Degenerate sets","19 sept. 2026, 09:00","19 sept. 2026, 09:30","","Bench Press (Barbell)",,"",3,"normal",1102.31,1,,,
+"10 Degenerate sets","19 sept. 2026, 09:00","19 sept. 2026, 09:30","","Bench Press (Barbell)",,"",4,"normal",2.76,999,,,
+"10 Degenerate sets","19 sept. 2026, 09:00","19 sept. 2026, 09:30","","Overhead Press (Barbell)",,"a set with nothing in it",0,"normal",,,,,
+"07 Legs, ""Heavy"" & 'Wide' — día 🦵","13 sept. 2026, 10:00","13 sept. 2026, 11:10","Multi-line description,
+with ""quotes"", commas, and emoji 🔥
+
+Blank line above. Кириллица. 日本語.","Squat (Barbell)",,"Line one, with a comma
+Line two ""quoted""
+	Tabbed line; semicolon
+CRLF line 💪",0,"normal",220.46,5,,,
+"07 Legs, ""Heavy"" & 'Wide' — día 🦵","13 sept. 2026, 10:00","13 sept. 2026, 11:10","Multi-line description,
+with ""quotes"", commas, and emoji 🔥
+
+Blank line above. Кириллица. 日本語.","Squat (Barbell)",,"Line one, with a comma
+Line two ""quoted""
+	Tabbed line; semicolon
+CRLF line 💪",1,"normal",220.46,5,,,
+"07 Legs, ""Heavy"" & 'Wide' — día 🦵","13 sept. 2026, 10:00","13 sept. 2026, 11:10","Multi-line description,
+with ""quotes"", commas, and emoji 🔥
+
+Blank line above. Кириллица. 日本語.","Leg Press (Machine)",,"",0,"normal",440.92,10,,,
+"05 Carries","9 sept. 2026, 17:00","9 sept. 2026, 17:40","","Farmers Walk",,"",0,"normal",70.55,,0.04,,
+"05 Carries","9 sept. 2026, 17:00","9 sept. 2026, 17:40","","Farmers Walk",,"",1,"normal",70.55,,0.04,38,
+"05 Carries","9 sept. 2026, 17:00","9 sept. 2026, 17:40","","Sled Pull",,"",0,"normal",220.46,,0.02,,
+"05 Carries","9 sept. 2026, 17:00","9 sept. 2026, 17:40","","Muffin Carry (Sandbag), ""heavy""",,"",0,"normal",99.21,,0.03,,
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",0,"warmup",44.09,10,,,
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",1,"warmup",88.18,8,,,
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",2,"normal",132.28,5,,,7
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",3,"normal",132.28,5,,,7.5
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",4,"normal",137.79,5,,,8.5
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",5,"failure",137.79,4,,,10
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Incline Bench Press (Dumbbell)",,"",0,"normal",49.6,10,,,8
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Incline Bench Press (Dumbbell)",,"",1,"normal",49.6,9,,,9
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Incline Bench Press (Dumbbell)",,"",2,"normal",49.6,8,,,9.5
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Triceps Rope Pushdown",,"",0,"normal",66.14,12,,,
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Triceps Rope Pushdown",,"",1,"dropset",55.12,8,,,
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Triceps Rope Pushdown",,"",2,"dropset",44.09,6,,,
+"01 Push: set types + RPE","1 sept. 2026, 07:30","1 sept. 2026, 08:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Triceps Rope Pushdown",,"",3,"dropset",33.07,6,,,

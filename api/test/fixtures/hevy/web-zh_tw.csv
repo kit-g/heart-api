@@ -1,0 +1,77 @@
+"title","start_time","end_time","description","exercise_title","superset_id","exercise_notes","set_index","set_type","weight_lbs","reps","distance_km","duration_seconds","rpe"
+"A archived Farmers Walk (Distance Duration)","2025年1月20日 中午12:00","2025年1月20日 中午12:30","","Farmers Walk (Distance Duration)",,"",0,"normal",,,1,300,
+"A archived Box Squat","2025年1月20日 中午12:00","2025年1月20日 中午12:30","","Box Squat",,"",0,"normal",44.09,10,,,
+"A archived Stair Machine","2025年1月20日 中午12:00","2025年1月20日 中午12:30","","Stair Machine",,"",0,"normal",,,1,300,
+"M Dec: month coverage","2025年12月23日 下午6:00","2025年12月23日 下午6:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M Aug: month coverage","2026年8月18日 下午6:00","2026年8月18日 下午6:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M Jul: month coverage","2026年7月21日 下午6:00","2026年7月21日 下午6:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M Jun: month coverage","2026年6月16日 下午6:00","2026年6月16日 下午6:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M May: month coverage","2026年5月12日 下午6:00","2026年5月12日 下午6:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M Apr: month coverage","2026年4月14日 下午6:00","2026年4月14日 下午6:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"M Feb: month coverage","2026年2月10日 下午6:00","2026年2月10日 下午6:45","","Squat (Barbell)",,"",0,"normal",132.28,5,,,
+"P long title (was 300 L)","2026年10月3日 下午4:20","2026年10月3日 下午4:30","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P lone superset","2026年10月3日 下午4:00","2026年10月3日 下午4:10","","Bench Press (Barbell)",7,"",0,"normal",110.23,5,,,
+"P millis","2026年10月3日 清晨5:30","2026年10月3日 清晨6:00","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P date only","2026年10月2日 晚上8:00","2026年10月2日 晚上8:00","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P naive timestamp","2026年10月3日 上午10:20","2026年10月3日 上午10:30","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"","2026年10月3日 下午1:00","2026年10月3日 下午1:10","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P future workout","2027年1月1日 上午9:00","2027年1月1日 上午10:00","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P end before start","2026年10月3日 中午12:00","2026年10月3日 中午12:30","","Bench Press (Barbell)",,"",0,"normal",110.23,5,,,
+"P weight 61.2349","2026年10月3日 上午10:20","2026年10月3日 上午10:30","","Bench Press (Barbell)",,"",0,"normal",135,5,,,
+"P negative weight","2026年10月3日 上午10:00","2026年10月3日 上午10:10","","Bench Press (Barbell)",,"",0,"normal",-22.05,5,,,
+"21 Odd fields on a lift","2026年10月3日 清晨7:00","2026年10月3日 清晨7:30","distance and duration on a weight_reps exercise","Bench Press (Barbell)",,"",0,"normal",132.28,5,0.1,30,
+"x","2026年10月2日 清晨7:00","2026年10月2日 清晨7:30","","Kettlebell Swing",,"",0,"normal",52.91,20,,,
+"20 Empty description","2026年10月1日 清晨7:00","2026年10月1日 清晨7:30","","Kettlebell Swing",,"",0,"normal",52.91,20,,,
+"17 Private workout","2026年9月28日 晚上7:00","2026年9月28日 晚上7:30","","Hip Thrust (Barbell)",,"",0,"normal",220.46,10,,,
+"16b Zero length","2026年9月27日 上午8:00","2026年9月27日 上午8:00","","Deadlift (Barbell)",,"",0,"normal",308.65,3,,,
+"16 Five hour session","2026年9月26日 上午8:00","2026年9月26日 下午1:00","","Deadlift (Barbell)",,"",0,"normal",308.65,3,,,
+"15c US fall-back 2025","2025年11月2日 凌晨1:30","2025年11月2日 凌晨1:45","spans the repeated 01:00-02:00 hour","Squat (Barbell)",,"",0,"normal",209.44,5,,,
+"15b US DST gap 2025","2025年3月9日 凌晨1:30","2025年3月9日 凌晨3:30","02:30 local does not exist in New York","Squat (Barbell)",,"",0,"normal",209.44,5,,,
+"15 EU DST night 2018","2018年3月24日 晚上8:30","2018年3月24日 晚上9:45","","Squat (Barbell)",,"",0,"normal",198.42,5,,,
+"14b UTC Z timestamp","2026年9月25日 上午8:00","2026年9月25日 上午8:40","","Seated Cable Row - V Grip (Cable)",,"",0,"normal",132.28,10,,,
+"14 Tokyo trip (+09:00)","2026年9月24日 清晨5:00","2026年9月24日 清晨6:00","","Lat Pulldown (Cable)",,"",0,"normal",110.23,12,,,
+"Morning Lift","2026年9月22日 清晨6:00","2026年9月22日 清晨6:50","exact title+start duplicate of the first Morning Lift","Overhead Press (Barbell)",,"",0,"normal",82.67,8,,,
+"Morning Lift","2026年9月22日 下午5:00","2026年9月22日 下午5:45","","Overhead Press (Barbell)",,"",0,"normal",93.7,8,,,
+"Morning Lift","2026年9月22日 清晨6:00","2026年9月22日 清晨6:45","","Overhead Press (Barbell)",,"",0,"normal",88.18,8,,,
+"11 Crosses midnight","2026年9月20日 晚上11:30","2026年9月21日 凌晨1:10","","Squat (Barbell)",,"",0,"normal",132.28,10,,,
+"10 Degenerate sets","2026年9月19日 上午9:00","2026年9月19日 上午9:30","","Bench Press (Barbell)",,"",0,"normal",,0,,,
+"10 Degenerate sets","2026年9月19日 上午9:00","2026年9月19日 上午9:30","","Bench Press (Barbell)",,"",1,"normal",,10,,,
+"10 Degenerate sets","2026年9月19日 上午9:00","2026年9月19日 上午9:30","","Bench Press (Barbell)",,"",2,"normal",132.28,0,,,
+"10 Degenerate sets","2026年9月19日 上午9:00","2026年9月19日 上午9:30","","Bench Press (Barbell)",,"",3,"normal",1102.31,1,,,
+"10 Degenerate sets","2026年9月19日 上午9:00","2026年9月19日 上午9:30","","Bench Press (Barbell)",,"",4,"normal",2.76,999,,,
+"10 Degenerate sets","2026年9月19日 上午9:00","2026年9月19日 上午9:30","","Overhead Press (Barbell)",,"a set with nothing in it",0,"normal",,,,,
+"07 Legs, ""Heavy"" & 'Wide' — día 🦵","2026年9月13日 上午10:00","2026年9月13日 上午11:10","Multi-line description,
+with ""quotes"", commas, and emoji 🔥
+
+Blank line above. Кириллица. 日本語.","Squat (Barbell)",,"Line one, with a comma
+Line two ""quoted""
+	Tabbed line; semicolon
+CRLF line 💪",0,"normal",220.46,5,,,
+"07 Legs, ""Heavy"" & 'Wide' — día 🦵","2026年9月13日 上午10:00","2026年9月13日 上午11:10","Multi-line description,
+with ""quotes"", commas, and emoji 🔥
+
+Blank line above. Кириллица. 日本語.","Squat (Barbell)",,"Line one, with a comma
+Line two ""quoted""
+	Tabbed line; semicolon
+CRLF line 💪",1,"normal",220.46,5,,,
+"07 Legs, ""Heavy"" & 'Wide' — día 🦵","2026年9月13日 上午10:00","2026年9月13日 上午11:10","Multi-line description,
+with ""quotes"", commas, and emoji 🔥
+
+Blank line above. Кириллица. 日本語.","Leg Press (Machine)",,"",0,"normal",440.92,10,,,
+"05 Carries","2026年9月9日 下午5:00","2026年9月9日 下午5:40","","Farmers Walk",,"",0,"normal",70.55,,0.04,,
+"05 Carries","2026年9月9日 下午5:00","2026年9月9日 下午5:40","","Farmers Walk",,"",1,"normal",70.55,,0.04,38,
+"05 Carries","2026年9月9日 下午5:00","2026年9月9日 下午5:40","","Sled Pull",,"",0,"normal",220.46,,0.02,,
+"05 Carries","2026年9月9日 下午5:00","2026年9月9日 下午5:40","","Muffin Carry (Sandbag), ""heavy""",,"",0,"normal",99.21,,0.03,,
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",0,"warmup",44.09,10,,,
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",1,"warmup",88.18,8,,,
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",2,"normal",132.28,5,,,7
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",3,"normal",132.28,5,,,7.5
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",4,"normal",137.79,5,,,8.5
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Bench Press (Barbell)",,"Paused first rep",5,"failure",137.79,4,,,10
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Incline Bench Press (Dumbbell)",,"",0,"normal",49.6,10,,,8
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Incline Bench Press (Dumbbell)",,"",1,"normal",49.6,9,,,9
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Incline Bench Press (Dumbbell)",,"",2,"normal",49.6,8,,,9.5
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Triceps Rope Pushdown",,"",0,"normal",66.14,12,,,
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Triceps Rope Pushdown",,"",1,"dropset",55.12,8,,,
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Triceps Rope Pushdown",,"",2,"dropset",44.09,6,,,
+"01 Push: set types + RPE","2026年9月1日 清晨7:30","2026年9月1日 上午8:41","Set types: warmup, normal, failure, dropset. RPE incl. 7.5/8.5/9.5.","Triceps Rope Pushdown",,"",3,"dropset",33.07,6,,,
