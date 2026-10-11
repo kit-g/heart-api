@@ -7,7 +7,7 @@ import 'package:heart_models/heart_models.dart';
 import 'hevy_dates.dart';
 import 'sets.dart';
 
-/// Bulk workout import from another app's CSV export.
+/// Bulk workout import from a CSV export: another app's, or Heart's own.
 ///
 /// The parser turns a one-row-per-set export into the canonical
 /// workout/exercise/set shape; the DB layer writes it in a single statement.
@@ -85,9 +85,12 @@ class WorkoutImport {
 
   /// Distinct exercise names across the batch, each with a category/target
   /// guess for the ones that turn out not to exist and need to be created as
-  /// the user's custom exercises.
+  /// the user's custom exercises, and — where the export names the exercise by
+  /// id (Heart's own does) and every appearance of the name agrees on it — that
+  /// id, for an exact match ahead of the name.
   List<Map<String, String>> get exercises {
     final shapes = <String, ({bool weight, bool distance, bool seconds})>{};
+    final ids = <String, Set<String?>>{};
     for (final workout in workouts) {
       for (final exercise in workout.exercises) {
         final prior = shapes[exercise.name] ?? (weight: false, distance: false, seconds: false);
@@ -96,11 +99,20 @@ class WorkoutImport {
           distance: prior.distance || exercise.sets.any((s) => s.distance != null),
           seconds: prior.seconds || exercise.sets.any((s) => s.duration != null),
         );
+        (ids[exercise.name] ??= {}).add(exercise.exerciseId);
       }
     }
     return [
       for (final MapEntry(key: name, value: shape) in shapes.entries)
-        {'name': name, 'category': _category(name, shape), 'target': 'Other'},
+        {
+          'name': name,
+          'category': _category(name, shape),
+          'target': 'Other',
+          'exerciseId': ?switch (ids[name]!.toList()) {
+            [final String id] => id,
+            _ => null,
+          },
+        },
     ];
   }
 
@@ -401,6 +413,131 @@ class WorkoutImport {
     );
   }
 
+  /// Parses the app's own CSV export (one row per set).
+  ///
+  /// The app writes `workout_id, start, end, exercise_id, exercise_name,
+  /// set_index, weight, unit, reps, duration, distance, notes`, RFC 4180: the
+  /// workout's own id and its ISO-8601 instants in UTC; the exercise's id (the
+  /// library's, or the user's custom's) and its name as displayed, which for a
+  /// catalog exercise is the app's language; the set's 1-based index within its
+  /// exercise; and, per row, the unit its weight and distance are in (`kg`,
+  /// `lb`, `km`, `mi`, or `kg/km`-style on a carry). `notes` is the exercise's
+  /// note, repeated on each of its rows. Nothing has to be asked: the file
+  /// carries its instants and units, so there is no offset or unit parameter.
+  ///
+  /// The workout id is the identity: the import id is `heart:<workout_id>`
+  /// when it is a UUID, which the app has minted since it moved off Firebase,
+  /// else `heart:<opaque(workout_id)>`, so an older store's workouts import
+  /// too. The workout's and each exercise's UUID travel in the payload. The
+  /// same exercise logged twice in one workout stays two (a block opens where
+  /// `set_index` restarts at 1). A row without a workout id, without a readable
+  /// start, or with nothing measured is skipped and counted; an unreadable end
+  /// is no end. The file has no workout name or note, no set types and no RPE;
+  /// zero reads as not recorded, as it does from the other exporters.
+  ///
+  /// Throws [FormatException] when the text isn't recognizable as a Heart
+  /// export; individual bad rows are skipped and counted instead.
+  factory fromHeartCsv(String csv) {
+    final rows = parseCsv(csv);
+    if (rows.isEmpty) throw const FormatException('empty file');
+    final header = _Header.of(rows.first);
+    final column = header.column;
+
+    final workoutId = column(['workoutid']);
+    final start = column(['start']);
+    final exerciseName = column(['exercisename']);
+    if (workoutId == null || start == null || exerciseName == null) {
+      throw const FormatException('expected Heart columns: workout_id, start, exercise_name');
+    }
+    final end = column(['end']);
+    final exerciseId = column(['exerciseid']);
+    final setIndex = column(['setindex']);
+    final weight = column(['weight']);
+    final unit = column(['unit']);
+    final reps = column(['reps']);
+    final duration = column(['duration']);
+    final distance = column(['distance']);
+    final notes = column(['notes']);
+
+    var skipped = 0;
+    var setsDropped = 0;
+    final builders = <String, _WorkoutBuilder>{};
+    // per workout, the exercise its last row named and whether a skipped row
+    // left a block to open: the same exercise logged twice stays two, and a
+    // skipped first set doesn't fold its block into the one before
+    final cursors = <String, ({String? exercise, bool pending})>{};
+    for (final row in rows.skip(1)) {
+      final id = _cell(row, workoutId);
+      final exercise = _cell(row, exerciseName);
+      final index = _cell(row, setIndex);
+      final cursor = switch (id) {
+        final String id => cursors[id] ?? (exercise: null, pending: false),
+        null => null,
+      };
+      try {
+        if (id == null) throw const FormatException('no workout_id');
+        if (exercise == null) throw const FormatException('no exercise_name');
+        final rawStart = _cell(row, start) ?? (throw const FormatException('no start'));
+        final (weightUnit, distanceUnit) = _heartUnits(_cell(row, unit));
+        // parse the entire row before touching the builders, so a bad row
+        // can't leave a half-built workout behind
+        final set = ImportedSet(
+          weight: _toKilograms(_nonNegative(_cell(row, weight)), weightUnit, .metric),
+          reps: _nonNegative(_cell(row, reps))?.round(),
+          duration: _nonNegative(_cell(row, duration))?.round(),
+          distance: _toKilometers(_nonNegative(_cell(row, distance)), distanceUnit, .metric),
+        );
+        if (set.isEmpty) throw const FormatException('a set with nothing in it');
+        final builder = builders.putIfAbsent(id, () {
+          final started = _instant(rawStart, .zero);
+          final ended = switch (_cell(row, end)) {
+            final String raw => _instantOrNull(raw),
+            null => null,
+          };
+          final uuid = _uuidOrNull(id);
+          return _WorkoutBuilder(
+            importId: 'heart:${uuid ?? _opaque(id)}',
+            workoutId: uuid,
+            name: null,
+            start: started,
+            // an end before the start, or past 24h, is a window not worth
+            // storing, as for the other sources
+            end: switch (ended?.difference(started)) {
+              Duration d when d > .zero && d <= const Duration(hours: 24) => ended,
+              _ => null,
+            },
+          );
+        });
+        final newBlock = cursor!.pending || exercise != cursor.exercise || index == '1';
+        final added = builder.add(
+          exercise,
+          set,
+          note: _cell(row, notes),
+          newBlock: newBlock,
+          exerciseId: _uuidOrNull(_cell(row, exerciseId)),
+        );
+        if (!added) setsDropped++;
+        cursors[id] = (exercise: exercise, pending: false);
+      } on FormatException {
+        skipped++;
+        if (id != null && exercise != null) {
+          cursors[id] = (
+            exercise: exercise,
+            pending: cursor!.pending || exercise != cursor.exercise || index == '1',
+          );
+        }
+      }
+    }
+    final (workouts, dropped) = _capped([for (final b in builders.values) b.build()]);
+    return WorkoutImport._(
+      source: 'heart',
+      workouts: workouts,
+      rowsSkipped: skipped,
+      workoutsDropped: dropped,
+      setsDropped: setsDropped,
+    );
+  }
+
   /// Keeps the most recent [maxWorkouts] by start time, in file order, and
   /// counts the rest.
   static (List<ImportedWorkout>, int) _capped(List<ImportedWorkout> workouts) {
@@ -419,10 +556,11 @@ class WorkoutImport {
 }
 
 /// The apps whose exports the importer reads: the `source` query parameter's
-/// vocabulary.
+/// vocabulary. Heart is its own export, written by the app.
 enum ImportSource {
   strong('Strong'),
-  hevy('Hevy');
+  hevy('Hevy'),
+  heart('Heart');
 
   /// The app's name as the user knows it, for error messages.
   final String label;
@@ -430,10 +568,13 @@ enum ImportSource {
   new(this.label);
 
   /// Parses [csv] with this source's parser into the one canonical batch.
+  /// [unit] and [utcOffset] are for the exports that carry neither; Heart's
+  /// own carries both and reads neither.
   WorkoutImport parse(String csv, {MeasurementUnit unit = .metric, Duration utcOffset = .zero}) {
     return switch (this) {
       .strong => WorkoutImport.fromStrongCsv(csv, unit: unit, utcOffset: utcOffset),
       .hevy => WorkoutImport.fromHevyCsv(csv, unit: unit, utcOffset: utcOffset),
+      .heart => WorkoutImport.fromHeartCsv(csv),
     };
   }
 }
@@ -494,6 +635,10 @@ class ImportedWorkout {
   static const maxNoteLength = Workout.maxNoteLength;
 
   final String importId;
+
+  /// The workout's id in the exporting store, when the export is Heart's own
+  /// and the id is a UUID; null from every other source.
+  final String? workoutId;
   final String? name;
   final DateTime start;
   final DateTime? end;
@@ -506,12 +651,14 @@ class ImportedWorkout {
     required this.start,
     required this.end,
     required this.exercises,
+    this.workoutId,
     this.note,
   });
 
   Map<String, dynamic> toPayload() {
     return {
       'importId': importId,
+      'workoutId': ?workoutId,
       'name': ?name,
       'start': start.toIso8601String(),
       'end': ?end?.toIso8601String(),
@@ -536,11 +683,16 @@ class ImportedExercise {
   final List<ImportedSet> sets;
   final String? note;
 
+  /// The exercise's id in the exporting store, when the export is Heart's own
+  /// and the id is a UUID; feeds [WorkoutImport.exercises]. Null from every
+  /// other source.
+  final String? exerciseId;
+
   /// Every rest timer run after a working set of this exercise in this
   /// workout, in file order; feeds [WorkoutImport.restTimers], never a set.
   final List<int> restTimers;
 
-  const new({required this.name, required this.sets, this.note, this.restTimers = const []});
+  const new({required this.name, required this.sets, this.note, this.exerciseId, this.restTimers = const []});
 }
 
 class ImportedSet {
@@ -805,19 +957,30 @@ String? _cell(List<String> row, int? index) {
   return v.isEmpty ? null : v;
 }
 
+/// A cell holding one of the platform's ids, case-folded so the identity it
+/// feeds is the same whatever case a file spells it in; anything else is no id.
+String? _uuidOrNull(String? cell) {
+  return switch (cell) {
+    final String id when isUuidV7(id) => id.toLowerCase(),
+    _ => null,
+  };
+}
+
 /// One exercise's run of sets within a workout.
 class _ExerciseBlock {
   final String name;
+  final String? exerciseId;
   final sets = <ImportedSet>[];
   // insertion-ordered: a note repeated on several rows is kept once
   final notes = <String>{};
   final restTimers = <int>[];
 
-  new(this.name);
+  new(this.name, {this.exerciseId});
 }
 
 class _WorkoutBuilder {
   final String importId;
+  final String? workoutId;
   final String? name;
   final DateTime start;
   final DateTime? end;
@@ -825,20 +988,21 @@ class _WorkoutBuilder {
   final _blocks = <_ExerciseBlock>[];
   var _totalSets = 0;
 
-  new({required this.importId, required this.name, required this.start, required this.end});
+  new({required this.importId, required this.name, required this.start, required this.end, this.workoutId});
 
   /// Adds the set unless the workout is already at
   /// [WorkoutImport.maxSetsPerWorkout]. With [newBlock] null the set joins the
   /// exercise's one block wherever it is (Strong lists an exercise once per
   /// workout); true opens a block even for a name already present, false
-  /// continues the latest one (Hevy keeps an exercise's second appearance
-  /// separate, as the lifter logged it).
-  bool add(String exercise, ImportedSet set, {String? note, bool? newBlock}) {
+  /// continues the latest one (Hevy and Heart keep an exercise's second
+  /// appearance separate, as the lifter logged it). [exerciseId] is the
+  /// exporting store's id for the exercise, kept on the block it opens.
+  bool add(String exercise, ImportedSet set, {String? note, bool? newBlock, String? exerciseId}) {
     if (_totalSets >= WorkoutImport.maxSetsPerWorkout) return false;
     _totalSets++;
     final block = switch (newBlock) {
-      null => _blocks.firstWhere((b) => b.name == exercise, orElse: () => _open(exercise)),
-      true => _open(exercise),
+      null => _blocks.firstWhere((b) => b.name == exercise, orElse: () => _open(exercise, exerciseId)),
+      true => _open(exercise, exerciseId),
       false => _blocks.last,
     };
     block.sets.add(set);
@@ -850,8 +1014,8 @@ class _WorkoutBuilder {
     _blocks.lastWhereOrNull((b) => b.name == exercise)?.restTimers.add(seconds);
   }
 
-  _ExerciseBlock _open(String exercise) {
-    final block = _ExerciseBlock(exercise);
+  _ExerciseBlock _open(String exercise, String? exerciseId) {
+    final block = _ExerciseBlock(exercise, exerciseId: exerciseId);
     _blocks.add(block);
     return block;
   }
@@ -859,6 +1023,7 @@ class _WorkoutBuilder {
   ImportedWorkout build() {
     return ImportedWorkout(
       importId: importId,
+      workoutId: workoutId,
       name: name,
       start: start,
       end: end,
@@ -869,6 +1034,7 @@ class _WorkoutBuilder {
             name: block.name,
             sets: block.sets,
             note: _bounded(block.notes.isEmpty ? null : block.notes.join('\n'), ImportedExercise.maxNoteLength),
+            exerciseId: block.exerciseId,
             restTimers: block.restTimers,
           ),
       ],
@@ -1078,6 +1244,16 @@ DateTime _instant(String raw, Duration utcOffset) {
   return DateTime.parse('${normalized}Z').subtract(utcOffset);
 }
 
+/// [_instant] for a field whose garbage must not cost the row: an unreadable
+/// instant is simply absent.
+DateTime? _instantOrNull(String raw) {
+  try {
+    return _instant(raw, .zero);
+  } on FormatException {
+    return null;
+  }
+}
+
 /// `1h 10m`, `47m`, `1h 5m 30s`, `1:10:00`, `70:00` — Strong has used all of
 /// these for workout duration.
 Duration? _parseDuration(String? raw) {
@@ -1160,6 +1336,23 @@ String? _strongSetType(String order) {
 /// letters, so a trailing period or a capital never sends a declared unit to
 /// the fallback (Strong writes `mi.`).
 String? _unitWord(String? unit) => unit?.toLowerCase().replaceAll(RegExp('[^a-z]'), '');
+
+/// The app's `unit` column, split into the weight's unit and the distance's:
+/// one word (`kg`, `lb`, `km`, `mi`) for a row holding one measurement, both
+/// with a slash (`kg/km`, weight's first) for a carry, blank for neither.
+(String?, String?) _heartUnits(String? raw) {
+  String? weight;
+  String? distance;
+  for (final word in raw?.split('/') ?? const <String>[]) {
+    switch (_unitWord(word)) {
+      case 'kg' || 'lb' || 'lbs':
+        weight ??= word;
+      case 'km' || 'mi':
+        distance ??= word;
+    }
+  }
+  return (weight, distance);
+}
 
 double? _toKilograms(double? value, String? unit, MeasurementUnit fallback) {
   if (value == null) return null;

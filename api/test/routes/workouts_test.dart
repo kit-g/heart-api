@@ -526,11 +526,49 @@ void main() {
       await expectLater(importWorkouts(importReq(query: {})), throwsA(isA<BadRequest>()));
     });
 
-    test('rejects an unsupported source', () async {
+    test('rejects an unsupported source, naming the three it reads', () async {
       await expectLater(
         importWorkouts(importReq(query: {'source': 'fitnotes'})),
-        throwsA(isA<BadRequest>()),
+        throwsA(
+          isA<BadRequest>().having(
+            (e) => e.reason,
+            'reason',
+            'unsupported source: fitnotes (supported: strong, hevy, heart)',
+          ),
+        ),
       );
+    });
+
+    test('parses a Heart export when source says so, reading the file\'s own instants and units', () async {
+      // a row as the app's ExportSnapshot.toCsv writes it: a UUID workout id,
+      // ISO instants in UTC, the unit on the row
+      const heart =
+          'workout_id,start,end,exercise_id,exercise_name,set_index,weight,unit,reps,duration,distance,notes\n'
+          '019ca8d7-2d00-7b4a-8c5d-6e7f80910a01,2026-03-01T10:00:00.000Z,2026-03-01T11:00:00.000Z,'
+          '019a4394-8c00-7a1e-8b2c-3d4e5f601001,Bench Press (Barbell),1,60,kg,8,,,\n';
+      when(
+        workouts.importWorkouts(
+          userId: anyNamed('userId'),
+          batch: anyNamed('batch'),
+          createCustom: anyNamed('createCustom'),
+        ),
+      ).thenAnswer((_) async => report);
+
+      // the offset and unit a client sends for the other sources are ignored
+      await importWorkouts(
+        importReq(body: heart, query: {'source': 'heart', 'tzOffset': '-04:00', 'unit': 'imperial'}),
+      );
+
+      final batch =
+          verify(
+                workouts.importWorkouts(userId: _meId, batch: captureAnyNamed('batch'), createCustom: null),
+              ).captured.single
+              as WorkoutImport;
+      expect(batch.source, 'heart');
+      final workout = batch.workouts.single;
+      expect(workout.importId, 'heart:019ca8d7-2d00-7b4a-8c5d-6e7f80910a01');
+      expect(workout.start, DateTime.utc(2026, 3, 1, 10));
+      expect(workout.exercises.single.sets.single.weight, 60);
     });
 
     test('parses a Hevy export when source says so', () async {
@@ -596,9 +634,10 @@ void main() {
       verifyNever(workouts.previewImport(userId: anyNamed('userId'), batch: anyNamed('batch')));
     });
 
-    test('a body in no known layout is still a 400, for Strong and for Hevy', () async {
+    test('a body in no known layout is still a 400, for Strong, Hevy and Heart', () async {
       await expectLater(importWorkouts(importReq(body: 'a,b\n1,2\n')), throwsA(isA<BadRequest>()));
       await expectLater(importWorkouts(importReq(query: {'source': 'hevy'})), throwsA(isA<BadRequest>()));
+      await expectLater(importWorkouts(importReq(query: {'source': 'heart'})), throwsA(isA<BadRequest>()));
       verifyNever(
         imports.keep(
           userId: anyNamed('userId'),

@@ -18,13 +18,16 @@ part of 'inputs.dart';
 ///   (even empty) means exactly those and no others.
 ///
 /// Query params:
-/// - `source` (required): the exporting app, `strong` or `hevy`.
+/// - `source` (required): the exporting app, `strong` or `hevy`, or `heart`
+///   for the app's own CSV export.
 /// - `dryRun` (optional, default `false`): parse and resolve only — write
 ///   nothing, respond with the would-be report.
 /// - `unit` (optional, `metric`|`imperial`, default `metric`): fallback for
-///   exports that carry no unit columns of their own.
+///   exports that carry no unit columns of their own. Heart's carries one per
+///   row and ignores this.
 /// - `tzOffset` (optional, `±HH:MM`): the exporting device's UTC offset —
-///   both apps' timestamps are naive local time.
+///   Strong's and Hevy's timestamps are naive local time. Heart's are instants
+///   and ignore this.
 class ImportWorkoutsIn {
   final ImportSource source;
   final String csv;
