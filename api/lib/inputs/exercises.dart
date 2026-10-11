@@ -32,6 +32,40 @@ class ExerciseCreateIn {
   }
 }
 
+/// `POST /exercises/:exerciseId/moves` — move everything the user has under the
+/// exercise in the path onto `targetId`, the body's one key. `?dryRun=true`
+/// previews the counts without writing. Both ids are uuids; moving an
+/// exercise onto itself is refused here (`same_exercise`) before it costs a
+/// round trip.
+class ExerciseMoveIn {
+  final String sourceId;
+  final String targetId;
+  final bool dryRun;
+
+  const new _({
+    required this.sourceId,
+    required this.targetId,
+    required this.dryRun,
+  });
+
+  static Future<ExerciseMoveIn> fromRequest(Request req, {required String sourceId}) async {
+    if (!isUuidV7(sourceId)) throw const BadRequest(reason: 'the exercise id must be a UUIDv7');
+    final json = await req.json();
+    final targetId = switch (json.uuidV7OrNull('targetId')) {
+      final String id => id,
+      null => throw const BadRequest(reason: 'targetId is required'),
+    };
+    if (targetId == sourceId) {
+      throw const BadRequest(code: 'same_exercise', reason: 'source and target are the same exercise');
+    }
+    return ExerciseMoveIn._(
+      sourceId: sourceId,
+      targetId: targetId,
+      dryRun: req.url.queryParameters.boolean('dryRun'),
+    );
+  }
+}
+
 class ExerciseUpdateIn {
   final String? category;
   final String? target;
