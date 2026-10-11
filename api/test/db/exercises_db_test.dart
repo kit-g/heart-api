@@ -558,6 +558,195 @@ void main() {
     });
   });
 
+  group('moveExerciseHistory', () {
+    /// A custom of [userId], by id.
+    Future<String> seedCustom(String userId, String name) async {
+      final row = await h.db.createExercise(
+        userId: userId,
+        name: h.uniqueName(name),
+        category: 'Reps Only',
+        target: 'Core',
+      );
+      return row['id'].toString();
+    }
+
+    /// A workout of [userId] logging [exerciseId] once; the workout exercise id.
+    Future<String> seedLogged(String userId, String exerciseId) async {
+      final workoutId = await h.seedWorkout(userId: userId);
+      return h.insertId(
+        'INSERT INTO workout_exercises (workout_id, exercise_id, exercise_order) VALUES (@w, @e::uuid, 0) RETURNING id',
+        {'w': workoutId, 'e': exerciseId},
+      );
+    }
+
+    /// A routine of [userId] holding [exerciseId]; the template id.
+    Future<String> seedRoutine(String userId, String exerciseId) async {
+      final templateId = await h.insertId(
+        'INSERT INTO templates (user_id, name, order_index) VALUES (@u, @n, 0) RETURNING id',
+        {'u': userId, 'n': h.uniqueName('Routine')},
+      );
+      await h.exec(
+        'INSERT INTO template_exercises (template_id, exercise_id, exercise_order) VALUES (@t, @e::uuid, 0)',
+        {'t': templateId, 'e': exerciseId},
+      );
+      return templateId;
+    }
+
+    Future<void> seedGoal(String userId, String exerciseId) => h.exec(
+      "INSERT INTO goals (user_id, metric, exercise_id, stages) VALUES (@u, 'totalReps', @e::uuid, @s::jsonb)",
+      {'u': userId, 'e': exerciseId, 's': '[{"id": "s1", "target": 100}]'},
+    );
+
+    Future<int> exerciseRows(String id) async {
+      final rows = await h.exec('SELECT count(*) AS n FROM exercises WHERE id = @id::uuid', {'id': id});
+      return rows.first.toColumnMap()['n'] as int;
+    }
+
+    Future<String?> exerciseOfWorkoutExercise(String weId) async {
+      final rows = await h.exec('SELECT exercise_id FROM workout_exercises WHERE id = @id::uuid', {'id': weId});
+      return rows.first.toColumnMap()['exercise_id']?.toString();
+    }
+
+    test('a custom moved onto a library exercise: every row re-keyed, counts reported, custom deleted', () async {
+      final userId = await h.seedProfile();
+      final source = await seedCustom(userId, 'Brzuszki');
+      final target = await h.seedGlobalExercise();
+      final we1 = await seedLogged(userId, source);
+      final we2 = await seedLogged(userId, source);
+      final templateId = await seedRoutine(userId, source);
+      await h.exec(
+        "INSERT INTO exercise_preferences (user_id, exercise_id, chart_type, rest_timer) VALUES (@u, @e::uuid, 'totalReps', 60)",
+        {'u': userId, 'e': source},
+      );
+      await seedGoal(userId, source);
+
+      final report = await h.db.moveExerciseHistory(userId: userId, sourceId: source, targetId: target, dryRun: false);
+
+      expect(report.toMap(), {
+        'sourceId': source,
+        'targetId': target,
+        'dryRun': false,
+        'workoutExercises': 2,
+        'templateExercises': 1,
+        'preferences': 1,
+        'preferencesDropped': 0,
+        'chartPreferences': 1,
+        'goals': 1,
+        'sourceDeleted': true,
+      });
+      expect(await exerciseRows(source), 0);
+      expect(await exerciseOfWorkoutExercise(we1), target);
+      expect(await exerciseOfWorkoutExercise(we2), target);
+      final te = await h.exec('SELECT exercise_id FROM template_exercises WHERE template_id = @t::uuid', {
+        't': templateId,
+      });
+      expect(te.first.toColumnMap()['exercise_id'].toString(), target);
+      final pref = await h.exec('SELECT exercise_id, rest_timer FROM exercise_preferences WHERE user_id = @u', {
+        'u': userId,
+      });
+      expect(pref.single.toColumnMap()['exercise_id'].toString(), target);
+      expect(pref.single.toColumnMap()['rest_timer'], 60);
+      final goals = await h.exec('SELECT exercise_id FROM goals WHERE user_id = @u', {'u': userId});
+      expect(goals.single.toColumnMap()['exercise_id'].toString(), target);
+    });
+
+    test('a preference on both sides: the target\'s row is kept, the source\'s dropped', () async {
+      final userId = await h.seedProfile();
+      final source = await seedCustom(userId, 'Mine');
+      final target = await h.seedGlobalExercise();
+      await h.exec(
+        "INSERT INTO exercise_preferences (user_id, exercise_id, chart_type, rest_timer) VALUES (@u, @s::uuid, 'totalReps', 60), (@u, @t::uuid, NULL, 120)",
+        {'u': userId, 's': source, 't': target},
+      );
+
+      final report = await h.db.moveExerciseHistory(userId: userId, sourceId: source, targetId: target, dryRun: false);
+
+      expect(report.preferences, 0);
+      expect(report.preferencesDropped, 1);
+      expect(report.chartPreferences, 0);
+      expect(report.sourceDeleted, isTrue);
+      final prefs = await h.exec(
+        'SELECT exercise_id, chart_type, rest_timer FROM exercise_preferences WHERE user_id = @u',
+        {'u': userId},
+      );
+      final kept = prefs.single.toColumnMap();
+      expect(kept['exercise_id'].toString(), target);
+      expect(kept['chart_type'], isNull);
+      expect(kept['rest_timer'], 120);
+    });
+
+    test('a library source is re-keyed for the caller only and never deleted', () async {
+      final userId = await h.seedProfile();
+      final source = await h.seedGlobalExercise();
+      final target = await h.seedGlobalExercise();
+      final mine = await seedLogged(userId, source);
+      final theirs = await seedLogged(otherId, source);
+
+      final report = await h.db.moveExerciseHistory(userId: userId, sourceId: source, targetId: target, dryRun: false);
+
+      expect(report.workoutExercises, 1);
+      expect(report.sourceDeleted, isFalse);
+      expect(await exerciseRows(source), 1);
+      expect(await exerciseOfWorkoutExercise(mine), target);
+      expect(await exerciseOfWorkoutExercise(theirs), source);
+    });
+
+    test('a dry run reports what the move would do and writes nothing', () async {
+      final userId = await h.seedProfile();
+      final source = await seedCustom(userId, 'Mine');
+      final target = await h.seedGlobalExercise();
+      final we = await seedLogged(userId, source);
+      await seedRoutine(userId, source);
+      await seedGoal(userId, source);
+
+      final preview = await h.db.moveExerciseHistory(userId: userId, sourceId: source, targetId: target, dryRun: true);
+
+      expect(preview.dryRun, isTrue);
+      expect(preview.workoutExercises, 1);
+      expect(preview.templateExercises, 1);
+      expect(preview.goals, 1);
+      expect(preview.sourceDeleted, isTrue);
+      expect(await exerciseRows(source), 1);
+      expect(await exerciseOfWorkoutExercise(we), source);
+
+      // the move itself agrees with its preview — and, by deleting the custom,
+      // keeps the routine from blocking the profile's cascade teardown
+      final moved = await h.db.moveExerciseHistory(userId: userId, sourceId: source, targetId: target, dryRun: false);
+      expect(moved.toMap()..remove('dryRun'), preview.toMap()..remove('dryRun'));
+      expect(await exerciseRows(source), 0);
+    });
+
+    test('someone else\'s custom, as source or target, is NotFound(unknown_exercise) naming it', () async {
+      final theirs = await seedCustom(otherId, 'Theirs');
+      final mine = await seedCustom(ownerId, 'Mine');
+
+      Matcher unknown(String id) => throwsA(
+        isA<NotFound>().having((e) => e.code, 'code', 'unknown_exercise').having((e) => e.id, 'id', id),
+      );
+
+      await expectLater(
+        h.db.moveExerciseHistory(userId: ownerId, sourceId: theirs, targetId: mine, dryRun: false),
+        unknown(theirs),
+      );
+      await expectLater(
+        h.db.moveExerciseHistory(userId: ownerId, sourceId: mine, targetId: theirs, dryRun: false),
+        unknown(theirs),
+      );
+      expect(await exerciseRows(theirs), 1);
+      expect(await exerciseRows(mine), 1);
+    });
+
+    test('the function\'s own source = target guard reads as BadRequest(same_exercise)', () async {
+      final mine = await seedCustom(ownerId, 'Mine');
+
+      await expectLater(
+        h.db.moveExerciseHistory(userId: ownerId, sourceId: mine, targetId: mine, dryRun: false),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'same_exercise')),
+      );
+      expect(await exerciseRows(mine), 1);
+    });
+  });
+
   group('library search', () {
     test("the library's rows parse and match through aliases and the locale's glossary", () async {
       // a locale nothing serves, so its glossary can't collide with the synced ones

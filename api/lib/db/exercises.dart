@@ -97,4 +97,43 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
     );
     if (rows.isEmpty) throw NotFound(type: 'Exercise', id: key);
   }
+
+  @override
+  Future<ExerciseMoveReport> moveExerciseHistory({
+    required String userId,
+    required String sourceId,
+    required String targetId,
+    required bool dryRun,
+  }) async {
+    try {
+      final rows = await _pool.execute(
+        _moveExerciseHistory.toSql(),
+        parameters: {
+          'userId': userId,
+          'sourceId': sourceId,
+          'targetId': targetId,
+          'dryRun': dryRun,
+        },
+      );
+      return ExerciseMoveReport.fromRow(
+        rows.first.toColumnMap(),
+        sourceId: sourceId,
+        targetId: targetId,
+        dryRun: dryRun,
+      );
+    } on ServerException catch (e) {
+      switch (e) {
+        // no_data_found, carrying the id the user may not reference — missing or
+        // someone else's custom, one answer for both (see `_saveExercisePreference`)
+        case ServerException(code: 'P0002', detail: final String id):
+          throw NotFound(type: 'Exercise', id: id, code: 'unknown_exercise');
+        // invalid_parameter_value: the function's own source = target guard; the
+        // route refuses it earlier, this keeps any other caller at a 400
+        case ServerException(code: '22023'):
+          throw const BadRequest(code: 'same_exercise', reason: 'source and target are the same exercise');
+        default:
+          rethrow;
+      }
+    }
+  }
 }

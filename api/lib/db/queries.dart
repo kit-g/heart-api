@@ -342,6 +342,24 @@ WHERE key = @key
 RETURNING id
 ''';
 
+/// The move lives in the database (`_move_exercise_history`, migration
+/// 2026-10-10): several tables re-keyed, a conditional delete, and a dry run
+/// that must report exactly what the move would do — one function, one path,
+/// rather than a CTE chain here with a second read-only twin for the preview.
+/// An id the caller cannot reference raises `no_data_found` with the id as the
+/// detail, and source = target `invalid_parameter_value`; the mixin maps both.
+const _moveExerciseHistory = '''
+SELECT
+  workout_exercises_moved,
+  template_exercises_moved,
+  preferences_moved,
+  preferences_dropped,
+  chart_preferences_moved,
+  goals_moved,
+  source_deleted
+FROM _move_exercise_history(@userId, @sourceId::uuid, @targetId::uuid, @dryRun)
+''';
+
 const _createConnection = '''
 WITH target_exists AS (
   SELECT 1 FROM profiles WHERE id = @targetId
