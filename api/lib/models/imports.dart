@@ -4,7 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:csv/csv.dart';
 import 'package:heart_models/heart_models.dart';
 
-import 'hevy_months.dart';
+import 'hevy_dates.dart';
 import 'sets.dart';
 
 /// Bulk workout import from another app's CSV export.
@@ -264,14 +264,15 @@ class WorkoutImport {
   /// token in the app's language, translates catalog exercise titles into that
   /// language, escapes a line break inside a field as the two characters `\n`
   /// and mixes CRLF with bare LF row endings. The web (`workouts.csv`) writes
-  /// `Intl`'s medium date in the browser's language and keeps every title in
-  /// English. Both are naive local time at minute precision with no offset;
-  /// [utcOffset] pins them. The app's dates parse in every language
-  /// ([hevyMonths]); of the web's, only English does, and a file none of whose
-  /// rows parse is refused whole (a [FormatException], like a file without the
-  /// columns) rather than reported as every row skipped. Exercise titles are
-  /// kept as the file writes them: the database resolves a translated catalog
-  /// title to its English one, so the parser never needs Hevy's catalog.
+  /// `Intl`'s medium date and short time in the site's language and keeps
+  /// every title in English. Both are naive local time at minute precision
+  /// with no offset; [utcOffset] pins them. The dates parse in every language
+  /// of either exporter without the language being asked or detected
+  /// ([_hevyDates]), and a file none of whose rows parse is refused whole (an
+  /// [UnreadableExport], a [FormatException] like a file without the columns)
+  /// rather than reported as every row skipped. Exercise titles are kept as
+  /// the file writes them: the database resolves a translated catalog title to
+  /// its English one, so the parser never needs Hevy's catalog.
   ///
   /// A workout is a contiguous run of rows with equal title, start, end and
   /// description. `title` + `start_time` does not identify one — two sessions
@@ -948,53 +949,85 @@ class _UnreadableDate extends FormatException {
   const new(super.message);
 }
 
-final _hevyAppDate = RegExp(r'^(\d{1,2}) (\S+) (\d{4}), (\d{1,2}):(\d{2})$');
-// ICU 72+ (Chrome 110, Node 20) puts a narrow no-break space before the meridiem
-final _hevyWebDate = RegExp(
-  r'^([A-Za-z]+)\.? (\d{1,2}), (\d{4}), (\d{1,2}):(\d{2})[   ]([AP]M)$',
-  caseSensitive: false,
-);
+/// Every shape a Hevy export date takes, app or web, in any language. The
+/// `month` is a number or a token in [hevyMonths]; the `hour` is 24-hour
+/// unless a `period` word from [hevyDayPeriods] goes with it. The words are
+/// never matched here, only looked up, so no shape knows which language it is
+/// reading.
+final _hevyDates = [
+  // the app in all 17 languages (`1 Sept. 2026, 07:30`, `1 сент. 2026, 07:30`)
+  // and hevy.com in es, fr, it (`9 sept 2026, 17:40`), pt and pt_br with `de`
+  // connectors (`9 de set. de 2026, 17:40`), tr without the comma
+  // (`9 Eyl 2026 17:40`), ru with `г.` after the year (`9 сент. 2026 г., 17:40`)
+  RegExp(
+    r'^(?<day>\d{1,2}) (?:de )?(?<month>\S+?)\.? (?:de )?(?<year>\d{4})(?: г\.)?,? (?<hour>\d{1,2}):(?<minute>\d{2})$',
+  ),
+  // hevy.com in en (`Sep 9, 2026, 5:40 PM`); ICU 72+ (Chrome 110, Node 20)
+  // puts a narrow no-break space before the meridiem
+  RegExp(
+    r'^(?<month>\S+)\.? (?<day>\d{1,2}), (?<year>\d{4}), (?<hour>\d{1,2}):(?<minute>\d{2})[ \u00A0\u202F](?<period>\S+)$',
+  ),
+  // hevy.com in de (`30.09.2026, 19:30`)
+  RegExp(r'^(?<day>\d{2})\.(?<month>\d{2})\.(?<year>\d{4}), (?<hour>\d{2}):(?<minute>\d{2})$'),
+  // hevy.com in ja (`2027/01/01 9:00`)
+  RegExp(r'^(?<year>\d{4})/(?<month>\d{2})/(?<day>\d{2}) (?<hour>\d{1,2}):(?<minute>\d{2})$'),
+  // hevy.com in ko (`2027. 1. 1. 오전 9:00`)
+  RegExp(r'^(?<year>\d{4})\. (?<month>\d{1,2})\. (?<day>\d{1,2})\. (?<period>\S+) (?<hour>\d{1,2}):(?<minute>\d{2})$'),
+  // hevy.com in zh_cn (`2027年1月1日 10:00`) and zh_tw (`2027年1月1日 上午9:00`,
+  // one of six day periods)
+  RegExp(r'^(?<year>\d{4})年(?<month>\d{1,2})月(?<day>\d{1,2})日 (?<period>[^\s\d]+)?(?<hour>\d{1,2}):(?<minute>\d{2})$'),
+];
 
 /// The start of a cell for an error message: a cell can be anything, and the
 /// message travels into a response and an alert.
 String _excerpt(String raw) => raw.length <= 80 ? raw : '${raw.substring(0, 80)}…';
 
 /// A Hevy timestamp as the wall clock it shows, in a UTC [DateTime] that
-/// stands in for naive local time: the app's `1 Sept. 2026, 07:30` in any
-/// language, or the web's `Sep 1, 2026, 7:30 AM` in English.
+/// stands in for naive local time, in any shape of [_hevyDates].
 DateTime _hevyLocal(String raw) {
   final text = raw.trim();
-  if (_hevyAppDate.firstMatch(text) case final m?) {
-    return _wallClock(
-      raw,
-      year: int.parse(m[3]!),
-      month: _hevyMonth(m[2]!, raw),
-      day: int.parse(m[1]!),
-      hour: int.parse(m[4]!),
-      minute: int.parse(m[5]!),
-    );
+  for (final shape in _hevyDates) {
+    if (shape.firstMatch(text) case final m?) {
+      final month = m.namedGroup('month')!;
+      final hour = int.parse(m.namedGroup('hour')!);
+      return _wallClock(
+        raw,
+        year: int.parse(m.namedGroup('year')!),
+        month: int.tryParse(month) ?? _hevyMonth(month, raw),
+        day: int.parse(m.namedGroup('day')!),
+        // a 12-hour clock reads 1–12; `13:00 PM` is a misread, not a time
+        hour: switch (m.period) {
+          null => hour,
+          final period when hour >= 1 && hour <= 12 => hour % 12 + _hevyDayPeriod(period, raw),
+          _ => throw FormatException('impossible time "${_excerpt(raw)}"'),
+        },
+        minute: int.parse(m.namedGroup('minute')!),
+      );
+    }
   }
-  if (_hevyWebDate.firstMatch(text) case final m?) {
-    final pm = m[6]!.toUpperCase() == 'PM';
-    return _wallClock(
-      raw,
-      year: int.parse(m[3]!),
-      month: _hevyMonth(m[1]!, raw),
-      day: int.parse(m[2]!),
-      hour: int.parse(m[4]!) % 12 + (pm ? 12 : 0),
-      minute: int.parse(m[5]!),
-    );
-  }
-  throw _UnreadableDate('unreadable date "${_excerpt(raw)}": export from the Hevy app, or from hevy.com in English');
+  throw _UnreadableDate('unreadable date "${_excerpt(raw)}": not a form the Hevy app or hevy.com is known to write');
 }
+
+extension on RegExpMatch {
+  /// The day-period word, when the shape has a place for one and the text
+  /// filled it; [namedGroup] throws on a shape without the group.
+  String? get period => groupNames.contains('period') ? namedGroup('period') : null;
+}
+
+/// The form a token is looked up in, the twin of the generator's `token_key`:
+/// case-folded, trailing dot dropped.
+String _tokenKey(String token) => token.toLowerCase().replaceFirst(RegExp(r'\.+$'), '');
 
 int _hevyMonth(String token, String raw) {
-  return hevyMonths[token.toLowerCase().replaceFirst(RegExp(r'\.+$'), '')] ??
-      (throw _UnreadableDate('unreadable month in "${_excerpt(raw)}"'));
+  return hevyMonths[_tokenKey(token)] ?? (throw _UnreadableDate('unreadable month in "${_excerpt(raw)}"'));
 }
 
-/// [DateTime.utc] normalizes an impossible date (Feb 30) into a possible one;
-/// an export never has one, so it's a misread, not a day.
+int _hevyDayPeriod(String word, String raw) {
+  return hevyDayPeriods[_tokenKey(word)] ?? (throw _UnreadableDate('unreadable day period in "${_excerpt(raw)}"'));
+}
+
+/// [DateTime.utc] normalizes an impossible date (Feb 30, month 13) into a
+/// possible one; an export never has one, so it's a misread, not a day.
 DateTime _wallClock(
   String raw, {
   required int year,
@@ -1004,7 +1037,7 @@ DateTime _wallClock(
   required int minute,
 }) {
   final local = DateTime.utc(year, month, day, hour, minute);
-  if (local.day != day || local.hour != hour || local.minute != minute) {
+  if (local.month != month || local.day != day || local.hour != hour || local.minute != minute) {
     throw FormatException('impossible date "${_excerpt(raw)}"');
   }
   return local;
