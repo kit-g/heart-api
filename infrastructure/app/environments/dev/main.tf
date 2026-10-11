@@ -36,10 +36,11 @@ module "api" {
   database                     = module.content.database
   apple_sign_in                = local.apple_sign_in
   account_deletion_offset_days = 2
-  # 1.13 is the first store release (CLAUDE.md, Compatibility floor); every
-  # earlier build is a tester's and is told to update (a 426 on every app route).
+  # 1.13 is the first store release (CLAUDE.md, Compatibility floor). Enforcement
+  # is off again: with it on, 1.13.0 builds were met with the 426 (2026-10-11),
+  # and the cause is not yet known; it comes back once that is understood.
   minimal_app_version = "1.13.0"
-  enforce_app_version = true
+  enforce_app_version = false
   monitoring_email    = "info@heart-of.me"
   media_distribution  = local.media_host
   events_enabled      = var.events_enabled
