@@ -8,6 +8,7 @@ export 'src/models/charts.dart';
 export 'src/models/comment.dart';
 export 'src/models/connected_app.dart';
 export 'src/models/connections.dart';
+export 'src/models/exercise_move.dart';
 export 'src/models/errors.dart';
 export 'src/models/exercise.dart';
 export 'src/models/exercise_preference.dart';
