@@ -146,7 +146,7 @@ void main() {
         extraHeaders: const {'origin': _allowed, 'access-control-request-method': 'GET'},
       );
 
-      expect(response.status, 204, reason: 'authentication would 401 this, and the version gate 426 it');
+      expect(response.status, 204, reason: 'authentication would 401 this');
       expect(response.headers['access-control-allow-origin'], _allowed);
       expect(response.headers['access-control-allow-methods'], isNotNull);
     });
@@ -161,7 +161,12 @@ void main() {
         extraHeaders: const {'origin': _allowed, 'access-control-request-method': 'GET'},
       );
 
-      expect(response.status, 204, reason: 'a preflight carries no x-app-version, so the gate would 426 it');
+      expect(
+        response.status,
+        204,
+        reason:
+            'a preflight carries no x-app-version, which the gate lets through to an authentication that would 401 it',
+      );
     });
 
     test('a 404 for an unknown path still carries the headers', () async {

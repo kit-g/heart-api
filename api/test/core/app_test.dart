@@ -186,6 +186,8 @@ void main() {
 
       expect((await send('GET', '/accounts/u1/goals', token: 'good', appVersion: '1.0.0')).status, 426);
       expect((await send('GET', '/accounts/u1/goals', token: 'good', appVersion: '2.1.0')).status, 200);
+      // The first requests of a cold launch leave before the app installs its headers; they are not an old build.
+      expect((await send('GET', '/accounts/u1/goals', token: 'good')).status, 200);
     });
   });
 }

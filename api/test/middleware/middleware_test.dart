@@ -102,8 +102,13 @@ void main() {
       expect(await _status(gate(), withVersion('1.0.0')), 426);
     });
 
-    test('426 when the version header is missing', () async {
-      expect(await _status(gate(), withVersion(null)), 426);
+    test('a request that states no version goes through: the gate judges only a version it is given', () async {
+      expect(await _status(gate(), withVersion(null)), 200);
+    });
+
+    test('a version it cannot read goes through too', () async {
+      expect(await _status(gate(), withVersion('+')), 200);
+      expect(await _status(gate(), withVersion('1.2.0 (7)')), 200);
     });
 
     test('skips the check when not required', () async {
