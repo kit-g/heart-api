@@ -712,7 +712,7 @@ WHERE w.id IN (SELECT id FROM _existing_workout)
 /// The shared, read-only half of re-import enrichment, spliced into both
 /// [_importWorkouts] and [_previewImport] so a dry run reports exactly what a
 /// commit would do. Expects `_incoming (workout, import_id)` and
-/// `_names (name)` ahead of it.
+/// `_names (name, canonical, exercise_id)` ahead of it.
 ///
 /// A re-import fills gaps and nothing else: a workout's note, an exercise's
 /// note, a set's type and RPE — each only where the stored value is NULL. A
@@ -724,6 +724,14 @@ WHERE w.id IN (SELECT id FROM _existing_workout)
 /// measurements after the insert's own casts. A set the user has since edited,
 /// or one shifted by a deleted neighbour, matches nothing and is left alone —
 /// which is what stops set 1's RPE landing on the old set 2.
+///
+/// Heart's own export names its workouts and exercises by id (`workoutId` on
+/// the workout, `exercise_id` in `_names`; both NULL from every other source):
+/// an exercise id is the exact match ahead of any name, and a workout id that
+/// is one of the user's own workouts is that workout, already there, so the
+/// file imported back into the account it came from creates nothing — and
+/// fills nothing either: the store is newer than its own export, so a NULL
+/// there is a clearing, not a gap.
 const _reimportCandidates = '''
 -- every name an exercise answers to, case-folded, one row each: its own name
 -- and each alias, over the library and the user's customs. Flat so the
@@ -737,30 +745,48 @@ _library AS (
   FROM exercises e
   CROSS JOIN LATERAL unnest(e.aliases) a
   WHERE e.user_id IS NULL OR e.user_id = @userId
-),
--- the two spellings an incoming name is looked up by: as written (an exercise
--- the user already owns under that very name, say from an import made before
--- its translation was known) and canonical (the English title behind it)
-_keys AS (
-  SELECT name, lower(name) AS key, 0 AS pref FROM _names
   UNION ALL
-  SELECT name, lower(canonical), 1 FROM _names
+  -- the exercise an export names by id, where it is the library's or the
+  -- user's own; the parser lets only a UUID through, so the cast is safe
+  SELECT e.id, e.user_id, n.exercise_id, true
+  FROM _names n
+  JOIN exercises e ON e.id = n.exercise_id::uuid
+  WHERE e.user_id IS NULL OR e.user_id = @userId
+),
+-- the keys an incoming name is looked up by: its id where the export gave one,
+-- and two spellings — as written (an exercise the user already owns under that
+-- very name, say from an import made before its translation was known) and
+-- canonical (the English title behind it)
+_keys AS (
+  SELECT name, lower(name) AS key, 0 AS pref, false AS by_id FROM _names
+  UNION ALL
+  SELECT name, lower(canonical), 1, false FROM _names
+  UNION ALL
+  SELECT name, exercise_id, 0, true FROM _names WHERE exercise_id IS NOT NULL
 ),
 -- keyed by the *incoming* name so downstream joins on the CSV's spelling still
 -- hit; matching is case-insensitive because that is the DB's own notion of
--- identity (unique on (user_id, lower(name))). The user's own exercise wins
--- over the library's, the name as written over its canonical form, and a
--- name over an alias
+-- identity (unique on (user_id, lower(name))). An id match is exact and wins
+-- outright; by name, the user's own exercise wins over the library's, the name
+-- as written over its canonical form, and a name over an alias
 _resolved AS (
   SELECT DISTINCT ON (k.name) k.name, l.id
   FROM _keys k
   JOIN _library l ON l.key = k.key
-  ORDER BY k.name, l.user_id NULLS LAST, k.pref, l.by_name DESC
+  ORDER BY k.name, k.by_id DESC, l.user_id NULLS LAST, k.pref, l.by_name DESC
 ),
+-- the stored workout an incoming one already is: imported before under the
+-- same identity (by_identity, the only kind a re-import fills), or the user's
+-- own workout the file was written from. Two joins, not one OR, so each is an
+-- index probe
 _reimported AS (
-  SELECT w.id AS workout_id, w.note AS stored_note, i.workout
+  SELECT i.import_id, w.id AS workout_id, w.note AS stored_note, i.workout, true AS by_identity
   FROM _incoming i
   JOIN workouts w ON w.user_id = @userId AND w.import_id = i.import_id
+  UNION ALL
+  SELECT i.import_id, w.id, w.note, i.workout, false
+  FROM _incoming i
+  JOIN workouts w ON w.user_id = @userId AND w.id = (i.workout->>'workoutId')::uuid
 ),
 -- an existing workout only ever references exercises that already exist, so
 -- _resolved (not the consent-gated lookup) is the whole of what can match
@@ -773,11 +799,12 @@ _reimported_exercises AS (
     ON we.workout_id = r.workout_id
    AND we.exercise_order = (ex->>'order')::int
    AND we.exercise_id = res.id
+  WHERE r.by_identity
 ),
 _fill_workouts AS (
   SELECT workout_id, workout->>'note' AS note
   FROM _reimported
-  WHERE stored_note IS NULL AND workout->>'note' IS NOT NULL
+  WHERE by_identity AND stored_note IS NULL AND workout->>'note' IS NOT NULL
 ),
 _fill_exercises AS (
   SELECT workout_id, workout_exercise_id, exercise->>'note' AS note
@@ -814,13 +841,15 @@ _rest_timers_in AS (
 /// Workouts left with no surviving exercise aren't created at all, so their
 /// import identity stays unclaimed and a later consenting re-import recovers
 /// them in full.
-/// Workouts land with ON CONFLICT DO NOTHING on (user_id, import_id): re-running
-/// the same export inserts nothing and the report shows it. A workout already
-/// imported is instead *enriched* ([_reimportCandidates]): gaps filled, nothing
-/// overwritten. Rest timers become the user's per-exercise preference where
-/// they have none. Ids — the
-/// workout's and its exercises'/sets' alike — are uuid-v7 minted at the
-/// workout's *start* time, because history pages by id: an import of
+/// Workouts already there ([_reimportCandidates]' `_reimported`: the same import
+/// identity, or the user's own workout a Heart export names) are not inserted —
+/// re-running the same export creates nothing and the report shows it — and
+/// are instead *enriched*: gaps filled, nothing overwritten. ON CONFLICT DO
+/// NOTHING on (user_id, import_id) still backs that for a concurrent import.
+/// Rest timers become the user's per-exercise preference where they have none.
+/// Ids — the workout's and its exercises'/sets' alike — are uuid-v7 minted at
+/// the workout's *start* time, never the exporting store's (a Heart export's
+/// ids may be another account's), because history pages by id: an import of
 /// years-old workouts must land deep in pagination, not on page one, and a
 /// child id shouldn't contradict its own workout's timeline.
 const _importWorkouts =
@@ -834,15 +863,13 @@ _incoming AS (
 -- another language (import_names), else the name itself
 _names AS (
   SELECT ex->>'name' AS name, ex->>'category' AS category, ex->>'target' AS target,
-         COALESCE(im.name, ex->>'name') AS canonical
+         COALESCE(im.name, ex->>'name') AS canonical, ex->>'exerciseId' AS exercise_id
   FROM jsonb_array_elements(@exercises::jsonb) ex
   LEFT JOIN import_names im ON im.source = @source AND lower(im.title) = lower(ex->>'name')
 ),
 $_reimportCandidates,
 _already_imported AS (
-  SELECT i.import_id
-  FROM _incoming i
-  WHERE exists (SELECT 1 FROM workouts w WHERE w.user_id = @userId AND w.import_id = i.import_id)
+  SELECT DISTINCT import_id FROM _reimported
 ),
 -- a custom is created under its canonical name, so the same history exported
 -- in two languages makes one custom, not two
@@ -882,6 +909,7 @@ _inserted_workouts AS (
     SELECT 1 FROM jsonb_array_elements(i.workout->'exercises') ex
     JOIN _lookup l ON l.name = lower(ex->>'name')
   )
+    AND NOT exists (SELECT 1 FROM _already_imported a WHERE a.import_id = i.import_id)
   ON CONFLICT (user_id, import_id) WHERE import_id IS NOT NULL DO NOTHING
   RETURNING id, import_id
 ),
@@ -1001,7 +1029,7 @@ _incoming AS (
   FROM jsonb_array_elements(@workouts::jsonb) w
 ),
 _names AS (
-  SELECT ex->>'name' AS name, COALESCE(im.name, ex->>'name') AS canonical
+  SELECT ex->>'name' AS name, COALESCE(im.name, ex->>'name') AS canonical, ex->>'exerciseId' AS exercise_id
   FROM jsonb_array_elements(@exercises::jsonb) ex
   LEFT JOIN import_names im ON im.source = @source AND lower(im.title) = lower(ex->>'name')
 ),
@@ -1021,10 +1049,7 @@ SELECT
      JOIN exercise_preferences ep ON ep.exercise_id = res.id AND ep.user_id = @userId
      WHERE lower(res.name) = lower(r.name) AND ep.rest_timer IS NOT NULL
    ))::int AS rest_timers_set,
-  (SELECT count(*)
-   FROM _incoming i
-   WHERE EXISTS (SELECT 1 FROM workouts w WHERE w.user_id = @userId AND w.import_id = i.import_id))::int
-    AS workouts_already_imported,
+  (SELECT count(DISTINCT import_id) FROM _reimported)::int AS workouts_already_imported,
   -- the *incoming* spellings that matched: the caller set-subtracts these from
   -- the batch's names, so DB-cased names would misreport case-variant matches
   COALESCE((SELECT jsonb_agg(DISTINCT name) FROM _resolved), '[]'::jsonb) AS exercises_matched
