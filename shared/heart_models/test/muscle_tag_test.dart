@@ -137,4 +137,55 @@ void main() {
       expect(withSecondary.isEmpty, isFalse);
     });
   });
+  group('muscle shares (heart-api#197)', () {
+    final bench = MuscleTagging.fromJson(const {
+      'primary': {
+        'ids': ['pectoralis_major_l', 'pectoralis_major_r'],
+        'groups': ['chest'],
+      },
+      'secondary': {
+        'ids': ['anterior_deltoid_l', 'triceps_brachii_caput_longum_l'],
+      },
+    });
+
+    test('a role without a share takes the default: all of a set, or half', () {
+      expect(bench.primaryShare, 1.0);
+      expect(bench.secondaryShare, 0.5);
+      expect(bench.primary.toMap().containsKey('share'), isFalse);
+    });
+
+    test('shareOf matches an id prefix or a group, primary first', () {
+      expect(bench.shareOf('pectoralis_major'), 1.0);
+      expect(bench.shareOf('chest'), 1.0);
+      expect(bench.shareOf('triceps_brachii'), 0.5);
+      expect(bench.shareOf('biceps_brachii'), 0.0);
+    });
+
+    test('a role may say its own share, and it round-trips', () {
+      final curl = MuscleTagging.fromJson(const {
+        'primary': {
+          'ids': ['biceps_brachii_l'],
+        },
+        'secondary': {
+          'ids': ['brachioradialis_l'],
+          'share': 0.25,
+        },
+      });
+      expect(curl.secondaryShare, 0.25);
+      expect(curl.shareOf('brachioradialis'), 0.25);
+      expect(curl.toMap()['secondary'], containsPair('share', 0.25));
+    });
+
+    test('a muscle tagged in both roles counts as primary', () {
+      final tagging = MuscleTagging.fromJson(const {
+        'primary': {
+          'groups': ['back'],
+        },
+        'secondary': {
+          'groups': ['back'],
+        },
+      });
+      expect(tagging.shareOf('back'), 1.0);
+    });
+  });
 }

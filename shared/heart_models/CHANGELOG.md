@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.17.0
+
+How much of a set each muscle receives (heart-api#197).
+
+- New: `MuscleTag.share`, a role's own share of a set when the library gives
+  one; read from and written to `share`, left out when null.
+- New: `MuscleTagging.primaryShare` and `secondaryShare` (defaults
+  `MuscleTagging.defaultPrimaryShare` 1.0 and `defaultSecondaryShare` 0.5),
+  and `shareOf(muscle)`: the share of one set a muscle id prefix or group
+  receives, primary first, 0 when untagged.
+
 ## 2.16.0
 
 Targets on template sets (heart-api#195, heart-of-yours#173).
