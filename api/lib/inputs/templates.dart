@@ -204,6 +204,11 @@ TemplateSetRequest _set(Map<String, dynamic> json, int index, int setIndex) {
       true => setType(json['set_type'], at: at),
       false => null,
     },
+    // absent leaves a stored set's target alone; null clears it
+    target: switch (json.containsKey('target')) {
+      true => setTarget(json['target'], at: at),
+      false => null,
+    },
     // Weight is the one measure that can legitimately go below zero — assisted
     // movements and deficit work are expressed against bodyweight — and the
     // column has never constrained it, so this layer must not start.
