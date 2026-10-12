@@ -18343,6 +18343,1426 @@ exercises:
         groups:
           - glutes
           - core
+  bird-dog:
+    category: Reps Only
+    target: Core
+    movement:
+      groups:
+        - core_bracing
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Bird Dog"
+        validated: true
+        instructions: |
+          ## Overview
+          The bird dog is a core stability exercise done on your hands and knees: you reach one arm forward and the opposite leg back, then switch sides. It trains your trunk to resist rotation and arching while your limbs move, and it strengthens the lower back and glutes with very little load on the spine.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Kneel on a mat on all fours
+          - Place your hands directly under your shoulders and your knees under your hips
+          - Keep your back flat and your neck neutral, looking at the floor
+          - Brace your core lightly as if preparing for a gentle push
+
+          ### 2. Movement
+          1. Reach your right arm straight forward and your left leg straight back at the same time
+          2. Extend until your arm and leg are in line with your torso
+          3. Pause briefly, keeping your hips and shoulders level
+          4. Return your hand and knee to the start under control
+          5. Repeat with your left arm and right leg
+          6. Keep alternating sides for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you reach your arm and leg away
+          - Breathe in as you bring them back to the start
+
+          ### 4. Tips
+          - Imagine balancing a glass of water on your lower back
+          - Reach long through your fingertips and heel rather than lifting high
+          - Squeeze the glute of the extended leg
+          - Move slowly; the pause matters more than the speed
+
+          ### 5. Common Mistakes
+          - Arching the lower back as the leg rises
+          - Rotating the hips open toward the side of the lifted leg
+          - Lifting the arm or leg above torso height
+          - Rushing through the reps without control
+
+          ### 6. Safety / Modifications
+          - Place a cushion under your knees if kneeling is uncomfortable
+          - Beginners can extend only the arm or only the leg at first
+          - Make it harder by holding each rep for a few seconds
+          - Stop if you feel pinching in your lower back and reduce the range
+
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        groups:
+          - back
+          - glutes
+          - shoulders
+  dead-bug:
+    category: Reps Only
+    target: Core
+    movement:
+      groups:
+        - core_bracing
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Dead Bug"
+        validated: true
+        instructions: |
+          ## Overview
+          The dead bug is a core exercise done lying on your back: you lower one arm and the opposite leg toward the floor while keeping your lower back pressed down. It trains the deep abdominal muscles to keep the trunk still while the limbs move, which makes it a safe, effective foundation for core strength.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on your back on a mat
+          - Raise your arms straight up toward the ceiling, hands over your shoulders
+          - Lift your legs so your hips and knees are both bent to 90 degrees, shins parallel to the floor
+          - Press your lower back gently into the mat
+          - Brace your core and draw your ribs down
+
+          ### 2. Movement
+          1. Slowly lower your right arm overhead and straighten your left leg toward the floor
+          2. Go as low as you can without your lower back lifting off the mat
+          3. Pause just above the floor
+          4. Return your arm and leg to the starting position
+          5. Repeat with your left arm and right leg
+          6. Keep alternating sides for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you lower your arm and leg
+          - Breathe in as you bring them back to the start
+
+          ### 4. Tips
+          - Keep your lower back in contact with the mat for the whole set
+          - Move slowly; control matters more than range
+          - Keep your head and shoulders relaxed on the floor
+          - Reach long through your heel and fingertips
+
+          ### 5. Common Mistakes
+          - Letting the lower back arch away from the floor
+          - Moving too fast and losing control
+          - Holding your breath
+          - Moving the arm and leg on the same side instead of opposite sides
+
+          ### 6. Safety / Modifications
+          - Beginners can move only the legs, or keep the knee bent as the leg lowers
+          - Reduce the range if your back starts to lift
+          - Make it harder by holding a light weight in your hands or pausing longer at the bottom
+          - Stop if you feel strain in your lower back rather than effort in your abs
+
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        ids:
+          - rectus_femoris_l
+          - rectus_femoris_r
+  dragon-flag:
+    category: Reps Only
+    target: Core
+    movement:
+      groups:
+        - core_bracing
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: high
+    i18n:
+      en:
+        name: "Dragon Flag"
+        validated: true
+        instructions: |
+          ## Overview
+          The dragon flag is an advanced core exercise done lying on a bench: gripping the bench behind your head, you raise your whole body, rigid from the shoulders down, and lower it slowly. It places a heavy demand on the abdominals and the muscles that stabilize the trunk, and it takes solid core strength before it can be done with good form.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on your back on a flat bench with your head near one end
+          - Reach overhead and grip the edges of the bench, or a sturdy post, beside your head
+          - Brace your core and squeeze your glutes
+          - Keep your legs together and straight
+
+          ### 2. Movement
+          1. Drive your legs and hips up until your body is nearly vertical, resting on your upper back and shoulders
+          2. Lock your body into one straight line from shoulders to toes
+          3. Lower your body slowly as one unit, without bending at the hips
+          4. Lower as far as you can while keeping your body straight and your lower back off the bench
+          5. Stop just above the bench
+          6. Raise your body back to vertical and repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe in at the top before you start lowering
+          - Breathe out slowly and steadily as you lower, keeping your brace
+
+          ### 4. Tips
+          - Think of your body as a stiff plank pivoting at the shoulders
+          - The slow lowering is the hard part; take three to five seconds on it
+          - Pull hard on the bench to keep your upper body anchored
+          - Build up with tuck and negative-only versions before the full movement
+
+          ### 5. Common Mistakes
+          - Bending at the hips, which turns it into a leg raise
+          - Letting the lower back arch as the body lowers
+          - Resting your weight on your neck instead of your upper back and shoulders
+          - Dropping the body quickly instead of controlling the descent
+
+          ### 6. Safety / Modifications
+          - Start with tuck dragon flags, knees bent toward the chest
+          - Practice negatives: lower slowly from the top and reset instead of raising back up
+          - Make sure the bench is stable and won't tip
+          - Stop if you feel strain in your neck or lower back
+
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        groups:
+          - shoulders
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+  hollow-rock:
+    category: Duration
+    target: Core
+    health:
+      activity: core_training
+    movement:
+      groups:
+        - core_bracing
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
+    i18n:
+      en:
+        name: "Hollow Rock"
+        validated: true
+        instructions: |
+          ## Overview
+          The hollow rock is a core exercise built on the hollow body position: lying on your back with your arms and legs lifted, you rock back and forth while holding the shape. It trains the abdominals to keep the trunk rigid and the lower back flat, a position that carries over to gymnastics, pull-ups, and overhead work.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on your back on a mat with your arms extended overhead and legs straight
+          - Press your lower back into the floor
+          - Lift your shoulders, arms, and legs a few inches off the floor
+          - Point your toes and keep your arms beside your ears
+          - Your body should form a shallow, banana-like curve
+
+          ### 2. Movement
+          1. Hold the hollow shape with your core braced
+          2. Rock backward onto your upper back, keeping your legs off the floor
+          3. Rock forward onto your lower back and hips, keeping your arms off the floor
+          4. Keep the same body shape throughout; the rock comes from momentum, not from bending
+          5. Continue rocking smoothly back and forth
+          6. Keep going for the target time, then lower your arms and legs to the floor
+
+          ### 3. Breathing
+          - Take short, steady breaths while keeping your core tight
+          - Don't hold your breath for the whole set
+
+          ### 4. Tips
+          - Master a still hollow hold for 30 seconds before adding the rock
+          - Keep your ribs pulled down toward your hips
+          - Squeeze your legs together and keep them straight
+          - Small, controlled rocks are better than big, sloppy ones
+
+          ### 5. Common Mistakes
+          - Letting the lower back lift off the floor
+          - Bending at the hips or knees to create the rocking motion
+          - Dropping the arms or legs to the floor between rocks
+          - Tucking the chin hard into the chest
+
+          ### 6. Safety / Modifications
+          - Bend your knees or bring your arms to your sides to make it easier
+          - Stop if you feel strain in your lower back rather than effort in your abs
+          - Keep your neck relaxed; look toward your toes
+          - Use a mat to cushion the spine as you rock
+
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        ids:
+          - rectus_femoris_l
+          - rectus_femoris_r
+  l-sit-hold:
+    category: Duration
+    target: Core
+    health:
+      activity: core_training
+    movement:
+      groups:
+        - core_bracing
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
+    i18n:
+      en:
+        name: "L-Sit Hold"
+        validated: true
+        instructions: |
+          ## Overview
+          The L-sit hold is a bodyweight hold in which you support yourself on your hands with your legs held straight out in front of you at hip height, so your body forms an L. It builds strong abdominals and hip flexors along with shoulder, triceps, and wrist strength, and it is a staple of gymnastics training.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set up between parallettes or dip bars, or sit on the floor with your hands flat beside your hips
+          - Grip the handles or press your palms down, fingers pointing forward
+          - Straighten your arms and push your shoulders down away from your ears
+          - Brace your core
+
+          ### 2. Movement
+          1. Press down through your hands to lift your hips off the floor or bench
+          2. Raise your legs straight out in front of you until they are level with your hips
+          3. Keep your knees locked and your toes pointed
+          4. Hold the L shape with your arms straight and your shoulders pressed down
+          5. Hold for the target time
+          6. Lower your legs and hips back down under control
+
+          ### 3. Breathing
+          - Take short, steady breaths during the hold
+          - Don't hold your breath; keep your brace while breathing
+
+          ### 4. Tips
+          - Push the floor or handles away as hard as you can
+          - Squeeze your thighs and point your toes to keep the legs straight
+          - Lean your shoulders slightly forward over your hands to help balance
+          - Several short holds add up faster than one long struggling hold
+
+          ### 5. Common Mistakes
+          - Shrugging the shoulders up toward the ears
+          - Bending the elbows
+          - Letting the knees bend or the legs drop below hip height
+          - Rounding the back and collapsing the chest
+
+          ### 6. Safety / Modifications
+          - Start with a tuck L-sit, knees bent toward your chest
+          - Progress with a one-leg L-sit, extending one leg at a time
+          - Parallettes or dip bars are easier on the wrists than the floor
+          - Stop if you feel pain in your wrists or shoulders
+
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        groups:
+          - shoulders
+        ids:
+          - rectus_femoris_l
+          - rectus_femoris_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+  pallof-press:
+    category: Machine
+    target: Core
+    movement:
+      groups:
+        - core_bracing
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Pallof Press"
+        aliases: ["cable core pallof press"]
+        validated: true
+        instructions: |
+          ## Overview
+          The Pallof press is an anti-rotation core exercise done at a cable station. You stand side-on to the cable and press the handle straight out in front of your chest while the cable tries to twist you toward it. Your job is to stay still, which trains the obliques and deep core to resist rotation and keep the trunk stable.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set a cable pulley to chest height and attach a single handle
+          - Hold the handle with both hands and step away from the stack until the cable is taut
+          - Stand side-on to the cable with your feet about shoulder-width apart and knees soft
+          - Bring the handle to the middle of your chest, elbows bent
+          - Brace your core and square your hips and shoulders forward
+
+          ### 2. Movement
+          1. Press the handle straight out in front of your chest until your arms are fully extended
+          2. Resist the pull of the cable; don't let your torso or hips turn toward the stack
+          3. Hold the extended position briefly
+          4. Bring the handle back to your chest under control
+          5. Complete all reps on one side
+          6. Turn around and repeat facing the other direction
+
+          ### 3. Breathing
+          - Exhale as you press the handle out
+          - Inhale as you bring it back to your chest, keeping your brace
+
+          ### 4. Tips
+          - Think of the movement as staying still rather than pressing
+          - Keep the handle in line with the middle of your chest
+          - Squeeze your glutes to lock in your hips
+          - Step farther from the stack to make it harder without adding weight
+
+          ### 5. Common Mistakes
+          - Letting the torso rotate toward the cable
+          - Using so much weight that you have to lean away to stay upright
+          - Pressing the handle up or to the side instead of straight out
+          - Rushing the reps instead of controlling each one
+
+          ### 6. Safety / Modifications
+          - Start light; the load needed is less than most people expect
+          - A half-kneeling or tall-kneeling stance removes the legs and makes the core work harder
+          - A resistance band anchored at chest height works in place of a cable
+          - Stop if you feel strain in your lower back rather than effort in your core
+
+    muscles:
+      primary:
+        groups:
+          - core
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+      secondary:
+        groups:
+          - glutes
+          - shoulders
+  pilates:
+    category: Duration
+    target: Core
+    movement:
+      groups:
+        - mobility
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Pilates"
+        validated: true
+        instructions: |
+          ## Overview
+          Pilates is a method of controlled, low-impact exercise centred on the core. A session on a mat or a reformer moves through a sequence of exercises that build deep abdominal strength, posture, flexibility and body control, with careful attention to alignment and breathing.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lay out a mat, or set the reformer springs to a light-to-moderate resistance
+          - Start lying on your back with your knees bent and feet flat
+          - Find a neutral spine, with a small natural curve in your lower back
+          - Relax your shoulders away from your ears
+          - Gently draw your lower abdominals in to set your core
+
+          ### 2. Movement
+          1. Begin with warm-up exercises such as pelvic tilts and breathing drills
+          2. Move through the session's sequence, for example the hundred, roll-ups, leg circles and bridging
+          3. Perform each repetition slowly and with control rather than using momentum
+          4. Keep your core engaged and your spine in the position each exercise calls for
+          5. Transition smoothly from one exercise to the next
+          6. Finish with gentle stretches for the back and hips
+
+          ### 3. Breathing
+          - Inhale through the nose to prepare, exhale through the mouth on the effort
+          - Breathe into the sides and back of your ribcage while keeping your abdominals engaged
+
+          ### 4. Tips
+          - Quality of movement matters more than the number of repetitions
+          - Keep the neck relaxed; support the head if it tires
+          - Follow an instructor or a structured class when learning
+          - Consistency, two to three sessions a week, brings the best results
+
+          ### 5. Common Mistakes
+          - Holding the breath during exercises
+          - Rushing through the movements with momentum
+          - Letting the lower back arch off the mat during abdominal work
+          - Shrugging the shoulders and straining the neck
+          - Using reformer springs that are too heavy to control
+
+          ### 6. Safety / Modifications
+          - Keep the knees bent and the head down to make abdominal exercises easier
+          - Use smaller ranges of motion until you have the control for larger ones
+          - Tell your instructor about any back, neck or joint problems
+          - Stop any exercise that causes pain rather than muscular effort
+
+    muscles:
+      primary:
+        groups:
+          - core
+      secondary:
+        groups:
+          - glutes
+          - back
+  reverse-wrist-curl-dumbbell:
+    category: Dumbbell
+    target: Arms
+    movement:
+      groups:
+        - forearm
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Reverse Wrist Curl (Dumbbell)"
+        validated: true
+        instructions: |
+          ## Overview
+          The reverse wrist curl is a forearm exercise done with the palms facing down. Lifting the dumbbells by extending the wrists works the extensor muscles on the back of the forearm, which balances the wrist flexors that gripping and curling train, and helps build grip endurance and elbow resilience.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the end of a bench with a light dumbbell in each hand
+          - Rest your forearms on your thighs or along the bench, palms facing down
+          - Let your wrists and hands hang just past your knees or the bench edge
+          - Keep your forearms flat and still on their support
+          - Sit tall with your shoulders relaxed
+
+          ### 2. Movement
+          1. Let the dumbbells lower slowly as your wrists bend down
+          2. Lift the backs of your hands toward the ceiling by extending your wrists
+          3. Raise the dumbbells as high as your wrists allow without lifting your forearms
+          4. Pause briefly at the top
+          5. Lower the dumbbells back down under control
+          6. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you lift the dumbbells
+          - Breathe in as you lower them
+
+          ### 4. Tips
+          - Use much lighter dumbbells than for a palms-up wrist curl; the extensors are smaller
+          - Keep your forearms pinned to your thighs or the bench throughout
+          - Move slowly through the full range of motion
+          - Higher reps work well for forearm exercises
+
+          ### 5. Common Mistakes
+          - Using too much weight and jerking the dumbbells up
+          - Lifting the forearms off their support to help the movement
+          - Cutting the range of motion short at the bottom
+          - Letting the dumbbells drop quickly instead of lowering them
+
+          ### 6. Safety / Modifications
+          - Start very light and add weight in small steps
+          - Stop if you feel pain in the wrist or the outside of the elbow
+          - Work one hand at a time to focus on each forearm
+          - A light weight plate or no weight at all is an easier start
+
+    muscles:
+      primary:
+        ids:
+          - extensor_carpi_radialis_longus_l
+          - extensor_carpi_radialis_longus_r
+          - extensor_carpi_ulnaris_l
+          - extensor_carpi_ulnaris_r
+          - extensor_digitorum_l
+          - extensor_digitorum_r
+      secondary:
+        ids:
+          - brachioradialis_l
+          - brachioradialis_r
+  dead-hang:
+    category: Duration
+    target: Arms
+    movement:
+      groups:
+        - forearm
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Dead Hang"
+        validated: true
+        instructions: |
+          ## Overview
+          The dead hang is a hang from a pull-up bar with straight arms, held for time. It builds grip strength and endurance, gently decompresses the shoulders in an overhead position, and is the foundation for pull-ups and every other bar exercise.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand on a box or bench under a pull-up bar, or reach up from the floor if the bar is low enough
+          - Grip the bar overhand, hands about shoulder-width apart
+          - Wrap your thumbs around the bar for a secure grip
+          - Step off and let your body hang with your arms straight
+          - Keep your legs together and your body still
+
+          ### 2. Movement
+          1. Hang with your arms fully straight
+          2. Keep your shoulders lightly engaged rather than completely loose
+          3. Keep your body still without swinging
+          4. Squeeze the bar for the whole hold
+          5. Hold for the target time
+          6. Step back onto the box or lower your feet to the floor before letting go
+
+          ### 3. Breathing
+          - Breathe slowly and steadily throughout the hang
+          - Don't hold your breath; relax everything except your grip
+
+          ### 4. Tips
+          - Start with shorter holds and build up gradually toward 60 seconds
+          - Chalk helps keep your hands from slipping
+          - A thicker bar or towels draped over the bar make the grip harder
+          - Bend your knees slightly if your feet touch the floor under a low bar
+
+          ### 5. Common Mistakes
+          - Swinging or kicking to get on or off the bar
+          - Shrugging the shoulders all the way up to the ears
+          - Bending the elbows instead of hanging with straight arms
+          - Dropping off the bar instead of stepping down under control
+
+          ### 6. Safety / Modifications
+          - Stop if you feel pain in your shoulders rather than fatigue in your grip
+          - Keep your toes lightly on a box to take some weight off while you build up
+          - Practice active hangs with the shoulder blades drawn slightly down for more shoulder work
+          - A weighted dead hang is the harder progression
+
+    muscles:
+      primary:
+        groups:
+          - arms
+      secondary:
+        groups:
+          - back
+          - shoulders
+          - core
+  front-lever-hold:
+    category: Duration
+    target: Back
+    movement:
+      groups:
+        - pullover
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
+    i18n:
+      en:
+        name: "Front Lever Hold"
+        validated: true
+        instructions: |
+          ## Overview
+          The front lever hold is an advanced bodyweight hold: you hang from a bar and hold your body horizontal, face up, with straight arms. The lats do most of the work, pulling down on the bar, while the core and glutes keep the body rigid. Most people build up to it through easier lever positions.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hang from a pull-up bar with an overhand grip, hands about shoulder-width apart
+          - Keep your arms straight and your shoulders pulled down away from your ears
+          - Brace your core and squeeze your glutes and legs together
+          - Choose the lever position that matches your level: tuck, advanced tuck, one leg, straddle, or full
+
+          ### 2. Movement
+          1. Pull the bar toward your hips with straight arms, driving through your lats
+          2. Lean your shoulders back as your hips and legs rise
+          3. Stop when your body is horizontal, face up, with your hips level with your shoulders
+          4. Keep your arms locked straight and your body rigid
+          5. Hold for the target time
+          6. Lower your legs back under the bar with control and return to a hang
+
+          ### 3. Breathing
+          - Take shallow, steady breaths behind a tight brace
+          - Don't hold your breath for the whole hold
+
+          ### 4. Tips
+          - Think of pushing the bar down toward your hips rather than pulling yourself up
+          - Keep the shoulder blades pulled down and slightly back
+          - Progress through tuck, advanced tuck, one leg, and straddle before the full lever
+          - Short, clean holds build the position faster than long, sloppy ones
+
+          ### 5. Common Mistakes
+          - Bending the elbows to make the hold easier
+          - Letting the hips sag below shoulder level
+          - Arching the lower back instead of keeping the body in one line
+          - Moving to a harder position before the easier one is solid
+
+          ### 6. Safety / Modifications
+          - Warm up the shoulders and elbows well before attempting it
+          - A resistance band looped over the bar and under the hips makes the hold easier
+          - Lower out of the hold under control instead of dropping
+          - Stop if you feel sharp pain in the elbows or shoulders
+
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - core
+          - shoulders
+          - arms
+  straight-arm-lat-pulldown-cable:
+    category: Machine
+    target: Back
+    movement:
+      groups:
+        - pullover
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Straight Arm Lat Pulldown (Cable)"
+        aliases: ["rope straight arm pulldown"]
+        validated: true
+        instructions: |
+          ## Overview
+          The straight arm lat pulldown is a cable isolation exercise for the lats. With your arms kept nearly straight, you sweep the handle from overhead down to your thighs, so the lats do the work without the biceps taking over as they do in a regular pulldown. It's a good way to learn to feel the lats and a useful finisher for back training. A rope attachment works the same way and lets your hands travel slightly past your hips.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Attach a straight bar or a rope to a high cable pulley
+          - Grip the bar overhand about shoulder-width apart, or hold one end of the rope in each hand
+          - Step back a couple of feet and hinge slightly at the hips, keeping your back flat
+          - Reach your arms up and forward toward the pulley with a slight bend in the elbows
+          - Brace your core and set your shoulders down away from your ears
+
+          ### 2. Movement
+          1. Keep the elbow angle fixed throughout the set
+          2. Pull the handle down in a wide arc by driving your arms toward your body
+          3. Bring the handle to the front of your thighs, squeezing your lats at the bottom
+          4. Pause briefly at the bottom
+          5. Let the handle rise back up in the same arc under control until you feel a stretch in your lats
+          6. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you pull the handle down
+          - Breathe in as you let it return
+
+          ### 4. Tips
+          - Think about pulling with your elbows and armpits rather than your hands
+          - Keep your torso still; the movement happens only at the shoulders
+          - With a rope, spread the ends apart and bring your hands just past your hips at the bottom
+          - Moderate weight with a full stretch works better than heavy partial reps
+
+          ### 5. Common Mistakes
+          - Bending the elbows and turning the movement into a pushdown or a pulldown
+          - Rocking the torso up and down to move the weight
+          - Shrugging the shoulders toward the ears at the top
+          - Using a weight so heavy that the arc gets short
+
+          ### 6. Safety / Modifications
+          - Start light until you can feel the lats doing the work
+          - Stop if you feel pain in the front of the shoulder
+          - A resistance band anchored overhead is an easier alternative
+          - Kneeling in front of the cable helps keep the torso still
+
+    muscles:
+      primary:
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - core
+        ids:
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - posterior_deltoid_l
+          - posterior_deltoid_r
+  scapular-pull-up:
+    category: Reps Only
+    target: Back
+    movement:
+      groups:
+        - vertical_pull
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Scapular Pull Up"
+        aliases: ["scapular pull ups"]
+        validated: true
+        instructions: |
+          ## Overview
+          The scapular pull up is a small, controlled movement from a dead hang: you pull your shoulder blades down and back to lift your body a few centimeters, without bending your elbows. It trains the lower traps and lats to set the shoulders, and it's a common warm-up and a first step toward full pull ups.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Grip a pull-up bar overhand, hands slightly wider than shoulder-width
+          - Hang with your arms fully straight and your feet off the floor
+          - Let your shoulders rise toward your ears in a relaxed hang
+          - Keep your legs together and your body still
+
+          ### 2. Movement
+          1. Pull your shoulder blades down and back without bending your elbows
+          2. Let your body rise a few centimeters as your shoulders move away from your ears
+          3. Keep your chest slightly lifted at the top
+          4. Pause briefly in the top position
+          5. Lower slowly back into the relaxed hang
+          6. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Exhale as you pull your shoulder blades down
+          - Inhale as you lower back into the hang
+
+          ### 4. Tips
+          - Think of putting your shoulder blades in your back pockets
+          - Keep your arms straight; the movement comes from the shoulders only
+          - Control the way down as carefully as the way up
+          - Use it before pull-up sets to set your shoulders
+
+          ### 5. Common Mistakes
+          - Bending the elbows and turning it into a partial pull up
+          - Swinging or kicking to create momentum
+          - Rushing the reps through a tiny range of motion
+          - Dropping into the bottom instead of lowering under control
+
+          ### 6. Safety / Modifications
+          - Keep your feet lightly on a box or the floor to take some weight off
+          - A resistance band looped over the bar makes it easier
+          - Use chalk if your grip slips
+          - Stop if you feel pain in your shoulders rather than effort in your back
+
+    muscles:
+      primary:
+        ids:
+          - trapezius_lower_l
+          - trapezius_lower_r
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+        ids:
+          - trapezius_middle_l
+          - trapezius_middle_r
+  svend-press:
+    category: Machine
+    target: Chest
+    movement:
+      groups:
+        - chest_fly
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Svend Press"
+        aliases: ["plate squeeze (svend press)"]
+        validated: true
+        instructions: |
+          ## Overview
+          The Svend press is a standing chest exercise done with two small weight plates squeezed together between your palms. Pressing the plates straight out from your chest while squeezing them hard keeps the chest working through the whole set, and the front of the shoulders helps hold the plates up. It's a light, joint-friendly finisher rather than a heavy press.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand tall with your feet hip-width apart and your knees soft
+          - Hold two small plates together, smooth sides out, pressed between your flat palms
+          - Bring the plates to the middle of your chest with your elbows bent and pointing out
+          - Point your fingers forward and keep your wrists straight
+          - Brace your core and set your shoulders down and back
+
+          ### 2. Movement
+          1. Squeeze your palms together as hard as you can to hold the plates
+          2. Press the plates straight out in front of you at chest height
+          3. Keep squeezing as your arms reach full extension without locking the elbows
+          4. Pause briefly with the arms extended
+          5. Bring the plates back to your chest under control, still squeezing
+          6. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you press the plates away from your chest
+          - Breathe in as you bring them back
+
+          ### 4. Tips
+          - The squeeze is the exercise; never let the pressure between your palms relax
+          - Keep the plates at chest height rather than letting them drift down
+          - Move slowly and pause at full extension to feel the chest working
+          - Two light plates are enough; more weight mainly tests your grip
+
+          ### 5. Common Mistakes
+          - Holding the plates with the fingers instead of pressing them between flat palms
+          - Letting the plates sink toward the waist as you press
+          - Shrugging the shoulders up toward the ears
+          - Leaning back to move the plates instead of using the arms and chest
+
+          ### 6. Safety / Modifications
+          - Use plates with smooth faces so they don't pinch your palms
+          - Stop if you feel pain in the front of the shoulder
+          - A single plate held between the palms is an easier start
+          - Stand clear of anything you could drop the plates on
+
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        groups:
+          - arms
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+  band-pull-apart:
+    category: Reps Only
+    target: Shoulders
+    movement:
+      groups:
+        - rear_delt
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Band Pull-Apart"
+        aliases: ["band pullaparts"]
+        validated: true
+        instructions: |
+          ## Overview
+          The band pull-apart is a simple resistance band exercise for the upper back and rear shoulders. Holding a band out in front with straight arms, you stretch it apart until it touches your chest by squeezing your shoulder blades together. It's popular as a warm-up and as high-rep work for posture and shoulder health.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand tall with your feet about hip-width apart
+          - Hold a light resistance band with both hands, palms down, about shoulder-width apart
+          - Raise your arms straight out in front of you at shoulder height
+          - Take a little slack out of the band so it's lightly tensioned
+          - Brace your core and keep your ribs down
+
+          ### 2. Movement
+          1. Pull the band apart by moving your hands out to the sides
+          2. Keep your arms straight, with only a slight bend in the elbows
+          3. Squeeze your shoulder blades together as the band reaches your chest
+          4. Pause briefly at the end of the movement
+          5. Return your hands to the front slowly, resisting the band
+          6. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Exhale as you pull the band apart
+          - Inhale as you return your hands to the front
+
+          ### 4. Tips
+          - Lead with your hands, not by shrugging your shoulders
+          - Keep the band at shoulder height throughout
+          - Move your hands closer together on the band to make it harder
+          - Try an underhand grip or a diagonal pull for variety
+
+          ### 5. Common Mistakes
+          - Shrugging the shoulders up toward the ears
+          - Arching the lower back to finish the rep
+          - Bending the elbows to turn it into a row
+          - Letting the band snap back instead of controlling it
+
+          ### 6. Safety / Modifications
+          - Start with a light band; this exercise works best with high reps and good form
+          - Check the band for nicks or tears before using it
+          - A wider grip on the band makes the movement easier
+          - Stop if you feel pain in the front of your shoulders
+
+    muscles:
+      primary:
+        ids:
+          - posterior_deltoid_l
+          - posterior_deltoid_r
+      secondary:
+        ids:
+          - trapezius_middle_l
+          - trapezius_middle_r
+          - infraspinatus_l
+          - infraspinatus_r
+  handstand-hold:
+    category: Duration
+    target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
+    i18n:
+      en:
+        name: "Handstand Hold"
+        validated: true
+        instructions: |
+          ## Overview
+          The handstand hold is a bodyweight hold upside down on your hands, either with your feet against a wall or freestanding. It builds overhead strength and stability in the shoulders, arms, and upper back, along with the balance and body tension to stay stacked in one line.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Place your hands on the floor about shoulder-width apart, a hand's length from a wall if you're using one
+          - Spread your fingers wide and grip the floor
+          - Lock your elbows and push the floor away
+          - Step one foot in and keep the other leg long behind you, ready to kick
+
+          ### 2. Movement
+          1. Kick up with the back leg and follow with the other until both legs are overhead
+          2. Bring your feet together, lightly against the wall or balanced freestanding
+          3. Stack your wrists, shoulders, hips, and ankles in one line
+          4. Push tall through your shoulders and keep your core and glutes tight
+          5. Hold for the target time, correcting balance with your fingers and palms
+          6. Bring one leg down at a time and step back to your feet
+
+          ### 3. Breathing
+          - Breathe slowly and steadily throughout the hold
+          - Don't hold your breath; keep your brace while breathing
+
+          ### 4. Tips
+          - Look at the floor between your hands without cranking your neck
+          - Push the floor away so your shoulders stay open and active
+          - Point your toes and squeeze your legs together to stay rigid
+          - Practice cartwheeling out sideways so you can exit safely
+
+          ### 5. Common Mistakes
+          - Letting the lower back arch into a banana shape
+          - Sinking into the shoulders instead of pushing tall
+          - Bending the elbows
+          - Kicking up too hard and flipping over
+
+          ### 6. Safety / Modifications
+          - Learn on a wall before trying it freestanding
+          - Warm up the wrists and shoulders well before you start
+          - A pike hold with the feet on a box is an easier progression
+          - Stop if you feel pain in your wrists, shoulders, or neck, and avoid inversions if you have a condition that makes them unsafe
+
+    muscles:
+      primary:
+        groups:
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - core
+  clamshell:
+    category: Reps Only
+    target: Legs
+    movement:
+      groups:
+        - hip_abduction
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Clamshell"
+        validated: true
+        instructions: |
+          ## Overview
+          The clamshell is a side-lying hip exercise that targets the gluteus medius, the muscle on the side of the hip that steadies the pelvis when you walk, run, or stand on one leg. Keeping your feet together, you open the top knee like a clamshell. It's a common warm-up and a simple way to strengthen the hips, and a resistance band above the knees makes it harder.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on your side on a mat with your head resting on your lower arm
+          - Bend your hips to about 45 degrees and your knees to about 90 degrees
+          - Stack your hips, knees, and feet on top of each other
+          - Keep your feet together throughout
+          - If using a band, place it just above your knees
+
+          ### 2. Movement
+          1. Brace your core lightly so your pelvis stays still
+          2. Keeping your feet touching, lift your top knee as high as you can without rolling your hips back
+          3. Squeeze the side of your hip at the top
+          4. Pause briefly
+          5. Lower the knee back down under control
+          6. Complete the target reps, then switch sides
+
+          ### 3. Breathing
+          - Breathe out as you open the knee
+          - Breathe in as you lower it
+
+          ### 4. Tips
+          - Place your top hand on your hip to feel whether your pelvis rolls back
+          - A smaller range with the hips still works better than a big range with rolling
+          - Move slowly; the clamshell is about control, not speed
+          - Add a light band above the knees once bodyweight reps feel easy
+
+          ### 5. Common Mistakes
+          - Rolling the top hip backward to lift the knee higher
+          - Letting the feet come apart
+          - Rushing the reps and dropping the knee
+          - Using a band so strong that the range becomes tiny
+
+          ### 6. Safety / Modifications
+          - Put a pillow or folded towel under your head for comfort
+          - Stop if you feel pain in the hip joint or lower back
+          - Straighter legs make the exercise harder; more bend makes it easier
+          - Lying with your back against a wall helps keep the pelvis from rolling
+
+    muscles:
+      primary:
+        ids:
+          - gluteus_medius_1_l
+          - gluteus_medius_1_r
+          - gluteus_medius_2_l
+          - gluteus_medius_2_r
+      secondary:
+        ids:
+          - gluteus_maximus_l
+          - gluteus_maximus_r
+  lateral-band-walk:
+    category: Reps Only
+    target: Legs
+    movement:
+      groups:
+        - hip_abduction
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
+    i18n:
+      en:
+        name: "Lateral Band Walk"
+        aliases: ["lateral band walks"]
+        validated: true
+        instructions: |
+          ## Overview
+          The lateral band walk is a sideways walk in a half squat with a resistance band around your legs. The band pulls your knees together, so every step works the gluteus medius and the other hip abductors that keep your knees and pelvis stable when you squat, run, or stand on one leg.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Place a loop band around your legs, just above the knees or around the ankles
+          - Stand with your feet hip-width apart so the band is lightly stretched
+          - Push your hips back and bend your knees into a shallow half squat
+          - Keep your chest up and your back flat
+          - Put your hands on your hips or hold them in front of your chest
+
+          ### 2. Movement
+          1. Step sideways with your lead foot, pushing your knee out against the band
+          2. Plant the lead foot and follow with the trailing foot, keeping the band tight
+          3. Keep your feet at least hip-width apart so the band never goes slack
+          4. Stay at the same squat depth for every step
+          5. Take the target number of steps in one direction
+          6. Repeat the same number of steps leading with the other leg
+
+          ### 3. Breathing
+          - Breathe steadily and evenly as you step
+          - Don't hold your breath; keep your core lightly braced
+
+          ### 4. Tips
+          - Keep your toes pointing forward rather than turning out
+          - Move slowly and with control rather than shuffling quickly
+          - A band around the ankles is harder than one above the knees
+          - Keep your hips level so they don't rock from side to side
+
+          ### 5. Common Mistakes
+          - Letting the knees cave inward toward the band
+          - Standing up out of the half squat as you tire
+          - Bringing the feet together so the band goes slack
+          - Leaning the torso sideways to swing the leg out
+
+          ### 6. Safety / Modifications
+          - Start with a light band and progress to a stronger one
+          - Stand taller if the half squat bothers your knees
+          - Stop if you feel pain in your hips or knees rather than effort in your glutes
+          - Walk forward and backward diagonally for a variation
+
+    muscles:
+      primary:
+        ids:
+          - gluteus_medius_1_l
+          - gluteus_medius_1_r
+          - gluteus_medius_2_l
+          - gluteus_medius_2_r
+      secondary:
+        groups:
+          - legs
+        ids:
+          - gluteus_maximus_l
+          - gluteus_maximus_r
+  sissy-squat:
+    category: Weighted Body Weight
+    target: Legs
+    movement:
+      groups:
+        - knee_extension
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
+    i18n:
+      en:
+        name: "Sissy Squat"
+        aliases: ["sissy squat (weighted)"]
+        validated: true
+        instructions: |
+          ## Overview
+          The sissy squat is a bodyweight quad exercise in which you rise onto your toes and let your knees travel far forward while your hips stay straight and your torso leans back. Keeping the hips extended puts nearly all the work on the quadriceps, especially the rectus femoris, without needing a barbell or a machine. Once bodyweight reps are easy, holding a weight plate at your chest adds load.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand next to a sturdy support such as a rack, wall, or post
+          - Hold the support lightly with one hand for balance
+          - Place your feet about hip-width apart
+          - Rise onto the balls of your feet
+          - Straighten your body from knees to head and brace your core and glutes
+
+          ### 2. Movement
+          1. Push your knees forward and down while leaning your torso back
+          2. Keep your hips straight so your body stays in one line from knees to head
+          3. Lower until your knees are well in front of your toes, as far as you can control
+          4. Pause briefly at the bottom
+          5. Drive your knees back to return to standing, keeping your hips extended
+          6. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe in as you lower
+          - Breathe out as you push back up
+
+          ### 4. Tips
+          - Squeeze your glutes to stop your hips from bending
+          - Use the support only for balance, not to pull yourself up
+          - Increase the depth gradually over several sessions
+          - To add load, hold a weight plate across your chest with your free arm
+
+          ### 5. Common Mistakes
+          - Bending at the hips and turning the movement into a regular squat
+          - Dropping onto your heels instead of staying on the balls of your feet
+          - Going deeper than you can control and bouncing out of the bottom
+          - Pulling on the support to get up
+
+          ### 6. Safety / Modifications
+          - The movement puts a lot of load on the knees; start shallow and build up
+          - Stop if you feel sharp pain in the knee rather than effort in the thighs
+          - A partial range, or a sissy squat bench that braces the lower legs, is easier
+          - Add weight only once bodyweight reps through a full range feel solid
+
+    muscles:
+      primary:
+        ids:
+          - rectus_femoris_l
+          - rectus_femoris_r
+          - vastus_lateralis_l
+          - vastus_lateralis_r
+          - vastus_medialis_l
+          - vastus_medialis_r
+      secondary:
+        groups:
+          - core
+  wall-sit:
+    category: Duration
+    target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Wall Sit"
+        validated: true
+        instructions: |
+          ## Overview
+          The wall sit is an isometric squat held with your back against a wall and your thighs parallel to the floor. It builds quadriceps strength and endurance with no movement, no equipment and no load on the spine from above.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with your back flat against a wall
+          - Walk your feet out about two feet from the wall, hip-width apart
+          - Slide down the wall until your thighs are parallel to the floor
+          - Check that your knees are over your ankles, not past your toes
+          - Let your arms hang at your sides or cross them over your chest
+
+          ### 2. Movement
+          1. Hold the position with your back and head against the wall
+          2. Keep your weight in your heels and mid-foot
+          3. Keep your knees in line with your toes, not caving inward
+          4. Keep your trunk still and your shoulders relaxed
+          5. Hold for the target time
+          6. Slide up the wall to stand, or lower yourself to sit on the floor
+
+          ### 3. Breathing
+          - Breathe steadily throughout the hold
+          - Keep breathing even as your legs start to burn
+
+          ### 4. Tips
+          - A higher position (above parallel) is easier and a good starting point
+          - Push your back gently into the wall to keep your trunk still
+          - Build up the hold time gradually, in small steps
+          - Once a long hold feels easy, a weighted wall sit is the next step
+
+          ### 5. Common Mistakes
+          - Letting the knees cave inward
+          - Sliding up the wall as you tire
+          - Resting your hands on your thighs to take weight off your legs
+          - Setting the feet too close to the wall, which pushes the knees past the toes
+
+          ### 6. Safety / Modifications
+          - Stop if you feel sharp pain in your knees rather than effort in your thighs
+          - Hold a higher position if knee bend at parallel is uncomfortable
+          - Shorten the hold rather than letting your form slip
+
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - glutes
+          - core
+  bear-crawl:
+    category: Cardio
+    target: Full Body
+    movement:
+      groups:
+        - full_body_conditioning
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: low
+      skill: low
+    i18n:
+      en:
+        name: "Bear Crawl"
+        validated: true
+        instructions: |
+          ## Overview
+          The bear crawl is a full-body crawl on your hands and feet with your knees hovering just off the floor. Moving opposite hand and foot together, you cover a set distance while your shoulders carry your weight and your core keeps your back flat, which makes it a demanding conditioning drill as well as a strength and coordination builder.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Get on your hands and knees, hands under your shoulders and knees under your hips
+          - Tuck your toes under
+          - Lift your knees about an inch off the floor
+          - Keep your back flat, like a tabletop
+          - Look at the floor a little ahead of your hands to keep your neck neutral
+
+          ### 2. Movement
+          1. Step your right hand and left foot forward a short distance at the same time
+          2. Plant them, then step your left hand and right foot forward
+          3. Keep your knees low and your hips at the same height as your shoulders
+          4. Keep your back flat and steady without rocking side to side
+          5. Continue crawling with short, controlled steps
+          6. Cover the target distance, then lower your knees to the floor to rest
+
+          ### 3. Breathing
+          - Breathe steadily and rhythmically as you crawl
+          - Don't hold your breath; keep your core braced while breathing
+
+          ### 4. Tips
+          - Take small steps; long reaches make your hips sway
+          - Push the floor away so your shoulders stay strong and stable
+          - Imagine balancing a glass of water on your lower back
+          - Try crawling backward or sideways once forward feels easy
+
+          ### 5. Common Mistakes
+          - Raising the hips high into a pike
+          - Letting the knees drop to the floor
+          - Moving the hand and foot on the same side together
+          - Letting the lower back sag or rounding the upper back
+
+          ### 6. Safety / Modifications
+          - Crawl a shorter distance or rest more often while you build up
+          - Use a soft surface or mat if your wrists or knees are sensitive
+          - Stop if you feel pain in your wrists, shoulders or lower back
+          - A stationary hold with the knees hovering is an easier starting point
+
+    muscles:
+      primary:
+        groups:
+          - core
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - legs
+  wall-ball:
+    category: Dumbbell
+    target: Full Body
+    movement:
+      groups:
+        - squat_bilateral
+        - vertical_press
+      axial_load: moderate
+      stability: free
+      unilateral: false
+      impact: low
+      skill: moderate
+    i18n:
+      en:
+        name: "Wall Ball"
+        validated: true
+        instructions: |
+          ## Overview
+          The wall ball is a full-body conditioning exercise: you squat holding a medicine ball at your chest, then drive up and throw the ball to a target on the wall above you, catching it as you sink into the next squat. It combines a front squat with an overhead throw, working the legs, glutes, shoulders and core while driving your heart rate up.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing a wall, about an arm's length away, with a target marked several feet above your head
+          - Set your feet shoulder-width apart, toes turned slightly out
+          - Hold a medicine ball at chest height with both hands underneath and to the sides of it
+          - Keep your elbows under the ball and your chest up
+          - Look up at the target
+
+          ### 2. Movement
+          1. Push your hips back and bend your knees to squat until your thighs are at least parallel to the floor
+          2. Drive up through your heels, extending your hips and knees explosively
+          3. Use that momentum to push the ball up and throw it to the target
+          4. Keep your eyes on the ball as it comes back down
+          5. Catch it at chest height with soft arms
+          6. Sink straight into the next squat and repeat
+
+          ### 3. Breathing
+          - Breathe in as you catch the ball and descend into the squat
+          - Breathe out as you drive up and throw
+
+          ### 4. Tips
+          - Let your legs do most of the work; the arms finish the throw
+          - Keep a steady rhythm that you can hold for the whole set
+          - Absorb the catch with your legs by flowing straight into the squat
+          - Choose a soft medicine ball made for throwing against a wall
+
+          ### 5. Common Mistakes
+          - Squatting too shallow to keep the pace up
+          - Throwing with the arms alone instead of driving with the legs
+          - Letting the chest fall forward and the back round in the squat
+          - Standing too far from the wall, so the ball comes back out of reach
+
+          ### 6. Safety / Modifications
+          - Start with a light ball until the squat and throw feel smooth together
+          - Lower the target or use a lighter ball to keep good form when tired
+          - Squat to a box behind you if full depth is uncomfortable
+          - Stop if you feel pain in your knees, back or shoulders
+
+    muscles:
+      primary:
+        groups:
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - core
+          - glutes
+          - arms
   aerobics:
     category: Duration
     target: Cardio
@@ -18440,6 +19860,73 @@ exercises:
       secondary:
         groups:
           - core
+  boxing:
+    category: Duration
+    target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: low
+      skill: moderate
+    i18n:
+      en:
+        name: "Boxing"
+        validated: true
+        instructions: |
+          ## Overview
+          Boxing as a workout combines shadowboxing, heavy bag work and pad work into rounds of punching and footwork. It builds conditioning, coordination and upper-body endurance, and the rotation behind each punch works the core and legs as much as the arms.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with your feet about shoulder-width apart, lead foot forward and rear heel slightly raised
+          - Turn your body slightly sideways, knees soft
+          - Raise your hands to guard your chin, elbows tucked in to protect your ribs
+          - Keep your chin down and your eyes forward
+          - Wrap your hands and wear gloves for bag or pad work
+
+          ### 2. Movement
+          1. Throw the jab: extend your lead hand straight out and snap it back to your guard
+          2. Throw the cross: rotate your rear hip and foot and drive your rear hand straight forward
+          3. Add hooks and uppercuts once the straight punches feel comfortable
+          4. Move your feet between combinations, stepping rather than crossing your feet
+          5. Return your hands to the guard after every punch
+          6. Work in rounds, for example 2-3 minutes on and 1 minute rest
+
+          ### 3. Breathing
+          - Exhale sharply through your mouth or nose with each punch
+          - Breathe steadily between combinations; don't hold your breath through a round
+
+          ### 4. Tips
+          - Power comes from turning your hips and feet, not from the arm alone
+          - Stay light on the balls of your feet
+          - Keep punches relaxed until the moment of contact
+          - Speed and accuracy matter more than hitting hard
+
+          ### 5. Common Mistakes
+          - Dropping the guard after throwing a punch
+          - Flaring the elbows out on straight punches
+          - Standing flat-footed with the feet square
+          - Overextending and losing balance on a missed punch
+          - Hitting the bag without wraps or gloves
+
+          ### 6. Safety / Modifications
+          - Always wrap your hands for bag and pad work to protect your wrists and knuckles
+          - Beginners can start with shadowboxing to learn the stance and punches
+          - Reduce round length or intensity if your form starts to slip
+          - Get coaching before sparring with a partner
+
+    muscles:
+      primary:
+        groups:
+          - shoulders
+          - arms
+      secondary:
+        groups:
+          - core
+          - legs
   climbing:
     category: Duration
     target: Cardio
@@ -18648,6 +20135,75 @@ exercises:
       secondary:
         groups:
           - core
+  hiit:
+    category: Duration
+    target: Cardio
+    health:
+      activity: high_intensity
+    movement:
+      groups:
+        - full_body_conditioning
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: high
+      skill: low
+    i18n:
+      en:
+        name: "HIIT"
+        aliases: ["high intensity interval training"]
+        validated: true
+        instructions: |
+          ## Overview
+          HIIT (high-intensity interval training) is a session built from short, hard work intervals separated by rest or easy recovery. It works with almost any modality: running, cycling, rowing, bodyweight circuits or kettlebells. The format packs a lot of conditioning into little time and builds both aerobic and anaerobic fitness.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Choose your modality and set up any equipment before you start
+          - Pick a work-to-rest ratio, for example 30 seconds hard and 30 seconds easy
+          - Decide how many rounds you will do, typically 6-12
+          - Warm up for 5-10 minutes at an easy pace
+          - Have a timer or interval app ready
+
+          ### 2. Movement
+          1. Start the first work interval at a hard, near-maximal effort
+          2. Hold good form for the whole interval rather than sprinting into sloppy reps
+          3. Drop to rest or very easy movement for the recovery interval
+          4. Repeat work and recovery for all planned rounds
+          5. Keep every work interval at a similar quality; stop if your output falls apart
+          6. Cool down for 5-10 minutes at an easy pace
+
+          ### 3. Breathing
+          - Breathe hard and rhythmically during work intervals; don't hold your breath
+          - Use the recovery to slow your breathing down and get ready for the next round
+
+          ### 4. Tips
+          - Effort should feel like 8-9 out of 10 during work and easy during recovery
+          - Start with fewer rounds and longer rest, then progress
+          - Pick movements you can do well when tired
+          - Two or three HIIT sessions a week is plenty alongside other training
+
+          ### 5. Common Mistakes
+          - Skipping the warm-up
+          - Going too easy on work intervals so the session turns into steady cardio
+          - Cutting rest so short that the work intervals lose quality
+          - Choosing complex lifts that break down under fatigue
+          - Doing HIIT every day without recovery
+
+          ### 6. Safety / Modifications
+          - Low-impact options such as cycling or rowing are easier on the joints than jumping
+          - Beginners can start with 20 seconds of work and 40 seconds of rest
+          - Stop if you feel dizzy, faint, or have chest pain
+          - Check with a doctor before starting high-intensity training if you have a medical condition
+
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - core
+          - shoulders
   hiking:
     category: Cardio
     target: Cardio
@@ -18963,6 +20519,77 @@ exercises:
       secondary:
         groups:
           - core
+  ski-erg:
+    category: Cardio
+    target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: low
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Ski Erg"
+        aliases: ["ski ergometer"]
+        validated: true
+        instructions: |
+          ## Overview
+          The ski erg is a ski ergometer: a standing cardio machine where you pull two handles down from overhead in a double-pole motion, like a cross-country skier. Each stroke combines a hip hinge, a core crunch and an arm pull, so it works the lats, triceps, core and legs while staying low impact.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing the machine with your feet about hip-width apart, a short step back from the base
+          - Reach up and take one handle in each hand
+          - Stand tall with your arms extended overhead and slightly forward
+          - Keep your knees soft and your core braced
+          - Set the damper low to moderate while you learn the stroke
+
+          ### 2. Movement
+          1. Start the pull by driving the handles down with straight, firm arms
+          2. Hinge at the hips and bend the knees slightly as the handles come down
+          3. Finish with your hands passing your hips and your torso leaning forward
+          4. Let the handles rise as you extend your hips and stand back up tall
+          5. Reach the arms back overhead to set up the next stroke
+          6. Keep a smooth, steady rhythm for your target time or distance
+
+          ### 3. Breathing
+          - Exhale as you pull the handles down
+          - Inhale as you stand up and reach overhead
+
+          ### 4. Tips
+          - Power comes from the hip hinge and core, not the arms alone
+          - Keep the elbows only slightly bent during the pull
+          - Use the display's pace per 500 m to keep your effort consistent
+          - Longer, powerful strokes beat short, rushed ones
+
+          ### 5. Common Mistakes
+          - Pulling only with the arms and keeping the body upright
+          - Squatting deep instead of hinging at the hips
+          - Rounding the back at the bottom of the stroke
+          - Rushing the recovery back to the top
+          - Setting the damper too high
+
+          ### 6. Safety / Modifications
+          - Start with short intervals to learn the stroke
+          - Reduce the hinge depth if you feel strain in your lower back
+          - A seated position on a box works for people who can't stand for long
+          - Stop if you feel pain in your shoulders or back
+
+    muscles:
+      primary:
+        groups:
+          - core
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - legs
+          - shoulders
   skiing:
     category: Cardio
     target: Cardio
@@ -19028,6 +20655,73 @@ exercises:
       primary:
         groups:
           - legs
+      secondary:
+        groups:
+          - core
+  stair-machine:
+    category: Duration
+    target: Cardio
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: low
+      skill: low
+    i18n:
+      en:
+        name: "Stair Machine"
+        aliases: ["stair machine (floors)", "stair machine (steps)", "stair climber"]
+        validated: true
+        instructions: |
+          ## Overview
+          The stair machine is a cardio machine with a revolving staircase that you climb continuously. It builds leg and glute endurance with low impact, since your feet never land hard. The console usually shows floors or steps climbed; the entry logs the time you spend climbing.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Step onto the machine while it is stopped and hold the side rails
+          - Stand tall with your chest up and shoulders relaxed
+          - Place your whole foot on the step
+          - Choose a slow starting speed on the console
+          - Brace your core lightly
+
+          ### 2. Movement
+          1. Start the machine and begin climbing at the slow speed
+          2. Push through your whole foot, especially the heel, on every step
+          3. Fully straighten the leg at the top of each step without locking the knee
+          4. Increase the speed gradually once you find a comfortable rhythm
+          5. Keep climbing at a steady pace for your target time
+          6. Slow down for the last few minutes, then stop the machine before stepping off
+
+          ### 3. Breathing
+          - Breathe steadily and rhythmically throughout
+          - If you can't speak in short sentences, slow the pace down
+
+          ### 4. Tips
+          - Use the rails for balance only, not to support your body weight
+          - Stand upright instead of leaning over the console
+          - Take one step at a time; skipping steps is an advanced variation
+          - Note the floors or steps on the console if you want to track them alongside your time
+
+          ### 5. Common Mistakes
+          - Leaning heavily on the rails, which takes work away from the legs
+          - Hunching forward over the console
+          - Climbing on the toes only
+          - Starting at a speed you can't sustain
+          - Stepping off while the stairs are still moving
+
+          ### 6. Safety / Modifications
+          - Begin with short sessions of 5-10 minutes
+          - Lower the speed if you feel unsteady
+          - Use the emergency stop if you lose your footing
+          - Choose another machine if climbing aggravates knee or hip pain
+
+    muscles:
+      primary:
+        groups:
+          - legs
+          - glutes
       secondary:
         groups:
           - core

@@ -2126,6 +2126,207 @@ wall-sit-weighted:
   unilateral: false
   impact: none
   skill: low
+bird-dog:
+  groups:
+    - core_bracing
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+dead-bug:
+  groups:
+    - core_bracing
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+dragon-flag:
+  groups:
+    - core_bracing
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: high
+hollow-rock:
+  groups:
+    - core_bracing
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+l-sit-hold:
+  groups:
+    - core_bracing
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+pallof-press:
+  groups:
+    - core_bracing
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+pilates:
+  groups:
+    - mobility
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+reverse-wrist-curl-dumbbell:
+  groups:
+    - forearm
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+dead-hang:
+  groups:
+    - forearm
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+front-lever-hold:
+  groups:
+    - pullover
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+straight-arm-lat-pulldown-cable:
+  groups:
+    - pullover
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+scapular-pull-up:
+  groups:
+    - vertical_pull
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+svend-press:
+  groups:
+    - chest_fly
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+band-pull-apart:
+  groups:
+    - rear_delt
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+handstand-hold:
+  groups:
+    - vertical_press
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+clamshell:
+  groups:
+    - hip_abduction
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+lateral-band-walk:
+  groups:
+    - hip_abduction
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+sissy-squat:
+  groups:
+    - knee_extension
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+wall-sit:
+  groups:
+    - squat_bilateral
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+bear-crawl:
+  groups:
+    - full_body_conditioning
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: low
+  skill: low
+wall-ball:
+  groups:
+    - squat_bilateral
+    - vertical_press
+  axial_load: moderate
+  stability: free
+  unilateral: false
+  impact: low
+  skill: moderate
+boxing:
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: low
+  skill: moderate
+hiit:
+  groups:
+    - full_body_conditioning
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: high
+  skill: low
+ski-erg:
+  groups:
+    - cardio_steady
+  axial_load: low
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: low
+stair-machine:
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: low
+  skill: low
 aerobics:
   groups:
     - cardio_steady
