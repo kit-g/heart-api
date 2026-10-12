@@ -2323,16 +2323,16 @@ _auth AS (
   ) AS allowed
 ),
 _goals AS (
-  SELECT id, metric, exercise_id, cadence, stages, archived, created_at
+  SELECT id, metric, exercise_id, pattern, muscle, cadence, stages, archived, created_at
   FROM goals
   WHERE (SELECT allowed FROM _auth)
     AND user_id = @targetUserId::text
     AND archived = @archived::boolean
   ORDER BY created_at
 )
-SELECT id, metric, exercise_id, cadence, stages, archived, created_at, false AS forbidden FROM _goals
+SELECT id, metric, exercise_id, pattern, muscle, cadence, stages, archived, created_at, false AS forbidden FROM _goals
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
 /// A user keeps a bounded number of live goals — enough for every sensible plan,
@@ -2360,25 +2360,33 @@ const _createGoal =
     '''
 WITH
 _by_id AS (
-  SELECT id, metric, exercise_id, cadence, stages, archived, created_at
+  SELECT id, metric, exercise_id, pattern, muscle, cadence, stages, archived, created_at
   FROM goals WHERE id = @id::uuid AND user_id = @userId
 ),
 _foreign AS (
   SELECT 1 FROM goals WHERE id = @id::uuid AND user_id <> @userId
 ),
 _ins AS (
-  INSERT INTO goals (id, user_id, metric, exercise_id, cadence, stages)
-  SELECT coalesce(@id::uuid, uuidv7()), @userId, @metric::text, @exerciseId::uuid, @cadence::text, @stages::jsonb
+  INSERT INTO goals (id, user_id, metric, exercise_id, pattern, muscle, cadence, stages)
+  SELECT
+    coalesce(@id::uuid, uuidv7()),
+    @userId,
+    @metric::text,
+    @exerciseId::uuid,
+    @pattern::text,
+    @muscle::text,
+    @cadence::text,
+    @stages::jsonb
   WHERE NOT EXISTS (SELECT 1 FROM _by_id)
     AND (
       EXISTS (SELECT 1 FROM _foreign)
       OR (SELECT count(*) FROM goals WHERE user_id = @userId AND NOT archived) < $_maxActiveGoals
     )
-  RETURNING id, metric, exercise_id, cadence, stages, archived, created_at
+  RETURNING id, metric, exercise_id, pattern, muscle, cadence, stages, archived, created_at
 )
-SELECT id, metric, exercise_id, cadence, stages, archived, created_at, true AS created FROM _ins
+SELECT id, metric, exercise_id, pattern, muscle, cadence, stages, archived, created_at, true AS created FROM _ins
 UNION ALL
-SELECT id, metric, exercise_id, cadence, stages, archived, created_at, false AS created FROM _by_id
+SELECT id, metric, exercise_id, pattern, muscle, cadence, stages, archived, created_at, false AS created FROM _by_id
 WHERE NOT EXISTS (SELECT 1 FROM _ins)
 ''';
 
@@ -2386,12 +2394,14 @@ const _updateGoal = '''
 UPDATE goals
 SET metric      = @metric::text,
     exercise_id = @exerciseId::uuid,
+    pattern     = @pattern::text,
+    muscle      = @muscle::text,
     cadence     = @cadence::text,
     stages      = @stages::jsonb,
     archived    = @archived::boolean
 WHERE id = @id::uuid
   AND user_id = @userId
-RETURNING id, metric, exercise_id, cadence, stages, archived, created_at
+RETURNING id, metric, exercise_id, pattern, muscle, cadence, stages, archived, created_at
 ''';
 
 const _deleteGoal = '''
@@ -2430,7 +2440,7 @@ WHERE id = @goalId::uuid
       FROM jsonb_array_elements(stages) AS stage
       WHERE stage ->> 'id' = @stageId
   )
-RETURNING id, metric, exercise_id, cadence, stages, archived, created_at
+RETURNING id, metric, exercise_id, pattern, muscle, cadence, stages, archived, created_at
 ''';
 
 // Personal access tokens (heart-api#111).
