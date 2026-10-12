@@ -1445,7 +1445,7 @@ _sets_input AS (
   LATERAL jsonb_array_elements(ex->'sets') WITH ORDINALITY ord(s, ordinality)
 ),
 _inserted_sets AS (
-  INSERT INTO template_exercise_sets (id, template_exercise_id, weight, reps, duration, distance, set_order, set_type)
+  INSERT INTO template_exercise_sets (id, template_exercise_id, weight, reps, duration, distance, set_order, set_type, target)
   SELECT
     CASE
       WHEN (si.set_data->>'id') IS NULL
@@ -1459,10 +1459,11 @@ _inserted_sets AS (
     (si.set_data->>'duration')::int,
     (si.set_data->>'distance')::real,
     si.set_order,
-    _set_type_code(si.set_data->>'set_type')
+    _set_type_code(si.set_data->>'set_type'),
+    nullif(si.set_data->'target', 'null'::jsonb)
   FROM _sets_input si
   JOIN _inserted_exercises ie ON ie.exercise_order = si.exercise_order
-  RETURNING id, template_exercise_id, weight, reps, duration, distance, set_order, set_type
+  RETURNING id, template_exercise_id, weight, reps, duration, distance, set_order, set_type, target
 ),
 _sets_json AS (
   SELECT
@@ -1471,7 +1472,7 @@ _sets_json AS (
       jsonb_build_object(
         'id', id, 'weight', weight, 'reps', reps,
         'duration', duration, 'distance', distance, 'set_order', set_order,
-        'set_type', _set_type_name(set_type)
+        'set_type', _set_type_name(set_type), 'target', target
       ) ORDER BY set_order
     ) AS sets_json
   FROM _inserted_sets
@@ -1633,8 +1634,9 @@ _set_rows AS (
   FROM _sets_input si
   JOIN _kept_exercises ke ON ke.exercise_order = si.exercise_order
 ),
--- a set whose payload leaves set_type out (a client that doesn't know the
--- field) keeps the stored type; an explicit value, normal included, sets it
+-- a set whose payload leaves set_type or target out (a client that doesn't
+-- know the field) keeps the stored value; an explicit one, normal and null
+-- included, sets it
 _updated_sets AS (
   UPDATE template_exercise_sets tes
   SET
@@ -1644,13 +1646,14 @@ _updated_sets AS (
     duration = (sr.set_data->>'duration')::int,
     distance = (sr.set_data->>'distance')::real,
     set_order = sr.set_order,
-    set_type = CASE WHEN sr.set_data ? 'set_type' THEN _set_type_code(sr.set_data->>'set_type') ELSE tes.set_type END
+    set_type = CASE WHEN sr.set_data ? 'set_type' THEN _set_type_code(sr.set_data->>'set_type') ELSE tes.set_type END,
+    target = CASE WHEN sr.set_data ? 'target' THEN nullif(sr.set_data->'target', 'null'::jsonb) ELSE tes.target END
   FROM _set_rows sr
   WHERE tes.id = sr.id AND tes.id IN (SELECT id FROM _previous_sets)
-  RETURNING tes.id, tes.template_exercise_id, tes.weight, tes.reps, tes.duration, tes.distance, tes.set_order, tes.set_type
+  RETURNING tes.id, tes.template_exercise_id, tes.weight, tes.reps, tes.duration, tes.distance, tes.set_order, tes.set_type, tes.target
 ),
 _inserted_sets AS (
-  INSERT INTO template_exercise_sets (id, template_exercise_id, weight, reps, duration, distance, set_order, set_type)
+  INSERT INTO template_exercise_sets (id, template_exercise_id, weight, reps, duration, distance, set_order, set_type, target)
   SELECT
     CASE
       WHEN sr.id IS NULL OR EXISTS (SELECT 1 FROM template_exercise_sets x WHERE x.id = sr.id) THEN uuidv7()
@@ -1662,10 +1665,11 @@ _inserted_sets AS (
     (sr.set_data->>'duration')::int,
     (sr.set_data->>'distance')::real,
     sr.set_order,
-    _set_type_code(sr.set_data->>'set_type')
+    _set_type_code(sr.set_data->>'set_type'),
+    nullif(sr.set_data->'target', 'null'::jsonb)
   FROM _set_rows sr
   WHERE sr.id IS NULL OR sr.id NOT IN (SELECT id FROM _previous_sets)
-  RETURNING id, template_exercise_id, weight, reps, duration, distance, set_order, set_type
+  RETURNING id, template_exercise_id, weight, reps, duration, distance, set_order, set_type, target
 ),
 -- every stored set the body no longer names, whether its exercise stays or goes
 _deleted_sets AS (
@@ -1686,7 +1690,7 @@ _sets_json AS (
       jsonb_build_object(
         'id', id, 'weight', weight, 'reps', reps,
         'duration', duration, 'distance', distance, 'set_order', set_order,
-        'set_type', _set_type_name(set_type)
+        'set_type', _set_type_name(set_type), 'target', target
       ) ORDER BY set_order
     ) AS sets_json
   FROM _written_sets
@@ -1918,8 +1922,8 @@ _new_exercises AS (
   RETURNING id, template_id, exercise_order
 ),
 _new_sets AS (
-  INSERT INTO template_exercise_sets (template_exercise_id, weight, reps, duration, distance, set_order, set_type)
-  SELECT ne.id, tes.weight, tes.reps, tes.duration, tes.distance, tes.set_order, tes.set_type
+  INSERT INTO template_exercise_sets (template_exercise_id, weight, reps, duration, distance, set_order, set_type, target)
+  SELECT ne.id, tes.weight, tes.reps, tes.duration, tes.distance, tes.set_order, tes.set_type, tes.target
   FROM _new_exercises ne
   JOIN _new_template nt ON nt.id = ne.template_id
   JOIN _resolved_exercises re

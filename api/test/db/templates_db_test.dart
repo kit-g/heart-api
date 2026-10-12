@@ -705,6 +705,112 @@ void main() {
       expect(setsOf(copy, 0).map((s) => s.id), isNot(anyElement(isIn(setsOf(master, 0).map((s) => s.id)))));
     });
   });
+
+  group('targets round-trip (heart-api#195)', () {
+    late String exerciseId;
+
+    setUpAll(() async {
+      exerciseId = await h.seedGlobalExercise();
+    });
+
+    final range = SetTarget({.reps: const TargetRange(min: 6, max: 10)});
+    final open = SetTarget({.reps: const TargetRange(min: 8)});
+
+    TemplateRequest withTarget(String setId, SetTarget? target, {String? templateExerciseId}) => TemplateRequest(
+      userId: coachId,
+      name: 'Targeted',
+      exercises: [
+        TemplateExerciseRequest(
+          id: templateExerciseId,
+          exerciseId: exerciseId,
+          order: 0,
+          sets: [TemplateSetRequest(id: setId, weight: 60, reps: 8, target: target)],
+        ),
+      ],
+    );
+
+    Future<Object?> stored(String setId) async => (await h.exec(
+      'SELECT target FROM template_exercise_sets WHERE id = @id::uuid',
+      {'id': setId},
+    )).single.toColumnMap()['target'];
+
+    test('a create stores the target and every read carries it', () async {
+      final setId = uuidV7();
+      final created = await h.db.createTemplate(userId: coachId, body: withTarget(setId, range));
+      expect(created.first.single.target?[.reps], const TargetRange(min: 6, max: 10));
+
+      final read = await h.db.getTemplate(userId: coachId, templateId: created.id);
+      expect(read.first.single.target?[.reps], const TargetRange(min: 6, max: 10));
+      expect(read.first.single.toMap()['target'], {
+        'reps': {'min': 6, 'max': 10},
+      });
+    });
+
+    test('a set without a target stores NULL and reads null', () async {
+      final setId = uuidV7();
+      final created = await h.db.createTemplate(userId: coachId, body: withTarget(setId, SetTarget.none));
+      expect(await stored(setId), isNull);
+      expect(created.first.single.target, isNull);
+      expect(created.first.single.toMap(), containsPair('target', null));
+    });
+
+    test('a replace without the key keeps the target; none clears it; a value replaces it', () async {
+      final setId = uuidV7();
+      final teId = uuidV7();
+      final created = await h.db.createTemplate(
+        userId: coachId,
+        body: withTarget(setId, range, templateExerciseId: teId),
+      );
+
+      // a build that predates targets saves the template
+      final kept = await h.db.updateTemplate(
+        userId: coachId,
+        templateId: created.id,
+        body: withTarget(setId, null, templateExerciseId: teId),
+      );
+      expect(kept.first.single.target?[.reps], const TargetRange(min: 6, max: 10));
+
+      final replaced = await h.db.updateTemplate(
+        userId: coachId,
+        templateId: created.id,
+        body: withTarget(setId, open, templateExerciseId: teId),
+      );
+      expect(replaced.first.single.target?[.reps], const TargetRange(min: 8));
+
+      final cleared = await h.db.updateTemplate(
+        userId: coachId,
+        templateId: created.id,
+        body: withTarget(setId, SetTarget.none, templateExerciseId: teId),
+      );
+      expect(cleared.first.single.target, isNull);
+      expect(await stored(setId), isNull);
+    });
+
+    test('a target this server version would not write still round-trips', () async {
+      final setId = uuidV7();
+      final created = await h.db.createTemplate(
+        userId: coachId,
+        body: withTarget(
+          setId,
+          SetTarget.fromJson(const {
+            'weight': {'share': 0.8},
+          }),
+        ),
+      );
+      expect(created.first.single.toMap()['target'], {
+        'weight': {'share': 0.8},
+      });
+    });
+
+    test('an assigned copy carries the master\'s targets', () async {
+      final master = await h.db.createTemplate(userId: coachId, body: withTarget(uuidV7(), range));
+
+      final share = await h.db.shareTemplate(coachId: coachId, targetUserId: studentId, masterTemplateId: master.id);
+      final copy = await h.db.getTemplate(userId: studentId, templateId: share.studentTemplateId);
+
+      expect(copy.first.single.target?[.reps], const TargetRange(min: 6, max: 10));
+    });
+  });
 }
 
 class _Harness extends DatabaseTestBase;
