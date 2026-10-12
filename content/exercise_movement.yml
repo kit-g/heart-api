@@ -2463,3 +2463,188 @@ yoga:
   unilateral: false
   impact: none
   skill: low
+russian-twist-weighted:
+  groups:
+    - trunk_lateral_rotation
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+triceps-kickback-dumbbell:
+  groups:
+    - elbow_extension
+  axial_load: none
+  stability: supported
+  unilateral: true
+  impact: none
+  skill: low
+meadows-row-barbell:
+  groups:
+    - horizontal_row
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: none
+  skill: moderate
+chest-supported-t-bar-row:
+  groups:
+    - horizontal_row
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+reverse-hyperextension:
+  groups:
+    - spinal_extension
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+pike-push-up:
+  groups:
+    - vertical_press
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+decline-push-up:
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+incline-push-up:
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+ring-dip:
+  groups:
+    - chest_dip
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: high
+belt-squat-machine:
+  groups:
+    - squat_bilateral
+  axial_load: low
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+pendulum-squat-machine:
+  groups:
+    - squat_bilateral
+  axial_load: moderate
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+hip-thrust-machine:
+  groups:
+    - hip_extension_bridge
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
+split-squat-dumbbell:
+  groups:
+    - lunge_split
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+lateral-lunge:
+  groups:
+    - lunge_split
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low
+nordic-hamstring-curl:
+  groups:
+    - knee_flexion
+  axial_load: none
+  stability: supported
+  unilateral: false
+  impact: none
+  skill: high
+glute-bridge:
+  groups:
+    - hip_extension_bridge
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+glute-bridge-barbell:
+  groups:
+    - hip_extension_bridge
+  axial_load: low
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+walking-lunge-weighted:
+  groups:
+    - lunge_split
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: low
+  skill: low
+snatch-kettlebell:
+  groups:
+    - olympic_lift
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: none
+  skill: high
+clean-kettlebell:
+  groups:
+    - olympic_lift
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: none
+  skill: moderate
+snatch-dumbbell:
+  groups:
+    - olympic_lift
+  axial_load: moderate
+  stability: free
+  unilateral: true
+  impact: none
+  skill: moderate
+clean-and-press-barbell:
+  groups:
+    - olympic_lift
+    - vertical_press
+  axial_load: high
+  stability: free
+  unilateral: false
+  impact: none
+  skill: moderate
+air-bike:
+  groups:
+    - cardio_steady
+  axial_load: none
+  stability: machine
+  unilateral: false
+  impact: none
+  skill: low
