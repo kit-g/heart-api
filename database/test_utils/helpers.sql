@@ -185,7 +185,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION validate_format_template_set(_set JSONB) RETURNS SETOF BOOL AS
 $$
 BEGIN
-    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_set)) = 7;
+    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_set)) = 8;
     RETURN NEXT jsonb_typeof(_set -> 'id') = 'string';
     RETURN NEXT jsonb_typeof(_set -> 'weight') = 'number' OR jsonb_typeof(_set -> 'weight') = 'null';
     RETURN NEXT jsonb_typeof(_set -> 'reps') = 'number' OR jsonb_typeof(_set -> 'reps') = 'null';
@@ -193,6 +193,7 @@ BEGIN
     RETURN NEXT jsonb_typeof(_set -> 'distance') = 'number' OR jsonb_typeof(_set -> 'distance') = 'null';
     RETURN NEXT jsonb_typeof(_set -> 'set_order') = 'number';
     RETURN NEXT jsonb_typeof(_set -> 'set_type') = 'string';
+    RETURN NEXT jsonb_typeof(_set -> 'target') = 'object' OR jsonb_typeof(_set -> 'target') = 'null';
 END
 $$ LANGUAGE plpgsql;
 

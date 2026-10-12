@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(27);
+SELECT plan(31);
 
 SELECT has_table('public'::name, 'template_exercise_sets'::name);
 
@@ -15,7 +15,8 @@ SELECT columns_are(
                    'duration',
                    'distance',
                    'set_order',
-                   'set_type'
+                   'set_type',
+                   'target'
                    ]
        );
 
@@ -27,6 +28,7 @@ SELECT col_type_is('public'::name, 'template_exercise_sets'::name, 'duration'::n
 SELECT col_type_is('public'::name, 'template_exercise_sets'::name, 'distance'::name, 'real'::name);
 SELECT col_type_is('public'::name, 'template_exercise_sets'::name, 'set_order'::name, 'integer'::name);
 SELECT col_type_is('public'::name, 'template_exercise_sets'::name, 'set_type'::name, 'character(1)'::name);
+SELECT col_type_is('public'::name, 'template_exercise_sets'::name, 'target'::name, 'jsonb'::name);
 
 SELECT has_pk('public'::name, 'template_exercise_sets'::name, 'template_exercise_sets has a primary key');
 SELECT col_is_pk('public'::name, 'template_exercise_sets'::name, 'id'::name, 'id is the primary key');
@@ -163,6 +165,43 @@ SELECT throws_ok(
                '22001',
                NULL,
                'the word does not fit: the column holds the letter'
+       );
+
+SELECT lives_ok(
+               $$
+               INSERT INTO template_exercise_sets (template_exercise_id, set_order, target)
+               VALUES (
+                   (SELECT te.id FROM template_exercises te JOIN templates t ON t.id = te.template_id WHERE t.name = 'tes check template'),
+                   1, '{"reps": {"min": 6, "max": 10}}'
+               )
+               $$,
+               'a target is an object naming a measure'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO template_exercise_sets (template_exercise_id, set_order, target)
+               VALUES (
+                   (SELECT te.id FROM template_exercises te JOIN templates t ON t.id = te.template_id WHERE t.name = 'tes check template'),
+                   1, '{}'
+               )
+               $$,
+               '23514',
+               NULL,
+               'no target is NULL, never an empty object'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO template_exercise_sets (template_exercise_id, set_order, target)
+               VALUES (
+                   (SELECT te.id FROM template_exercises te JOIN templates t ON t.id = te.template_id WHERE t.name = 'tes check template'),
+                   1, '[6, 10]'
+               )
+               $$,
+               '23514',
+               NULL,
+               'a target that is not an object is rejected'
        );
 
 SELECT * FROM finish();
