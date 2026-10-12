@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.18.0
+
+Goals about a movement pattern or a muscle (heart-api#196).
+
+- New: `GoalMetric.sessions` (workouts that trained the subject) and
+  `GoalMetric.sets` (working sets on it, fractional for a muscle), with
+  `GoalMetric.countsSubject`. Neither has a `chart`. Exhaustive switches over
+  `GoalMetric` gain these two cases.
+- New: `Goal.pattern` (a library pattern key) and `Goal.muscle` (a muscle id
+  prefix or group), on the wire and the row as `pattern` / `muscle`, in the
+  factory, `copyWith`, `toMap` and `toBody`; left out when null.
+- New: `Goal.subject`, a sealed `GoalSubject`: `ExerciseSubject`,
+  `PatternSubject` or `MuscleSubject`.
+
 ## 2.17.0
 
 How much of a set each muscle receives (heart-api#197).

@@ -3,10 +3,14 @@ import 'dart:convert';
 import 'charts.dart';
 import 'misc.dart';
 
-/// What a [Goal] measures. Every value except [workouts] mirrors a
-/// [ChartPreferenceType] — same string, same underlying query — so the app routes
-/// a goal to the metric query it already has. [workouts] is the frequency metric
-/// and is served by `StatsService.getWeeklyWorkoutCount`.
+/// What a [Goal] measures. Every value except [workouts], [sessions] and [sets]
+/// mirrors a [ChartPreferenceType] — same string, same underlying query — so the
+/// app routes a goal to the metric query it already has. [workouts] is the
+/// frequency metric and is served by `StatsService.getWeeklyWorkoutCount`.
+///
+/// [sessions] and [sets] count what trained one subject — an exercise, a
+/// movement pattern or a muscle ([Goal.subject]): "press twice a week", "12
+/// sets of pull a week".
 enum GoalMetric {
   workouts('workouts'),
   topSetWeight('topSetWeight'),
@@ -20,6 +24,13 @@ enum GoalMetric {
   cardioDuration('cardioDuration'),
   averagePace('averagePace'),
   totalTimeUnderTension('totalTimeUnderTension'),
+
+  /// Workouts that trained the goal's subject.
+  sessions('sessions'),
+
+  /// Working sets on the goal's subject. A muscle receives each set at its
+  /// share ([MuscleTagging.shareOf]), so the count may be fractional.
+  sets('sets'),
   ;
 
   final String value;
@@ -40,22 +51,32 @@ enum GoalMetric {
       'cardioDuration' => cardioDuration,
       'averagePace' => averagePace,
       'totalTimeUnderTension' => totalTimeUnderTension,
+      'sessions' => sessions,
+      'sets' => sets,
       _ => throw ArgumentError.value(v, 'metric', 'unknown goal metric'),
     };
   }
 
   /// [workouts] counts whole workouts, so it carries no exercise. Every other
-  /// metric is per-exercise. The DB enforces the same rule (`goals_scope_check`).
+  /// metric is per-exercise or, for [countsSubject], per subject. The DB
+  /// enforces the same rule (`goals_scope_check`).
   bool get isWholeWorkout => this == workouts;
+
+  /// [sessions] and [sets] are about exactly one subject: an exercise, a
+  /// pattern or a muscle. Every other metric but [workouts] takes an exercise.
+  bool get countsSubject => this == sessions || this == sets;
 
   /// Pace is the one metric where progress means going *down*, so a ladder of
   /// pace targets descends and a stage is met at `value <= target`.
   bool get lowerIsBetter => this == averagePace;
 
-  /// The chart metric this goal is measured by — `null` only for [workouts],
-  /// which has no per-exercise chart.
+  /// The chart metric this goal is measured by — `null` for [workouts],
+  /// [sessions] and [sets], which have no per-exercise chart.
   ChartPreferenceType? get chart {
-    return isWholeWorkout ? null : ChartPreferenceType.fromString(value);
+    return switch (this) {
+      workouts || sessions || sets => null,
+      _ => ChartPreferenceType.fromString(value),
+    };
   }
 }
 
@@ -219,6 +240,20 @@ abstract interface class Goal implements Model {
 
   String? get exerciseId;
 
+  /// A movement pattern key from the exercise library (`horizontal_press`), for
+  /// a [GoalMetric.countsSubject] goal about a pattern. Keys are content: the
+  /// library can add one without a release.
+  String? get pattern;
+
+  /// A muscle id prefix (`triceps_brachii`) or a muscle group (`chest`), for a
+  /// [GoalMetric.countsSubject] goal about a muscle, matched as
+  /// [MuscleTagging.shareOf] matches it.
+  String? get muscle;
+
+  /// What a [GoalMetric.countsSubject] goal is about: whichever of
+  /// [exerciseId], [pattern] and [muscle] it names.
+  GoalSubject? get subject;
+
   GoalCadence? get cadence;
 
   List<GoalStage> get stages;
@@ -238,6 +273,8 @@ abstract interface class Goal implements Model {
     String? id,
     required GoalMetric metric,
     String? exerciseId,
+    String? pattern,
+    String? muscle,
     GoalCadence? cadence,
     required List<GoalStage> stages,
     bool archived,
@@ -250,6 +287,8 @@ abstract interface class Goal implements Model {
       id: json['id'] as String?,
       metric: GoalMetric.fromString(json['metric'] as String),
       exerciseId: json['exerciseId'] as String?,
+      pattern: json['pattern'] as String?,
+      muscle: json['muscle'] as String?,
       cadence: switch (json['cadence']) {
         null => null,
         final String c => GoalCadence.fromString(c),
@@ -273,6 +312,8 @@ abstract interface class Goal implements Model {
       id: row['id']?.toString(),
       metric: GoalMetric.fromString(row['metric'] as String),
       exerciseId: row['exercise_id']?.toString(),
+      pattern: row['pattern'] as String?,
+      muscle: row['muscle'] as String?,
       cadence: switch (row['cadence']) {
         null => null,
         final String c => GoalCadence.fromString(c),
@@ -329,6 +370,8 @@ abstract interface class Goal implements Model {
     String? id,
     GoalMetric? metric,
     String? exerciseId,
+    String? pattern,
+    String? muscle,
     GoalCadence? cadence,
     List<GoalStage>? stages,
     bool? archived,
@@ -353,6 +396,10 @@ class _Goal implements Goal {
   @override
   final String? exerciseId;
   @override
+  final String? pattern;
+  @override
+  final String? muscle;
+  @override
   final GoalCadence? cadence;
   @override
   final List<GoalStage> stages;
@@ -365,11 +412,23 @@ class _Goal implements Goal {
     this.id,
     required this.metric,
     this.exerciseId,
+    this.pattern,
+    this.muscle,
     this.cadence,
     required this.stages,
     this.archived = false,
     this.createdAt,
   });
+
+  @override
+  GoalSubject? get subject {
+    return switch ((exerciseId, pattern, muscle)) {
+      (final String id, null, null) => .exercise(id),
+      (null, final String key, null) => .pattern(key),
+      (null, null, final String key) => .muscle(key),
+      _ => null,
+    };
+  }
 
   @override
   bool get isComplete => cadence == null && stages.every((stage) => stage.isAchieved);
@@ -387,6 +446,8 @@ class _Goal implements Goal {
     String? id,
     GoalMetric? metric,
     String? exerciseId,
+    String? pattern,
+    String? muscle,
     GoalCadence? cadence,
     List<GoalStage>? stages,
     bool? archived,
@@ -395,6 +456,8 @@ class _Goal implements Goal {
       id: id ?? this.id,
       metric: metric ?? this.metric,
       exerciseId: exerciseId ?? this.exerciseId,
+      pattern: pattern ?? this.pattern,
+      muscle: muscle ?? this.muscle,
       cadence: cadence ?? this.cadence,
       stages: stages ?? this.stages,
       archived: archived ?? this.archived,
@@ -408,6 +471,8 @@ class _Goal implements Goal {
       'id': ?id,
       'metric': metric.value,
       'exerciseId': ?exerciseId,
+      'pattern': ?pattern,
+      'muscle': ?muscle,
       'cadence': ?cadence?.value,
       'stages': stages.map((stage) => stage.toMap()).toList(),
       'archived': archived,
@@ -420,9 +485,59 @@ class _Goal implements Goal {
     return {
       'metric': metric.value,
       'exerciseId': ?exerciseId,
+      'pattern': ?pattern,
+      'muscle': ?muscle,
       'cadence': ?cadence?.value,
       'archived': archived,
       'stages': stages.map((stage) => stage.toMap()).toList(),
     };
   }
+}
+
+/// What a [GoalMetric.countsSubject] goal is about: one exercise, one movement
+/// pattern, or one muscle.
+sealed class GoalSubject {
+  const new();
+
+  const factory exercise(String id) = ExerciseSubject;
+
+  const factory pattern(String key) = PatternSubject;
+
+  const factory muscle(String key) = MuscleSubject;
+}
+
+final class ExerciseSubject extends GoalSubject {
+  final String id;
+
+  const new(this.id);
+
+  @override
+  bool operator ==(Object other) => other is ExerciseSubject && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
+final class PatternSubject extends GoalSubject {
+  final String key;
+
+  const new(this.key);
+
+  @override
+  bool operator ==(Object other) => other is PatternSubject && other.key == key;
+
+  @override
+  int get hashCode => Object.hash(PatternSubject, key);
+}
+
+final class MuscleSubject extends GoalSubject {
+  final String key;
+
+  const new(this.key);
+
+  @override
+  bool operator ==(Object other) => other is MuscleSubject && other.key == key;
+
+  @override
+  int get hashCode => Object.hash(MuscleSubject, key);
 }

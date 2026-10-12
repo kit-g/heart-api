@@ -42,11 +42,13 @@ void main() {
   });
 
   group('GoalMetric', () {
-    test('every metric but workouts maps onto a chart metric', () {
+    test('every metric but workouts and the subject counts maps onto a chart metric', () {
       for (final metric in GoalMetric.values) {
         if (metric == GoalMetric.workouts) {
           expect(metric.chart, isNull);
           expect(metric.isWholeWorkout, isTrue);
+        } else if (metric.countsSubject) {
+          expect(metric.chart, isNull);
         } else {
           expect(metric.chart, isNotNull, reason: '${metric.value} should have a chart query');
           expect(metric.chart!.value, metric.value);
@@ -219,6 +221,77 @@ void main() {
       );
 
       expect(identical(Goal.inDeadlineOrder(goal), goal), isTrue);
+    });
+  });
+  group('goals about a subject (heart-api#196)', () {
+    test('sessions and sets are subject counts with no chart', () {
+      for (final metric in [GoalMetric.sessions, GoalMetric.sets]) {
+        expect(GoalMetric.fromString(metric.value), metric);
+        expect(metric.countsSubject, isTrue);
+        expect(metric.isWholeWorkout, isFalse);
+        expect(metric.chart, isNull);
+      }
+      expect(GoalMetric.workouts.countsSubject, isFalse);
+      expect(GoalMetric.topSetWeight.countsSubject, isFalse);
+      expect(GoalMetric.topSetWeight.chart, ChartPreferenceType.topSetWeight);
+    });
+
+    test('a pattern or muscle goal round-trips through the wire and the row', () {
+      final press = Goal.fromJson(const {
+        'id': 'g1',
+        'metric': 'sessions',
+        'pattern': 'horizontal_press',
+        'cadence': 'week',
+        'stages': [
+          {'id': 's1', 'target': 2},
+        ],
+      });
+      expect(press.pattern, 'horizontal_press');
+      expect(press.subject, const GoalSubject.pattern('horizontal_press'));
+      expect(press.toMap(), containsPair('pattern', 'horizontal_press'));
+      expect(press.toBody(), containsPair('pattern', 'horizontal_press'));
+      expect(press.toMap().containsKey('muscle'), isFalse);
+
+      final pull = Goal.fromRow({
+        'id': 'g2',
+        'metric': 'sets',
+        'muscle': 'latissimus_dorsi',
+        'cadence': 'week',
+        'stages': [
+          {'id': 's1', 'target': 12},
+        ],
+      });
+      expect(pull.subject, const GoalSubject.muscle('latissimus_dorsi'));
+      expect(pull.toBody(), containsPair('muscle', 'latissimus_dorsi'));
+    });
+
+    test('an exercise goal names its exercise as the subject; a workouts goal has none', () {
+      final bench = Goal(metric: .sets, exerciseId: 'e1', stages: [GoalStage(target: 10)]);
+      expect(bench.subject, const GoalSubject.exercise('e1'));
+      expect(Goal(metric: .workouts, stages: [GoalStage(target: 3)]).subject, isNull);
+    });
+
+    test('a build that predates these metrics sets the goal aside, as readEach does', () {
+      final goals = readEach(
+        [
+          {
+            'metric': 'workouts',
+            'stages': [
+              {'target': 3},
+            ],
+          },
+          {
+            'metric': 'futureMetric',
+            'pattern': 'hip_hinge',
+            'stages': [
+              {'target': 2},
+            ],
+          },
+        ],
+        Goal.fromJson,
+      );
+      expect(goals.items.single.metric, GoalMetric.workouts);
+      expect(goals.unread.single['pattern'], 'hip_hinge');
     });
   });
 }
