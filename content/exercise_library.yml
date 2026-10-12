@@ -132,6 +132,7 @@ exercises:
     i18n:
       en:
         name: "Bicycle Crunch"
+        aliases: ["bicycle crunch raised legs"]
         validated: true
         instructions: |
           ## Overview
@@ -1596,7 +1597,7 @@ exercises:
     i18n:
       en:
         name: "Flutter Kick"
-        aliases: ["flutter kicks"]
+        aliases: ["flutter kicks", "ab scissors"]
         validated: true
         instructions: |
           ## Overview
@@ -1733,6 +1734,7 @@ exercises:
     i18n:
       en:
         name: "Side Bend (Band)"
+        aliases: ["side bend"]
         validated: true
         instructions: |
           ## Overview
@@ -2427,6 +2429,7 @@ exercises:
     i18n:
       en:
         name: "Bicep Curl (Barbell)"
+        aliases: ["ez bar biceps curl"]
         validated: true
         instructions: |
           ## Overview
@@ -2569,6 +2572,7 @@ exercises:
     i18n:
       en:
         name: "Bicep Curl (Dumbbell)"
+        aliases: ["kettlebell curl"]
         validated: true
         instructions: |
           ## Overview
@@ -3058,6 +3062,7 @@ exercises:
     i18n:
       en:
         name: "Hammer Curl (Dumbbell)"
+        aliases: ["cross body hammer curl", "pinwheel curl (dumbbell)"]
         validated: true
         instructions: |
           ## Overview
@@ -4379,6 +4384,7 @@ exercises:
     i18n:
       en:
         name: "Triceps Extension (Dumbbell)"
+        aliases: ["seated triceps press"]
         instructions: |
           ## Overview
           The dumbbell triceps extension is an isolation exercise that primarily targets all three heads of the triceps. It also engages the shoulders and core as stabilizers, using an overhead dumbbell position to allow natural arm movement and maximize triceps stretch.
@@ -4516,8 +4522,8 @@ exercises:
       skill: low
     i18n:
       en:
-        name: "Triceps Pushdown (Cable - Straight Bar)"
-        aliases: ["triceps pushdown"]
+        name: "Triceps Pushdown (Cable)"
+        aliases: ["triceps pushdown", "triceps pushdown (cable - straight bar)", "triceps rope pushdown", "triceps pressdown"]
         instructions: |
           ## Overview
           The cable triceps pushdown is an isolation exercise that primarily targets all three heads of the triceps with constant tension. It also engages the shoulders minimally as stabilizers, using a high cable pulley with a straight bar for consistent resistance throughout the movement.
@@ -5492,7 +5498,7 @@ exercises:
     i18n:
       en:
         name: "Incline Row (Dumbbell)"
-        aliases: ["chest supported incline row (dumbbell)"]
+        aliases: ["chest supported incline row (dumbbell)", "seal row (dumbbell)"]
         instructions: |
           ## Overview
           The incline dumbbell row is a chest-supported pulling exercise that primarily targets the latissimus dorsi, rhomboids, and middle trapezius. It also engages the biceps and rear deltoids, using an incline bench to eliminate lower back strain while allowing you to focus purely on back muscle contraction.
@@ -5835,6 +5841,7 @@ exercises:
     i18n:
       en:
         name: "Kneeling Pulldown (Band)"
+        aliases: ["lat pulldown (band)"]
         instructions: |
           ## Overview
           The kneeling band pulldown is a resistance-based pulling exercise that primarily targets the latissimus dorsi. It also engages the rhomboids, middle trapezius, and biceps, using a kneeling position with bands to provide progressive resistance throughout the pulling motion.
@@ -6444,7 +6451,7 @@ exercises:
     i18n:
       en:
         name: "Pull Up"
-        aliases: ["pullup", "pull up (weighted)"]
+        aliases: ["pullup", "pull up (weighted)", "ring pull up"]
         instructions: |
           ## Overview
           The pull up is a bodyweight pulling exercise that primarily targets the latissimus dorsi. It also engages the rhomboids, middle trapezius, biceps, and core, making it one of the most effective upper body exercises for building back width and pulling strength.
@@ -7910,7 +7917,7 @@ exercises:
     i18n:
       en:
         name: "Cable Crossover"
-        aliases: ["cable fly", "cable fly crossovers"]
+        aliases: ["cable fly", "cable fly crossovers", "seated chest flys (cable)", "low cable fly crossovers", "single arm cable crossover"]
         instructions: |
           ## Overview
           The cable crossover is an isolation exercise that primarily targets the pectoralis major, particularly the inner chest. It also engages the front deltoids as stabilizers, using cables to provide constant tension throughout a wide arc of motion.
@@ -8263,6 +8270,7 @@ exercises:
     i18n:
       en:
         name: "Chest Fly (Dumbbell)"
+        aliases: ["decline chest fly (dumbbell)"]
         instructions: |
           ## Overview
           The dumbbell chest fly is an isolation exercise that primarily targets the pectoralis major. It also engages the front deltoids as stabilizers, using dumbbells to create a wide arc of motion that stretches and contracts the chest muscles.
@@ -9834,7 +9842,7 @@ exercises:
     i18n:
       en:
         name: "Bulgarian Split Squat"
-        aliases: ["bss", "rfess", "rear foot elevated split squat", "bulgarian split squat (barbell)"]
+        aliases: ["bss", "rfess", "rear foot elevated split squat", "bulgarian split squat (barbell)", "bulgarian split squat (dumbbell)"]
         instructions: |
           ## Overview
           The Bulgarian split squat is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and hip stabilizers, using an elevated rear foot position to increase range of motion and challenge balance while building single-leg strength.
@@ -10585,7 +10593,7 @@ exercises:
     i18n:
       en:
         name: "Goblet Squat (Kettlebell)"
-        aliases: ["goblet squat", "kettlebell goblet squat"]
+        aliases: ["goblet squat", "kettlebell goblet squat", "sumo squat (kettlebell)"]
         instructions: |
           ## Overview
           The goblet squat is a compound lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and upper back, using a front-loaded kettlebell or dumbbell position to promote proper squat mechanics and upright torso positioning.
@@ -10792,6 +10800,7 @@ exercises:
     i18n:
       en:
         name: "High Knee Skips"
+        aliases: ["high knees"]
         instructions: |
           ## Overview
           High knee skips are a plyometric cardio exercise that primarily targets the hip flexors, quadriceps, and calves. They also engage the core and improve coordination, using explosive skipping movements to build lower body power and cardiovascular endurance.
@@ -11320,6 +11329,7 @@ exercises:
     i18n:
       en:
         name: "Jump Squat"
+        aliases: ["frog jumps"]
         instructions: |
           ## Overview
           The jump squat is a plyometric exercise that primarily targets the quadriceps, glutes, and calves. It also engages the hamstrings and core, using explosive jumping from a squat position to build lower body power and cardiovascular endurance.
@@ -11661,7 +11671,7 @@ exercises:
     i18n:
       en:
         name: "Lunge (Bodyweight)"
-        aliases: ["lunge"]
+        aliases: ["lunge", "walking lunge"]
         instructions: |
           ## Overview
           The bodyweight lunge is a unilateral lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and stabilizer muscles, using body weight alone to build foundational single-leg strength, balance, and coordination.
@@ -11928,6 +11938,7 @@ exercises:
     i18n:
       en:
         name: "Mountain Climber"
+        aliases: ["spiderman"]
         instructions: |
           ## Overview
           The mountain climber is a dynamic full-body exercise that primarily targets the core, hip flexors, and shoulders. It also engages the quadriceps and cardiovascular system, using a running motion from a plank position to build endurance, coordination, and core stability.
@@ -12527,7 +12538,7 @@ exercises:
     i18n:
       en:
         name: "Squat (Barbell)"
-        aliases: ["back squat"]
+        aliases: ["back squat", "full squat", "sumo squat (barbell)"]
         instructions: |
           ## Overview
           The barbell squat is a compound lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core, lower back, and upper back, making it one of the most effective full-body strength exercises for building overall lower body power.
@@ -12597,6 +12608,7 @@ exercises:
     i18n:
       en:
         name: "Squat (Bodyweight)"
+        aliases: ["sumo squat"]
         instructions: |
           ## Overview
           The bodyweight squat is a fundamental compound exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and lower back, using body weight alone to build foundational lower body strength, mobility, and movement patterns.
@@ -12664,6 +12676,7 @@ exercises:
     i18n:
       en:
         name: "Squat (Dumbbell)"
+        aliases: ["sumo squat (dumbbell)"]
         instructions: |
           ## Overview
           The dumbbell squat is a compound lower body exercise that primarily targets the quadriceps, glutes, and hamstrings. It also engages the core and stabilizers, using dumbbells held at the sides or shoulders to add resistance while maintaining better balance than barbell variations.
@@ -14400,7 +14413,7 @@ exercises:
     i18n:
       en:
         name: "Front Raise (Plate)"
-        aliases: ["plate front raise"]
+        aliases: ["plate front raise", "overhead plate raise"]
         instructions: |
           ## Overview
           The plate front raise is an isolation exercise that primarily targets the front deltoids. It also engages the upper chest and core, using a weight plate held with both hands to provide stable resistance for shoulder strength and definition.
@@ -14660,7 +14673,7 @@ exercises:
     i18n:
       en:
         name: "Lateral Raise (Dumbbell)"
-        aliases: ["side raise"]
+        aliases: ["side raise", "seated lateral raise (dumbbell)"]
         instructions: |
           ## Overview
           The dumbbell lateral raise is an isolation exercise that primarily targets the middle deltoids. It also engages the upper trapezius, using dumbbells for independent arm movement to build shoulder width and create the appearance of broader shoulders.
@@ -14943,7 +14956,7 @@ exercises:
     i18n:
       en:
         name: "Overhead Press (Dumbbell)"
-        aliases: ["ohp", "shoulder press", "shoulder press (dumbbell)"]
+        aliases: ["ohp", "shoulder press", "shoulder press (dumbbell)", "kettlebell shoulder press"]
         instructions: |
           ## Overview
           The dumbbell overhead press is a compound upper body exercise that primarily targets all three heads of the deltoids. It also engages the triceps and upper chest, using dumbbells for independent arm movement and a greater range of motion than barbell variations.
@@ -15167,7 +15180,7 @@ exercises:
     i18n:
       en:
         name: "Reverse Fly (Cable)"
-        aliases: ["rear delt fly", "rear delt reverse fly (cable)"]
+        aliases: ["rear delt fly", "rear delt reverse fly (cable)", "reverse fly single arm (cable)"]
         instructions: |
           ## Overview
           The cable reverse fly is an isolation exercise that primarily targets the rear deltoids and upper back. It also engages the rhomboids and middle trapezius, using cables to provide constant tension for improved shoulder balance, posture, and rear delt development.
@@ -15235,7 +15248,7 @@ exercises:
     i18n:
       en:
         name: "Reverse Fly (Dumbbell)"
-        aliases: ["rear delt fly", "rear delt reverse fly (dumbbell)"]
+        aliases: ["rear delt fly", "rear delt reverse fly (dumbbell)", "chest supported reverse fly (dumbbell)"]
         instructions: |
           ## Overview
           The dumbbell reverse fly is an isolation exercise that primarily targets the rear deltoids and upper back. It also engages the rhomboids and middle trapezius, using dumbbells with a bent-over position to build rear shoulder strength, improve posture, and balance shoulder development.
@@ -17404,6 +17417,7 @@ exercises:
     i18n:
       en:
         name: "Squat Row (Band)"
+        aliases: ["squat row"]
         instructions: |
           ## Overview
           The band squat row is a compound full-body exercise that combines a squat with a rowing motion. It primarily targets the legs, back, and core, using a resistance band to coordinate lower and upper body movement while building strength and coordination.
@@ -19763,6 +19777,1464 @@ exercises:
           - core
           - glutes
           - arms
+  russian-twist-weighted:
+    category: Weighted Body Weight
+    target: Core
+    movement:
+      groups:
+        - trunk_lateral_rotation
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Russian Twist (Weighted)"
+        validated: true
+        instructions: |
+          ## Overview
+          The weighted Russian twist is a seated rotational core exercise done holding a weight plate, dumbbell or medicine ball: you lean back with your chest up and turn the weight from one side of your body to the other. The load makes the obliques work harder to start and stop each turn, while the rest of the abdominals hold the lean-back position.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on a mat with your knees bent and your heels on the floor
+          - Hold the weight with both hands in front of your chest, elbows slightly bent
+          - Lean back until your torso is at about 45 degrees to the floor
+          - Keep your chest up and your back straight
+          - Brace your core
+
+          ### 2. Movement
+          1. Rotate your torso to the right, bringing the weight beside your right hip
+          2. Keep your knees and hips still as you turn
+          3. Rotate back through the center under control
+          4. Continue to the left, bringing the weight beside your left hip
+          5. Count each side as one rep, or each full right-and-left as one, consistently
+          6. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you rotate to each side
+          - Breathe in as you pass back through the center
+
+          ### 4. Tips
+          - Turn from your ribcage, not just your arms
+          - Follow the weight with your eyes to keep the rotation honest
+          - Start light; a heavy weight quickly turns the movement into an arm swing
+          - Lift your feet off the floor to make it harder once the form is solid
+
+          ### 5. Common Mistakes
+          - Rounding the lower back as you lean back
+          - Swinging the weight with the arms while the torso stays still
+          - Letting the knees sway from side to side
+          - Moving too fast to control the turn
+
+          ### 6. Safety / Modifications
+          - Keep your heels on the floor until you can control the lean
+          - Use a lighter weight or no weight if your lower back starts to ache
+          - Shorten the rotation if you feel strain in your spine
+          - Avoid it if twisting under load aggravates a back problem
+
+    muscles:
+      primary:
+        ids:
+          - external_oblique_l
+          - external_oblique_r
+      secondary:
+        ids:
+          - rectus_abdominis_1
+          - rectus_abdominis_2_l
+          - rectus_abdominis_2_r
+  triceps-kickback-dumbbell:
+    category: Dumbbell
+    target: Arms
+    movement:
+      groups:
+        - elbow_extension
+      axial_load: none
+      stability: supported
+      unilateral: true
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Triceps Kickback (Dumbbell)"
+        validated: true
+        instructions: |
+          ## Overview
+          The dumbbell triceps kickback is an isolation exercise for the back of the upper arm: bent over with your upper arm held still beside your body, you straighten your elbow to swing the dumbbell back. It works all three heads of the triceps and is hardest at full extension, which makes it a good finisher with light weights.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Place your left knee and left hand on a flat bench
+          - Hold a dumbbell in your right hand with a neutral grip
+          - Keep your back flat and roughly parallel to the floor
+          - Raise your right upper arm until it is in line with your torso, elbow bent to 90 degrees
+          - Keep your neck neutral and look at the floor
+
+          ### 2. Movement
+          1. Straighten your elbow to move the dumbbell back until your arm is fully extended
+          2. Keep your upper arm still and tight to your side
+          3. Squeeze the triceps for a moment at full extension
+          4. Bend the elbow slowly to return to 90 degrees
+          5. Complete the target reps, then switch to the other arm
+
+          ### 3. Breathing
+          - Breathe out as you straighten your arm
+          - Breathe in as you bend it back
+
+          ### 4. Tips
+          - Only the forearm moves; the upper arm is the hinge
+          - Use a weight you can hold at full extension for a second
+          - Keep the dumbbell under control on the way back down
+          - Both arms can work together standing in a hip hinge, without the bench
+
+          ### 5. Common Mistakes
+          - Swinging the weight with momentum
+          - Letting the upper arm drop toward the floor
+          - Stopping short of full extension
+          - Rounding the back
+
+          ### 6. Safety / Modifications
+          - Start with a light dumbbell; this exercise needs little weight
+          - Stop if you feel pain in the elbow joint
+          - A cable or resistance band keeps tension through the whole range
+          - Keep your support hand directly under your shoulder to protect the lower back
+
+    muscles:
+      primary:
+        ids:
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+      secondary:
+        ids:
+          - posterior_deltoid_l
+          - posterior_deltoid_r
+  meadows-row-barbell:
+    category: Barbell
+    target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: none
+      skill: moderate
+    i18n:
+      en:
+        name: "Meadows Row (Barbell)"
+        aliases: ["meadows rows (barbell)"]
+        validated: true
+        instructions: |
+          ## Overview
+          The Meadows row is a one-arm row done on the end of a barbell anchored in a landmine or a corner. Standing side-on to the bar, you grip its thick end with an overhand grip and row it toward your hip. The angle lets the lats and upper back work through a long range, and the staggered stance lets you load it heavier than a dumbbell row.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Anchor one end of a barbell in a landmine or a corner and load plates on the free end
+          - Stand side-on to the bar, near the plates, with the bar beside your working arm
+          - Stagger your stance: the leg nearer the bar back, the far leg forward and bent
+          - Hinge at the hips until your torso is close to parallel with the floor
+          - Rest your free forearm on your front thigh and grip the end of the bar overhand
+
+          ### 2. Movement
+          1. Pull the bar up toward your hip, driving your elbow up and back
+          2. Keep your torso still and your back flat
+          3. Squeeze your shoulder blade toward your spine at the top
+          4. Lower the bar slowly until your arm is straight and your lat is stretched
+          5. Complete the target reps, then switch sides
+
+          ### 3. Breathing
+          - Breathe out as you row the bar up
+          - Breathe in as you lower it
+
+          ### 4. Tips
+          - Use small plates so the bar can travel through a full range
+          - Let your shoulder reach down at the bottom for a full stretch
+          - Lifting straps help if your grip on the thick bar end gives out first
+          - Think of pulling with your elbow, not your hand
+
+          ### 5. Common Mistakes
+          - Twisting the torso to heave the weight up
+          - Rounding the back in the hinge
+          - Cutting the range short at the bottom
+          - Shrugging the shoulder toward the ear
+
+          ### 6. Safety / Modifications
+          - Start light while you learn the stance
+          - Keep the free arm braced on your thigh to protect your lower back
+          - A one-arm dumbbell row is a simpler alternative
+          - Stop if you feel strain in your lower back rather than effort in your back muscles
+
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
+  chest-supported-t-bar-row:
+    category: Machine
+    target: Back
+    movement:
+      groups:
+        - horizontal_row
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Chest Supported T Bar Row"
+        validated: true
+        instructions: |
+          ## Overview
+          The chest supported T bar row is a rowing machine with an angled pad: you lie face down on the pad and row a loaded lever arm toward your chest. With the chest supported, the lower back stays out of it and the lats, middle back and rear shoulders do the work, so you can row heavy without the fatigue of holding a hinge.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Adjust the foot plate so your chest sits on the top of the pad
+          - Stand on the foot plate and lean onto the pad, chest firmly against it
+          - Take the handles with the grip you want: wide overhand, or close neutral
+          - Lift the lever off the rack so your arms hang straight
+          - Keep your neck neutral and your shoulders down
+
+          ### 2. Movement
+          1. Row the handles toward your chest by driving your elbows back
+          2. Squeeze your shoulder blades together at the top
+          3. Keep your chest on the pad the whole time
+          4. Lower the weight slowly until your arms are straight
+          5. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you row the handles up
+          - Breathe in as you lower them
+
+          ### 4. Tips
+          - A wide grip shifts the work toward the upper back and rear shoulders
+          - A close grip with elbows tucked targets the lats more
+          - Let your shoulder blades move forward at the bottom for a full stretch
+          - Pause for a moment at the top of each rep
+
+          ### 5. Common Mistakes
+          - Lifting the chest off the pad to heave the weight
+          - Using a short, jerky range of motion
+          - Shrugging the shoulders toward the ears
+          - Letting the weight drop on the way down
+
+          ### 6. Safety / Modifications
+          - Start with a light load while you set up the pad height
+          - Return the lever to its rack at the end of the set, never let it drop
+          - A chest-supported dumbbell row on an incline bench works the same muscles
+          - Stop if you feel pain in your shoulders
+
+    muscles:
+      primary:
+        groups:
+          - back
+        ids:
+          - latissimus_dorsi_l
+          - latissimus_dorsi_r
+      secondary:
+        groups:
+          - arms
+          - shoulders
+  reverse-hyperextension:
+    category: Machine
+    target: Back
+    movement:
+      groups:
+        - spinal_extension
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Reverse Hyperextension"
+        validated: true
+        instructions: |
+          ## Overview
+          The reverse hyperextension is done lying face down on a reverse hyper machine or a high bench with your legs hanging off the end: you swing your straight legs up behind you until they line up with your torso. It trains the glutes, hamstrings and lower back while the spine stays unloaded, which is why it is popular for strength and for lower-back health.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie face down on the pad with your hips at its edge
+          - Hold the handles firmly
+          - Let your legs hang straight down, feet in the strap or together if there is none
+          - Brace your core lightly
+
+          ### 2. Movement
+          1. Squeeze your glutes and raise your straight legs behind you
+          2. Lift until your legs are in line with your torso
+          3. Pause briefly at the top
+          4. Lower your legs under control back to hanging
+          5. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you raise your legs
+          - Breathe in as you lower them
+
+          ### 4. Tips
+          - Drive the movement from the hips, not the lower back
+          - Control the lowering phase; don't let the pendulum swing you
+          - Start with bodyweight before adding plates to the strap
+          - Keep your upper body relaxed on the pad
+
+          ### 5. Common Mistakes
+          - Swinging the legs well above torso height and overarching the lower back
+          - Using momentum from the bottom instead of the glutes
+          - Bending the knees to shorten the lever
+          - Letting the weight crash down at the end of each rep
+
+          ### 6. Safety / Modifications
+          - Use a light load at first; the arc builds momentum quickly
+          - A high bench or a sturdy table works without the machine
+          - Shorten the range if your lower back feels pinched at the top
+          - Stop if you feel sharp pain in your back
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - hamstrings
+      secondary:
+        groups:
+          - back
+  pike-push-up:
+    category: Reps Only
+    target: Shoulders
+    movement:
+      groups:
+        - vertical_press
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
+    i18n:
+      en:
+        name: "Pike Push Up"
+        aliases: ["pike pushup"]
+        validated: true
+        instructions: |
+          ## Overview
+          The pike push up is a bodyweight shoulder press: with your hips raised high and your body in an upside-down V, you bend your arms to lower the top of your head toward the floor and press back up. The angle puts most of the work on the shoulders and triceps, and it is the usual step toward the handstand push up.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Start in a push up position with your hands slightly wider than shoulder-width
+          - Walk your feet toward your hands and lift your hips high
+          - Form an upside-down V, with your arms and back in a straight line
+          - Keep your legs as straight as you comfortably can
+          - Look back toward your feet
+
+          ### 2. Movement
+          1. Bend your elbows to lower the top of your head toward the floor in front of your hands
+          2. Keep your hips high so your upper body stays steep
+          3. Lower until your head nearly touches the floor
+          4. Press back up until your arms are straight
+          5. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe in as you lower
+          - Breathe out as you press up
+
+          ### 4. Tips
+          - Your head travels forward of your hands, making a triangle with them
+          - Keep your elbows angled back, not flared straight out
+          - Put your feet on a box or bench to make it harder
+          - The steeper your torso, the closer it gets to a handstand push up
+
+          ### 5. Common Mistakes
+          - Letting the hips drop, which turns it into a regular push up
+          - Flaring the elbows wide
+          - Using a short range that stops well above the floor
+          - Dropping onto the head at the bottom
+
+          ### 6. Safety / Modifications
+          - Bend your knees if tight hamstrings stop you reaching a V
+          - Reduce the range until your shoulders are strong enough
+          - Place a folded mat under your head for the first sessions
+          - Stop if you feel pain in your shoulders or neck
+
+    muscles:
+      primary:
+        groups:
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - chest
+          - core
+  decline-push-up:
+    category: Weighted Body Weight
+    target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Decline Push Up"
+        validated: true
+        instructions: |
+          ## Overview
+          The decline push up is a push up done with your feet raised on a bench or box. Raising the feet shifts more of your bodyweight onto your hands and angles the press toward the upper chest and front shoulders, making it harder than a push up on the floor.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Place your feet on a bench or box behind you
+          - Put your hands on the floor slightly wider than shoulder-width
+          - Straighten your body into one line from heels to head
+          - Brace your core and squeeze your glutes
+
+          ### 2. Movement
+          1. Bend your elbows to lower your chest toward the floor
+          2. Keep your elbows at about 45 degrees from your body
+          3. Lower until your chest is just above the floor
+          4. Press back up until your arms are straight
+          5. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe in as you lower
+          - Breathe out as you press up
+
+          ### 4. Tips
+          - The higher the feet, the more the work moves to the shoulders
+          - Keep your hips in line; don't let them pike up or sag
+          - Spread your fingers and press through the whole hand
+          - Add a weight vest or a plate on your back once bodyweight reps are easy
+
+          ### 5. Common Mistakes
+          - Letting the lower back sag
+          - Flaring the elbows straight out to the sides
+          - Dropping the head instead of lowering the chest
+          - Using a short, bouncing range
+
+          ### 6. Safety / Modifications
+          - Start with a low step before moving to a bench
+          - Go back to floor push ups if you can't keep your body straight
+          - Make sure the bench or box is stable before you start
+          - Stop if you feel pain in your shoulders or wrists
+
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        groups:
+          - arms
+          - core
+          - shoulders
+  incline-push-up:
+    category: Reps Only
+    target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Incline Push Up"
+        aliases: ["incline push ups"]
+        validated: true
+        instructions: |
+          ## Overview
+          The incline push up is a push up done with your hands on a raised surface such as a bench, box or wall. Raising the hands takes some of your bodyweight off them, so it is an easier version of the push up that still trains the chest, front shoulders and triceps, and a good way to build up to the floor version.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Place your hands on the edge of a bench or box, slightly wider than shoulder-width
+          - Walk your feet back until your body forms a straight line from heels to head
+          - Keep your arms straight and your shoulders over your hands
+          - Brace your core and squeeze your glutes
+
+          ### 2. Movement
+          1. Bend your elbows to lower your chest toward the edge of the bench
+          2. Keep your elbows at about 45 degrees from your body
+          3. Lower until your chest nearly touches the bench
+          4. Press back up until your arms are straight
+          5. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe in as you lower
+          - Breathe out as you press up
+
+          ### 4. Tips
+          - The higher your hands, the easier the push up
+          - Lower the surface over time to progress toward floor push ups
+          - Keep your body rigid like a plank throughout
+          - Move slowly on the way down
+
+          ### 5. Common Mistakes
+          - Letting the hips sag or pike up
+          - Flaring the elbows straight out to the sides
+          - Reaching the head forward instead of lowering the chest
+          - Stopping short of a full range
+
+          ### 6. Safety / Modifications
+          - Use a wall if a bench is still too hard
+          - Make sure the surface can't slide or tip
+          - Keep your wrists under your shoulders to protect them
+          - Stop if you feel pain in your shoulders or wrists
+
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        groups:
+          - arms
+          - core
+          - shoulders
+  ring-dip:
+    category: Weighted Body Weight
+    target: Chest
+    movement:
+      groups:
+        - chest_dip
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: high
+    i18n:
+      en:
+        name: "Ring Dip"
+        aliases: ["ring dips"]
+        validated: true
+        instructions: |
+          ## Overview
+          The ring dip is a dip done on gymnastic rings. Because the rings move freely, you have to hold them steady at your sides while you lower and press, so it trains the chest, triceps and front shoulders along with the small stabilizing muscles around the shoulder. It is noticeably harder than a dip on parallel bars.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set the rings at about hip height, or high enough that your feet clear the floor when you dip
+          - Grip the rings and jump or press up to a support hold with straight arms
+          - Keep the rings close to your sides, palms facing in or turned slightly out
+          - Brace your core and keep your legs together
+
+          ### 2. Movement
+          1. Bend your elbows to lower your body, leaning your torso slightly forward
+          2. Keep the rings tight to your sides as you go down
+          3. Lower until your shoulders are just below your elbows
+          4. Press back up to straight arms
+          5. Turn your palms slightly forward at the top to lock out
+          6. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe in as you lower
+          - Breathe out as you press up
+
+          ### 4. Tips
+          - Squeeze the rings into your body to stop them drifting apart
+          - Master a steady support hold before adding reps
+          - Move slowly; the rings punish rushed reps
+          - Add weight with a dip belt once bodyweight reps are solid
+
+          ### 5. Common Mistakes
+          - Letting the rings swing out away from the body
+          - Going deeper than your shoulders can control
+          - Shrugging the shoulders up at the bottom
+          - Kicking the legs to get out of the bottom
+
+          ### 6. Safety / Modifications
+          - Practice the support hold and dips on parallel bars first
+          - Keep your feet near the floor at first so you can catch yourself
+          - Reduce the depth if your shoulders feel strained
+          - Stop if you feel pain in the front of the shoulder
+
+    muscles:
+      primary:
+        groups:
+          - chest
+      secondary:
+        ids:
+          - anterior_deltoid_l
+          - anterior_deltoid_r
+          - triceps_brachii_caput_laterale_l
+          - triceps_brachii_caput_laterale_r
+          - triceps_brachii_caput_longum_l
+          - triceps_brachii_caput_longum_r
+          - triceps_brachii_caput_mediale_l
+          - triceps_brachii_caput_mediale_r
+  belt-squat-machine:
+    category: Machine
+    target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: low
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Belt Squat (Machine)"
+        validated: true
+        instructions: |
+          ## Overview
+          The belt squat is a squat done with the load hanging from a belt around your hips instead of a bar on your back. On a belt squat machine the belt clips to a lever or cable, so you can train the quads and glutes hard while your spine and shoulders carry almost nothing, which makes it useful for heavy leg work around a sore back.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Fasten the belt snugly around your hips
+          - Stand on the platform and clip the belt to the machine's chain or lever
+          - Place your feet shoulder-width apart, toes turned slightly out
+          - Hold the handles or rails lightly for balance
+          - Release the safety so the weight hangs from the belt
+
+          ### 2. Movement
+          1. Bend your knees and hips to squat down, keeping your chest up
+          2. Let your knees travel forward over your toes
+          3. Lower until your thighs are at least parallel to the platform
+          4. Drive through your whole foot to stand back up
+          5. Repeat for the target number of reps, then set the safety before unclipping
+
+          ### 3. Breathing
+          - Breathe in and brace before you squat down
+          - Breathe out as you stand back up
+
+          ### 4. Tips
+          - Use the handles for balance, not to pull yourself up
+          - A more upright torso keeps the work on the quads
+          - Adjust the belt so it sits on your hips, not your waist
+          - Pause at the bottom to remove the bounce
+
+          ### 5. Common Mistakes
+          - Letting the knees collapse inward
+          - Rising onto the toes
+          - Cutting the depth short
+          - Pulling hard on the handles to stand up
+
+          ### 6. Safety / Modifications
+          - Always engage the safety before unclipping the belt
+          - Start light to learn how the machine moves
+          - A dip belt with a kettlebell, standing on two boxes, works without the machine
+          - Stop if you feel pain in your knees or hips
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - adductors
+          - hamstrings
+  pendulum-squat-machine:
+    category: Machine
+    target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: moderate
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Pendulum Squat (Machine)"
+        validated: true
+        instructions: |
+          ## Overview
+          The pendulum squat is a machine squat in which the back pad and shoulder pads swing on an arc rather than sliding on a straight track. The arc keeps the resistance high at the bottom, where you are deepest, and lets the knees travel well forward, so it hits the quads very hard with the back supported.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Step onto the platform with your back flat against the pad
+          - Settle the shoulder pads on your shoulders
+          - Place your feet about shoulder-width apart in the middle of the platform
+          - Grip the handles and stand up to release the safety
+
+          ### 2. Movement
+          1. Bend your knees and let the pad swing down as you squat
+          2. Keep your back and hips against the pad
+          3. Lower as deep as you can control, ideally below parallel
+          4. Drive through your whole foot to push back up
+          5. Stop just short of locking your knees at the top
+          6. Repeat for the target number of reps, then lock the safety
+
+          ### 3. Breathing
+          - Breathe in as you lower
+          - Breathe out as you push back up
+
+          ### 4. Tips
+          - Feet lower on the platform put more work on the quads
+          - Feet higher shift some of it to the glutes and hamstrings
+          - Control the bottom; that is where the machine is hardest
+          - Keep tension through the set instead of resting at the top
+
+          ### 5. Common Mistakes
+          - Lifting the hips off the pad at the bottom
+          - Letting the heels rise
+          - Using a short range of motion
+          - Locking out the knees hard at the top
+
+          ### 6. Safety / Modifications
+          - Set the safety stops before you start
+          - Start light; the arc feels different from a hack squat
+          - Reduce the depth if your knees feel strained
+          - Stop if you feel pain in your knees or lower back
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
+  hip-thrust-machine:
+    category: Machine
+    target: Legs
+    movement:
+      groups:
+        - hip_extension_bridge
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Hip Thrust (Machine)"
+        validated: true
+        instructions: |
+          ## Overview
+          The machine hip thrust is a glute exercise done on a hip thrust machine: with your upper back on a pad and a padded belt or lever across your hips, you drive your hips up until your body is straight from shoulders to knees. The machine does the setup a barbell needs, so you can load the glutes heavily and get straight to work.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the machine with your upper back against the back pad
+          - Position the hip pad or belt across your hip crease
+          - Place your feet flat on the platform about hip-width apart
+          - Adjust the feet so your shins are vertical at the top of the movement
+          - Hold the handles and brace your core
+
+          ### 2. Movement
+          1. Drive through your heels to push your hips up
+          2. Rise until your hips are fully extended and your body is straight from shoulders to knees
+          3. Squeeze your glutes hard at the top for a moment
+          4. Lower your hips under control
+          5. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you drive your hips up
+          - Breathe in as you lower them
+
+          ### 4. Tips
+          - Tuck your chin and keep your ribs down at the top
+          - Push through your heels, not your toes
+          - Pause at the top to make the glutes do the work
+          - Keep the range smooth instead of bouncing at the bottom
+
+          ### 5. Common Mistakes
+          - Arching the lower back at the top instead of extending the hips
+          - Placing the feet too far forward or too close
+          - Letting the knees cave inward
+          - Rushing the lowering phase
+
+          ### 6. Safety / Modifications
+          - Start light while you set up the pad and foot position
+          - Adjust the hip pad so it doesn't press on your hip bones
+          - A barbell or bodyweight hip thrust works without the machine
+          - Stop if you feel strain in your lower back
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+      secondary:
+        groups:
+          - hamstrings
+  split-squat-dumbbell:
+    category: Dumbbell
+    target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Split Squat (Dumbbell)"
+        validated: true
+        instructions: |
+          ## Overview
+          The dumbbell split squat is a single-leg exercise done in a staggered stance with both feet on the floor: holding a dumbbell in each hand, you lower your back knee straight down and stand back up without moving your feet. It works the quads and glutes of the front leg and is more stable than a walking lunge or a Bulgarian split squat, which raises the rear foot.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hold a dumbbell in each hand at your sides
+          - Take a long step forward with one foot, about two to three feet apart
+          - Rise onto the ball of your back foot
+          - Keep your torso upright and your feet hip-width apart side to side
+          - Brace your core
+
+          ### 2. Movement
+          1. Bend both knees to lower your back knee straight down toward the floor
+          2. Keep your front heel down and your front knee over your foot
+          3. Lower until your back knee is just above the floor
+          4. Push through your front foot to stand back up
+          5. Complete the target reps, then switch legs
+
+          ### 3. Breathing
+          - Breathe in as you lower
+          - Breathe out as you stand back up
+
+          ### 4. Tips
+          - Think of moving straight down and up, like an elevator
+          - A longer stance works the glutes more; a shorter one, the quads
+          - Keep most of your weight on the front leg
+          - Use lifting straps if your grip limits the load
+
+          ### 5. Common Mistakes
+          - Standing with the feet in one line, which kills your balance
+          - Letting the front knee collapse inward
+          - Pushing off the back foot instead of the front leg
+          - Leaning far forward at the bottom
+
+          ### 6. Safety / Modifications
+          - Learn the movement with bodyweight first
+          - Hold on to a rack with one hand if balance is an issue
+          - Place a pad under the back knee to control the depth
+          - Stop if you feel sharp pain in the front knee
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
+  lateral-lunge:
+    category: Reps Only
+    target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Lateral Lunge"
+        aliases: ["lateral squat"]
+        validated: true
+        instructions: |
+          ## Overview
+          The lateral lunge is a side-to-side lunge: you step wide to one side and sit your hips back over that leg while the other leg stays straight. Moving sideways works the quads and glutes of the bent leg, stretches and trains the inner thigh of the straight one, and builds the side-to-side strength and mobility that forward lunges miss.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand tall with your feet together
+          - Keep your chest up and your shoulders back
+          - Clasp your hands in front of your chest or put them on your hips
+          - Brace your core
+
+          ### 2. Movement
+          1. Take a wide step to the right
+          2. Bend your right knee and push your hips back, keeping your left leg straight
+          3. Lower until your right thigh is close to parallel with the floor
+          4. Keep both feet flat and pointing forward
+          5. Push through your right foot to return to the start
+          6. Alternate sides, or complete all reps on one side before switching
+
+          ### 3. Breathing
+          - Breathe in as you step out and lower
+          - Breathe out as you push back to standing
+
+          ### 4. Tips
+          - Sit back into the hip as if reaching for a chair to your side
+          - Keep the bent knee over your toes
+          - Go only as low as your hips allow while keeping your heel down
+          - Hold a dumbbell or kettlebell at your chest once bodyweight reps are easy
+
+          ### 5. Common Mistakes
+          - Letting the bent knee cave inward
+          - Lifting the heel of the working foot
+          - Rounding the back as you lower
+          - Bending the trailing leg
+
+          ### 6. Safety / Modifications
+          - Shorten the step and the depth if your inner thighs are tight
+          - Hold a support for balance at first
+          - Warm up the hips before working through a deep range
+          - Stop if you feel pain in your knee or groin
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - adductors
+          - core
+          - hamstrings
+  nordic-hamstring-curl:
+    category: Weighted Body Weight
+    target: Legs
+    movement:
+      groups:
+        - knee_flexion
+      axial_load: none
+      stability: supported
+      unilateral: false
+      impact: none
+      skill: high
+    i18n:
+      en:
+        name: "Nordic Hamstring Curl"
+        aliases: ["nordic hamstrings curls"]
+        validated: true
+        instructions: |
+          ## Overview
+          The Nordic hamstring curl is a bodyweight hamstring exercise done kneeling with your ankles anchored: you lower your body forward as slowly as you can, resisting with your hamstrings, then catch yourself and return. The slow lowering loads the hamstrings very heavily while they lengthen, which builds strength and is widely used to reduce hamstring injuries.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Kneel on a pad with your ankles secured under a bar, a bench or a partner's hands
+          - Keep your body straight from knees to head
+          - Squeeze your glutes and brace your core
+          - Hold your hands in front of your chest, ready to catch yourself
+
+          ### 2. Movement
+          1. Lean forward slowly, keeping your hips straight
+          2. Resist the fall with your hamstrings for as long as you can
+          3. When you can no longer hold it, catch yourself with your hands
+          4. Push lightly off the floor and pull with your hamstrings to return to upright
+          5. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe in before you start leaning
+          - Breathe out slowly as you lower
+
+          ### 4. Tips
+          - The lowering is the exercise; make it last three to five seconds
+          - Keep the line from knees to head straight, without bending at the hips
+          - Use as much push from the hands as you need to get back up
+          - Progress by catching yourself later each session
+
+          ### 5. Common Mistakes
+          - Bending at the hips to shorten the lever
+          - Dropping quickly after the first few inches
+          - Letting the ankles slip out of the anchor
+          - Doing too many reps too soon
+
+          ### 6. Safety / Modifications
+          - Start with a few reps; this exercise causes heavy soreness at first
+          - A band from above, looped under the chest, assists the lowering
+          - Make sure the ankle anchor can't move before you start
+          - Stop if you feel a sharp pain in the back of the thigh
+
+    muscles:
+      primary:
+        groups:
+          - hamstrings
+      secondary:
+        groups:
+          - glutes
+  glute-bridge:
+    category: Reps Only
+    target: Legs
+    movement:
+      groups:
+        - hip_extension_bridge
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Glute Bridge"
+        validated: true
+        instructions: |
+          ## Overview
+          The glute bridge is a bodyweight glute exercise done lying on your back: with your knees bent and feet flat, you lift your hips until your body is straight from shoulders to knees. It strengthens the glutes and hamstrings with no equipment and little strain on the back, and it is the floor-level version of the hip thrust.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Lie on your back on a mat
+          - Bend your knees and place your feet flat on the floor, hip-width apart
+          - Bring your heels close enough that your fingertips can touch them
+          - Rest your arms at your sides, palms down
+          - Brace your core lightly
+
+          ### 2. Movement
+          1. Press through your heels to lift your hips off the floor
+          2. Rise until your body is straight from shoulders to knees
+          3. Squeeze your glutes at the top for one to two seconds
+          4. Lower your hips slowly back to the floor
+          5. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you lift your hips
+          - Breathe in as you lower them
+
+          ### 4. Tips
+          - Push through your heels to keep the work in the glutes
+          - Keep your ribs down so the lower back doesn't arch
+          - Hold the top longer to make it harder
+          - Lift one foot to progress to the single leg bridge
+
+          ### 5. Common Mistakes
+          - Arching the lower back instead of extending the hips
+          - Pushing through the toes
+          - Letting the knees fall in or drift apart
+          - Dropping the hips quickly
+
+          ### 6. Safety / Modifications
+          - Keep the range smaller if your back is sensitive
+          - Place a mini band above your knees to work the outer glutes
+          - Rest your head and shoulders on the mat throughout
+          - Stop if you feel cramping in the hamstrings and bring your feet closer
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+      secondary:
+        groups:
+          - core
+          - hamstrings
+  glute-bridge-barbell:
+    category: Barbell
+    target: Legs
+    movement:
+      groups:
+        - hip_extension_bridge
+      axial_load: low
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Glute Bridge (Barbell)"
+        aliases: ["partial glute bridge (barbell)"]
+        validated: true
+        instructions: |
+          ## Overview
+          The barbell glute bridge is a glute bridge done from the floor with a loaded barbell across your hips. With your shoulders on the floor rather than a bench, the range is shorter than a hip thrust and the load stays heavy at the top, where the glutes work hardest. It is a simple way to load the glutes heavily with little setup.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit on the floor and roll a loaded barbell over your legs until it rests in your hip crease
+          - Place a pad or folded mat under the bar
+          - Lie back with your shoulders and head on the floor
+          - Bend your knees and place your feet flat, hip-width apart
+          - Grip the bar on either side of your hips
+
+          ### 2. Movement
+          1. Press through your heels to drive the bar up with your hips
+          2. Rise until your body is straight from shoulders to knees
+          3. Squeeze your glutes hard at the top
+          4. Lower your hips under control until they nearly touch the floor
+          5. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you drive the hips up
+          - Breathe in as you lower
+
+          ### 4. Tips
+          - Use full-size plates so the bar sits high enough to roll in
+          - Keep your chin tucked and your ribs down
+          - Short, controlled reps near the top are a common variant
+          - Hold the bar steady so it doesn't roll toward your chest or thighs
+
+          ### 5. Common Mistakes
+          - Arching the lower back at the top
+          - Pushing through the toes instead of the heels
+          - Letting the bar roll off the hip crease
+          - Bouncing the hips off the floor
+
+          ### 6. Safety / Modifications
+          - Always pad the bar; it presses directly on the hip bones
+          - Start light while you learn to roll the bar into place
+          - The bodyweight glute bridge is the place to start
+          - Stop if you feel strain in your lower back
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+      secondary:
+        groups:
+          - hamstrings
+  walking-lunge-weighted:
+    category: Weighted Distance
+    target: Legs
+    movement:
+      groups:
+        - lunge_split
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: low
+      skill: low
+    i18n:
+      en:
+        name: "Walking Lunge (Weighted)"
+        aliases: ["walking lunge (dumbbell)", "walking lunge (sandbag)"]
+        validated: true
+        instructions: |
+          ## Overview
+          The weighted walking lunge is a lunge that travels: holding dumbbells, a sandbag or another load, you step forward into a lunge, then bring the back leg through into the next step. It is logged by weight and distance covered, and it trains the quads and glutes along with balance and conditioning.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Hold the load: dumbbells at your sides, or a sandbag hugged at your chest or on one shoulder
+          - Stand tall with your feet hip-width apart
+          - Clear a straight path in front of you
+          - Brace your core
+
+          ### 2. Movement
+          1. Take a long step forward with one leg
+          2. Lower your back knee toward the floor until both knees are bent to about 90 degrees
+          3. Push through your front foot and bring your back leg forward into the next step
+          4. Keep alternating legs as you walk forward
+          5. Continue for the target distance
+
+          ### 3. Breathing
+          - Breathe in as you lower into each lunge
+          - Breathe out as you push up and step through
+
+          ### 4. Tips
+          - Keep your torso upright and your eyes forward
+          - Make each step long enough that the front knee stays over the foot
+          - Pick a steady rhythm instead of rushing the steps
+          - Measure the distance, or count the steps, so the sets compare
+
+          ### 5. Common Mistakes
+          - Taking short steps that push the front knee far past the toes
+          - Letting the knee cave inward
+          - Leaning forward under the load
+          - Slamming the back knee into the floor
+
+          ### 6. Safety / Modifications
+          - Learn the bodyweight walking lunge before adding load
+          - Choose a load you can control for the whole distance
+          - Pause between steps if your balance slips
+          - Stop if you feel pain in your knees
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
+  snatch-kettlebell:
+    category: Dumbbell
+    target: Full Body
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: none
+      skill: high
+    i18n:
+      en:
+        name: "Snatch (Kettlebell)"
+        aliases: ["kettlebell snatch"]
+        validated: true
+        instructions: |
+          ## Overview
+          The kettlebell snatch is a one-arm ballistic lift that takes a kettlebell from between your legs to overhead in a single movement. A powerful hip snap drives the bell up, and you guide it close to your body and punch through to lock out. It trains the glutes, hamstrings, back and shoulders together and is a demanding conditioning drill.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with your feet a little wider than hip-width, a kettlebell on the floor in front of you
+          - Hinge at the hips and grip the handle with one hand
+          - Keep your back flat and your shoulder packed down
+          - Hike the bell back between your legs to start
+
+          ### 2. Movement
+          1. Snap your hips forward to drive the bell up, as in a swing
+          2. Keep the bell close to your body as it rises, elbow high
+          3. As it passes your head, punch your hand up through the handle so the bell rolls onto the back of your forearm
+          4. Lock your arm overhead with the bell steady
+          5. Let the bell drop back down, guiding it between your legs into the next rep
+          6. Complete the target reps, then switch hands
+
+          ### 3. Breathing
+          - Breathe out sharply as you snap the hips
+          - Breathe in as the bell drops back down
+
+          ### 4. Tips
+          - The hips do the lifting; the arm only guides the bell
+          - Punch through at the top to stop the bell flipping over and hitting your forearm
+          - Master the swing and the clean before the snatch
+          - Keep the bell's path close to your body
+
+          ### 5. Common Mistakes
+          - Swinging the bell out in a wide arc
+          - Pulling it up with the arm instead of the hips
+          - Letting the bell slam onto the forearm
+          - Squatting instead of hinging
+
+          ### 6. Safety / Modifications
+          - Start with a light bell and low reps
+          - Give yourself plenty of space front and back
+          - A single-arm swing or a high pull are easier steps toward it
+          - Stop if you feel pain in your shoulder or lower back
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - hamstrings
+          - shoulders
+      secondary:
+        groups:
+          - back
+          - core
+  clean-kettlebell:
+    category: Dumbbell
+    target: Full Body
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: none
+      skill: moderate
+    i18n:
+      en:
+        name: "Clean (Kettlebell)"
+        aliases: ["kettlebell clean"]
+        validated: true
+        instructions: |
+          ## Overview
+          The kettlebell clean brings a kettlebell from between your legs to the rack position at your shoulder in one movement. A hip snap drives the bell up, and you guide it close to your body so it settles softly against your forearm. It trains the hips, back and grip, and it is the start of many kettlebell lifts such as the press and the front squat.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with your feet a little wider than hip-width, a kettlebell on the floor in front of you
+          - Hinge at the hips and grip the handle with one hand
+          - Keep your back flat and your shoulder packed down
+          - Hike the bell back between your legs
+
+          ### 2. Movement
+          1. Snap your hips forward to drive the bell up
+          2. Keep your elbow close to your body as the bell rises
+          3. Rotate your hand around the handle so the bell lands softly in the rack position
+          4. Finish standing tall with the bell resting between your forearm and upper arm
+          5. Let the bell drop back between your legs into the next rep
+          6. Complete the target reps, then switch hands
+
+          ### 3. Breathing
+          - Breathe out as you snap the hips
+          - Breathe in as the bell drops back down
+
+          ### 4. Tips
+          - Think of zipping up a jacket: the bell travels close to your body
+          - Loosen your grip at the top so the bell rolls around your hand
+          - Keep the wrist straight in the rack position
+          - Learn the two-handed swing first
+
+          ### 5. Common Mistakes
+          - Swinging the bell out wide so it bangs onto the forearm
+          - Curling it up with the arm
+          - Letting the elbow drift away from the body in the rack
+          - Bending the wrist back under the bell
+
+          ### 6. Safety / Modifications
+          - Start with a light bell while you learn the catch
+          - Wear long sleeves or a wrist guard if the bell bruises your forearm
+          - Two kettlebells at once make it a double clean
+          - Stop if you feel pain in your wrist or lower back
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - hamstrings
+      secondary:
+        groups:
+          - arms
+          - back
+          - core
+          - shoulders
+  snatch-dumbbell:
+    category: Dumbbell
+    target: Full Body
+    movement:
+      groups:
+        - olympic_lift
+      axial_load: moderate
+      stability: free
+      unilateral: true
+      impact: none
+      skill: moderate
+    i18n:
+      en:
+        name: "Snatch (Dumbbell)"
+        aliases: ["dumbbell snatch"]
+        validated: true
+        instructions: |
+          ## Overview
+          The dumbbell snatch is a one-arm power lift that takes a dumbbell from the floor to overhead in a single movement. A jump-like extension of the hips, knees and ankles launches the dumbbell, and you pull it up close to your body and catch it at arm's length overhead. It is simpler to learn than the barbell snatch and trains power across the whole body.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with your feet hip-width apart, a dumbbell on the floor between them
+          - Squat down with your hips back and grip the dumbbell with one hand
+          - Keep your back flat, chest up and arm straight
+          - Place your free hand on your thigh or out to the side
+
+          ### 2. Movement
+          1. Drive through your feet and extend your hips and knees explosively
+          2. Pull the dumbbell up close to your body, elbow high
+          3. Drop slightly under it and punch your arm straight overhead
+          4. Stand up fully with the dumbbell locked out overhead
+          5. Lower it to your shoulder, then to the floor, and reset for the next rep
+          6. Complete the target reps, then switch hands, or alternate hands each rep
+
+          ### 3. Breathing
+          - Breathe in at the bottom before you drive up
+          - Breathe out as you launch the dumbbell overhead
+
+          ### 4. Tips
+          - The power comes from the legs and hips, not the arm
+          - Keep the dumbbell close; a wide arc wastes power
+          - Lock the elbow and keep the shoulder active overhead
+          - Starting from hanging between the knees is easier than from the floor
+
+          ### 5. Common Mistakes
+          - Pressing the dumbbell out instead of catching it locked
+          - Rounding the back at the start
+          - Swinging the dumbbell away from the body
+          - Not finishing with the hips fully extended
+
+          ### 6. Safety / Modifications
+          - Start with a light dumbbell
+          - Clear the space around you before each set
+          - The dumbbell high pull is an easier way to learn the pull
+          - Stop if you feel pain in your shoulder or lower back
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - back
+          - core
+          - hamstrings
+  clean-and-press-barbell:
+    category: Barbell
+    target: Full Body
+    movement:
+      groups:
+        - olympic_lift
+        - vertical_press
+      axial_load: high
+      stability: free
+      unilateral: false
+      impact: none
+      skill: moderate
+    i18n:
+      en:
+        name: "Clean and Press (Barbell)"
+        aliases: ["clean and press"]
+        validated: true
+        instructions: |
+          ## Overview
+          The barbell clean and press combines two lifts: you clean the bar from the floor to your shoulders, then press it strictly overhead. It trains the legs, hips and back in the clean and the shoulders and triceps in the press, which makes it a staple of full-body strength and conditioning work.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand with your feet hip-width apart, the bar over your midfoot
+          - Squat down and grip the bar just outside your knees with an overhand grip
+          - Keep your back flat, chest up and shoulders slightly in front of the bar
+          - Brace your core
+
+          ### 2. Movement
+          1. Drive through your legs to lift the bar off the floor, keeping it close
+          2. As it passes your knees, extend your hips explosively
+          3. Pull your elbows quickly forward under the bar to catch it on the front of your shoulders
+          4. Stand tall with the bar in the rack position
+          5. Press the bar straight overhead until your arms are locked
+          6. Lower it to your shoulders, then to the floor, and reset for the next rep
+
+          ### 3. Breathing
+          - Breathe in and brace at the floor
+          - Breathe out after catching the clean, then breathe in and brace again before the press
+          - Breathe out as you press overhead
+
+          ### 4. Tips
+          - Keep the bar close to your body throughout the clean
+          - Squeeze your glutes during the press to stop leaning back
+          - Move your head back to let the bar pass, then through once it is overhead
+          - Reset your stance between the clean and the press if you need to
+
+          ### 5. Common Mistakes
+          - Pulling the bar up with the arms instead of the hips
+          - Catching with the elbows low, so the bar sits in the hands
+          - Leaning back and turning the press into a push press
+          - Rounding the back as the bar leaves the floor
+
+          ### 6. Safety / Modifications
+          - Learn the clean and the overhead press separately first
+          - Start light and use bumper plates if you may need to drop the bar
+          - Starting from the hang is easier than from the floor
+          - Stop if you feel pain in your lower back, wrists or shoulders
+
+    muscles:
+      primary:
+        groups:
+          - back
+          - glutes
+          - legs
+          - shoulders
+      secondary:
+        groups:
+          - arms
+          - core
+          - hamstrings
   aerobics:
     category: Duration
     target: Cardio
@@ -19790,6 +21262,72 @@ exercises:
       secondary:
         groups:
           - core
+  air-bike:
+    category: Cardio
+    target: Cardio
+    health:
+      activity: cycling_indoor
+    movement:
+      groups:
+        - cardio_steady
+      axial_load: none
+      stability: machine
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Air Bike"
+        validated: true
+        instructions: |
+          ## Overview
+          The air bike is a stationary bike with a large fan for a flywheel and moving handles that you push and pull while you pedal. The fan's resistance rises the harder you work, so the same machine suits an easy steady ride or an all-out sprint. Working arms and legs together makes it one of the most demanding cardio machines in the gym.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Set the seat height so your knee stays slightly bent at the bottom of the pedal stroke
+          - Sit tall and place your feet on the pedals
+          - Grip the handles with your arms slightly bent
+          - Brace your core lightly
+
+          ### 2. Movement
+          1. Start pedaling at an easy pace
+          2. Push and pull the handles in time with your legs
+          3. Raise the effort gradually; pedal faster and push harder for more resistance
+          4. Hold your target pace, or alternate sprints with easy recovery
+          5. Ease off for the last minute or two to cool down
+
+          ### 3. Breathing
+          - Breathe steadily and rhythmically at an easy pace
+          - During sprints, breathe hard and fast without holding your breath
+
+          ### 4. Tips
+          - Drive through your legs; the arms add work but shouldn't take over
+          - Use the display's calories or watts to keep intervals consistent
+          - Keep your upper body stable rather than rocking side to side
+          - Short, hard intervals are a common way to use this machine
+
+          ### 5. Common Mistakes
+          - Setting the seat too low, which strains the knees
+          - Going all-out from the first minute and fading quickly
+          - Pulling with the arms only and letting the legs coast
+          - Hunching over the handles
+
+          ### 6. Safety / Modifications
+          - Use the foot pegs to rest your legs while you work only the arms, or let go of the handles to pedal only
+          - Start with short sessions to learn your pacing
+          - Hold back on sprint intervals until a steady ride feels comfortable
+          - Stop if you feel dizzy or have chest pain
+
+    muscles:
+      primary:
+        groups:
+          - legs
+      secondary:
+        groups:
+          - arms
+          - core
+          - shoulders
   battle-ropes:
     category: Cardio
     target: Cardio
@@ -20046,7 +21584,7 @@ exercises:
     i18n:
       en:
         name: "Cycling (Indoor)"
-        aliases: ["stationary bike", "exercise bike", "spin", "spinning"]
+        aliases: ["stationary bike", "exercise bike", "spin", "spinning", "recumbent bike"]
         instructions: |
           ## Overview
           Indoor cycling is a cardiovascular exercise performed on a stationary bike that targets the quadriceps, hamstrings, and glutes. It provides controlled, low-impact aerobic conditioning while building leg strength and endurance in a climate-controlled environment.

@@ -3084,7 +3084,7 @@ exercises:
     validated: false
     source_digest: 6556f917e034
   triceps-pushdown-cable-straight-bar:
-    name: Empuje de tríceps hacia abajo (polea, barra recta)
+    name: Empuje de tríceps hacia abajo (polea)
     instructions: |
       ## Resumen
       El empuje de tríceps hacia abajo en polea es un ejercicio de aislamiento que trabaja principalmente las tres cabezas del tríceps con tensión constante. También involucra mínimamente los hombros como estabilizadores, y utiliza una polea alta con barra recta para ofrecer una resistencia uniforme durante todo el movimiento.
@@ -3130,7 +3130,7 @@ exercises:
       - Variación avanzada: trabaja un brazo a la vez para un enfoque unilateral
       - Añade una pausa de 2-3 segundos en la extensión completa para mayor intensidad
     validated: false
-    source_digest: 71683f6aee68
+    source_digest: 308669fb6b9b
   upright-row-cable:
     name: Remo al mentón (polea)
     instructions: |
@@ -13613,6 +13613,971 @@ exercises:
       - Detente si sientes dolor en las rodillas, la espalda o los hombros
     validated: false
     source_digest: 348381151bd2
+  russian-twist-weighted:
+    name: Giro ruso (con lastre)
+    instructions: |
+      ## Resumen
+      El giro ruso con lastre es un ejercicio rotacional de core que se hace sentado sujetando un disco, una mancuerna o un balón medicinal: te inclinas hacia atrás con el pecho alto y llevas el peso de un lado del cuerpo al otro. La carga obliga a los oblicuos a trabajar más para iniciar y frenar cada giro, mientras el resto del abdomen sostiene la inclinación.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Siéntate en una esterilla con las rodillas flexionadas y los talones en el suelo
+      - Sujeta el peso con ambas manos frente al pecho, con los codos ligeramente flexionados
+      - Inclínate hacia atrás hasta que el torso quede a unos 45 grados del suelo
+      - Mantén el pecho alto y la espalda recta
+      - Activa el core
+
+      ### 2. Movimiento
+      1. Gira el torso a la derecha y lleva el peso junto a la cadera derecha
+      2. Mantén las rodillas y la cadera quietas mientras giras
+      3. Vuelve al centro con control
+      4. Continúa hacia la izquierda y lleva el peso junto a la cadera izquierda
+      5. Cuenta cada lado como una repetición, o cada ida y vuelta como una, siempre igual
+      6. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Exhala al girar hacia cada lado
+      - Inhala al pasar por el centro
+
+      ### 4. Consejos
+      - Gira desde las costillas, no solo con los brazos
+      - Sigue el peso con la mirada para que el giro sea completo
+      - Empieza ligero; un peso grande convierte el ejercicio en un balanceo de brazos
+      - Levanta los pies del suelo para hacerlo más difícil cuando domines la técnica
+
+      ### 5. Errores comunes
+      - Redondear la zona lumbar al inclinarte hacia atrás
+      - Balancear el peso con los brazos mientras el torso no se mueve
+      - Dejar que las rodillas se balanceen de un lado a otro
+      - Moverse demasiado rápido para controlar el giro
+
+      ### 6. Seguridad y modificaciones
+      - Mantén los talones en el suelo hasta que controles la inclinación
+      - Usa menos peso, o ninguno, si te empieza a doler la zona lumbar
+      - Acorta el giro si notas tensión en la columna
+      - Evítalo si girar con carga agrava un problema de espalda
+    validated: false
+    source_digest: facfb99eea0d
+  triceps-kickback-dumbbell:
+    name: Patada de tríceps (mancuerna)
+    instructions: |
+      ## Resumen
+      La patada de tríceps con mancuerna es un ejercicio de aislamiento para la parte posterior del brazo: inclinado, con el brazo quieto junto al cuerpo, extiendes el codo para llevar la mancuerna hacia atrás. Trabaja las tres cabezas del tríceps y es más difícil en la extensión completa, por lo que funciona bien como ejercicio final con poco peso.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Apoya la rodilla y la mano izquierdas en un banco plano
+      - Sujeta una mancuerna con la mano derecha en agarre neutro
+      - Mantén la espalda recta y aproximadamente paralela al suelo
+      - Sube el brazo derecho hasta que quede alineado con el torso, con el codo flexionado a 90 grados
+      - Mantén el cuello neutro y mira al suelo
+
+      ### 2. Movimiento
+      1. Extiende el codo para llevar la mancuerna hacia atrás hasta estirar el brazo por completo
+      2. Mantén el brazo quieto y pegado al costado
+      3. Aprieta el tríceps un momento en la extensión completa
+      4. Flexiona el codo despacio para volver a 90 grados
+      5. Completa las repeticiones objetivo y cambia de brazo
+
+      ### 3. Respiración
+      - Exhala al extender el brazo
+      - Inhala al flexionarlo de nuevo
+
+      ### 4. Consejos
+      - Solo se mueve el antebrazo; el brazo hace de bisagra
+      - Usa un peso que puedas sostener un segundo en la extensión completa
+      - Controla la mancuerna en el regreso
+      - También puedes trabajar ambos brazos a la vez, de pie e inclinado desde la cadera, sin banco
+
+      ### 5. Errores comunes
+      - Balancear el peso con impulso
+      - Dejar caer el brazo hacia el suelo
+      - No llegar a la extensión completa
+      - Redondear la espalda
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con una mancuerna ligera; este ejercicio necesita poco peso
+      - Detente si sientes dolor en la articulación del codo
+      - Una polea o una banda elástica mantienen la tensión en todo el recorrido
+      - Coloca la mano de apoyo justo debajo del hombro para proteger la zona lumbar
+    validated: false
+    source_digest: ff8de071e9e8
+  meadows-row-barbell:
+    name: Remo Meadows (barra)
+    instructions: |
+      ## Resumen
+      El remo Meadows es un remo a una mano que se hace en el extremo de una barra anclada en un landmine o en una esquina. De lado a la barra, la sujetas por el extremo grueso con agarre prono y tiras de ella hacia la cadera. El ángulo permite que los dorsales y la parte alta de la espalda trabajen en un recorrido largo, y la postura escalonada permite cargar más que en un remo con mancuerna.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ancla un extremo de la barra en un landmine o en una esquina y carga los discos en el extremo libre
+      - Colócate de lado a la barra, cerca de los discos, con la barra junto al brazo que trabaja
+      - Escalona los pies: la pierna más cercana a la barra atrás, la otra delante y flexionada
+      - Flexiona la cadera hasta que el torso quede casi paralelo al suelo
+      - Apoya el antebrazo libre en el muslo adelantado y sujeta el extremo de la barra con agarre prono
+
+      ### 2. Movimiento
+      1. Tira de la barra hacia la cadera llevando el codo hacia arriba y atrás
+      2. Mantén el torso quieto y la espalda recta
+      3. Junta la escápula hacia la columna arriba del todo
+      4. Baja la barra despacio hasta estirar el brazo y sentir el estiramiento del dorsal
+      5. Completa las repeticiones objetivo y cambia de lado
+
+      ### 3. Respiración
+      - Exhala al subir la barra
+      - Inhala al bajarla
+
+      ### 4. Consejos
+      - Usa discos pequeños para que la barra recorra toda la amplitud
+      - Deja que el hombro baje abajo del todo para un estiramiento completo
+      - Las correas ayudan si el agarre en el extremo grueso falla antes
+      - Piensa en tirar con el codo, no con la mano
+
+      ### 5. Errores comunes
+      - Girar el torso para levantar el peso a tirones
+      - Redondear la espalda en la flexión de cadera
+      - Recortar el recorrido abajo
+      - Encoger el hombro hacia la oreja
+
+      ### 6. Seguridad y modificaciones
+      - Empieza ligero mientras aprendes la postura
+      - Mantén el brazo libre apoyado en el muslo para proteger la zona lumbar
+      - El remo con mancuerna a una mano es una alternativa más sencilla
+      - Detente si notas tensión en la zona lumbar en lugar de esfuerzo en la espalda
+    validated: false
+    source_digest: adad4d535ebb
+  chest-supported-t-bar-row:
+    name: Remo en barra T con apoyo de pecho
+    instructions: |
+      ## Resumen
+      El remo en barra T con apoyo de pecho es una máquina de remo con un apoyo inclinado: te tumbas boca abajo sobre el apoyo y tiras de una palanca cargada hacia el pecho. Con el pecho apoyado, la zona lumbar queda fuera del ejercicio y trabajan los dorsales, la espalda media y los deltoides posteriores, así que puedes remar pesado sin la fatiga de mantener la bisagra.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ajusta la plataforma de los pies para que el pecho quede en la parte alta del apoyo
+      - Súbete a la plataforma e inclínate sobre el apoyo con el pecho bien pegado
+      - Toma las asas con el agarre que prefieras: prono y abierto, o neutro y cerrado
+      - Saca la palanca del soporte para que los brazos queden estirados
+      - Mantén el cuello neutro y los hombros abajo
+
+      ### 2. Movimiento
+      1. Tira de las asas hacia el pecho llevando los codos hacia atrás
+      2. Junta las escápulas arriba del todo
+      3. Mantén el pecho en el apoyo en todo momento
+      4. Baja el peso despacio hasta estirar los brazos
+      5. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Exhala al subir las asas
+      - Inhala al bajarlas
+
+      ### 4. Consejos
+      - Un agarre abierto lleva el trabajo a la parte alta de la espalda y los deltoides posteriores
+      - Un agarre cerrado con los codos pegados trabaja más los dorsales
+      - Deja que las escápulas se adelanten abajo para un estiramiento completo
+      - Haz una pausa breve arriba en cada repetición
+
+      ### 5. Errores comunes
+      - Despegar el pecho del apoyo para tirar a tirones
+      - Usar un recorrido corto y brusco
+      - Encoger los hombros hacia las orejas
+      - Dejar caer el peso en la bajada
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con poca carga mientras ajustas la altura del apoyo
+      - Devuelve la palanca a su soporte al terminar la serie, nunca la sueltes
+      - El remo con mancuernas apoyado en un banco inclinado trabaja los mismos músculos
+      - Detente si sientes dolor en los hombros
+    validated: false
+    source_digest: 9b545d96f332
+  reverse-hyperextension:
+    name: Hiperextensión inversa
+    instructions: |
+      ## Resumen
+      La hiperextensión inversa se hace tumbado boca abajo en una máquina específica o en un banco alto con las piernas colgando por el extremo: elevas las piernas estiradas hacia atrás hasta alinearlas con el torso. Trabaja los glúteos, los isquiotibiales y la zona lumbar sin cargar la columna, por eso es popular tanto para la fuerza como para la salud de la espalda baja.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Túmbate boca abajo en el apoyo con la cadera en el borde
+      - Sujeta firmemente las asas
+      - Deja las piernas colgando estiradas, con los pies en la correa o juntos si no la hay
+      - Activa ligeramente el core
+
+      ### 2. Movimiento
+      1. Aprieta los glúteos y eleva las piernas estiradas hacia atrás
+      2. Sube hasta que las piernas queden alineadas con el torso
+      3. Haz una pausa breve arriba
+      4. Baja las piernas con control hasta que vuelvan a colgar
+      5. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Exhala al elevar las piernas
+      - Inhala al bajarlas
+
+      ### 4. Consejos
+      - Inicia el movimiento desde la cadera, no desde la zona lumbar
+      - Controla la bajada; no dejes que el péndulo te balancee
+      - Empieza con el peso corporal antes de añadir discos a la correa
+      - Mantén la parte superior del cuerpo relajada sobre el apoyo
+
+      ### 5. Errores comunes
+      - Subir las piernas muy por encima del torso y arquear la zona lumbar
+      - Usar el impulso desde abajo en lugar de los glúteos
+      - Doblar las rodillas para acortar la palanca
+      - Dejar caer el peso al final de cada repetición
+
+      ### 6. Seguridad y modificaciones
+      - Usa poca carga al principio; el arco genera impulso rápidamente
+      - Un banco alto o una mesa firme sirven si no hay máquina
+      - Acorta el recorrido si notas un pinzamiento en la zona lumbar arriba
+      - Detente si sientes un dolor agudo en la espalda
+    validated: false
+    source_digest: f6e0093b195a
+  pike-push-up:
+    name: Flexiones en pica
+    instructions: |
+      ## Resumen
+      La flexión en pica es un press de hombros con el peso corporal: con la cadera elevada y el cuerpo en forma de V invertida, flexionas los brazos para bajar la coronilla hacia el suelo y vuelves a empujar. El ángulo pone la mayor parte del trabajo en los hombros y los tríceps, y es el paso habitual hacia la flexión en parada de manos.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Empieza en posición de flexión con las manos algo más abiertas que los hombros
+      - Acerca los pies a las manos y eleva la cadera
+      - Forma una V invertida, con los brazos y la espalda en línea recta
+      - Mantén las piernas tan rectas como te resulte cómodo
+      - Mira hacia los pies
+
+      ### 2. Movimiento
+      1. Flexiona los codos para bajar la coronilla hacia el suelo, por delante de las manos
+      2. Mantén la cadera alta para que el torso siga empinado
+      3. Baja hasta que la cabeza casi toque el suelo
+      4. Empuja de nuevo hasta estirar los brazos
+      5. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Inhala al bajar
+      - Exhala al empujar hacia arriba
+
+      ### 4. Consejos
+      - La cabeza va por delante de las manos y forma un triángulo con ellas
+      - Lleva los codos hacia atrás en ángulo, no abiertos hacia los lados
+      - Apoya los pies en un cajón o banco para hacerlo más difícil
+      - Cuanto más vertical el torso, más se parece a una flexión en parada de manos
+
+      ### 5. Errores comunes
+      - Dejar caer la cadera y convertirlo en una flexión normal
+      - Abrir mucho los codos
+      - Usar un recorrido corto que se queda lejos del suelo
+      - Dejarse caer sobre la cabeza abajo
+
+      ### 6. Seguridad y modificaciones
+      - Flexiona las rodillas si la falta de flexibilidad en los isquiotibiales no te deja formar la V
+      - Reduce el recorrido hasta que los hombros tengan suficiente fuerza
+      - Coloca una esterilla doblada bajo la cabeza las primeras sesiones
+      - Detente si sientes dolor en los hombros o el cuello
+    validated: false
+    source_digest: 8eb4fd4d45fc
+  decline-push-up:
+    name: Flexiones declinadas
+    instructions: |
+      ## Resumen
+      La flexión declinada es una flexión con los pies elevados sobre un banco o un cajón. Elevar los pies pone más peso corporal sobre las manos y dirige el empuje hacia la parte alta del pecho y los deltoides anteriores, por lo que es más difícil que la flexión en el suelo.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Apoya los pies en un banco o un cajón detrás de ti
+      - Coloca las manos en el suelo algo más abiertas que los hombros
+      - Alinea el cuerpo de los talones a la cabeza
+      - Activa el core y aprieta los glúteos
+
+      ### 2. Movimiento
+      1. Flexiona los codos para bajar el pecho hacia el suelo
+      2. Mantén los codos a unos 45 grados del cuerpo
+      3. Baja hasta que el pecho quede justo por encima del suelo
+      4. Empuja de nuevo hasta estirar los brazos
+      5. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Inhala al bajar
+      - Exhala al empujar hacia arriba
+
+      ### 4. Consejos
+      - Cuanto más altos los pies, más trabajo pasa a los hombros
+      - Mantén la cadera alineada; que no suba ni se hunda
+      - Abre los dedos y empuja con toda la mano
+      - Añade un chaleco lastrado o un disco en la espalda cuando las repeticiones con peso corporal sean fáciles
+
+      ### 5. Errores comunes
+      - Dejar que la zona lumbar se hunda
+      - Abrir los codos hacia los lados
+      - Bajar la cabeza en lugar del pecho
+      - Usar un recorrido corto y con rebote
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con un escalón bajo antes de pasar a un banco
+      - Vuelve a las flexiones en el suelo si no puedes mantener el cuerpo recto
+      - Comprueba que el banco o el cajón estén estables antes de empezar
+      - Detente si sientes dolor en los hombros o las muñecas
+    validated: false
+    source_digest: 130819b93478
+  incline-push-up:
+    name: Flexiones inclinadas
+    instructions: |
+      ## Resumen
+      La flexión inclinada es una flexión con las manos apoyadas en una superficie elevada, como un banco, un cajón o una pared. Elevar las manos les quita parte del peso corporal, así que es una versión más fácil de la flexión que sigue trabajando el pecho, los deltoides anteriores y los tríceps, y una buena forma de progresar hacia la versión en el suelo.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Apoya las manos en el borde de un banco o un cajón, algo más abiertas que los hombros
+      - Lleva los pies hacia atrás hasta que el cuerpo forme una línea recta de los talones a la cabeza
+      - Mantén los brazos estirados y los hombros sobre las manos
+      - Activa el core y aprieta los glúteos
+
+      ### 2. Movimiento
+      1. Flexiona los codos para bajar el pecho hacia el borde del banco
+      2. Mantén los codos a unos 45 grados del cuerpo
+      3. Baja hasta que el pecho casi toque el banco
+      4. Empuja de nuevo hasta estirar los brazos
+      5. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Inhala al bajar
+      - Exhala al empujar hacia arriba
+
+      ### 4. Consejos
+      - Cuanto más altas las manos, más fácil la flexión
+      - Baja la superficie con el tiempo para progresar hacia las flexiones en el suelo
+      - Mantén el cuerpo rígido como en una plancha
+      - Baja despacio
+
+      ### 5. Errores comunes
+      - Dejar que la cadera se hunda o se eleve
+      - Abrir los codos hacia los lados
+      - Adelantar la cabeza en lugar de bajar el pecho
+      - No completar el recorrido
+
+      ### 6. Seguridad y modificaciones
+      - Usa una pared si el banco todavía es demasiado difícil
+      - Asegúrate de que la superficie no pueda deslizarse ni volcar
+      - Mantén las muñecas bajo los hombros para protegerlas
+      - Detente si sientes dolor en los hombros o las muñecas
+    validated: false
+    source_digest: f38d1d48271d
+  ring-dip:
+    name: Fondos en anillas
+    instructions: |
+      ## Resumen
+      El fondo en anillas es un fondo hecho en anillas de gimnasia. Como las anillas se mueven libremente, tienes que mantenerlas firmes a los costados mientras bajas y empujas, así que trabaja el pecho, los tríceps y los deltoides anteriores junto con los pequeños músculos estabilizadores del hombro. Es claramente más difícil que un fondo en paralelas.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Coloca las anillas a la altura de la cadera, o lo bastante altas para que los pies no toquen el suelo al bajar
+      - Sujeta las anillas y salta o empuja hasta un apoyo con los brazos estirados
+      - Mantén las anillas pegadas a los costados, con las palmas hacia dentro o algo giradas hacia fuera
+      - Activa el core y mantén las piernas juntas
+
+      ### 2. Movimiento
+      1. Flexiona los codos para bajar el cuerpo, inclinando el torso ligeramente hacia delante
+      2. Mantén las anillas pegadas a los costados al bajar
+      3. Baja hasta que los hombros queden justo por debajo de los codos
+      4. Empuja de nuevo hasta estirar los brazos
+      5. Gira ligeramente las palmas hacia delante arriba para bloquear
+      6. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Inhala al bajar
+      - Exhala al empujar hacia arriba
+
+      ### 4. Consejos
+      - Aprieta las anillas contra el cuerpo para que no se separen
+      - Domina un apoyo estable antes de sumar repeticiones
+      - Muévete despacio; las anillas castigan las repeticiones apresuradas
+      - Añade peso con un cinturón de lastre cuando las repeticiones con peso corporal sean sólidas
+
+      ### 5. Errores comunes
+      - Dejar que las anillas se abran lejos del cuerpo
+      - Bajar más de lo que tus hombros pueden controlar
+      - Encoger los hombros abajo
+      - Dar patadas con las piernas para salir de abajo
+
+      ### 6. Seguridad y modificaciones
+      - Practica primero el apoyo y los fondos en paralelas
+      - Al principio mantén los pies cerca del suelo para poder sujetarte
+      - Reduce la profundidad si notas tensión en los hombros
+      - Detente si sientes dolor en la parte delantera del hombro
+    validated: false
+    source_digest: b85f49fd519e
+  belt-squat-machine:
+    name: Sentadilla con cinturón (máquina)
+    instructions: |
+      ## Resumen
+      La sentadilla con cinturón es una sentadilla en la que la carga cuelga de un cinturón alrededor de la cadera en lugar de una barra sobre la espalda. En la máquina, el cinturón se engancha a una palanca o a un cable, así que puedes trabajar duro los cuádriceps y los glúteos mientras la columna y los hombros casi no cargan nada, lo que la hace útil para entrenar pierna pesado con la espalda resentida.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ajusta bien el cinturón alrededor de la cadera
+      - Súbete a la plataforma y engancha el cinturón a la cadena o la palanca de la máquina
+      - Coloca los pies a la anchura de los hombros, con las puntas algo hacia fuera
+      - Sujeta ligeramente las asas o barandillas para mantener el equilibrio
+      - Quita el seguro para que el peso cuelgue del cinturón
+
+      ### 2. Movimiento
+      1. Flexiona rodillas y cadera para bajar en sentadilla con el pecho alto
+      2. Deja que las rodillas avancen sobre las puntas de los pies
+      3. Baja hasta que los muslos queden al menos paralelos a la plataforma
+      4. Empuja con todo el pie para volver a subir
+      5. Repite hasta completar las repeticiones objetivo y pon el seguro antes de desenganchar
+
+      ### 3. Respiración
+      - Inhala y activa el core antes de bajar
+      - Exhala al subir
+
+      ### 4. Consejos
+      - Usa las asas para el equilibrio, no para tirar de ti
+      - Un torso más erguido mantiene el trabajo en los cuádriceps
+      - Ajusta el cinturón para que quede en la cadera, no en la cintura
+      - Haz una pausa abajo para eliminar el rebote
+
+      ### 5. Errores comunes
+      - Dejar que las rodillas se vayan hacia dentro
+      - Ponerse de puntillas
+      - Recortar la profundidad
+      - Tirar con fuerza de las asas para subir
+
+      ### 6. Seguridad y modificaciones
+      - Pon siempre el seguro antes de desenganchar el cinturón
+      - Empieza ligero para aprender cómo se mueve la máquina
+      - Un cinturón de lastre con una pesa rusa, de pie sobre dos cajones, sirve sin máquina
+      - Detente si sientes dolor en las rodillas o la cadera
+    validated: false
+    source_digest: 7b9ba2971247
+  pendulum-squat-machine:
+    name: Sentadilla péndulo (máquina)
+    instructions: |
+      ## Resumen
+      La sentadilla péndulo es una sentadilla en máquina en la que el respaldo y las hombreras oscilan describiendo un arco en lugar de deslizarse por un carril recto. El arco mantiene la resistencia alta abajo, donde estás más profundo, y deja que las rodillas avancen mucho, así que trabaja los cuádriceps con mucha intensidad con la espalda apoyada.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Súbete a la plataforma con la espalda bien apoyada en el respaldo
+      - Coloca las hombreras sobre los hombros
+      - Pon los pies más o menos a la anchura de los hombros en el centro de la plataforma
+      - Sujeta las asas y sube para quitar el seguro
+
+      ### 2. Movimiento
+      1. Flexiona las rodillas y deja que el respaldo oscile hacia abajo mientras bajas
+      2. Mantén la espalda y la cadera contra el respaldo
+      3. Baja tanto como puedas controlar, idealmente por debajo del paralelo
+      4. Empuja con todo el pie para volver a subir
+      5. Detente justo antes de bloquear las rodillas arriba
+      6. Repite hasta completar las repeticiones objetivo y pon el seguro
+
+      ### 3. Respiración
+      - Inhala al bajar
+      - Exhala al subir
+
+      ### 4. Consejos
+      - Los pies más abajo en la plataforma dan más trabajo a los cuádriceps
+      - Los pies más arriba pasan parte del trabajo a los glúteos y los isquiotibiales
+      - Controla la parte baja; es donde la máquina resulta más dura
+      - Mantén la tensión durante la serie en lugar de descansar arriba
+
+      ### 5. Errores comunes
+      - Despegar la cadera del respaldo abajo
+      - Levantar los talones
+      - Usar un recorrido corto
+      - Bloquear las rodillas con fuerza arriba
+
+      ### 6. Seguridad y modificaciones
+      - Coloca los topes de seguridad antes de empezar
+      - Empieza ligero; el arco se siente distinto a una sentadilla hack
+      - Reduce la profundidad si notas tensión en las rodillas
+      - Detente si sientes dolor en las rodillas o la zona lumbar
+    validated: false
+    source_digest: 4f0f4e1c4484
+  hip-thrust-machine:
+    name: Hip thrust (máquina)
+    instructions: |
+      ## Resumen
+      El hip thrust en máquina es un ejercicio de glúteos que se hace en una máquina específica: con la parte alta de la espalda en un respaldo y un cinturón o palanca acolchada sobre la cadera, empujas la cadera hacia arriba hasta que el cuerpo queda recto de los hombros a las rodillas. La máquina resuelve la preparación que exige una barra, así que puedes cargar mucho los glúteos y ponerte a trabajar enseguida.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Siéntate en la máquina con la parte alta de la espalda contra el respaldo
+      - Coloca el acolchado o el cinturón sobre el pliegue de la cadera
+      - Apoya los pies en la plataforma a la anchura de la cadera
+      - Ajusta los pies para que las tibias queden verticales arriba del todo
+      - Sujeta las asas y activa el core
+
+      ### 2. Movimiento
+      1. Empuja con los talones para subir la cadera
+      2. Sube hasta extender del todo la cadera, con el cuerpo recto de los hombros a las rodillas
+      3. Aprieta fuerte los glúteos arriba un momento
+      4. Baja la cadera con control
+      5. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Exhala al subir la cadera
+      - Inhala al bajarla
+
+      ### 4. Consejos
+      - Mete la barbilla y mantén las costillas abajo arriba del todo
+      - Empuja con los talones, no con las puntas
+      - Haz una pausa arriba para que trabajen los glúteos
+      - Mantén un recorrido fluido sin rebotar abajo
+
+      ### 5. Errores comunes
+      - Arquear la zona lumbar arriba en lugar de extender la cadera
+      - Colocar los pies demasiado adelante o demasiado cerca
+      - Dejar que las rodillas se vayan hacia dentro
+      - Bajar con prisa
+
+      ### 6. Seguridad y modificaciones
+      - Empieza ligero mientras ajustas el acolchado y la posición de los pies
+      - Ajusta el acolchado para que no presione los huesos de la cadera
+      - El hip thrust con barra o con peso corporal sirve sin máquina
+      - Detente si notas tensión en la zona lumbar
+    validated: false
+    source_digest: abf80151cb7b
+  split-squat-dumbbell:
+    name: Sentadilla dividida (mancuernas)
+    instructions: |
+      ## Resumen
+      La sentadilla dividida con mancuernas es un ejercicio a una pierna con los pies escalonados y ambos apoyados en el suelo: con una mancuerna en cada mano, bajas la rodilla de atrás en vertical y vuelves a subir sin mover los pies. Trabaja los cuádriceps y los glúteos de la pierna delantera y es más estable que la zancada caminando o la sentadilla búlgara, que eleva el pie trasero.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Sujeta una mancuerna en cada mano a los costados
+      - Da un paso largo hacia delante con un pie, de unos 60 a 90 cm
+      - Apóyate en la parte delantera del pie de atrás
+      - Mantén el torso erguido y los pies separados a la anchura de la cadera
+      - Activa el core
+
+      ### 2. Movimiento
+      1. Flexiona ambas rodillas para bajar la rodilla de atrás en vertical hacia el suelo
+      2. Mantén el talón delantero apoyado y la rodilla delantera sobre el pie
+      3. Baja hasta que la rodilla de atrás quede justo por encima del suelo
+      4. Empuja con el pie delantero para volver a subir
+      5. Completa las repeticiones objetivo y cambia de pierna
+
+      ### 3. Respiración
+      - Inhala al bajar
+      - Exhala al subir
+
+      ### 4. Consejos
+      - Piensa en bajar y subir en línea recta, como un ascensor
+      - Una zancada más larga trabaja más los glúteos; una más corta, los cuádriceps
+      - Mantén la mayor parte del peso en la pierna delantera
+      - Usa correas si el agarre limita la carga
+
+      ### 5. Errores comunes
+      - Colocar los pies en una sola línea, lo que arruina el equilibrio
+      - Dejar que la rodilla delantera se vaya hacia dentro
+      - Empujar con el pie de atrás en lugar de con la pierna delantera
+      - Inclinarse mucho hacia delante abajo
+
+      ### 6. Seguridad y modificaciones
+      - Aprende el movimiento primero con el peso corporal
+      - Sujétate a un rack con una mano si te cuesta el equilibrio
+      - Coloca un cojín bajo la rodilla de atrás para controlar la profundidad
+      - Detente si sientes un dolor agudo en la rodilla delantera
+    validated: false
+    source_digest: 098b107609b9
+  lateral-lunge:
+    name: Zancada lateral
+    instructions: |
+      ## Resumen
+      La zancada lateral es una zancada hacia el lado: das un paso amplio a un lado y llevas la cadera atrás sobre esa pierna mientras la otra se mantiene estirada. Al moverte de lado trabajas los cuádriceps y los glúteos de la pierna flexionada, estiras y fortaleces la cara interna del muslo de la pierna estirada, y desarrollas la fuerza y la movilidad laterales que las zancadas hacia delante no cubren.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ponte de pie, erguido, con los pies juntos
+      - Mantén el pecho alto y los hombros atrás
+      - Junta las manos frente al pecho o ponlas en la cadera
+      - Activa el core
+
+      ### 2. Movimiento
+      1. Da un paso amplio hacia la derecha
+      2. Flexiona la rodilla derecha y lleva la cadera atrás, con la pierna izquierda estirada
+      3. Baja hasta que el muslo derecho quede casi paralelo al suelo
+      4. Mantén ambos pies apoyados y apuntando hacia delante
+      5. Empuja con el pie derecho para volver al inicio
+      6. Alterna los lados, o completa todas las repeticiones de un lado antes de cambiar
+
+      ### 3. Respiración
+      - Inhala al dar el paso y bajar
+      - Exhala al empujar para volver a la posición de pie
+
+      ### 4. Consejos
+      - Siéntate en la cadera como si buscaras una silla a tu lado
+      - Mantén la rodilla flexionada sobre las puntas de los pies
+      - Baja solo hasta donde tu cadera lo permita con el talón apoyado
+      - Sujeta una mancuerna o una pesa rusa al pecho cuando las repeticiones con peso corporal sean fáciles
+
+      ### 5. Errores comunes
+      - Dejar que la rodilla flexionada se vaya hacia dentro
+      - Levantar el talón del pie que trabaja
+      - Redondear la espalda al bajar
+      - Flexionar la pierna que queda estirada
+
+      ### 6. Seguridad y modificaciones
+      - Acorta el paso y la profundidad si tienes los aductores rígidos
+      - Sujétate a un apoyo para mantener el equilibrio al principio
+      - Calienta la cadera antes de trabajar en un recorrido profundo
+      - Detente si sientes dolor en la rodilla o la ingle
+    validated: false
+    source_digest: 890a8316dc65
+  nordic-hamstring-curl:
+    name: Curl nórdico de isquiotibiales
+    instructions: |
+      ## Resumen
+      El curl nórdico es un ejercicio de isquiotibiales con el peso corporal que se hace de rodillas con los tobillos sujetos: inclinas el cuerpo hacia delante tan despacio como puedas, resistiendo con los isquiotibiales, y luego te recoges con las manos y vuelves. La bajada lenta carga mucho los isquiotibiales mientras se alargan, lo que desarrolla fuerza y se usa mucho para reducir lesiones en esa zona.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Arrodíllate sobre un cojín con los tobillos sujetos bajo una barra, un banco o las manos de un compañero
+      - Mantén el cuerpo recto de las rodillas a la cabeza
+      - Aprieta los glúteos y activa el core
+      - Mantén las manos frente al pecho, listas para recogerte
+
+      ### 2. Movimiento
+      1. Inclínate hacia delante despacio, con la cadera estirada
+      2. Resiste la caída con los isquiotibiales tanto tiempo como puedas
+      3. Cuando ya no puedas sostenerla, recógete con las manos
+      4. Empuja ligeramente desde el suelo y tira con los isquiotibiales para volver a la vertical
+      5. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Inhala antes de empezar a inclinarte
+      - Exhala despacio mientras bajas
+
+      ### 4. Consejos
+      - La bajada es el ejercicio; haz que dure de tres a cinco segundos
+      - Mantén recta la línea de las rodillas a la cabeza, sin flexionar la cadera
+      - Ayúdate con las manos tanto como necesites para volver arriba
+      - Progresa recogiéndote cada vez más tarde
+
+      ### 5. Errores comunes
+      - Flexionar la cadera para acortar la palanca
+      - Caer rápido tras los primeros centímetros
+      - Dejar que los tobillos se suelten del anclaje
+      - Hacer demasiadas repeticiones demasiado pronto
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con pocas repeticiones; al principio produce mucha agujeta
+      - Una banda elástica desde arriba, pasada bajo el pecho, ayuda en la bajada
+      - Comprueba que el anclaje de los tobillos no se mueva antes de empezar
+      - Detente si sientes un dolor agudo en la parte posterior del muslo
+    validated: false
+    source_digest: c9c3cdef9e3c
+  glute-bridge:
+    name: Puente de glúteos
+    instructions: |
+      ## Resumen
+      El puente de glúteos es un ejercicio de glúteos con el peso corporal que se hace tumbado boca arriba: con las rodillas flexionadas y los pies apoyados, elevas la cadera hasta que el cuerpo queda recto de los hombros a las rodillas. Fortalece los glúteos y los isquiotibiales sin material y con poca tensión en la espalda, y es la versión en el suelo del hip thrust.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Túmbate boca arriba en una esterilla
+      - Flexiona las rodillas y apoya los pies en el suelo a la anchura de la cadera
+      - Acerca los talones lo suficiente para rozarlos con la punta de los dedos
+      - Deja los brazos a los costados, con las palmas hacia abajo
+      - Activa ligeramente el core
+
+      ### 2. Movimiento
+      1. Empuja con los talones para despegar la cadera del suelo
+      2. Sube hasta que el cuerpo quede recto de los hombros a las rodillas
+      3. Aprieta los glúteos arriba durante uno o dos segundos
+      4. Baja la cadera despacio hasta el suelo
+      5. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Exhala al subir la cadera
+      - Inhala al bajarla
+
+      ### 4. Consejos
+      - Empuja con los talones para mantener el trabajo en los glúteos
+      - Mantén las costillas abajo para que la zona lumbar no se arquee
+      - Mantén más tiempo arriba para hacerlo más difícil
+      - Levanta un pie para progresar al puente a una pierna
+
+      ### 5. Errores comunes
+      - Arquear la zona lumbar en lugar de extender la cadera
+      - Empujar con las puntas de los pies
+      - Dejar que las rodillas se cierren o se separen
+      - Dejar caer la cadera rápido
+
+      ### 6. Seguridad y modificaciones
+      - Reduce el recorrido si tienes la espalda sensible
+      - Coloca una minibanda sobre las rodillas para trabajar la parte externa del glúteo
+      - Mantén la cabeza y los hombros apoyados en la esterilla
+      - Si se te cargan los isquiotibiales, acerca los pies
+    validated: false
+    source_digest: 7d2b43bcdce5
+  glute-bridge-barbell:
+    name: Puente de glúteos (barra)
+    instructions: |
+      ## Resumen
+      El puente de glúteos con barra es un puente de glúteos desde el suelo con una barra cargada sobre la cadera. Con los hombros en el suelo en lugar de en un banco, el recorrido es más corto que en el hip thrust y la carga sigue siendo alta arriba, donde los glúteos trabajan más. Es una forma sencilla de cargar mucho los glúteos con poca preparación.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Siéntate en el suelo y rueda la barra cargada sobre las piernas hasta que quede en el pliegue de la cadera
+      - Pon un cojín o una esterilla doblada bajo la barra
+      - Túmbate con los hombros y la cabeza en el suelo
+      - Flexiona las rodillas y apoya los pies a la anchura de la cadera
+      - Sujeta la barra a ambos lados de la cadera
+
+      ### 2. Movimiento
+      1. Empuja con los talones para subir la barra con la cadera
+      2. Sube hasta que el cuerpo quede recto de los hombros a las rodillas
+      3. Aprieta fuerte los glúteos arriba
+      4. Baja la cadera con control hasta que casi toque el suelo
+      5. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Exhala al subir la cadera
+      - Inhala al bajar
+
+      ### 4. Consejos
+      - Usa discos de tamaño estándar para que la barra quede lo bastante alta para rodarla
+      - Mete la barbilla y mantén las costillas abajo
+      - Las repeticiones cortas y controladas cerca de arriba son una variante habitual
+      - Sujeta la barra para que no ruede hacia el pecho o los muslos
+
+      ### 5. Errores comunes
+      - Arquear la zona lumbar arriba
+      - Empujar con las puntas en lugar de los talones
+      - Dejar que la barra se salga del pliegue de la cadera
+      - Rebotar la cadera contra el suelo
+
+      ### 6. Seguridad y modificaciones
+      - Acolcha siempre la barra; presiona directamente sobre los huesos de la cadera
+      - Empieza ligero mientras aprendes a colocar la barra
+      - El puente de glúteos con peso corporal es el punto de partida
+      - Detente si notas tensión en la zona lumbar
+    validated: false
+    source_digest: 220b8cc388b1
+  walking-lunge-weighted:
+    name: Zancadas caminando (con lastre)
+    instructions: |
+      ## Resumen
+      La zancada caminando con lastre es una zancada que avanza: con mancuernas, un saco de arena u otra carga, das un paso adelante en zancada y luego pasas la pierna de atrás al siguiente paso. Se registra por peso y distancia recorrida, y trabaja los cuádriceps y los glúteos junto con el equilibrio y la condición física.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Sujeta la carga: mancuernas a los costados, o un saco de arena abrazado al pecho o sobre un hombro
+      - Ponte erguido con los pies a la anchura de la cadera
+      - Despeja un recorrido recto delante de ti
+      - Activa el core
+
+      ### 2. Movimiento
+      1. Da un paso largo adelante con una pierna
+      2. Baja la rodilla de atrás hacia el suelo hasta que ambas rodillas formen unos 90 grados
+      3. Empuja con el pie delantero y lleva la pierna de atrás adelante al siguiente paso
+      4. Sigue alternando las piernas mientras avanzas
+      5. Continúa hasta la distancia objetivo
+
+      ### 3. Respiración
+      - Inhala al bajar en cada zancada
+      - Exhala al subir y dar el paso
+
+      ### 4. Consejos
+      - Mantén el torso erguido y la mirada al frente
+      - Da pasos lo bastante largos para que la rodilla delantera quede sobre el pie
+      - Elige un ritmo constante en lugar de apresurar los pasos
+      - Mide la distancia, o cuenta los pasos, para poder comparar las series
+
+      ### 5. Errores comunes
+      - Dar pasos cortos que llevan la rodilla delantera muy por delante de las puntas
+      - Dejar que la rodilla se vaya hacia dentro
+      - Inclinarse hacia delante bajo la carga
+      - Golpear el suelo con la rodilla de atrás
+
+      ### 6. Seguridad y modificaciones
+      - Aprende la zancada caminando con peso corporal antes de añadir carga
+      - Elige una carga que puedas controlar durante toda la distancia
+      - Haz una pausa entre pasos si pierdes el equilibrio
+      - Detente si sientes dolor en las rodillas
+    validated: false
+    source_digest: 7875bb462320
+  snatch-kettlebell:
+    name: Arranque (pesa rusa)
+    instructions: |
+      ## Resumen
+      El arranque con pesa rusa es un levantamiento balístico a una mano que lleva la pesa desde entre las piernas hasta encima de la cabeza en un solo movimiento. Un golpe de cadera potente impulsa la pesa hacia arriba, la guías cerca del cuerpo y metes la mano para bloquear. Trabaja a la vez los glúteos, los isquiotibiales, la espalda y los hombros, y es un ejercicio de acondicionamiento exigente.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ponte de pie con los pies algo más abiertos que la cadera y una pesa rusa en el suelo delante de ti
+      - Flexiona la cadera y sujeta el asa con una mano
+      - Mantén la espalda recta y el hombro bajo y estable
+      - Lleva la pesa hacia atrás entre las piernas para empezar
+
+      ### 2. Movimiento
+      1. Extiende la cadera con fuerza para impulsar la pesa hacia arriba, como en un swing
+      2. Mantén la pesa cerca del cuerpo mientras sube, con el codo alto
+      3. Cuando pase por la cabeza, mete la mano a través del asa para que la pesa se apoye en el dorso del antebrazo
+      4. Bloquea el brazo arriba con la pesa estable
+      5. Deja caer la pesa y guíala entre las piernas para la siguiente repetición
+      6. Completa las repeticiones objetivo y cambia de mano
+
+      ### 3. Respiración
+      - Exhala con fuerza al extender la cadera
+      - Inhala cuando la pesa vuelve a bajar
+
+      ### 4. Consejos
+      - La cadera hace el trabajo; el brazo solo guía la pesa
+      - Mete la mano arriba para que la pesa no se voltee y golpee el antebrazo
+      - Domina el swing y la cargada antes del arranque
+      - Mantén la trayectoria de la pesa cerca del cuerpo
+
+      ### 5. Errores comunes
+      - Lanzar la pesa en un arco amplio
+      - Subirla con el brazo en lugar de con la cadera
+      - Dejar que la pesa golpee el antebrazo
+      - Hacer una sentadilla en lugar de flexionar la cadera
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con una pesa ligera y pocas repeticiones
+      - Deja mucho espacio libre delante y detrás
+      - El swing a una mano o el tirón alto son pasos más fáciles hacia este ejercicio
+      - Detente si sientes dolor en el hombro o la zona lumbar
+    validated: false
+    source_digest: 83928fd54d24
+  clean-kettlebell:
+    name: Cargada (pesa rusa)
+    instructions: |
+      ## Resumen
+      La cargada con pesa rusa lleva la pesa desde entre las piernas hasta la posición de rack, junto al hombro, en un solo movimiento. Un golpe de cadera impulsa la pesa y la guías cerca del cuerpo para que se apoye suavemente en el antebrazo. Trabaja la cadera, la espalda y el agarre, y es el inicio de muchos ejercicios con pesa rusa, como el press y la sentadilla frontal.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ponte de pie con los pies algo más abiertos que la cadera y una pesa rusa en el suelo delante de ti
+      - Flexiona la cadera y sujeta el asa con una mano
+      - Mantén la espalda recta y el hombro bajo y estable
+      - Lleva la pesa hacia atrás entre las piernas
+
+      ### 2. Movimiento
+      1. Extiende la cadera con fuerza para impulsar la pesa hacia arriba
+      2. Mantén el codo cerca del cuerpo mientras sube la pesa
+      3. Gira la mano alrededor del asa para que la pesa llegue suavemente a la posición de rack
+      4. Termina erguido con la pesa apoyada entre el antebrazo y el brazo
+      5. Deja caer la pesa entre las piernas para la siguiente repetición
+      6. Completa las repeticiones objetivo y cambia de mano
+
+      ### 3. Respiración
+      - Exhala al extender la cadera
+      - Inhala cuando la pesa vuelve a bajar
+
+      ### 4. Consejos
+      - Piensa en subir una cremallera: la pesa viaja pegada al cuerpo
+      - Afloja el agarre arriba para que la pesa gire alrededor de la mano
+      - Mantén la muñeca recta en la posición de rack
+      - Aprende primero el swing a dos manos
+
+      ### 5. Errores comunes
+      - Lanzar la pesa hacia fuera de modo que golpee el antebrazo
+      - Subirla con un curl de brazo
+      - Separar el codo del cuerpo en el rack
+      - Doblar la muñeca hacia atrás bajo la pesa
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con una pesa ligera mientras aprendes la recepción
+      - Usa manga larga o una muñequera si la pesa te marca el antebrazo
+      - Con dos pesas a la vez se convierte en una cargada doble
+      - Detente si sientes dolor en la muñeca o la zona lumbar
+    validated: false
+    source_digest: 8ad5ea2dbfde
+  snatch-dumbbell:
+    name: Arranque (mancuerna)
+    instructions: |
+      ## Resumen
+      El arranque con mancuerna es un levantamiento de potencia a una mano que lleva la mancuerna del suelo a encima de la cabeza en un solo movimiento. Una extensión explosiva de cadera, rodillas y tobillos, como un salto, lanza la mancuerna; tiras de ella cerca del cuerpo y la recibes con el brazo estirado arriba. Es más fácil de aprender que el arranque con barra y desarrolla potencia en todo el cuerpo.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ponte de pie con los pies a la anchura de la cadera y una mancuerna en el suelo entre ellos
+      - Baja con la cadera atrás y sujeta la mancuerna con una mano
+      - Mantén la espalda recta, el pecho alto y el brazo estirado
+      - Apoya la mano libre en el muslo o llévala al lado
+
+      ### 2. Movimiento
+      1. Empuja con los pies y extiende la cadera y las rodillas de forma explosiva
+      2. Tira de la mancuerna hacia arriba cerca del cuerpo, con el codo alto
+      3. Métete ligeramente debajo y estira el brazo por encima de la cabeza
+      4. Ponte de pie del todo con la mancuerna bloqueada arriba
+      5. Bájala al hombro, luego al suelo, y prepárate para la siguiente repetición
+      6. Completa las repeticiones objetivo y cambia de mano, o alterna las manos en cada repetición
+
+      ### 3. Respiración
+      - Inhala abajo antes de impulsarte
+      - Exhala al lanzar la mancuerna hacia arriba
+
+      ### 4. Consejos
+      - La potencia sale de las piernas y la cadera, no del brazo
+      - Mantén la mancuerna cerca; un arco amplio desperdicia potencia
+      - Bloquea el codo y mantén el hombro activo arriba
+      - Empezar con la mancuerna colgando entre las rodillas es más fácil que desde el suelo
+
+      ### 5. Errores comunes
+      - Terminar con un press en lugar de recibirla con el brazo bloqueado
+      - Redondear la espalda al empezar
+      - Alejar la mancuerna del cuerpo en el balanceo
+      - No terminar con la cadera totalmente extendida
+
+      ### 6. Seguridad y modificaciones
+      - Empieza con una mancuerna ligera
+      - Despeja el espacio a tu alrededor antes de cada serie
+      - El tirón alto con mancuerna es una forma más fácil de aprender el tirón
+      - Detente si sientes dolor en el hombro o la zona lumbar
+    validated: false
+    source_digest: 0528be79049c
+  clean-and-press-barbell:
+    name: Cargada y press (barra)
+    instructions: |
+      ## Resumen
+      La cargada y press con barra combina dos levantamientos: cargas la barra del suelo a los hombros y luego la empujas en estricto por encima de la cabeza. Trabaja las piernas, la cadera y la espalda en la cargada, y los hombros y los tríceps en el press, por lo que es un clásico del entrenamiento de fuerza y acondicionamiento de cuerpo completo.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ponte de pie con los pies a la anchura de la cadera y la barra sobre la mitad del pie
+      - Baja y sujeta la barra justo por fuera de las rodillas con agarre prono
+      - Mantén la espalda recta, el pecho alto y los hombros algo por delante de la barra
+      - Activa el core
+
+      ### 2. Movimiento
+      1. Empuja con las piernas para despegar la barra del suelo, manteniéndola cerca
+      2. Cuando pase las rodillas, extiende la cadera de forma explosiva
+      3. Lleva los codos rápido hacia delante bajo la barra para recibirla sobre la parte delantera de los hombros
+      4. Ponte erguido con la barra en posición de rack
+      5. Empuja la barra en vertical por encima de la cabeza hasta bloquear los brazos
+      6. Bájala a los hombros, luego al suelo, y prepárate para la siguiente repetición
+
+      ### 3. Respiración
+      - Inhala y activa el core en el suelo
+      - Exhala tras recibir la cargada, y vuelve a inhalar y activar el core antes del press
+      - Exhala al empujar hacia arriba
+
+      ### 4. Consejos
+      - Mantén la barra cerca del cuerpo durante toda la cargada
+      - Aprieta los glúteos durante el press para no inclinarte hacia atrás
+      - Retira la cabeza para dejar pasar la barra y vuelve a meterla cuando esté arriba
+      - Recoloca los pies entre la cargada y el press si lo necesitas
+
+      ### 5. Errores comunes
+      - Subir la barra con los brazos en lugar de con la cadera
+      - Recibir con los codos bajos, con la barra apoyada en las manos
+      - Inclinarse hacia atrás y convertir el press en un push press
+      - Redondear la espalda cuando la barra sale del suelo
+
+      ### 6. Seguridad y modificaciones
+      - Aprende primero la cargada y el press militar por separado
+      - Empieza ligero y usa discos de goma por si tienes que soltar la barra
+      - Empezar desde colgado es más fácil que desde el suelo
+      - Detente si sientes dolor en la zona lumbar, las muñecas o los hombros
+    validated: false
+    source_digest: a742d6ba97f1
   aerobics:
     name: Aeróbicos
     instructions: |
@@ -13620,6 +14585,49 @@ exercises:
       Los aeróbicos son una forma de ejercicio cardiovascular que combina movimientos rítmicos con música. Trabajan el sistema cardiovascular y varios grupos musculares, mejorando la salud del corazón, la resistencia, la coordinación y la condición física general mediante una actividad sostenida de intensidad moderada a vigorosa.
     validated: false
     source_digest: 48ce16b91ca4
+  air-bike:
+    name: Bicicleta de aire
+    instructions: |
+      ## Resumen
+      La bicicleta de aire es una bicicleta estática con un gran ventilador como volante y asas móviles que empujas y tiras mientras pedaleas. La resistencia del ventilador aumenta cuanto más fuerte trabajas, así que la misma máquina sirve para un paseo suave y constante o para un esprint a tope. Al trabajar brazos y piernas a la vez, es una de las máquinas de cardio más exigentes del gimnasio.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ajusta la altura del sillín para que la rodilla quede ligeramente flexionada en el punto bajo del pedaleo
+      - Siéntate erguido y coloca los pies en los pedales
+      - Sujeta las asas con los brazos ligeramente flexionados
+      - Activa ligeramente el core
+
+      ### 2. Movimiento
+      1. Empieza a pedalear a un ritmo suave
+      2. Empuja y tira de las asas al ritmo de las piernas
+      3. Sube el esfuerzo poco a poco; pedalea más rápido y empuja más fuerte para más resistencia
+      4. Mantén el ritmo objetivo, o alterna esprints con recuperación suave
+      5. Baja la intensidad en el último minuto o dos para volver a la calma
+
+      ### 3. Respiración
+      - Respira de forma constante y rítmica a ritmo suave
+      - En los esprints, respira fuerte y rápido sin aguantar la respiración
+
+      ### 4. Consejos
+      - Empuja con las piernas; los brazos suman trabajo pero no deben llevar el peso
+      - Usa las calorías o los vatios de la pantalla para que los intervalos sean constantes
+      - Mantén el tronco estable en lugar de balancearte de lado a lado
+      - Los intervalos cortos e intensos son una forma habitual de usar esta máquina
+
+      ### 5. Errores comunes
+      - Poner el sillín demasiado bajo, lo que carga las rodillas
+      - Ir a tope desde el primer minuto y desfondarse enseguida
+      - Tirar solo con los brazos mientras las piernas van sueltas
+      - Encorvarse sobre las asas
+
+      ### 6. Seguridad y modificaciones
+      - Usa los reposapiés para descansar las piernas y trabajar solo los brazos, o suelta las asas para pedalear solo con las piernas
+      - Empieza con sesiones cortas para aprender a dosificarte
+      - Espera a los esprints hasta que un paseo constante te resulte cómodo
+      - Detente si te mareas o sientes dolor en el pecho
+    validated: false
+    source_digest: 000146ece675
   battle-ropes:
     name: Cuerdas de batalla
     instructions: |

@@ -3084,7 +3084,7 @@ exercises:
     validated: false
     source_digest: 6556f917e034
   triceps-pushdown-cable-straight-bar:
-    name: Extension des triceps à la poulie haute (barre droite)
+    name: Extension des triceps à la poulie haute
     instructions: |
       ## Aperçu
       L'extension des triceps à la poulie haute est un exercice d'isolation qui cible principalement les trois chefs du triceps avec une tension constante. Il sollicite aussi très légèrement les épaules comme stabilisateurs, la poulie haute munie d'une barre droite assurant une résistance régulière tout au long du mouvement.
@@ -3130,7 +3130,7 @@ exercises:
       - Variante avancée : travaillez un bras à la fois pour un accent unilatéral
       - Ajoutez une pause de 2 à 3 secondes en extension complète pour plus d'intensité
     validated: false
-    source_digest: 71683f6aee68
+    source_digest: 308669fb6b9b
   upright-row-cable:
     name: Tirage menton (poulie)
     instructions: |
@@ -13602,6 +13602,971 @@ exercises:
       - Arrêtez si vous ressentez une douleur aux genoux, au dos ou aux épaules
     validated: false
     source_digest: 348381151bd2
+  russian-twist-weighted:
+    name: Rotations russes (lestées)
+    instructions: |
+      ## Aperçu
+      Les rotations russes lestées sont un exercice de rotation du tronc en position assise, en tenant un disque, un haltère ou un médecine-ball : vous vous inclinez en arrière, poitrine haute, et faites passer la charge d'un côté du corps à l'autre. La charge oblige les obliques à travailler davantage pour lancer et freiner chaque rotation, tandis que le reste de la sangle abdominale tient l'inclinaison.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Asseyez-vous sur un tapis, genoux fléchis et talons au sol
+      - Tenez la charge à deux mains devant la poitrine, coudes légèrement fléchis
+      - Inclinez-vous en arrière jusqu'à ce que le buste forme environ 45 degrés avec le sol
+      - Gardez la poitrine haute et le dos droit
+      - Gainez la sangle abdominale
+
+      ### 2. Mouvement
+      1. Tournez le buste vers la droite et amenez la charge près de la hanche droite
+      2. Gardez les genoux et les hanches immobiles pendant la rotation
+      3. Revenez au centre avec contrôle
+      4. Continuez vers la gauche et amenez la charge près de la hanche gauche
+      5. Comptez chaque côté comme une répétition, ou chaque aller-retour, mais toujours de la même façon
+      6. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Expirez en tournant de chaque côté
+      - Inspirez en repassant par le centre
+
+      ### 4. Conseils
+      - Tournez depuis la cage thoracique, pas seulement avec les bras
+      - Suivez la charge du regard pour que la rotation soit complète
+      - Commencez léger ; une charge lourde transforme vite le mouvement en balancement des bras
+      - Décollez les pieds du sol pour corser l'exercice une fois la technique maîtrisée
+
+      ### 5. Erreurs fréquentes
+      - Arrondir le bas du dos en s'inclinant en arrière
+      - Balancer la charge avec les bras pendant que le buste reste fixe
+      - Laisser les genoux osciller d'un côté à l'autre
+      - Aller trop vite pour contrôler la rotation
+
+      ### 6. Sécurité et adaptations
+      - Gardez les talons au sol tant que vous ne contrôlez pas l'inclinaison
+      - Prenez une charge plus légère, ou aucune, si le bas du dos commence à tirer
+      - Réduisez l'amplitude de la rotation si vous sentez une tension dans la colonne
+      - Évitez l'exercice si les rotations sous charge aggravent un problème de dos
+    validated: false
+    source_digest: facfb99eea0d
+  triceps-kickback-dumbbell:
+    name: Extension du triceps vers l'arrière (haltère)
+    instructions: |
+      ## Aperçu
+      L'extension du triceps vers l'arrière à l'haltère, ou kickback, est un exercice d'isolation pour l'arrière du bras : penché en avant, le bras immobile le long du corps, vous tendez le coude pour envoyer l'haltère vers l'arrière. Elle sollicite les trois chefs du triceps et devient la plus difficile en extension complète, ce qui en fait un bon exercice de finition avec des charges légères.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Posez le genou et la main gauches sur un banc plat
+      - Tenez un haltère dans la main droite en prise neutre
+      - Gardez le dos plat et à peu près parallèle au sol
+      - Montez le bras droit jusqu'à l'aligner avec le buste, coude fléchi à 90 degrés
+      - Gardez la nuque neutre et regardez le sol
+
+      ### 2. Mouvement
+      1. Tendez le coude pour amener l'haltère vers l'arrière jusqu'à l'extension complète du bras
+      2. Gardez le bras immobile et collé au flanc
+      3. Contractez le triceps un instant en extension complète
+      4. Fléchissez lentement le coude pour revenir à 90 degrés
+      5. Terminez les répétitions prévues, puis changez de bras
+
+      ### 3. Respiration
+      - Expirez en tendant le bras
+      - Inspirez en le fléchissant
+
+      ### 4. Conseils
+      - Seul l'avant-bras bouge ; le bras sert de charnière
+      - Choisissez un poids que vous pouvez tenir une seconde en extension complète
+      - Contrôlez l'haltère au retour
+      - Les deux bras peuvent travailler ensemble, debout en flexion de hanches, sans banc
+
+      ### 5. Erreurs fréquentes
+      - Balancer la charge avec de l'élan
+      - Laisser le bras retomber vers le sol
+      - S'arrêter avant l'extension complète
+      - Arrondir le dos
+
+      ### 6. Sécurité et adaptations
+      - Commencez avec un haltère léger ; cet exercice demande peu de charge
+      - Arrêtez-vous si vous ressentez une douleur dans l'articulation du coude
+      - Une poulie ou une bande élastique maintient la tension sur toute l'amplitude
+      - Placez la main d'appui juste sous l'épaule pour protéger le bas du dos
+    validated: false
+    source_digest: ff8de071e9e8
+  meadows-row-barbell:
+    name: Rowing Meadows (barre)
+    instructions: |
+      ## Aperçu
+      Le rowing Meadows est un rowing à un bras réalisé au bout d'une barre ancrée dans un landmine ou dans un coin. De profil par rapport à la barre, vous saisissez son extrémité épaisse en pronation et la tirez vers la hanche. L'angle fait travailler les dorsaux et le haut du dos sur une grande amplitude, et la position décalée des pieds permet de charger plus lourd qu'un rowing à l'haltère.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Ancrez une extrémité de la barre dans un landmine ou un coin et chargez les disques à l'autre bout
+      - Placez-vous de profil par rapport à la barre, près des disques, la barre à côté du bras qui travaille
+      - Décalez les pieds : la jambe la plus proche de la barre en arrière, l'autre devant et fléchie
+      - Penchez-vous en flexion de hanches jusqu'à ce que le buste soit presque parallèle au sol
+      - Posez l'avant-bras libre sur la cuisse avant et saisissez le bout de la barre en pronation
+
+      ### 2. Mouvement
+      1. Tirez la barre vers la hanche en montant le coude vers le haut et l'arrière
+      2. Gardez le buste immobile et le dos plat
+      3. Serrez l'omoplate vers la colonne en haut du mouvement
+      4. Redescendez lentement jusqu'à ce que le bras soit tendu et le dorsal étiré
+      5. Terminez les répétitions prévues, puis changez de côté
+
+      ### 3. Respiration
+      - Expirez en tirant la barre
+      - Inspirez en la redescendant
+
+      ### 4. Conseils
+      - Utilisez de petits disques pour que la barre parcoure toute l'amplitude
+      - Laissez l'épaule descendre en bas pour un étirement complet
+      - Des sangles aident si la prise sur l'extrémité épaisse lâche en premier
+      - Pensez à tirer avec le coude, pas avec la main
+
+      ### 5. Erreurs fréquentes
+      - Tourner le buste pour arracher la charge
+      - Arrondir le dos en flexion de hanches
+      - Raccourcir l'amplitude en bas
+      - Hausser l'épaule vers l'oreille
+
+      ### 6. Sécurité et adaptations
+      - Commencez léger le temps d'apprendre la position
+      - Gardez le bras libre en appui sur la cuisse pour protéger le bas du dos
+      - Le rowing à un bras à l'haltère est une alternative plus simple
+      - Arrêtez-vous si vous sentez une tension dans le bas du dos plutôt qu'un effort dans le dos
+    validated: false
+    source_digest: adad4d535ebb
+  chest-supported-t-bar-row:
+    name: Rowing à la barre en T avec appui pectoral
+    instructions: |
+      ## Aperçu
+      Le rowing à la barre en T avec appui pectoral se fait sur une machine de rowing munie d'un appui incliné : allongé face au support, vous tirez un bras de levier chargé vers la poitrine. Poitrine en appui, le bas du dos ne participe pas et ce sont les dorsaux, le milieu du dos et l'arrière des épaules qui travaillent, si bien que vous pouvez tirer lourd sans la fatigue de maintenir la flexion de hanches.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Réglez le repose-pieds pour que la poitrine arrive en haut de l'appui
+      - Montez sur le repose-pieds et penchez-vous sur l'appui, poitrine bien plaquée
+      - Saisissez les poignées avec la prise voulue : large en pronation, ou serrée en prise neutre
+      - Décrochez le levier de son support pour que les bras pendent tendus
+      - Gardez la nuque neutre et les épaules basses
+
+      ### 2. Mouvement
+      1. Tirez les poignées vers la poitrine en ramenant les coudes vers l'arrière
+      2. Serrez les omoplates en haut du mouvement
+      3. Gardez la poitrine sur l'appui tout du long
+      4. Redescendez lentement jusqu'à ce que les bras soient tendus
+      5. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Expirez en tirant les poignées
+      - Inspirez en les redescendant
+
+      ### 4. Conseils
+      - Une prise large déplace le travail vers le haut du dos et l'arrière des épaules
+      - Une prise serrée, coudes près du corps, cible davantage les dorsaux
+      - Laissez les omoplates avancer en bas pour un étirement complet
+      - Marquez une courte pause en haut de chaque répétition
+
+      ### 5. Erreurs fréquentes
+      - Décoller la poitrine de l'appui pour arracher la charge
+      - Faire des mouvements courts et saccadés
+      - Hausser les épaules vers les oreilles
+      - Laisser retomber la charge à la descente
+
+      ### 6. Sécurité et adaptations
+      - Commencez léger le temps de régler la hauteur de l'appui
+      - Reposez le levier sur son support en fin de série, ne le lâchez jamais
+      - Le rowing aux haltères sur banc incliné fait travailler les mêmes muscles
+      - Arrêtez-vous si vous ressentez une douleur aux épaules
+    validated: false
+    source_digest: 9b545d96f332
+  reverse-hyperextension:
+    name: Hyperextension inversée
+    instructions: |
+      ## Aperçu
+      L'hyperextension inversée se pratique allongé sur le ventre, sur une machine dédiée ou un banc haut, les jambes pendant au bout : vous montez les jambes tendues derrière vous jusqu'à les aligner avec le buste. Elle fait travailler les fessiers, les ischio-jambiers et les lombaires sans charger la colonne, d'où sa popularité pour la force comme pour la santé du bas du dos.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Allongez-vous sur le ventre, les hanches au bord du support
+      - Tenez fermement les poignées
+      - Laissez les jambes pendre tendues, pieds dans la sangle ou joints s'il n'y en a pas
+      - Gainez légèrement la sangle abdominale
+
+      ### 2. Mouvement
+      1. Contractez les fessiers et montez les jambes tendues derrière vous
+      2. Montez jusqu'à ce que les jambes soient dans l'alignement du buste
+      3. Marquez une courte pause en haut
+      4. Redescendez les jambes avec contrôle jusqu'à ce qu'elles pendent
+      5. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Expirez en montant les jambes
+      - Inspirez en les redescendant
+
+      ### 4. Conseils
+      - Lancez le mouvement depuis les hanches, pas depuis les lombaires
+      - Contrôlez la descente ; ne vous laissez pas emporter par le balancier
+      - Commencez au poids du corps avant d'ajouter des disques à la sangle
+      - Gardez le haut du corps détendu sur le support
+
+      ### 5. Erreurs fréquentes
+      - Monter les jambes bien au-dessus du buste en cambrant les lombaires
+      - Prendre de l'élan en bas au lieu d'utiliser les fessiers
+      - Plier les genoux pour raccourcir le levier
+      - Laisser retomber la charge à la fin de chaque répétition
+
+      ### 6. Sécurité et adaptations
+      - Prenez une charge légère au début ; l'arc de cercle crée vite de l'élan
+      - Un banc haut ou une table solide font l'affaire sans machine
+      - Réduisez l'amplitude si vous sentez un pincement dans le bas du dos en haut
+      - Arrêtez-vous si vous ressentez une douleur vive dans le dos
+    validated: false
+    source_digest: f6e0093b195a
+  pike-push-up:
+    name: Pompes en pike
+    instructions: |
+      ## Aperçu
+      La pompe en pike est un développé des épaules au poids du corps : hanches hautes, le corps en V inversé, vous fléchissez les bras pour descendre le sommet du crâne vers le sol, puis vous repoussez. L'angle place l'essentiel du travail sur les épaules et les triceps, et c'est l'étape habituelle vers la pompe en équilibre sur les mains.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Commencez en position de pompe, mains un peu plus écartées que les épaules
+      - Rapprochez les pieds des mains et montez les hanches
+      - Formez un V inversé, bras et dos alignés
+      - Gardez les jambes aussi tendues que possible sans forcer
+      - Regardez vers vos pieds
+
+      ### 2. Mouvement
+      1. Fléchissez les coudes pour descendre le sommet du crâne vers le sol, devant les mains
+      2. Gardez les hanches hautes pour que le buste reste bien incliné
+      3. Descendez jusqu'à ce que la tête touche presque le sol
+      4. Repoussez jusqu'à ce que les bras soient tendus
+      5. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Inspirez en descendant
+      - Expirez en poussant
+
+      ### 4. Conseils
+      - La tête passe devant les mains et forme un triangle avec elles
+      - Orientez les coudes vers l'arrière, pas écartés sur les côtés
+      - Posez les pieds sur une box ou un banc pour corser l'exercice
+      - Plus le buste est vertical, plus on se rapproche de la pompe en équilibre
+
+      ### 5. Erreurs fréquentes
+      - Laisser tomber les hanches, ce qui en fait une pompe classique
+      - Écarter largement les coudes
+      - Faire une amplitude courte qui s'arrête loin du sol
+      - Se laisser tomber sur la tête en bas
+
+      ### 6. Sécurité et adaptations
+      - Pliez les genoux si des ischio-jambiers raides vous empêchent de former le V
+      - Réduisez l'amplitude jusqu'à ce que les épaules soient assez fortes
+      - Placez un tapis plié sous la tête lors des premières séances
+      - Arrêtez-vous si vous ressentez une douleur aux épaules ou à la nuque
+    validated: false
+    source_digest: 8eb4fd4d45fc
+  decline-push-up:
+    name: Pompes déclinées
+    instructions: |
+      ## Aperçu
+      La pompe déclinée est une pompe réalisée les pieds surélevés sur un banc ou une box. Surélever les pieds reporte davantage de poids du corps sur les mains et oriente la poussée vers le haut des pectoraux et l'avant des épaules, ce qui la rend plus difficile qu'une pompe au sol.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Posez les pieds sur un banc ou une box derrière vous
+      - Placez les mains au sol un peu plus écartées que les épaules
+      - Alignez le corps des talons à la tête
+      - Gainez la sangle abdominale et serrez les fessiers
+
+      ### 2. Mouvement
+      1. Fléchissez les coudes pour descendre la poitrine vers le sol
+      2. Gardez les coudes à environ 45 degrés du corps
+      3. Descendez jusqu'à ce que la poitrine soit juste au-dessus du sol
+      4. Repoussez jusqu'à ce que les bras soient tendus
+      5. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Inspirez en descendant
+      - Expirez en poussant
+
+      ### 4. Conseils
+      - Plus les pieds sont hauts, plus le travail passe aux épaules
+      - Gardez les hanches alignées ; elles ne doivent ni monter ni s'affaisser
+      - Écartez les doigts et poussez avec toute la main
+      - Ajoutez un gilet lesté ou un disque sur le dos quand les répétitions au poids du corps deviennent faciles
+
+      ### 5. Erreurs fréquentes
+      - Laisser le bas du dos s'affaisser
+      - Écarter les coudes sur les côtés
+      - Baisser la tête au lieu de descendre la poitrine
+      - Faire une amplitude courte avec rebond
+
+      ### 6. Sécurité et adaptations
+      - Commencez avec une marche basse avant de passer au banc
+      - Revenez aux pompes au sol si vous ne pouvez pas garder le corps droit
+      - Vérifiez que le banc ou la box est stable avant de commencer
+      - Arrêtez-vous si vous ressentez une douleur aux épaules ou aux poignets
+    validated: false
+    source_digest: 130819b93478
+  incline-push-up:
+    name: Pompes inclinées
+    instructions: |
+      ## Aperçu
+      La pompe inclinée est une pompe réalisée les mains sur une surface surélevée, comme un banc, une box ou un mur. Surélever les mains allège la part du poids du corps qu'elles portent : c'est une version plus facile de la pompe qui fait toujours travailler les pectoraux, l'avant des épaules et les triceps, et un bon moyen de progresser vers la pompe au sol.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Posez les mains sur le bord d'un banc ou d'une box, un peu plus écartées que les épaules
+      - Reculez les pieds jusqu'à ce que le corps forme une ligne droite des talons à la tête
+      - Gardez les bras tendus et les épaules au-dessus des mains
+      - Gainez la sangle abdominale et serrez les fessiers
+
+      ### 2. Mouvement
+      1. Fléchissez les coudes pour descendre la poitrine vers le bord du banc
+      2. Gardez les coudes à environ 45 degrés du corps
+      3. Descendez jusqu'à ce que la poitrine touche presque le banc
+      4. Repoussez jusqu'à ce que les bras soient tendus
+      5. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Inspirez en descendant
+      - Expirez en poussant
+
+      ### 4. Conseils
+      - Plus les mains sont hautes, plus la pompe est facile
+      - Abaissez la surface au fil du temps pour progresser vers les pompes au sol
+      - Gardez le corps gainé comme en planche
+      - Descendez lentement
+
+      ### 5. Erreurs fréquentes
+      - Laisser les hanches s'affaisser ou remonter
+      - Écarter les coudes sur les côtés
+      - Avancer la tête au lieu de descendre la poitrine
+      - Ne pas aller au bout de l'amplitude
+
+      ### 6. Sécurité et adaptations
+      - Utilisez un mur si le banc est encore trop difficile
+      - Assurez-vous que la surface ne peut ni glisser ni basculer
+      - Gardez les poignets sous les épaules pour les protéger
+      - Arrêtez-vous si vous ressentez une douleur aux épaules ou aux poignets
+    validated: false
+    source_digest: f38d1d48271d
+  ring-dip:
+    name: Dips aux anneaux
+    instructions: |
+      ## Aperçu
+      Le dip aux anneaux est un dip réalisé sur des anneaux de gymnastique. Comme les anneaux bougent librement, il faut les maintenir fermement le long du corps pendant la descente et la poussée : l'exercice sollicite les pectoraux, les triceps et l'avant des épaules ainsi que les petits muscles stabilisateurs de l'épaule. Il est nettement plus difficile qu'un dip aux barres parallèles.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Réglez les anneaux à hauteur de hanches, ou assez haut pour que les pieds ne touchent pas le sol pendant le dip
+      - Saisissez les anneaux et sautez ou poussez jusqu'à l'appui bras tendus
+      - Gardez les anneaux près du corps, paumes vers l'intérieur ou légèrement tournées vers l'extérieur
+      - Gainez la sangle abdominale et gardez les jambes serrées
+
+      ### 2. Mouvement
+      1. Fléchissez les coudes pour descendre, le buste légèrement penché en avant
+      2. Gardez les anneaux collés au corps pendant la descente
+      3. Descendez jusqu'à ce que les épaules soient juste sous les coudes
+      4. Repoussez jusqu'aux bras tendus
+      5. Tournez légèrement les paumes vers l'avant en haut pour verrouiller
+      6. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Inspirez en descendant
+      - Expirez en poussant
+
+      ### 4. Conseils
+      - Serrez les anneaux contre le corps pour éviter qu'ils s'écartent
+      - Maîtrisez un appui stable avant d'ajouter des répétitions
+      - Bougez lentement ; les anneaux ne pardonnent pas les répétitions bâclées
+      - Ajoutez du poids avec une ceinture de lest une fois les répétitions au poids du corps solides
+
+      ### 5. Erreurs fréquentes
+      - Laisser les anneaux s'écarter du corps
+      - Descendre plus bas que ce que les épaules contrôlent
+      - Hausser les épaules en bas
+      - Donner des coups de jambes pour remonter
+
+      ### 6. Sécurité et adaptations
+      - Entraînez d'abord l'appui et les dips aux barres parallèles
+      - Gardez les pieds près du sol au début pour pouvoir vous rattraper
+      - Réduisez la profondeur si les épaules tirent
+      - Arrêtez-vous si vous ressentez une douleur à l'avant de l'épaule
+    validated: false
+    source_digest: b85f49fd519e
+  belt-squat-machine:
+    name: Squat à la ceinture (machine)
+    instructions: |
+      ## Aperçu
+      Le squat à la ceinture est un squat dans lequel la charge pend à une ceinture autour des hanches au lieu d'une barre sur le dos. Sur la machine, la ceinture s'accroche à un levier ou à un câble : vous pouvez faire travailler dur les quadriceps et les fessiers pendant que la colonne et les épaules ne portent presque rien, ce qui le rend utile pour travailler lourd les jambes avec un dos sensible.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Serrez bien la ceinture autour des hanches
+      - Montez sur la plateforme et accrochez la ceinture à la chaîne ou au levier de la machine
+      - Placez les pieds à la largeur des épaules, pointes légèrement vers l'extérieur
+      - Tenez légèrement les poignées ou les rambardes pour l'équilibre
+      - Retirez la sécurité pour que la charge pende à la ceinture
+
+      ### 2. Mouvement
+      1. Fléchissez les genoux et les hanches pour descendre en squat, poitrine haute
+      2. Laissez les genoux avancer au-dessus des orteils
+      3. Descendez jusqu'à ce que les cuisses soient au moins parallèles à la plateforme
+      4. Poussez avec tout le pied pour remonter
+      5. Répétez pour le nombre de répétitions prévu, puis remettez la sécurité avant de décrocher
+
+      ### 3. Respiration
+      - Inspirez et gainez avant de descendre
+      - Expirez en remontant
+
+      ### 4. Conseils
+      - Servez-vous des poignées pour l'équilibre, pas pour vous hisser
+      - Un buste plus droit garde le travail sur les quadriceps
+      - Réglez la ceinture pour qu'elle repose sur les hanches, pas sur la taille
+      - Marquez une pause en bas pour supprimer le rebond
+
+      ### 5. Erreurs fréquentes
+      - Laisser les genoux rentrer vers l'intérieur
+      - Monter sur la pointe des pieds
+      - Raccourcir la profondeur
+      - Tirer fort sur les poignées pour remonter
+
+      ### 6. Sécurité et adaptations
+      - Remettez toujours la sécurité avant de décrocher la ceinture
+      - Commencez léger pour comprendre le mouvement de la machine
+      - Une ceinture de lest avec un kettlebell, debout sur deux box, remplace la machine
+      - Arrêtez-vous si vous ressentez une douleur aux genoux ou aux hanches
+    validated: false
+    source_digest: 7b9ba2971247
+  pendulum-squat-machine:
+    name: Squat pendulaire (machine)
+    instructions: |
+      ## Aperçu
+      Le squat pendulaire est un squat guidé dans lequel le dossier et les épaulières pivotent en arc de cercle au lieu de coulisser sur un rail droit. L'arc maintient une résistance élevée en bas, là où vous êtes le plus profond, et laisse les genoux avancer loin, si bien qu'il sollicite très fortement les quadriceps avec le dos soutenu.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Montez sur la plateforme, le dos bien à plat contre le dossier
+      - Placez les épaulières sur les épaules
+      - Posez les pieds à peu près à la largeur des épaules au milieu de la plateforme
+      - Saisissez les poignées et poussez pour retirer la sécurité
+
+      ### 2. Mouvement
+      1. Fléchissez les genoux et laissez le dossier pivoter vers le bas pendant la descente
+      2. Gardez le dos et les hanches contre le dossier
+      3. Descendez aussi bas que vous contrôlez, idéalement sous la parallèle
+      4. Poussez avec tout le pied pour remonter
+      5. Arrêtez-vous juste avant de verrouiller les genoux en haut
+      6. Répétez pour le nombre de répétitions prévu, puis remettez la sécurité
+
+      ### 3. Respiration
+      - Inspirez en descendant
+      - Expirez en remontant
+
+      ### 4. Conseils
+      - Des pieds plus bas sur la plateforme donnent plus de travail aux quadriceps
+      - Des pieds plus hauts en reportent une partie sur les fessiers et les ischio-jambiers
+      - Contrôlez le bas du mouvement ; c'est là que la machine est la plus dure
+      - Gardez la tension pendant toute la série au lieu de vous reposer en haut
+
+      ### 5. Erreurs fréquentes
+      - Décoller les hanches du dossier en bas
+      - Lever les talons
+      - Faire une amplitude courte
+      - Verrouiller brutalement les genoux en haut
+
+      ### 6. Sécurité et adaptations
+      - Réglez les butées de sécurité avant de commencer
+      - Commencez léger ; l'arc donne d'autres sensations qu'un hack squat
+      - Réduisez la profondeur si les genoux tirent
+      - Arrêtez-vous si vous ressentez une douleur aux genoux ou dans le bas du dos
+    validated: false
+    source_digest: 4f0f4e1c4484
+  hip-thrust-machine:
+    name: Hip thrust (machine)
+    instructions: |
+      ## Aperçu
+      Le hip thrust à la machine est un exercice pour les fessiers réalisé sur une machine dédiée : le haut du dos contre un dossier et une ceinture ou un levier rembourré sur les hanches, vous poussez les hanches vers le haut jusqu'à ce que le corps soit aligné des épaules aux genoux. La machine remplace l'installation qu'exige une barre, vous pouvez donc charger lourd les fessiers et vous mettre au travail tout de suite.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Asseyez-vous sur la machine, le haut du dos contre le dossier
+      - Placez le rembourrage ou la ceinture dans le pli de la hanche
+      - Posez les pieds à plat sur la plateforme, à la largeur des hanches
+      - Ajustez les pieds pour que les tibias soient verticaux en haut du mouvement
+      - Tenez les poignées et gainez la sangle abdominale
+
+      ### 2. Mouvement
+      1. Poussez dans les talons pour monter les hanches
+      2. Montez jusqu'à l'extension complète des hanches, corps aligné des épaules aux genoux
+      3. Contractez fort les fessiers un instant en haut
+      4. Redescendez les hanches avec contrôle
+      5. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Expirez en poussant les hanches vers le haut
+      - Inspirez en les redescendant
+
+      ### 4. Conseils
+      - Rentrez le menton et gardez les côtes basses en haut
+      - Poussez dans les talons, pas dans les orteils
+      - Marquez une pause en haut pour faire travailler les fessiers
+      - Gardez un mouvement fluide sans rebondir en bas
+
+      ### 5. Erreurs fréquentes
+      - Cambrer le bas du dos en haut au lieu d'étendre les hanches
+      - Placer les pieds trop loin ou trop près
+      - Laisser les genoux rentrer vers l'intérieur
+      - Redescendre trop vite
+
+      ### 6. Sécurité et adaptations
+      - Commencez léger le temps de régler le rembourrage et la position des pieds
+      - Ajustez le rembourrage pour qu'il n'appuie pas sur les os des hanches
+      - Le hip thrust à la barre ou au poids du corps se fait sans machine
+      - Arrêtez-vous si vous sentez une tension dans le bas du dos
+    validated: false
+    source_digest: abf80151cb7b
+  split-squat-dumbbell:
+    name: Squat fendu (haltères)
+    instructions: |
+      ## Aperçu
+      Le squat fendu aux haltères est un exercice unilatéral en fente, les deux pieds au sol : un haltère dans chaque main, vous descendez le genou arrière à la verticale puis remontez sans bouger les pieds. Il fait travailler les quadriceps et les fessiers de la jambe avant et il est plus stable qu'une fente marchée ou qu'un squat bulgare, qui surélève le pied arrière.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Tenez un haltère dans chaque main le long du corps
+      - Faites un grand pas en avant, de 60 à 90 cm environ
+      - Montez sur la pointe du pied arrière
+      - Gardez le buste droit et les pieds écartés à la largeur des hanches
+      - Gainez la sangle abdominale
+
+      ### 2. Mouvement
+      1. Fléchissez les deux genoux pour descendre le genou arrière à la verticale vers le sol
+      2. Gardez le talon avant au sol et le genou avant au-dessus du pied
+      3. Descendez jusqu'à ce que le genou arrière soit juste au-dessus du sol
+      4. Poussez avec le pied avant pour remonter
+      5. Terminez les répétitions prévues, puis changez de jambe
+
+      ### 3. Respiration
+      - Inspirez en descendant
+      - Expirez en remontant
+
+      ### 4. Conseils
+      - Pensez à descendre et monter en ligne droite, comme un ascenseur
+      - Une fente plus longue sollicite davantage les fessiers ; une plus courte, les quadriceps
+      - Gardez la majeure partie du poids sur la jambe avant
+      - Utilisez des sangles si la prise limite la charge
+
+      ### 5. Erreurs fréquentes
+      - Placer les pieds sur une même ligne, ce qui ruine l'équilibre
+      - Laisser le genou avant rentrer vers l'intérieur
+      - Pousser avec le pied arrière au lieu de la jambe avant
+      - Se pencher fortement en avant en bas
+
+      ### 6. Sécurité et adaptations
+      - Apprenez d'abord le mouvement au poids du corps
+      - Tenez-vous à un rack d'une main si l'équilibre pose problème
+      - Placez un coussin sous le genou arrière pour contrôler la profondeur
+      - Arrêtez-vous si vous ressentez une douleur vive au genou avant
+    validated: false
+    source_digest: 098b107609b9
+  lateral-lunge:
+    name: Fente latérale
+    instructions: |
+      ## Aperçu
+      La fente latérale est une fente sur le côté : vous faites un grand pas latéral et reculez les hanches au-dessus de cette jambe pendant que l'autre reste tendue. Le déplacement latéral fait travailler les quadriceps et les fessiers de la jambe fléchie, étire et renforce l'intérieur de la cuisse de la jambe tendue, et développe la force et la mobilité latérales que les fentes avant ne travaillent pas.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Tenez-vous droit, pieds joints
+      - Gardez la poitrine haute et les épaules en arrière
+      - Joignez les mains devant la poitrine ou posez-les sur les hanches
+      - Gainez la sangle abdominale
+
+      ### 2. Mouvement
+      1. Faites un grand pas vers la droite
+      2. Fléchissez le genou droit et reculez les hanches, jambe gauche tendue
+      3. Descendez jusqu'à ce que la cuisse droite soit presque parallèle au sol
+      4. Gardez les deux pieds à plat et orientés vers l'avant
+      5. Poussez avec le pied droit pour revenir au départ
+      6. Alternez les côtés, ou faites toutes les répétitions d'un côté avant de changer
+
+      ### 3. Respiration
+      - Inspirez en faisant le pas et en descendant
+      - Expirez en poussant pour revenir debout
+
+      ### 4. Conseils
+      - Asseyez-vous dans la hanche comme pour atteindre une chaise sur le côté
+      - Gardez le genou fléchi au-dessus des orteils
+      - Descendez seulement autant que vos hanches le permettent, talon au sol
+      - Tenez un haltère ou un kettlebell contre la poitrine quand les répétitions au poids du corps deviennent faciles
+
+      ### 5. Erreurs fréquentes
+      - Laisser le genou fléchi rentrer vers l'intérieur
+      - Décoller le talon du pied qui travaille
+      - Arrondir le dos en descendant
+      - Plier la jambe qui doit rester tendue
+
+      ### 6. Sécurité et adaptations
+      - Raccourcissez le pas et la profondeur si les adducteurs sont raides
+      - Tenez-vous à un appui pour l'équilibre au début
+      - Échauffez les hanches avant de travailler sur une grande amplitude
+      - Arrêtez-vous si vous ressentez une douleur au genou ou à l'aine
+    validated: false
+    source_digest: 890a8316dc65
+  nordic-hamstring-curl:
+    name: Curl nordique des ischio-jambiers
+    instructions: |
+      ## Aperçu
+      Le curl nordique est un exercice des ischio-jambiers au poids du corps réalisé à genoux, chevilles bloquées : vous basculez le corps vers l'avant aussi lentement que possible en résistant avec les ischio-jambiers, puis vous vous rattrapez avec les mains et revenez. La descente lente charge très fortement les ischio-jambiers pendant qu'ils s'allongent, ce qui développe la force ; il est largement utilisé pour réduire les blessures à l'arrière de la cuisse.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Agenouillez-vous sur un coussin, chevilles bloquées sous une barre, un banc ou les mains d'un partenaire
+      - Gardez le corps aligné des genoux à la tête
+      - Serrez les fessiers et gainez la sangle abdominale
+      - Gardez les mains devant la poitrine, prêtes à vous rattraper
+
+      ### 2. Mouvement
+      1. Basculez lentement vers l'avant, hanches tendues
+      2. Résistez à la chute avec les ischio-jambiers aussi longtemps que possible
+      3. Quand vous ne pouvez plus tenir, rattrapez-vous avec les mains
+      4. Poussez légèrement sur le sol et tirez avec les ischio-jambiers pour revenir à la verticale
+      5. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Inspirez avant de commencer à basculer
+      - Expirez lentement pendant la descente
+
+      ### 4. Conseils
+      - La descente est l'exercice ; faites-la durer trois à cinq secondes
+      - Gardez la ligne genoux-tête droite, sans plier les hanches
+      - Aidez-vous des mains autant que nécessaire pour remonter
+      - Progressez en vous rattrapant un peu plus tard à chaque séance
+
+      ### 5. Erreurs fréquentes
+      - Plier les hanches pour raccourcir le levier
+      - Tomber vite après les premiers centimètres
+      - Laisser les chevilles glisser hors de l'ancrage
+      - Faire trop de répétitions trop tôt
+
+      ### 6. Sécurité et adaptations
+      - Commencez avec peu de répétitions ; les courbatures sont fortes au début
+      - Un élastique fixé en hauteur et passé sous la poitrine assiste la descente
+      - Vérifiez que l'ancrage des chevilles ne peut pas bouger avant de commencer
+      - Arrêtez-vous si vous ressentez une douleur vive à l'arrière de la cuisse
+    validated: false
+    source_digest: c9c3cdef9e3c
+  glute-bridge:
+    name: Pont fessier
+    instructions: |
+      ## Aperçu
+      Le pont fessier est un exercice des fessiers au poids du corps réalisé allongé sur le dos : genoux fléchis et pieds à plat, vous montez les hanches jusqu'à ce que le corps soit aligné des épaules aux genoux. Il renforce les fessiers et les ischio-jambiers sans matériel et avec peu de contrainte sur le dos ; c'est la version au sol du hip thrust.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Allongez-vous sur le dos sur un tapis
+      - Fléchissez les genoux et posez les pieds à plat, à la largeur des hanches
+      - Rapprochez les talons pour pouvoir les effleurer du bout des doigts
+      - Laissez les bras le long du corps, paumes vers le sol
+      - Gainez légèrement la sangle abdominale
+
+      ### 2. Mouvement
+      1. Poussez dans les talons pour décoller les hanches du sol
+      2. Montez jusqu'à ce que le corps soit aligné des épaules aux genoux
+      3. Contractez les fessiers en haut pendant une à deux secondes
+      4. Redescendez lentement les hanches au sol
+      5. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Expirez en montant les hanches
+      - Inspirez en les redescendant
+
+      ### 4. Conseils
+      - Poussez dans les talons pour garder le travail dans les fessiers
+      - Gardez les côtes basses pour que le bas du dos ne se cambre pas
+      - Tenez plus longtemps en haut pour corser l'exercice
+      - Levez un pied pour progresser vers le pont fessier à une jambe
+
+      ### 5. Erreurs fréquentes
+      - Cambrer le bas du dos au lieu d'étendre les hanches
+      - Pousser dans les orteils
+      - Laisser les genoux se rapprocher ou s'écarter
+      - Laisser retomber les hanches rapidement
+
+      ### 6. Sécurité et adaptations
+      - Réduisez l'amplitude si votre dos est sensible
+      - Placez une mini-bande au-dessus des genoux pour travailler l'extérieur des fessiers
+      - Gardez la tête et les épaules au sol tout du long
+      - Si les ischio-jambiers crampent, rapprochez les pieds
+    validated: false
+    source_digest: 7d2b43bcdce5
+  glute-bridge-barbell:
+    name: Pont fessier (barre)
+    instructions: |
+      ## Aperçu
+      Le pont fessier à la barre est un pont fessier réalisé au sol avec une barre chargée sur les hanches. Les épaules au sol plutôt que sur un banc, l'amplitude est plus courte que celle du hip thrust et la charge reste lourde en haut, là où les fessiers travaillent le plus. C'est une façon simple de charger lourd les fessiers avec peu d'installation.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Asseyez-vous au sol et faites rouler la barre chargée sur les jambes jusqu'au pli de la hanche
+      - Placez un coussin ou un tapis plié sous la barre
+      - Allongez-vous, épaules et tête au sol
+      - Fléchissez les genoux et posez les pieds à plat, à la largeur des hanches
+      - Tenez la barre de part et d'autre des hanches
+
+      ### 2. Mouvement
+      1. Poussez dans les talons pour monter la barre avec les hanches
+      2. Montez jusqu'à ce que le corps soit aligné des épaules aux genoux
+      3. Contractez fort les fessiers en haut
+      4. Redescendez les hanches avec contrôle jusqu'à ce qu'elles frôlent le sol
+      5. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Expirez en montant les hanches
+      - Inspirez en redescendant
+
+      ### 4. Conseils
+      - Utilisez des disques de taille standard pour que la barre soit assez haute pour rouler
+      - Rentrez le menton et gardez les côtes basses
+      - Des répétitions courtes et contrôlées près du haut sont une variante courante
+      - Tenez la barre pour qu'elle ne roule ni vers la poitrine ni vers les cuisses
+
+      ### 5. Erreurs fréquentes
+      - Cambrer le bas du dos en haut
+      - Pousser dans les orteils au lieu des talons
+      - Laisser la barre quitter le pli de la hanche
+      - Faire rebondir les hanches sur le sol
+
+      ### 6. Sécurité et adaptations
+      - Protégez toujours la barre ; elle appuie directement sur les os des hanches
+      - Commencez léger le temps d'apprendre à mettre la barre en place
+      - Le pont fessier au poids du corps est le point de départ
+      - Arrêtez-vous si vous sentez une tension dans le bas du dos
+    validated: false
+    source_digest: 220b8cc388b1
+  walking-lunge-weighted:
+    name: Fentes marchées (lestées)
+    instructions: |
+      ## Aperçu
+      La fente marchée lestée est une fente qui avance : avec des haltères, un sac de sable ou une autre charge, vous faites un pas en fente vers l'avant, puis ramenez la jambe arrière dans le pas suivant. Elle s'enregistre au poids et à la distance parcourue, et fait travailler les quadriceps et les fessiers ainsi que l'équilibre et la condition physique.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Tenez la charge : haltères le long du corps, ou sac de sable serré contre la poitrine ou sur une épaule
+      - Tenez-vous droit, pieds à la largeur des hanches
+      - Dégagez un trajet droit devant vous
+      - Gainez la sangle abdominale
+
+      ### 2. Mouvement
+      1. Faites un grand pas en avant avec une jambe
+      2. Descendez le genou arrière vers le sol jusqu'à ce que les deux genoux soient fléchis à environ 90 degrés
+      3. Poussez avec le pied avant et ramenez la jambe arrière dans le pas suivant
+      4. Continuez à alterner les jambes en avançant
+      5. Poursuivez jusqu'à la distance prévue
+
+      ### 3. Respiration
+      - Inspirez en descendant dans chaque fente
+      - Expirez en remontant et en avançant
+
+      ### 4. Conseils
+      - Gardez le buste droit et le regard devant
+      - Faites des pas assez longs pour que le genou avant reste au-dessus du pied
+      - Prenez un rythme régulier plutôt que de précipiter les pas
+      - Mesurez la distance, ou comptez les pas, pour pouvoir comparer les séries
+
+      ### 5. Erreurs fréquentes
+      - Faire des pas courts qui envoient le genou avant loin devant les orteils
+      - Laisser le genou rentrer vers l'intérieur
+      - Se pencher en avant sous la charge
+      - Taper le genou arrière au sol
+
+      ### 6. Sécurité et adaptations
+      - Apprenez la fente marchée au poids du corps avant d'ajouter une charge
+      - Choisissez une charge que vous contrôlez sur toute la distance
+      - Marquez une pause entre les pas si l'équilibre vacille
+      - Arrêtez-vous si vous ressentez une douleur aux genoux
+    validated: false
+    source_digest: 7875bb462320
+  snatch-kettlebell:
+    name: Arraché (kettlebell)
+    instructions: |
+      ## Aperçu
+      L'arraché au kettlebell est un mouvement balistique à un bras qui amène le kettlebell d'entre les jambes au-dessus de la tête en un seul geste. Une extension puissante des hanches propulse le kettlebell, que vous guidez près du corps avant de passer la main pour verrouiller. Il fait travailler ensemble les fessiers, les ischio-jambiers, le dos et les épaules, et c'est un exercice de conditionnement exigeant.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Tenez-vous debout, pieds un peu plus écartés que les hanches, un kettlebell au sol devant vous
+      - Penchez-vous en flexion de hanches et saisissez la poignée d'une main
+      - Gardez le dos plat et l'épaule basse et stable
+      - Lancez le kettlebell en arrière entre les jambes pour démarrer
+
+      ### 2. Mouvement
+      1. Étendez les hanches avec force pour propulser le kettlebell vers le haut, comme pour un swing
+      2. Gardez le kettlebell près du corps pendant la montée, coude haut
+      3. Quand il passe la tête, passez la main à travers la poignée pour que le kettlebell se pose sur le dos de l'avant-bras
+      4. Verrouillez le bras au-dessus de la tête, kettlebell stable
+      5. Laissez retomber le kettlebell en le guidant entre les jambes pour la répétition suivante
+      6. Terminez les répétitions prévues, puis changez de main
+
+      ### 3. Respiration
+      - Expirez fortement en étendant les hanches
+      - Inspirez quand le kettlebell redescend
+
+      ### 4. Conseils
+      - Ce sont les hanches qui soulèvent ; le bras ne fait que guider
+      - Passez la main en haut pour éviter que le kettlebell bascule et frappe l'avant-bras
+      - Maîtrisez le swing et l'épaulé avant l'arraché
+      - Gardez la trajectoire du kettlebell près du corps
+
+      ### 5. Erreurs fréquentes
+      - Lancer le kettlebell dans un grand arc de cercle
+      - Le monter avec le bras plutôt qu'avec les hanches
+      - Laisser le kettlebell claquer sur l'avant-bras
+      - Faire un squat au lieu d'une flexion de hanches
+
+      ### 6. Sécurité et adaptations
+      - Commencez avec un kettlebell léger et peu de répétitions
+      - Gardez beaucoup d'espace libre devant et derrière vous
+      - Le swing à un bras ou le tirage haut sont des étapes plus faciles vers l'arraché
+      - Arrêtez-vous si vous ressentez une douleur à l'épaule ou dans le bas du dos
+    validated: false
+    source_digest: 83928fd54d24
+  clean-kettlebell:
+    name: Épaulé (kettlebell)
+    instructions: |
+      ## Aperçu
+      L'épaulé au kettlebell amène le kettlebell d'entre les jambes à la position de rack, contre l'épaule, en un seul geste. Une extension des hanches propulse le kettlebell, que vous guidez près du corps pour qu'il se pose en douceur sur l'avant-bras. Il fait travailler les hanches, le dos et la prise, et c'est le point de départ de nombreux mouvements au kettlebell comme le développé et le squat avant.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Tenez-vous debout, pieds un peu plus écartés que les hanches, un kettlebell au sol devant vous
+      - Penchez-vous en flexion de hanches et saisissez la poignée d'une main
+      - Gardez le dos plat et l'épaule basse et stable
+      - Lancez le kettlebell en arrière entre les jambes
+
+      ### 2. Mouvement
+      1. Étendez les hanches avec force pour propulser le kettlebell vers le haut
+      2. Gardez le coude près du corps pendant la montée
+      3. Faites tourner la main autour de la poignée pour que le kettlebell arrive en douceur en position de rack
+      4. Finissez debout, le kettlebell posé entre l'avant-bras et le bras
+      5. Laissez retomber le kettlebell entre les jambes pour la répétition suivante
+      6. Terminez les répétitions prévues, puis changez de main
+
+      ### 3. Respiration
+      - Expirez en étendant les hanches
+      - Inspirez quand le kettlebell redescend
+
+      ### 4. Conseils
+      - Pensez à remonter une fermeture éclair : le kettlebell voyage près du corps
+      - Desserrez la prise en haut pour que le kettlebell tourne autour de la main
+      - Gardez le poignet droit en position de rack
+      - Apprenez d'abord le swing à deux mains
+
+      ### 5. Erreurs fréquentes
+      - Lancer le kettlebell vers l'avant si bien qu'il frappe l'avant-bras
+      - Le monter avec un curl du bras
+      - Laisser le coude s'éloigner du corps en position de rack
+      - Casser le poignet vers l'arrière sous le kettlebell
+
+      ### 6. Sécurité et adaptations
+      - Commencez avec un kettlebell léger le temps d'apprendre la réception
+      - Portez des manches longues ou un protège-poignet si le kettlebell marque l'avant-bras
+      - Avec deux kettlebells à la fois, il devient un double épaulé
+      - Arrêtez-vous si vous ressentez une douleur au poignet ou dans le bas du dos
+    validated: false
+    source_digest: 8ad5ea2dbfde
+  snatch-dumbbell:
+    name: Arraché (haltère)
+    instructions: |
+      ## Aperçu
+      L'arraché à l'haltère est un mouvement de puissance à un bras qui amène l'haltère du sol au-dessus de la tête en un seul geste. Une extension explosive des hanches, des genoux et des chevilles, comme un saut, lance l'haltère ; vous le tirez près du corps puis le réceptionnez bras tendu au-dessus de la tête. Plus simple à apprendre que l'arraché à la barre, il développe la puissance de tout le corps.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Tenez-vous debout, pieds à la largeur des hanches, un haltère au sol entre les pieds
+      - Descendez hanches en arrière et saisissez l'haltère d'une main
+      - Gardez le dos plat, la poitrine haute et le bras tendu
+      - Posez la main libre sur la cuisse ou écartez-la sur le côté
+
+      ### 2. Mouvement
+      1. Poussez dans les pieds et étendez hanches et genoux de façon explosive
+      2. Tirez l'haltère vers le haut près du corps, coude haut
+      3. Passez légèrement dessous et tendez le bras au-dessus de la tête
+      4. Redressez-vous complètement, l'haltère verrouillé au-dessus de la tête
+      5. Ramenez-le à l'épaule, puis au sol, et replacez-vous pour la répétition suivante
+      6. Terminez les répétitions prévues, puis changez de main, ou alternez les mains à chaque répétition
+
+      ### 3. Respiration
+      - Inspirez en bas avant de pousser
+      - Expirez en lançant l'haltère au-dessus de la tête
+
+      ### 4. Conseils
+      - La puissance vient des jambes et des hanches, pas du bras
+      - Gardez l'haltère près du corps ; un grand arc gaspille de la puissance
+      - Verrouillez le coude et gardez l'épaule active au-dessus de la tête
+      - Partir de l'haltère suspendu entre les genoux est plus facile que depuis le sol
+
+      ### 5. Erreurs fréquentes
+      - Finir par un développé au lieu de réceptionner bras verrouillé
+      - Arrondir le dos au départ
+      - Éloigner l'haltère du corps pendant la montée
+      - Ne pas finir hanches complètement étendues
+
+      ### 6. Sécurité et adaptations
+      - Commencez avec un haltère léger
+      - Dégagez l'espace autour de vous avant chaque série
+      - Le tirage haut à l'haltère est un moyen plus facile d'apprendre le tirage
+      - Arrêtez-vous si vous ressentez une douleur à l'épaule ou dans le bas du dos
+    validated: false
+    source_digest: 0528be79049c
+  clean-and-press-barbell:
+    name: Épaulé-développé (barre)
+    instructions: |
+      ## Aperçu
+      L'épaulé-développé à la barre combine deux mouvements : vous épaulez la barre du sol aux épaules, puis vous la développez strictement au-dessus de la tête. Il fait travailler les jambes, les hanches et le dos pendant l'épaulé, et les épaules et les triceps pendant le développé, ce qui en fait un classique de la force et du conditionnement du corps entier.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Tenez-vous debout, pieds à la largeur des hanches, la barre au-dessus du milieu des pieds
+      - Descendez et saisissez la barre juste à l'extérieur des genoux en pronation
+      - Gardez le dos plat, la poitrine haute et les épaules légèrement devant la barre
+      - Gainez la sangle abdominale
+
+      ### 2. Mouvement
+      1. Poussez avec les jambes pour décoller la barre du sol en la gardant près du corps
+      2. Quand elle passe les genoux, étendez les hanches de façon explosive
+      3. Passez vite les coudes vers l'avant sous la barre pour la recevoir sur l'avant des épaules
+      4. Redressez-vous, la barre en position de rack
+      5. Développez la barre à la verticale au-dessus de la tête jusqu'à verrouiller les bras
+      6. Ramenez-la aux épaules, puis au sol, et replacez-vous pour la répétition suivante
+
+      ### 3. Respiration
+      - Inspirez et gainez au sol
+      - Expirez après la réception de l'épaulé, puis inspirez et gainez à nouveau avant le développé
+      - Expirez en développant au-dessus de la tête
+
+      ### 4. Conseils
+      - Gardez la barre près du corps pendant tout l'épaulé
+      - Serrez les fessiers pendant le développé pour ne pas vous cambrer en arrière
+      - Reculez la tête pour laisser passer la barre, puis avancez-la une fois la barre au-dessus
+      - Replacez vos appuis entre l'épaulé et le développé si besoin
+
+      ### 5. Erreurs fréquentes
+      - Monter la barre avec les bras au lieu des hanches
+      - Réceptionner coudes bas, la barre posée dans les mains
+      - Se pencher en arrière et transformer le développé en push press
+      - Arrondir le dos quand la barre quitte le sol
+
+      ### 6. Sécurité et adaptations
+      - Apprenez d'abord l'épaulé et le développé militaire séparément
+      - Commencez léger et utilisez des disques bumper au cas où vous devriez lâcher la barre
+      - Partir de la position suspendue est plus facile que depuis le sol
+      - Arrêtez-vous si vous ressentez une douleur dans le bas du dos, aux poignets ou aux épaules
+    validated: false
+    source_digest: a742d6ba97f1
   aerobics:
     name: Aérobic
     instructions: |
@@ -13609,6 +14574,49 @@ exercises:
       L'aérobic est une forme d'exercice cardiovasculaire qui combine des mouvements rythmés et de la musique. Elle sollicite le système cardiovasculaire et divers groupes musculaires, améliorant la santé cardiaque, l'endurance, la coordination et la condition physique générale grâce à une activité soutenue d'intensité modérée à vigoureuse.
     validated: false
     source_digest: 48ce16b91ca4
+  air-bike:
+    name: Vélo à air
+    instructions: |
+      ## Aperçu
+      Le vélo à air est un vélo stationnaire équipé d'un grand ventilateur en guise de volant d'inertie et de poignées mobiles que l'on pousse et tire en pédalant. La résistance du ventilateur augmente à mesure que vous forcez, si bien que la même machine convient à une sortie tranquille comme à un sprint à fond. Faire travailler bras et jambes ensemble en fait l'une des machines cardio les plus exigeantes de la salle.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Réglez la hauteur de la selle pour que le genou reste légèrement fléchi en bas du coup de pédale
+      - Asseyez-vous droit et placez les pieds sur les pédales
+      - Saisissez les poignées, bras légèrement fléchis
+      - Gainez légèrement la sangle abdominale
+
+      ### 2. Mouvement
+      1. Commencez à pédaler à allure facile
+      2. Poussez et tirez les poignées au rythme des jambes
+      3. Augmentez l'effort progressivement ; pédalez plus vite et poussez plus fort pour plus de résistance
+      4. Tenez l'allure visée, ou alternez sprints et récupération facile
+      5. Relâchez l'effort pendant la dernière ou les deux dernières minutes pour récupérer
+
+      ### 3. Respiration
+      - Respirez de façon régulière et rythmée à allure facile
+      - Pendant les sprints, respirez fort et vite sans bloquer la respiration
+
+      ### 4. Conseils
+      - Poussez avec les jambes ; les bras ajoutent du travail mais ne doivent pas prendre le dessus
+      - Servez-vous des calories ou des watts de l'écran pour garder des intervalles réguliers
+      - Gardez le haut du corps stable au lieu de vous balancer d'un côté à l'autre
+      - Les intervalles courts et intenses sont une façon courante d'utiliser cette machine
+
+      ### 5. Erreurs fréquentes
+      - Régler la selle trop basse, ce qui sollicite les genoux
+      - Partir à fond dès la première minute et s'effondrer rapidement
+      - Tirer uniquement avec les bras en laissant les jambes en roue libre
+      - Se voûter sur les poignées
+
+      ### 6. Sécurité et adaptations
+      - Posez les pieds sur les repose-pieds pour reposer les jambes et ne travailler que les bras, ou lâchez les poignées pour ne pédaler qu'avec les jambes
+      - Commencez par des séances courtes pour apprendre à gérer l'allure
+      - Attendez qu'une sortie régulière soit confortable avant les sprints
+      - Arrêtez-vous en cas de vertige ou de douleur à la poitrine
+    validated: false
+    source_digest: 000146ece675
   battle-ropes:
     name: Cordes ondulatoires
     instructions: |
