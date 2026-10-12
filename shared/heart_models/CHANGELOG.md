@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.16.0
+
+Targets on template sets (heart-api#195, heart-of-yours#173).
+
+- New: `SetTarget`, what a template set aims for per `TargetMeasure` (`reps`,
+  `weight`, `duration`, `distance`), each a `TargetRange`: `min` and an
+  optional `max`, exact when they are equal (`TargetRange.exactly`), an open
+  top ("8+") when `max` is null. `fromJson`/`toMap`, `operator []`,
+  `withRange`, `isEmpty`, and `SetTarget.none`. A measure or a range shape this
+  build doesn't know is carried as it arrived and written back.
+- New: `ExerciseSet.target` and the factory's `target:`. Read off a set's
+  `target` key; `toMap` writes the key only on a set that arrived with it or
+  had one assigned, and there always, null included, so a target can be
+  cleared. `copy()` keeps it.
+- New: `TemplateSetRequest.target`: null leaves the stored target alone,
+  `SetTarget.none` clears it.
+
 ## 2.15.0
 
 Moving an exercise's history onto another exercise (heart-api#140, heart-of-yours#338).

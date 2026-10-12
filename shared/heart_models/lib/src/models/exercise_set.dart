@@ -1,5 +1,6 @@
 import 'exercise.dart';
 import 'misc.dart';
+import 'set_target.dart';
 import 'uuid.dart';
 
 abstract interface class Completes {
@@ -85,6 +86,13 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
   /// category.
   abstract double? rpe;
 
+  /// What a template set aims for; null when it aims for nothing in
+  /// particular. A target is a plan, never part of what was done: a session
+  /// started from a template carries its targets to show beside the values,
+  /// and the server keeps none on a workout. Assigning [SetTarget.none] or
+  /// null clears it.
+  abstract SetTarget? target;
+
   factory(
     Exercise exercise, {
     String? id,
@@ -95,6 +103,7 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
     int? duration,
     SetType setType = .normal,
     double? rpe,
+    SetTarget? target,
   }) {
     final set =
         _ExerciseSet(
@@ -104,6 +113,7 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
           )
           ..setType = setType
           ..rpe = rpe;
+    if (target != null) set.target = target;
     // Only the measurements that exist for the exercise's category are kept,
     // mirroring [setMeasurements]. Legacy serializers wrote zero-valued
     // defaults into every field; dropping the inapplicable ones at
@@ -174,6 +184,12 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
     if (word != null && SetType.lenient(word).value != word) {
       (set as _ExerciseSet)._unreadSetType = word;
     }
+    if (json.containsKey('target')) {
+      set.target = switch (json['target']) {
+        final Map target => SetTarget.fromJson(target),
+        _ => null,
+      };
+    }
     return set;
   }
 
@@ -195,9 +211,9 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
 
   bool operator <=(covariant ExerciseSet other);
 
-  /// A fresh set with the same measurements and type, for repeating a session
-  /// or starting one from a template. The [rpe] is a rating of the original
-  /// effort, so the copy starts unrated, and it starts incomplete.
+  /// A fresh set with the same measurements, type and [target], for repeating
+  /// a session or starting one from a template. The [rpe] is a rating of the
+  /// original effort, so the copy starts unrated, and it starts incomplete.
   ///
   /// [sameId] instead duplicates the set as it is — id, [start], completion,
   /// [rpe], and a type word this build doesn't know — for a copy of the same
@@ -251,6 +267,10 @@ class _ExerciseSet implements ExerciseSet {
       // body without the keys leaves the stored values alone
       'set_type': setTypeValue,
       'rpe': rpe,
+      // only on a set that speaks about a target, so a set that never had
+      // one writes as it always did; there it is always present, so a target
+      // can be cleared, and a body without the key leaves the stored one alone
+      if (_speaksTarget) 'target': target?.toMap(),
     };
   }
 
@@ -316,6 +336,24 @@ class _ExerciseSet implements ExerciseSet {
   @override
   double? rpe;
 
+  SetTarget? _target;
+
+  /// Whether this set says anything about a target: it arrived with the key,
+  /// or one was assigned.
+  bool _speaksTarget = false;
+
+  @override
+  SetTarget? get target => _target;
+
+  @override
+  set target(SetTarget? target) {
+    _target = switch (target) {
+      final SetTarget t when !t.isEmpty => t,
+      _ => null,
+    };
+    _speaksTarget = true;
+  }
+
   @override
   bool get canBeCompleted {
     switch (category) {
@@ -356,7 +394,9 @@ class _ExerciseSet implements ExerciseSet {
       .._unreadSetType = _unreadSetType
       ..isCompleted = sameId && isCompleted
       ..completedAt = sameId ? completedAt : null
-      ..rpe = sameId ? rpe : null;
+      ..rpe = sameId ? rpe : null
+      .._target = _target
+      .._speaksTarget = _speaksTarget;
   }
 
   @override
