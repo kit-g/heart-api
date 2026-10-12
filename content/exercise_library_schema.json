@@ -308,6 +308,12 @@
         },
         "ids": {
           "$ref": "#/$defs/muscleList"
+        },
+        "share": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "The share of one set each of these muscles receives, when it differs from the role's default: 1 for primary, 0.5 for secondary."
         }
       }
     },

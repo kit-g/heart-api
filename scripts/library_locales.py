@@ -50,13 +50,16 @@ MAX_ARCHIVED_DEFAULT = 10
 class MuscleRole:
     groups: list[str]
     ids: list[str]
+    # the share of a set each of these muscles receives, only where it differs
+    # from the role's default (1 primary, 0.5 secondary), which the client owns
+    share: float | None = None
 
     @classmethod
     def parse(cls, source: dict) -> Self:
-        return cls(groups=source.get('groups', []), ids=source.get('ids', []))
+        return cls(groups=source.get('groups', []), ids=source.get('ids', []), share=source.get('share'))
 
     def to_dict(self) -> dict:
-        return {'groups': self.groups, 'ids': self.ids}
+        return {'groups': self.groups, 'ids': self.ids} | ({'share': self.share} if self.share is not None else {})
 
 
 @dataclass
