@@ -669,6 +669,11 @@ abstract interface class MuscleTag implements Model {
 
   Iterable<String>? get groups;
 
+  /// The share of a set each of these muscles receives, when the library
+  /// says it differs from the role's default ([MuscleTagging.primaryShare],
+  /// [MuscleTagging.secondaryShare]); null otherwise.
+  double? get share;
+
   bool get isEmpty;
 
   factory fromJson(Map json) {
@@ -680,6 +685,10 @@ abstract interface class MuscleTag implements Model {
       groups: switch (json['groups']) {
         List l => l.cast<String>(),
         _ => [],
+      },
+      share: switch (json['share']) {
+        num share => share.toDouble(),
+        _ => null,
       },
     );
   }
@@ -694,10 +703,13 @@ class _MuscleTag implements MuscleTag {
   final List<String>? ids;
   @override
   final List<String>? groups;
+  @override
+  final double? share;
 
   const new({
     required this.ids,
     required this.groups,
+    this.share,
   });
 
   @override
@@ -705,6 +717,7 @@ class _MuscleTag implements MuscleTag {
     return {
       'ids': ids,
       'groups': groups,
+      'share': ?share,
     };
   }
 
@@ -713,11 +726,31 @@ class _MuscleTag implements MuscleTag {
 }
 
 abstract interface class MuscleTagging implements Model {
+  /// What a set counts for a primary muscle unless the library says otherwise:
+  /// all of it.
+  static const defaultPrimaryShare = 1.0;
+
+  /// What a set counts for a secondary muscle unless the library says
+  /// otherwise: about half, as the volume research counts indirect work.
+  static const defaultSecondaryShare = 0.5;
+
   MuscleTag get primary;
 
   MuscleTag? get secondary;
 
   bool get isEmpty;
+
+  /// The share of a set each primary muscle receives.
+  double get primaryShare;
+
+  /// The share of a set each secondary muscle receives.
+  double get secondaryShare;
+
+  /// The share of one set of this exercise that [muscle] receives: a muscle
+  /// id prefix (`triceps_brachii`) or a muscle group (`chest`), matched as the
+  /// library search matches them. Primary involvement wins over secondary;
+  /// a muscle the exercise doesn't tag gets 0.
+  double shareOf(String muscle);
 
   factory fromJson(Map json) {
     return _MuscleTagging(
@@ -755,6 +788,23 @@ class _MuscleTagging implements MuscleTagging {
 
   @override
   bool get isEmpty => primary.isEmpty && (secondary?.isEmpty ?? true);
+
+  @override
+  double get primaryShare => primary.share ?? MuscleTagging.defaultPrimaryShare;
+
+  @override
+  double get secondaryShare => secondary?.share ?? MuscleTagging.defaultSecondaryShare;
+
+  @override
+  double shareOf(String muscle) {
+    bool tags(MuscleTag? tag) {
+      return [...?tag?.ids].any((id) => id.startsWith(muscle)) || [...?tag?.groups].contains(muscle);
+    }
+
+    if (tags(primary)) return primaryShare;
+    if (tags(secondary)) return secondaryShare;
+    return 0;
+  }
 }
 
 abstract interface class Exercise implements Searchable, Model, Comparable<Exercise> {

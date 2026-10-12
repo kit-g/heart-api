@@ -337,6 +337,117 @@ void main() {
         throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'duplicate_id')),
       );
     });
+
+    test('target: absent is unsaid, null and {} clear, a range is that range', () async {
+      final request = await parse([
+        {'reps': 5},
+        {'reps': 5, 'target': null},
+        {'reps': 5, 'target': <String, dynamic>{}},
+        {
+          'reps': 5,
+          'target': {
+            'reps': {'min': 6, 'max': 10},
+            'weight': {'min': 60},
+            'duration': {'min': 30, 'max': 30},
+            'distance': {'min': 1.5, 'max': null},
+          },
+        },
+      ]);
+      final targets = request.exercises.single.sets.map((s) => s.target).toList();
+      expect(targets[0], isNull);
+      expect(targets[1]?.isEmpty, isTrue);
+      expect(targets[2]?.isEmpty, isTrue);
+      expect(targets[3]?.toMap(), {
+        'reps': {'min': 6, 'max': 10},
+        'weight': {'min': 60},
+        'duration': {'min': 30, 'max': 30},
+        'distance': {'min': 1.5},
+      });
+    });
+
+    for (final (target, why) in [
+      ('6-10', 'not an object'),
+      (
+        {
+          'rpe': {'min': 8},
+        },
+        'an unknown measure',
+      ),
+      ({'reps': 8}, 'a bare number'),
+      (
+        {
+          'reps': {'max': 10},
+        },
+        'no min',
+      ),
+      (
+        {
+          'reps': {'min': '6'},
+        },
+        'a string min',
+      ),
+      (
+        {
+          'reps': {'min': 6, 'max': '10'},
+        },
+        'a string max',
+      ),
+      (
+        {
+          'reps': {'min': -1},
+        },
+        'a negative min',
+      ),
+      (
+        {
+          'reps': {'min': 10, 'max': 6},
+        },
+        'max below min',
+      ),
+      (
+        {
+          'reps': {'min': 6.5},
+        },
+        'half a rep',
+      ),
+      (
+        {
+          'duration': {'min': 30, 'max': 30.5},
+        },
+        'a fraction of a second',
+      ),
+      (
+        {
+          'reps': {'min': 6, 'step': 1},
+        },
+        'a key besides min and max',
+      ),
+    ]) {
+      test('a target with $why is a 400 naming the set', () async {
+        await expectLater(
+          parse([
+            {'reps': 5, 'target': target},
+          ]),
+          throwsA(
+            isA<BadRequest>()
+                .having((e) => e.code, 'code', 'invalid_target')
+                .having((e) => e.reason, 'reason', contains('exercises[0].sets[0].target')),
+          ),
+        );
+      });
+    }
+
+    test('a fractional weight or distance is fine', () async {
+      final request = await parse([
+        {
+          'reps': 5,
+          'target': {
+            'weight': {'min': 47.5, 'max': 52.5},
+          },
+        },
+      ]);
+      expect(request.exercises.single.sets.single.target?[.weight], const TargetRange(min: 47.5, max: 52.5));
+    });
   });
 
   test('two exercises at one order are a 400: sets find their exercise by it', () async {

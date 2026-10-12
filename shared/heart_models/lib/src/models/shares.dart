@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'auth.dart';
 import 'exercise_set.dart';
 import 'misc.dart';
+import 'set_target.dart';
 
 /// One coach-owned master template, handed to one student.
 ///
@@ -133,7 +134,11 @@ class TemplateSetRequest {
   /// set's type alone; [SetType.normal] clears it.
   final SetType? setType;
 
-  const new({this.id, this.weight, this.reps, this.duration, this.distance, this.setType});
+  /// Null when the body said nothing about the target, which leaves a stored
+  /// set's target alone; [SetTarget.none] clears it.
+  final SetTarget? target;
+
+  const new({this.id, this.weight, this.reps, this.duration, this.distance, this.setType, this.target});
 
   /// Keys match what `_saveTemplate` reads out of the `@exercises` jsonb.
   Map<String, dynamic> toJson() {
@@ -144,6 +149,7 @@ class TemplateSetRequest {
       'duration': ?duration,
       'distance': ?distance,
       'set_type': ?setType?.value,
+      if (target case final SetTarget target) 'target': target.isEmpty ? null : target.toMap(),
     };
   }
 }

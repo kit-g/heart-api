@@ -403,6 +403,56 @@ void main() {
       expect(first.achievedBy, workoutId);
     });
   });
+
+  group('goals about a subject (heart-api#196)', () {
+    Goal subjectGoal(GoalMetric metric, {String? exerciseId, String? pattern, String? muscle, num target = 2}) {
+      return Goal(
+        metric: metric,
+        exerciseId: exerciseId,
+        pattern: pattern,
+        muscle: muscle,
+        cadence: GoalCadence.week,
+        stages: [GoalStage(target: target)],
+      );
+    }
+
+    test('a pattern goal and a muscle goal persist and list back', () async {
+      final owner = await h.seedProfile();
+      final (press, _) = await h.db.createGoalOrExisting(
+        subjectGoal(.sessions, pattern: 'horizontal_press'),
+        owner,
+      );
+      final (pull, _) = await h.db.createGoalOrExisting(
+        subjectGoal(.sets, muscle: 'latissimus_dorsi', target: 12),
+        owner,
+      );
+      expect(press.subject, const GoalSubject.pattern('horizontal_press'));
+      expect(pull.subject, const GoalSubject.muscle('latissimus_dorsi'));
+
+      final listed = (await h.db.getTargetUserGoals(requesterId: owner, targetUserId: owner)).toList();
+      expect(listed.map((goal) => goal.subject), [
+        const GoalSubject.pattern('horizontal_press'),
+        const GoalSubject.muscle('latissimus_dorsi'),
+      ]);
+    });
+
+    test('a sets goal can be about an exercise', () async {
+      final owner = await h.seedProfile();
+      final exerciseId = await h.seedGlobalExercise();
+      final (goal, _) = await h.db.createGoalOrExisting(subjectGoal(.sets, exerciseId: exerciseId), owner);
+      expect(goal.subject, GoalSubject.exercise(exerciseId));
+      expect(goal.pattern, isNull);
+    });
+
+    test('a replace moves the subject from a pattern to a muscle', () async {
+      final owner = await h.seedProfile();
+      final (created, _) = await h.db.createGoalOrExisting(subjectGoal(.sessions, pattern: 'vertical_pull'), owner);
+
+      final updated = await h.db.updateGoal(created.id!, subjectGoal(.sessions, muscle: 'back'), owner);
+      expect(updated.pattern, isNull);
+      expect(updated.subject, const GoalSubject.muscle('back'));
+    });
+  });
 }
 
 class _Harness extends DatabaseTestBase;

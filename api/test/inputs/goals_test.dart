@@ -108,4 +108,80 @@ void main() {
       );
     });
   });
+  group('goals about a subject (heart-api#196)', () {
+    const exerciseId = '0198c1a2-b3c4-7d5e-8f60-718293a4b5c6';
+
+    Future<GoalCreateIn> create(Map<String, dynamic> subject, {String metric = 'sessions'}) {
+      return GoalCreateIn.fromRequest(
+        jsonRequest(
+          body: {
+            'metric': metric,
+            'cadence': 'week',
+            ...subject,
+            'stages': [
+              {'target': 2},
+            ],
+          },
+        ),
+      );
+    }
+
+    Matcher rejected(String code) => throwsA(isA<BadRequest>().having((e) => e.code, 'code', code));
+
+    test('sessions and sets take one subject: a pattern, a muscle or an exercise', () async {
+      expect(
+        (await create({'pattern': 'horizontal_press'})).goal.subject,
+        const GoalSubject.pattern('horizontal_press'),
+      );
+      expect(
+        (await create({'muscle': 'latissimus_dorsi'}, metric: 'sets')).goal.subject,
+        const GoalSubject.muscle('latissimus_dorsi'),
+      );
+      expect(
+        (await create({'exerciseId': exerciseId}, metric: 'sets')).goal.subject,
+        const GoalSubject.exercise(exerciseId),
+      );
+    });
+
+    test('a subject count names exactly one subject', () async {
+      await expectLater(create({}), rejected('goal_scope'));
+      await expectLater(create({'pattern': 'horizontal_press', 'muscle': 'chest'}), rejected('goal_scope'));
+      await expectLater(create({'pattern': 'horizontal_press', 'exerciseId': exerciseId}), rejected('goal_scope'));
+    });
+
+    test('the older metrics keep their scope', () async {
+      await expectLater(create({'pattern': 'horizontal_press'}, metric: 'workouts'), rejected('goal_scope'));
+      await expectLater(create({'muscle': 'chest'}, metric: 'topSetWeight'), rejected('goal_scope'));
+      await expectLater(
+        create({'exerciseId': exerciseId, 'pattern': 'horizontal_press'}, metric: 'topSetWeight'),
+        rejected('goal_scope'),
+      );
+    });
+
+    test('a key is snake_case and short; which keys exist is the library\'s', () async {
+      expect(
+        (await create({'pattern': 'a_pattern_added_after_this_release'})).pattern,
+        'a_pattern_added_after_this_release',
+      );
+      await expectLater(create({'pattern': 'Horizontal Press'}), rejected('invalid_subject'));
+      await expectLater(create({'muscle': 7}), rejected('invalid_subject'));
+      await expectLater(create({'muscle': 'x' * 65}), rejected('invalid_subject'));
+    });
+
+    test('an update carries the subject too', () async {
+      final input = await GoalUpdateIn.fromRequest(
+        jsonRequest(
+          body: {
+            'metric': 'sets',
+            'muscle': 'chest',
+            'cadence': 'week',
+            'stages': [
+              {'target': 12},
+            ],
+          },
+        ),
+      );
+      expect(input.goal.subject, const GoalSubject.muscle('chest'));
+    });
+  });
 }

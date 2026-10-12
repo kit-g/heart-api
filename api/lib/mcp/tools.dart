@@ -331,7 +331,8 @@ final List<McpTool> tools = [
     title: 'List goals',
     description:
         "The user's goals: what is measured, the targets and deadlines, and which stages are achieved (a stage "
-        'carries achievedAt only once it is). A goal on an exercise names it. Goals on health metrics carry their '
+        'carries achievedAt only once it is). A goal on an exercise names it; one on a movement pattern or a muscle '
+        'carries that key as pattern or muscle. Goals on health metrics carry their '
         'definition only; their progress lives on the phone.',
     inputSchema: {
       'type': 'object',

@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(31);
+SELECT plan(41);
 
 SELECT has_table('public'::name, 'goals'::name);
 
@@ -15,7 +15,9 @@ SELECT columns_are(
                    'cadence',
                    'stages',
                    'archived',
-                   'created_at'
+                   'created_at',
+                   'pattern',
+                   'muscle'
                    ]
        );
 
@@ -27,6 +29,8 @@ SELECT col_type_is('public'::name, 'goals'::name, 'cadence'::name, 'text'::name)
 SELECT col_type_is('public'::name, 'goals'::name, 'stages'::name, 'jsonb'::name);
 SELECT col_type_is('public'::name, 'goals'::name, 'archived'::name, 'boolean'::name);
 SELECT col_type_is('public'::name, 'goals'::name, 'created_at'::name, 'timestamp with time zone'::name);
+SELECT col_type_is('public'::name, 'goals'::name, 'pattern'::name, 'text'::name);
+SELECT col_type_is('public'::name, 'goals'::name, 'muscle'::name, 'text'::name);
 
 SELECT has_pk('public'::name, 'goals'::name, 'goals has a primary key');
 SELECT col_is_pk('public'::name, 'goals'::name, 'id'::name, 'id is the primary key');
@@ -144,6 +148,72 @@ SELECT throws_ok(
                '23514',
                NULL,
                'an unknown cadence is rejected'
+       );
+
+SELECT lives_ok(
+               $$
+               INSERT INTO goals (user_id, metric, cadence, stages, exercise_id, pattern, muscle) VALUES ('goal-test-user', 'sessions', 'week', '[{"id": "s1", "target": 2}]'::jsonb, NULL, 'horizontal_press', NULL)
+               $$,
+               'a sessions goal can be about a pattern'
+       );
+
+SELECT lives_ok(
+               $$
+               INSERT INTO goals (user_id, metric, cadence, stages, exercise_id, pattern, muscle) VALUES ('goal-test-user', 'sets', 'week', '[{"id": "s1", "target": 2}]'::jsonb, NULL, NULL, 'latissimus_dorsi')
+               $$,
+               'a sets goal can be about a muscle'
+       );
+
+SELECT lives_ok(
+               $$
+               INSERT INTO goals (user_id, metric, cadence, stages, exercise_id, pattern, muscle) VALUES ('goal-test-user', 'sets', 'week', '[{"id": "s1", "target": 2}]'::jsonb, (SELECT id FROM exercises WHERE name = 'Goal Test Bench'), NULL, NULL)
+               $$,
+               'a sets goal can be about an exercise'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO goals (user_id, metric, cadence, stages, exercise_id, pattern, muscle) VALUES ('goal-test-user', 'sessions', 'week', '[{"id": "s1", "target": 2}]'::jsonb, NULL, NULL, NULL)
+               $$,
+               '23514',
+               NULL,
+               'a sessions goal names a subject'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO goals (user_id, metric, cadence, stages, exercise_id, pattern, muscle) VALUES ('goal-test-user', 'sets', 'week', '[{"id": "s1", "target": 2}]'::jsonb, NULL, 'horizontal_press', 'chest')
+               $$,
+               '23514',
+               NULL,
+               'a sets goal names one subject, not two'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO goals (user_id, metric, cadence, stages, exercise_id, pattern, muscle) VALUES ('goal-test-user', 'workouts', 'week', '[{"id": "s1", "target": 2}]'::jsonb, NULL, 'horizontal_press', NULL)
+               $$,
+               '23514',
+               NULL,
+               'the frequency metric takes no pattern'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO goals (user_id, metric, cadence, stages, exercise_id, pattern, muscle) VALUES ('goal-test-user', 'topSetWeight', NULL, '[{"id": "s1", "target": 100}]'::jsonb, (SELECT id FROM exercises WHERE name = 'Goal Test Bench'), 'horizontal_press', NULL)
+               $$,
+               '23514',
+               NULL,
+               'a per-exercise metric takes no pattern'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO goals (user_id, metric, cadence, stages, exercise_id, pattern, muscle) VALUES ('goal-test-user', 'sessions', 'week', '[{"id": "s1", "target": 2}]'::jsonb, NULL, 'Horizontal Press', NULL)
+               $$,
+               '23514',
+               NULL,
+               'a pattern key is snake_case'
        );
 
 SELECT * FROM finish();

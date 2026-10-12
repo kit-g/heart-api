@@ -1,10 +1,12 @@
 part of 'inputs.dart';
 
-/// `POST /goals` — `{id?, metric, exerciseId?, cadence?, stages: [{target, dueOn?}]}`.
+/// `POST /goals` — `{id?, metric, exerciseId?, pattern?, muscle?, cadence?, stages: [{target, dueOn?}]}`.
 class GoalCreateIn {
   final String? id;
   final GoalMetric metric;
   final String? exerciseId;
+  final String? pattern;
+  final String? muscle;
   final GoalCadence? cadence;
   final List<GoalStage> stages;
 
@@ -12,6 +14,8 @@ class GoalCreateIn {
     required this.id,
     required this.metric,
     required this.exerciseId,
+    required this.pattern,
+    required this.muscle,
     required this.cadence,
     required this.stages,
   });
@@ -27,15 +31,32 @@ class GoalCreateIn {
       id: json.uuidV7OrNull(),
       metric: metric,
       exerciseId: json['exerciseId'] as String?,
+      pattern: json.subjectKey('pattern'),
+      muscle: json.subjectKey('muscle'),
       cadence: cadence,
       stages: _parseStages(json),
     );
-    _validate(metric: metric, exerciseId: input.exerciseId, cadence: cadence, stages: input.stages);
+    _validate(
+      metric: metric,
+      exerciseId: input.exerciseId,
+      pattern: input.pattern,
+      muscle: input.muscle,
+      cadence: cadence,
+      stages: input.stages,
+    );
     return input;
   }
 
   Goal get goal {
-    return Goal(id: id, metric: metric, exerciseId: exerciseId, cadence: cadence, stages: stages);
+    return Goal(
+      id: id,
+      metric: metric,
+      exerciseId: exerciseId,
+      pattern: pattern,
+      muscle: muscle,
+      cadence: cadence,
+      stages: stages,
+    );
   }
 }
 
@@ -44,6 +65,8 @@ class GoalCreateIn {
 class GoalUpdateIn {
   final GoalMetric metric;
   final String? exerciseId;
+  final String? pattern;
+  final String? muscle;
   final GoalCadence? cadence;
   final List<GoalStage> stages;
   final bool archived;
@@ -51,6 +74,8 @@ class GoalUpdateIn {
   const new _({
     required this.metric,
     required this.exerciseId,
+    required this.pattern,
+    required this.muscle,
     required this.cadence,
     required this.stages,
     required this.archived,
@@ -66,11 +91,20 @@ class GoalUpdateIn {
     final input = GoalUpdateIn._(
       metric: metric,
       exerciseId: json['exerciseId'] as String?,
+      pattern: json.subjectKey('pattern'),
+      muscle: json.subjectKey('muscle'),
       cadence: cadence,
       stages: _parseStages(json),
       archived: json.boolean('archived'),
     );
-    _validate(metric: metric, exerciseId: input.exerciseId, cadence: cadence, stages: input.stages);
+    _validate(
+      metric: metric,
+      exerciseId: input.exerciseId,
+      pattern: input.pattern,
+      muscle: input.muscle,
+      cadence: cadence,
+      stages: input.stages,
+    );
     return input;
   }
 
@@ -78,6 +112,8 @@ class GoalUpdateIn {
     return Goal(
       metric: metric,
       exerciseId: exerciseId,
+      pattern: pattern,
+      muscle: muscle,
       cadence: cadence,
       stages: stages,
       archived: archived,
@@ -120,23 +156,50 @@ List<GoalStage> _parseStages(Map<String, dynamic> json) {
   ];
 }
 
-/// The shape rules, mirrored by the CHECK constraints in `2026-07-12.goals.sql`.
+extension on Map<String, dynamic> {
+  /// A pattern or muscle key: a snake_case content identifier. Which keys exist
+  /// is the library's business, and it can add one without a release, so the
+  /// spelling is all that is checked.
+  String? subjectKey(String field) {
+    return switch (this[field]) {
+      null => null,
+      final String key when _subjectKey.hasMatch(key) => key,
+      _ => throw BadRequest(
+        code: 'invalid_subject',
+        reason: '$field must be a snake_case key of at most 64 characters',
+      ),
+    };
+  }
+}
+
+final _subjectKey = RegExp(r'^[a-z][a-z0-9_]{0,63}$');
+
+/// The shape rules, mirrored by the CHECK constraints on `goals`.
 void _validate({
   required GoalMetric metric,
   required String? exerciseId,
+  required String? pattern,
+  required String? muscle,
   required GoalCadence? cadence,
   required List<GoalStage> stages,
 }) {
-  if (metric.isWholeWorkout && exerciseId != null) {
+  final subjects = [exerciseId, pattern, muscle].nonNulls.length;
+  if (metric.isWholeWorkout && subjects > 0) {
     throw BadRequest(
       code: 'goal_scope',
-      reason: 'the ${metric.value} metric counts whole workouts and takes no exerciseId',
+      reason: 'the ${metric.value} metric counts whole workouts and takes no exerciseId, pattern or muscle',
     );
   }
-  if (!metric.isWholeWorkout && exerciseId == null) {
+  if (metric.countsSubject && subjects != 1) {
     throw BadRequest(
       code: 'goal_scope',
-      reason: '${metric.value} is measured per exercise, so exerciseId is required',
+      reason: '${metric.value} counts one subject, so exactly one of exerciseId, pattern and muscle is required',
+    );
+  }
+  if (!metric.isWholeWorkout && !metric.countsSubject && (exerciseId == null || subjects > 1)) {
+    throw BadRequest(
+      code: 'goal_scope',
+      reason: '${metric.value} is measured per exercise, so exerciseId is required and pattern and muscle are not',
     );
   }
   if (cadence != null && stages.length > 1) {

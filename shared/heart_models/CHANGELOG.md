@@ -1,5 +1,47 @@
 # Changelog
 
+## 2.18.0
+
+Goals about a movement pattern or a muscle (heart-api#196).
+
+- New: `GoalMetric.sessions` (workouts that trained the subject) and
+  `GoalMetric.sets` (working sets on it, fractional for a muscle), with
+  `GoalMetric.countsSubject`. Neither has a `chart`. Exhaustive switches over
+  `GoalMetric` gain these two cases.
+- New: `Goal.pattern` (a library pattern key) and `Goal.muscle` (a muscle id
+  prefix or group), on the wire and the row as `pattern` / `muscle`, in the
+  factory, `copyWith`, `toMap` and `toBody`; left out when null.
+- New: `Goal.subject`, a sealed `GoalSubject`: `ExerciseSubject`,
+  `PatternSubject` or `MuscleSubject`.
+
+## 2.17.0
+
+How much of a set each muscle receives (heart-api#197).
+
+- New: `MuscleTag.share`, a role's own share of a set when the library gives
+  one; read from and written to `share`, left out when null.
+- New: `MuscleTagging.primaryShare` and `secondaryShare` (defaults
+  `MuscleTagging.defaultPrimaryShare` 1.0 and `defaultSecondaryShare` 0.5),
+  and `shareOf(muscle)`: the share of one set a muscle id prefix or group
+  receives, primary first, 0 when untagged.
+
+## 2.16.0
+
+Targets on template sets (heart-api#195, heart-of-yours#173).
+
+- New: `SetTarget`, what a template set aims for per `TargetMeasure` (`reps`,
+  `weight`, `duration`, `distance`), each a `TargetRange`: `min` and an
+  optional `max`, exact when they are equal (`TargetRange.exactly`), an open
+  top ("8+") when `max` is null. `fromJson`/`toMap`, `operator []`,
+  `withRange`, `isEmpty`, and `SetTarget.none`. A measure or a range shape this
+  build doesn't know is carried as it arrived and written back.
+- New: `ExerciseSet.target` and the factory's `target:`. Read off a set's
+  `target` key; `toMap` writes the key only on a set that arrived with it or
+  had one assigned, and there always, null included, so a target can be
+  cleared. `copy()` keeps it.
+- New: `TemplateSetRequest.target`: null leaves the stored target alone,
+  `SetTarget.none` clears it.
+
 ## 2.15.0
 
 Moving an exercise's history onto another exercise (heart-api#140, heart-of-yours#338).

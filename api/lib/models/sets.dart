@@ -27,3 +27,50 @@ SetType setType(Object? value, {required String at}) {
     ),
   };
 }
+
+/// A set's `target` as a body sent it: an object keyed by measure, each a
+/// `{min, max?}` range — at least zero, `max` no lower than `min`, reps and
+/// seconds whole — or null (or `{}`) for no target, which clears a stored one.
+/// Anything else is a 400 naming the set at [at].
+SetTarget setTarget(Object? value, {required String at}) {
+  Never invalid(String why) => throw BadRequest(code: 'invalid_target', reason: '$at.target $why');
+
+  bool whole(TargetMeasure measure) => measure == .reps || measure == .duration;
+
+  TargetRange range(TargetMeasure measure, Object? value) {
+    final key = measure.value;
+    final range = switch (value) {
+      final Map m when m.keys.any((k) => k != 'min' && k != 'max') => invalid('.$key takes only min and max'),
+      {'min': final num min} && final Map m => switch (m['max']) {
+        null => TargetRange(min: min),
+        final num max => TargetRange(min: min, max: max),
+        _ => invalid('.$key.max must be a number or absent'),
+      },
+      _ => invalid('.$key must be an object with a numeric min'),
+    };
+    return switch (range) {
+      TargetRange(:final min) when min < 0 => invalid('.$key.min must be >= 0'),
+      TargetRange(:final min, max: final num max) when max < min => invalid('.$key.max must be >= min'),
+      TargetRange(:final min, :final max) when whole(measure) && [min, ?max].any((n) => n != n.truncate()) => invalid(
+        '.$key must be whole numbers',
+      ),
+      _ => range,
+    };
+  }
+
+  TargetMeasure measure(Object? key) {
+    return switch (TargetMeasure.values.where((measure) => measure.value == key).firstOrNull) {
+      final TargetMeasure measure => measure,
+      null => invalid('has an unknown measure: $key'),
+    };
+  }
+
+  return switch (value) {
+    null => SetTarget.none,
+    final Map m => SetTarget({
+      for (final MapEntry(:key, :value) in m.entries)
+        if (measure(key) case final measure) measure: range(measure, value),
+    }),
+    _ => invalid('must be an object or null'),
+  };
+}

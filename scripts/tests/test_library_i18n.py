@@ -3,16 +3,20 @@
 Run scoped: uv run pytest scripts/tests -o pythonpath=scripts
 """
 
+import json
+
+import jsonschema
 import pytest
 from library_locales import (
     ARCHIVE_MISSING,
     UPSERT_EXERCISE,
     UPSERT_TRANSLATION,
     Library,
+    Muscles,
     merge_overlays,
     source_digest,
 )
-from validate_library import search_problems, search_words
+from validate_library import MASTER_SCHEMA, search_problems, search_words
 
 
 def master(**overrides) -> dict:
@@ -234,3 +238,23 @@ def test_accented_glossary_words_are_fine():
     doc = vocabulary_master()
     doc['glossary']['es'] = {'glúteos': {'words': ['romanian']}}
     assert search_problems(Library.parse(doc), MUSCLE_GROUPS, MUSCLE_IDS) == []
+
+
+def test_a_muscle_role_carries_its_share_only_when_it_has_one():
+    muscles = Muscles.parse(
+        {'primary': {'ids': ['biceps_brachii_l']}, 'secondary': {'ids': ['brachioradialis_l'], 'share': 0.25}}
+    )
+    assert muscles.to_dict() == {
+        'primary': {'groups': [], 'ids': ['biceps_brachii_l']},
+        'secondary': {'groups': [], 'ids': ['brachioradialis_l'], 'share': 0.25},
+    }
+
+
+@pytest.mark.parametrize(('share', 'valid'), [(0.25, True), (1, True), (0, False), (1.5, False), ('half', False)])
+def test_the_schema_bounds_a_share_to_a_fraction_of_a_set(share, valid):
+    with open(MASTER_SCHEMA) as f:
+        schema = json.load(f)
+    role = {'$defs': schema['$defs'], **schema['$defs']['muscleRole']}
+    errors = list(jsonschema.Draft202012Validator(role).iter_errors({'ids': [], 'share': share}))
+    assert (not errors) == valid
+
