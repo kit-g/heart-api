@@ -6,6 +6,12 @@ locals {
 }
 
 module "deploy_role" {
+  github_oidc_subjects = [
+    "repo:kit-g/heart-api:ref:refs/heads/main",
+    "repo:kit-g/heart-of-yours:ref:refs/heads/main",
+    "repo:kit-g/heart-of-yours:ref:refs/tags/v*",
+    "repo:kit-g/heart-of-yours:ref:refs/tags/dev-*",
+  ]
   source                = "../../stack"
   buckets               = ["583168578067-ca-central-1-content"]
   static_bucket         = "583168578067-ca-central-1-static"

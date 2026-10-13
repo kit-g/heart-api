@@ -26,14 +26,25 @@ data "aws_iam_policy_document" "content_bucket" {
     actions = [
       "s3:ListBucket",
       "s3:GetObject",
-      "s3:PutObject",
       "s3:GetObjectTagging",
-      "s3:PutObjectTagging",
-      "s3:DeleteObject",
     ]
     resources = [
       var.content_bucket.arn,
       "${var.content_bucket.arn}/*",
+    ]
+  }
+  # Runtime media and private transfers only; catalog assets are published by
+  # separate roles and must survive a compromised API request.
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:PutObjectTagging",
+      "s3:DeleteObject",
+    ]
+    resources = [
+      for prefix in ["uploads", "workouts", "avatars", "imports", "exports"] :
+      "${var.content_bucket.arn}/${prefix}/*"
     ]
   }
 }

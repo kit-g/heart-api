@@ -36,11 +36,15 @@ extension CronJobs on PostgresConfig {
   /// at its own database, and this runs once a deploy.
   Future<int?> declareCronJobs({
     String cronDatabase = 'postgres',
-    pg.SslMode sslMode = pg.SslMode.require,
+    pg.SslMode? sslMode,
   }) async {
     final connection = await pg.Connection.open(
       pg.Endpoint(host: host, port: port, database: cronDatabase, username: user, password: password),
-      settings: pg.ConnectionSettings(sslMode: sslMode, applicationName: 'heart-api-cron'),
+      settings: pg.ConnectionSettings(
+        sslMode: sslMode ?? this.sslMode,
+        securityContext: securityContext,
+        applicationName: 'heart-api-cron',
+      ),
     );
     try {
       final available = await connection.execute(_cronAvailable);

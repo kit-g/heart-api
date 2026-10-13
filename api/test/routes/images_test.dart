@@ -55,6 +55,40 @@ void main() {
   Request getReq({Map<String, String> query = const {}}) =>
       wire(bareRequest(method: Method.get, path: '/workouts/images', query: query));
 
+  group('deleteWorkoutImage', () {
+    for (final key in ['workouts/another-user/photo.jpg', 'static/exercises/en.json']) {
+      test('an unowned key cannot reach S3: $key', () async {
+        when(imageDb.getWorkoutImageKeys(userId: _meId, workoutId: 'w-1'))
+            .thenAnswer((_) async => ['workouts/owned/photo.jpg']);
+        final request = wire(bareRequest(method: Method.delete, query: {'key': key}));
+        await expectLater(deleteWorkoutImageById(request, 'w-1'), throwsA(isA<NotFound>()));
+        verifyZeroInteractions(imageStorage);
+        verifyNever(imageDb.deleteImageRecord(userId: _meId, workoutId: 'w-1', key: key));
+      });
+    }
+
+    test('an owned image is authorized before S3 deletion', () async {
+      const key = 'workouts/owned/photo.jpg';
+      when(imageDb.getWorkoutImageKeys(userId: _meId, workoutId: 'w-1')).thenAnswer((_) async => [key]);
+      final request = wire(bareRequest(method: Method.delete, query: {'key': key}));
+      await expectLater(deleteWorkoutImageById(request, 'w-1'), throwsA(isA<NoContent>()));
+      verifyInOrder([
+        imageDb.getWorkoutImageKeys(userId: _meId, workoutId: 'w-1'),
+        imageStorage.deleteObject(key: key),
+        imageDb.deleteImageRecord(userId: _meId, workoutId: 'w-1', key: key),
+      ]);
+    });
+
+    test('an S3 failure leaves the ownership record available for a retry', () async {
+      const key = 'workouts/owned/photo.jpg';
+      when(imageDb.getWorkoutImageKeys(userId: _meId, workoutId: 'w-1')).thenAnswer((_) async => [key]);
+      when(imageStorage.deleteObject(key: key)).thenThrow(StateError('S3 unavailable'));
+      final request = wire(bareRequest(method: Method.delete, query: {'key': key}));
+      await expectLater(deleteWorkoutImageById(request, 'w-1'), throwsStateError);
+      verifyNever(imageDb.deleteImageRecord(userId: _meId, workoutId: 'w-1', key: key));
+    });
+  });
+
   /// The presign used to hand out a URL for any id, so an upload against a
   /// workout the caller does not have succeeded, transferred, and only failed
   /// later in the event handler on the `workout_id` FK — after the object had

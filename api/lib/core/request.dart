@@ -14,12 +14,7 @@ extension JsonBody on Request {
       // a client mistake, not a missing server feature: 415, not 501
       _ => throw const UnsupportedMediaType(reason: 'expected an application/json request body'),
     };
-    if (_healthField(decoded) case final String field) {
-      throw BadRequest(
-        code: 'health_data',
-        reason: '$field looks like health data, which stays on the device',
-      );
-    }
+    rejectHealthFields(decoded);
     return decoded;
   }
 
@@ -34,6 +29,16 @@ extension JsonBody on Request {
       ...url.queryParameters,
       ...pathParameters.raw.map((k, v) => MapEntry(k.toString(), v)),
     };
+  }
+}
+
+/// Applies the same device-only boundary to JSON keys and imported CSV headers.
+void rejectHealthFields(Object? value) {
+  if (_healthField(value) case final String field) {
+    throw BadRequest(
+      code: 'health_data',
+      reason: '$field looks like health data, which stays on the device',
+    );
   }
 }
 

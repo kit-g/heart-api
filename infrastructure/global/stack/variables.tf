@@ -1,10 +1,16 @@
-# Full owner/name slugs, deliberately: these become the OIDC trust policy's
-# `repo:<owner>/<name>:*` subjects, and the bare names the docs use would stop
-# every GitHub Actions deploy from assuming the role.
-variable "github_repos" {
+# Full OIDC subjects: PRs and arbitrary branches must never assume a deploy
+# role, even when a workflow accidentally requests an identity token.
+variable "github_oidc_subjects" {
   type        = list(string)
-  default     = ["kit-g/heart-api", "kit-g/heart-of-yours"]
-  description = "GitHub repos (owner/name) allowed to assume the deploy role."
+  description = "Explicit main/release-tag subjects allowed to assume this account's deploy role."
+
+  validation {
+    condition = length(var.github_oidc_subjects) > 0 && alltrue([
+      for subject in var.github_oidc_subjects :
+      can(regex("^repo:[^:*?]+/[^:*?]+:ref:refs/(heads/main|tags/[^:*?]+[^:]*)$", subject))
+    ])
+    error_message = "Trust exact repositories on main or a release-tag prefix; never all contexts or pull requests."
+  }
 }
 
 variable "static_bucket" {

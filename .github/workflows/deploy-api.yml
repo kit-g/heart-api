@@ -28,15 +28,13 @@ on:
         required: true
         type: string
 
-permissions:
-  id-token: write
-  contents: read
-
 env:
   PG_VERSION: "17"
 
 jobs:
   lint:
+    permissions:
+      contents: read
     name: "Lint Dart Code"
     runs-on: ubuntu-latest
     steps:
@@ -72,6 +70,8 @@ jobs:
         run: dart analyze
 
   dart-test:
+    permissions:
+      contents: read
     name: "Dart Tests (${{ matrix.package }})"
     runs-on: ubuntu-latest
     strategy:
@@ -125,6 +125,8 @@ jobs:
           retention-days: 7
 
   db-test:
+    permissions:
+      contents: read
     name: "Database Tests & Coverage"
     runs-on: ubuntu-latest
     # A healthy run takes about 5 minutes. The coverage run has hung mid-suite
@@ -223,6 +225,8 @@ jobs:
           retention-days: 7
 
   test-summary:
+    permissions:
+      contents: read
     name: "Test Summary"
     runs-on: ubuntu-latest
     needs: [ dart-test, db-test ]
@@ -249,6 +253,9 @@ jobs:
 
 
   build-and-deploy:
+    permissions:
+      contents: read
+      id-token: write
     name: "Build & Deploy"
     runs-on: ubuntu-latest
     needs: [ lint, dart-test, db-test ]
@@ -294,7 +301,7 @@ jobs:
         run: |
           dart pub get
           COMMIT=${{ steps.commit.outputs.commit }} ARTIFACTS_DIR=. make build-ApiFunction
-          zip function.zip bootstrap
+          zip function.zip bootstrap supabase-ca.crt
 
       - name: "Update Lambda Function Code"
         run: |
@@ -343,6 +350,8 @@ jobs:
       commit: ${{ steps.commit.outputs.commit }}
 
   smoke-test:
+    permissions:
+      contents: read
     name: "Smoke Test"
     runs-on: ubuntu-latest
     needs: [ build-and-deploy ]
@@ -402,6 +411,9 @@ jobs:
           echo "Smoke test passed."
 
   notify:
+    permissions:
+      contents: read
+      id-token: write
     name: "Notify Monitoring Topic"
     runs-on: ubuntu-latest
     needs: [ lint, dart-test, db-test, build-and-deploy, smoke-test ]

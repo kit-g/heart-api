@@ -32,6 +32,7 @@ import hashlib
 import json
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Self
 
 import boto3
@@ -44,6 +45,7 @@ from psycopg.types.json import Json
 # many exercises in one run. A deliberate mass-archive raises the cap via env:
 #   MAX_ARCHIVED=100 python scripts/library_locales.py
 MAX_ARCHIVED_DEFAULT = 10
+ROOT = Path(__file__).resolve().parents[1]
 
 
 @dataclass
@@ -508,13 +510,21 @@ def connect() -> psycopg.Connection:
             user=creds['user'],
             password=creds['password'],
             dbname=creds.get('database', 'heart'),
-            sslmode='require',
+            sslmode='verify-full',
+            sslrootcert=os.environ.get('PGSSLROOTCERT', str(ROOT / 'api/bin/supabase-ca.crt')),
         )
 
     host = os.environ.get('PGHOST', 'localhost')
     dbname = os.environ.get('PGDATABASE', 'heart')
     print(f'>> Connecting to {host}/{dbname} (local; user/port/password from PG* env)')
-    return psycopg.connect(host=host, dbname=dbname)
+    if host in {'localhost', '127.0.0.1', '::1'}:
+        return psycopg.connect(host=host, dbname=dbname)
+    return psycopg.connect(
+        host=host,
+        dbname=dbname,
+        sslmode='verify-full',
+        sslrootcert=os.environ.get('PGSSLROOTCERT', str(ROOT / 'api/bin/supabase-ca.crt')),
+    )
 
 
 def main():
