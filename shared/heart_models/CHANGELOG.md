@@ -2,7 +2,7 @@
 
 ## 2.32.0
 
-Phases and test sessions (heart-api#233).
+Phases and test sessions (heart-api#233). App side: heart-of-yours#346, #350.
 
 - New: `ProgramPhase` (`name`, `sessions`, `cycles`) and `Program.phases`; a
   program week falls in a phase by the phases' cycles in turn, the last (or
@@ -17,7 +17,7 @@ Phases and test sessions (heart-api#233).
 
 ## 2.31.0
 
-Variation ladders (heart-api#231).
+Variation ladders (heart-api#231). App side: heart-of-yours#350.
 
 - New: `Ladder`, a growth rule (`kind: ladder`) of `rungs` (exercise ids,
   easiest first), `top` and `bottom`; `after(exercise)`. `Progression.next`
@@ -28,7 +28,7 @@ Variation ladders (heart-api#231).
 
 ## 2.30.0
 
-Lighter weeks (heart-api#229).
+Lighter weeks (heart-api#229). App side: heart-of-yours#350, #346.
 
 - New: `Deload` (`every` cycles, `load` and `volume` shares) and
   `Program.deload`, on the wire as `deload`; `ProgramField.deload` for
@@ -41,7 +41,7 @@ Lighter weeks (heart-api#229).
 ## 2.29.0
 
 The progression engine: what a session does to a base, misses, and a step set
-by the AMRAP set (heart-api#228).
+by the AMRAP set (heart-api#228). App side: heart-of-yours#350.
 
 - New: `Progression.next(rule:, base:, sets:, misses:, lighter:, week:,
   closesCycle:)` returns a sealed `ProgressionStep`: `Grow`, `Hold`, `Missed`,
@@ -63,7 +63,7 @@ by the AMRAP set (heart-api#228).
 ## 2.28.0
 
 Slots: one lift with two bases, a share of another's, supplemental sets and
-open slots (heart-api#232).
+open slots (heart-api#232). App side: heart-of-yours#349, #346.
 
 - New: `ProgramBase.slot`, the template exercise a base belongs to when one
   lift has two. `currentBases` now keys a slotted base by its slot, and the
@@ -83,7 +83,7 @@ open slots (heart-api#232).
 
 ## 2.27.0
 
-Supersets and circuits (heart-api#234).
+Supersets and circuits (heart-api#234). App side: heart-of-yours#159.
 
 - New: `WorkoutExercise.superset`, the superset an exercise belongs to in its
   session (same number, back to back), on the wire as `superset`. Carried by
@@ -93,7 +93,8 @@ Supersets and circuits (heart-api#234).
 
 ## 2.26.0
 
-Effort targets, a capped AMRAP, and rest per exercise (heart-api#230).
+Effort targets, a capped AMRAP, and rest per exercise (heart-api#230). App side:
+heart-of-yours#349.
 
 - New: `SetTarget.rir` and `withRir`, reps in reserve, on the wire as `rir`
   beside the measures. `SetTarget`'s factory takes it.
@@ -109,7 +110,7 @@ Effort targets, a capped AMRAP, and rest per exercise (heart-api#230).
 
 ## 2.25.0
 
-A history move re-keys programs (heart-api#226).
+A history move re-keys programs (heart-api#226). App side: heart-of-yours#346.
 
 - New: `ExerciseMoveReport.programs`, the programs whose rules or bases moved
   from the source to the target, on the wire as `programs`. Optional in the
@@ -117,7 +118,7 @@ A history move re-keys programs (heart-api#226).
 
 ## 2.24.0
 
-Four gaps the app ran into (heart-api#227).
+Four gaps the app ran into (heart-api#227). App side: heart-of-yours#346.
 
 - New: `Program.without({ProgramField...})` unsets `note`, `perWeek`, `weeks`
   or `constraint`, which `copyWith` can't (a null there keeps the value).
