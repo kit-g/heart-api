@@ -61,6 +61,35 @@ void main() {
       expect(exercises[1], isNot(contains('met')));
     });
 
+    test('forwards a superset when the body speaks about one, and refuses a bad one', () {
+      final params = const WorkoutRequest(
+        userId: 'u1',
+        body: {
+          'exercises': [
+            {'exercise': _bench, 'order': 0, 'superset': 1, 'sets': []},
+            {'exercise': _squat, 'order': 1, 'superset': null, 'sets': []},
+            {'exercise': _bench, 'order': 2, 'sets': []},
+          ],
+        },
+      ).toParams();
+      final exercises = jsonDecode(params['exercises'] as String) as List;
+      expect(exercises[0]['superset'], 1);
+      expect(exercises[1], containsPair('superset', null));
+      expect(exercises[2], isNot(contains('superset')));
+
+      expect(
+        () => const WorkoutRequest(
+          userId: 'u1',
+          body: {
+            'exercises': [
+              {'exercise': _bench, 'order': 0, 'superset': 0, 'sets': []},
+            ],
+          },
+        ).toParams(),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
     test('forwards a per-exercise note, trimmed, dropping blank ones', () {
       final req = const WorkoutRequest(
         userId: 'u1',

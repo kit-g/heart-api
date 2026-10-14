@@ -580,6 +580,42 @@ void main() {
       expect(set.request.exercises.single.rest, 90);
     });
 
+    test('a superset is a number from 1 to 50, three-valued', () async {
+      final absent = await TemplateUpdateIn.fromRequest(
+        req(
+          body: {
+            'exercises': [exercise({})],
+          },
+        ),
+      );
+      expect(absent.request.exercises.single.setsSuperset, isFalse);
+      final paired = await TemplateUpdateIn.fromRequest(
+        req(
+          body: {
+            'exercises': [
+              exercise({'superset': 3}),
+            ],
+          },
+        ),
+      );
+      expect(paired.request.exercises.single.superset, 3);
+      for (final superset in [0, 51, 1.5, 'A']) {
+        await expectLater(
+          TemplateCreateIn.fromRequest(
+            req(
+              body: {
+                'exercises': [
+                  exercise({'superset': superset}),
+                ],
+              },
+            ),
+          ),
+          throwsA(isA<BadRequest>()),
+          reason: '$superset',
+        );
+      }
+    });
+
     test('rest is whole seconds up to 30 minutes', () async {
       for (final rest in [-1, 1801, 90.5, '90']) {
         await expectLater(
