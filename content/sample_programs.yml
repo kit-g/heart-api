@@ -14,6 +14,11 @@
 # Rules:            as on the wire (heart_models' GrowthRule), plus
 #                   {kind: ladder, ladder: push, top, bottom} naming a ladder in
 #                   exercise_ladders.yml
+# Claims (why):     each cites `sources` and says what it is `about`, so the app
+#                   can show it where the program shows that part: program, who,
+#                   week, grows, misses, deload, phases, tests, next, rest,
+#                   rules.<exercise>, sessions.<session> or
+#                   sessions.<session>.<exercise>
 # Weights are never written: they come from the user's history and the
 # program's bases. Names stay generic, so no named program's licensing is
 # involved, and the copy never says "inspired by" one.
@@ -58,18 +63,21 @@ programs:
       ru: Пропустили прогулку? Пройдитесь на следующий день — неделя вас подождёт.
     why:
       - sources: [who_2020]
+        about: [program, grows]
         text:
           en: Any amount of activity is better than none; the goal is 150 minutes a week, which is where this plan ends.
           es: Cualquier cantidad de actividad es mejor que nada; el objetivo son 150 minutos a la semana, justo donde termina este plan.
           fr: Toute activité vaut mieux que rien ; l’objectif est de 150 minutes par semaine, là où ce programme se termine.
           ru: Любая активность лучше, чем никакой; цель — 150 минут в неделю, ровно там, где заканчивается этот план.
       - sources: [walk_with_ease]
+        about: [grows, rules.walking]
         text:
           en: Starting around ten minutes and building to half an hour over a few weeks is how proven walking programs begin.
           es: Empezar con unos diez minutos y llegar a media hora en unas semanas es como empiezan los programas de caminar que funcionan.
           fr: Commencer vers dix minutes et monter à une demi-heure en quelques semaines, c’est ainsi que débutent les programmes de marche qui ont fait leurs preuves.
           ru: Начать примерно с десяти минут и за несколько недель дойти до получаса — так устроены проверенные программы ходьбы.
       - sources: [otago_2022]
+        about: [week, sessions.strength, sessions.balance]
         text:
           en: Strength and balance between walks does more for steadiness and getting up from a chair than walking alone.
           es: Fuerza y equilibrio entre paseos hacen más por la estabilidad y por levantarse de una silla que solo caminar.
@@ -142,18 +150,21 @@ programs:
       ru: "Подход меньше 8 — ничего страшного: в следующий раз та же ступень. Назад ничего не откатывается."
     why:
       - sources: [acsm_2026, iversen_2021]
+        about: [program, week]
         text:
           en: Almost any sensible program works for a beginner; a few hard sets per muscle twice a week is enough.
           es: Casi cualquier programa sensato funciona para un principiante; unas pocas series exigentes por músculo dos veces por semana bastan.
           fr: Presque n’importe quel programme sensé marche pour un débutant ; quelques séries difficiles par muscle deux fois par semaine suffisent.
           ru: Для новичка работает почти любая разумная программа; нескольких тяжёлых подходов на мышцу дважды в неделю достаточно.
       - sources: [kotarsky_2018]
+        about: [grows, rules.sit-to-stand, rules.wall-push-up, rules.glute-bridge, rules.step-up-bodyweight]
         text:
           en: Climbing to harder versions of an exercise builds strength the way adding weight does.
           es: Subir a versiones más difíciles de un ejercicio desarrolla la fuerza como lo hace añadir peso.
           fr: Passer à des versions plus dures d’un exercice développe la force comme le fait l’ajout de charge.
           ru: Переход к более трудным вариантам упражнения развивает силу так же, как добавление веса.
       - sources: [lee_mcgill_2015]
+        about: [rules.plank]
         text:
           en: Planks stop growing at a minute because longer holds train little but holding a plank.
           es: Las planchas dejan de alargarse al minuto porque más tiempo entrena poco más que aguantar la plancha.
@@ -228,18 +239,21 @@ programs:
       ru: Три тренировки подряд меньше 8 повторений снижают вес на десятую часть. Пропуск дня ничего не стоит — неделя подождёт.
     why:
       - sources: [bosquet_2013, sbs_detraining]
+        about: [program, who, phases]
         text:
           en: A month off barely touches strength, and what you lose comes back in about half the time it took to lose it.
           es: Un mes de parón apenas afecta a la fuerza, y lo que pierdes vuelve en más o menos la mitad del tiempo que tardó en irse.
           fr: Un mois d’arrêt touche à peine la force, et ce que vous perdez revient en à peu près la moitié du temps.
           ru: Месяц перерыва почти не сказывается на силе, а потерянное возвращается примерно за половину времени.
       - sources: [ogasawara_2013]
+        about: [program]
         text:
           en: People who took breaks ended up as strong as those who never stopped. A break is not lost progress.
           es: Quienes hicieron pausas acabaron tan fuertes como quienes nunca pararon. Una pausa no es progreso perdido.
           fr: Ceux qui faisaient des pauses ont fini aussi forts que ceux qui ne s’arrêtaient jamais. Une pause n’est pas un progrès perdu.
           ru: Те, кто делал перерывы, в итоге были так же сильны, как те, кто не останавливался. Перерыв — не потерянный прогресс.
       - sources: [plotkin_2022]
+        about: [grows]
         text:
           en: Dumbbells climb in big steps, so reps rise first and the weight follows.
           es: Las mancuernas suben a saltos grandes, así que primero suben las repeticiones y luego el peso.
@@ -349,12 +363,14 @@ programs:
       ru: Меньше 15 повторений за три подхода — и в следующий раз вес снижается на десятую часть, а потом снова растёт. Примерно через три месяца прибавки прекращаются — пора переходить дальше.
     why:
       - sources: [acsm_2009, currier_2023]
+        about: [program, week, grows]
         text:
           en: Heavy sets three times a week led the research for strength, and beginners can add weight almost every session for a while.
           es: Las series pesadas tres veces por semana encabezaron la investigación en fuerza, y un principiante puede sumar peso casi cada sesión durante un tiempo.
           fr: Des séries lourdes trois fois par semaine arrivent en tête de la recherche pour la force, et un débutant peut ajouter de la charge presque à chaque séance pendant un temps.
           ru: Тяжёлые подходы три раза в неделю лидируют в исследованиях силы, и новичок какое-то время может прибавлять вес почти каждую тренировку.
       - sources: [rest_singer_2024]
+        about: [rest]
         text:
           en: Rest is two to three minutes on the big lifts, because a little longer rest does a little more.
           es: El descanso es de dos a tres minutos en los ejercicios grandes, porque descansar algo más da algo más.
@@ -449,18 +465,21 @@ programs:
       ru: Три тренировки подряд меньше 8 снижают вес на десятую часть. Лёгкая неделя не считается ни в плюс, ни в минус.
     why:
       - sources: [plotkin_2022]
+        about: [grows]
         text:
           en: More reps build as much muscle as more weight, which suits dumbbells that climb in big steps.
           es: Más repeticiones construyen tanto músculo como más peso, algo que va bien con mancuernas que suben a saltos grandes.
           fr: Plus de répétitions construisent autant de muscle que plus de charge, ce qui convient aux haltères qui montent par gros paliers.
           ru: Больше повторений растят мышцы не хуже, чем больше вес, — это удобно с гантелями, которые растут большими шагами.
       - sources: [schoenfeld_2016, acsm_2026]
+        about: [week]
         text:
           en: Each muscle gets worked three times a week, more than the twice that research found beats once.
           es: Cada músculo trabaja tres veces por semana, más que las dos veces que la investigación vio mejores que una.
           fr: Chaque muscle travaille trois fois par semaine, plus que les deux fois que la recherche trouve meilleures qu’une.
           ru: Каждая мышца работает три раза в неделю — больше, чем два раза, которые в исследованиях оказались лучше одного.
       - sources: [bell_2023, coleman_2024]
+        about: [deload]
         text:
           en: The fifth week is lighter, not off, because rest that stops training altogether costs a little strength.
           es: La quinta semana es más ligera, no de descanso, porque parar del todo cuesta algo de fuerza.
@@ -541,18 +560,21 @@ programs:
       ru: Тяжёлый подход, который не дотянул, — не провал, пока вы едите меньше. В следующий раз оставьте тот же вес.
     why:
       - sources: [spiering_2021, bickel_2011]
+        about: [program, grows]
         text:
           en: Strength and muscle hold for months on a third of the usual sets, as long as the weights stay heavy.
           es: La fuerza y el músculo se mantienen meses con un tercio de las series habituales, siempre que los pesos sigan altos.
           fr: La force et le muscle tiennent des mois avec un tiers des séries habituelles, tant que les charges restent lourdes.
           ru: Сила и мышцы держатся месяцами на трети обычных подходов, пока веса остаются тяжёлыми.
       - sources: [roth_2023, murphy_2022]
+        about: [who]
         text:
           en: While eating less, more sets don't keep more muscle, and strength holds better than size.
           es: Comiendo menos, más series no conservan más músculo, y la fuerza aguanta mejor que el tamaño.
           fr: En mangeant moins, plus de séries ne préservent pas plus de muscle, et la force tient mieux que le volume.
           ru: При урезанном питании больше подходов не сохраняют больше мышц, а сила держится лучше объёма.
       - sources: [helms_2014]
+        about: [who]
         text:
           en: Losing about half a percent to one percent of your weight a week keeps the most muscle.
           es: Perder entre medio y un uno por ciento de tu peso a la semana es lo que más músculo conserva.
@@ -613,6 +635,7 @@ programs:
       ru: Пропустили тренировку? Сделайте, когда сможете, — неделя подождёт.
     why:
       - sources: [iversen_2021, steele_2023]
+        about: [program, grows]
         text:
           en: A few hard sets per muscle a week is enough to keep, and even build, strength.
           es: Unas pocas series exigentes por músculo a la semana bastan para mantener, e incluso ganar, fuerza.
@@ -671,12 +694,14 @@ programs:
       ru: Три тренировки подряд ниже диапазона снижают вес в этом упражнении на десятую часть.
     why:
       - sources: [schoenfeld_2016]
+        about: [week]
         text:
           en: Four upper/lower days and three full-body days do the same when the sets are equal; this one suits four free days.
           es: Cuatro días superior/inferior y tres de cuerpo completo dan lo mismo a igualdad de series; este encaja si tienes cuatro días.
           fr: Quatre jours haut/bas et trois jours corps entier se valent à séries égales ; celui-ci convient si vous avez quatre jours.
           ru: Четыре дня верх/низ и три дня на всё тело равноценны при равном числе подходов; этот вариант — для тех, у кого есть четыре дня.
       - sources: [bell_2023, coleman_2024]
+        about: [deload]
         text:
           en: A lighter week every six keeps you fresh without a week off.
           es: Una semana ligera cada seis te mantiene fresco sin una semana de descanso.
@@ -762,12 +787,14 @@ programs:
       ru: Не дотянули последний подход две волны подряд — максимум в этом упражнении снижается на десятую часть.
     why:
       - sources: [acsm_2026]
+        about: [program, grows]
         text:
           en: Waves aren't magic — research finds a small edge for strength at most — but a plan you enjoy is one you keep.
           es: Las olas no son magia —la investigación ve, como mucho, una pequeña ventaja en fuerza—, pero un plan que disfrutas es un plan que mantienes.
           fr: Les vagues ne sont pas magiques — la recherche y voit au mieux un petit avantage pour la force — mais un plan qui vous plaît est un plan que vous tenez.
           ru: "Волны — не магия: исследования видят в лучшем случае небольшое преимущество в силе. Но план, который нравится, — это план, который соблюдаешь."
       - sources: [bell_2023, coleman_2024]
+        about: [grows]
         text:
           en: Every fourth week is light, not off.
           es: Cada cuarta semana es ligera, no de descanso.

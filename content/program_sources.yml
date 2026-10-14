@@ -3,6 +3,9 @@
 # the programs so the app can link them. From the research of 2026-10-14
 # (the Notion page "Programs — research").
 #
+# A link goes to the publisher's page, PubMed or PMC, or the author body's own
+# page: never a copy of a paper hosted by someone else.
+#
 # `finding` is the one line the app shows next to the link, in plain words;
 # it is copy, translated like every other line. `title`, `who` and `year` say
 # what the link is and stay as published.
@@ -25,7 +28,7 @@ sources:
     title: Resistance training prescription for muscle strength and hypertrophy in healthy adults
     who: Currier et al., British Journal of Sports Medicine (network meta-analysis)
     year: 2023
-    url: https://bjsm.bmj.com/content/bjsports/57/18/1211.full.pdf
+    url: https://pubmed.ncbi.nlm.nih.gov/37414459/
     finding:
       en: Every way of training beat not training. Heavy sets three times a week led for strength.
       es: Cualquier forma de entrenar fue mejor que no entrenar. Las series pesadas tres veces por semana fueron las mejores para la fuerza.
@@ -65,7 +68,7 @@ sources:
     title: Progression models in resistance training for healthy adults
     who: American College of Sports Medicine, position stand
     year: 2009
-    url: https://sfu.ca/~ryand/kin343/ACSMresistance.pdf
+    url: https://pubmed.ncbi.nlm.nih.gov/19204579/
     finding:
       en: Beginners do well on 8 to 12 reps, two or three days a week, adding 2 to 10% once they can do a rep or two more than asked.
       es: A los principiantes les va bien con 8 a 12 repeticiones, dos o tres días por semana, añadiendo un 2 a 10% cuando pueden hacer una o dos repeticiones más de las pedidas.
@@ -185,7 +188,7 @@ sources:
     title: Effect of long-term isometric training on core/torso stiffness
     who: Lee & McGill, Journal of Strength and Conditioning Research
     year: 2015
-    url: "https://www.backfitpro.com/medical-scientific-articles/2015/[25]-Lee,B.-(2015)-The-effect-of-long-term-isometric-training-[J.-Strength-Condit.].pdf"
+    url: https://pubmed.ncbi.nlm.nih.gov/26010794/
     finding:
       en: Short holds built a stiffer, steadier core. Past about a minute, a longer plank trains little but holding a plank.
       es: Los apoyos cortos construyeron un core más firme y estable. Pasado un minuto, una plancha más larga entrena poco más que aguantar la plancha.
@@ -215,7 +218,7 @@ sources:
     title: Walk With Ease
     who: Arthritis Foundation
     year: 2023
-    url: https://arthritis.health.utah.gov/wp-content/uploads/factSheet_WalkWithEase.pdf
+    url: https://www.arthritis.org/health-wellness/healthy-living/physical-activity/walking/walk-with-ease/wwe-about-the-program
     finding:
       en: Six weeks of three walks a week, starting around ten minutes and building to about half an hour.
       es: Seis semanas de tres paseos semanales, empezando por unos diez minutos y llegando a una media hora.
@@ -265,7 +268,7 @@ sources:
     title: Updating ACSM's recommendations for exercise preparticipation health screening
     who: Riebe et al., Medicine & Science in Sports & Exercise
     year: 2015
-    url: https://www.acefitness.org/education-and-resources/professional/expert-articles/6921/new-preparticipation-screening-guidelines-what-health-and-fitness-pros-need-to-know/
+    url: https://pubmed.ncbi.nlm.nih.gov/26473759/
     finding:
       en: Most people can start light to moderate exercise without seeing a doctor first; heart, metabolic or kidney disease, or symptoms, are the reason to check.
       es: La mayoría puede empezar con ejercicio suave o moderado sin ir antes al médico; una enfermedad del corazón, metabólica o renal, o síntomas, son el motivo para consultar.
@@ -275,7 +278,7 @@ sources:
     title: Give it a rest — a systematic review with Bayesian meta-analysis on the effect of inter-set rest interval duration
     who: Singer et al., Frontiers in Sports and Active Living
     year: 2024
-    url: https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2024.1429789/pdf
+    url: https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2024.1429789/full
     finding:
       en: Resting longer than a minute or so between sets did a little more, especially on big lifts.
       es: Descansar más de un minuto o así entre series dio algo más, sobre todo en los ejercicios grandes.

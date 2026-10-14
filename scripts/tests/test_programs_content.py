@@ -28,7 +28,7 @@ def one(**program) -> dict:
         'week': _t('K'),
         'grows': _t('G'),
         'misses': _t('M'),
-        'why': [{'text': _t('Y'), 'sources': ['acsm_2026']}],
+        'why': [{'text': _t('Y'), 'sources': ['acsm_2026'], 'about': ['program']}],
         'rules': {'squat-barbell': {'kind': 'rangeThenWeight', 'step': 2.5}},
         'sessions': [
             {
@@ -102,6 +102,32 @@ def test_targets_fit_the_category():
 def test_a_claim_cites_a_source_that_exists():
     assert any('no source' in p for p in check(one(why=[{'text': _t('Y'), 'sources': ['vibes']}]), LIBRARY_DOC))
     assert any('cites a source' in p for p in check(one(why=[{'text': _t('Y'), 'sources': []}]), LIBRARY_DOC))
+
+
+@pytest.mark.parametrize(
+    ('about', 'problem'),
+    [
+        (None, 'about says which part'),
+        ([], 'about says which part'),
+        (['footer'], 'is none of'),
+        (['deload'], 'names a deload the program does not have'),
+        (['rules.bench-press-barbell'], 'names no rule'),
+        (['sessions.z'], 'names no session'),
+        (['sessions.a.bench-press-barbell'], 'exactly once'),
+    ],
+)
+def test_a_claim_is_about_a_part_the_program_has(about, problem):
+    claim = {'text': _t('Y'), 'sources': ['acsm_2026'], 'about': about}
+    assert any(problem in p for p in check(one(why=[claim]), LIBRARY_DOC))
+
+
+def test_a_claim_may_be_about_rules_sessions_and_a_session_s_exercise():
+    claim = {
+        'text': _t('Y'),
+        'sources': ['acsm_2026'],
+        'about': ['grows', 'rules.squat-barbell', 'sessions.a', 'sessions.a.squat-barbell', 'rest'],
+    }
+    assert check(one(why=[claim]), LIBRARY_DOC) == []
 
 
 def test_safety_notes_and_next_programs_exist():
@@ -188,3 +214,23 @@ def test_render_is_stable_and_in_the_template_shape():
     assert {'acsm_2026', 'kotarsky_2018'} <= set(steps['sources'])
     assert first['sources']['acsm_2026']['url'].startswith('https://')
     assert first['safety']['mecfs']['sources'] == ['nice_mecfs']
+
+    # claims are anchored where the program shows them, by the ids it uses
+    plank = next(claim for claim in steps['why'] if 'lee_mcgill_2015' in claim['sources'])
+    assert plank['about'] == [{'on': 'rule', 'exercise': 'plank'}]
+    walk = next(p for p in first['programs'] if p['key'] == 'walk_and_move')
+    otago = next(claim for claim in walk['why'] if 'otago_2022' in claim['sources'])
+    strength = next(s for s in walk['sessions'] if s['key'] == 'strength')
+    assert {'on': 'session', 'session': strength['id']} in otago['about']
+    # and a source knows the programs that cite it
+    assert 'first_steps' in first['sources']['acsm_2026']['usedBy']
+    assert first['sources']['lee_mcgill_2015']['usedBy'] == ['first_steps']
+
+
+def test_a_session_s_exercise_is_anchored_by_its_template_exercise_id():
+    claim = {'text': _t('Y'), 'sources': ['acsm_2026'], 'about': ['sessions.a.squat-barbell']}
+    rendered = render(one(why=[claim]))['programs'][0]
+    exercise = rendered['sessions'][0]['exercises'][0]
+    assert rendered['why'][0]['about'] == [
+        {'on': 'exercise', 'session': rendered['sessions'][0]['id'], 'exercise': exercise['id']}
+    ]

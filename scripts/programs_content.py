@@ -195,6 +195,36 @@ def check_rule(where, rule, category, targets, ladders) -> list[str]:
     return problems
 
 
+# What a claim can be about: a part of the program page, by name, or one of
+# its rules, sessions or a session's exercise, by key.
+ANCHORS = {'program', 'who', 'week', 'grows', 'misses', 'deload', 'phases', 'tests', 'next', 'rest'}
+OPTIONAL_ANCHORS = {'deload', 'phases', 'tests', 'next'}
+
+
+def _anchor_problem(program: dict, anchor) -> str | None:
+    """Why [anchor] names nothing in [program], or None when it does."""
+    if not isinstance(anchor, str):
+        return 'is not a string'
+    sessions = {session.get('key'): session for session in program.get('sessions') or []}
+    match anchor.split('.'):
+        case [name] if name in ANCHORS:
+            if name in OPTIONAL_ANCHORS and not program.get(name):
+                return f'names a {name} the program does not have'
+            return None
+        case ['rules', exercise]:
+            return None if exercise in (program.get('rules') or {}) else 'names no rule of the program'
+        case ['sessions', session]:
+            return None if session in sessions else 'names no session of the program'
+        case ['sessions', session, exercise]:
+            if session not in sessions:
+                return 'names no session of the program'
+            count = sum(1 for entry in sessions[session].get('exercises') or [] if entry.get('exercise') == exercise)
+            if count != 1:
+                return 'must name an exercise the session has exactly once'
+            return None
+    return f'is none of {sorted(ANCHORS)}, rules.<exercise>, sessions.<session>[.<exercise>]'
+
+
 def check(document: dict, library: dict, sources=None, safety=None, ladders=None) -> list[str]:
     """Every problem in [document], or none."""
     sources = load(SOURCES) if sources is None else sources
@@ -272,6 +302,13 @@ def check(document: dict, library: dict, sources=None, safety=None, ladders=None
             if not claim.get('sources'):
                 problems.append(f'{where}.why[{at}]: a claim cites a source')
             cites(f'{where}.why[{at}]', claim.get('sources'))
+            about = claim.get('about')
+            if not isinstance(about, list) or not about:
+                problems.append(f'{where}.why[{at}]: about says which part of the program a claim explains')
+                continue
+            for anchor in about:
+                if (why := _anchor_problem(program, anchor)) is not None:
+                    problems.append(f'{where}.why[{at}].about: {anchor!r} {why}')
         if (deload := program.get('deload')) is not None and not (
             isinstance(deload, dict)
             and isinstance(deload.get('every'), int)
@@ -387,6 +424,27 @@ def _wire_target(target: dict) -> dict:
     return {key: value for key, value in target.items()}
 
 
+def _wire_anchor(program: dict, anchor: str, session_ids: dict[str, str]) -> dict:
+    """An anchor as the app finds it: a part by name, a rule by exercise key
+    (the key rules are under), a session or a session's exercise by id."""
+    match anchor.split('.'):
+        case ['rules', exercise]:
+            return {'on': 'rule', 'exercise': exercise}
+        case ['sessions', session]:
+            return {'on': 'session', 'session': session_ids[session]}
+        case ['sessions', session, exercise]:
+            entries = next(s for s in program['sessions'] if s['key'] == session)['exercises']
+            order = next(i for i, entry in enumerate(entries) if entry['exercise'] == exercise)
+            return {
+                'on': 'exercise',
+                'session': session_ids[session],
+                'exercise': _id(program['key'], session, str(order)),
+            }
+        case [name]:
+            return {'on': name}
+    raise ValueError(anchor)
+
+
 def render(document: dict, sources=None, safety=None, ladders=None) -> dict:
     """The static/programs object. Rules, ladders and sources stay keyed by
     library and content keys: the app resolves an exercise key through its
@@ -470,7 +528,14 @@ def render(document: dict, sources=None, safety=None, ladders=None) -> dict:
                 'week': text(program['week']),
                 'grows': text(program['grows']),
                 'misses': text(program['misses']),
-                'why': [{'text': text(claim['text']), 'sources': claim['sources']} for claim in program['why']],
+                'why': [
+                    {
+                        'text': text(claim['text']),
+                        'sources': claim['sources'],
+                        'about': [_wire_anchor(program, anchor, session_ids) for anchor in claim['about']],
+                    }
+                    for claim in program['why']
+                ],
                 'sources': cited,
                 'safety': program.get('safety') or [],
                 'next': program.get('next') or [],
@@ -519,6 +584,11 @@ def render(document: dict, sources=None, safety=None, ladders=None) -> dict:
                 'year': source['year'],
                 'url': source['url'],
                 'finding': text(source['finding'], source_locales),
+                'usedBy': sorted(
+                    program['key']
+                    for program in document['programs']
+                    if any(key in claim['sources'] for claim in program['why'])
+                ),
             }
             for key, source in sources['sources'].items()
         },
