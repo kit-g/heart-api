@@ -191,6 +191,7 @@ void main() {
         'preferencesDropped': 0,
         'chartPreferences': 0,
         'goals': 1,
+        'programs': 0,
         'sourceDeleted': true,
       });
       verify(app.db.moveExerciseHistory(userId: 'u1', sourceId: source, targetId: target, dryRun: false)).called(1);
