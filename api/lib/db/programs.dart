@@ -235,6 +235,10 @@ mixin _Programs on _DatabaseBase implements ProgramService {
       'weeks': program.weeks,
       'rules': jsonEncode(map['rules']),
       'constraintKey': program.constraint,
+      'deload': switch (program.deload) {
+        final Deload deload => jsonEncode(deload.toMap()),
+        null => null,
+      },
     };
   }
 }

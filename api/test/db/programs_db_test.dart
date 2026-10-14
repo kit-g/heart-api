@@ -202,7 +202,13 @@ FROM generate_series(1, 100) n
       final updated = await h.db.updateProgram(
         userId: userId,
         programId: stored.id!,
-        program: Program(name: 'Renamed', perWeek: 2, archived: true, rules: {exerciseId: const NoGrowth()}),
+        program: Program(
+          name: 'Renamed',
+          perWeek: 2,
+          archived: true,
+          rules: {exerciseId: const NoGrowth()},
+          deload: const Deload(every: 6),
+        ),
       );
 
       expect(updated.name, 'Renamed');
@@ -212,6 +218,7 @@ FROM generate_series(1, 100) n
       expect(updated.archived, isTrue);
       expect(updated.rules[exerciseId], const NoGrowth());
       expect(updated.source, 'getting_stronger_1');
+      expect(updated.deload, const Deload(every: 6));
       expect(updated.sessions, stored.sessions);
     });
 
