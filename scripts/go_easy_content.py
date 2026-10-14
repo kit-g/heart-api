@@ -101,8 +101,23 @@ def check(document: dict, library: dict) -> list[str]:
     return problems
 
 
+# A predicate's keys as the app reads them: the names of heart_models'
+# `Movement` and `Exercise` fields on the wire. The YAML keeps the library's own
+# snake_case names, as content does everywhere else.
+WIRE_KEYS = {
+    'groups': 'groups',
+    'axial_load': 'axialLoad',
+    'impact': 'impact',
+    'stability': 'stability',
+    'category': 'category',
+}
+
+
 def render(document: dict) -> dict:
     locales = document['locales']
+
+    def wire(predicates: list[dict]) -> list[dict]:
+        return [{WIRE_KEYS[key]: values for key, values in predicate.items()} for predicate in predicates]
 
     def text(field: dict) -> dict:
         return {'en': field['en'], **{locale: field[locale] for locale in locales}}
@@ -112,8 +127,8 @@ def render(document: dict) -> dict:
             key: {
                 'name': text(entry['name']),
                 'easierOn': text(entry['easier_on']),
-                'easier': entry['easier'],
-                'prefer': entry.get('prefer') or [],
+                'easier': wire(entry['easier']),
+                'prefer': wire(entry.get('prefer') or []),
             }
             for key, entry in document[section].items()
         }

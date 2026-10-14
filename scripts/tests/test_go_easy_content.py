@@ -50,4 +50,4 @@ def test_render_carries_copy_and_predicates():
     rendered = render(load(SOURCE))
     assert rendered['areas']['knee']['easierOn']['en'] == 'Easier on your knee'
     assert rendered['copy']['explainer']['ru']
-    assert rendered['movements']['spine_load']['easier'] == [{'axial_load': ['high']}]
+    assert rendered['movements']['spine_load']['easier'] == [{'axialLoad': ['high']}], 'the wire names Movement uses'
