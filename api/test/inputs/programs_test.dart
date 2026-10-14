@@ -176,6 +176,40 @@ void main() {
     });
   });
 
+  group('lighter weeks (heart-api#229)', () {
+    test('a program schedules one every N cycles', () async {
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'deload': {'every': 6, 'load': 0.9},
+          },
+        ),
+      );
+      expect(input.program.deload, const Deload(every: 6));
+    });
+
+    test('a bad one is refused', () async {
+      for (final deload in [
+        {'every': 1},
+        {'every': 4, 'volume': 1.5},
+        {'every': 4, 'skip': true},
+        'monthly',
+      ]) {
+        await expectLater(
+          ProgramCreateIn.fromRequest(req(body: {'name': 'p', 'deload': deload})),
+          badRequest('invalid_deload'),
+          reason: '$deload',
+        );
+      }
+    });
+
+    test('a lighter week is an action', () async {
+      final input = await ProgramActionIn.fromRequest(req(body: {'kind': 'lighter', 'at': '2026-10-15T08:00:00Z'}));
+      expect(input.action.kind, ProgramActionKind.lighter);
+    });
+  });
+
   group('ProgramUpdateIn', () {
     test('a full replace: what is left out is cleared, source is never read', () async {
       final input = await ProgramUpdateIn.fromRequest(

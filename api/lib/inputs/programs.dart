@@ -34,6 +34,7 @@ class ProgramCreateIn {
         weeks: json.programCount('weeks', max: 104),
         rules: json.programRules(),
         constraint: json.programKey('constraint'),
+        deload: json.programDeload(),
       ),
       sessions: [
         for (final (index, session) in sessions.indexed)
@@ -65,6 +66,7 @@ class ProgramUpdateIn {
         weeks: json.programCount('weeks', max: 104),
         rules: json.programRules(),
         constraint: json.programKey('constraint'),
+        deload: json.programDeload(),
         archived: json.boolean('archived'),
       ),
     );
@@ -132,6 +134,15 @@ extension on Map<String, dynamic> {
     };
   }
 
+  /// A lighter week every N cycles: `{every, load?, volume?}`.
+  Deload? programDeload() {
+    return switch (this['deload']) {
+      null => null,
+      final Map deload when deload.keys.every(const {'every', 'load', 'volume'}.contains) => _deload(deload),
+      _ => throw const BadRequest(code: 'invalid_deload', reason: 'deload must be {every, load?, volume?}'),
+    };
+  }
+
   /// A rule per exercise id, read strictly: a newer kind is a 400 here until
   /// the server knows it, though a build that predates it carries it untouched.
   Map<String, GrowthRule> programRules() {
@@ -150,6 +161,14 @@ extension on Map<String, dynamic> {
           _ => throw BadRequest(code: 'invalid_rule', reason: 'rules.$key must be an object'),
         },
     };
+  }
+}
+
+Deload _deload(Map json) {
+  try {
+    return Deload.fromJson(json);
+  } on ArgumentError catch (e) {
+    throw BadRequest(code: 'invalid_deload', reason: 'deload.${e.name}: ${e.message}');
   }
 }
 
