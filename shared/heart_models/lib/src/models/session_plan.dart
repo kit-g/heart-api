@@ -42,8 +42,9 @@ abstract interface class PlannedSession implements Model {
   ///   reps, AMRAP and supplemental in order; sets past the wave keep their
   ///   own targets.
   /// - A set with a share weighs the share of its base: the slot's, else the
-  ///   exercise's, or the exercise's that `of` names. Rounded down to that
-  ///   exercise's rule step, else to 2.5 kg.
+  ///   exercise's; or, with `of`, the base of the slot `ofSlot` names, else
+  ///   of the exercise `of` names. Rounded down to that rule's step, else to
+  ///   2.5 kg.
   /// - A slot's own rule comes before its exercise's ([Program.ruleFor]).
   /// - A `stages` rule lays out the stage [stages] has it on
   ///   ([currentStages]): that many sets of its reps, the last as many as
@@ -122,7 +123,7 @@ abstract interface class PlannedSession implements Model {
           weight = null;
         } else if (target?.share case final num share) {
           weight = switch (target?.of) {
-            final String of => weigh(share, of, bases[of]),
+            final String of => weigh(share, of, bases[target?.ofSlot] ?? bases[of], slot: target?.ofSlot),
             null => weigh(share, exerciseId, base, slot: slot),
           };
         } else if (base != null) {

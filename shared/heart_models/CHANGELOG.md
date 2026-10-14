@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.35.0
+
+A share of one slot's base (heart-api#257). App side: heart-of-yours#349.
+
+- New: `SetTarget.ofSlot` and `withOfSlot`, on the wire as `ofSlot` beside
+  `of`: the template exercise whose base a share is of, when the lift keeps a
+  base per slot. `fromJson` reads it, `toMap` writes it, and every `with…`
+  keeps it.
+- `PlannedSession.of` weighs such a share from that slot's base, else from
+  `of`'s own.
+
 ## 2.34.0
 
 Stages, and rules per slot (heart-api#256). App side: heart-of-yours#350.

@@ -385,6 +385,34 @@ void main() {
       );
     });
 
+    test('a share of one slot\'s base: that occurrence\'s, else the lift\'s own (heart-api#257)', () {
+      const intensity = '019a0000-0000-7000-8000-0000000000b1';
+      const volume = '019a0000-0000-7000-8000-0000000000b2';
+      final session = _template([
+        (
+          volume,
+          _exercise(_squat, 'Squat'),
+          [
+            _set(1, {..._reps(5, 5), 'share': 0.9, 'of': _squat, 'ofSlot': intensity}),
+          ],
+        ),
+      ]);
+      final program = Program(
+        name: 'Volume day',
+        sessions: const [_session],
+        rules: {_squat: const AddWeight(step: 2.5)},
+      );
+      PlannedSession plan(List<ProgramBase> bases) =>
+          PlannedSession.of(program, session, position: _at(program), bases: currentBases(bases));
+      final both = [_base(_squat, 100), _base(_squat, 120, slot: intensity), _base(_squat, 80, slot: volume)];
+      expect(plan(both).exercises.single.sets.single.weight, 107.5, reason: '90% of the intensity day\'s 120');
+      expect(
+        plan([_base(_squat, 100)]).exercises.single.sets.single.weight,
+        90,
+        reason: 'no base for that occurrence: the lift\'s own',
+      );
+    });
+
     test('on the wire', () {
       final program = Program(name: 'Waves', sessions: const [_session], rules: {_squat: waves});
       final map = _plan(program, squatDay, [_base(_squat, 140)]).toMap();
