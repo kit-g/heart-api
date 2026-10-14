@@ -55,6 +55,13 @@ abstract interface class ProgramService {
 
   /// The program's workouts and skips, as its position reads them.
   Future<Iterable<ProgramMark>> getProgramMarks({required String userId, required String programId});
+
+  /// The program's skips, oldest first.
+  Future<Iterable<TrainingSkip>> getProgramSkips({required String userId, required String programId});
+
+  /// The session each of the program's workouts was, by workout id; null for
+  /// one that named none, or whose template is gone.
+  Future<Map<String, String?>> getProgramWorkouts({required String userId, required String programId});
 }
 
 abstract interface class ProgramsResponse implements Model {
@@ -116,3 +123,4 @@ class _ProgramBasesResponse implements ProgramBasesResponse {
     };
   }
 }
+
