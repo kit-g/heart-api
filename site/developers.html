@@ -103,12 +103,14 @@
             <tr><td><code>/me/records</code></td><td>Personal records per exercise, the same ones the app shows; <code>?exerciseId=</code> for one.</td></tr>
             <tr><td><code>/me/exercises/:id/history</code></td><td>Every session of one exercise, newest first, with its working sets and the values the app’s progress chart plots.</td></tr>
             <tr><td><code>/me/library?q=</code></td><td>The exercise library and your own exercises, searched the way the app searches: word order free, abbreviations such as <code>db</code> or <code>rdl</code>, muscle words such as <code>lats</code>, one typo a word.</td></tr>
+            <tr><td><code>/me/library/programs</code></td><td>Heart’s ready-made programs, with what helps choose one: who it’s for (<code>audience</code>), the <code>equipment</code> it needs, days a week, minutes a session and weeks long. In your language where translated, otherwise English.</td></tr>
+            <tr><td><code>/me/library/programs/:key</code></td><td>One ready-made program in full: what a week looks like, how it grows, its sessions and growth rules, its safety notes, and the research behind it. Each claim has its sources (title, authors, year, a link and the finding in plain words) and the part of the program it explains (<code>about</code>).</td></tr>
             <tr><td><code>/me/exercises</code></td><td>Your custom exercises.</td></tr>
             <tr><td><code>/me/templates</code></td><td>Your templates, in your order; <code>?folder=</code> for one folder.</td></tr>
             <tr><td><code>/me/template-folders</code></td><td>Your template folders.</td></tr>
             <tr><td><code>/me/goals</code></td><td>Your goals. Goals backed by health data carry their definition only; their progress lives on your phone.</td></tr>
             <tr><td><code>/me/programs</code></td><td>Your programs, each with where you stand: the program week, the sessions done in the open cycle and the next one, whether it’s paused, and workouts this week. Worked out from what you logged, the way the app works it out; weeks here are ISO weeks in UTC.</td></tr>
-            <tr><td><code>/me/programs/:id</code></td><td>One program: its sessions and when each joined (<code>joined</code>), each exercise’s growth rule, its lighter weeks (<code>deload</code>), <code>phases</code> and test sessions (<code>tests</code>). Under <code>bases</code>, each exercise’s current base: the training max, working weight, duration or distance its rule raises. A lift used in two sessions can keep a base for each; that one is keyed by its <code>slot</code> and names its <code>exerciseId</code>. Under <code>nextSession</code>, the session up next as the app shows it: this week’s targets, and weights worked out from the bases (a share of a base, rounded down to the rule’s step, and lighter in a lighter week). It reads what’s stored and isn’t a forecast.</td></tr>
+            <tr><td><code>/me/programs/:id</code></td><td>One program: its sessions and when each joined (<code>joined</code>), each exercise’s growth rule, its lighter weeks (<code>deload</code>), <code>phases</code> and test sessions (<code>tests</code>). Under <code>bases</code>, each exercise’s current base: the training max, working weight, duration or distance its rule raises. A lift used in two sessions can keep a base for each; that one is keyed by its <code>slot</code> and names its <code>exerciseId</code>. Under <code>nextSession</code>, the session up next as the app shows it: this week’s targets, and weights worked out from the bases (a share of a base, rounded down to the rule’s step, and lighter in a lighter week). It reads what’s stored and isn’t a forecast. A program you started from the library also has <code>research</code>: the claims behind it and their sources, each placed on the part of your copy it explains.</td></tr>
             <tr><td><code>/me/programs/:id/history</code></td><td>How the program got there, oldest first. Each base value has its <code>cause</code>: <code>workout</code> (a session raised it, or lowered it after misses), <code>test</code> (a test session set it), <code>action</code> (replaying a week set it) or <code>user</code>, and the value before it (<code>previous</code>). Also your <code>actions</code> (pauses, lighter weeks, repeats, replays, a variation moving up a step) and the sessions you skipped (<code>skips</code>), with the reason you gave.</td></tr>
             </tbody>
         </table>
@@ -142,9 +144,9 @@
   "url": "https://api.heart-of.me/v1/mcp",
   "headers": {"Authorization": "Bearer hrt_…"}
 }}}</code></pre>
-        <p>The assistant can read your profile, workouts, templates and folders, goals, programs (with their history
-            and the next session’s weights), personal records, an
-            exercise’s history, your custom exercises and the exercise library. It can’t change anything. Only the
+        <p>The assistant can read your profile, workouts, templates and folders, goals, programs (with their history,
+            the next session’s weights and the research behind them), Heart’s ready-made programs, personal
+            records, an exercise’s history, your custom exercises and the exercise library. It can’t change anything. Only the
             data it reads counts against your limits, not the tool listing it does at the start of a conversation.
             What it reads goes to the assistant’s provider and is covered by their privacy policy, not ours.</p>
 
