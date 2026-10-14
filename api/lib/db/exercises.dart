@@ -131,6 +131,13 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
         // route refuses it earlier, this keeps any other caller at a 400
         case ServerException(code: '22023'):
           throw const BadRequest(code: 'same_exercise', reason: 'source and target are the same exercise');
+        // datatype_mismatch: the target's category keeps sets in other columns
+        // than the source's, so the moved sets would hold values nothing reads
+        case ServerException(code: '42804', detail: final String detail):
+          throw BadRequest(
+            code: 'incompatible_exercise',
+            reason: "the target's sets cannot hold the source's: $detail",
+          );
         default:
           rethrow;
       }
