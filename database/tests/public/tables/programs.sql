@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(34);
+SELECT plan(37);
 
 SELECT has_table('public'::name, 'programs'::name);
 
@@ -21,7 +21,9 @@ SELECT columns_are(
                    'archived',
                    'created_at',
                    'updated_at',
-                   'deload'
+                   'deload',
+                   'phases',
+                   'tests'
                    ]
        );
 
@@ -39,6 +41,8 @@ SELECT col_type_is('public'::name, 'programs'::name, 'archived'::name, 'boolean'
 SELECT col_type_is('public'::name, 'programs'::name, 'created_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'programs'::name, 'updated_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'programs'::name, 'deload'::name, 'jsonb'::name);
+SELECT col_type_is('public'::name, 'programs'::name, 'phases'::name, 'jsonb'::name);
+SELECT col_type_is('public'::name, 'programs'::name, 'tests'::name, 'jsonb'::name);
 
 SELECT has_pk('public'::name, 'programs'::name, 'programs has a primary key');
 SELECT col_is_pk('public'::name, 'programs'::name, 'id'::name, 'id is the primary key');
@@ -78,6 +82,11 @@ SELECT throws_ok(
 SELECT throws_ok(
                $$INSERT INTO programs (user_id, name, deload) VALUES (create_test_profile(), 'p', '{"load": 0.9}')$$,
                '23514', NULL, 'a deload says how often'
+       );
+
+SELECT throws_ok(
+               $$INSERT INTO programs (user_id, name, phases) VALUES (create_test_profile(), 'p', '[]')$$,
+               '23514', NULL, 'phases are one or more'
        );
 
 SELECT * FROM finish();
