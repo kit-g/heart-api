@@ -182,7 +182,7 @@ def test_share_of_max_waves_match_the_sets_and_need_a_share():
         'carry a share' in p for p in exercise({'exercise': 'squat-barbell', 'sets': 2, 'target': {'reps': 5}}, rule)
     )
     assert any(
-        'needs a shareOfMax rule' in p
+        'needs a rule that keeps a base' in p
         for p in exercise({'exercise': 'squat-barbell', 'sets': [{'share': 0.65, 'reps': 5}]}, {})
     )
 
@@ -234,3 +234,74 @@ def test_a_session_s_exercise_is_anchored_by_its_template_exercise_id():
     assert rendered['why'][0]['about'] == [
         {'on': 'exercise', 'session': rendered['sessions'][0]['id'], 'exercise': exercise['id']}
     ]
+
+
+STAGES = {
+    'kind': 'stages',
+    'step': 2.5,
+    'stages': [{'sets': 5, 'reps': 3, 'amrap': True}, {'sets': 6, 'reps': 2, 'amrap': True}],
+}
+
+
+def test_stages_hold_the_sets_to_the_first_stage():
+    good = {'exercise': 'squat-barbell', 'sets': [{'reps': 3}] * 4 + [{'reps': '3+'}]}
+    assert exercise(good, {'squat-barbell': STAGES}) == []
+    wrong = {'exercise': 'squat-barbell', 'sets': 3, 'target': {'reps': 3}}
+    assert any('the first stage, 5×3' in p for p in exercise(wrong, {'squat-barbell': STAGES}))
+    one_stage = {**STAGES, 'stages': STAGES['stages'][:1]}
+    assert any('stages is 2 to 20' in p for p in exercise(good, {'squat-barbell': one_stage}))
+
+
+def _two_days(monday: dict, thursday: dict, rules: dict) -> dict:
+    return one(
+        rules=rules,
+        sessions=[
+            {'key': 'monday', 'name': _t('Mon'), 'exercises': [monday]},
+            {'key': 'thursday', 'name': _t('Thu'), 'exercises': [thursday]},
+        ],
+    )
+
+
+def test_an_occurrence_s_own_rule_is_checked_against_its_own_sets_and_rendered_by_its_id():
+    heavy = {'exercise': 'squat-barbell', 'sets': [{'reps': 3}] * 4 + [{'reps': '3+'}]}
+    volume = {
+        'exercise': 'squat-barbell',
+        'sets': 3,
+        'target': {'reps': 10},
+        'rule': {**STAGES, 'stages': [{'sets': 3, 'reps': 10}, {'sets': 3, 'reps': 8}]},
+    }
+    document = _two_days(heavy, volume, {'squat-barbell': STAGES})
+    assert check(document, LIBRARY_DOC) == []
+    rendered = render(document)['programs'][0]
+    thursday = rendered['sessions'][1]['exercises'][0]
+    assert rendered['rules'][thursday['id']]['stages'][0] == {'sets': 3, 'reps': 10}
+    assert rendered['rules']['squat-barbell'] == STAGES
+
+    wrong = {**volume, 'target': {'reps': 8}}
+    assert any(
+        'thursday.squat-barbell.rule' in p
+        for p in check(_two_days(heavy, wrong, {'squat-barbell': STAGES}), LIBRARY_DOC)
+    )
+
+
+def test_a_share_of_one_occurrence_names_its_session_and_renders_its_id():
+    heavy = {'exercise': 'squat-barbell', 'sets': 1, 'target': {'reps': 5}, 'rule': {'kind': 'addWeight', 'step': 2.5}}
+    volume = {
+        'exercise': 'squat-barbell',
+        'sets': 5,
+        'target': {'reps': 5, 'share': 0.9, 'of': 'squat-barbell', 'of_slot': 'monday'},
+    }
+    document = _two_days(heavy, volume, {})
+    assert check(document, LIBRARY_DOC) == []
+    rendered = render(document)['programs'][0]
+    monday = rendered['sessions'][0]['exercises'][0]
+    target = rendered['sessions'][1]['exercises'][0]['sets'][0]['target']
+    assert target == {'reps': {'min': 5, 'max': 5}, 'share': 0.9, 'of': 'squat-barbell', 'ofSlot': monday['id']}
+
+    nowhere = {**volume, 'target': {**volume['target'], 'of_slot': 'friday'}}
+    assert any('must be a session doing' in p for p in check(_two_days(heavy, nowhere, {}), LIBRARY_DOC))
+    unruled = {**heavy}
+    del unruled['rule']
+    assert any('no rule that keeps a base' in p for p in check(_two_days(unruled, volume, {}), LIBRARY_DOC))
+    lone = {'exercise': 'squat-barbell', 'sets': 1, 'target': {'reps': 5, 'share': 0.9, 'of_slot': 'monday'}}
+    assert any('of_slot goes with of' in p for p in check(_two_days(heavy, lone, {}), LIBRARY_DOC))
