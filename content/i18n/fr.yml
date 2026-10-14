@@ -14567,6 +14567,139 @@ exercises:
       - Arrêtez-vous si vous ressentez une douleur dans le bas du dos, aux poignets ou aux épaules
     validated: false
     source_digest: a742d6ba97f1
+  wall-push-up:
+    name: Pompes contre un mur
+    instructions: |
+      ## Aperçu
+      La pompe contre un mur est une pompe réalisée debout, les mains posées sur un mur. Comme le corps reste presque vertical, les bras ne portent qu'une petite part du poids du corps : c'est la pompe la plus facile qui soit. Elle fait travailler les pectoraux, l'avant des épaules et les triceps, et c'est par là qu'il faut commencer si les pompes sur un banc ou au sol sont encore trop difficiles.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Tenez-vous debout face à un mur, à environ une longueur de bras
+      - Posez les mains à plat sur le mur à hauteur de poitrine, un peu plus écartées que les épaules
+      - Reculez légèrement les pieds pour vous pencher vers le mur
+      - Gardez le corps aligné des talons à la tête
+      - Gainez la sangle abdominale et serrez les fessiers
+
+      ### 2. Mouvement
+      1. Fléchissez les coudes pour amener la poitrine vers le mur
+      2. Gardez les coudes à environ 45 degrés du corps
+      3. Descendez jusqu'à ce que le nez soit près du mur
+      4. Repoussez jusqu'à ce que les bras soient tendus
+      5. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Inspirez en descendant
+      - Expirez en vous repoussant du mur
+
+      ### 4. Conseils
+      - Plus les pieds sont loin du mur, plus c'est difficile
+      - Gardez les talons au sol si possible, ou laissez-les se lever un peu
+      - Bougez lentement, tout le corps d'un seul bloc
+      - Quand 15 répétitions deviennent faciles, passez à un banc ou à un plan de travail
+
+      ### 5. Erreurs fréquentes
+      - Laisser les hanches s'affaisser ou ressortir vers l'arrière
+      - Écarter les coudes sur les côtés
+      - N'avancer que la tête vers le mur
+      - Faire une amplitude si courte que les coudes plient à peine
+
+      ### 6. Sécurité et adaptations
+      - Portez des chaussures qui accrochent ou placez-vous sur un sol antidérapant
+      - Rapprochez-vous du mur si vous sentez une tension dans les épaules ou les poignets
+      - Gardez les poignets à hauteur des épaules, pas au-dessus de la tête
+      - Arrêtez-vous si vous ressentez une douleur aux épaules ou aux poignets
+    validated: false
+    source_digest: 37917292ce6d
+  sit-to-stand:
+    name: Lever de chaise
+    aliases: ["assis-debout"]
+    instructions: |
+      ## Aperçu
+      Le lever de chaise consiste à se lever d'une chaise puis à se rasseoir, sans s'aider des mains. C'est le geste que vous faites chaque jour pour quitter un siège, et il fait travailler les cuisses et les fessiers. C'est la première étape vers le squat complet au poids du corps, et un moyen simple de continuer à se lever sans effort.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Asseyez-vous près du bord avant d'une chaise stable, les pieds à plat au sol
+      - Écartez les pieds à la largeur des hanches, légèrement en arrière des genoux
+      - Croisez les bras sur la poitrine ou tendez-les devant vous
+      - Asseyez-vous bien droit, la poitrine haute
+
+      ### 2. Mouvement
+      1. Penchez la poitrine vers l'avant, au-dessus des pieds
+      2. Poussez dans les talons pour vous lever complètement
+      3. Serrez les fessiers en haut
+      4. Reculez les hanches et fléchissez les genoux pour vous rasseoir lentement
+      5. Effleurez la chaise, puis relevez-vous
+      6. Répétez pour le nombre de répétitions prévu
+
+      ### 3. Respiration
+      - Expirez en vous levant
+      - Inspirez en vous rasseyant
+
+      ### 4. Conseils
+      - Rasseyez-vous lentement au lieu de vous laisser tomber sur la chaise
+      - Gardez les genoux dans l'axe des orteils
+      - Une chaise plus basse rend l'exercice plus difficile, une plus haute plus facile
+      - Quand c'est facile, restez juste au-dessus de l'assise au lieu de vous asseoir
+
+      ### 5. Erreurs fréquentes
+      - Pousser avec les mains sur les cuisses ou sur la chaise
+      - Se laisser tomber sur la chaise en bas
+      - Laisser les genoux rentrer vers l'intérieur
+      - Ne pas se redresser complètement en haut
+
+      ### 6. Sécurité et adaptations
+      - Utilisez une chaise stable sans roulettes, calée contre un mur pour qu'elle ne glisse pas
+      - Au début, appuyez-vous sur les accoudoirs si besoin, puis passez-vous-en peu à peu
+      - Ajoutez un coussin pour rehausser l'assise si se lever est encore difficile
+      - Arrêtez-vous en cas de vertige ou de douleur aux genoux ou aux hanches
+    validated: false
+    source_digest: 20b77a2b89f7
+  single-leg-stand:
+    name: Équilibre sur une jambe
+    aliases: ["appui unipodal"]
+    instructions: |
+      ## Aperçu
+      L'équilibre sur une jambe est un maintien : vous tenez sur un pied pendant un temps donné, puis vous changez. Il fait travailler les petits muscles de la cheville, du pied et de la hanche qui vous gardent stable, et un meilleur équilibre rend plus sûrs les gestes du quotidien, comme monter un escalier ou s'habiller. Faites-le près d'un plan de travail pour avoir toujours un appui à portée de main.
+
+      ## Exécution
+      ### 1. Position de départ
+      - Tenez-vous debout à côté d'un plan de travail ou d'une chaise stable, assez près pour le toucher
+      - Posez une main légèrement sur l'appui
+      - Tenez-vous droit, les pieds à la largeur des hanches et le poids bien réparti
+      - Regardez droit devant vous un point fixe
+
+      ### 2. Mouvement
+      1. Transférez le poids sur un pied
+      2. Soulevez l'autre pied de quelques centimètres
+      3. Gardez le genou d'appui souple, sans le verrouiller
+      4. Tenez pendant le temps prévu
+      5. Reposez le pied, puis changez de côté
+
+      ### 3. Respiration
+      - Respirez lentement et régulièrement tout au long du maintien
+      - Ne bloquez pas votre respiration pour rester stable
+
+      ### 4. Conseils
+      - Les petites oscillations sont normales : c'est votre équilibre qui travaille
+      - Progressez de deux mains sur l'appui à une, puis au bout d'un doigt, puis sans appui
+      - Fermer les yeux ou se tenir sur un coussin rend l'exercice bien plus difficile
+      - Pratiquez peu mais souvent
+
+      ### 5. Erreurs fréquentes
+      - S'appuyer de tout son poids sur l'appui
+      - Verrouiller le genou de la jambe d'appui
+      - Laisser tomber la hanche du côté de la jambe levée
+      - Regarder ses pieds
+
+      ### 6. Sécurité et adaptations
+      - Placez-vous toujours à côté d'un plan de travail, d'un mur ou d'une chaise stable que vous pouvez saisir
+      - Dégagez le sol autour de vous des tapis et des objets
+      - Gardez la main sur l'appui jusqu'à vous sentir en confiance
+      - Arrêtez-vous et asseyez-vous en cas de vertige
+    validated: false
+    source_digest: 9571c9ffa23d
   aerobics:
     name: Aérobic
     instructions: |
