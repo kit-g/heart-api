@@ -215,6 +215,21 @@ void main() {
           expect(template1.compareTo(template1) == 0, true);
         },
       );
+      test(
+        'joined round-trips, so a session filed offline joins when it was filed',
+        () {
+          final template = Template.fromJson({
+            'id': '019a0000-0000-7000-8000-000000000001',
+            'order': 0,
+            'programId': '019a0000-0000-7000-8000-000000000002',
+            'joined': '2026-01-01T08:00:00.000Z',
+            'exercises': [],
+          });
+          expect(template.joined, DateTime.utc(2026, 1, 1, 8));
+          expect(template.toMap()['joined'], '2026-01-01T08:00:00.000Z');
+          expect(Template.fromJson({'id': 'x', 'order': 0, 'exercises': []}).toMap(), isNot(contains('joined')));
+        },
+      );
     },
   );
 }

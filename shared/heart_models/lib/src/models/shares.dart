@@ -215,6 +215,11 @@ class TemplateRequest {
   /// Whether the request spoke about the program at all.
   final bool movesProgram;
 
+  /// When the template joined [programId], as the device saw it: a session
+  /// filed offline joins when it was filed, not when it synced. Null leaves it
+  /// to the server's clock, as for a build that predates it.
+  final DateTime? joined;
+
   /// The template's note. On an update only consulted when [changesNote] is
   /// true, for the same reason as [programId].
   final String? note;
@@ -233,6 +238,7 @@ class TemplateRequest {
     this.movesFolder = false,
     this.programId,
     this.movesProgram = false,
+    this.joined,
     this.note,
     this.changesNote = false,
     this.exercises = const [],
