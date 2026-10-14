@@ -503,6 +503,7 @@ final List<McpTool> tools = [
             next,
             session: templates.nonNulls.firstWhere((template) => template.id == next.templateId).name ?? 'Untitled',
             names: names,
+            sessions: sessionOf,
           ),
       };
     },
@@ -643,8 +644,13 @@ final List<McpTool> tools = [
 ];
 
 /// [plan] for an assistant: exercises by name, and a share of another lift
-/// naming that lift.
-Map<String, dynamic> _namedPlan(PlannedSession plan, {required String session, required Map<String, String> names}) {
+/// naming that lift, and the session of the occurrence it is of.
+Map<String, dynamic> _namedPlan(
+  PlannedSession plan, {
+  required String session,
+  required Map<String, String> names,
+  required Map<String, String> sessions,
+}) {
   final map = plan.toMap();
   return {
     'session': session,
@@ -661,7 +667,11 @@ Map<String, dynamic> _namedPlan(PlannedSession plan, {required String session, r
               {
                 ...set,
                 if (set['target'] case final Map<String, dynamic> target)
-                  'target': {...target, if (target['of'] case final String of) 'of': names[of] ?? of},
+                  'target': {
+                    ...target,
+                    if (target['of'] case final String of) 'of': names[of] ?? of,
+                    if (target['ofSlot'] case final String slot) 'ofSlot': sessions[slot] ?? slot,
+                  },
               },
           ],
         },

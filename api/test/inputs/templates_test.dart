@@ -427,6 +427,8 @@ void main() {
       ({'supplemental': 'yes'}, 'a supplemental set that is not true or false'),
       ({'of': '0198c1a2-b3c4-7d5e-8f60-718293a4b501'}, 'whose base, without a share'),
       ({'share': 0.6, 'of': 'squat'}, 'whose base, not by id'),
+      ({'share': 0.6, 'ofSlot': '0198c1a2-b3c4-7d5e-8f60-718293a4b501'}, 'an occurrence, without its lift'),
+      ({'share': 0.6, 'of': '0198c1a2-b3c4-7d5e-8f60-718293a4b501', 'ofSlot': 'monday'}, 'an occurrence, not by id'),
       ({'rir': 11}, 'reps in reserve past 10'),
       ({'rir': 1.3}, 'a third of a rep in reserve'),
       (
@@ -475,6 +477,18 @@ void main() {
         },
       ]);
       expect(request.exercises.single.sets.single.target!.of, _squat);
+    });
+
+    test('a share can be of one occurrence of a lift (heart-api#257)', () async {
+      const slot = '0198c1a2-b3c4-7d5e-8f60-718293a4b5f1';
+      final request = await parse([
+        {
+          'reps': 5,
+          'target': {'share': 0.9, 'of': _squat, 'ofSlot': slot},
+        },
+      ]);
+      final target = request.exercises.single.sets.single.target!;
+      expect((target.of, target.ofSlot), (_squat, slot));
     });
 
     test('a share of the base sits beside the measures', () async {
