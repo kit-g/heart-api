@@ -112,14 +112,11 @@ Future<Model> deleteProgramBase(Request req) async {
   throw const NoContent();
 }
 
-/// Where the user stands in [program], and each exercise's current base, read
-/// off its history the way the app reads it. The server's weeks are ISO weeks
-/// in UTC: it knows neither the user's zone nor their first weekday.
-Future<(ProgramPosition, Map<String, ProgramBase>)> programState(
-  Request req,
-  Program program, {
-  bool withBases = false,
-}) async {
+/// Where the user stands in [program], and each exercise's current base and
+/// stage, read off its history the way the app reads it. The server's weeks
+/// are ISO weeks in UTC: it knows neither the user's zone nor their first
+/// weekday.
+Future<ProgramState> programState(Request req, Program program, {bool withBases = false}) async {
   final service = req.programService;
   final programId = program.id!;
   final (marks, actions, bases) = await (
@@ -130,9 +127,21 @@ Future<(ProgramPosition, Map<String, ProgramBase>)> programState(
       false => Future.value(const <ProgramBase>[]),
     },
   ).wait;
-  final position = ProgramPosition.of(program, marks: marks, actions: actions, now: DateTime.timestamp());
-  return (position, currentBases(bases));
+  return (
+    position: ProgramPosition.of(program, marks: marks, actions: actions, now: DateTime.timestamp()),
+    bases: currentBases(bases),
+    stages: currentStages(actions),
+  );
 }
+
+/// Where the user stands in a program: its position, and the current base and
+/// stage of each exercise, or slot that has its own, as `currentBases` and
+/// `currentStages` key them.
+typedef ProgramState = ({
+  ProgramPosition position,
+  Map<String, ProgramBase> bases,
+  Map<String, int> stages,
+});
 
 /// [program]'s history: its bases with their causes, its actions and its
 /// skips (heart-api#260).
@@ -154,17 +163,16 @@ Future<ProgramHistory> programHistory(Request req, Program program) async {
   );
 }
 
-/// The session [position] puts next, planned from [bases]; null when there is
-/// none, or its template is gone. [templates] spares a read when the caller
+/// The session [state] puts next, planned from its bases and stages; null when
+/// there is none, or its template is gone. [templates] spares a read when the caller
 /// has them already.
 Future<PlannedSession?> nextSession(
   Request req,
   Program program,
-  ProgramPosition position,
-  Map<String, ProgramBase> bases, {
+  ProgramState state, {
   Iterable<Template>? templates,
 }) async {
-  final next = position.next;
+  final next = state.position.next;
   if (next == null) return null;
   final Template? session = switch (templates) {
     final Iterable<Template> templates => templates.where((template) => template.id == next).firstOrNull,
@@ -174,7 +182,7 @@ Future<PlannedSession?> nextSession(
           .then<Template?>((template) => template, onError: (_) => null),
   };
   if (session == null) return null;
-  return PlannedSession.of(program, session, position: position, bases: bases);
+  return PlannedSession.of(program, session, position: state.position, bases: state.bases, stages: state.stages);
 }
 
 /// [program]'s session templates in its order, null for one that is gone.

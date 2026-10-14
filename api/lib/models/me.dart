@@ -211,6 +211,7 @@ abstract interface class MeProgram implements Model {
     Program program,
     ProgramPosition position, {
     Map<String, ProgramBase>? bases,
+    Map<String, int>? stages,
     PlannedSession? nextSession,
     Map<String, dynamic>? research,
   }) = _MeProgram.new;
@@ -222,10 +223,11 @@ class _MeProgram implements MeProgram {
   @override
   final ProgramPosition position;
   final Map<String, ProgramBase>? bases;
+  final Map<String, int>? stages;
   final PlannedSession? nextSession;
   final Map<String, dynamic>? research;
 
-  new(this.program, this.position, {this.bases, this.nextSession, this.research});
+  new(this.program, this.position, {this.bases, this.stages, this.nextSession, this.research});
 
   @override
   Map<String, dynamic> toMap() {
@@ -243,6 +245,8 @@ class _MeProgram implements MeProgram {
               'slot': ?value.slot,
             },
         },
+      // the stage each stages rule is on, keyed as bases are; absent is the first
+      if (stages case final Map<String, int> stages when stages.isNotEmpty) 'stages': stages,
       'nextSession': ?nextSession?.toMap(),
       'research': ?research,
     };

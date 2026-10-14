@@ -381,7 +381,7 @@ final List<McpTool> tools = [
               'sessions': program.sessions.length,
               if (program.weeks case final int weeks) 'weeks': weeks,
               'perWeek': ?program.perWeek,
-              ...(await programs.programState(request, program)).$1.toMap()
+              ...(await programs.programState(request, program)).position.toMap()
                 ..remove('done')
                 ..remove('remaining'),
             },
@@ -396,7 +396,8 @@ final List<McpTool> tools = [
         'One program in full: its sessions in order with which are done in the open cycle, the next one, and each '
         "exercise's growth rule and current base. A base is the number the rule grows: a training max or working "
         'weight in kg, a duration in seconds, a distance in km. A lift used in two sessions (heavy one day, light '
-        'another) may keep a base per session, under slots. The position is computed from the workouts and skips '
+        'another) may keep a rule, a base and a stage per session, under slots. A stages rule moves through set '
+        'schemes on a miss; stage is the one it is on, from 0. The position is computed from the workouts and skips '
         'the user logged against the program, never stored. nextSession is the session up next as the app will '
         "show it: this week's targets, weights worked out from the current bases (a share of a base, rounded down "
         'to the rule step; a lighter week at its deload share), and no weights in a test session, which is how a '
@@ -420,7 +421,8 @@ final List<McpTool> tools = [
       } on NotFound {
         throw ToolError('No program $id. Use list_programs for valid ids.');
       }
-      final (position, bases) = await programs.programState(request, program, withBases: true);
+      final state = await programs.programState(request, program, withBases: true);
+      final (:position, :bases, :stages) = state;
       final library = await request.exerciseService.getExercises(request.userId);
       final names = library.toExerciseNames();
       final (templates, view) = await (
@@ -436,7 +438,12 @@ final List<McpTool> tools = [
         for (final template in templates.nonNulls)
           for (final exercise in template) exercise.id: template.name ?? 'Untitled',
       };
-      final next = await programs.nextSession(request, program, position, bases, templates: templates.nonNulls);
+      // and the exercise each slot is, for a rule kept per slot
+      final exerciseOf = {
+        for (final template in templates.nonNulls)
+          for (final exercise in template) exercise.id: exercise.exercise.id,
+      };
+      final next = await programs.nextSession(request, program, state, templates: templates.nonNulls);
       return {
         'id': program.id,
         'name': program.name,
@@ -460,16 +467,27 @@ final List<McpTool> tools = [
             },
         ],
         'exercises': [
-          for (final exerciseId in {...program.rules.keys, for (final base in bases.values) base.exerciseId})
+          for (final exerciseId in {
+            for (final key in program.rules.keys) exerciseOf[key] ?? key,
+            for (final base in bases.values) base.exerciseId,
+          })
             {
               'name': names[exerciseId] ?? exerciseId,
               'rule': ?program.rules[exerciseId]?.toMap(),
               if (bases[exerciseId] case final ProgramBase base) 'base': base.value,
-              // a lift used twice keeps a base per occurrence, keyed by its slot
+              'stage': ?stages[exerciseId],
+              // a lift used twice may keep a rule, a base and a stage per
+              // occurrence, keyed by its slot
               if ([
-                    for (final base in bases.values)
-                      if (base.exerciseId == exerciseId && base.slot != null)
-                        {'session': ?sessionOf[base.slot], 'base': base.value},
+                    for (final MapEntry(key: slot, value: exercise) in exerciseOf.entries)
+                      if (exercise == exerciseId &&
+                          (program.rules.containsKey(slot) || bases.containsKey(slot) || stages.containsKey(slot)))
+                        {
+                          'session': ?sessionOf[slot],
+                          'rule': ?program.rules[slot]?.toMap(),
+                          'base': ?bases[slot]?.value,
+                          'stage': ?stages[slot],
+                        },
                   ]
                   case final slots when slots.isNotEmpty)
                 'slots': slots,
@@ -493,7 +511,8 @@ final List<McpTool> tools = [
         "How a program got where it is: every value of each exercise's base, oldest first, with what caused it "
         '(workout: a session grew it, or cut it after misses when it went down; test: a test session set it; '
         'action: replaying a week set it; user: the user set it) and the value before it. Also the steps the user '
-        'took (pause, resume, repeat, replay, a lighter week, a ladder moving to its next exercise) and the sessions '
+        'took (pause, resume, repeat, replay, a lighter week, a ladder moving to its next exercise, a stages rule '
+        'moving to another set scheme) and the sessions '
         'skipped, with the reason given. Bases are in kg, seconds or km, as in get_program.',
     inputSchema: {
       'type': 'object',
@@ -542,6 +561,9 @@ final List<McpTool> tools = [
               'week': ?action.week,
               if (action.from case final String from) 'from': name(from),
               if (action.to case final String to) 'to': name(to),
+              if (action.exercise case final String exercise) 'exercise': name(exercise),
+              if (action.slot case final String slot) 'session': slotSessions[slot] ?? slot,
+              'stage': ?action.stage,
               'at': action.at.toUtc().toIso8601String(),
             },
         ],

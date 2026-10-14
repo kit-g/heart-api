@@ -604,6 +604,89 @@ void main() {
       expect((await call('get_program', {'programId': 'nope'}))['isError'], isTrue);
     });
 
+    test('get_program shows a slot\'s own rule, base and stage under its exercise (heart-api#256)', () async {
+      const programId = '01900000-0000-7000-8000-000000000050';
+      const monday = '01900000-0000-7000-8000-000000000051';
+      const thursday = '01900000-0000-7000-8000-000000000053';
+      const squat = '01900000-0000-7000-8000-000000000001';
+      const heavy = '01900000-0000-7000-8000-000000000052';
+      const volume = '01900000-0000-7000-8000-000000000054';
+      const t1 = Stages(
+        step: 2.5,
+        stages: [Stage(sets: 5, reps: 3, amrap: true), Stage(sets: 6, reps: 2, amrap: true)],
+      );
+      const t2 = Stages(
+        step: 2.5,
+        stages: [Stage(sets: 3, reps: 10), Stage(sets: 3, reps: 8)],
+      );
+      final program = Program(
+        id: programId,
+        name: 'Tiers',
+        sessions: [monday, thursday],
+        rules: {squat: t1, volume: t2},
+      );
+      when(app.db.getProgram(userId: 'u1', programId: programId)).thenAnswer((_) async => program);
+      when(app.db.getProgramMarks(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
+      when(app.db.getProgramActions(userId: 'u1', programId: programId)).thenAnswer(
+        (_) async => [
+          ProgramAction(kind: .stage, exercise: squat, slot: volume, stage: 1, at: DateTime.utc(2026, 10, 2)),
+        ],
+      );
+      when(app.db.getProgramBases(userId: 'u1', programId: programId)).thenAnswer(
+        (_) async => [
+          ProgramBase(exerciseId: squat, value: 100, at: DateTime.utc(2026, 10, 1)),
+          ProgramBase(exerciseId: squat, slot: volume, value: 70, at: DateTime.utc(2026, 10, 1)),
+        ],
+      );
+      when(app.db.getExercises('u1')).thenAnswer(
+        (_) async => {
+          'exercises': [
+            {'id': squat, 'name': 'Squat'},
+          ],
+        },
+      );
+      Template day(String id, String name, String slot) => Template.fromJson({
+        'id': id,
+        'order': 0,
+        'name': name,
+        'exercises': [
+          {
+            'id': slot,
+            'exercise': const {'id': squat, 'name': 'Squat', 'category': 'Barbell', 'target': 'Legs'},
+            'sets': [
+              {
+                'id': '01900000-0000-7000-8000-0000000000${slot.substring(slot.length - 2)}',
+                'completed': false,
+                'target': const {
+                  'reps': {'min': 3, 'max': 3},
+                },
+              },
+            ],
+          },
+        ],
+      });
+      when(
+        app.db.getTemplate(userId: 'u1', templateId: monday),
+      ).thenAnswer((_) async => day(monday, 'Monday', heavy));
+      when(
+        app.db.getTemplate(userId: 'u1', templateId: thursday),
+      ).thenAnswer((_) async => day(thursday, 'Thursday', volume));
+
+      final detail = (await call('get_program', {'programId': programId}))['structuredContent'] as Map;
+      expect(detail['exercises'], [
+        {
+          'name': 'Squat',
+          'rule': t1.toMap(),
+          'base': 100,
+          'slots': [
+            {'session': 'Thursday', 'rule': t2.toMap(), 'base': 70, 'stage': 1},
+          ],
+        },
+      ]);
+      final next = (detail['nextSession'] as Map)['exercises'] as List;
+      expect((next.single as Map)['sets'], hasLength(5), reason: 'Monday is up next: the first stage, five sets');
+    });
+
     test('get_program_history explains each base by name, with the steps and skips', () async {
       const programId = '01900000-0000-7000-8000-000000000050';
       const session = '01900000-0000-7000-8000-000000000051';

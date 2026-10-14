@@ -86,7 +86,8 @@ Future<MePrograms> getMyPrograms(Request req) async {
   final all = await req.programService.getPrograms(req.userId);
   return MePrograms(
     await Future.wait([
-      for (final program in all) programs.programState(req, program).then((state) => MeProgram(program, state.$1)),
+      for (final program in all)
+        programs.programState(req, program).then((state) => MeProgram(program, state.position)),
     ]),
   );
 }
@@ -98,17 +99,19 @@ Future<MeProgram> getMyProgram(Request req) => getMyProgramById(req, req.rawPath
 /// program, the research behind it.
 Future<MeProgram> getMyProgramById(Request req, String programId) async {
   final program = await _myProgram(req, programId);
-  final (position, bases) = await programs.programState(req, program, withBases: true);
+  final state = await programs.programState(req, program, withBases: true);
+  final (:position, :bases, :stages) = state;
   if (program.source == null) {
-    final next = await programs.nextSession(req, program, position, bases);
-    return MeProgram(program, position, bases: bases, nextSession: next);
+    final next = await programs.nextSession(req, program, state);
+    return MeProgram(program, position, bases: bases, stages: stages, nextSession: next);
   }
   final (sessions, view) = await (programs.programSessions(req, program), libraryView(req)).wait;
   return MeProgram(
     program,
     position,
     bases: bases,
-    nextSession: await programs.nextSession(req, program, position, bases, templates: sessions.nonNulls),
+    stages: stages,
+    nextSession: await programs.nextSession(req, program, state, templates: sessions.nonNulls),
     research: view?.researchFor(program, sessions),
   );
 }

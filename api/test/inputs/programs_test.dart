@@ -290,6 +290,91 @@ void main() {
       }
     });
 
+    test(
+      'a stage names its exercise and stage, maybe a slot and the workout; nothing else does (heart-api#256)',
+      () async {
+        const workout = '0198c1a2-b3c4-7d5e-8f60-718293a4b520';
+        const slot = '0198c1a2-b3c4-7d5e-8f60-718293a4b521';
+        final input = await ProgramActionIn.fromRequest(
+          req(
+            body: {
+              'kind': 'stage',
+              'exercise': _squat,
+              'slot': slot,
+              'stage': 2,
+              'workoutId': workout,
+              'at': '2026-10-15T08:00:00Z',
+            },
+          ),
+        );
+        expect(
+          (input.action.kind, input.action.exercise, input.action.slot, input.action.stage, input.action.workoutId),
+          (ProgramActionKind.stage, _squat, slot, 2, workout),
+        );
+        for (final body in [
+          {'kind': 'stage', 'exercise': _squat, 'at': '2026-10-15T08:00:00Z'},
+          {'kind': 'stage', 'stage': 1, 'at': '2026-10-15T08:00:00Z'},
+          {'kind': 'stage', 'exercise': _squat, 'stage': 20, 'at': '2026-10-15T08:00:00Z'},
+          {'kind': 'stage', 'exercise': _squat, 'stage': -1, 'at': '2026-10-15T08:00:00Z'},
+          {'kind': 'stage', 'exercise': _squat, 'stage': 1, 'from': _bench, 'to': _squat, 'at': '2026-10-15T08:00:00Z'},
+          {'kind': 'pause', 'stage': 1, 'at': '2026-10-15T08:00:00Z'},
+          {'kind': 'lighter', 'exercise': _squat, 'at': '2026-10-15T08:00:00Z'},
+          {'kind': 'lighter', 'slot': slot, 'at': '2026-10-15T08:00:00Z'},
+        ]) {
+          await expectLater(ProgramActionIn.fromRequest(req(body: body)), badRequest(), reason: '$body');
+        }
+      },
+    );
+
+    test('a stages rule, by exercise or by slot; its stages read strictly (heart-api#256)', () async {
+      const slot = '0198c1a2-b3c4-7d5e-8f60-718293a4b521';
+      Map<String, dynamic> stages(List<Map<String, dynamic>> list) => {'kind': 'stages', 'step': 2.5, 'stages': list};
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'rules': {
+              _squat: stages([
+                {'sets': 5, 'reps': 3, 'amrap': true},
+                {'sets': 6, 'reps': 2, 'amrap': true},
+              ]),
+              slot: stages([
+                {'sets': 3, 'reps': 10},
+                {'sets': 3, 'reps': 8},
+              ]),
+            },
+          },
+        ),
+      );
+      expect(input.program.rules[_squat], isA<Stages>());
+      expect(input.program.ruleFor(_squat, slot: slot), isA<Stages>().having((r) => r.stages.first.reps, 'reps', 10));
+      for (final rule in [
+        stages([
+          {'sets': 5, 'reps': 3},
+        ]),
+        stages([
+          {'sets': 5, 'reps': 3, 'rest': 180},
+          {'sets': 6, 'reps': 2},
+        ]),
+        stages([
+          for (var i = 0; i < 21; i++) {'sets': 1, 'reps': i + 1},
+        ]),
+      ]) {
+        await expectLater(
+          ProgramCreateIn.fromRequest(
+            req(
+              body: {
+                'name': 'p',
+                'rules': {_squat: rule},
+              },
+            ),
+          ),
+          badRequest('invalid_rule'),
+          reason: '$rule',
+        );
+      }
+    });
+
     test('a ladder rule climbs exercise ids', () async {
       final input = await ProgramCreateIn.fromRequest(
         req(
