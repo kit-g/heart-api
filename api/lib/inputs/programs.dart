@@ -184,8 +184,23 @@ GrowthRule _rule(String exerciseId, Map json) {
   if (rule.extra.isNotEmpty) {
     throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: unknown ${rule.extra.keys.join(', ')}');
   }
+  // and inside the miss rule and the AMRAP table, which read only what they know
+  final unknown = {
+    if (json['miss'] case final Map miss)
+      ...miss.keys.where((key) => !_missKeys.contains(key)).map((key) => 'miss.$key'),
+    if (json['amrap'] case final List amrap)
+      for (final (at, row) in amrap.indexed)
+        if (row case final Map row)
+          ...row.keys.where((key) => !_amrapKeys.contains(key)).map((key) => 'amrap[$at].$key'),
+  };
+  if (unknown.isNotEmpty) {
+    throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: unknown ${unknown.join(', ')}');
+  }
   return rule;
 }
+
+const _missKeys = {'when', 'floor', 'after', 'cut'};
+const _amrapKeys = {'reps', 'step'};
 
 /// `POST /programs/:programId/actions` — `{id?, kind, week?, at}`. Only a
 /// replay names a week.

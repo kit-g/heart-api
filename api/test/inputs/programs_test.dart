@@ -140,6 +140,33 @@ void main() {
       expect(rule.amrap.single.step, 5);
     });
 
+    test('a cut and a hold in the AMRAP table are steps too', () async {
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'rules': {
+              _bench: {
+                'kind': 'shareOfMax',
+                'step': 5,
+                'waves': [
+                  [
+                    {'share': 0.85, 'reps': 5, 'amrap': true},
+                  ],
+                ],
+                'amrap': [
+                  {'reps': 0, 'step': -5},
+                  {'reps': 5, 'step': 0},
+                  {'reps': 8, 'step': 5},
+                ],
+              },
+            },
+          },
+        ),
+      );
+      expect(input.program.rules[_bench]!.amrap.map((row) => row.step), [-5, 0, 5]);
+    });
+
     test('rules are read strictly', () async {
       for (final rules in [
         [],
@@ -165,6 +192,48 @@ void main() {
             'step': 2.5,
             'miss': {'after': 0},
           },
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'miss': {'after': 2, 'grace': 1},
+          },
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'miss': {'cut': 1},
+          },
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'miss': {'when': 'totalReps', 'floor': 0},
+          },
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'amrap': [
+              {'reps': 10, 'step': 5, 'per': 'side'},
+            ],
+          },
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'amrap': [
+              {'reps': -1, 'step': 5},
+            ],
+          },
+        },
+        {
+          _bench: {'kind': 'addWeight', 'step': 2.5, 'amrap': 'double'},
         },
       ]) {
         await expectLater(
