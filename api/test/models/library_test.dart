@@ -91,6 +91,31 @@ void main() {
       expect(_view().program('nowhere'), isNull);
     });
 
+    test('an occurrence\'s own rule sits on it, and a share of one names its session (heart-api#255)', () {
+      final content = _content();
+      final program = (content['programs'] as List).cast<Map<String, dynamic>>().first;
+      final [first, second, ...] = (program['sessions'] as List).cast<Map>();
+      final heavy = (first['exercises'] as List).first as Map;
+      final light = (second['exercises'] as List).first as Map;
+      program['rules'] = {
+        ...program['rules'] as Map,
+        heavy['id']: {'kind': 'addWeight', 'step': 2.5},
+      };
+      ((light['sets'] as List).first as Map)['target'] = {
+        'reps': {'min': 5, 'max': 5},
+        'share': 0.9,
+        'of': 'walking',
+        'ofSlot': heavy['id'],
+      };
+      final view = _view('en', content).program('walk_and_move')!;
+      expect((view['rules'] as Map).keys, isNot(contains(heavy['id'])));
+      expect((view['exercises'] as Map).keys, isNot(contains(heavy['id'])));
+      final sessions = (view['sessions'] as List).cast<Map>();
+      expect(((sessions.first['exercises'] as List).first as Map)['rule'], {'kind': 'addWeight', 'step': 2.5});
+      final target = ((((sessions[1]['exercises'] as List).first as Map)['sets'] as List).first as Map)['target'];
+      expect(target, containsPair('ofSlot', 'Walk and strengthen'));
+    });
+
     group('research for a copy', () {
       Template session(String id, List<(String, String)> exercises) {
         return Template.fromJson({

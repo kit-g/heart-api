@@ -39,11 +39,22 @@ final class LibraryView {
     if (program == null) return null;
     final sessions = (program['sessions'] as List? ?? const []).whereType<Map>().toList();
     final sessionNames = {for (final session in sessions) '${session['id']}': _named(session)};
-    final rules = (program['rules'] as Map?)?.cast<String, dynamic>() ?? const {};
+    final slots = {
+      for (final session in sessions)
+        for (final exercise in (session['exercises'] as List? ?? const []).whereType<Map>())
+          '${exercise['id']}': session,
+    };
+    // a rule keyed by a session exercise's id is that occurrence's own, shown
+    // on it; the rest are by exercise key
+    final all = (program['rules'] as Map?)?.cast<String, dynamic>() ?? const {};
+    final rules = {
+      for (final MapEntry(:key, :value) in all.entries)
+        if (!slots.containsKey(key)) key: value,
+    };
     // every exercise key the view names: in sessions, rules and ladders
     final used = <String>{
       ...rules.keys,
-      for (final rule in rules.values.whereType<Map>()) ...?(rule['rungs'] as List?)?.whereType<String>(),
+      for (final rule in all.values.whereType<Map>()) ...?(rule['rungs'] as List?)?.whereType<String>(),
       for (final session in sessions)
         for (final exercise in (session['exercises'] as List? ?? const []).whereType<Map>()) ...[
           if (exercise['exercise'] case {'key': final String key}) key,
@@ -83,11 +94,21 @@ final class LibraryView {
                   },
                   for (final field in const ['rest', 'superset', 'pattern', 'totalReps'])
                     if (exercise[field] case final Object value) field: value,
+                  'rule': ?all[exercise['id']],
                   'sets': [
                     for (final set in (exercise['sets'] as List? ?? const []).whereType<Map>())
                       {
                         if (set['set_type'] case final String type when type != 'normal') 'setType': type,
-                        'target': ?set['target'],
+                        // the occurrence a share is of, by its session's name
+                        if (set['target'] case final Map target)
+                          'target': {
+                            ...target,
+                            if (target['ofSlot'] case final String slot)
+                              'ofSlot': switch (slots[slot]) {
+                                final Map session => _named(session),
+                                null => slot,
+                              },
+                          },
                       },
                   ],
                 },
