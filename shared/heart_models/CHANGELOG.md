@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.24.0
+
+Four gaps the app ran into (heart-api#227).
+
+- New: `Program.without({ProgramField...})` unsets `note`, `perWeek`, `weeks`
+  or `constraint`, which `copyWith` can't (a null there keeps the value).
+- New: `Program.joined`, when each session joined the program, on the wire as
+  `joined` (template id → ISO time). `ProgramPosition.of` reads it before the
+  id's own time, so a template filed into a program later joins when it was
+  filed.
+- New: `ProgramPosition.target`, what `thisWeek` counts toward: the weekly
+  target, or null while paused or finished. `thisWeek` itself stays a count.
+
 ## 2.23.0
 
 Where the user stands in a program, computed the same everywhere
