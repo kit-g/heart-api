@@ -40,7 +40,7 @@ class TemplateListQuery {
   }
 }
 
-/// `POST /templates` — `{id?, name?, order?, folderId?, programId?, note?, exercises: [...]}`.
+/// `POST /templates` — `{id?, name?, order?, folderId?, programId?, joined?, note?, exercises: [...]}`.
 class TemplateCreateIn {
   final TemplateRequest request;
 
@@ -56,6 +56,7 @@ class TemplateCreateIn {
         order: json.templateOrder(),
         folderId: json.folderIdOrNull(),
         programId: json.programIdOrNull(),
+        joined: json.dateOrNull('joined'),
         note: json.templateNote(),
         exercises: json.templateExercises(),
       ),
@@ -86,6 +87,7 @@ class TemplateUpdateIn {
         movesFolder: json.containsKey('folderId'),
         programId: json.programIdOrNull(),
         movesProgram: json.containsKey('programId'),
+        joined: json.dateOrNull('joined'),
         note: json.templateNote(),
         changesNote: json.containsKey('note'),
         exercises: json.templateExercises(),

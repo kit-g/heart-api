@@ -90,6 +90,7 @@ TemplateRequest _session(String userId, Map<String, dynamic> json) {
     name: json.templateName(),
     order: json.templateOrder(),
     folderId: json.folderIdOrNull(),
+    joined: json.dateOrNull('joined'),
     note: json.templateNote(),
     exercises: json.templateExercises(),
   );

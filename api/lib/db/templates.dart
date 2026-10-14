@@ -14,7 +14,13 @@ mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
       final rows = await _retryOnCreateRace(
         () => _pool.execute(
           _saveTemplate.toSql(),
-          parameters: {'id': body.id, ...body.toParams(), 'programId': body.programId, 'note': body.note},
+          parameters: {
+            'id': body.id,
+            ...body.toParams(),
+            'programId': body.programId,
+            'joined': body.joined,
+            'note': body.note,
+          },
         ),
       );
       // Empty means `folderId` names a folder the user does not own — the id
@@ -44,6 +50,7 @@ mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
           'changesNote': body.changesNote,
           ...body.toParams(),
           'programId': body.programId,
+          'joined': body.joined,
           'note': body.note,
         },
       );

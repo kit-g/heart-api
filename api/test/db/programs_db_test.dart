@@ -76,11 +76,34 @@ void main() {
       expect(created.rules[exerciseId], const AddWeight(step: 2.5));
       expect(created.sessions, hasLength(2));
 
+      expect(created.joined.keys, unorderedEquals(created.sessions));
       final first = await h.db.getTemplate(userId: userId, templateId: created.sessions.first);
       expect(first.name, 'A');
       expect(first.programId, created.id);
       expect(first.note, 'why A');
       expect(first.single.single.reps, 5);
+    });
+
+    test('a session joins when the device says it did', () async {
+      final userId = await h.seedProfile();
+      final filed = DateTime.utc(2026, 1, 1, 8);
+      final base = session(userId, 'A', 0);
+      final (created, _) = await h.db.createProgramOrExisting(
+        userId: userId,
+        program: program(),
+        sessions: [
+          TemplateRequest(
+            userId: userId,
+            name: base.name,
+            joined: filed,
+            exercises: base.exercises,
+          ),
+        ],
+      );
+
+      expect(created.joined.values.single, filed);
+      final template = await h.db.getTemplate(userId: userId, templateId: created.sessions.single);
+      expect(template.joined, filed);
     });
 
     test('a replay returns the stored program and writes no sessions twice', () async {

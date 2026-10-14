@@ -44,6 +44,7 @@ mixin _Programs on _DatabaseBase implements ProgramService {
                   'id': session.id,
                   ...session.toParams(),
                   'programId': id,
+                  'joined': session.joined,
                   'note': session.note,
                 },
               );
