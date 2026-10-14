@@ -1,0 +1,417 @@
+# The free program library (heart-api#198): ready-made programs anyone can
+# start, served from the CDN as static/programs. Rendered and checked by
+# scripts/programs_content.py; the shape is docs/2026-10-14.program-library.md.
+#
+# DRAFT, awaiting the owner's review: the programming, and the es/fr/ru copy,
+# which is machine-translated.
+#
+# Targets per set:  reps: 5 (exactly)  |  reps: [8, 12] (a range)  |  reps: 5+ (as many as possible)
+# Durations are seconds. Weights are never written: they come from the user's
+# history and the program's bases. Names stay generic, so no named program's
+# licensing is involved.
+
+version: 1
+locales: [es, fr, ru]
+
+programs:
+  - key: first_steps
+    audience: starting_out
+    equipment: none
+    per_week: 2
+    weeks: 8
+    name:
+      en: First steps
+      es: Primeros pasos
+      fr: Premiers pas
+      ru: Первые шаги
+    note:
+      en: Two short sessions a week with nothing but the floor. The ranges grow with you; holds and walks get a little longer each week.
+      es: Dos sesiones cortas a la semana, sin nada más que el suelo. Los rangos crecen contigo; las planchas y los paseos se alargan un poco cada semana.
+      fr: Deux courtes séances par semaine, sans autre matériel que le sol. Les fourchettes évoluent avec vous ; gainages et marches s’allongent un peu chaque semaine.
+      ru: Две короткие тренировки в неделю, без всякого инвентаря. Диапазоны растут вместе с вами; планки и прогулки каждую неделю чуть длиннее.
+    rules:
+      plank: {kind: longer, step: 5}
+      side-plank: {kind: longer, step: 5}
+      walking: {kind: longer, step: 120}
+    sessions:
+      - key: a
+        name: {en: Day A, es: Día A, fr: Jour A, ru: День A}
+        note:
+          en: Legs, a push and the middle, then a walk.
+          es: Piernas, un empuje y el core, luego un paseo.
+          fr: Jambes, une poussée et le tronc, puis une marche.
+          ru: Ноги, жим и кор, затем прогулка.
+        exercises:
+          - {exercise: squat-bodyweight, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: incline-push-up, sets: 3, target: {reps: [6, 12]}}
+          - {exercise: glute-bridge, sets: 3, target: {reps: [10, 15]}}
+          - {exercise: plank, sets: 3, target: {duration: 20}}
+          - {exercise: walking, sets: 1, target: {duration: 600}}
+      - key: b
+        name: {en: Day B, es: Día B, fr: Jour B, ru: День B}
+        note:
+          en: One leg at a time, balance and the sides, then a walk.
+          es: Una pierna cada vez, equilibrio y los costados, luego un paseo.
+          fr: Une jambe à la fois, l’équilibre et les flancs, puis une marche.
+          ru: Одна нога за раз, баланс и косые мышцы, затем прогулка.
+        exercises:
+          - {exercise: step-up-bodyweight, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: push-up-knees, sets: 3, target: {reps: [6, 12]}}
+          - {exercise: bird-dog, sets: 3, target: {reps: [8, 10]}}
+          - {exercise: side-plank, sets: 2, target: {duration: 15}}
+          - {exercise: walking, sets: 1, target: {duration: 600}}
+
+  - key: full_body_three
+    audience: starting_out
+    equipment: gym
+    per_week: 3
+    weeks: 12
+    name:
+      en: Full body, three days
+      es: Cuerpo completo, tres días
+      fr: Corps entier, trois jours
+      ru: Всё тело, три дня
+    note:
+      en: The classic way to start with a barbell. Squat every session, a little heavier each time while the sets stay clean; the rest follow when you hit the top of their range.
+      es: La forma clásica de empezar con barra. Sentadilla en cada sesión, un poco más de peso cada vez mientras las series salgan limpias; el resto sube cuando llegas al tope de su rango.
+      fr: La façon classique de débuter à la barre. Squat à chaque séance, un peu plus lourd à chaque fois tant que les séries restent propres ; le reste suit quand vous atteignez le haut de la fourchette.
+      ru: Классический старт со штангой. Присед на каждой тренировке, каждый раз чуть тяжелее, пока подходы чистые; остальное растёт, когда вы доходите до верха диапазона.
+    rules:
+      squat-barbell: {kind: addWeight, step: 2.5}
+      bench-press-barbell: {kind: addWeight, step: 2.5}
+      overhead-press-barbell: {kind: addWeight, step: 2.5}
+      deadlift-barbell: {kind: addWeight, step: 5}
+      bent-over-row-barbell: {kind: rangeThenWeight, step: 2.5}
+      lat-pulldown-cable: {kind: rangeThenWeight, step: 2.5}
+    sessions:
+      - key: a
+        name: {en: Day A, es: Día A, fr: Jour A, ru: День A}
+        note:
+          en: Squat, bench and a row.
+          es: Sentadilla, press de banca y remo.
+          fr: Squat, développé couché et rowing.
+          ru: Присед, жим лёжа и тяга.
+        exercises:
+          - {exercise: squat-barbell, sets: 3, target: {reps: 5}}
+          - {exercise: bench-press-barbell, sets: 3, target: {reps: 5}}
+          - {exercise: bent-over-row-barbell, sets: 3, target: {reps: [8, 12]}}
+      - key: b
+        name: {en: Day B, es: Día B, fr: Jour B, ru: День B}
+        note:
+          en: Squat, press overhead and pull from the floor.
+          es: Sentadilla, press por encima de la cabeza y tirón desde el suelo.
+          fr: Squat, développé au-dessus de la tête et tirage depuis le sol.
+          ru: Присед, жим стоя и тяга с пола.
+        exercises:
+          - {exercise: squat-barbell, sets: 3, target: {reps: 5}}
+          - {exercise: overhead-press-barbell, sets: 3, target: {reps: 5}}
+          - {exercise: deadlift-barbell, sets: 1, target: {reps: 5}}
+      - key: c
+        name: {en: Day C, es: Día C, fr: Jour C, ru: День C}
+        note:
+          en: Squat, bench and a pull from above.
+          es: Sentadilla, press de banca y un tirón desde arriba.
+          fr: Squat, développé couché et un tirage vertical.
+          ru: Присед, жим лёжа и тяга сверху.
+        exercises:
+          - {exercise: squat-barbell, sets: 3, target: {reps: 5}}
+          - {exercise: bench-press-barbell, sets: 3, target: {reps: 5}}
+          - {exercise: lat-pulldown-cable, sets: 3, target: {reps: [8, 12]}}
+
+  - key: easing_back
+    audience: getting_back
+    equipment: home
+    per_week: 2
+    weeks: 6
+    name:
+      en: Easing back in
+      es: Volver poco a poco
+      fr: Reprendre en douceur
+      ru: Постепенное возвращение
+    note:
+      en: Two light sessions a week with a pair of dumbbells, for coming back after a break. Not a rehab plan; if a physio gave you one, follow theirs.
+      es: Dos sesiones ligeras a la semana con un par de mancuernas, para volver tras una pausa. No es un plan de rehabilitación; si un fisioterapeuta te dio uno, sigue el suyo.
+      fr: Deux séances légères par semaine avec une paire d’haltères, pour reprendre après une pause. Ce n’est pas un plan de rééducation ; si un kiné vous en a donné un, suivez le sien.
+      ru: Две лёгкие тренировки в неделю с парой гантелей, чтобы вернуться после перерыва. Это не план реабилитации; если физиотерапевт дал вам свой, следуйте ему.
+    rules:
+      goblet-squat-kettlebell: {kind: rangeThenWeight, step: 2}
+      bench-press-dumbbell: {kind: rangeThenWeight, step: 2}
+      bent-over-one-arm-row-dumbbell: {kind: rangeThenWeight, step: 2}
+      romanian-deadlift-dumbbell: {kind: rangeThenWeight, step: 2}
+      split-squat-dumbbell: {kind: rangeThenWeight, step: 2}
+      seated-overhead-press-dumbbell: {kind: rangeThenWeight, step: 2}
+      incline-row-dumbbell: {kind: rangeThenWeight, step: 2}
+      side-plank: {kind: longer, step: 5}
+    sessions:
+      - key: a
+        name: {en: Day A, es: Día A, fr: Jour A, ru: День A}
+        note:
+          en: The big movements, light, with reps in reserve.
+          es: Los movimientos grandes, ligeros, sin llegar al límite.
+          fr: Les grands mouvements, léger, en gardant de la marge.
+          ru: Базовые движения, легко, с запасом повторений.
+        exercises:
+          - {exercise: goblet-squat-kettlebell, sets: 2, target: {reps: [10, 15]}}
+          - {exercise: bench-press-dumbbell, sets: 2, target: {reps: [10, 15]}}
+          - {exercise: bent-over-one-arm-row-dumbbell, sets: 2, target: {reps: [10, 15]}}
+          - {exercise: romanian-deadlift-dumbbell, sets: 2, target: {reps: [10, 15]}}
+          - {exercise: dead-bug, sets: 2, target: {reps: [8, 10]}}
+      - key: b
+        name: {en: Day B, es: Día B, fr: Jour B, ru: День B}
+        note:
+          en: One leg at a time, overhead, and the sides.
+          es: Una pierna cada vez, por encima de la cabeza y los costados.
+          fr: Une jambe à la fois, au-dessus de la tête, et les flancs.
+          ru: Одна нога за раз, жим над головой и косые мышцы.
+        exercises:
+          - {exercise: split-squat-dumbbell, sets: 2, target: {reps: [8, 12]}}
+          - {exercise: seated-overhead-press-dumbbell, sets: 2, target: {reps: [10, 15]}}
+          - {exercise: incline-row-dumbbell, sets: 2, target: {reps: [10, 15]}}
+          - {exercise: glute-bridge, sets: 2, target: {reps: [12, 15]}}
+          - {exercise: side-plank, sets: 2, target: {duration: 20}}
+
+  - key: walk_and_move
+    audience: getting_back
+    equipment: none
+    per_week: 3
+    weeks: 8
+    name:
+      en: Walk and move
+      es: Camina y muévete
+      fr: Marcher et bouger
+      ru: Ходьба и движение
+    note:
+      en: Three walks a week, two minutes longer each week, with a few minutes of easy movement around them.
+      es: Tres paseos a la semana, dos minutos más largos cada semana, con unos minutos de movimiento suave alrededor.
+      fr: Trois marches par semaine, deux minutes de plus chaque semaine, avec quelques minutes de mouvements doux autour.
+      ru: Три прогулки в неделю, каждую неделю на две минуты длиннее, и несколько минут лёгких движений вокруг них.
+    rules:
+      walking: {kind: longer, step: 120}
+    sessions:
+      - key: a
+        name: {en: Walk and stretch, es: Paseo y estiramientos, fr: Marche et étirements, ru: Прогулка и растяжка}
+        exercises:
+          - {exercise: walking, sets: 1, target: {duration: 1200}}
+          - {exercise: stretching, sets: 1, target: {duration: 600}}
+      - key: b
+        name: {en: Walk and strengthen, es: Paseo y fuerza, fr: Marche et renforcement, ru: Прогулка и укрепление}
+        exercises:
+          - {exercise: walking, sets: 1, target: {duration: 1200}}
+          - {exercise: bird-dog, sets: 2, target: {reps: [6, 10]}}
+          - {exercise: glute-bridge, sets: 2, target: {reps: [10, 15]}}
+          - {exercise: stretching, sets: 1, target: {duration: 300}}
+      - key: c
+        name: {en: Walk, es: Paseo, fr: Marche, ru: Прогулка}
+        exercises:
+          - {exercise: walking, sets: 1, target: {duration: 1200}}
+
+  - key: keep_what_you_built
+    audience: keep_muscle
+    equipment: gym
+    per_week: 3
+    name:
+      en: Keep what you’ve built
+      es: Conserva lo que has construido
+      fr: Garder ce que vous avez construit
+      ru: Сохранить достигнутое
+    note:
+      en: For while you eat less. Fewer sets, still heavy enough to matter. Holding a weight steady is a good week here.
+      es: Para cuando comes menos. Menos series, aún con peso suficiente. Mantener un peso ya es una buena semana.
+      fr: Pour les périodes où vous mangez moins. Moins de séries, mais assez lourd pour compter. Tenir une charge stable, c’est déjà une bonne semaine.
+      ru: Для периода, когда вы едите меньше. Меньше подходов, но вес всё ещё ощутимый. Удержать вес — уже хорошая неделя.
+    rules:
+      squat-barbell: {kind: rangeThenWeight, step: 2.5}
+      bench-press-barbell: {kind: rangeThenWeight, step: 2.5}
+      romanian-deadlift-barbell: {kind: rangeThenWeight, step: 2.5}
+      overhead-press-barbell: {kind: rangeThenWeight, step: 2.5}
+      bent-over-row-barbell: {kind: rangeThenWeight, step: 2.5}
+      seated-row-cable: {kind: rangeThenWeight, step: 2.5}
+      lat-pulldown-cable: {kind: rangeThenWeight, step: 2.5}
+      leg-press: {kind: rangeThenWeight, step: 5}
+      incline-bench-press-dumbbell: {kind: rangeThenWeight, step: 2}
+    sessions:
+      - key: a
+        name: {en: Day A, es: Día A, fr: Jour A, ru: День A}
+        exercises:
+          - {exercise: squat-barbell, sets: 3, target: {reps: [5, 8]}}
+          - {exercise: bench-press-barbell, sets: 3, target: {reps: [5, 8]}}
+          - {exercise: seated-row-cable, sets: 3, target: {reps: [8, 12]}}
+      - key: b
+        name: {en: Day B, es: Día B, fr: Jour B, ru: День B}
+        exercises:
+          - {exercise: romanian-deadlift-barbell, sets: 3, target: {reps: [6, 10]}}
+          - {exercise: overhead-press-barbell, sets: 3, target: {reps: [6, 10]}}
+          - {exercise: lat-pulldown-cable, sets: 3, target: {reps: [8, 12]}}
+      - key: c
+        name: {en: Day C, es: Día C, fr: Jour C, ru: День C}
+        exercises:
+          - {exercise: leg-press, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: incline-bench-press-dumbbell, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: bent-over-row-barbell, sets: 3, target: {reps: [6, 10]}}
+
+  - key: two_days_dumbbells
+    audience: keep_muscle
+    equipment: home
+    per_week: 2
+    name:
+      en: Two days with dumbbells
+      es: Dos días con mancuernas
+      fr: Deux jours aux haltères
+      ru: Два дня с гантелями
+    note:
+      en: The least that keeps you strong, at home. Two full-body sessions a week.
+      es: Lo mínimo que te mantiene fuerte, en casa. Dos sesiones de cuerpo completo a la semana.
+      fr: Le minimum pour rester fort, à la maison. Deux séances corps entier par semaine.
+      ru: Минимум, чтобы оставаться сильным, дома. Две тренировки на всё тело в неделю.
+    rules:
+      squat-dumbbell: {kind: rangeThenWeight, step: 2}
+      bench-press-dumbbell: {kind: rangeThenWeight, step: 2}
+      bent-over-row-dumbbell: {kind: rangeThenWeight, step: 2}
+      romanian-deadlift-dumbbell: {kind: rangeThenWeight, step: 2}
+      seated-overhead-press-dumbbell: {kind: rangeThenWeight, step: 2}
+      split-squat-dumbbell: {kind: rangeThenWeight, step: 2}
+      plank: {kind: longer, step: 5}
+    sessions:
+      - key: a
+        name: {en: Day A, es: Día A, fr: Jour A, ru: День A}
+        exercises:
+          - {exercise: squat-dumbbell, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: bench-press-dumbbell, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: bent-over-row-dumbbell, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: plank, sets: 2, target: {duration: 30}}
+      - key: b
+        name: {en: Day B, es: Día B, fr: Jour B, ru: День B}
+        exercises:
+          - {exercise: romanian-deadlift-dumbbell, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: seated-overhead-press-dumbbell, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: split-squat-dumbbell, sets: 2, target: {reps: [8, 12]}}
+          - {exercise: push-up, sets: 2, target: {reps: 5+}}
+
+  - key: upper_lower
+    audience: getting_stronger
+    equipment: gym
+    per_week: 4
+    weeks: 12
+    name:
+      en: Upper / lower
+      es: Superior / inferior
+      fr: Haut / bas
+      ru: Верх / низ
+    note:
+      en: Four days, upper body and lower body in turn. Every lift works in a range; reach the top on every set and the weight goes up.
+      es: Cuatro días, tren superior e inferior por turnos. Cada ejercicio trabaja en un rango; llega al tope en todas las series y el peso sube.
+      fr: Quatre jours, haut et bas du corps en alternance. Chaque exercice se fait dans une fourchette ; atteignez le haut à chaque série et la charge augmente.
+      ru: Четыре дня, верх и низ по очереди. Каждое упражнение — в диапазоне повторений; дошли до верха во всех подходах — вес растёт.
+    rules:
+      bench-press-barbell: {kind: rangeThenWeight, step: 2.5}
+      bent-over-row-barbell: {kind: rangeThenWeight, step: 2.5}
+      seated-overhead-press-dumbbell: {kind: rangeThenWeight, step: 2}
+      lat-pulldown-cable: {kind: rangeThenWeight, step: 2.5}
+      squat-barbell: {kind: rangeThenWeight, step: 2.5}
+      romanian-deadlift-barbell: {kind: rangeThenWeight, step: 2.5}
+      leg-press: {kind: rangeThenWeight, step: 5}
+      standing-calf-raise-machine: {kind: rangeThenWeight, step: 5}
+      overhead-press-barbell: {kind: rangeThenWeight, step: 2.5}
+      pull-up: {kind: rangeThenWeight, step: 2.5}
+      incline-bench-press-dumbbell: {kind: rangeThenWeight, step: 2}
+      seated-row-cable: {kind: rangeThenWeight, step: 2.5}
+      deadlift-barbell: {kind: rangeThenWeight, step: 5}
+      split-squat-dumbbell: {kind: rangeThenWeight, step: 2}
+      hip-thrust-barbell: {kind: rangeThenWeight, step: 5}
+      plank: {kind: longer, step: 5}
+    sessions:
+      - key: upper_a
+        name: {en: Upper A, es: Superior A, fr: Haut A, ru: Верх A}
+        exercises:
+          - {exercise: bench-press-barbell, sets: 4, target: {reps: [5, 8]}}
+          - {exercise: bent-over-row-barbell, sets: 4, target: {reps: [6, 10]}}
+          - {exercise: seated-overhead-press-dumbbell, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: lat-pulldown-cable, sets: 3, target: {reps: [8, 12]}}
+      - key: lower_a
+        name: {en: Lower A, es: Inferior A, fr: Bas A, ru: Низ A}
+        exercises:
+          - {exercise: squat-barbell, sets: 4, target: {reps: [5, 8]}}
+          - {exercise: romanian-deadlift-barbell, sets: 3, target: {reps: [6, 10]}}
+          - {exercise: leg-press, sets: 3, target: {reps: [10, 15]}}
+          - {exercise: standing-calf-raise-machine, sets: 3, target: {reps: [10, 15]}}
+      - key: upper_b
+        name: {en: Upper B, es: Superior B, fr: Haut B, ru: Верх B}
+        exercises:
+          - {exercise: overhead-press-barbell, sets: 4, target: {reps: [5, 8]}}
+          - {exercise: pull-up, sets: 4, target: {reps: [5, 10]}}
+          - {exercise: incline-bench-press-dumbbell, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: seated-row-cable, sets: 3, target: {reps: [8, 12]}}
+      - key: lower_b
+        name: {en: Lower B, es: Inferior B, fr: Bas B, ru: Низ B}
+        exercises:
+          - {exercise: deadlift-barbell, sets: 3, target: {reps: [3, 5]}}
+          - {exercise: split-squat-dumbbell, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: hip-thrust-barbell, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: plank, sets: 3, target: {duration: 45}}
+
+  - key: strength_waves
+    audience: getting_stronger
+    equipment: gym
+    per_week: 4
+    name:
+      en: Strength waves
+      es: Olas de fuerza
+      fr: Vagues de force
+      ru: Волны силы
+    note:
+      en: Four main lifts on a training max, in four-week waves of fives, threes, a heavy single, then an easy week. The last set of each is as many as you can; make it and the max goes up after the wave.
+      es: Cuatro ejercicios principales sobre un máximo de entrenamiento, en olas de cuatro semanas. La última serie de cada uno es a tope; si la cumples, el máximo sube tras la ola.
+      fr: Quatre mouvements principaux sur un max d’entraînement, en vagues de quatre semaines. La dernière série de chacun se fait au maximum de répétitions ; réussissez-la et le max augmente après la vague.
+      ru: Четыре основных упражнения от тренировочного максимума, волнами по четыре недели. Последний подход каждого — на максимум повторений; выполнили — максимум растёт после волны.
+    rules:
+      squat-barbell: &lower_wave
+        kind: shareOfMax
+        step: 5
+        waves: &waves
+          - [{share: 0.65, reps: 5}, {share: 0.75, reps: 5}, {share: 0.85, reps: 5, amrap: true}]
+          - [{share: 0.70, reps: 3}, {share: 0.80, reps: 3}, {share: 0.90, reps: 3, amrap: true}]
+          - [{share: 0.75, reps: 5}, {share: 0.85, reps: 3}, {share: 0.95, reps: 1, amrap: true}]
+          - [{share: 0.40, reps: 5}, {share: 0.50, reps: 5}, {share: 0.60, reps: 5}]
+      deadlift-barbell: *lower_wave
+      bench-press-barbell: &upper_wave
+        kind: shareOfMax
+        step: 2.5
+        waves: *waves
+      overhead-press-barbell: *upper_wave
+      leg-press: {kind: rangeThenWeight, step: 5}
+      seated-row-cable: {kind: rangeThenWeight, step: 2.5}
+      triceps-dip-assisted: {kind: rangeThenWeight, step: 2.5}
+      split-squat-dumbbell: {kind: rangeThenWeight, step: 2}
+      chin-up-assisted: {kind: rangeThenWeight, step: 2.5}
+      face-pull-cable: {kind: rangeThenWeight, step: 2.5}
+      plank: {kind: longer, step: 5}
+      side-plank: {kind: longer, step: 5}
+    sessions:
+      - key: squat
+        name: {en: Squat day, es: Día de sentadilla, fr: Jour squat, ru: День приседа}
+        exercises:
+          - exercise: squat-barbell
+            sets: [{share: 0.65, reps: 5}, {share: 0.75, reps: 5}, {share: 0.85, reps: 5+}]
+          - {exercise: leg-press, sets: 3, target: {reps: [10, 15]}}
+          - {exercise: plank, sets: 3, target: {duration: 30}}
+      - key: bench
+        name: {en: Bench day, es: Día de press de banca, fr: Jour développé couché, ru: День жима лёжа}
+        exercises:
+          - exercise: bench-press-barbell
+            sets: [{share: 0.65, reps: 5}, {share: 0.75, reps: 5}, {share: 0.85, reps: 5+}]
+          - {exercise: seated-row-cable, sets: 5, target: {reps: [8, 12]}}
+          - {exercise: triceps-dip-assisted, sets: 3, target: {reps: [8, 12]}}
+      - key: deadlift
+        name: {en: Deadlift day, es: Día de peso muerto, fr: Jour soulevé de terre, ru: День становой тяги}
+        exercises:
+          - exercise: deadlift-barbell
+            sets: [{share: 0.65, reps: 5}, {share: 0.75, reps: 5}, {share: 0.85, reps: 5+}]
+          - {exercise: split-squat-dumbbell, sets: 3, target: {reps: [8, 12]}}
+          - {exercise: side-plank, sets: 2, target: {duration: 30}}
+      - key: press
+        name: {en: Press day, es: Día de press militar, fr: Jour développé militaire, ru: День жима стоя}
+        exercises:
+          - exercise: overhead-press-barbell
+            sets: [{share: 0.65, reps: 5}, {share: 0.75, reps: 5}, {share: 0.85, reps: 5+}]
+          - {exercise: chin-up-assisted, sets: 5, target: {reps: [5, 10]}}
+          - {exercise: face-pull-cable, sets: 3, target: {reps: [12, 15]}}
