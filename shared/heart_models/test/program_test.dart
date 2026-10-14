@@ -165,4 +165,54 @@ void main() {
       expect(map.containsKey('note'), isFalse);
     });
   });
+
+  group('ProgramAction', () {
+    test('round-trips the wire and the row', () {
+      final json = {'id': 'a1', 'programId': 'p1', 'kind': 'replay', 'week': 2, 'at': '2026-10-14T18:00:00.000Z'};
+      expect(ProgramAction.fromJson(json).toMap(), json);
+
+      final row = ProgramAction.fromRow({
+        'id': 'a1',
+        'program_id': 'p1',
+        'kind': 'pause',
+        'at': DateTime.utc(2026, 10, 14),
+      });
+      expect(row.kind, ProgramActionKind.pause);
+      expect(row.week, isNull);
+    });
+
+    test('an unknown kind is set aside by readEach', () {
+      final read = readEach([
+        {'kind': 'resume', 'at': '2026-10-14T18:00:00Z'},
+        {'kind': 'deload', 'at': '2026-10-14T18:00:00Z'},
+      ], ProgramAction.fromJson);
+      expect(read.items.single.kind, ProgramActionKind.resume);
+      expect(read.unread.single['kind'], 'deload');
+    });
+  });
+
+  group('ProgramBase', () {
+    test('round-trips, and knows a manual value from a caused one', () {
+      final json = {
+        'id': 'b1',
+        'programId': 'p1',
+        'exerciseId': 'e1',
+        'value': 102.5,
+        'workoutId': 'w1',
+        'at': '2026-10-14T18:00:00.000Z',
+      };
+      final base = ProgramBase.fromJson(json);
+      expect(base.toMap(), json);
+      expect(base.isManual, isFalse);
+
+      final manual = ProgramBase.fromRow({
+        'id': 'b2',
+        'program_id': 'p1',
+        'exercise_id': 'e1',
+        'value': 100,
+        'at': DateTime.utc(2026, 10, 14),
+      });
+      expect(manual.isManual, isTrue);
+    });
+  });
 }

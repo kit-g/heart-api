@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.21.0
+
+Program actions and bases (heart-api#216, part of heart-api#86).
+
+- New: `ProgramAction` (`id`, `programId`, `kind`, `week`, `at`) and
+  `ProgramActionKind`: `repeat`, `pause`, `resume`, `replay`. An unknown kind
+  is an `ArgumentError`, so `readEach` sets it aside.
+- New: `ProgramBase` (`id`, `programId`, `exerciseId`, `value`, `workoutId`,
+  `actionId`, `at`, `isManual`): one value of what an exercise's growth rule
+  grows, with its cause.
+
 ## 2.20.0
 
 Workouts name the template and the program they were started from
