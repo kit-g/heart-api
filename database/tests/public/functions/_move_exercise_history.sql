@@ -28,7 +28,7 @@ DECLARE
 BEGIN
     _user_id   := create_test_profile();
     _source_id := create_test_exercise('Brzuszki', 'Reps Only', 'Core', _user_id);
-    _target_id := create_test_exercise();
+    _target_id := create_test_exercise(_category => 'Reps Only', _target => 'Core');
 
     RETURN NEXT is((SELECT count(*) FROM workouts WHERE user_id = _user_id), 0::bigint, 'no workouts yet');
     RETURN NEXT is((SELECT count(*) FROM templates WHERE user_id = _user_id), 0::bigint, 'no templates yet');
@@ -259,6 +259,57 @@ BEGIN
         'moving an exercise onto itself is refused'
     );
     RETURN NEXT is((SELECT count(*) FROM exercises WHERE id = _mine), 1::bigint, 'and the custom is kept');
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__move_exercise_history_refuses_incompatible_target() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id  TEXT;
+    _wheel    UUID;
+    _ride     UUID;
+    _dumbbell UUID;
+    _assisted UUID;
+    _we       UUID;
+    _r        RECORD;
+BEGIN
+    _user_id  := create_test_profile();
+    _wheel    := create_test_exercise('Ab wheel', 'Reps Only', 'Core', _user_id);
+    _ride     := create_test_exercise('Ride', 'Cardio', 'Legs', _user_id);
+    _dumbbell := create_test_exercise('Press', 'Dumbbell', 'Chest', _user_id);
+    _assisted := create_test_exercise('Dip', 'Assisted Body Weight', 'Chest', _user_id);
+    RETURN NEXT is((SELECT count(*) FROM workouts WHERE user_id = _user_id), 0::bigint, 'no workouts yet');
+
+    _we := create_test_workout_exercise(create_test_workout(_user_id => _user_id), _wheel, 0);
+
+    RETURN NEXT throws_ok(
+        format('SELECT * FROM _move_exercise_history(%L, %L, %L, true)', _user_id, _wheel, _ride),
+        '42804',
+        'the target''s sets cannot hold the source''s',
+        'a dry run refuses reps onto distance and time'
+    );
+    RETURN NEXT throws_ok(
+        format('SELECT * FROM _move_exercise_history(%L, %L, %L)', _user_id, _wheel, _ride),
+        '42804',
+        'the target''s sets cannot hold the source''s',
+        'and so does the move'
+    );
+    RETURN NEXT is((SELECT exercise_id FROM workout_exercises WHERE id = _we), _wheel, 'the sets stay where they were');
+    RETURN NEXT throws_ok(
+        format('SELECT * FROM _move_exercise_history(%L, %L, %L, true)', _user_id, _assisted, _dumbbell),
+        '42804',
+        'the target''s sets cannot hold the source''s',
+        'assistance does not become load'
+    );
+    RETURN NEXT throws_ok(
+        format('SELECT * FROM _move_exercise_history(%L, %L, %L, true)', _user_id, _dumbbell, _assisted),
+        '42804',
+        'the target''s sets cannot hold the source''s',
+        'nor load assistance'
+    );
+
+    SELECT * INTO _r FROM _move_exercise_history(_user_id, _dumbbell, create_test_exercise(), true);
+    RETURN NEXT ok(_r.source_deleted, 'a dumbbell lift moves onto a barbell one');
 END
 $$ LANGUAGE plpgsql;
 
