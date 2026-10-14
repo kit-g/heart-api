@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.30.0
+
+Lighter weeks (heart-api#229).
+
+- New: `Deload` (`every` cycles, `load` and `volume` shares) and
+  `Program.deload`, on the wire as `deload`; `ProgramField.deload` for
+  `without`.
+- New: `ProgramActionKind.lighter`: the open cycle becomes a lighter one, on
+  demand. An exhaustive switch over the kinds gains a case.
+- New: `ProgramPosition.lighter`, on the wire as `lighter`: the open cycle is
+  scheduled lighter or asked for. Pass it to `Progression.next`.
+
 ## 2.29.0
 
 The progression engine: what a session does to a base, misses, and a step set

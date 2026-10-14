@@ -48,6 +48,11 @@ abstract interface class ProgramPosition implements Model {
 
   bool get paused;
 
+  /// Whether the open cycle is a lighter one: one the program schedules
+  /// ([Program.deload]) or one the user asked for. Nothing moves in it and
+  /// nothing counts as a miss (`Progression.next`).
+  bool get lighter;
+
   /// A program with a length is finished once its week passes it.
   bool get finished;
 
@@ -75,6 +80,7 @@ abstract interface class ProgramPosition implements Model {
   ///   just finished again; otherwise it restarts the open cycle at its week.
   /// - `replay` opens a new cycle at its week.
   /// - `pause` holds until a `resume` or a program workout.
+  /// - `lighter` makes the open cycle a lighter one, until it closes.
   factory of(
     Program program, {
     required Iterable<ProgramMark> marks,
@@ -92,12 +98,14 @@ abstract interface class ProgramPosition implements Model {
 
     var week = 1;
     var paused = false;
+    var lighterNow = false;
     Set<String>? required;
     final done = <String>{};
 
     void open(int at) {
       week = at;
       required = null;
+      lighterNow = false;
       done.clear();
     }
 
@@ -125,6 +133,8 @@ abstract interface class ProgramPosition implements Model {
           paused = true;
         case ProgramAction(kind: .resume):
           paused = false;
+        case ProgramAction(kind: .lighter):
+          lighterNow = true;
         default:
           break;
       }
@@ -153,6 +163,7 @@ abstract interface class ProgramPosition implements Model {
       remaining: remaining,
       next: finished ? null : remaining.firstOrNull,
       paused: paused,
+      lighter: lighterNow || (program.deload?.lightens(week) ?? false),
       finished: finished,
       thisWeek: thisWeek,
       target: paused || finished ? null : program.perWeek,
@@ -191,6 +202,8 @@ class _ProgramPosition implements ProgramPosition {
   @override
   final bool paused;
   @override
+  final bool lighter;
+  @override
   final bool finished;
   @override
   final int thisWeek;
@@ -203,6 +216,7 @@ class _ProgramPosition implements ProgramPosition {
     required this.remaining,
     required this.next,
     required this.paused,
+    required this.lighter,
     required this.finished,
     required this.thisWeek,
     required this.target,
@@ -216,6 +230,7 @@ class _ProgramPosition implements ProgramPosition {
       'remaining': remaining,
       'next': ?next,
       'paused': paused,
+      'lighter': lighter,
       'finished': finished,
       'thisWeek': thisWeek,
       'target': ?target,

@@ -403,8 +403,52 @@ num _positive(Map json, String key) {
   };
 }
 
+/// A lighter week a program schedules (heart-api#229): every [every]th cycle,
+/// the sheet takes [load] of each target's weight and [volume] of its sets.
+/// Nothing moves and nothing counts as a miss in it. Deloads reduce, never
+/// stop.
+final class Deload implements Model {
+  static const defaultLoad = 0.9;
+  static const defaultVolume = 0.5;
+
+  final int every;
+  final num load;
+  final num volume;
+
+  const new({required this.every, this.load = defaultLoad, this.volume = defaultVolume});
+
+  factory fromJson(Map json) {
+    num share(String key, num fallback) => switch (json[key]) {
+      null => fallback,
+      final num value when value > 0 && value <= 1 => value,
+      final other => throw ArgumentError.value(other, key, 'a share above 0 and at most 1'),
+    };
+    return Deload(
+      every: switch (json['every']) {
+        final int every when every >= 2 && every <= 52 => every,
+        final other => throw ArgumentError.value(other, 'every', 'a whole number of cycles from 2 to 52'),
+      },
+      load: share('load', defaultLoad),
+      volume: share('volume', defaultVolume),
+    );
+  }
+
+  /// Whether program [week] is one of the lighter ones.
+  bool lightens(int week) => week % every == 0;
+
+  @override
+  Map<String, dynamic> toMap() => {'every': every, 'load': load, 'volume': volume};
+
+  @override
+  bool operator ==(Object other) =>
+      other is Deload && other.every == every && other.load == load && other.volume == volume;
+
+  @override
+  int get hashCode => Object.hash(every, load, volume);
+}
+
 /// A field of a [Program] that can be left unset, for [Program.without].
-enum ProgramField { note, perWeek, weeks, constraint }
+enum ProgramField { note, perWeek, weeks, constraint, deload }
 
 /// Templates on a plan, with targets that grow (heart-api#86). The design is
 /// `docs/2026-10-13.programs.md`.
@@ -440,6 +484,9 @@ abstract interface class Program implements Model {
   /// inside the program.
   String? get constraint;
 
+  /// The lighter week it schedules, if any.
+  Deload? get deload;
+
   bool get archived;
 
   /// The ids of the program's session templates, in order. Read-only: a
@@ -468,6 +515,7 @@ abstract interface class Program implements Model {
     int? weeks,
     Map<String, GrowthRule> rules,
     String? constraint,
+    Deload? deload,
     bool archived,
     List<String> sessions,
     Map<String, DateTime> joined,
@@ -499,6 +547,7 @@ abstract interface class Program implements Model {
     int? weeks,
     Map<String, GrowthRule>? rules,
     String? constraint,
+    Deload? deload,
     bool? archived,
   });
 
@@ -527,6 +576,8 @@ class _Program implements Program {
   @override
   final String? constraint;
   @override
+  final Deload? deload;
+  @override
   final bool archived;
   @override
   final List<String> sessions;
@@ -547,6 +598,7 @@ class _Program implements Program {
     this.weeks,
     this.rules = const {},
     this.constraint,
+    this.deload,
     this.archived = false,
     this.sessions = const [],
     this.joined = const {},
@@ -585,6 +637,10 @@ class _Program implements Program {
       weeks: (json['weeks'] as num?)?.toInt(),
       rules: rules,
       constraint: json['constraint'] as String?,
+      deload: switch (_decoded(json['deload'])) {
+        final Map deload => Deload.fromJson(deload),
+        _ => null,
+      },
       archived: json['archived'] == true,
       sessions: [
         for (final id in (json['sessions'] as List?) ?? const []) id.toString(),
@@ -612,6 +668,7 @@ class _Program implements Program {
     int? weeks,
     Map<String, GrowthRule>? rules,
     String? constraint,
+    Deload? deload,
     bool? archived,
   }) {
     return _Program(
@@ -624,6 +681,7 @@ class _Program implements Program {
       weeks: weeks ?? this.weeks,
       rules: rules ?? this.rules,
       constraint: constraint ?? this.constraint,
+      deload: deload ?? this.deload,
       archived: archived ?? this.archived,
       sessions: sessions,
       joined: joined,
@@ -648,6 +706,7 @@ class _Program implements Program {
       weeks: fields.contains(ProgramField.weeks) ? null : weeks,
       rules: rules,
       constraint: fields.contains(ProgramField.constraint) ? null : constraint,
+      deload: fields.contains(ProgramField.deload) ? null : deload,
       archived: archived,
       sessions: sessions,
       joined: joined,
@@ -672,6 +731,7 @@ class _Program implements Program {
         for (final MapEntry(:key, :value) in rules.entries) key: value.toMap(),
       },
       'constraint': ?constraint,
+      'deload': ?deload?.toMap(),
       'archived': archived,
       'sessions': sessions,
       if (joined.isNotEmpty)
@@ -704,7 +764,10 @@ enum ProgramActionKind {
   resume('resume'),
 
   /// Goes back to [ProgramAction.week].
-  replay('replay');
+  replay('replay'),
+
+  /// Makes the open cycle a lighter one, on demand (heart-api#229).
+  lighter('lighter');
 
   /// The `kind` on the wire.
   final String value;
