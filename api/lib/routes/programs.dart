@@ -47,3 +47,67 @@ Future<Model> deleteProgramById(Request req, String programId) async {
   );
   throw const NoContent();
 }
+
+Future<ProgramActionsResponse> getProgramActions(Request req) async {
+  final actions = await req.programService.getProgramActions(
+    userId: req.userId,
+    programId: req.rawPathParameters[#programId]!,
+  );
+  return ProgramActionsResponse(actions: actions);
+}
+
+Future<Model> createProgramAction(Request req) {
+  return createProgramActionFor(req, req.rawPathParameters[#programId]!);
+}
+
+Future<Model> createProgramActionFor(Request req, String programId) async {
+  final input = await ProgramActionIn.fromRequest(req);
+  final (action, isNew) = await req.programService.createProgramAction(
+    userId: req.userId,
+    programId: programId,
+    action: input.action,
+  );
+  if (isNew) return Created(action);
+  return action;
+}
+
+Future<Model> deleteProgramAction(Request req) async {
+  await req.programService.deleteProgramAction(
+    userId: req.userId,
+    programId: req.rawPathParameters[#programId]!,
+    actionId: req.rawPathParameters[#actionId]!,
+  );
+  throw const NoContent();
+}
+
+Future<ProgramBasesResponse> getProgramBases(Request req) async {
+  final bases = await req.programService.getProgramBases(
+    userId: req.userId,
+    programId: req.rawPathParameters[#programId]!,
+  );
+  return ProgramBasesResponse(bases: bases);
+}
+
+Future<Model> createProgramBase(Request req) {
+  return createProgramBaseFor(req, req.rawPathParameters[#programId]!);
+}
+
+Future<Model> createProgramBaseFor(Request req, String programId) async {
+  final input = await ProgramBaseIn.fromRequest(req);
+  final (base, isNew) = await req.programService.createProgramBase(
+    userId: req.userId,
+    programId: programId,
+    base: input.base,
+  );
+  if (isNew) return Created(base);
+  return base;
+}
+
+Future<Model> deleteProgramBase(Request req) async {
+  await req.programService.deleteProgramBase(
+    userId: req.userId,
+    programId: req.rawPathParameters[#programId]!,
+    baseId: req.rawPathParameters[#baseId]!,
+  );
+  throw const NoContent();
+}

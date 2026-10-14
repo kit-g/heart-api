@@ -158,6 +158,17 @@ void main() {
         ],
       });
 
+      when(
+        db.getProgramActions(userId: anyNamed('userId'), programId: anyNamed('programId')),
+      ).thenAnswer((_) async => [ProgramAction(kind: .pause, at: DateTime.utc(2026, 10, 14))]);
+      final actions = await send('GET', '/programs/p-1/actions', token: 'good');
+      expect(actions.status, 200);
+      expect(jsonDecode(actions.body), {
+        'actions': [
+          {'kind': 'pause', 'at': '2026-10-14T00:00:00.000Z'},
+        ],
+      });
+
       final deleted = await send('DELETE', '/programs/p-1?keepTemplates=true', token: 'good');
       expect(deleted.status, 204);
       verify(db.deleteProgram(userId: 'u1', programId: 'p-1', keepTemplates: true)).called(1);
