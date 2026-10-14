@@ -200,7 +200,8 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION validate_format_workout_exercise(_we JSONB) RETURNS SETOF BOOL AS
 $$
 BEGIN
-    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_we)) = 6;
+    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_we)) = 7;
+    RETURN NEXT jsonb_typeof(_we -> 'superset') IN ('number', 'null');
     RETURN NEXT jsonb_typeof(_we -> 'id') = 'string';
     RETURN NEXT jsonb_typeof(_we -> 'exercise') = 'object';
     RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_we -> 'exercise')) = 4;
@@ -218,7 +219,8 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION validate_format_template_exercise(_te JSONB) RETURNS SETOF BOOL AS
 $$
 BEGIN
-    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_te)) = 5;
+    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_te)) = 6;
+    RETURN NEXT jsonb_typeof(_te -> 'superset') IN ('number', 'null');
     RETURN NEXT jsonb_typeof(_te -> 'id') = 'string';
     RETURN NEXT jsonb_typeof(_te -> 'rest') IN ('number', 'null');
     RETURN NEXT jsonb_typeof(_te -> 'exercise') = 'object';

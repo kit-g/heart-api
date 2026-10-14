@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(18);
+SELECT plan(19);
 
 SELECT has_table('public'::name, 'template_exercises'::name);
 
@@ -12,7 +12,8 @@ SELECT columns_are(
                    'template_id',
                    'exercise_id',
                    'exercise_order',
-                   'rest'
+                   'rest',
+                   'superset'
                    ]
        );
 
@@ -37,6 +38,7 @@ SELECT fk_ok('public', 'template_exercises', 'exercise_id', 'public', 'exercises
 SELECT has_index('public'::name, 'template_exercises'::name, 'template_exercises_template_id_idx'::name);
 
 SELECT col_type_is('public'::name, 'template_exercises'::name, 'rest'::name, 'integer'::name);
+SELECT col_type_is('public'::name, 'template_exercises'::name, 'superset'::name, 'smallint'::name);
 SELECT throws_ok(
                $$
                INSERT INTO template_exercises (template_id, exercise_id, exercise_order, rest)
