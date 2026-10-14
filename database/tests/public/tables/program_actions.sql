@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(20);
+SELECT plan(21);
 
 SELECT has_table('public'::name, 'program_actions'::name);
 
@@ -61,6 +61,17 @@ SELECT throws_ok(
                SELECT user_id, id, 'deload', now() FROM _p
                $$,
                '23514', NULL, 'the kinds are a closed list'
+       );
+
+SELECT lives_ok(
+               $$
+               WITH _p AS (
+                   INSERT INTO programs (user_id, name) VALUES (create_test_profile(), 'p') RETURNING user_id, id
+               )
+               INSERT INTO program_actions (user_id, program_id, kind, at)
+               SELECT user_id, id, 'lighter', now() FROM _p
+               $$,
+               'a lighter week is an action'
        );
 
 SELECT * FROM finish();
