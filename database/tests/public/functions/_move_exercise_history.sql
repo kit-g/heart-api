@@ -206,6 +206,90 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION test__move_exercise_history_rekeys_programs() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id   TEXT;
+    _source_id UUID;
+    _target_id UUID;
+    _moving    UUID;
+    _both      UUID;
+    _w         UUID;
+    _dry       RECORD;
+    _r         RECORD;
+BEGIN
+    _user_id   := create_test_profile();
+    _source_id := create_test_exercise('Moving press', 'Barbell', 'Chest', _user_id);
+    _target_id := create_test_exercise(_category => 'Barbell', _target => 'Chest');
+
+    RETURN NEXT is((SELECT count(*) FROM programs WHERE user_id = _user_id), 0::bigint, 'no programs yet');
+    RETURN NEXT is((SELECT count(*) FROM program_bases WHERE user_id = _user_id), 0::bigint, 'no bases yet');
+
+    -- one program grows only the source; the other grows both
+    INSERT INTO programs (user_id, name, rules)
+    VALUES (_user_id, 'moving', jsonb_build_object(_source_id::text, '{"kind": "addWeight", "step": 2.5}'::jsonb))
+    RETURNING id INTO _moving;
+    INSERT INTO programs (user_id, name, rules)
+    VALUES (
+        _user_id,
+        'both',
+        jsonb_build_object(
+            _source_id::text, '{"kind": "addWeight", "step": 2.5}'::jsonb,
+            _target_id::text, '{"kind": "none"}'::jsonb
+        )
+    )
+    RETURNING id INTO _both;
+    _w := create_test_workout(_user_id => _user_id, _name => 'bumped both');
+
+    INSERT INTO program_bases (user_id, program_id, exercise_id, value, workout_id, at)
+    VALUES
+        (_user_id, _moving, _source_id, 100, NULL, now() - interval '2 days'),
+        (_user_id, _moving, _source_id, 102.5, _w, now() - interval '1 day'),
+        (_user_id, _both, _source_id, 60, _w, now()),
+        (_user_id, _both, _target_id, 70, _w, now());
+
+    _dry := (SELECT r FROM _move_exercise_history(_user_id, _source_id, _target_id, true) r);
+    RETURN NEXT is(_dry.programs_moved, 2, 'a dry run counts both programs');
+    RETURN NEXT is(
+            (SELECT count(*) FROM program_bases WHERE exercise_id = _source_id),
+            3::bigint,
+            'and writes nothing'
+        );
+
+    _r := (SELECT r FROM _move_exercise_history(_user_id, _source_id, _target_id) r);
+    RETURN NEXT is(_r.programs_moved, 2, 'both programs moved');
+    RETURN NEXT is(
+            (SELECT rules -> _target_id::text ->> 'kind' FROM programs WHERE id = _moving),
+            'addWeight',
+            'a rule on the source alone moves to the target'
+        );
+    RETURN NEXT ok(
+            NOT (SELECT rules ? _source_id::text FROM programs WHERE id = _moving),
+            'and leaves the source'
+        );
+    RETURN NEXT is(
+            (SELECT rules -> _target_id::text ->> 'kind' FROM programs WHERE id = _both),
+            'none',
+            'where both have a rule, the target''s wins'
+        );
+    RETURN NEXT is(
+            (SELECT array_agg(value ORDER BY at) FROM program_bases WHERE program_id = _moving AND exercise_id = _target_id),
+            ARRAY [100, 102.5]::real[],
+            'the bases move with their history'
+        );
+    RETURN NEXT is(
+            (SELECT array_agg(value) FROM program_bases WHERE program_id = _both),
+            ARRAY [70]::real[],
+            'one workout moves a base once: the source''s move from the same workout is dropped'
+        );
+    RETURN NEXT is(
+            (SELECT count(*) FROM exercises WHERE id = _source_id),
+            0::bigint,
+            'the custom source is gone, and nothing of the programs went with it'
+        );
+END
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION test__move_exercise_history_refuses_what_the_user_cannot_see() RETURNS SETOF TEXT AS
 $$
 DECLARE

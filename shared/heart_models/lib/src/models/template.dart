@@ -51,6 +51,11 @@ abstract interface class Template
   /// A session joins or leaves its program through this id.
   String? get programId;
 
+  /// When this template joined [programId], as the device saw it; null outside
+  /// a program, or when no one said. A program's cycles go by it
+  /// (`Program.joined`).
+  DateTime? get joined;
+
   /// A line about the template: what a session is for, in the user's words or
   /// the library's ("big lifts for the quads, chest and lats").
   String? get note;
@@ -109,6 +114,10 @@ abstract interface class Template
       },
       syncEnabled: json['syncEnabled'] as bool?,
       programId: json['programId']?.toString(),
+      joined: switch (json['joined']) {
+        final String at => DateTime.tryParse(at),
+        _ => null,
+      },
       note: json['note'] as String?,
       local: false,
     );
@@ -156,6 +165,7 @@ abstract interface class Template
       },
       syncEnabled: row['sync_enabled'] as bool?,
       programId: row['program_id']?.toString(),
+      joined: row['joined_program_at'] as DateTime?,
       note: row['note'] as String?,
     );
   }
@@ -185,6 +195,8 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
   @override
   final String? programId;
   @override
+  final DateTime? joined;
+  @override
   final String? note;
 
   final List<WorkoutExercise> _exercises;
@@ -202,6 +214,7 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
     this.assignedBy,
     this.syncEnabled,
     this.programId,
+    this.joined,
     this.note,
   }) : _unread = unread ?? [];
 
@@ -263,6 +276,7 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       assignedBy: assignedBy,
       syncEnabled: syncEnabled,
       programId: programId,
+      joined: joined,
       note: note,
     );
   }
@@ -298,6 +312,7 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       'assignedBy': ?assignedBy?.toMap(),
       'syncEnabled': ?syncEnabled,
       'programId': ?programId,
+      'joined': ?joined?.toUtc().toIso8601String(),
       'note': ?note,
       'exercises': splice([for (final exercise in this) exercise.toMap()], _unread),
     };

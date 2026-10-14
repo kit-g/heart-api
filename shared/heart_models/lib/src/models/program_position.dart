@@ -54,15 +54,21 @@ abstract interface class ProgramPosition implements Model {
   /// Program workouts in the calendar week that holds `now`.
   int get thisWeek;
 
+  /// What [thisWeek] counts toward: [Program.perWeek], or null while the
+  /// program is paused or finished. A paused week is no week at all, so illness
+  /// never reads as "0 of 3".
+  int? get target;
+
   /// Folds [marks] (the program's workouts and skips) and [actions] in time
   /// order. [now] sets the calendar week and its zone: a local `now` counts
   /// local weeks. [firstWeekday] is ISO, 1 Monday to 7 Sunday.
   ///
   /// The rules:
-  /// - A cycle's sessions are fixed by its first mark: the program's sessions
-  ///   created by then. One added later joins the next cycle, so adding a
-  ///   session never undoes a past week. Before any mark, or when none is
-  ///   older than it (a clock behind), all of them.
+  /// - A cycle's sessions are fixed by its first mark: the sessions that had
+  ///   joined the program by then ([Program.joined], else the id's time). One
+  ///   added later joins the next cycle, so adding a session never undoes a
+  ///   past week. Before any mark, or when none had joined (a clock behind),
+  ///   all of them.
   /// - A mark completes its session in the open cycle; twice counts once. A
   ///   mark naming no current session moves nothing.
   /// - `repeat` with nothing in the open cycle goes back a week, to run the one
@@ -77,7 +83,7 @@ abstract interface class ProgramPosition implements Model {
     int firstWeekday = DateTime.monday,
   }) {
     final sessions = program.sessions;
-    DateTime? created(String id) => DateTime.tryParse(id) ?? timestampOfUuidV7(id);
+    DateTime? created(String id) => program.joined[id] ?? DateTime.tryParse(id) ?? timestampOfUuidV7(id);
 
     final events = <(DateTime, Object)>[
       for (final mark in marks) (mark.at, mark),
@@ -149,6 +155,7 @@ abstract interface class ProgramPosition implements Model {
       paused: paused,
       finished: finished,
       thisWeek: thisWeek,
+      target: paused || finished ? null : program.perWeek,
     );
   }
 }
@@ -184,6 +191,8 @@ class _ProgramPosition implements ProgramPosition {
   final bool finished;
   @override
   final int thisWeek;
+  @override
+  final int? target;
 
   const new({
     required this.week,
@@ -193,6 +202,7 @@ class _ProgramPosition implements ProgramPosition {
     required this.paused,
     required this.finished,
     required this.thisWeek,
+    required this.target,
   });
 
   @override
@@ -205,6 +215,7 @@ class _ProgramPosition implements ProgramPosition {
       'paused': paused,
       'finished': finished,
       'thisWeek': thisWeek,
+      'target': ?target,
     };
   }
 }

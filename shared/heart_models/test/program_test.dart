@@ -215,4 +215,29 @@ void main() {
       expect(manual.isManual, isTrue);
     });
   });
+
+  group('Program.without and joined (heart-api#227)', () {
+    test('clears what copyWith cannot', () {
+      final program = Program(name: 'p', note: 'n', perWeek: 3, weeks: 12, constraint: 'avoid_high_axial_load');
+      final open = program.without({.perWeek, .weeks});
+      expect(open.perWeek, isNull);
+      expect(open.weeks, isNull);
+      expect(open.note, 'n');
+      expect(program.copyWith(perWeek: null).perWeek, 3, reason: 'copyWith still keeps on null');
+      expect(program.without(ProgramField.values.toSet()).toMap().keys, isNot(contains('note')));
+    });
+
+    test('joined round-trips the wire and reads a row', () {
+      final json = {
+        'name': 'p',
+        'rules': {},
+        'archived': false,
+        'sessions': ['t1'],
+        'joined': {'t1': '2026-10-03T00:00:00.000Z'},
+      };
+      expect(Program.fromJson(json).toMap(), json);
+      final row = Program.fromRow({'name': 'p', 'joined': '{"t1": "2026-10-03T00:00:00+00:00"}'});
+      expect(row.joined['t1'], DateTime.utc(2026, 10, 3));
+    });
+  });
 }

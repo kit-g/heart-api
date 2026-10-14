@@ -86,6 +86,29 @@ void main() {
     expect(position.week, 2);
   });
 
+  test('an old template filed into the program later joins when it was filed, not when it was made', () {
+    final old = _v7(DateTime.utc(2025, 1, 1));
+    final filed = Program(
+      name: 'p',
+      sessions: [a, b, c, old],
+      joined: {old: DateTime.utc(2026, 10, 3)},
+    );
+    final position = ProgramPosition.of(
+      filed,
+      marks: [done(a, 2), done(b, 4), done(c, 6)],
+      actions: const [],
+      now: now,
+    );
+    expect(position.week, 2, reason: 'the old template joined after the first cycle opened');
+  });
+
+  test('a paused or finished program has no weekly target; the count stays a fact', () {
+    expect(fold([done(a, 26)]).target, 3);
+    final paused = fold([done(a, 26)], [act(.pause, 27)]);
+    expect(paused.target, isNull);
+    expect(paused.thisWeek, 1);
+  });
+
   test('repeat right after a cycle runs that week again', () {
     final position = fold([done(a, 2), done(b, 3), done(c, 4)], [act(.repeat, 4)]);
     expect(position.week, 1);
@@ -145,6 +168,7 @@ void main() {
       'paused': false,
       'finished': false,
       'thisWeek': 0,
+      'target': 3,
     });
   });
 

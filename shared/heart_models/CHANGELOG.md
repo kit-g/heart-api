@@ -1,5 +1,30 @@
 # Changelog
 
+## 2.25.0
+
+A history move re-keys programs (heart-api#226).
+
+- New: `ExerciseMoveReport.programs`, the programs whose rules or bases moved
+  from the source to the target, on the wire as `programs`. Optional in the
+  factory and read as 0 when absent.
+
+## 2.24.0
+
+Four gaps the app ran into (heart-api#227).
+
+- New: `Program.without({ProgramField...})` unsets `note`, `perWeek`, `weeks`
+  or `constraint`, which `copyWith` can't (a null there keeps the value).
+- New: `Program.joined`, when each session joined the program, on the wire as
+  `joined` (template id → ISO time). `ProgramPosition.of` reads it before the
+  id's own time, so a template filed into a program later joins when it was
+  filed.
+- New: `Template.joined` and `TemplateRequest.joined`, when the session
+  joined its program as the device saw it, on the wire as `joined`. Send it
+  when filing a session into a program: one filed offline then joins when it
+  was filed, not when it synced. Without it the server stamps its own clock.
+- New: `ProgramPosition.target`, what `thisWeek` counts toward: the weekly
+  target, or null while paused or finished. `thisWeek` itself stays a count.
+
 ## 2.23.0
 
 Where the user stands in a program, computed the same everywhere

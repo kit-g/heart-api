@@ -215,6 +215,9 @@ num _positive(Map json, String key) {
   };
 }
 
+/// A field of a [Program] that can be left unset, for [Program.without].
+enum ProgramField { note, perWeek, weeks, constraint }
+
 /// Templates on a plan, with targets that grow (heart-api#86). The design is
 /// `docs/2026-10-13.programs.md`.
 ///
@@ -255,6 +258,12 @@ abstract interface class Program implements Model {
   /// session joins or leaves through its template.
   List<String> get sessions;
 
+  /// When each session joined the program, by template id. A session that
+  /// joined after a cycle opened waits for the next one, so this, not the
+  /// template's own age, is what [ProgramPosition.of] reads. A session missing
+  /// here is dated by its id.
+  Map<String, DateTime> get joined;
+
   DateTime? get createdAt;
 
   /// Rules this build could not read, by exercise id, as they arrived.
@@ -273,6 +282,7 @@ abstract interface class Program implements Model {
     String? constraint,
     bool archived,
     List<String> sessions,
+    Map<String, DateTime> joined,
     DateTime? createdAt,
     Map<String, Map> unreadRules,
   }) = _Program;
@@ -303,6 +313,10 @@ abstract interface class Program implements Model {
     String? constraint,
     bool? archived,
   });
+
+  /// The same program with [fields] unset: no weekly target, an ongoing length,
+  /// no note or constraint. [copyWith] can't, since a null there keeps a value.
+  Program without(Set<ProgramField> fields);
 }
 
 class _Program implements Program {
@@ -329,6 +343,8 @@ class _Program implements Program {
   @override
   final List<String> sessions;
   @override
+  final Map<String, DateTime> joined;
+  @override
   final DateTime? createdAt;
   @override
   final Map<String, Map> unreadRules;
@@ -345,6 +361,7 @@ class _Program implements Program {
     this.constraint,
     this.archived = false,
     this.sessions = const [],
+    this.joined = const {},
     this.createdAt,
     this.unreadRules = const {},
   });
@@ -384,6 +401,11 @@ class _Program implements Program {
       sessions: [
         for (final id in (json['sessions'] as List?) ?? const []) id.toString(),
       ],
+      joined: {
+        if (_decoded(json['joined']) case final Map joined)
+          for (final MapEntry(:key, :value) in joined.entries)
+            if (_moment(value) case final DateTime at) '$key': at,
+      },
       createdAt: switch (created) {
         final DateTime c => c,
         final String c => DateTime.parse(c),
@@ -416,12 +438,33 @@ class _Program implements Program {
       constraint: constraint ?? this.constraint,
       archived: archived ?? this.archived,
       sessions: sessions,
+      joined: joined,
       createdAt: createdAt,
       // a rule the user set for an exercise replaces one this build couldn't read
       unreadRules: {
         for (final MapEntry(:key, :value) in unreadRules.entries)
           if (rules == null || !rules.containsKey(key)) key: value,
       },
+    );
+  }
+
+  @override
+  Program without(Set<ProgramField> fields) {
+    return _Program(
+      id: id,
+      name: name,
+      note: fields.contains(ProgramField.note) ? null : note,
+      source: source,
+      perWeek: fields.contains(ProgramField.perWeek) ? null : perWeek,
+      days: days,
+      weeks: fields.contains(ProgramField.weeks) ? null : weeks,
+      rules: rules,
+      constraint: fields.contains(ProgramField.constraint) ? null : constraint,
+      archived: archived,
+      sessions: sessions,
+      joined: joined,
+      createdAt: createdAt,
+      unreadRules: unreadRules,
     );
   }
 
@@ -443,6 +486,8 @@ class _Program implements Program {
       'constraint': ?constraint,
       'archived': archived,
       'sessions': sessions,
+      if (joined.isNotEmpty)
+        'joined': {for (final MapEntry(:key, :value) in joined.entries) key: value.toUtc().toIso8601String()},
       'createdAt': ?createdAt?.toUtc().toIso8601String(),
     };
   }
@@ -658,4 +703,14 @@ class _ProgramBase implements ProgramBase {
       'at': at.toUtc().toIso8601String(),
     };
   }
+}
+
+Object? _decoded(Object? value) => value is String ? jsonDecode(value) : value;
+
+DateTime? _moment(Object? value) {
+  return switch (value) {
+    final DateTime at => at,
+    final String at => DateTime.tryParse(at),
+    _ => null,
+  };
 }

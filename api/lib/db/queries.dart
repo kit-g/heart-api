@@ -385,6 +385,7 @@ SELECT
   preferences_dropped,
   chart_preferences_moved,
   goals_moved,
+  programs_moved,
   source_deleted
 FROM _move_exercise_history(@userId, @sourceId::uuid, @targetId::uuid, @dryRun)
 ''';
@@ -1474,14 +1475,14 @@ _exercise_lookup AS (
 -- A folder the user does not own resolves to no row, so the INSERT selects
 -- nothing and the mixin reports NotFound rather than silently unfiling.
 _template AS (
-  INSERT INTO templates (id, user_id, name, order_index, folder_id, program_id, note)
-  SELECT coalesce(@id::uuid, uuidv7()), @userId, @name, @orderIndex, (SELECT id FROM _folder), @programId::uuid, @note
+  INSERT INTO templates (id, user_id, name, order_index, folder_id, program_id, joined_program_at, note)
+  SELECT coalesce(@id::uuid, uuidv7()), @userId, @name, @orderIndex, (SELECT id FROM _folder), @programId::uuid, @joined::timestamptz, @note
   WHERE NOT EXISTS (SELECT 1 FROM _existing_template)
     AND (
       EXISTS (SELECT 1 FROM _foreign_template)
       OR (@folderId::uuid IS NULL OR EXISTS (SELECT 1 FROM _folder))
     )
-  RETURNING id, name, order_index, folder_id, source_template_id, assigned_by, sync_enabled, created_at, program_id, note
+  RETURNING id, name, order_index, folder_id, source_template_id, assigned_by, sync_enabled, created_at, program_id, joined_program_at, note
 ),
 -- ids round-trip, except one another row already holds: a template saved
 -- from a workout carries the workout's ids, and saving it twice must not
@@ -1571,6 +1572,7 @@ SELECT
   t.sync_enabled,
   t.created_at,
   t.program_id,
+  t.joined_program_at,
   t.note,
   COALESCE(ej.exercises_json, '[]'::jsonb) AS exercises,
   true AS created
@@ -1594,6 +1596,7 @@ SELECT
   t.sync_enabled,
   t.created_at,
   t.program_id,
+  t.joined_program_at,
   t.note,
   _template_exercises(t.id) AS exercises,
   false AS created
@@ -1639,10 +1642,14 @@ _template AS (
       order_index = @orderIndex,
       folder_id = CASE WHEN @movesFolder::boolean THEN (SELECT id FROM _folder) ELSE folder_id END,
       program_id = CASE WHEN @movesProgram::boolean THEN @programId::uuid ELSE program_id END,
+      joined_program_at = CASE
+          WHEN @movesProgram::boolean AND @joined::timestamptz IS NOT NULL THEN @joined::timestamptz
+          ELSE joined_program_at
+        END,
       note = CASE WHEN @changesNote::boolean THEN @note ELSE note END
   WHERE id = @templateId::uuid AND user_id = @userId
     AND (NOT @movesFolder::boolean OR @folderId::uuid IS NULL OR EXISTS (SELECT 1 FROM _folder))
-  RETURNING id, name, order_index, folder_id, source_template_id, assigned_by, sync_enabled, created_at, program_id, note
+  RETURNING id, name, order_index, folder_id, source_template_id, assigned_by, sync_enabled, created_at, program_id, joined_program_at, note
 ),
 -- The body as stored, read from the statement's snapshot. Empty unless the
 -- template update above matched, so a refused folder move writes nothing.
@@ -1798,6 +1805,7 @@ SELECT
   t.sync_enabled,
   t.created_at,
   t.program_id,
+  t.joined_program_at,
   t.note,
   COALESCE(ej.exercises_json, '[]'::jsonb) AS exercises
 FROM _template t
@@ -1822,6 +1830,7 @@ SELECT
   t.sync_enabled,
   t.created_at,
   t.program_id,
+  t.joined_program_at,
   t.note,
   _template_exercises(t.id) AS exercises
 FROM templates t
@@ -1854,6 +1863,7 @@ SELECT
   t.sync_enabled,
   t.created_at,
   t.program_id,
+  t.joined_program_at,
   t.note,
   _template_exercises(t.id) AS exercises
 FROM templates t
@@ -2526,6 +2536,7 @@ RETURNING id, metric, exercise_id, pattern, muscle, cadence, stages, archived, c
 /// The columns `Program.fromRow` reads, from a row aliased `p`. `sessions` is
 /// the program's templates in their order, the same `(order_index, id)` the
 /// template list walks.
+/// `joined` says when each one joined the program.
 const _programColumns = '''
   p.id,
   p.name,
@@ -2545,7 +2556,12 @@ const _programColumns = '''
       WHERE t.program_id = p.id
     ),
     '{}'
-  ) AS sessions
+  ) AS sessions,
+  (
+    SELECT jsonb_object_agg(t.id, t.joined_program_at)
+    FROM templates t
+    WHERE t.program_id = p.id
+  ) AS joined
 ''';
 
 /// Archived ones included: the cap counts them, so the list stays small, and
