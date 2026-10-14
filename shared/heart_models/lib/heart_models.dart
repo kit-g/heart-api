@@ -18,6 +18,7 @@ export 'src/models/media.dart';
 export 'src/models/misc.dart';
 export 'src/models/pagination.dart';
 export 'src/models/program.dart';
+export 'src/models/program_position.dart';
 export 'src/models/records.dart';
 export 'src/models/search.dart' hide searchNormalized, withinOneEdit;
 export 'src/models/set_target.dart';

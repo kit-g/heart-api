@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.23.0
+
+Where the user stands in a program, computed the same everywhere
+(heart-api#217, part of heart-api#86).
+
+- New: `ProgramPosition.of(program, marks:, actions:, now:, firstWeekday:)`, a
+  pure fold: `week`, `done`, `remaining`, `next`, `paused`, `finished`,
+  `thisWeek`. The rules are on the factory; the design is
+  `docs/2026-10-13.programs.md` in heart-api.
+- New: `ProgramMark` (`workout`, `skip`), what the fold reads beside the
+  program's actions.
+- New: `currentBases`, the latest base per exercise.
+- New: `SetTarget.share` and `withShare`, a set's weight as a share of the
+  exercise's base, on the wire as `share`. Builds since 2.16.0 already carried
+  the key untouched.
+
 ## 2.22.0
 
 Skips, and programs in the account summary (heart-api#202).
