@@ -491,7 +491,7 @@ _auth AS (
 ),
 _workouts AS (
   SELECT
-    id, name, started_at, completed_at, calories, note, pauses, created_at,
+    id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at,
     _workout_exercises(id) AS exercises,
     COALESCE(
       (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -505,9 +505,9 @@ _workouts AS (
   ORDER BY id DESC
   LIMIT @limit
 )
-SELECT id, name, started_at, completed_at, calories, note, pauses, created_at, exercises, images, false AS forbidden FROM _workouts
+SELECT id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, exercises, images, false AS forbidden FROM _workouts
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
 const _getWorkout = '''
@@ -519,6 +519,8 @@ SELECT
   w.calories,
   w.note,
   w.pauses,
+  w.template_id,
+  w.program_id,
   w.created_at,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
@@ -549,7 +551,7 @@ _auth AS (
   ) AS allowed
 )
 SELECT
-  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.created_at,
+  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -560,7 +562,7 @@ SELECT
 FROM workouts w
 WHERE w.id = @workoutId::uuid AND w.user_id = @targetUserId::text AND (SELECT allowed FROM _auth)
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
 /// Idempotent create for a workout, the replay's fifth resource
@@ -578,6 +580,14 @@ const _saveWorkout = '''
 WITH
 _existing_workout AS (
   SELECT id FROM workouts WHERE id = @id::uuid AND user_id = @userId
+),
+-- the template and program are the caller's own or nothing: a session saved
+-- before its template synced, or after it was deleted, still saves, unlinked
+_template AS (
+  SELECT id FROM templates WHERE id = @templateId::uuid AND user_id = @userId
+),
+_program AS (
+  SELECT id FROM programs WHERE id = @programId::uuid AND user_id = @userId
 ),
 _order_to_id AS (
   SELECT
@@ -602,10 +612,20 @@ _exercise_lookup AS (
   WHERE e.user_id IS NULL OR e.user_id = @userId
 ),
 _workout AS (
-  INSERT INTO workouts (id, user_id, name, started_at, completed_at, calories, note, pauses)
-  SELECT coalesce(@id::uuid, uuidv7()), @userId, @name, @startedAt, @completedAt, @calories, @note, @pauses::jsonb
+  INSERT INTO workouts (id, user_id, name, started_at, completed_at, calories, note, pauses, template_id, program_id)
+  SELECT
+    coalesce(@id::uuid, uuidv7()),
+    @userId,
+    @name,
+    @startedAt,
+    @completedAt,
+    @calories,
+    @note,
+    @pauses::jsonb,
+    (SELECT id FROM _template),
+    (SELECT id FROM _program)
   WHERE NOT EXISTS (SELECT 1 FROM _existing_workout)
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, created_at
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at
 ),
 _inserted_exercises AS (
   INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note)
@@ -699,6 +719,8 @@ SELECT
   w.calories,
   w.note,
   w.pauses,
+  w.template_id,
+  w.program_id,
   w.created_at,
   coalesce(ej.exercises_json, '[]'::jsonb) AS exercises,
   '[]'::jsonb AS images,
@@ -715,6 +737,8 @@ SELECT
   w.calories,
   w.note,
   w.pauses,
+  w.template_id,
+  w.program_id,
   w.created_at,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
@@ -1108,8 +1132,16 @@ _exercise_lookup AS (
   JOIN _order_to_id otn ON otn.exercise_id = e.id
   WHERE e.user_id IS NULL OR e.user_id = @userId
 ),
--- the note and the pauses are newer than most clients: a body without the key
--- keeps them, and stored pauses are cut to the window the body sets
+-- the caller's own template and program, or nothing, as on create
+_template AS (
+  SELECT id FROM templates WHERE id = @templateId::uuid AND user_id = @userId
+),
+_program AS (
+  SELECT id FROM programs WHERE id = @programId::uuid AND user_id = @userId
+),
+-- the note, the pauses, the template and the program are newer than most
+-- clients: a body without the key keeps them, and stored pauses are cut to the
+-- window the body sets
 _workout AS (
   UPDATE workouts
   SET
@@ -1118,12 +1150,14 @@ _workout AS (
     completed_at = @completedAt,
     calories = @calories,
     note = CASE WHEN @setsNote::boolean THEN @note ELSE note END,
+    template_id = CASE WHEN @setsTemplate::boolean THEN (SELECT id FROM _template) ELSE template_id END,
+    program_id = CASE WHEN @setsProgram::boolean THEN (SELECT id FROM _program) ELSE program_id END,
     pauses = CASE
       WHEN @setsPauses::boolean THEN @pauses::jsonb
       ELSE _clip_pauses(pauses, @startedAt::timestamptz, @completedAt::timestamptz)
     END
   WHERE id = @workoutId::uuid AND user_id = @userId
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, created_at
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at
 ),
 -- The body as stored, read from the statement's snapshot: every CTE sees the
 -- rows as they were before this replace, whatever the others write.
@@ -1294,7 +1328,7 @@ _exercises_json AS (
   LEFT JOIN _sets_json sj ON sj.workout_exercise_id = ie.id
 )
 SELECT
-  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.created_at,
+  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
   -- the replacing branch reads its own RETURNING, because a CTE cannot see
   -- rows it just wrote; the preserving branch reads the table, which is
   -- untouched in that case and so already final
@@ -1332,7 +1366,7 @@ WITH _updated AS (
       )
     END
   WHERE id = @workoutId::uuid AND user_id = @userId
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, created_at
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at
 )
 SELECT
   u.id,
@@ -1342,6 +1376,8 @@ SELECT
   u.calories,
   u.note,
   u.pauses,
+  u.template_id,
+  u.program_id,
   u.created_at,
   _workout_exercises(u.id) AS exercises,
   coalesce(
@@ -2725,7 +2761,7 @@ WITH _check AS (
 SELECT
   c.stale,
   p.id, p.xid::text AS xid, p.at, p.deleted,
-  w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.created_at,
+  w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
   CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id) END AS exercises,
   CASE WHEN p.deleted THEN NULL ELSE COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)

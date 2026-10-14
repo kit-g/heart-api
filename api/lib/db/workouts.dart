@@ -232,6 +232,8 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
           'replacesExercises': body.replacesExercises,
           'setsNote': body.setsNote,
           'setsPauses': body.setsPauses,
+          'setsTemplate': body.setsTemplate,
+          'setsProgram': body.setsProgram,
           ...body.toParams(),
         },
       );
