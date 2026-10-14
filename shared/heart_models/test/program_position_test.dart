@@ -166,6 +166,7 @@ void main() {
       'remaining': [b, c],
       'next': b,
       'paused': false,
+      'lighter': false,
       'finished': false,
       'thisWeek': 0,
       'target': 3,
@@ -196,6 +197,35 @@ void main() {
       });
       expect(target.withShare(null).toMap().containsKey('share'), isFalse);
       expect(SetTarget(const {}, share: 0.7).isEmpty, isFalse);
+    });
+  });
+
+  group('lighter weeks (heart-api#229)', () {
+    test('a program schedules every Nth cycle lighter', () {
+      final scheduled = Program(name: 'p', sessions: [a, b, c], deload: const Deload(every: 2));
+      List<ProgramMark> cycle(int day) => [done(a, day), done(b, day), done(c, day)];
+      ProgramPosition at(List<ProgramMark> marks) =>
+          ProgramPosition.of(scheduled, marks: marks, actions: const [], now: now);
+      expect(at([]).lighter, isFalse, reason: 'week 1');
+      expect(at(cycle(2)).lighter, isTrue, reason: 'week 2');
+      expect(at([...cycle(2), ...cycle(5)]).lighter, isFalse, reason: 'week 3');
+    });
+
+    test('the user can take one on demand, and it ends with its cycle', () {
+      expect(fold([done(a, 2)], [act(.lighter, 2)]).lighter, isTrue);
+      expect(fold([done(a, 2), done(b, 3), done(c, 4)], [act(.lighter, 2)]).lighter, isFalse);
+    });
+
+    test('a deload round-trips on a program, and is checked', () {
+      final program = Program.fromJson(const {
+        'name': 'p',
+        'deload': {'every': 6, 'load': 0.9, 'volume': 0.5},
+      });
+      expect(program.deload, const Deload(every: 6));
+      expect(program.toMap()['deload'], {'every': 6, 'load': 0.9, 'volume': 0.5});
+      expect(program.without({.deload}).deload, isNull);
+      expect(() => Deload.fromJson(const {'every': 1}), throwsArgumentError);
+      expect(() => Deload.fromJson(const {'every': 4, 'load': 0}), throwsArgumentError);
     });
   });
 }

@@ -2,30 +2,164 @@ import 'dart:convert';
 
 import 'misc.dart';
 
+/// What counts as a missed session for a rule (heart-api#228).
+enum MissWhen {
+  /// A working set short of its target.
+  anySet('anySet'),
+
+  /// The AMRAP set short of its minimum; any set, when the session has none.
+  amrap('amrap'),
+
+  /// Reps across the working sets under [MissRule.floor] (by default, under
+  /// the sum of the targets' minimums).
+  totalReps('totalReps');
+
+  /// The `when` on the wire.
+  final String value;
+
+  new(this.value);
+
+  factory fromString(String value) {
+    return values.firstWhere(
+      (each) => each.value == value,
+      orElse: () => throw ArgumentError.value(value, 'when', 'unknown miss'),
+    );
+  }
+}
+
+/// What a miss does: the base holds, and after [after] misses in a row it
+/// drops by [cut], a share of itself.
+final class MissRule implements Model {
+  static const defaultAfter = 3;
+  static const defaultCut = 0.1;
+
+  final MissWhen when;
+  final int? floor;
+  final int after;
+  final num cut;
+
+  const new({this.when = .anySet, this.floor, this.after = defaultAfter, this.cut = defaultCut});
+
+  factory fromJson(Map json) {
+    return MissRule(
+      when: switch (json['when']) {
+        null => .anySet,
+        final String word => MissWhen.fromString(word),
+        final other => throw ArgumentError.value(other, 'when', 'unknown miss'),
+      },
+      floor: switch (json['floor']) {
+        null => null,
+        final int floor when floor >= 1 => floor,
+        final other => throw ArgumentError.value(other, 'floor', 'a whole number of reps'),
+      },
+      after: switch (json['after']) {
+        null => defaultAfter,
+        final int after when after >= 1 => after,
+        final other => throw ArgumentError.value(other, 'after', 'a whole number of at least 1'),
+      },
+      cut: switch (json['cut']) {
+        null => defaultCut,
+        final num cut when cut >= 0 && cut < 1 => cut,
+        final other => throw ArgumentError.value(other, 'cut', 'a share from 0 to below 1'),
+      },
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() => {'when': when.value, 'floor': ?floor, 'after': after, 'cut': cut};
+}
+
+/// One row of an AMRAP table: [reps] or more on the AMRAP set moves the base by
+/// [step]. Zero holds; below zero cuts.
+final class AmrapStep implements Model {
+  final int reps;
+  final num step;
+
+  const new({required this.reps, required this.step});
+
+  factory fromJson(Map json) {
+    return AmrapStep(
+      reps: switch (json['reps']) {
+        final int reps when reps >= 0 => reps,
+        final other => throw ArgumentError.value(other, 'reps', 'a whole number of reps'),
+      },
+      step: switch (json['step']) {
+        final num step => step,
+        final other => throw ArgumentError.value(other, 'step', 'a number'),
+      },
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() => {'reps': reps, 'step': step};
+}
+
 /// How one exercise's base grows over a program: what is raised, and when.
 ///
 /// The base is the one number a rule grows: the training max under
 /// [ShareOfMax], the working weight under [AddWeight] and [RangeThenWeight],
 /// the duration or distance under [Longer]. [NoGrowth] leaves the sets as
-/// written.
+/// written. What a session does to it is `Progression.next`.
 ///
-/// [fromJson] is strict: an unknown kind, a missing parameter or one out of
-/// range is an [ArgumentError]. [Program.fromJson] catches that and carries the
-/// rule as it arrived, so a newer kind survives an older build's save.
+/// [fromJson] is strict about what it knows: an unknown kind, a missing
+/// parameter or one out of range is an [ArgumentError], and [Program.fromJson]
+/// carries such a rule as it arrived. A field it doesn't know is kept in
+/// [extra] and written back, so a newer field survives an older build's save.
 sealed class GrowthRule implements Model {
-  const new();
+  /// Fields this build doesn't know, as they arrived.
+  final Map<String, Object?> extra;
+
+  const new({this.extra = const {}});
 
   /// The `kind` on the wire.
   String get kind;
 
+  /// What a miss does, for a rule that grows a weight; null for the others.
+  MissRule? get miss => null;
+
+  /// The step by the AMRAP set's reps, highest [AmrapStep.reps] met first;
+  /// empty uses the rule's own step.
+  List<AmrapStep> get amrap => const [];
+
   Map<String, dynamic> get _parameters;
 
   factory fromJson(Map json) {
+    Map<String, Object?> rest(Set<String> known) => {
+      for (final MapEntry(:key, :value) in json.entries)
+        if (!known.contains(key) && key != 'kind') '$key': value,
+    };
+    MissRule? miss() => switch (json['miss']) {
+      null => null,
+      final Map miss => MissRule.fromJson(miss),
+      final other => throw ArgumentError.value(other, 'miss', 'an object'),
+    };
+    List<AmrapStep> amrap() => switch (json['amrap']) {
+      null => const [],
+      final List table => [
+        for (final row in table)
+          switch (row) {
+            final Map row => AmrapStep.fromJson(row),
+            _ => throw ArgumentError.value(row, 'amrap', 'a list of {reps, step}'),
+          },
+      ],
+      final other => throw ArgumentError.value(other, 'amrap', 'a list of {reps, step}'),
+    };
+    const weighted = {'step', 'miss', 'amrap'};
     return switch (json['kind']) {
-      NoGrowth.key => const NoGrowth(),
-      AddWeight.key => AddWeight(step: _positive(json, 'step')),
-      RangeThenWeight.key => RangeThenWeight(step: _positive(json, 'step')),
-      Longer.key => Longer(step: _positive(json, 'step')),
+      NoGrowth.key => NoGrowth(extra: rest(const {})),
+      AddWeight.key => AddWeight(
+        step: _positive(json, 'step'),
+        miss: miss(),
+        amrap: amrap(),
+        extra: rest(weighted),
+      ),
+      RangeThenWeight.key => RangeThenWeight(
+        step: _positive(json, 'step'),
+        miss: miss(),
+        amrap: amrap(),
+        extra: rest(weighted),
+      ),
+      Longer.key => Longer(step: _positive(json, 'step'), extra: rest(const {'step'})),
       ShareOfMax.key => ShareOfMax(
         waves: switch (json['waves']) {
           final List waves when waves.isNotEmpty => [for (final wave in waves) _wave(wave)],
@@ -42,13 +176,16 @@ sealed class GrowthRule implements Model {
           final int misses when misses >= 1 => misses,
           final other => throw ArgumentError.value(other, 'misses', 'a whole number of at least 1'),
         },
+        explicitMiss: miss(),
+        amrap: amrap(),
+        extra: rest(const {'waves', 'step', 'missCut', 'misses', 'miss', 'amrap'}),
       ),
       final other => throw ArgumentError.value(other, 'kind', 'unknown growth rule'),
     };
   }
 
   @override
-  Map<String, dynamic> toMap() => {'kind': kind, ..._parameters};
+  Map<String, dynamic> toMap() => {...extra, 'kind': kind, ..._parameters};
 
   @override
   bool operator ==(Object other) {
@@ -62,11 +199,19 @@ sealed class GrowthRule implements Model {
   String toString() => 'GrowthRule(${toMap()})';
 }
 
+Map<String, dynamic> _weighted(num step, MissRule? miss, List<AmrapStep> amrap) {
+  return {
+    'step': step,
+    'miss': ?miss?.toMap(),
+    if (amrap.isNotEmpty) 'amrap': [for (final row in amrap) row.toMap()],
+  };
+}
+
 /// The sets stay as written, every time.
 final class NoGrowth extends GrowthRule {
   static const key = 'none';
 
-  const new();
+  const new({super.extra});
 
   @override
   String get kind => key;
@@ -75,19 +220,27 @@ final class NoGrowth extends GrowthRule {
   Map<String, dynamic> get _parameters => const {};
 }
 
-/// The working weight goes up by [step] kilograms after every completed session.
+/// The working weight goes up by [step] kilograms after every session that
+/// makes its targets.
 final class AddWeight extends GrowthRule {
   static const key = 'addWeight';
 
   final num step;
+  final MissRule? _miss;
+  @override
+  final List<AmrapStep> amrap;
 
-  const new({required this.step});
+  const new({required this.step, this._miss, this.amrap = const [], super.extra});
+
+  /// A miss holds; three in a row cut 10% unless the rule says otherwise.
+  @override
+  MissRule get miss => _miss ?? const MissRule();
 
   @override
   String get kind => key;
 
   @override
-  Map<String, dynamic> get _parameters => {'step': step};
+  Map<String, dynamic> get _parameters => _weighted(step, _miss, amrap);
 }
 
 /// The working weight goes up by [step] kilograms once every set reaches the
@@ -96,24 +249,32 @@ final class RangeThenWeight extends GrowthRule {
   static const key = 'rangeThenWeight';
 
   final num step;
+  final MissRule? _miss;
+  @override
+  final List<AmrapStep> amrap;
 
-  const new({required this.step});
+  const new({required this.step, this._miss, this.amrap = const [], super.extra});
+
+  @override
+  MissRule get miss => _miss ?? const MissRule();
 
   @override
   String get kind => key;
 
   @override
-  Map<String, dynamic> get _parameters => {'step': step};
+  Map<String, dynamic> get _parameters => _weighted(step, _miss, amrap);
 }
 
 /// The duration (seconds) or distance (kilometres) goes up by [step] after
-/// every completed cycle.
+/// every completed cycle. Which one is the set target's measure; without a
+/// target, distance for an exercise logged by weight and distance, duration
+/// for everything else (a walk's minutes).
 final class Longer extends GrowthRule {
   static const key = 'longer';
 
   final num step;
 
-  const new({required this.step});
+  const new({required this.step, super.extra});
 
   @override
   String get kind => key;
@@ -126,8 +287,9 @@ final class Longer extends GrowthRule {
 ///
 /// [waves] has one entry per program week and repeats: week 5 of a four-week
 /// wave is its first week again. Each entry is applied to the session's working
-/// sets in order. The max grows by [step] kilograms when a cycle's AMRAP set
-/// makes its reps, and drops by [missCut] of itself after [misses] misses.
+/// sets in order. At the end of each wave the max grows by [step] kilograms
+/// (or by the [amrap] table), and after [misses] AMRAP sets short in a row it
+/// drops by [missCut] of itself.
 final class ShareOfMax extends GrowthRule {
   static const key = 'shareOfMax';
   static const defaultMissCut = 0.1;
@@ -137,16 +299,30 @@ final class ShareOfMax extends GrowthRule {
   final num step;
   final num missCut;
   final int misses;
+  final MissRule? _explicitMiss;
+  @override
+  final List<AmrapStep> amrap;
 
   const new({
     required this.waves,
     required this.step,
     this.missCut = defaultMissCut,
     this.misses = defaultMisses,
+    this._explicitMiss,
+    this.amrap = const [],
+    super.extra,
   });
+
+  /// A `miss` on the wire wins; otherwise [misses] AMRAP sets short in a row
+  /// cut [missCut].
+  @override
+  MissRule get miss => _explicitMiss ?? MissRule(when: .amrap, after: misses, cut: missCut);
 
   /// The sets of program [week], counting from 1.
   List<WaveSet> week(int week) => waves[(week - 1) % waves.length];
+
+  /// Whether program [week] closes a wave: the max moves only then.
+  bool closesWave(int week) => week % waves.length == 0;
 
   @override
   String get kind => key;
@@ -160,18 +336,23 @@ final class ShareOfMax extends GrowthRule {
       'step': step,
       'missCut': missCut,
       'misses': misses,
+      'miss': ?_explicitMiss?.toMap(),
+      if (amrap.isNotEmpty) 'amrap': [for (final row in amrap) row.toMap()],
     };
   }
 }
 
 /// One working set of a [ShareOfMax] week: [share] of the training max for
-/// [reps], or at least [reps] when [amrap].
+/// [reps], or at least [reps] when [amrap]. A [supplemental] set (a
+/// first-set-last 5×5) takes its share like the others but never counts for
+/// the AMRAP, a miss or a bump.
 final class WaveSet implements Model {
   final num share;
   final int reps;
   final bool amrap;
+  final bool supplemental;
 
-  const new({required this.share, required this.reps, this.amrap = false});
+  const new({required this.share, required this.reps, this.amrap = false, this.supplemental = false});
 
   factory fromJson(Map json) {
     return WaveSet(
@@ -188,11 +369,18 @@ final class WaveSet implements Model {
         true => true,
         final other => throw ArgumentError.value(other, 'amrap', 'a boolean'),
       },
+      supplemental: switch (json['supplemental']) {
+        null || false => false,
+        true => true,
+        final other => throw ArgumentError.value(other, 'supplemental', 'a boolean'),
+      },
     );
   }
 
   @override
-  Map<String, dynamic> toMap() => {'share': share, 'reps': reps, if (amrap) 'amrap': true};
+  Map<String, dynamic> toMap() {
+    return {'share': share, 'reps': reps, if (amrap) 'amrap': true, if (supplemental) 'supplemental': true};
+  }
 }
 
 List<WaveSet> _wave(Object? wave) {
@@ -215,8 +403,52 @@ num _positive(Map json, String key) {
   };
 }
 
+/// A lighter week a program schedules (heart-api#229): every [every]th cycle,
+/// the sheet takes [load] of each target's weight and [volume] of its sets.
+/// Nothing moves and nothing counts as a miss in it. Deloads reduce, never
+/// stop.
+final class Deload implements Model {
+  static const defaultLoad = 0.9;
+  static const defaultVolume = 0.5;
+
+  final int every;
+  final num load;
+  final num volume;
+
+  const new({required this.every, this.load = defaultLoad, this.volume = defaultVolume});
+
+  factory fromJson(Map json) {
+    num share(String key, num fallback) => switch (json[key]) {
+      null => fallback,
+      final num value when value > 0 && value <= 1 => value,
+      final other => throw ArgumentError.value(other, key, 'a share above 0 and at most 1'),
+    };
+    return Deload(
+      every: switch (json['every']) {
+        final int every when every >= 2 && every <= 52 => every,
+        final other => throw ArgumentError.value(other, 'every', 'a whole number of cycles from 2 to 52'),
+      },
+      load: share('load', defaultLoad),
+      volume: share('volume', defaultVolume),
+    );
+  }
+
+  /// Whether program [week] is one of the lighter ones.
+  bool lightens(int week) => week % every == 0;
+
+  @override
+  Map<String, dynamic> toMap() => {'every': every, 'load': load, 'volume': volume};
+
+  @override
+  bool operator ==(Object other) =>
+      other is Deload && other.every == every && other.load == load && other.volume == volume;
+
+  @override
+  int get hashCode => Object.hash(every, load, volume);
+}
+
 /// A field of a [Program] that can be left unset, for [Program.without].
-enum ProgramField { note, perWeek, weeks, constraint }
+enum ProgramField { note, perWeek, weeks, constraint, deload }
 
 /// Templates on a plan, with targets that grow (heart-api#86). The design is
 /// `docs/2026-10-13.programs.md`.
@@ -252,6 +484,9 @@ abstract interface class Program implements Model {
   /// inside the program.
   String? get constraint;
 
+  /// The lighter week it schedules, if any.
+  Deload? get deload;
+
   bool get archived;
 
   /// The ids of the program's session templates, in order. Read-only: a
@@ -280,6 +515,7 @@ abstract interface class Program implements Model {
     int? weeks,
     Map<String, GrowthRule> rules,
     String? constraint,
+    Deload? deload,
     bool archived,
     List<String> sessions,
     Map<String, DateTime> joined,
@@ -311,6 +547,7 @@ abstract interface class Program implements Model {
     int? weeks,
     Map<String, GrowthRule>? rules,
     String? constraint,
+    Deload? deload,
     bool? archived,
   });
 
@@ -339,6 +576,8 @@ class _Program implements Program {
   @override
   final String? constraint;
   @override
+  final Deload? deload;
+  @override
   final bool archived;
   @override
   final List<String> sessions;
@@ -359,6 +598,7 @@ class _Program implements Program {
     this.weeks,
     this.rules = const {},
     this.constraint,
+    this.deload,
     this.archived = false,
     this.sessions = const [],
     this.joined = const {},
@@ -397,6 +637,10 @@ class _Program implements Program {
       weeks: (json['weeks'] as num?)?.toInt(),
       rules: rules,
       constraint: json['constraint'] as String?,
+      deload: switch (_decoded(json['deload'])) {
+        final Map deload => Deload.fromJson(deload),
+        _ => null,
+      },
       archived: json['archived'] == true,
       sessions: [
         for (final id in (json['sessions'] as List?) ?? const []) id.toString(),
@@ -424,6 +668,7 @@ class _Program implements Program {
     int? weeks,
     Map<String, GrowthRule>? rules,
     String? constraint,
+    Deload? deload,
     bool? archived,
   }) {
     return _Program(
@@ -436,6 +681,7 @@ class _Program implements Program {
       weeks: weeks ?? this.weeks,
       rules: rules ?? this.rules,
       constraint: constraint ?? this.constraint,
+      deload: deload ?? this.deload,
       archived: archived ?? this.archived,
       sessions: sessions,
       joined: joined,
@@ -460,6 +706,7 @@ class _Program implements Program {
       weeks: fields.contains(ProgramField.weeks) ? null : weeks,
       rules: rules,
       constraint: fields.contains(ProgramField.constraint) ? null : constraint,
+      deload: fields.contains(ProgramField.deload) ? null : deload,
       archived: archived,
       sessions: sessions,
       joined: joined,
@@ -484,6 +731,7 @@ class _Program implements Program {
         for (final MapEntry(:key, :value) in rules.entries) key: value.toMap(),
       },
       'constraint': ?constraint,
+      'deload': ?deload?.toMap(),
       'archived': archived,
       'sessions': sessions,
       if (joined.isNotEmpty)
@@ -516,7 +764,10 @@ enum ProgramActionKind {
   resume('resume'),
 
   /// Goes back to [ProgramAction.week].
-  replay('replay');
+  replay('replay'),
+
+  /// Makes the open cycle a lighter one, on demand (heart-api#229).
+  lighter('lighter');
 
   /// The `kind` on the wire.
   final String value;
@@ -612,6 +863,11 @@ abstract interface class ProgramBase implements Model {
 
   String get exerciseId;
 
+  /// The occurrence this base belongs to, a template exercise id, when one
+  /// lift has two (heavy on Monday, light on Thursday). Null is the exercise's
+  /// own base.
+  String? get slot;
+
   num get value;
 
   String? get workoutId;
@@ -627,6 +883,7 @@ abstract interface class ProgramBase implements Model {
     String? id,
     String? programId,
     required String exerciseId,
+    String? slot,
     required num value,
     String? workoutId,
     String? actionId,
@@ -638,6 +895,7 @@ abstract interface class ProgramBase implements Model {
       id: json['id']?.toString(),
       programId: json['programId']?.toString(),
       exerciseId: json['exerciseId'] as String,
+      slot: json['slot'] as String?,
       value: json['value'] as num,
       workoutId: json['workoutId'] as String?,
       actionId: json['actionId'] as String?,
@@ -650,6 +908,7 @@ abstract interface class ProgramBase implements Model {
       id: row['id']?.toString(),
       programId: row['program_id']?.toString(),
       exerciseId: row['exercise_id'].toString(),
+      slot: row['slot']?.toString(),
       value: row['value'] as num,
       workoutId: row['workout_id']?.toString(),
       actionId: row['action_id']?.toString(),
@@ -670,6 +929,8 @@ class _ProgramBase implements ProgramBase {
   @override
   final String exerciseId;
   @override
+  final String? slot;
+  @override
   final num value;
   @override
   final String? workoutId;
@@ -682,6 +943,7 @@ class _ProgramBase implements ProgramBase {
     this.id,
     this.programId,
     required this.exerciseId,
+    this.slot,
     required this.value,
     this.workoutId,
     this.actionId,
@@ -697,6 +959,7 @@ class _ProgramBase implements ProgramBase {
       'id': ?id,
       'programId': ?programId,
       'exerciseId': exerciseId,
+      'slot': ?slot,
       'value': value,
       'workoutId': ?workoutId,
       'actionId': ?actionId,

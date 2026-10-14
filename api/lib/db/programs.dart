@@ -161,6 +161,7 @@ mixin _Programs on _DatabaseBase implements ProgramService {
             ...references,
             'id': base.id,
             'programId': programId,
+            'slot': base.slot,
             'value': base.value,
             'actionId': base.actionId,
             'at': base.at.toUtc(),
@@ -234,6 +235,10 @@ mixin _Programs on _DatabaseBase implements ProgramService {
       'weeks': program.weeks,
       'rules': jsonEncode(map['rules']),
       'constraintKey': program.constraint,
+      'deload': switch (program.deload) {
+        final Deload deload => jsonEncode(deload.toMap()),
+        null => null,
+      },
     };
   }
 }

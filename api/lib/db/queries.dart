@@ -1482,7 +1482,11 @@ _order_to_id AS (
     -- the stored one
     ex ? 'rest' AS sets_rest,
     (ex->>'superset')::smallint AS superset,
-    ex ? 'superset' AS sets_superset
+    ex ? 'superset' AS sets_superset,
+    ex->>'pattern' AS pattern,
+    ex ? 'pattern' AS sets_pattern,
+    nullif(ex->'totalReps', 'null'::jsonb) AS total_reps,
+    ex ? 'totalReps' AS sets_total_reps
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -1509,7 +1513,7 @@ _template AS (
 -- from a workout carries the workout's ids, and saving it twice must not
 -- collide, so that row gets a fresh id instead
 _inserted_exercises AS (
-  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order, rest, superset)
+  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order, rest, superset, pattern, total_reps)
   SELECT
     CASE
       WHEN otn.id IS NULL OR EXISTS (SELECT 1 FROM template_exercises x WHERE x.id = otn.id) THEN uuidv7()
@@ -1519,11 +1523,13 @@ _inserted_exercises AS (
     el.id,
     otn.exercise_order,
     otn.rest,
-    otn.superset
+    otn.superset,
+    otn.pattern,
+    otn.total_reps
   FROM _template t
   CROSS JOIN _order_to_id otn
   JOIN _exercise_lookup el ON el.id = otn.exercise_id
-  RETURNING id, exercise_id, exercise_order, rest, superset
+  RETURNING id, exercise_id, exercise_order, rest, superset, pattern, total_reps
 ),
 _sets_input AS (
   SELECT
@@ -1575,6 +1581,8 @@ _exercises_json AS (
       'exercise_order', ie.exercise_order,
       'rest', ie.rest,
       'superset', ie.superset,
+      'pattern', ie.pattern,
+      'totalReps', ie.total_reps,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -1650,7 +1658,11 @@ _order_to_id AS (
     -- the stored one
     ex ? 'rest' AS sets_rest,
     (ex->>'superset')::smallint AS superset,
-    ex ? 'superset' AS sets_superset
+    ex ? 'superset' AS sets_superset,
+    ex->>'pattern' AS pattern,
+    ex ? 'pattern' AS sets_pattern,
+    nullif(ex->'totalReps', 'null'::jsonb) AS total_reps,
+    ex ? 'totalReps' AS sets_total_reps
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -1703,15 +1715,17 @@ _updated_exercises AS (
     exercise_id = el.id,
     exercise_order = otn.exercise_order,
     rest = CASE WHEN otn.sets_rest THEN otn.rest ELSE te.rest END,
-    superset = CASE WHEN otn.sets_superset THEN otn.superset ELSE te.superset END
+    superset = CASE WHEN otn.sets_superset THEN otn.superset ELSE te.superset END,
+    pattern = CASE WHEN otn.sets_pattern THEN otn.pattern ELSE te.pattern END,
+    total_reps = CASE WHEN otn.sets_total_reps THEN otn.total_reps ELSE te.total_reps END
   FROM _order_to_id otn
   JOIN _exercise_lookup el ON el.id = otn.exercise_id
   WHERE te.id = otn.id AND te.id IN (SELECT id FROM _previous_exercises)
-  RETURNING te.id, te.exercise_id, te.exercise_order, te.rest, te.superset
+  RETURNING te.id, te.exercise_id, te.exercise_order, te.rest, te.superset, te.pattern, te.total_reps
 ),
 -- an id another template holds gets a fresh one, as on create
 _inserted_exercises AS (
-  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order, rest, superset)
+  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order, rest, superset, pattern, total_reps)
   SELECT
     CASE
       WHEN otn.id IS NULL OR EXISTS (SELECT 1 FROM template_exercises x WHERE x.id = otn.id) THEN uuidv7()
@@ -1721,17 +1735,19 @@ _inserted_exercises AS (
     el.id,
     otn.exercise_order,
     otn.rest,
-    otn.superset
+    otn.superset,
+    otn.pattern,
+    otn.total_reps
   FROM _template t
   CROSS JOIN _order_to_id otn
   JOIN _exercise_lookup el ON el.id = otn.exercise_id
   WHERE otn.id IS NULL OR otn.id NOT IN (SELECT id FROM _previous_exercises)
-  RETURNING id, exercise_id, exercise_order, rest, superset
+  RETURNING id, exercise_id, exercise_order, rest, superset, pattern, total_reps
 ),
 _kept_exercises AS (
-  SELECT id, exercise_id, exercise_order, rest, superset FROM _updated_exercises
+  SELECT id, exercise_id, exercise_order, rest, superset, pattern, total_reps FROM _updated_exercises
   UNION ALL
-  SELECT id, exercise_id, exercise_order, rest, superset FROM _inserted_exercises
+  SELECT id, exercise_id, exercise_order, rest, superset, pattern, total_reps FROM _inserted_exercises
 ),
 _deleted AS (
   DELETE FROM template_exercises
@@ -1822,6 +1838,8 @@ _exercises_json AS (
       'exercise_order', ke.exercise_order,
       'rest', ke.rest,
       'superset', ke.superset,
+      'pattern', ke.pattern,
+      'totalReps', ke.total_reps,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ke.exercise_order
   ) AS exercises_json
@@ -2004,6 +2022,8 @@ _master_exercises AS (
     te.exercise_order,
     te.rest,
     te.superset,
+    te.pattern,
+    te.total_reps,
     e.name, e.category, e.target, e.instructions, e.asset, e.thumbnail, e.muscles, e.movement, e.health,
     (
       SELECT e2.id FROM exercises e2
@@ -2035,6 +2055,8 @@ _resolved_exercises AS (
     me.source_te_id,
     me.rest,
     me.superset,
+    me.pattern,
+    me.total_reps,
     coalesce(me.resolved_id, c.id) AS exercise_id
   FROM _master_exercises me
   LEFT JOIN _copied_exercises c ON c.name = me.name AND me.resolved_id IS NULL
@@ -2048,8 +2070,8 @@ _new_template AS (
   RETURNING id, source_template_id
 ),
 _new_exercises AS (
-  INSERT INTO template_exercises (template_id, exercise_id, exercise_order, rest, superset)
-  SELECT nt.id, re.exercise_id, re.exercise_order, re.rest, re.superset
+  INSERT INTO template_exercises (template_id, exercise_id, exercise_order, rest, superset, pattern, total_reps)
+  SELECT nt.id, re.exercise_id, re.exercise_order, re.rest, re.superset, re.pattern, re.total_reps
   FROM _new_template nt
   JOIN _resolved_exercises re ON re.master_id = nt.source_template_id
   RETURNING id, template_id, exercise_order
@@ -2590,6 +2612,7 @@ const _programColumns = '''
   p.weeks,
   p.rules,
   p.constraint_key,
+  p.deload,
   p.archived,
   p.created_at,
   coalesce(
@@ -2649,7 +2672,7 @@ _foreign AS (
     AND user_id <> @userId
 ),
 _ins AS (
-  INSERT INTO programs (id, user_id, name, note, source, per_week, days, weeks, rules, constraint_key)
+  INSERT INTO programs (id, user_id, name, note, source, per_week, days, weeks, rules, constraint_key, deload)
   SELECT
     coalesce(@id::uuid, uuidv7()),
     @userId,
@@ -2660,7 +2683,8 @@ _ins AS (
     @days::smallint[],
     @weeks::smallint,
     @rules::jsonb,
-    @constraintKey
+    @constraintKey,
+    @deload::jsonb
   WHERE NOT EXISTS (SELECT 1 FROM _by_id)
     AND (
       EXISTS (SELECT 1 FROM _foreign)
@@ -2689,6 +2713,7 @@ _updated AS (
     weeks = @weeks::smallint,
     rules = @rules::jsonb,
     constraint_key = @constraintKey,
+    deload = @deload::jsonb,
     archived = @archived::boolean,
     updated_at = now()
   WHERE id = @id::uuid
@@ -2764,7 +2789,7 @@ WHERE id = @id::uuid
 
 /// Every base of a program, oldest first: the latest per exercise is current.
 const _listProgramBases = '''
-SELECT id, program_id, exercise_id, value, workout_id, action_id, at
+SELECT id, program_id, exercise_id, slot, value, workout_id, action_id, at
 FROM program_bases
 WHERE program_id = @programId::uuid
   AND user_id = @userId
@@ -2779,7 +2804,7 @@ const _createProgramBase =
     '''
 WITH
 _existing AS (
-  SELECT id, program_id, exercise_id, value, workout_id, action_id, at
+  SELECT id, program_id, exercise_id, slot, value, workout_id, action_id, at
   FROM program_bases
   WHERE user_id = @userId
     AND (
@@ -2787,18 +2812,20 @@ _existing AS (
       OR (
         program_id = @programId::uuid
         AND exercise_id = @exerciseId::uuid
+        AND slot IS NOT DISTINCT FROM @slot::uuid
         AND workout_id = @workoutId::uuid
       )
     )
   LIMIT 1
 ),
 _ins AS (
-  INSERT INTO program_bases (id, user_id, program_id, exercise_id, value, workout_id, action_id, at)
+  INSERT INTO program_bases (id, user_id, program_id, exercise_id, slot, value, workout_id, action_id, at)
   SELECT
     coalesce(@id::uuid, uuidv7()),
     @userId,
     @programId::uuid,
     @exerciseId::uuid,
+    @slot::uuid,
     @value::real,
     @workoutId::uuid,
     @actionId::uuid,
@@ -2815,11 +2842,11 @@ _ins AS (
       OR EXISTS (SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId)
     )
     AND (SELECT count(*) FROM program_bases WHERE program_id = @programId::uuid) < $_maxProgramBases
-  RETURNING id, program_id, exercise_id, value, workout_id, action_id, at
+  RETURNING id, program_id, exercise_id, slot, value, workout_id, action_id, at
 )
-SELECT id, program_id, exercise_id, value, workout_id, action_id, at, true AS created FROM _ins
+SELECT id, program_id, exercise_id, slot, value, workout_id, action_id, at, true AS created FROM _ins
 UNION ALL
-SELECT id, program_id, exercise_id, value, workout_id, action_id, at, false AS created FROM _existing
+SELECT id, program_id, exercise_id, slot, value, workout_id, action_id, at, false AS created FROM _existing
 WHERE NOT EXISTS (SELECT 1 FROM _ins)
 ''';
 

@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(32);
+SELECT plan(34);
 
 SELECT has_table('public'::name, 'programs'::name);
 
@@ -20,7 +20,8 @@ SELECT columns_are(
                    'constraint_key',
                    'archived',
                    'created_at',
-                   'updated_at'
+                   'updated_at',
+                   'deload'
                    ]
        );
 
@@ -37,6 +38,7 @@ SELECT col_type_is('public'::name, 'programs'::name, 'constraint_key'::name, 'te
 SELECT col_type_is('public'::name, 'programs'::name, 'archived'::name, 'boolean'::name);
 SELECT col_type_is('public'::name, 'programs'::name, 'created_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'programs'::name, 'updated_at'::name, 'timestamp with time zone'::name);
+SELECT col_type_is('public'::name, 'programs'::name, 'deload'::name, 'jsonb'::name);
 
 SELECT has_pk('public'::name, 'programs'::name, 'programs has a primary key');
 SELECT col_is_pk('public'::name, 'programs'::name, 'id'::name, 'id is the primary key');
@@ -71,6 +73,11 @@ SELECT throws_ok(
 SELECT throws_ok(
                $$INSERT INTO programs (user_id, name) VALUES (create_test_profile(), '  ')$$,
                '23514', NULL, 'a name is never blank'
+       );
+
+SELECT throws_ok(
+               $$INSERT INTO programs (user_id, name, deload) VALUES (create_test_profile(), 'p', '{"load": 0.9}')$$,
+               '23514', NULL, 'a deload says how often'
        );
 
 SELECT * FROM finish();

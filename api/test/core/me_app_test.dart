@@ -98,6 +98,7 @@ void main() {
     const programId = '01900000-0000-7000-8000-000000000050';
     const session = '01900000-0000-7000-8000-000000000051';
     const bench = '01900000-0000-7000-8000-000000000001';
+    const slot = '01900000-0000-7000-8000-000000000052';
     final program = Program(id: programId, name: 'Getting stronger', sessions: [session], perWeek: 3);
     when(app.db.getPrograms('u1')).thenAnswer((_) async => [program]);
     when(app.db.getProgram(userId: 'u1', programId: programId)).thenAnswer((_) async => program);
@@ -109,6 +110,7 @@ void main() {
       (_) async => [
         ProgramBase(exerciseId: bench, value: 100, at: DateTime.utc(2026, 10, 1)),
         ProgramBase(exerciseId: bench, value: 102.5, at: DateTime.utc(2026, 10, 2)),
+        ProgramBase(exerciseId: bench, slot: slot, value: 80, at: DateTime.utc(2026, 10, 2)),
       ],
     );
 
@@ -120,7 +122,13 @@ void main() {
 
     final one = await app.send('GET', '/me/programs/$programId', token: secret);
     expect(one.status, 200);
-    expect(((jsonDecode(one.body) as Map)['bases'] as Map)[bench], {'value': 102.5, 'at': '2026-10-02T00:00:00.000Z'});
+    final bases = (jsonDecode(one.body) as Map)['bases'] as Map;
+    expect(bases[bench], {'value': 102.5, 'at': '2026-10-02T00:00:00.000Z', 'exerciseId': bench});
+    expect(
+      bases[slot],
+      {'value': 80, 'at': '2026-10-02T00:00:00.000Z', 'exerciseId': bench, 'slot': slot},
+      reason: 'a base kept per occurrence is keyed by its slot, and says which exercise it is',
+    );
   });
 
   test('workouts are paginated and images keep only id and url', () async {

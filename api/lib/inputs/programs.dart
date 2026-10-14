@@ -34,6 +34,7 @@ class ProgramCreateIn {
         weeks: json.programCount('weeks', max: 104),
         rules: json.programRules(),
         constraint: json.programKey('constraint'),
+        deload: json.programDeload(),
       ),
       sessions: [
         for (final (index, session) in sessions.indexed)
@@ -65,6 +66,7 @@ class ProgramUpdateIn {
         weeks: json.programCount('weeks', max: 104),
         rules: json.programRules(),
         constraint: json.programKey('constraint'),
+        deload: json.programDeload(),
         archived: json.boolean('archived'),
       ),
     );
@@ -132,6 +134,15 @@ extension on Map<String, dynamic> {
     };
   }
 
+  /// A lighter week every N cycles: `{every, load?, volume?}`.
+  Deload? programDeload() {
+    return switch (this['deload']) {
+      null => null,
+      final Map deload when deload.keys.every(const {'every', 'load', 'volume'}.contains) => _deload(deload),
+      _ => throw const BadRequest(code: 'invalid_deload', reason: 'deload must be {every, load?, volume?}'),
+    };
+  }
+
   /// A rule per exercise id, read strictly: a newer kind is a 400 here until
   /// the server knows it, though a build that predates it carries it untouched.
   Map<String, GrowthRule> programRules() {
@@ -153,12 +164,27 @@ extension on Map<String, dynamic> {
   }
 }
 
-GrowthRule _rule(String exerciseId, Map json) {
+Deload _deload(Map json) {
   try {
-    return GrowthRule.fromJson(json);
+    return Deload.fromJson(json);
+  } on ArgumentError catch (e) {
+    throw BadRequest(code: 'invalid_deload', reason: 'deload.${e.name}: ${e.message}');
+  }
+}
+
+GrowthRule _rule(String exerciseId, Map json) {
+  final GrowthRule rule;
+  try {
+    rule = GrowthRule.fromJson(json);
   } on ArgumentError catch (e) {
     throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: ${e.name} ${e.message}');
   }
+  // a client carries fields it doesn't know; the server knows every field it
+  // accepts, so one it doesn't is a mistake, not a newer vocabulary
+  if (rule.extra.isNotEmpty) {
+    throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: unknown ${rule.extra.keys.join(', ')}');
+  }
+  return rule;
 }
 
 /// `POST /programs/:programId/actions` — `{id?, kind, week?, at}`. Only a
@@ -183,7 +209,7 @@ class ProgramActionIn {
   }
 }
 
-/// `POST /programs/:programId/bases` — `{id?, exerciseId, value, workoutId?, actionId?, at}`.
+/// `POST /programs/:programId/bases` — `{id?, exerciseId, slot?, value, workoutId?, actionId?, at}`.
 /// A base names at most one cause; with none, the user set it.
 class ProgramBaseIn {
   final ProgramBase base;
@@ -204,6 +230,7 @@ class ProgramBaseIn {
           final String id => id,
           null => throw const BadRequest(reason: 'exerciseId is required'),
         },
+        slot: json.uuidV7OrNull('slot'),
         value: json.number('value', exclusiveMin: 0),
         workoutId: workoutId,
         actionId: actionId,

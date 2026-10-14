@@ -117,6 +117,29 @@ void main() {
       );
     });
 
+    test('a rule says what a miss does and how the AMRAP set moves it (heart-api#228)', () async {
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'rules': {
+              _bench: {
+                'kind': 'addWeight',
+                'step': 2.5,
+                'miss': {'when': 'totalReps', 'floor': 15, 'after': 1, 'cut': 0.1},
+                'amrap': [
+                  {'reps': 10, 'step': 5},
+                ],
+              },
+            },
+          },
+        ),
+      );
+      final rule = input.program.rules[_bench]!;
+      expect(rule.miss?.floor, 15);
+      expect(rule.amrap.single.step, 5);
+    });
+
     test('rules are read strictly', () async {
       for (final rules in [
         [],
@@ -133,6 +156,16 @@ void main() {
         {
           _bench: {'kind': 'shareOfMax', 'step': 5, 'waves': []},
         },
+        {
+          _bench: {'kind': 'addWeight', 'step': 2.5, 'tempo': '3-1-1'},
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'miss': {'after': 0},
+          },
+        },
       ]) {
         await expectLater(
           ProgramCreateIn.fromRequest(req(body: {'name': 'p', 'rules': rules})),
@@ -140,6 +173,40 @@ void main() {
           reason: '$rules',
         );
       }
+    });
+  });
+
+  group('lighter weeks (heart-api#229)', () {
+    test('a program schedules one every N cycles', () async {
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'deload': {'every': 6, 'load': 0.9},
+          },
+        ),
+      );
+      expect(input.program.deload, const Deload(every: 6));
+    });
+
+    test('a bad one is refused', () async {
+      for (final deload in [
+        {'every': 1},
+        {'every': 4, 'volume': 1.5},
+        {'every': 4, 'skip': true},
+        'monthly',
+      ]) {
+        await expectLater(
+          ProgramCreateIn.fromRequest(req(body: {'name': 'p', 'deload': deload})),
+          badRequest('invalid_deload'),
+          reason: '$deload',
+        );
+      }
+    });
+
+    test('a lighter week is an action', () async {
+      final input = await ProgramActionIn.fromRequest(req(body: {'kind': 'lighter', 'at': '2026-10-15T08:00:00Z'}));
+      expect(input.action.kind, ProgramActionKind.lighter);
     });
   });
 
@@ -186,6 +253,20 @@ void main() {
   group('ProgramBaseIn', () {
     const workout = '0198c1a2-b3c4-7d5e-8f60-718293a4b520';
     const action = '0198c1a2-b3c4-7d5e-8f60-718293a4b521';
+
+    test('a base may belong to one occurrence of a lift', () async {
+      const slot = '0198c1a2-b3c4-7d5e-8f60-718293a4b522';
+      final input = await ProgramBaseIn.fromRequest(
+        req(body: {'exerciseId': _bench, 'slot': slot, 'value': 80, 'at': '2026-10-14T18:00:00Z'}),
+      );
+      expect(input.base.slot, slot);
+      await expectLater(
+        ProgramBaseIn.fromRequest(
+          req(body: {'exerciseId': _bench, 'slot': 'monday', 'value': 80, 'at': '2026-10-14T18:00:00Z'}),
+        ),
+        badRequest(),
+      );
+    });
 
     test('reads a bump caused by a workout', () async {
       final input = await ProgramBaseIn.fromRequest(

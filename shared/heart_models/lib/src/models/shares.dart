@@ -175,6 +175,14 @@ class TemplateExerciseRequest {
   final int? superset;
   final bool setsSuperset;
 
+  /// An open slot's movement pattern; only consulted when [setsPattern].
+  final String? pattern;
+  final bool setsPattern;
+
+  /// Reps across all sets; only consulted when [setsTotalReps].
+  final TargetRange? totalReps;
+  final bool setsTotalReps;
+
   const new({
     this.id,
     required this.exerciseId,
@@ -184,6 +192,10 @@ class TemplateExerciseRequest {
     this.setsRest = false,
     this.superset,
     this.setsSuperset = false,
+    this.pattern,
+    this.setsPattern = false,
+    this.totalReps,
+    this.setsTotalReps = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -193,6 +205,8 @@ class TemplateExerciseRequest {
       'order': order,
       if (setsRest) 'rest': rest,
       if (setsSuperset) 'superset': superset,
+      if (setsPattern) 'pattern': pattern,
+      if (setsTotalReps) 'totalReps': totalReps?.toMap(),
       'sets': sets.map((s) => s.toJson()).toList(),
     };
   }

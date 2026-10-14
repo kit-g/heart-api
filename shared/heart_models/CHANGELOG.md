@@ -1,5 +1,60 @@
 # Changelog
 
+## 2.30.0
+
+Lighter weeks (heart-api#229).
+
+- New: `Deload` (`every` cycles, `load` and `volume` shares) and
+  `Program.deload`, on the wire as `deload`; `ProgramField.deload` for
+  `without`.
+- New: `ProgramActionKind.lighter`: the open cycle becomes a lighter one, on
+  demand. An exhaustive switch over the kinds gains a case.
+- New: `ProgramPosition.lighter`, on the wire as `lighter`: the open cycle is
+  scheduled lighter or asked for. Pass it to `Progression.next`.
+
+## 2.29.0
+
+The progression engine: what a session does to a base, misses, and a step set
+by the AMRAP set (heart-api#228).
+
+- New: `Progression.next(rule:, base:, sets:, misses:, lighter:, week:,
+  closesCycle:)` returns a sealed `ProgressionStep`: `Grow`, `Hold`, `Missed`,
+  `Cut` or `Advance`. `Progression.streak(rule, sessions, lighter:)` folds the
+  misses in a row, skipping sessions of a lighter week; `Progression.test` sets
+  a base from a test session (Brzycki, 10 reps at most). `Longer` grows the
+  measure the set's target names (distance or duration).
+- New: `MissRule` (`when`: `MissWhen.anySet` / `amrap` / `totalReps`, `floor`,
+  `after`, `cut`) and `AmrapStep` (`reps`, `step`). `AddWeight` and
+  `RangeThenWeight` take `miss` and `amrap`; `ShareOfMax` takes them too and
+  reads its `misses` / `missCut` as its miss rule. `GrowthRule.miss` and
+  `.amrap` read them for any rule.
+- New: `GrowthRule.extra` keeps fields a build doesn't know and writes them
+  back. The rule constructors gain an optional `extra`.
+- New: `ShareOfMax.closesWave(week)`.
+- New: `SetTarget.supplemental`, on the wire as `supplemental: true`: a set the
+  engine leaves out.
+
+## 2.28.0
+
+Slots: one lift with two bases, a share of another's, supplemental sets and
+open slots (heart-api#232).
+
+- New: `ProgramBase.slot`, the template exercise a base belongs to when one
+  lift has two. `currentBases` now keys a slotted base by its slot, and the
+  rest by exercise id as before.
+- New: `SetTarget.of` / `withOf`: whose base `share` is a share of, on the
+  wire as `of`. Null is the set's own exercise.
+- New: `WaveSet.supplemental`: takes its share but never counts for the AMRAP,
+  a miss or a bump.
+- New: `WorkoutExercise.pattern` (an open slot: any exercise of a movement
+  pattern) and `WorkoutExercise.totalReps` (reps across all sets), on the wire
+  as `pattern` / `totalReps`, carried into workouts like `rest` and cleared
+  like it (`toMap` sends a null once the key was read or assigned). A
+  `totalReps` in a shape this build predates is carried as it came, never a
+  failed read.
+- New: `TemplateExerciseRequest.pattern` / `setsPattern` and `totalReps` /
+  `setsTotalReps`, three-valued.
+
 ## 2.27.0
 
 Supersets and circuits (heart-api#234).

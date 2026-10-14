@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(19);
+SELECT plan(21);
 
 SELECT has_table('public'::name, 'template_exercises'::name);
 
@@ -13,7 +13,9 @@ SELECT columns_are(
                    'exercise_id',
                    'exercise_order',
                    'rest',
-                   'superset'
+                   'superset',
+                   'pattern',
+                   'total_reps'
                    ]
        );
 
@@ -39,6 +41,8 @@ SELECT has_index('public'::name, 'template_exercises'::name, 'template_exercises
 
 SELECT col_type_is('public'::name, 'template_exercises'::name, 'rest'::name, 'integer'::name);
 SELECT col_type_is('public'::name, 'template_exercises'::name, 'superset'::name, 'smallint'::name);
+SELECT col_type_is('public'::name, 'template_exercises'::name, 'pattern'::name, 'text'::name);
+SELECT col_type_is('public'::name, 'template_exercises'::name, 'total_reps'::name, 'jsonb'::name);
 SELECT throws_ok(
                $$
                INSERT INTO template_exercises (template_id, exercise_id, exercise_order, rest)

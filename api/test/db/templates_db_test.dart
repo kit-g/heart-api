@@ -776,6 +776,38 @@ void main() {
       expect(cleared.single.superset, isNull);
     });
 
+    test('an open slot keeps its pattern and total reps, unless a body speaks about them', () async {
+      final teId = uuidV7();
+      TemplateRequest slot({bool speaks = false, String? pattern, TargetRange? totalReps}) => TemplateRequest(
+        userId: coachId,
+        name: 'Open',
+        exercises: [
+          TemplateExerciseRequest(
+            id: teId,
+            exerciseId: exerciseId,
+            order: 0,
+            pattern: pattern,
+            setsPattern: speaks,
+            totalReps: totalReps,
+            setsTotalReps: speaks,
+            sets: [const TemplateSetRequest(reps: 10)],
+          ),
+        ],
+      );
+      final created = await h.db.createTemplate(
+        userId: coachId,
+        body: slot(speaks: true, pattern: 'vertical_pull', totalReps: const TargetRange(min: 50, max: 100)),
+      );
+      expect(created.single.pattern, 'vertical_pull');
+      expect(created.single.totalReps, const TargetRange(min: 50, max: 100));
+      final kept = await h.db.updateTemplate(userId: coachId, templateId: created.id, body: slot());
+      expect(kept.single.pattern, 'vertical_pull');
+      final read = await h.db.getTemplate(userId: coachId, templateId: created.id);
+      expect(read.single.totalReps, const TargetRange(min: 50, max: 100));
+      final cleared = await h.db.updateTemplate(userId: coachId, templateId: created.id, body: slot(speaks: true));
+      expect((cleared.single.pattern, cleared.single.totalReps), (null, null));
+    });
+
     test('reps in reserve and a capped AMRAP round-trip', () async {
       final target = SetTarget({.reps: const TargetRange(min: 5, max: 10, amrap: true)}, rir: 1);
       final created = await h.db.createTemplate(

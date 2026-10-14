@@ -288,7 +288,9 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       if (each.isNotEmpty) {
         final exercise = WorkoutExercise(starter: each.first.copy())
           ..rest = each.rest
-          ..superset = each.superset;
+          ..superset = each.superset
+          ..pattern = each.pattern
+          ..totalReps = each.totalReps;
 
         for (final set in each.skip(1)) {
           exercise.add(set.copy());

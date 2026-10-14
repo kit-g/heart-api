@@ -424,6 +424,9 @@ void main() {
       ),
       ({'share': 0}, 'a share of nothing'),
       ({'rir': -1}, 'negative reps in reserve'),
+      ({'supplemental': 'yes'}, 'a supplemental set that is not true or false'),
+      ({'of': '0198c1a2-b3c4-7d5e-8f60-718293a4b501'}, 'whose base, without a share'),
+      ({'share': 0.6, 'of': 'squat'}, 'whose base, not by id'),
       ({'rir': 11}, 'reps in reserve past 10'),
       ({'rir': 1.3}, 'a third of a rep in reserve'),
       (
@@ -462,6 +465,16 @@ void main() {
       final target = request.exercises.single.sets.single.target!;
       expect(target.rir, 1.5);
       expect(target[TargetMeasure.reps], const TargetRange(min: 5, max: 10, amrap: true));
+    });
+
+    test('a share can be of another exercise\'s base', () async {
+      final request = await parse([
+        {
+          'reps': 5,
+          'target': {'share': 0.6, 'of': _squat},
+        },
+      ]);
+      expect(request.exercises.single.sets.single.target!.of, _squat);
     });
 
     test('a share of the base sits beside the measures', () async {
@@ -612,6 +625,45 @@ void main() {
           ),
           throwsA(isA<BadRequest>()),
           reason: '$superset',
+        );
+      }
+    });
+
+    test('an open slot: a pattern key and a total of whole reps', () async {
+      final open = await TemplateUpdateIn.fromRequest(
+        req(
+          body: {
+            'exercises': [
+              exercise({
+                'pattern': 'vertical_pull',
+                'totalReps': {'min': 50, 'max': 100},
+              }),
+            ],
+          },
+        ),
+      );
+      expect(open.request.exercises.single.pattern, 'vertical_pull');
+      expect(open.request.exercises.single.totalReps, const TargetRange(min: 50, max: 100));
+      for (final bad in [
+        {'pattern': 'Vertical Pull'},
+        {'totalReps': 50},
+        {
+          'totalReps': {'min': 100, 'max': 50},
+        },
+        {
+          'totalReps': {'min': 5.5},
+        },
+      ]) {
+        await expectLater(
+          TemplateCreateIn.fromRequest(
+            req(
+              body: {
+                'exercises': [exercise(bad)],
+              },
+            ),
+          ),
+          throwsA(isA<BadRequest>()),
+          reason: '$bad',
         );
       }
     });

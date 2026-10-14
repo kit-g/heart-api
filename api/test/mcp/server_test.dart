@@ -509,6 +509,7 @@ void main() {
       const programId = '01900000-0000-7000-8000-000000000050';
       const session = '01900000-0000-7000-8000-000000000051';
       const bench = '01900000-0000-7000-8000-000000000001';
+      const slot = '01900000-0000-7000-8000-000000000052';
       final program = Program(
         id: programId,
         name: 'Getting stronger',
@@ -522,7 +523,10 @@ void main() {
         (_) async => [ProgramAction(kind: .pause, at: DateTime.utc(2026, 10, 2))],
       );
       when(app.db.getProgramBases(userId: 'u1', programId: programId)).thenAnswer(
-        (_) async => [ProgramBase(exerciseId: bench, value: 100, at: DateTime.utc(2026, 10, 1))],
+        (_) async => [
+          ProgramBase(exerciseId: bench, value: 100, at: DateTime.utc(2026, 10, 1)),
+          ProgramBase(exerciseId: bench, slot: slot, value: 80, at: DateTime.utc(2026, 10, 1)),
+        ],
       );
       when(app.db.getExercises('u1')).thenAnswer(
         (_) async => {
@@ -533,7 +537,20 @@ void main() {
       );
       when(
         app.db.getTemplate(userId: 'u1', templateId: session),
-      ).thenAnswer((_) async => Template.fromJson(const {'id': session, 'order': 0, 'name': 'A'}));
+      ).thenAnswer(
+        (_) async => Template.fromJson(const {
+          'id': session,
+          'order': 0,
+          'name': 'A',
+          'exercises': [
+            {
+              'id': slot,
+              'exercise': {'id': bench, 'name': 'Bench Press', 'category': 'Barbell', 'target': 'Chest'},
+              'sets': [],
+            },
+          ],
+        }),
+      );
 
       final listed = ((await call('list_programs'))['structuredContent'] as Map)['programs'] as List;
       expect((listed.single as Map)['paused'], isTrue);
@@ -546,6 +563,9 @@ void main() {
           'name': 'Bench Press',
           'rule': {'kind': 'addWeight', 'step': 2.5},
           'base': 100,
+          'slots': [
+            {'session': 'A', 'base': 80},
+          ],
         },
       ]);
       expect((await call('get_program', {'programId': 'nope'}))['isError'], isTrue);

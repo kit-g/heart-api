@@ -393,7 +393,8 @@ final List<McpTool> tools = [
     description:
         'One program in full: its sessions in order with which are done in the open cycle, the next one, and each '
         "exercise's growth rule and current base. A base is the number the rule grows: a training max or working "
-        'weight in kg, a duration in seconds, a distance in km. The position is computed from the workouts and skips '
+        'weight in kg, a duration in seconds, a distance in km. A lift used in two sessions (heavy one day, light '
+        'another) may keep a base per session, under slots. The position is computed from the workouts and skips '
         'the user logged against the program, never stored.',
     inputSchema: {
       'type': 'object',
@@ -420,6 +421,11 @@ final List<McpTool> tools = [
               .getTemplate(userId: request.userId, templateId: session)
               .then<Template?>((template) => template, onError: (_) => null),
       ]);
+      // the session each template exercise is in, for a base kept per slot
+      final sessionOf = {
+        for (final template in templates.nonNulls)
+          for (final exercise in template) exercise.id: template.name ?? 'Untitled',
+      };
       return {
         'id': program.id,
         'name': program.name,
@@ -443,11 +449,19 @@ final List<McpTool> tools = [
             },
         ],
         'exercises': [
-          for (final exerciseId in {...program.rules.keys, ...bases.keys})
+          for (final exerciseId in {...program.rules.keys, for (final base in bases.values) base.exerciseId})
             {
               'name': names[exerciseId] ?? exerciseId,
               'rule': ?program.rules[exerciseId]?.toMap(),
               if (bases[exerciseId] case final ProgramBase base) 'base': base.value,
+              // a lift used twice keeps a base per occurrence, keyed by its slot
+              if ([
+                    for (final base in bases.values)
+                      if (base.exerciseId == exerciseId && base.slot != null)
+                        {'session': ?sessionOf[base.slot], 'base': base.value},
+                  ]
+                  case final slots when slots.isNotEmpty)
+                'slots': slots,
             },
         ],
       };
