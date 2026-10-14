@@ -40,6 +40,11 @@ abstract interface class WorkoutExercise
   /// user's own timer. A workout started from the template carries it.
   abstract int? rest;
 
+  /// The superset this exercise belongs to in its session: exercises with the
+  /// same number are done back to back, a circuit when there are more than
+  /// two. Null stands alone. Only meaningful within one template or workout.
+  abstract int? superset;
+
   void add(ExerciseSet set);
 
   bool remove(ExerciseSet set);
@@ -77,6 +82,7 @@ abstract interface class WorkoutExercise
       met: (json['met'] as num?)?.toDouble(),
       note: json['note'] as String?,
       rest: (json['rest'] as num?)?.toInt(),
+      superset: (json['superset'] as num?)?.toInt(),
       spoken: {
         for (final key in _clearable)
           if (json.containsKey(key)) key,
@@ -86,7 +92,7 @@ abstract interface class WorkoutExercise
 }
 
 /// The keys of a [WorkoutExercise] that a save clears by sending null.
-const _clearable = {'rest'};
+const _clearable = {'rest', 'superset'};
 
 abstract interface class HasExercises {
   /// starts a new exercise
@@ -350,6 +356,17 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
   /// the server's value; a key it leaves out keeps it.
   final Set<String> _spoken;
 
+  int? _superset;
+
+  @override
+  int? get superset => _superset;
+
+  @override
+  set superset(int? value) {
+    _superset = value;
+    _spoken.add('superset');
+  }
+
   new _({
     ExerciseSet? starter,
     DateTime? start,
@@ -358,6 +375,7 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
     this.met,
     this.note,
     this._rest,
+    this._superset,
     Set<String>? spoken,
     required this._exercise,
     List<ExerciseSet>? sets,
@@ -420,6 +438,7 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
       'met': ?met,
       'note': ?note,
       if (rest != null || _spoken.contains('rest')) 'rest': rest,
+      if (superset != null || _spoken.contains('superset')) 'superset': superset,
       'sets': splice([for (final each in this) each.toMap()], _unread),
     };
   }
@@ -792,7 +811,8 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         // a note is an instruction on how to do the exercise, so a repeat carries it.
         exercise
           ..note = each.note
-          ..rest = each.rest;
+          ..rest = each.rest
+          ..superset = each.superset;
 
         for (final set in each.skip(1)) {
           exercise.add(set.copy());
@@ -822,6 +842,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         met: e.met,
         note: e.note,
         rest: e.rest,
+        superset: e.superset,
         spoken: e._spoken,
         exercise: e._exercise,
         sets: sets,
@@ -835,6 +856,7 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         met: exercise.met,
         note: exercise.note,
         rest: exercise.rest,
+        superset: exercise.superset,
         exercise: exercise.exercise,
         sets: sets,
         unread: [for (final (index, json) in exercise.unread.indexed) (sets.length + index, json)],

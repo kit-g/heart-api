@@ -96,4 +96,56 @@ void main() {
       );
     });
   });
+
+  group('supersets (heart-api#234)', () {
+    test('taking an exercise out of its superset sends a null, which clears it', () {
+      final exercise = WorkoutExercise.fromJson(const {
+        'id': 'x1',
+        'superset': 1,
+        'exercise': {'id': 'e1', 'name': 'Curl', 'category': 'Dumbbell', 'target': 'Arms'},
+        'sets': [],
+      });
+      exercise.superset = null;
+      expect(exercise.toMap(), containsPair('superset', null));
+      expect(exercise.toMap().containsKey('rest'), isFalse);
+    });
+
+    test('a template exercise carries its superset into a workout, its repeat, and back to the wire', () {
+      final template = Template.fromJson(const {
+        'id': 't1',
+        'order': 0,
+        'exercises': [
+          {
+            'id': 'x1',
+            'superset': 1,
+            'exercise': {'id': 'e1', 'name': 'Curl', 'category': 'Dumbbell', 'target': 'Arms'},
+            'sets': [
+              {'id': 's1', 'reps': 10},
+            ],
+          },
+          {
+            'id': 'x2',
+            'superset': 1,
+            'exercise': {'id': 'e2', 'name': 'Pushdown', 'category': 'Machine', 'target': 'Arms'},
+            'sets': [
+              {'id': 's2', 'reps': 10},
+            ],
+          },
+        ],
+      });
+      final workout = template.toWorkout();
+      expect(workout.map((e) => e.superset), [1, 1]);
+      expect(workout.copy().map((e) => e.superset), [1, 1]);
+      expect(workout.copy(sameId: true).first.superset, 1);
+      expect(template.first.toMap(), containsPair('superset', 1));
+    });
+
+    test('a request speaks about the superset only when told to', () {
+      expect(const TemplateExerciseRequest(exerciseId: 'e1', order: 0).toJson().containsKey('superset'), isFalse);
+      expect(
+        const TemplateExerciseRequest(exerciseId: 'e1', order: 0, superset: 2, setsSuperset: true).toJson(),
+        containsPair('superset', 2),
+      );
+    });
+  });
 }

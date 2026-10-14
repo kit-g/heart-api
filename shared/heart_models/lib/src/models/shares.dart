@@ -171,6 +171,10 @@ class TemplateExerciseRequest {
   final int? rest;
   final bool setsRest;
 
+  /// The superset this exercise belongs to; only consulted when [setsSuperset].
+  final int? superset;
+  final bool setsSuperset;
+
   const new({
     this.id,
     required this.exerciseId,
@@ -178,6 +182,8 @@ class TemplateExerciseRequest {
     this.sets = const [],
     this.rest,
     this.setsRest = false,
+    this.superset,
+    this.setsSuperset = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -186,6 +192,7 @@ class TemplateExerciseRequest {
       'exercise_id': exerciseId,
       'order': order,
       if (setsRest) 'rest': rest,
+      if (setsSuperset) 'superset': superset,
       'sets': sets.map((s) => s.toJson()).toList(),
     };
   }

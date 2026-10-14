@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.27.0
+
+Supersets and circuits (heart-api#234).
+
+- New: `WorkoutExercise.superset`, the superset an exercise belongs to in its
+  session (same number, back to back), on the wire as `superset`. Carried by
+  `Template.toWorkout` and both kinds of `Workout.copy`. Cleared like `rest`:
+  `toMap` sends `superset: null` once it was read or assigned.
+- New: `TemplateExerciseRequest.superset` / `setsSuperset`, three-valued.
+
 ## 2.26.0
 
 Effort targets, a capped AMRAP, and rest per exercise (heart-api#230).
