@@ -456,3 +456,206 @@ class _Program implements Program {
   @override
   String toString() => 'Program(${toMap()})';
 }
+
+/// How the user steers a program: the steps a fold over its history takes
+/// besides workouts and skips.
+enum ProgramActionKind {
+  /// Runs the cycle again at the same week: the one just finished when nothing
+  /// is done in the open cycle yet, the open one otherwise.
+  repeat('repeat'),
+
+  /// Steps the program aside: out of "up next" and the weekly count.
+  pause('pause'),
+
+  /// Brings a paused program back. A program workout resumes one as well.
+  resume('resume'),
+
+  /// Goes back to [ProgramAction.week].
+  replay('replay');
+
+  /// The `kind` on the wire.
+  final String value;
+
+  new(this.value);
+
+  factory fromString(String value) {
+    return values.firstWhere(
+      (each) => each.value == value,
+      orElse: () => throw ArgumentError.value(value, 'kind', 'unknown program action'),
+    );
+  }
+}
+
+/// One step the user took in a program, at a moment. Undoing it is deleting it.
+abstract interface class ProgramAction implements Model {
+  String? get id;
+
+  String? get programId;
+
+  ProgramActionKind get kind;
+
+  /// The week a [ProgramActionKind.replay] goes back to, from 1; null otherwise.
+  int? get week;
+
+  /// When the user took it, by the device's clock.
+  DateTime get at;
+
+  factory({String? id, String? programId, required ProgramActionKind kind, int? week, required DateTime at}) =
+      _ProgramAction;
+
+  factory fromJson(Map json) {
+    return _ProgramAction(
+      id: json['id']?.toString(),
+      programId: json['programId']?.toString(),
+      kind: ProgramActionKind.fromString(json['kind'] as String),
+      week: (json['week'] as num?)?.toInt(),
+      at: DateTime.parse(json['at'] as String),
+    );
+  }
+
+  factory fromRow(Map row) {
+    return _ProgramAction(
+      id: row['id']?.toString(),
+      programId: row['program_id']?.toString(),
+      kind: ProgramActionKind.fromString(row['kind'] as String),
+      week: (row['week'] as num?)?.toInt(),
+      at: switch (row['at']) {
+        final DateTime at => at,
+        final String at => DateTime.parse(at),
+        final other => throw ArgumentError.value(other, 'at'),
+      },
+    );
+  }
+}
+
+class _ProgramAction implements ProgramAction {
+  @override
+  final String? id;
+  @override
+  final String? programId;
+  @override
+  final ProgramActionKind kind;
+  @override
+  final int? week;
+  @override
+  final DateTime at;
+
+  new({this.id, this.programId, required this.kind, this.week, required this.at});
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'id': ?id,
+      'programId': ?programId,
+      'kind': kind.value,
+      'week': ?week,
+      'at': at.toUtc().toIso8601String(),
+    };
+  }
+}
+
+/// One value of an exercise's base in a program: the number its growth rule
+/// grows (a training max, a working weight, a duration or a distance), in
+/// kilograms, seconds or kilometres. The current base is the latest.
+///
+/// It says what caused it: a workout (a bump the rule made), an action (a
+/// replay's cut), or neither (the user set it). Deleting the cause deletes it.
+abstract interface class ProgramBase implements Model {
+  String? get id;
+
+  String? get programId;
+
+  String get exerciseId;
+
+  num get value;
+
+  String? get workoutId;
+
+  String? get actionId;
+
+  DateTime get at;
+
+  /// Set by the user, not by a workout or an action.
+  bool get isManual;
+
+  factory({
+    String? id,
+    String? programId,
+    required String exerciseId,
+    required num value,
+    String? workoutId,
+    String? actionId,
+    required DateTime at,
+  }) = _ProgramBase;
+
+  factory fromJson(Map json) {
+    return _ProgramBase(
+      id: json['id']?.toString(),
+      programId: json['programId']?.toString(),
+      exerciseId: json['exerciseId'] as String,
+      value: json['value'] as num,
+      workoutId: json['workoutId'] as String?,
+      actionId: json['actionId'] as String?,
+      at: DateTime.parse(json['at'] as String),
+    );
+  }
+
+  factory fromRow(Map row) {
+    return _ProgramBase(
+      id: row['id']?.toString(),
+      programId: row['program_id']?.toString(),
+      exerciseId: row['exercise_id'].toString(),
+      value: row['value'] as num,
+      workoutId: row['workout_id']?.toString(),
+      actionId: row['action_id']?.toString(),
+      at: switch (row['at']) {
+        final DateTime at => at,
+        final String at => DateTime.parse(at),
+        final other => throw ArgumentError.value(other, 'at'),
+      },
+    );
+  }
+}
+
+class _ProgramBase implements ProgramBase {
+  @override
+  final String? id;
+  @override
+  final String? programId;
+  @override
+  final String exerciseId;
+  @override
+  final num value;
+  @override
+  final String? workoutId;
+  @override
+  final String? actionId;
+  @override
+  final DateTime at;
+
+  new({
+    this.id,
+    this.programId,
+    required this.exerciseId,
+    required this.value,
+    this.workoutId,
+    this.actionId,
+    required this.at,
+  });
+
+  @override
+  bool get isManual => workoutId == null && actionId == null;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'id': ?id,
+      'programId': ?programId,
+      'exerciseId': exerciseId,
+      'value': value,
+      'workoutId': ?workoutId,
+      'actionId': ?actionId,
+      'at': at.toUtc().toIso8601String(),
+    };
+  }
+}

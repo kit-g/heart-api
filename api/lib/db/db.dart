@@ -14,6 +14,7 @@ import 'package:heart/models/imports.dart';
 import 'package:heart/models/oauth.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/programs.dart';
+import 'package:heart/models/skips.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart' hide WorkoutService, TemplateService, ExerciseService;
@@ -31,6 +32,7 @@ part 'oauth.dart';
 part 'profiles.dart';
 part 'programs.dart';
 part 'queries.dart';
+part 'skips.dart';
 part 'template_folders.dart';
 part 'templates.dart';
 part 'tokens.dart';
@@ -84,6 +86,9 @@ abstract class _DatabaseBase {
     'template_folders_pkey',
     'goals_pkey',
     'programs_pkey',
+    'program_actions_pkey',
+    'program_bases_pkey',
+    'skips_pkey',
   };
 
   Forbidden get _idTaken => const Forbidden(code: 'id_taken', reason: 'this id belongs to another account');
@@ -99,7 +104,11 @@ abstract class _DatabaseBase {
   /// (heart-api#66) — a name the caller already uses resolving to that
   /// row instead of erroring — is enforced by real unique indexes distinct
   /// from the id-scoped ones in [_foreignIdConstraints].
-  static const _raceableNameConstraints = {'exercises_user_name_idx', 'template_folders_user_name_idx'};
+  static const _raceableNameConstraints = {
+    'exercises_user_name_idx',
+    'template_folders_user_name_idx',
+    'program_bases_workout_idx',
+  };
 
   /// Every idempotent-create statement (`_createExercise`, `_saveWorkout`,
   /// `_saveTemplate`, `_createTemplateFolder`, `_createGoal`) pre-checks its id
@@ -138,6 +147,9 @@ const _missingReferenceCodes = <String, String>{
   'template_exercises_exercise_id_fkey': 'unknown_exercise',
   'templates_folder_fk': 'unknown_folder',
   'templates_program_fk': 'unknown_program',
+  'program_actions_program_fk': 'unknown_program',
+  'program_bases_program_fk': 'unknown_program',
+  'program_bases_action_fk': 'unknown_action',
   'comments_workout_id_fkey': 'unknown_comment_target',
   'comments_workout_exercise_id_fkey': 'unknown_comment_target',
   'comments_exercise_set_id_fkey': 'unknown_comment_target',
@@ -196,6 +208,7 @@ class Database extends _DatabaseBase
         _Images,
         _Profiles,
         _Programs,
+        _Skips,
         _Workouts,
         _Templates,
         _TemplateFolders,
@@ -212,6 +225,7 @@ class Database extends _DatabaseBase
         ApiImageDbService,
         ApiProfileService,
         ProgramService,
+        SkipService,
         ApiWorkoutService,
         IdempotentTemplateService,
         IdempotentTemplateFolderService,

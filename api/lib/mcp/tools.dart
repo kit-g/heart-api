@@ -7,6 +7,7 @@ import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/me.dart';
 import 'package:heart/models/workouts.dart';
+import 'package:heart/routes/programs.dart' as programs;
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -354,6 +355,100 @@ final List<McpTool> tools = [
       return {
         'goals': [
           for (final goal in goals) {...goal.toMap(), 'exerciseName': ?names[goal.exerciseId]},
+        ],
+      };
+    },
+  ),
+  McpTool(
+    name: 'list_programs',
+    title: 'List programs',
+    description:
+        "The user's programs: plans of their templates, done in any order on any day, whose targets grow. Each "
+        'shows where the user stands: the program week (it moves when every session of a cycle is done or skipped, '
+        'never by the calendar), the next session, whether it is paused or finished, and workouts this week against '
+        'the weekly target. Weeks here are ISO weeks in UTC.',
+    run: (request, _) async {
+      final all = await request.programService.getPrograms(request.userId);
+      return {
+        'programs': [
+          for (final program in all)
+            {
+              'id': program.id,
+              'name': program.name,
+              'archived': program.archived,
+              'sessions': program.sessions.length,
+              if (program.weeks case final int weeks) 'weeks': weeks,
+              'perWeek': ?program.perWeek,
+              ...(await programs.programState(request, program)).$1.toMap()
+                ..remove('done')
+                ..remove('remaining'),
+            },
+        ],
+      };
+    },
+  ),
+  McpTool(
+    name: 'get_program',
+    title: 'Get a program',
+    description:
+        'One program in full: its sessions in order with which are done in the open cycle, the next one, and each '
+        "exercise's growth rule and current base. A base is the number the rule grows: a training max or working "
+        'weight in kg, a duration in seconds, a distance in km. The position is computed from the workouts and skips '
+        'the user logged against the program, never stored.',
+    inputSchema: {
+      'type': 'object',
+      'properties': {
+        'programId': {'type': 'string', 'description': 'An id from list_programs.'},
+      },
+      'required': ['programId'],
+      'additionalProperties': false,
+    },
+    run: (request, arguments) async {
+      final id = arguments['programId'];
+      if (id is! String || !isUuidV7(id)) throw const ToolError('programId must be an id from list_programs.');
+      final Program program;
+      try {
+        program = await request.programService.getProgram(userId: request.userId, programId: id);
+      } on NotFound {
+        throw ToolError('No program $id. Use list_programs for valid ids.');
+      }
+      final (position, bases) = await programs.programState(request, program, withBases: true);
+      final names = (await request.exerciseService.getExercises(request.userId)).toExerciseNames();
+      final templates = await Future.wait([
+        for (final session in program.sessions)
+          request.templatesService
+              .getTemplate(userId: request.userId, templateId: session)
+              .then<Template?>((template) => template, onError: (_) => null),
+      ]);
+      return {
+        'id': program.id,
+        'name': program.name,
+        'note': ?program.note,
+        'perWeek': ?program.perWeek,
+        'weeks': ?program.weeks,
+        'archived': program.archived,
+        'position': {
+          ...position.toMap()
+            ..remove('done')
+            ..remove('remaining'),
+        },
+        'sessions': [
+          for (final template in templates.nonNulls)
+            {
+              'id': template.id,
+              'name': template.name ?? 'Untitled',
+              'note': ?template.note,
+              'done': position.done.contains(template.id),
+              'exercises': [for (final exercise in template) exercise.exercise.name],
+            },
+        ],
+        'exercises': [
+          for (final exerciseId in {...program.rules.keys, ...bases.keys})
+            {
+              'name': names[exerciseId] ?? exerciseId,
+              'rule': ?program.rules[exerciseId]?.toMap(),
+              if (bases[exerciseId] case final ProgramBase base) 'base': base.value,
+            },
         ],
       };
     },

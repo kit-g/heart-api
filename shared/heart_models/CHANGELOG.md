@@ -1,5 +1,58 @@
 # Changelog
 
+## 2.23.0
+
+Where the user stands in a program, computed the same everywhere
+(heart-api#217, part of heart-api#86).
+
+- New: `ProgramPosition.of(program, marks:, actions:, now:, firstWeekday:)`, a
+  pure fold: `week`, `done`, `remaining`, `next`, `paused`, `finished`,
+  `thisWeek`. The rules are on the factory; the design is
+  `docs/2026-10-13.programs.md` in heart-api.
+- New: `ProgramMark` (`workout`, `skip`), what the fold reads beside the
+  program's actions.
+- New: `currentBases`, the latest base per exercise.
+- New: `SetTarget.share` and `withShare`, a set's weight as a share of the
+  exercise's base, on the wire as `share`. Builds since 2.16.0 already carried
+  the key untouched.
+
+## 2.22.0
+
+Skips, and programs in the account summary (heart-api#202).
+
+- New: `TrainingSkip` ("Not today"): `id`, `at`, `reason` (a snake_case tag),
+  `weather`, `templateId`, `programId`. Named so it doesn't collide with
+  `package:test`'s `Skip`.
+- New: `Weather` (`temperature` °C, `humidity` %, `pressure` hPa,
+  `pressureTrend` hPa over 24 h), read tolerantly: an unknown field is kept
+  and written back.
+- New: `ExportableCollection.programs`, `programActions`, `programBases` and
+  `skips`, in upsync replay order. Exhaustive switches over the enum gain
+  these four cases; `tryParse` and the summary's reader were already tolerant.
+
+## 2.21.0
+
+Program actions and bases (heart-api#216, part of heart-api#86).
+
+- New: `ProgramAction` (`id`, `programId`, `kind`, `week`, `at`) and
+  `ProgramActionKind`: `repeat`, `pause`, `resume`, `replay`. An unknown kind
+  is an `ArgumentError`, so `readEach` sets it aside.
+- New: `ProgramBase` (`id`, `programId`, `exerciseId`, `value`, `workoutId`,
+  `actionId`, `at`, `isManual`): one value of what an exercise's growth rule
+  grows, with its cause.
+
+## 2.20.0
+
+Workouts name the template and the program they were started from
+(heart-api#215, part of heart-api#86).
+
+- New: `Workout.templateId` and `Workout.programId`, on the wire as
+  `templateId` / `programId` and on the row as `template_id` / `program_id`;
+  left out of `toMap` when null, so a save never detaches a workout.
+- New: optional `templateId` and `programId` on `Workout.fromExercises`.
+- `Template.toWorkout` now sets both from the template. `Workout.copy` keeps
+  them for the same session and drops them for a repeat.
+
 ## 2.19.0
 
 Programs: the entity and its sessions (heart-api#214, part of heart-api#86).

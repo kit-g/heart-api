@@ -300,6 +300,166 @@ FROM generate_series(1, 100) n
       expect(apiExceptionForDbError(error!), isA<NotFound>().having((e) => e.code, 'code', 'unknown_program'));
     });
   });
+
+  group('actions', () {
+    test('created idempotently, listed in the order taken, deleted to undo', () async {
+      final userId = await h.seedProfile();
+      final (stored, _) = await h.db.createProgramOrExisting(userId: userId, program: program(), sessions: const []);
+      final programId = stored.id!;
+      final pause = ProgramAction(id: uuidV7(), kind: .pause, at: DateTime.utc(2026, 10, 2));
+
+      final (first, isNew) = await h.db.createProgramAction(userId: userId, programId: programId, action: pause);
+      final (again, againNew) = await h.db.createProgramAction(userId: userId, programId: programId, action: pause);
+      await h.db.createProgramAction(
+        userId: userId,
+        programId: programId,
+        action: ProgramAction(kind: .replay, week: 2, at: DateTime.utc(2026, 10, 1)),
+      );
+
+      expect((isNew, againNew), (true, false));
+      expect(again.id, first.id);
+      final listed = await h.db.getProgramActions(userId: userId, programId: programId);
+      expect(listed.map((a) => a.kind), [ProgramActionKind.replay, ProgramActionKind.pause]);
+      expect(listed.first.week, 2);
+
+      await h.db.deleteProgramAction(userId: userId, programId: programId, actionId: first.id!);
+      expect(await h.db.getProgramActions(userId: userId, programId: programId), hasLength(1));
+    });
+
+    test("someone else's program is unknown_program, and its actions are invisible", () async {
+      final owner = await h.seedProfile();
+      final stranger = await h.seedProfile();
+      final (theirs, _) = await h.db.createProgramOrExisting(userId: owner, program: program(), sessions: const []);
+      await h.db.createProgramAction(
+        userId: owner,
+        programId: theirs.id!,
+        action: ProgramAction(kind: .pause, at: DateTime.utc(2026, 10, 1)),
+      );
+
+      expect(await h.db.getProgramActions(userId: stranger, programId: theirs.id!), isEmpty);
+      Object? error;
+      try {
+        await h.db.createProgramAction(
+          userId: stranger,
+          programId: theirs.id!,
+          action: ProgramAction(kind: .pause, at: DateTime.utc(2026, 10, 1)),
+        );
+      } catch (e) {
+        error = e;
+      }
+      expect(apiExceptionForDbError(error!), isA<NotFound>().having((e) => e.code, 'code', 'unknown_program'));
+    });
+  });
+
+  group('bases', () {
+    test('one move per workout: a second device replaying the bump gets the first back', () async {
+      final userId = await h.seedProfile();
+      final (stored, _) = await h.db.createProgramOrExisting(userId: userId, program: program(), sessions: const []);
+      final workoutId = await h.seedWorkout(userId: userId);
+      ProgramBase bump() => ProgramBase(
+        id: uuidV7(),
+        exerciseId: exerciseId,
+        value: 102.5,
+        workoutId: workoutId,
+        at: DateTime.utc(2026, 10, 14),
+      );
+
+      final (first, isNew) = await h.db.createProgramBase(userId: userId, programId: stored.id!, base: bump());
+      final (second, secondNew) = await h.db.createProgramBase(userId: userId, programId: stored.id!, base: bump());
+
+      expect((isNew, secondNew), (true, false));
+      expect(second.id, first.id);
+      expect(await h.db.getProgramBases(userId: userId, programId: stored.id!), hasLength(1));
+    });
+
+    test('deleting the workout or the action deletes the move it caused', () async {
+      final userId = await h.seedProfile();
+      final (stored, _) = await h.db.createProgramOrExisting(userId: userId, program: program(), sessions: const []);
+      final programId = stored.id!;
+      final workoutId = await h.seedWorkout(userId: userId);
+      final (replay, _) = await h.db.createProgramAction(
+        userId: userId,
+        programId: programId,
+        action: ProgramAction(kind: .replay, week: 1, at: DateTime.utc(2026, 10, 3)),
+      );
+      for (final base in [
+        ProgramBase(exerciseId: exerciseId, value: 100, at: DateTime.utc(2026, 10, 1)),
+        ProgramBase(exerciseId: exerciseId, value: 102.5, workoutId: workoutId, at: DateTime.utc(2026, 10, 2)),
+        ProgramBase(exerciseId: exerciseId, value: 92.5, actionId: replay.id, at: DateTime.utc(2026, 10, 3)),
+      ]) {
+        await h.db.createProgramBase(userId: userId, programId: programId, base: base);
+      }
+
+      await h.exec('DELETE FROM workouts WHERE id = @id::uuid', {'id': workoutId});
+      await h.db.deleteProgramAction(userId: userId, programId: programId, actionId: replay.id!);
+
+      final left = await h.db.getProgramBases(userId: userId, programId: programId);
+      expect(left.single.value, 100);
+      expect(left.single.isManual, isTrue);
+    });
+
+    test("an exercise the caller can't see, or a workout they don't own, is not found", () async {
+      final userId = await h.seedProfile();
+      final stranger = await h.seedProfile();
+      final (stored, _) = await h.db.createProgramOrExisting(userId: userId, program: program(), sessions: const []);
+      final theirWorkout = await h.seedWorkout(userId: stranger);
+
+      expect(
+        () => h.db.createProgramBase(
+          userId: userId,
+          programId: stored.id!,
+          base: ProgramBase(exerciseId: uuidV7(), value: 100, at: DateTime.utc(2026, 10, 1)),
+        ),
+        throwsA(isA<NotFound>().having((e) => e.code, 'code', 'unknown_exercise')),
+      );
+      expect(
+        () => h.db.createProgramBase(
+          userId: userId,
+          programId: stored.id!,
+          base: ProgramBase(exerciseId: exerciseId, value: 100, workoutId: theirWorkout, at: DateTime.utc(2026, 10, 1)),
+        ),
+        throwsA(isA<NotFound>().having((e) => e.code, 'code', 'unknown_workout')),
+      );
+    });
+  });
+
+  group('marks', () {
+    test("the program's workouts at their start and its skips, nobody else's", () async {
+      final userId = await h.seedProfile();
+      final (stored, _) = await h.db.createProgramOrExisting(
+        userId: userId,
+        program: program(),
+        sessions: [session(userId, 'A', 0)],
+      );
+      final programId = stored.id!;
+      final templateId = stored.sessions.single;
+      final workoutId = await h.seedWorkout(userId: userId, start: DateTime.utc(2026, 10, 2, 18));
+      await h.exec(
+        'UPDATE workouts SET template_id = @t::uuid, program_id = @p::uuid WHERE id = @w::uuid',
+        {'t': templateId, 'p': programId, 'w': workoutId},
+      );
+      await h.seedWorkout(userId: userId); // not the program's
+      await h.db.createSkip(
+        userId: userId,
+        skip: TrainingSkip(at: DateTime.utc(2026, 10, 3), templateId: templateId, programId: programId),
+      );
+
+      final marks = (await h.db.getProgramMarks(userId: userId, programId: programId)).toList()
+        ..sort((a, b) => a.at.compareTo(b.at));
+
+      expect(marks.map((m) => (m.templateId, m.at, m.isWorkout)), [
+        (templateId, DateTime.utc(2026, 10, 2, 18), true),
+        (templateId, DateTime.utc(2026, 10, 3), false),
+      ]);
+      final position = ProgramPosition.of(
+        await h.db.getProgram(userId: userId, programId: programId),
+        marks: marks,
+        actions: await h.db.getProgramActions(userId: userId, programId: programId),
+        now: DateTime.utc(2026, 10, 4),
+      );
+      expect(position.week, 3, reason: 'one session per cycle: the workout closes week 1, the skip week 2');
+    });
+  });
 }
 
 class _Harness extends DatabaseTestBase;

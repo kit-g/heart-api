@@ -162,6 +162,14 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
 
   static const maxPauses = 100;
 
+  /// The template this workout was started from, if any: a program's session
+  /// or a plain template.
+  String? get templateId;
+
+  /// The program this workout counts toward, if any. Kept apart from
+  /// [templateId] so the workout still counts after its session is deleted.
+  String? get programId;
+
   Iterable<WorkoutExercise> get sets;
 
   Map<String, WorkoutImage>? get images;
@@ -188,12 +196,19 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
     );
   }
 
-  factory fromExercises(Iterable<WorkoutExercise> exercises, {String? name}) {
+  factory fromExercises(
+    Iterable<WorkoutExercise> exercises, {
+    String? name,
+    String? templateId,
+    String? programId,
+  }) {
     return _Workout._(
       id: uuidV7(),
       start: DateTime.timestamp(),
       name: name,
       exercises: exercises.toList(),
+      templateId: templateId,
+      programId: programId,
     );
   }
 
@@ -223,6 +238,8 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
       calories: (row['calories'] as num?)?.toDouble(),
       note: row['note'] as String?,
       pauses: _pauses(row['pauses']),
+      templateId: row['template_id']?.toString(),
+      programId: row['program_id']?.toString(),
       // a workout read from the server's own store is, by definition, synced
       synced: true,
     );
@@ -520,6 +537,12 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   List<WorkoutPause> pauses;
 
   @override
+  final String? templateId;
+
+  @override
+  final String? programId;
+
+  @override
   final bool synced;
 
   new _({
@@ -532,6 +555,8 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
     this.calories,
     this.note,
     List<WorkoutPause>? pauses,
+    this.templateId,
+    this.programId,
     Map<String, WorkoutImage>? images,
     this.synced = false,
   }) : _sets = exercises ?? <WorkoutExercise>[],
@@ -549,6 +574,8 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       calories: (json['calories'] as num?)?.toDouble(),
       note: json['note'] as String?,
       pauses: _pauses(json['pauses']),
+      templateId: json['templateId'] as String?,
+      programId: json['programId'] as String?,
       exercises: exercises.items,
       unread: exercises.unread,
       images: switch (json) {
@@ -604,6 +631,10 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       'note': note,
       // always present for the same reason: an empty list is no pauses
       'pauses': pauses.map((pause) => pause.toMap()).toList(),
+      // left out when null, so a save never detaches a workout from its
+      // program; deleting the template or the program does that
+      'templateId': ?templateId,
+      'programId': ?programId,
       'exercises': [
         for (final (order, each) in exercises.indexed) {...each, 'order': order},
       ],
@@ -712,6 +743,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       calories: sameId ? calories : null,
       note: sameId ? note : null,
       pauses: sameId ? [...pauses] : null,
+      // a repeat of a program session is a workout of its own, not the session
+      templateId: sameId ? templateId : null,
+      programId: sameId ? programId : null,
       unread: sameId ? [..._unread] : null,
       images: images,
     );

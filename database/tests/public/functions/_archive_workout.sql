@@ -17,15 +17,21 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test__archive_workout_copies_row_on_delete() RETURNS SETOF TEXT AS
 $$
 DECLARE
-    _user_id TEXT;
-    _w_id    UUID;
+    _user_id     TEXT;
+    _w_id        UUID;
+    _program_id  UUID;
+    _template_id UUID;
 BEGIN
     _user_id := create_test_profile();
     _w_id    := create_test_workout(_user_id => _user_id, _name => 'archive me');
+    INSERT INTO programs (user_id, name) VALUES (_user_id, 'archive program') RETURNING id INTO _program_id;
+    _template_id := create_test_template(_user_id => _user_id);
     UPDATE workouts
     SET calories = 420,
         note = 'felt strong',
-        pauses = '[{"start": "2026-10-03T18:10:00Z", "end": "2026-10-03T18:20:00Z"}]'
+        pauses = '[{"start": "2026-10-03T18:10:00Z", "end": "2026-10-03T18:20:00Z"}]',
+        template_id = _template_id,
+        program_id = _program_id
     WHERE id = _w_id;
 
     DELETE FROM workouts WHERE id = _w_id;
@@ -59,6 +65,11 @@ BEGIN
             (SELECT jsonb_array_length(pauses) FROM archive.deleted_workouts WHERE id = _w_id),
             1,
             'archive preserved the pauses'
+        );
+    RETURN NEXT is(
+            (SELECT (template_id, program_id) FROM archive.deleted_workouts WHERE id = _w_id),
+            (_template_id, _program_id),
+            'archive preserved the template and the program'
         );
 END
 $$ LANGUAGE plpgsql;

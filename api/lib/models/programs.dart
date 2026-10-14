@@ -27,6 +27,34 @@ abstract interface class ProgramService {
 
   /// Deletes the program and, unless [keepTemplates], its session templates.
   Future<void> deleteProgram({required String userId, required String programId, bool keepTemplates = false});
+
+  /// The program's steps in the order they were taken.
+  Future<Iterable<ProgramAction>> getProgramActions({required String userId, required String programId});
+
+  /// Idempotent on the action's id.
+  Future<(ProgramAction, bool created)> createProgramAction({
+    required String userId,
+    required String programId,
+    required ProgramAction action,
+  });
+
+  /// Undoes a step. Deleting what isn't there is not an error.
+  Future<void> deleteProgramAction({required String userId, required String programId, required String actionId});
+
+  /// Every base of the program, oldest first.
+  Future<Iterable<ProgramBase>> getProgramBases({required String userId, required String programId});
+
+  /// Idempotent on the base's id, and on its exercise and workout together.
+  Future<(ProgramBase, bool created)> createProgramBase({
+    required String userId,
+    required String programId,
+    required ProgramBase base,
+  });
+
+  Future<void> deleteProgramBase({required String userId, required String programId, required String baseId});
+
+  /// The program's workouts and skips, as its position reads them.
+  Future<Iterable<ProgramMark>> getProgramMarks({required String userId, required String programId});
 }
 
 abstract interface class ProgramsResponse implements Model {
@@ -45,6 +73,46 @@ class _ProgramsResponse implements ProgramsResponse {
   Map<String, dynamic> toMap() {
     return {
       'programs': programs.map((each) => each.toMap()).toList(),
+    };
+  }
+}
+
+abstract interface class ProgramActionsResponse implements Model {
+  Iterable<ProgramAction> get actions;
+
+  factory({required Iterable<ProgramAction> actions}) = _ProgramActionsResponse.new;
+}
+
+class _ProgramActionsResponse implements ProgramActionsResponse {
+  @override
+  final Iterable<ProgramAction> actions;
+
+  new({required this.actions});
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'actions': actions.map((each) => each.toMap()).toList(),
+    };
+  }
+}
+
+abstract interface class ProgramBasesResponse implements Model {
+  Iterable<ProgramBase> get bases;
+
+  factory({required Iterable<ProgramBase> bases}) = _ProgramBasesResponse.new;
+}
+
+class _ProgramBasesResponse implements ProgramBasesResponse {
+  @override
+  final Iterable<ProgramBase> bases;
+
+  new({required this.bases});
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'bases': bases.map((each) => each.toMap()).toList(),
     };
   }
 }

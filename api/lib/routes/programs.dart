@@ -47,3 +47,89 @@ Future<Model> deleteProgramById(Request req, String programId) async {
   );
   throw const NoContent();
 }
+
+Future<ProgramActionsResponse> getProgramActions(Request req) async {
+  final actions = await req.programService.getProgramActions(
+    userId: req.userId,
+    programId: req.rawPathParameters[#programId]!,
+  );
+  return ProgramActionsResponse(actions: actions);
+}
+
+Future<Model> createProgramAction(Request req) {
+  return createProgramActionFor(req, req.rawPathParameters[#programId]!);
+}
+
+Future<Model> createProgramActionFor(Request req, String programId) async {
+  final input = await ProgramActionIn.fromRequest(req);
+  final (action, isNew) = await req.programService.createProgramAction(
+    userId: req.userId,
+    programId: programId,
+    action: input.action,
+  );
+  if (isNew) return Created(action);
+  return action;
+}
+
+Future<Model> deleteProgramAction(Request req) async {
+  await req.programService.deleteProgramAction(
+    userId: req.userId,
+    programId: req.rawPathParameters[#programId]!,
+    actionId: req.rawPathParameters[#actionId]!,
+  );
+  throw const NoContent();
+}
+
+Future<ProgramBasesResponse> getProgramBases(Request req) async {
+  final bases = await req.programService.getProgramBases(
+    userId: req.userId,
+    programId: req.rawPathParameters[#programId]!,
+  );
+  return ProgramBasesResponse(bases: bases);
+}
+
+Future<Model> createProgramBase(Request req) {
+  return createProgramBaseFor(req, req.rawPathParameters[#programId]!);
+}
+
+Future<Model> createProgramBaseFor(Request req, String programId) async {
+  final input = await ProgramBaseIn.fromRequest(req);
+  final (base, isNew) = await req.programService.createProgramBase(
+    userId: req.userId,
+    programId: programId,
+    base: input.base,
+  );
+  if (isNew) return Created(base);
+  return base;
+}
+
+Future<Model> deleteProgramBase(Request req) async {
+  await req.programService.deleteProgramBase(
+    userId: req.userId,
+    programId: req.rawPathParameters[#programId]!,
+    baseId: req.rawPathParameters[#baseId]!,
+  );
+  throw const NoContent();
+}
+
+/// Where the user stands in [program], and each exercise's current base, read
+/// off its history the way the app reads it. The server's weeks are ISO weeks
+/// in UTC: it knows neither the user's zone nor their first weekday.
+Future<(ProgramPosition, Map<String, ProgramBase>)> programState(
+  Request req,
+  Program program, {
+  bool withBases = false,
+}) async {
+  final service = req.programService;
+  final programId = program.id!;
+  final (marks, actions, bases) = await (
+    service.getProgramMarks(userId: req.userId, programId: programId),
+    service.getProgramActions(userId: req.userId, programId: programId),
+    switch (withBases) {
+      true => service.getProgramBases(userId: req.userId, programId: programId),
+      false => Future.value(const <ProgramBase>[]),
+    },
+  ).wait;
+  final position = ProgramPosition.of(program, marks: marks, actions: actions, now: DateTime.timestamp());
+  return (position, currentBases(bases));
+}

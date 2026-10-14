@@ -96,7 +96,7 @@
         <table class="[&_td:first-child]:break-all">
             <thead><tr><th>Route</th><th>Returns</th></tr></thead>
             <tbody>
-            <tr><td><code>/me</code></td><td>Your username, unit system, and how many workouts, templates, folders, goals and custom exercises you have.</td></tr>
+            <tr><td><code>/me</code></td><td>Your username, unit system, and how many workouts, templates, folders, goals, custom exercises and programs you have.</td></tr>
             <tr><td><code>/me/workouts</code></td><td>Your workouts, newest first, each with its exercises, sets, notes and image links.</td></tr>
             <tr><td><code>/me/workouts/:id</code></td><td>One workout.</td></tr>
             <tr><td><code>/me/workouts/changes</code></td><td>What changed since a cursor: see <a href="#polling">Keeping a copy in sync</a>.</td></tr>
@@ -107,6 +107,8 @@
             <tr><td><code>/me/templates</code></td><td>Your templates, in your order; <code>?folder=</code> for one folder.</td></tr>
             <tr><td><code>/me/template-folders</code></td><td>Your template folders.</td></tr>
             <tr><td><code>/me/goals</code></td><td>Your goals. Goals backed by health data carry their definition only; their progress lives on your phone.</td></tr>
+            <tr><td><code>/me/programs</code></td><td>Your programs, each with where you stand: the program week, the sessions done in the open cycle and the next one, whether it’s paused, and workouts this week. Worked out from what you logged, the way the app works it out; weeks here are ISO weeks in UTC.</td></tr>
+            <tr><td><code>/me/programs/:id</code></td><td>One program, with each exercise’s current base: the training max, working weight, duration or distance its growth rule raises.</td></tr>
             </tbody>
         </table>
         </div>
@@ -139,7 +141,7 @@
   "url": "https://api.heart-of.me/v1/mcp",
   "headers": {"Authorization": "Bearer hrt_…"}
 }}}</code></pre>
-        <p>The assistant can read your profile, workouts, templates and folders, goals, personal records, an
+        <p>The assistant can read your profile, workouts, templates and folders, goals, programs, personal records, an
             exercise’s history, your custom exercises and the exercise library. It can’t change anything. Only the
             data it reads counts against your limits, not the tool listing it does at the start of a conversation.
             What it reads goes to the assistant’s provider and is covered by their privacy policy, not ours.</p>

@@ -125,4 +125,46 @@ void main() {
       verify(service.deleteProgram(userId: _meId, programId: _programId, keepTemplates: true)).called(1);
     });
   });
+
+  group('actions and bases', () {
+    test('a new action is 201 for the program in the path; a replay of it is 200', () async {
+      var created = true;
+      when(
+        service.createProgramAction(
+          userId: anyNamed('userId'),
+          programId: anyNamed('programId'),
+          action: anyNamed('action'),
+        ),
+      ).thenAnswer((i) async => (i.namedArguments[#action] as ProgramAction, created));
+      Request body() => wire(
+        jsonRequest(method: Method.post, path: '/', body: {'kind': 'pause', 'at': '2026-10-14T18:00:00Z'}),
+      );
+
+      expect(await createProgramActionFor(body(), _programId), isA<Created<ProgramAction>>());
+      created = false;
+      expect(await createProgramActionFor(body(), _programId), isA<ProgramAction>());
+      verify(
+        service.createProgramAction(userId: _meId, programId: _programId, action: anyNamed('action')),
+      ).called(2);
+    });
+
+    test('a new base is 201', () async {
+      when(
+        service.createProgramBase(userId: anyNamed('userId'), programId: anyNamed('programId'), base: anyNamed('base')),
+      ).thenAnswer((i) async => (i.namedArguments[#base] as ProgramBase, true));
+
+      final result = await createProgramBaseFor(
+        wire(
+          jsonRequest(
+            method: Method.post,
+            path: '/',
+            body: {'exerciseId': '019def00-0000-7000-8000-000000000001', 'value': 100, 'at': '2026-10-14T18:00:00Z'},
+          ),
+        ),
+        _programId,
+      );
+
+      expect(result, isA<Created<ProgramBase>>());
+    });
+  });
 }

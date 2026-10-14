@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(43);
+SELECT plan(49);
 
 SELECT has_table('public'::name, 'workouts'::name);
 
@@ -19,7 +19,9 @@ SELECT columns_are(
                    'note',
                    'pauses',
                    'updated_at',
-                   'changed_xid'
+                   'changed_xid',
+                   'template_id',
+                   'program_id'
                    ]
        );
 
@@ -33,6 +35,8 @@ SELECT col_type_is('public'::name, 'workouts'::name, 'created_at'::name, 'timest
 SELECT col_type_is('public'::name, 'workouts'::name, 'import_id'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'workouts'::name, 'note'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'workouts'::name, 'pauses'::name, 'jsonb'::name);
+SELECT col_type_is('public'::name, 'workouts'::name, 'template_id'::name, 'uuid'::name);
+SELECT col_type_is('public'::name, 'workouts'::name, 'program_id'::name, 'uuid'::name);
 
 SELECT has_pk('public'::name, 'workouts'::name, 'workouts has a primary key');
 SELECT col_is_pk('public'::name, 'workouts'::name, 'id'::name, 'id is the primary key');
@@ -47,9 +51,13 @@ SELECT col_default_is('public', 'workouts', 'created_at', 'now()', 'created_at d
 SELECT col_default_is('public', 'workouts', 'pauses', '[]'::jsonb, 'pauses default to none');
 
 SELECT fk_ok('public', 'workouts', 'user_id', 'public', 'profiles', 'id');
+SELECT fk_ok('public', 'workouts', 'template_id', 'public', 'templates', 'id');
+SELECT fk_ok('public', 'workouts', 'program_id', 'public', 'programs', 'id');
 
 SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_id_idx'::name);
 SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_changed_idx'::name);
+SELECT has_index('public'::name, 'workouts'::name, 'workouts_template_id_idx'::name);
+SELECT has_index('public'::name, 'workouts'::name, 'workouts_program_id_idx'::name);
 SELECT col_type_is('public'::name, 'workouts'::name, 'updated_at'::name, 'timestamp with time zone'::name);
 SELECT col_not_null('public'::name, 'workouts'::name, 'updated_at'::name);
 SELECT col_default_is('public', 'workouts', 'updated_at', 'now()', 'updated_at defaults to now()');

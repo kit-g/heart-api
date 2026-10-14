@@ -106,9 +106,10 @@ WHERE id = @userId
 /// export has to match, so the app can compare it against its local mirror and
 /// know the export is complete rather than assume it.
 ///
-/// Ten independent counts in one round trip; the final cross join is ten
-/// one-row relations. Eight of the ten ride an existing index on their owner
-/// column. The exceptions are `comments` (no `author_id` index — the table's
+/// Fourteen independent counts in one round trip; the final cross join is
+/// fourteen one-row relations. Most ride an existing index on their owner
+/// column; `program_actions` and `program_bases` are indexed by program, not
+/// owner, and scan like the two below. The exceptions are `comments` (no `author_id` index — the table's
 /// indexes are all on the four target columns) and `goals` (`goals_user_id_idx`
 /// is partial on `NOT archived`, and an export counts archived goals too), both
 /// of which scan. Fine for a call made once before an export; the thing to
@@ -174,6 +175,22 @@ WITH
   _connections AS (
     SELECT count(*) AS n, NULL::text AS latest
     FROM connections WHERE initiator_id = @userId OR target_id = @userId
+  ),
+  _programs AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM programs WHERE user_id = @userId
+  ),
+  _program_actions AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM program_actions WHERE user_id = @userId
+  ),
+  _program_bases AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM program_bases WHERE user_id = @userId
+  ),
+  _skips AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM skips WHERE user_id = @userId
   )
 SELECT
   _custom_exercises.n         AS custom_exercises_count,
@@ -195,7 +212,15 @@ SELECT
   _comments.n                 AS comments_count,
   _comments.latest            AS comments_latest,
   _connections.n              AS connections_count,
-  _connections.latest         AS connections_latest
+  _connections.latest         AS connections_latest,
+  _programs.n                 AS programs_count,
+  _programs.latest            AS programs_latest,
+  _program_actions.n          AS program_actions_count,
+  _program_actions.latest     AS program_actions_latest,
+  _program_bases.n            AS program_bases_count,
+  _program_bases.latest       AS program_bases_latest,
+  _skips.n                    AS skips_count,
+  _skips.latest               AS skips_latest
 FROM _custom_exercises,
      _exercise_preferences,
      _template_folders,
@@ -205,7 +230,11 @@ FROM _custom_exercises,
      _workout_images,
      _goals,
      _comments,
-     _connections
+     _connections,
+     _programs,
+     _program_actions,
+     _program_bases,
+     _skips
 ''';
 
 const _listExercises = '''
@@ -491,7 +520,7 @@ _auth AS (
 ),
 _workouts AS (
   SELECT
-    id, name, started_at, completed_at, calories, note, pauses, created_at,
+    id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at,
     _workout_exercises(id) AS exercises,
     COALESCE(
       (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -505,9 +534,9 @@ _workouts AS (
   ORDER BY id DESC
   LIMIT @limit
 )
-SELECT id, name, started_at, completed_at, calories, note, pauses, created_at, exercises, images, false AS forbidden FROM _workouts
+SELECT id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, exercises, images, false AS forbidden FROM _workouts
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
 const _getWorkout = '''
@@ -519,6 +548,8 @@ SELECT
   w.calories,
   w.note,
   w.pauses,
+  w.template_id,
+  w.program_id,
   w.created_at,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
@@ -549,7 +580,7 @@ _auth AS (
   ) AS allowed
 )
 SELECT
-  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.created_at,
+  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -560,7 +591,7 @@ SELECT
 FROM workouts w
 WHERE w.id = @workoutId::uuid AND w.user_id = @targetUserId::text AND (SELECT allowed FROM _auth)
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
 ''';
 
 /// Idempotent create for a workout, the replay's fifth resource
@@ -578,6 +609,14 @@ const _saveWorkout = '''
 WITH
 _existing_workout AS (
   SELECT id FROM workouts WHERE id = @id::uuid AND user_id = @userId
+),
+-- the template and program are the caller's own or nothing: a session saved
+-- before its template synced, or after it was deleted, still saves, unlinked
+_template AS (
+  SELECT id FROM templates WHERE id = @templateId::uuid AND user_id = @userId
+),
+_program AS (
+  SELECT id FROM programs WHERE id = @programId::uuid AND user_id = @userId
 ),
 _order_to_id AS (
   SELECT
@@ -602,10 +641,20 @@ _exercise_lookup AS (
   WHERE e.user_id IS NULL OR e.user_id = @userId
 ),
 _workout AS (
-  INSERT INTO workouts (id, user_id, name, started_at, completed_at, calories, note, pauses)
-  SELECT coalesce(@id::uuid, uuidv7()), @userId, @name, @startedAt, @completedAt, @calories, @note, @pauses::jsonb
+  INSERT INTO workouts (id, user_id, name, started_at, completed_at, calories, note, pauses, template_id, program_id)
+  SELECT
+    coalesce(@id::uuid, uuidv7()),
+    @userId,
+    @name,
+    @startedAt,
+    @completedAt,
+    @calories,
+    @note,
+    @pauses::jsonb,
+    (SELECT id FROM _template),
+    (SELECT id FROM _program)
   WHERE NOT EXISTS (SELECT 1 FROM _existing_workout)
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, created_at
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at
 ),
 _inserted_exercises AS (
   INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note)
@@ -699,6 +748,8 @@ SELECT
   w.calories,
   w.note,
   w.pauses,
+  w.template_id,
+  w.program_id,
   w.created_at,
   coalesce(ej.exercises_json, '[]'::jsonb) AS exercises,
   '[]'::jsonb AS images,
@@ -715,6 +766,8 @@ SELECT
   w.calories,
   w.note,
   w.pauses,
+  w.template_id,
+  w.program_id,
   w.created_at,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
@@ -1108,8 +1161,16 @@ _exercise_lookup AS (
   JOIN _order_to_id otn ON otn.exercise_id = e.id
   WHERE e.user_id IS NULL OR e.user_id = @userId
 ),
--- the note and the pauses are newer than most clients: a body without the key
--- keeps them, and stored pauses are cut to the window the body sets
+-- the caller's own template and program, or nothing, as on create
+_template AS (
+  SELECT id FROM templates WHERE id = @templateId::uuid AND user_id = @userId
+),
+_program AS (
+  SELECT id FROM programs WHERE id = @programId::uuid AND user_id = @userId
+),
+-- the note, the pauses, the template and the program are newer than most
+-- clients: a body without the key keeps them, and stored pauses are cut to the
+-- window the body sets
 _workout AS (
   UPDATE workouts
   SET
@@ -1118,12 +1179,14 @@ _workout AS (
     completed_at = @completedAt,
     calories = @calories,
     note = CASE WHEN @setsNote::boolean THEN @note ELSE note END,
+    template_id = CASE WHEN @setsTemplate::boolean THEN (SELECT id FROM _template) ELSE template_id END,
+    program_id = CASE WHEN @setsProgram::boolean THEN (SELECT id FROM _program) ELSE program_id END,
     pauses = CASE
       WHEN @setsPauses::boolean THEN @pauses::jsonb
       ELSE _clip_pauses(pauses, @startedAt::timestamptz, @completedAt::timestamptz)
     END
   WHERE id = @workoutId::uuid AND user_id = @userId
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, created_at
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at
 ),
 -- The body as stored, read from the statement's snapshot: every CTE sees the
 -- rows as they were before this replace, whatever the others write.
@@ -1294,7 +1357,7 @@ _exercises_json AS (
   LEFT JOIN _sets_json sj ON sj.workout_exercise_id = ie.id
 )
 SELECT
-  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.created_at,
+  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
   -- the replacing branch reads its own RETURNING, because a CTE cannot see
   -- rows it just wrote; the preserving branch reads the table, which is
   -- untouched in that case and so already final
@@ -1332,7 +1395,7 @@ WITH _updated AS (
       )
     END
   WHERE id = @workoutId::uuid AND user_id = @userId
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, created_at
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at
 )
 SELECT
   u.id,
@@ -1342,6 +1405,8 @@ SELECT
   u.calories,
   u.note,
   u.pauses,
+  u.template_id,
+  u.program_id,
   u.created_at,
   _workout_exercises(u.id) AS exercises,
   coalesce(
@@ -2591,6 +2656,211 @@ WHERE id = @id::uuid
   AND user_id = @userId
 ''';
 
+/// A program's steps in the order they were taken. Someone else's program
+/// reads as one with none.
+const _listProgramActions = '''
+SELECT id, program_id, kind, week, at
+FROM program_actions
+WHERE program_id = @programId::uuid
+  AND user_id = @userId
+ORDER BY at, id
+''';
+
+/// A program keeps at most this many steps, and this many bases: years of use,
+/// and a ceiling on what a fold reads.
+const _maxProgramActions = 1000;
+const _maxProgramBases = 5000;
+
+// Idempotent on the id, as the other creates. A program that isn't the
+// caller's trips program_actions_program_fk (404 unknown_program); an empty
+// result is the cap.
+const _createProgramAction =
+    '''
+WITH
+_by_id AS (
+  SELECT id, program_id, kind, week, at
+  FROM program_actions
+  WHERE id = @id::uuid
+    AND user_id = @userId
+),
+_ins AS (
+  INSERT INTO program_actions (id, user_id, program_id, kind, week, at)
+  SELECT coalesce(@id::uuid, uuidv7()), @userId, @programId::uuid, @kind, @week::smallint, @at::timestamptz
+  WHERE NOT EXISTS (SELECT 1 FROM _by_id)
+    AND (SELECT count(*) FROM program_actions WHERE program_id = @programId::uuid) < $_maxProgramActions
+  RETURNING id, program_id, kind, week, at
+)
+SELECT id, program_id, kind, week, at, true AS created FROM _ins
+UNION ALL
+SELECT id, program_id, kind, week, at, false AS created FROM _by_id
+WHERE NOT EXISTS (SELECT 1 FROM _ins)
+''';
+
+const _deleteProgramAction = '''
+DELETE FROM program_actions
+WHERE id = @id::uuid
+  AND program_id = @programId::uuid
+  AND user_id = @userId
+''';
+
+/// Every base of a program, oldest first: the latest per exercise is current.
+const _listProgramBases = '''
+SELECT id, program_id, exercise_id, value, workout_id, action_id, at
+FROM program_bases
+WHERE program_id = @programId::uuid
+  AND user_id = @userId
+ORDER BY at, id
+''';
+
+// Idempotent twice over: on the id, and on (exercise, workout), so a second
+// device replaying the same bump gets the first one back. The exercise must be
+// one the caller can see and the workout one they own; when either isn't, or
+// the program is full, nothing is written and the db layer tells which.
+const _createProgramBase =
+    '''
+WITH
+_existing AS (
+  SELECT id, program_id, exercise_id, value, workout_id, action_id, at
+  FROM program_bases
+  WHERE user_id = @userId
+    AND (
+      id = @id::uuid
+      OR (
+        program_id = @programId::uuid
+        AND exercise_id = @exerciseId::uuid
+        AND workout_id = @workoutId::uuid
+      )
+    )
+  LIMIT 1
+),
+_ins AS (
+  INSERT INTO program_bases (id, user_id, program_id, exercise_id, value, workout_id, action_id, at)
+  SELECT
+    coalesce(@id::uuid, uuidv7()),
+    @userId,
+    @programId::uuid,
+    @exerciseId::uuid,
+    @value::real,
+    @workoutId::uuid,
+    @actionId::uuid,
+    @at::timestamptz
+  WHERE NOT EXISTS (SELECT 1 FROM _existing)
+    AND EXISTS (
+      SELECT 1
+      FROM exercises
+      WHERE id = @exerciseId::uuid
+        AND (user_id IS NULL OR user_id = @userId)
+    )
+    AND (
+      @workoutId::uuid IS NULL
+      OR EXISTS (SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId)
+    )
+    AND (SELECT count(*) FROM program_bases WHERE program_id = @programId::uuid) < $_maxProgramBases
+  RETURNING id, program_id, exercise_id, value, workout_id, action_id, at
+)
+SELECT id, program_id, exercise_id, value, workout_id, action_id, at, true AS created FROM _ins
+UNION ALL
+SELECT id, program_id, exercise_id, value, workout_id, action_id, at, false AS created FROM _existing
+WHERE NOT EXISTS (SELECT 1 FROM _ins)
+''';
+
+/// Why `_createProgramBase` wrote nothing, asked only when it didn't.
+const _diagnoseProgramBase = '''
+SELECT
+  EXISTS (
+    SELECT 1
+    FROM exercises
+    WHERE id = @exerciseId::uuid
+      AND (user_id IS NULL OR user_id = @userId)
+  ) AS exercise_known,
+  (
+    @workoutId::uuid IS NULL
+    OR EXISTS (SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId)
+  ) AS workout_known
+''';
+
+const _deleteProgramBase = '''
+DELETE FROM program_bases
+WHERE id = @id::uuid
+  AND program_id = @programId::uuid
+  AND user_id = @userId
+''';
+
+/// The caller's skips, newest first, a page at a time.
+const _listSkips = '''
+SELECT id, at, reason, weather, template_id, program_id
+FROM skips
+WHERE user_id = @userId
+  AND (@cursor::uuid IS NULL OR id < @cursor::uuid)
+ORDER BY id DESC
+LIMIT @limit
+''';
+
+/// Ten years of days, and then some.
+const _maxSkips = 10000;
+
+// Idempotent on the id, as the other creates. The template and program are the
+// caller's own or nothing, as on a workout: a skip always saves. An empty
+// result is the cap.
+const _createSkip =
+    '''
+WITH
+_by_id AS (
+  SELECT id, at, reason, weather, template_id, program_id
+  FROM skips
+  WHERE id = @id::uuid
+    AND user_id = @userId
+),
+_foreign AS (
+  SELECT 1
+  FROM skips
+  WHERE id = @id::uuid
+    AND user_id <> @userId
+),
+_ins AS (
+  INSERT INTO skips (id, user_id, at, reason, weather, template_id, program_id)
+  SELECT
+    coalesce(@id::uuid, uuidv7()),
+    @userId,
+    @at::timestamptz,
+    @reason,
+    @weather::jsonb,
+    (SELECT id FROM templates WHERE id = @templateId::uuid AND user_id = @userId),
+    (SELECT id FROM programs WHERE id = @programId::uuid AND user_id = @userId)
+  WHERE NOT EXISTS (SELECT 1 FROM _by_id)
+    AND (
+      EXISTS (SELECT 1 FROM _foreign)
+      OR (SELECT count(*) FROM skips WHERE user_id = @userId) < $_maxSkips
+    )
+  RETURNING id, at, reason, weather, template_id, program_id
+)
+SELECT id, at, reason, weather, template_id, program_id, true AS created FROM _ins
+UNION ALL
+SELECT id, at, reason, weather, template_id, program_id, false AS created FROM _by_id
+WHERE NOT EXISTS (SELECT 1 FROM _ins)
+''';
+
+const _deleteSkip = '''
+DELETE FROM skips
+WHERE id = @id::uuid
+  AND user_id = @userId
+''';
+
+/// What a program's position is folded from besides its actions: its workouts,
+/// at their start, and its skips.
+const _listProgramMarks = '''
+SELECT template_id, started_at AS at, true AS is_workout
+FROM workouts
+WHERE program_id = @programId::uuid
+  AND user_id = @userId
+  AND started_at IS NOT NULL
+UNION ALL
+SELECT template_id, at, false AS is_workout
+FROM skips
+WHERE program_id = @programId::uuid
+  AND user_id = @userId
+''';
+
 // Personal access tokens (heart-api#111).
 //
 // The cap counts only active tokens, the same rule `ApiToken.isActive`
@@ -2725,7 +2995,7 @@ WITH _check AS (
 SELECT
   c.stale,
   p.id, p.xid::text AS xid, p.at, p.deleted,
-  w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.created_at,
+  w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
   CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id) END AS exercises,
   CASE WHEN p.deleted THEN NULL ELSE COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)

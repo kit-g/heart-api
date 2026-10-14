@@ -159,3 +159,55 @@ GrowthRule _rule(String exerciseId, Map json) {
     throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: ${e.name} ${e.message}');
   }
 }
+
+/// `POST /programs/:programId/actions` — `{id?, kind, week?, at}`. Only a
+/// replay names a week.
+class ProgramActionIn {
+  final ProgramAction action;
+
+  const new _(this.action);
+
+  static Future<ProgramActionIn> fromRequest(Request req) async {
+    final json = await req.json();
+    final kind = json.parsed('kind', ProgramActionKind.fromString);
+    final week = switch ((kind, json['week'])) {
+      (.replay, final int week) when week >= 1 && week <= 104 => week,
+      (.replay, _) => throw const BadRequest(reason: 'a replay names a week, a whole number from 1 to 104'),
+      (_, null) => null,
+      (_, _) => throw BadRequest(reason: 'only a replay names a week, not a ${kind.value}'),
+    };
+    return ProgramActionIn._(
+      ProgramAction(id: json.uuidV7OrNull(), kind: kind, week: week, at: json.timestamp('at')),
+    );
+  }
+}
+
+/// `POST /programs/:programId/bases` — `{id?, exerciseId, value, workoutId?, actionId?, at}`.
+/// A base names at most one cause; with none, the user set it.
+class ProgramBaseIn {
+  final ProgramBase base;
+
+  const new _(this.base);
+
+  static Future<ProgramBaseIn> fromRequest(Request req) async {
+    final json = await req.json();
+    final workoutId = json.uuidV7OrNull('workoutId');
+    final actionId = json.uuidV7OrNull('actionId');
+    if (workoutId != null && actionId != null) {
+      throw const BadRequest(reason: 'a base has one cause: a workout or an action, not both');
+    }
+    return ProgramBaseIn._(
+      ProgramBase(
+        id: json.uuidV7OrNull(),
+        exerciseId: switch (json.uuidV7OrNull('exerciseId')) {
+          final String id => id,
+          null => throw const BadRequest(reason: 'exerciseId is required'),
+        },
+        value: json.number('value', exclusiveMin: 0),
+        workoutId: workoutId,
+        actionId: actionId,
+        at: json.timestamp('at'),
+      ),
+    );
+  }
+}

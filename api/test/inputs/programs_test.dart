@@ -161,4 +161,50 @@ void main() {
       expect(ProgramDeleteQuery.fromRequest(req(query: {'keepTemplates': 'true'})).keepTemplates, isTrue);
     });
   });
+
+  group('ProgramActionIn', () {
+    test('a replay names its week; nothing else does', () async {
+      final replay = await ProgramActionIn.fromRequest(
+        req(body: {'kind': 'replay', 'week': 2, 'at': '2026-10-14T18:00:00Z'}),
+      );
+      expect(replay.action.week, 2);
+      final pause = await ProgramActionIn.fromRequest(req(body: {'kind': 'pause', 'at': '2026-10-14T18:00:00Z'}));
+      expect(pause.action.kind, ProgramActionKind.pause);
+
+      for (final body in [
+        {'kind': 'replay', 'at': '2026-10-14T18:00:00Z'},
+        {'kind': 'replay', 'week': 0, 'at': '2026-10-14T18:00:00Z'},
+        {'kind': 'pause', 'week': 2, 'at': '2026-10-14T18:00:00Z'},
+        {'kind': 'deload', 'at': '2026-10-14T18:00:00Z'},
+        {'kind': 'pause'},
+      ]) {
+        await expectLater(ProgramActionIn.fromRequest(req(body: body)), badRequest(), reason: '$body');
+      }
+    });
+  });
+
+  group('ProgramBaseIn', () {
+    const workout = '0198c1a2-b3c4-7d5e-8f60-718293a4b520';
+    const action = '0198c1a2-b3c4-7d5e-8f60-718293a4b521';
+
+    test('reads a bump caused by a workout', () async {
+      final input = await ProgramBaseIn.fromRequest(
+        req(body: {'exerciseId': _bench, 'value': 102.5, 'workoutId': workout, 'at': '2026-10-14T18:00:00Z'}),
+      );
+      expect(input.base.value, 102.5);
+      expect(input.base.workoutId, workout);
+      expect(input.base.isManual, isFalse);
+    });
+
+    test('rejects a missing exercise, a value of zero, and two causes', () async {
+      for (final body in [
+        {'value': 100, 'at': '2026-10-14T18:00:00Z'},
+        {'exerciseId': _bench, 'value': 0, 'at': '2026-10-14T18:00:00Z'},
+        {'exerciseId': _bench, 'value': 100, 'workoutId': workout, 'actionId': action, 'at': '2026-10-14T18:00:00Z'},
+        {'exerciseId': _bench, 'value': 100},
+      ]) {
+        await expectLater(ProgramBaseIn.fromRequest(req(body: body)), badRequest(), reason: '$body');
+      }
+    });
+  });
 }

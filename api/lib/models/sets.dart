@@ -30,7 +30,8 @@ SetType setType(Object? value, {required String at}) {
 
 /// A set's `target` as a body sent it: an object keyed by measure, each a
 /// `{min, max?}` range — at least zero, `max` no lower than `min`, reps and
-/// seconds whole — or null (or `{}`) for no target, which clears a stored one.
+/// seconds whole — plus, in a program, `share`: the weight as a share of the
+/// exercise's base. Null (or `{}`) is no target, which clears a stored one.
 /// Anything else is a 400 naming the set at [at].
 SetTarget setTarget(Object? value, {required String at}) {
   Never invalid(String why) => throw BadRequest(code: 'invalid_target', reason: '$at.target $why');
@@ -65,12 +66,23 @@ SetTarget setTarget(Object? value, {required String at}) {
     };
   }
 
+  // the weight as a share of the exercise's base in a program: above zero,
+  // and at most twice it, which no plan reaches
+  num? share(Object? value) {
+    return switch (value) {
+      null => null,
+      final num share when share > 0 && share <= 2 => share,
+      _ => invalid('.share must be a number above 0 and at most 2'),
+    };
+  }
+
   return switch (value) {
     null => SetTarget.none,
     final Map m => SetTarget({
       for (final MapEntry(:key, :value) in m.entries)
-        if (measure(key) case final measure) measure: range(measure, value),
-    }),
+        if (key != 'share')
+          if (measure(key) case final measure) measure: range(measure, value),
+    }, share: share(m['share'])),
     _ => invalid('must be an object or null'),
   };
 }

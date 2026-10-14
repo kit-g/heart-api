@@ -422,6 +422,9 @@ void main() {
         },
         'a key besides min and max',
       ),
+      ({'share': 0}, 'a share of nothing'),
+      ({'share': 2.5}, 'a share past twice the base'),
+      ({'share': '85%'}, 'a share that is not a number'),
     ]) {
       test('a target with $why is a 400 naming the set', () async {
         await expectLater(
@@ -436,6 +439,21 @@ void main() {
         );
       });
     }
+
+    test('a share of the base sits beside the measures', () async {
+      final request = await parse([
+        {
+          'reps': 5,
+          'target': {
+            'share': 0.85,
+            'reps': {'min': 5},
+          },
+        },
+      ]);
+      final target = request.exercises.single.sets.single.target!;
+      expect(target.share, 0.85);
+      expect(target[TargetMeasure.reps], const TargetRange(min: 5));
+    });
 
     test('a fractional weight or distance is fine', () async {
       final request = await parse([

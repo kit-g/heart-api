@@ -16,6 +16,7 @@ import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
 import 'package:heart/routes/oauth.dart' as oauth;
 import 'package:heart/routes/programs.dart' as programs;
+import 'package:heart/routes/skips.dart' as skips;
 import 'package:heart/routes/template_folders.dart' as folders;
 import 'package:heart/routes/templates.dart' as templates;
 import 'package:heart/routes/tokens.dart' as tokens;
@@ -67,6 +68,15 @@ final routes = <(String, Method), ModelHandler>{
   ('/programs/:programId', .get): programs.getMyProgram,
   ('/programs/:programId', .put): programs.updateProgram,
   ('/programs/:programId', .delete): programs.deleteProgram,
+  ('/programs/:programId/actions', .get): programs.getProgramActions,
+  ('/programs/:programId/actions', .post): programs.createProgramAction,
+  ('/programs/:programId/actions/:actionId', .delete): programs.deleteProgramAction,
+  ('/programs/:programId/bases', .get): programs.getProgramBases,
+  ('/programs/:programId/bases', .post): programs.createProgramBase,
+  ('/programs/:programId/bases/:baseId', .delete): programs.deleteProgramBase,
+  ('/skips', .get): skips.getMySkips,
+  ('/skips', .post): skips.createSkip,
+  ('/skips/:skipId', .delete): skips.deleteSkip,
   ('/events', .post): events.handler,
   ('/template-folders', .get): folders.getMyFolders,
   ('/template-folders', .post): folders.createFolder,

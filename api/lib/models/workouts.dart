@@ -175,6 +175,22 @@ class WorkoutRequest {
   /// present list, an empty one included, is the new value.
   bool get setsPauses => body.containsKey('pauses');
 
+  /// Whether this payload speaks about the template the workout was started
+  /// from, and about the program it counts toward. Absent keeps what is stored,
+  /// which is what a build that predates programs sends.
+  bool get setsTemplate => body.containsKey('templateId');
+
+  bool get setsProgram => body.containsKey('programId');
+
+  /// A link, never a requirement: anything but a v7 id reads as none, and the
+  /// query drops an id that isn't the caller's, so a workout always saves.
+  String? _link(String field) {
+    return switch (body[field]) {
+      final String id when isUuidV7(id) => id,
+      _ => null,
+    };
+  }
+
   List<Map> _exercises() {
     final source = (body['exercises'] as List? ?? []).cast<Map>();
     final out = <Map>[];
@@ -356,6 +372,8 @@ class WorkoutRequest {
       'calories': (body['calories'] as num?)?.toDouble(),
       'note': workoutNote(body['note']),
       'pauses': jsonEncode(workoutPauses(body['pauses']).map((pause) => pause.toMap()).toList()),
+      'templateId': _link('templateId'),
+      'programId': _link('programId'),
       'exercises': jsonEncode(_exercises()),
     };
   }

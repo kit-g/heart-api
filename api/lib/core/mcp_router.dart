@@ -21,6 +21,7 @@ RelicRouter buildMcpRouter({required Database database}) {
     ..use('/', templatesDb(db: database))
     ..use('/', templateFoldersDb(db: database))
     ..use('/', goalsDb(db: database))
+    ..use('/', programsDb(db: database))
     ..add(.post, '/', mcpEndpoint)
     ..add(.get, '/.well-known/oauth-protected-resource', mcpResourceMetadata)
     ..add(.get, '/', mcpMethodNotAllowed)

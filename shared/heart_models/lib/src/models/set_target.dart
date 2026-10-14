@@ -73,18 +73,31 @@ abstract interface class SetTarget implements Model {
   /// Nothing at all, readable or not.
   bool get isEmpty;
 
+  /// The weight as a share of the exercise's base in a program, a training
+  /// max (heart-api#86): 0.85 is 85%. On the wire as `share`, beside the
+  /// measures. Outside a program it has nothing to be a share of.
+  num? get share;
+
+  /// The same target with [share] replaced, or removed when null.
+  SetTarget withShare(num? share);
+
   TargetRange? operator [](TargetMeasure measure);
 
   /// The same target with [measure]'s range replaced, or removed when [range]
   /// is null. Everything else, what this build could not read included, stays.
   SetTarget withRange(TargetMeasure measure, TargetRange? range);
 
-  factory(Map<TargetMeasure, TargetRange> ranges) => _SetTarget(Map.of(ranges), const {});
+  factory(Map<TargetMeasure, TargetRange> ranges, {num? share}) => _SetTarget(Map.of(ranges), const {}, share);
 
   factory fromJson(Map json) {
     final ranges = <TargetMeasure, TargetRange>{};
     final unread = <String, Object?>{};
+    num? share;
     for (final MapEntry(:key, :value) in json.entries) {
+      if (key == 'share' && value is num && value > 0) {
+        share = value;
+        continue;
+      }
       final measure = TargetMeasure.values.where((each) => each.value == key).firstOrNull;
       try {
         switch ((measure, value)) {
@@ -97,7 +110,7 @@ abstract interface class SetTarget implements Model {
         unread['$key'] = value;
       }
     }
-    return _SetTarget(ranges, unread);
+    return _SetTarget(ranges, unread, share);
   }
 }
 
@@ -108,10 +121,16 @@ class _SetTarget implements SetTarget {
   /// Measures this build could not read, by their wire key, as they arrived.
   final Map<String, Object?> _unread;
 
-  const new(this.ranges, this._unread);
+  @override
+  final num? share;
+
+  const new(this.ranges, this._unread, [this.share]);
 
   @override
-  bool get isEmpty => ranges.isEmpty && _unread.isEmpty;
+  bool get isEmpty => ranges.isEmpty && _unread.isEmpty && share == null;
+
+  @override
+  SetTarget withShare(num? share) => _SetTarget(ranges, {..._unread}..remove('share'), share);
 
   @override
   TargetRange? operator [](TargetMeasure measure) => ranges[measure];
@@ -127,7 +146,7 @@ class _SetTarget implements SetTarget {
     }
     // the user set this measure, so a value this build couldn't read under
     // the same key no longer stands
-    return _SetTarget(ranges, {..._unread}..remove(measure.value));
+    return _SetTarget(ranges, {..._unread}..remove(measure.value), share);
   }
 
   @override
@@ -135,6 +154,7 @@ class _SetTarget implements SetTarget {
     return {
       ..._unread,
       for (final MapEntry(:key, :value) in ranges.entries) key.value: value.toMap(),
+      'share': ?share,
     };
   }
 

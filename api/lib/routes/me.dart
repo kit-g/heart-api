@@ -17,6 +17,7 @@ import 'package:heart/models/template_folders.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/routes/exercises.dart' as exercises;
 import 'package:heart/routes/goals.dart' as goals;
+import 'package:heart/routes/programs.dart' as programs;
 import 'package:heart/routes/template_folders.dart' as folders;
 import 'package:heart/routes/templates.dart' as templates;
 import 'package:heart_models/heart_models.dart';
@@ -76,6 +77,27 @@ Future<GoalsResponse> getMyGoals(Request req) => goals.getTargetUserGoalsById(
   req.userId,
   archived: GoalsQuery.fromRequest(req).archived,
 );
+
+/// The user's programs, each with where they stand in it.
+Future<MePrograms> getMyPrograms(Request req) async {
+  final all = await req.programService.getPrograms(req.userId);
+  return MePrograms(
+    await Future.wait([
+      for (final program in all) programs.programState(req, program).then((state) => MeProgram(program, state.$1)),
+    ]),
+  );
+}
+
+Future<MeProgram> getMyProgram(Request req) => getMyProgramById(req, req.rawPathParameters[#programId]!);
+
+/// One program with where the user stands in it and each exercise's current
+/// base.
+Future<MeProgram> getMyProgramById(Request req, String programId) async {
+  if (!isUuidV7(programId)) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
+  final program = await req.programService.getProgram(userId: req.userId, programId: programId);
+  final (position, bases) = await programs.programState(req, program, withBases: true);
+  return MeProgram(program, position, bases: bases);
+}
 
 /// Larger than this, an export goes out through a presigned link instead of
 /// the response body, which Lambda caps at 6 MB.

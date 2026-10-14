@@ -4,6 +4,7 @@ import 'package:heart/models/images.dart';
 import 'package:heart/models/oauth.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/programs.dart';
+import 'package:heart/models/skips.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart';
@@ -15,6 +16,7 @@ final _chatsProperty = ContextProperty<ChartPreferenceService>('ChartPreferenceS
 final _exercisePrefsProperty = ContextProperty<ApiExercisePreferenceService>('ApiExercisePreferenceService');
 final _goalsProperty = ContextProperty<IdempotentGoalService>('IdempotentGoalService');
 final _programsProperty = ContextProperty<ProgramService>('ProgramService');
+final _skipsProperty = ContextProperty<SkipService>('SkipService');
 final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
 final _devicesProperty = ContextProperty<DeviceService>('DeviceService');
@@ -114,6 +116,15 @@ Middleware programsDb({required ProgramService db}) {
   };
 }
 
+Middleware skipsDb({required SkipService db}) {
+  return (Handler next) {
+    return (request) {
+      _skipsProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
 Middleware templatesDb({required IdempotentTemplateService db}) {
   return (Handler next) {
     return (request) {
@@ -170,6 +181,10 @@ extension DatabaseContext on Request {
   ProgramService get programService => _programsProperty.get(this);
 
   set programService(ProgramService v) => _programsProperty[this] = v;
+
+  SkipService get skipService => _skipsProperty.get(this);
+
+  set skipService(SkipService v) => _skipsProperty[this] = v;
 
   ConnectionsService get connectionsService => _connectionsProperty.get(this);
 
