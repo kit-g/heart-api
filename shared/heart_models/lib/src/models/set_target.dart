@@ -16,12 +16,14 @@ enum TargetMeasure {
 
 /// One measure's aim: at least [min], at most [max]. A [max] equal to [min] is
 /// an exact number ("8 reps", "hold 30 s"); a null [max] is an open top ("8+",
-/// as many as possible).
+/// as many as possible). An [amrap] range with a [max] is as many as possible
+/// up to it ("up to 10"): estimated-max formulas break down past about 10.
 final class TargetRange implements Model {
   final num min;
   final num? max;
+  final bool amrap;
 
-  const new({required this.min, this.max});
+  const new({required this.min, this.max, this.amrap = false});
 
   factory exactly(num value) => TargetRange(min: value, max: value);
 
@@ -29,31 +31,40 @@ final class TargetRange implements Model {
 
   bool get isOpen => max == null;
 
-  /// Reads `{min, max?}`, and nothing else: a range carrying a key this build
-  /// doesn't know is a shape it predates, so it is an [ArgumentError] here and
-  /// [SetTarget.fromJson] carries it as it arrived.
+  /// As many as possible: an open top, or a capped [amrap].
+  bool get isAmrap => isOpen || amrap;
+
+  /// Reads `{min, max?, amrap?}`, and nothing else: a range carrying a key this
+  /// build doesn't know is a shape it predates, so it is an [ArgumentError] here
+  /// and [SetTarget.fromJson] carries it as it arrived.
   factory fromJson(Map json) {
-    if (json.keys.any((key) => key != 'min' && key != 'max')) {
+    if (json.keys.any((key) => key != 'min' && key != 'max' && key != 'amrap')) {
       throw ArgumentError.value(json, 'target', 'unknown range shape');
     }
+    final amrap = switch (json['amrap']) {
+      null || false => false,
+      true => true,
+      _ => throw ArgumentError.value(json, 'target', 'unknown range shape'),
+    };
     return switch (json) {
-      {'min': final num min, 'max': final num max} => TargetRange(min: min, max: max),
+      {'min': final num min, 'max': final num max} => TargetRange(min: min, max: max, amrap: amrap),
       {'min': final num min} when json['max'] == null => TargetRange(min: min),
       _ => throw ArgumentError.value(json, 'target', 'unknown range shape'),
     };
   }
 
   @override
-  Map<String, dynamic> toMap() => {'min': min, 'max': ?max};
+  Map<String, dynamic> toMap() => {'min': min, 'max': ?max, if (amrap && max != null) 'amrap': true};
 
   @override
-  bool operator ==(Object other) => other is TargetRange && other.min == min && other.max == max;
+  bool operator ==(Object other) =>
+      other is TargetRange && other.min == min && other.max == max && other.amrap == amrap;
 
   @override
-  int get hashCode => Object.hash(min, max);
+  int get hashCode => Object.hash(min, max, amrap);
 
   @override
-  String toString() => 'TargetRange($min, $max)';
+  String toString() => 'TargetRange($min, $max${amrap ? ', amrap' : ''})';
 }
 
 /// What a template set aims for, per measure: "6 to 10 reps", "hold 30 s",
@@ -81,21 +92,34 @@ abstract interface class SetTarget implements Model {
   /// The same target with [share] replaced, or removed when null.
   SetTarget withShare(num? share);
 
+  /// Reps in reserve: stop with this many left in the tank. On the wire as
+  /// `rir`, beside the measures.
+  num? get rir;
+
+  /// The same target with [rir] replaced, or removed when null.
+  SetTarget withRir(num? rir);
+
   TargetRange? operator [](TargetMeasure measure);
 
   /// The same target with [measure]'s range replaced, or removed when [range]
   /// is null. Everything else, what this build could not read included, stays.
   SetTarget withRange(TargetMeasure measure, TargetRange? range);
 
-  factory(Map<TargetMeasure, TargetRange> ranges, {num? share}) => _SetTarget(Map.of(ranges), const {}, share);
+  factory(Map<TargetMeasure, TargetRange> ranges, {num? share, num? rir}) =>
+      _SetTarget(Map.of(ranges), const {}, share, rir);
 
   factory fromJson(Map json) {
     final ranges = <TargetMeasure, TargetRange>{};
     final unread = <String, Object?>{};
     num? share;
+    num? rir;
     for (final MapEntry(:key, :value) in json.entries) {
       if (key == 'share' && value is num && value > 0) {
         share = value;
+        continue;
+      }
+      if (key == 'rir' && value is num && value >= 0) {
+        rir = value;
         continue;
       }
       final measure = TargetMeasure.values.where((each) => each.value == key).firstOrNull;
@@ -110,7 +134,7 @@ abstract interface class SetTarget implements Model {
         unread['$key'] = value;
       }
     }
-    return _SetTarget(ranges, unread, share);
+    return _SetTarget(ranges, unread, share, rir);
   }
 }
 
@@ -123,14 +147,19 @@ class _SetTarget implements SetTarget {
 
   @override
   final num? share;
+  @override
+  final num? rir;
 
-  const new(this.ranges, this._unread, [this.share]);
+  const new(this.ranges, this._unread, [this.share, this.rir]);
 
   @override
-  bool get isEmpty => ranges.isEmpty && _unread.isEmpty && share == null;
+  bool get isEmpty => ranges.isEmpty && _unread.isEmpty && share == null && rir == null;
 
   @override
-  SetTarget withShare(num? share) => _SetTarget(ranges, {..._unread}..remove('share'), share);
+  SetTarget withShare(num? share) => _SetTarget(ranges, {..._unread}..remove('share'), share, rir);
+
+  @override
+  SetTarget withRir(num? rir) => _SetTarget(ranges, {..._unread}..remove('rir'), share, rir);
 
   @override
   TargetRange? operator [](TargetMeasure measure) => ranges[measure];
@@ -146,7 +175,7 @@ class _SetTarget implements SetTarget {
     }
     // the user set this measure, so a value this build couldn't read under
     // the same key no longer stands
-    return _SetTarget(ranges, {..._unread}..remove(measure.value), share);
+    return _SetTarget(ranges, {..._unread}..remove(measure.value), share, rir);
   }
 
   @override
@@ -155,6 +184,7 @@ class _SetTarget implements SetTarget {
       ..._unread,
       for (final MapEntry(:key, :value) in ranges.entries) key.value: value.toMap(),
       'share': ?share,
+      'rir': ?rir,
     };
   }
 

@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(16);
+SELECT plan(19);
 
 SELECT has_table('public'::name, 'template_exercises'::name);
 
@@ -11,7 +11,9 @@ SELECT columns_are(
                    'id',
                    'template_id',
                    'exercise_id',
-                   'exercise_order'
+                   'exercise_order',
+                   'rest',
+                   'superset'
                    ]
        );
 
@@ -34,6 +36,16 @@ SELECT fk_ok('public', 'template_exercises', 'template_id', 'public', 'templates
 SELECT fk_ok('public', 'template_exercises', 'exercise_id', 'public', 'exercises', 'id');
 
 SELECT has_index('public'::name, 'template_exercises'::name, 'template_exercises_template_id_idx'::name);
+
+SELECT col_type_is('public'::name, 'template_exercises'::name, 'rest'::name, 'integer'::name);
+SELECT col_type_is('public'::name, 'template_exercises'::name, 'superset'::name, 'smallint'::name);
+SELECT throws_ok(
+               $$
+               INSERT INTO template_exercises (template_id, exercise_id, exercise_order, rest)
+               VALUES (create_test_template(create_test_profile()), create_test_exercise(), 0, 1801)
+               $$,
+               '23514', NULL, 'rest stops at 30 minutes'
+       );
 
 SELECT * FROM finish();
 

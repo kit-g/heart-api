@@ -706,6 +706,88 @@ void main() {
     });
   });
 
+  group('rest and the new targets (heart-api#230)', () {
+    late String exerciseId;
+
+    setUpAll(() async {
+      exerciseId = await h.seedGlobalExercise();
+    });
+
+    TemplateRequest body({String? teId, int? rest, bool setsRest = false, SetTarget? target}) => TemplateRequest(
+      userId: coachId,
+      name: 'Rested',
+      exercises: [
+        TemplateExerciseRequest(
+          id: teId,
+          exerciseId: exerciseId,
+          order: 0,
+          rest: rest,
+          setsRest: setsRest,
+          sets: [TemplateSetRequest(reps: 5, target: target)],
+        ),
+      ],
+    );
+
+    test('rest is stored, kept by a replace that leaves it out, and cleared by null', () async {
+      final teId = uuidV7();
+      final created = await h.db.createTemplate(
+        userId: coachId,
+        body: body(teId: teId, rest: 150, setsRest: true),
+      );
+      expect(created.single.rest, 150);
+      expect((await h.db.getTemplate(userId: coachId, templateId: created.id)).single.rest, 150);
+
+      final kept = await h.db.updateTemplate(
+        userId: coachId,
+        templateId: created.id,
+        body: body(teId: teId),
+      );
+      expect(kept.single.rest, 150, reason: 'a build that predates rest');
+
+      final cleared = await h.db.updateTemplate(
+        userId: coachId,
+        templateId: created.id,
+        body: body(teId: teId, setsRest: true),
+      );
+      expect(cleared.single.rest, isNull);
+    });
+
+    test('a superset is stored, kept by a replace that leaves it out, and cleared by null', () async {
+      final teId = uuidV7();
+      TemplateRequest grouped({int? superset, bool sets = false}) => TemplateRequest(
+        userId: coachId,
+        name: 'Paired',
+        exercises: [
+          TemplateExerciseRequest(
+            id: teId,
+            exerciseId: exerciseId,
+            order: 0,
+            superset: superset,
+            setsSuperset: sets,
+            sets: [const TemplateSetRequest(reps: 10)],
+          ),
+        ],
+      );
+      final created = await h.db.createTemplate(userId: coachId, body: grouped(superset: 1, sets: true));
+      expect(created.single.superset, 1);
+      final kept = await h.db.updateTemplate(userId: coachId, templateId: created.id, body: grouped());
+      expect(kept.single.superset, 1);
+      final cleared = await h.db.updateTemplate(userId: coachId, templateId: created.id, body: grouped(sets: true));
+      expect(cleared.single.superset, isNull);
+    });
+
+    test('reps in reserve and a capped AMRAP round-trip', () async {
+      final target = SetTarget({.reps: const TargetRange(min: 5, max: 10, amrap: true)}, rir: 1);
+      final created = await h.db.createTemplate(
+        userId: coachId,
+        body: body(target: target),
+      );
+      final read = (await h.db.getTemplate(userId: coachId, templateId: created.id)).single.single.target!;
+      expect(read.rir, 1);
+      expect(read[TargetMeasure.reps], const TargetRange(min: 5, max: 10, amrap: true));
+    });
+  });
+
   group('targets round-trip (heart-api#195)', () {
     late String exerciseId;
 

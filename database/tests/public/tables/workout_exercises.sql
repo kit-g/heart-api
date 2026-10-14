@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(23);
+SELECT plan(24);
 
 SELECT has_table('public'::name, 'workout_exercises'::name);
 
@@ -13,12 +13,14 @@ SELECT columns_are(
                    'exercise_id',
                    'exercise_order',
                    'met',
-                   'note'
+                   'note',
+                   'superset'
                    ]
        );
 
 SELECT col_type_is('public'::name, 'workout_exercises'::name, 'id'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'workout_exercises'::name, 'workout_id'::name, 'uuid'::name);
+SELECT col_type_is('public'::name, 'workout_exercises'::name, 'superset'::name, 'smallint'::name);
 SELECT col_type_is('public'::name, 'workout_exercises'::name, 'exercise_id'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'workout_exercises'::name, 'exercise_order'::name, 'integer'::name);
 SELECT col_type_is('public'::name, 'workout_exercises'::name, 'met'::name, 'real'::name);

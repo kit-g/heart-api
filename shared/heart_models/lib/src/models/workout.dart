@@ -35,6 +35,16 @@ abstract interface class WorkoutExercise
   /// Null when unset; the server caps it at 500 characters.
   abstract String? note;
 
+  /// Rest between sets, in seconds, as a template plans it: 2–3 minutes for a
+  /// compound lift, 60–90 seconds for isolation work. Null leaves it to the
+  /// user's own timer. A workout started from the template carries it.
+  abstract int? rest;
+
+  /// The superset this exercise belongs to in its session: exercises with the
+  /// same number are done back to back, a circuit when there are more than
+  /// two. Null stands alone. Only meaningful within one template or workout.
+  abstract int? superset;
+
   void add(ExerciseSet set);
 
   bool remove(ExerciseSet set);
@@ -71,9 +81,18 @@ abstract interface class WorkoutExercise
       order: json['exercise_order'] ?? json['order'],
       met: (json['met'] as num?)?.toDouble(),
       note: json['note'] as String?,
+      rest: (json['rest'] as num?)?.toInt(),
+      superset: (json['superset'] as num?)?.toInt(),
+      spoken: {
+        for (final key in _clearable)
+          if (json.containsKey(key)) key,
+      },
     );
   }
 }
+
+/// The keys of a [WorkoutExercise] that a save clears by sending null.
+const _clearable = {'rest', 'superset'};
 
 abstract interface class HasExercises {
   /// starts a new exercise
@@ -321,6 +340,33 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
   @override
   String? note;
 
+  int? _rest;
+
+  @override
+  int? get rest => _rest;
+
+  @override
+  set rest(int? value) {
+    _rest = value;
+    _spoken.add('rest');
+  }
+
+  /// The clearable keys this exercise speaks about, null or not: ones it
+  /// arrived with or had assigned. [toMap] sends a null for them, which clears
+  /// the server's value; a key it leaves out keeps it.
+  final Set<String> _spoken;
+
+  int? _superset;
+
+  @override
+  int? get superset => _superset;
+
+  @override
+  set superset(int? value) {
+    _superset = value;
+    _spoken.add('superset');
+  }
+
   new _({
     ExerciseSet? starter,
     DateTime? start,
@@ -328,10 +374,14 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
     this.order,
     this.met,
     this.note,
+    this._rest,
+    this._superset,
+    Set<String>? spoken,
     required this._exercise,
     List<ExerciseSet>? sets,
     List<(int, Map)>? unread,
-  }) : start = start ?? DateTime.timestamp(),
+  }) : _spoken = {...?spoken},
+       start = start ?? DateTime.timestamp(),
        _sets = sets ?? [],
        _unread = unread ?? [] {
     if (starter != null) {
@@ -387,6 +437,8 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
       'start': start.toIso8601String(),
       'met': ?met,
       'note': ?note,
+      if (rest != null || _spoken.contains('rest')) 'rest': rest,
+      if (superset != null || _spoken.contains('superset')) 'superset': superset,
       'sets': splice([for (final each in this) each.toMap()], _unread),
     };
   }
@@ -757,7 +809,10 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         final exercise = WorkoutExercise(starter: each.first.copy());
         // met describes the original session (dropped, like calories above);
         // a note is an instruction on how to do the exercise, so a repeat carries it.
-        exercise.note = each.note;
+        exercise
+          ..note = each.note
+          ..rest = each.rest
+          ..superset = each.superset;
 
         for (final set in each.skip(1)) {
           exercise.add(set.copy());
@@ -786,6 +841,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         order: e.order,
         met: e.met,
         note: e.note,
+        rest: e.rest,
+        superset: e.superset,
+        spoken: e._spoken,
         exercise: e._exercise,
         sets: sets,
         unread: [...e._unread],
@@ -797,6 +855,8 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         order: exercise.order,
         met: exercise.met,
         note: exercise.note,
+        rest: exercise.rest,
+        superset: exercise.superset,
         exercise: exercise.exercise,
         sets: sets,
         unread: [for (final (index, json) in exercise.unread.indexed) (sets.length + index, json)],

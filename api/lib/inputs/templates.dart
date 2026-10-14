@@ -201,6 +201,20 @@ TemplateExerciseRequest _exercise(Map<String, dynamic> json, int index) {
       final num o => o.toInt(),
       _ => throw BadRequest(reason: 'exercises[$index].order must be a number'),
     },
+    // absent keeps a stored rest; null clears it
+    rest: switch (json['rest']) {
+      null => null,
+      final int seconds when seconds >= 0 && seconds <= 1800 => seconds,
+      _ => throw BadRequest(reason: 'exercises[$index].rest must be whole seconds from 0 to 1800'),
+    },
+    setsRest: json.containsKey('rest'),
+    // absent keeps a stored superset; null takes the exercise out of it
+    superset: switch (json['superset']) {
+      null => null,
+      final int n when n >= 1 && n <= 50 => n,
+      _ => throw BadRequest(reason: 'exercises[$index].superset must be a whole number from 1 to 50, or null'),
+    },
+    setsSuperset: json.containsKey('superset'),
     sets: switch (json['sets']) {
       null => const [],
       final List l => [

@@ -166,11 +166,24 @@ class TemplateExerciseRequest {
   final int order;
   final List<TemplateSetRequest> sets;
 
+  /// Rest between sets, in seconds. Only consulted when [setsRest]: a body from
+  /// a build that predates it keeps what is stored.
+  final int? rest;
+  final bool setsRest;
+
+  /// The superset this exercise belongs to; only consulted when [setsSuperset].
+  final int? superset;
+  final bool setsSuperset;
+
   const new({
     this.id,
     required this.exerciseId,
     required this.order,
     this.sets = const [],
+    this.rest,
+    this.setsRest = false,
+    this.superset,
+    this.setsSuperset = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -178,6 +191,8 @@ class TemplateExerciseRequest {
       'id': ?id,
       'exercise_id': exerciseId,
       'order': order,
+      if (setsRest) 'rest': rest,
+      if (setsSuperset) 'superset': superset,
       'sets': sets.map((s) => s.toJson()).toList(),
     };
   }

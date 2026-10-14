@@ -629,7 +629,10 @@ _order_to_id AS (
     (ex->>'order')::int AS exercise_order,
     (ex->>'exercise_id')::uuid AS exercise_id,
     (ex->>'met')::real AS met,
-    ex->>'note' AS note
+    ex->>'note' AS note,
+    (ex->>'superset')::smallint AS superset,
+    -- a body that leaves the superset out (a build that predates it) keeps it
+    ex ? 'superset' AS sets_superset
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -658,18 +661,19 @@ _workout AS (
   RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at
 ),
 _inserted_exercises AS (
-  INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note)
+  INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note, superset)
   SELECT
     coalesce(otn.id, uuidv7(coalesce(otn.started_at, clock_timestamp()))),
     w.id,
     el.exercise_id,
     otn.exercise_order,
     otn.met,
-    otn.note
+    otn.note,
+    otn.superset
   FROM _workout w
   CROSS JOIN _order_to_id otn
   JOIN _exercise_lookup el ON el.exercise_id = otn.exercise_id
-  RETURNING id, exercise_order, met, note
+  RETURNING id, exercise_order, met, note, superset
 ),
 _sets_input AS (
   SELECT
@@ -732,6 +736,7 @@ _exercises_json AS (
       'exercise_order', ie.exercise_order,
       'met', ie.met,
       'note', ie.note,
+      'superset', ie.superset,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -1150,7 +1155,10 @@ _order_to_id AS (
     (ex->>'order')::int AS exercise_order,
     (ex->>'exercise_id')::uuid AS exercise_id,
     (ex->>'met')::real AS met,
-    ex->>'note' AS note
+    ex->>'note' AS note,
+    (ex->>'superset')::smallint AS superset,
+    -- a body that leaves the superset out (a build that predates it) keeps it
+    ex ? 'superset' AS sets_superset
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -1209,36 +1217,42 @@ _previous_sets AS (
 -- body no longer names is deleted, and its cascade is then the point.
 _updated_exercises AS (
   UPDATE workout_exercises we
-  SET exercise_id = el.exercise_id, exercise_order = otn.exercise_order, met = otn.met, note = otn.note
+  SET
+    exercise_id = el.exercise_id,
+    exercise_order = otn.exercise_order,
+    met = otn.met,
+    note = otn.note,
+    superset = CASE WHEN otn.sets_superset THEN otn.superset ELSE we.superset END
   FROM _order_to_id otn
   JOIN _exercise_lookup el ON el.exercise_id = otn.exercise_id
   WHERE @replacesExercises::boolean
     AND we.id = otn.id
     AND we.id IN (SELECT id FROM _previous_exercises)
-  RETURNING we.id, we.exercise_order, we.met, we.note
+  RETURNING we.id, we.exercise_order, we.met, we.note, we.superset
 ),
 -- a new id, or one this workout doesn't hold: an id another workout holds
 -- trips the primary key here, which the caller maps to its 400/403
 _inserted_exercises AS (
-  INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note)
+  INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note, superset)
   SELECT
     coalesce(otn.id, uuidv7(coalesce(otn.started_at, clock_timestamp()))),
     w.id,
     el.exercise_id,
     otn.exercise_order,
     otn.met,
-    otn.note
+    otn.note,
+    otn.superset
   FROM _workout w
   CROSS JOIN _order_to_id otn
   JOIN _exercise_lookup el ON el.exercise_id = otn.exercise_id
   WHERE @replacesExercises::boolean
     AND (otn.id IS NULL OR otn.id NOT IN (SELECT id FROM _previous_exercises))
-  RETURNING id, exercise_order, met, note
+  RETURNING id, exercise_order, met, note, superset
 ),
 _kept_exercises AS (
-  SELECT id, exercise_order, met, note FROM _updated_exercises
+  SELECT id, exercise_order, met, note, superset FROM _updated_exercises
   UNION ALL
-  SELECT id, exercise_order, met, note FROM _inserted_exercises
+  SELECT id, exercise_order, met, note, superset FROM _inserted_exercises
 ),
 _deleted AS (
   DELETE FROM workout_exercises
@@ -1348,6 +1362,7 @@ _exercises_json AS (
       'exercise_order', ie.exercise_order,
       'met', ie.met,
       'note', ie.note,
+      'superset', ie.superset,
       'sets', coalesce(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -1461,7 +1476,13 @@ _order_to_id AS (
   SELECT
     (ex->>'id')::uuid AS id,
     (ex->>'order')::int AS exercise_order,
-    (ex->>'exercise_id')::uuid AS exercise_id
+    (ex->>'exercise_id')::uuid AS exercise_id,
+    (ex->>'rest')::int AS rest,
+    -- a body that leaves rest or superset out (a build that predates it) keeps
+    -- the stored one
+    ex ? 'rest' AS sets_rest,
+    (ex->>'superset')::smallint AS superset,
+    ex ? 'superset' AS sets_superset
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -1488,7 +1509,7 @@ _template AS (
 -- from a workout carries the workout's ids, and saving it twice must not
 -- collide, so that row gets a fresh id instead
 _inserted_exercises AS (
-  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order)
+  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order, rest, superset)
   SELECT
     CASE
       WHEN otn.id IS NULL OR EXISTS (SELECT 1 FROM template_exercises x WHERE x.id = otn.id) THEN uuidv7()
@@ -1496,11 +1517,13 @@ _inserted_exercises AS (
     END,
     t.id,
     el.id,
-    otn.exercise_order
+    otn.exercise_order,
+    otn.rest,
+    otn.superset
   FROM _template t
   CROSS JOIN _order_to_id otn
   JOIN _exercise_lookup el ON el.id = otn.exercise_id
-  RETURNING id, exercise_id, exercise_order
+  RETURNING id, exercise_id, exercise_order, rest, superset
 ),
 _sets_input AS (
   SELECT
@@ -1550,6 +1573,8 @@ _exercises_json AS (
       'id', ie.id,
       'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
       'exercise_order', ie.exercise_order,
+      'rest', ie.rest,
+      'superset', ie.superset,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -1619,7 +1644,13 @@ _order_to_id AS (
   SELECT
     (ex->>'id')::uuid AS id,
     (ex->>'order')::int AS exercise_order,
-    (ex->>'exercise_id')::uuid AS exercise_id
+    (ex->>'exercise_id')::uuid AS exercise_id,
+    (ex->>'rest')::int AS rest,
+    -- a body that leaves rest or superset out (a build that predates it) keeps
+    -- the stored one
+    ex ? 'rest' AS sets_rest,
+    (ex->>'superset')::smallint AS superset,
+    ex ? 'superset' AS sets_superset
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -1668,15 +1699,19 @@ _previous_sets AS (
 -- statement and would take the re-inserted sets with it.
 _updated_exercises AS (
   UPDATE template_exercises te
-  SET exercise_id = el.id, exercise_order = otn.exercise_order
+  SET
+    exercise_id = el.id,
+    exercise_order = otn.exercise_order,
+    rest = CASE WHEN otn.sets_rest THEN otn.rest ELSE te.rest END,
+    superset = CASE WHEN otn.sets_superset THEN otn.superset ELSE te.superset END
   FROM _order_to_id otn
   JOIN _exercise_lookup el ON el.id = otn.exercise_id
   WHERE te.id = otn.id AND te.id IN (SELECT id FROM _previous_exercises)
-  RETURNING te.id, te.exercise_id, te.exercise_order
+  RETURNING te.id, te.exercise_id, te.exercise_order, te.rest, te.superset
 ),
 -- an id another template holds gets a fresh one, as on create
 _inserted_exercises AS (
-  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order)
+  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order, rest, superset)
   SELECT
     CASE
       WHEN otn.id IS NULL OR EXISTS (SELECT 1 FROM template_exercises x WHERE x.id = otn.id) THEN uuidv7()
@@ -1684,17 +1719,19 @@ _inserted_exercises AS (
     END,
     t.id,
     el.id,
-    otn.exercise_order
+    otn.exercise_order,
+    otn.rest,
+    otn.superset
   FROM _template t
   CROSS JOIN _order_to_id otn
   JOIN _exercise_lookup el ON el.id = otn.exercise_id
   WHERE otn.id IS NULL OR otn.id NOT IN (SELECT id FROM _previous_exercises)
-  RETURNING id, exercise_id, exercise_order
+  RETURNING id, exercise_id, exercise_order, rest, superset
 ),
 _kept_exercises AS (
-  SELECT id, exercise_id, exercise_order FROM _updated_exercises
+  SELECT id, exercise_id, exercise_order, rest, superset FROM _updated_exercises
   UNION ALL
-  SELECT id, exercise_id, exercise_order FROM _inserted_exercises
+  SELECT id, exercise_id, exercise_order, rest, superset FROM _inserted_exercises
 ),
 _deleted AS (
   DELETE FROM template_exercises
@@ -1783,6 +1820,8 @@ _exercises_json AS (
       'id', ke.id,
       'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
       'exercise_order', ke.exercise_order,
+      'rest', ke.rest,
+      'superset', ke.superset,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ke.exercise_order
   ) AS exercises_json
@@ -1963,6 +2002,8 @@ _master_exercises AS (
     te.template_id AS master_id,
     te.id AS source_te_id,
     te.exercise_order,
+    te.rest,
+    te.superset,
     e.name, e.category, e.target, e.instructions, e.asset, e.thumbnail, e.muscles, e.movement, e.health,
     (
       SELECT e2.id FROM exercises e2
@@ -1992,6 +2033,8 @@ _resolved_exercises AS (
     me.master_id,
     me.exercise_order,
     me.source_te_id,
+    me.rest,
+    me.superset,
     coalesce(me.resolved_id, c.id) AS exercise_id
   FROM _master_exercises me
   LEFT JOIN _copied_exercises c ON c.name = me.name AND me.resolved_id IS NULL
@@ -2005,8 +2048,8 @@ _new_template AS (
   RETURNING id, source_template_id
 ),
 _new_exercises AS (
-  INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
-  SELECT nt.id, re.exercise_id, re.exercise_order
+  INSERT INTO template_exercises (template_id, exercise_id, exercise_order, rest, superset)
+  SELECT nt.id, re.exercise_id, re.exercise_order, re.rest, re.superset
   FROM _new_template nt
   JOIN _resolved_exercises re ON re.master_id = nt.source_template_id
   RETURNING id, template_id, exercise_order
