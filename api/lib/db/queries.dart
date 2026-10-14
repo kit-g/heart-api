@@ -2613,6 +2613,8 @@ const _programColumns = '''
   p.rules,
   p.constraint_key,
   p.deload,
+  p.phases,
+  p.tests,
   p.archived,
   p.created_at,
   coalesce(
@@ -2672,7 +2674,7 @@ _foreign AS (
     AND user_id <> @userId
 ),
 _ins AS (
-  INSERT INTO programs (id, user_id, name, note, source, per_week, days, weeks, rules, constraint_key, deload)
+  INSERT INTO programs (id, user_id, name, note, source, per_week, days, weeks, rules, constraint_key, deload, phases, tests)
   SELECT
     coalesce(@id::uuid, uuidv7()),
     @userId,
@@ -2684,7 +2686,9 @@ _ins AS (
     @weeks::smallint,
     @rules::jsonb,
     @constraintKey,
-    @deload::jsonb
+    @deload::jsonb,
+    @phases::jsonb,
+    @tests::jsonb
   WHERE NOT EXISTS (SELECT 1 FROM _by_id)
     AND (
       EXISTS (SELECT 1 FROM _foreign)
@@ -2714,6 +2718,8 @@ _updated AS (
     rules = @rules::jsonb,
     constraint_key = @constraintKey,
     deload = @deload::jsonb,
+    phases = @phases::jsonb,
+    tests = @tests::jsonb,
     archived = @archived::boolean,
     updated_at = now()
   WHERE id = @id::uuid

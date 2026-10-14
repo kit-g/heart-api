@@ -251,6 +251,8 @@ mixin _Programs on _DatabaseBase implements ProgramService {
         final Deload deload => jsonEncode(deload.toMap()),
         null => null,
       },
+      'phases': program.phases.isEmpty ? null : jsonEncode(map['phases']),
+      'tests': program.tests.isEmpty ? null : jsonEncode(map['tests']),
     };
   }
 }

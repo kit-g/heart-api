@@ -208,6 +208,10 @@ FROM generate_series(1, 100) n
           archived: true,
           rules: {exerciseId: const NoGrowth()},
           deload: const Deload(every: 6),
+          phases: [
+            ProgramPhase(name: 'Volume', sessions: [stored.sessions.single], cycles: 4),
+          ],
+          tests: {stored.sessions.single: const ProgramTest()},
         ),
       );
 
@@ -219,6 +223,8 @@ FROM generate_series(1, 100) n
       expect(updated.rules[exerciseId], const NoGrowth());
       expect(updated.source, 'getting_stronger_1');
       expect(updated.deload, const Deload(every: 6));
+      expect(updated.phases.single.cycles, 4);
+      expect(updated.tests.keys, [stored.sessions.single]);
       expect(updated.sessions, stored.sessions);
     });
 
