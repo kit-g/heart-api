@@ -423,6 +423,15 @@ void main() {
         'a key besides min and max',
       ),
       ({'share': 0}, 'a share of nothing'),
+      ({'rir': -1}, 'negative reps in reserve'),
+      ({'rir': 11}, 'reps in reserve past 10'),
+      ({'rir': 1.3}, 'a third of a rep in reserve'),
+      (
+        {
+          'reps': {'min': 5, 'max': 10, 'amrap': 'yes'},
+        },
+        'an amrap that is not true or false',
+      ),
       ({'share': 2.5}, 'a share past twice the base'),
       ({'share': '85%'}, 'a share that is not a number'),
     ]) {
@@ -439,6 +448,21 @@ void main() {
         );
       });
     }
+
+    test('reps in reserve and a capped AMRAP are read', () async {
+      final request = await parse([
+        {
+          'reps': 5,
+          'target': {
+            'rir': 1.5,
+            'reps': {'min': 5, 'max': 10, 'amrap': true},
+          },
+        },
+      ]);
+      final target = request.exercises.single.sets.single.target!;
+      expect(target.rir, 1.5);
+      expect(target[TargetMeasure.reps], const TargetRange(min: 5, max: 10, amrap: true));
+    });
 
     test('a share of the base sits beside the measures', () async {
       final request = await parse([
@@ -512,6 +536,66 @@ void main() {
         TemplateUpdateIn.fromRequest(req(body: {'folderId': 42})),
         throwsA(isA<BadRequest>()),
       );
+    });
+  });
+
+  group('rest on a template exercise (heart-api#230)', () {
+    Map<String, dynamic> exercise(Map<String, dynamic> extra) => {
+      'exercise': _bench,
+      'sets': [
+        {'reps': 5},
+      ],
+      ...extra,
+    };
+
+    test('absent keeps, null clears, seconds set', () async {
+      final absent = await TemplateUpdateIn.fromRequest(
+        req(
+          body: {
+            'exercises': [exercise({})],
+          },
+        ),
+      );
+      expect(absent.request.exercises.single.setsRest, isFalse);
+      final cleared = await TemplateUpdateIn.fromRequest(
+        req(
+          body: {
+            'exercises': [
+              exercise({'rest': null}),
+            ],
+          },
+        ),
+      );
+      expect(cleared.request.exercises.single.setsRest, isTrue);
+      expect(cleared.request.exercises.single.rest, isNull);
+      final set = await TemplateUpdateIn.fromRequest(
+        req(
+          body: {
+            'exercises': [
+              exercise({'rest': 90}),
+            ],
+          },
+        ),
+      );
+      expect(set.request.exercises.single.rest, 90);
+    });
+
+    test('rest is whole seconds up to 30 minutes', () async {
+      for (final rest in [-1, 1801, 90.5, '90']) {
+        await expectLater(
+          TemplateCreateIn.fromRequest(
+            req(
+              body: {
+                'exercises': [
+                  exercise({'rest': rest}),
+                ],
+              },
+            ),
+          ),
+          throwsA(isA<BadRequest>()),
+          reason: '$rest',
+        );
+      }
     });
   });
 
