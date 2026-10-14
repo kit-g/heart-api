@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.26.0
+
+Effort targets, a capped AMRAP, and rest per exercise (heart-api#230).
+
+- New: `SetTarget.rir` and `withRir`, reps in reserve, on the wire as `rir`
+  beside the measures. `SetTarget`'s factory takes it.
+- New: `TargetRange.amrap`, as many as possible up to `max`, on the wire as
+  `amrap: true` in a bounded range; `isAmrap` is true for it and for an open
+  top. A range's equality now includes it.
+- New: `WorkoutExercise.rest`, seconds between sets as a template plans it, on
+  the wire as `rest`; `Template.toWorkout` and `Workout.copy` carry it.
+  `toMap` sends `rest: null` once it was read or assigned, so clearing it
+  clears the server's; an exercise that never had the key leaves it out.
+- New: `TemplateExerciseRequest.rest` / `setsRest`, three-valued like a set's
+  target.
+
 ## 2.25.0
 
 A history move re-keys programs (heart-api#226).

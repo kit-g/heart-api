@@ -166,11 +166,18 @@ class TemplateExerciseRequest {
   final int order;
   final List<TemplateSetRequest> sets;
 
+  /// Rest between sets, in seconds. Only consulted when [setsRest]: a body from
+  /// a build that predates it keeps what is stored.
+  final int? rest;
+  final bool setsRest;
+
   const new({
     this.id,
     required this.exerciseId,
     required this.order,
     this.sets = const [],
+    this.rest,
+    this.setsRest = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -178,6 +185,7 @@ class TemplateExerciseRequest {
       'id': ?id,
       'exercise_id': exerciseId,
       'order': order,
+      if (setsRest) 'rest': rest,
       'sets': sets.map((s) => s.toJson()).toList(),
     };
   }
