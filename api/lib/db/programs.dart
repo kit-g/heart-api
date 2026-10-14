@@ -108,11 +108,18 @@ mixin _Programs on _DatabaseBase implements ProgramService {
             'programId': programId,
             'kind': action.kind.value,
             'week': action.week,
+            'from': action.from,
+            'to': action.to,
+            'workoutId': action.workoutId,
             'at': action.at.toUtc(),
           },
         ),
       );
       if (rows.isEmpty) {
+        final workoutId = action.workoutId;
+        if (workoutId != null && !await _owns(userId, workoutId)) {
+          throw NotFound(type: 'Workout', id: workoutId, code: 'unknown_workout');
+        }
         throw const BadRequest(
           code: 'program_history_limit',
           reason: 'a program keeps at most $_maxProgramActions actions',
@@ -215,6 +222,11 @@ mixin _Programs on _DatabaseBase implements ProgramService {
     });
   }
 
+  Future<bool> _owns(String userId, String workoutId) async {
+    final rows = await _pool.execute(_ownsWorkout.toSql(), parameters: {'userId': userId, 'workoutId': workoutId});
+    return rows.isNotEmpty;
+  }
+
   Future<Program> _readProgram(Session session, {required String userId, required String programId}) async {
     final rows = await session.execute(_getProgram.toSql(), parameters: {'id': programId, 'userId': userId});
     if (rows.isEmpty) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
@@ -239,6 +251,8 @@ mixin _Programs on _DatabaseBase implements ProgramService {
         final Deload deload => jsonEncode(deload.toMap()),
         null => null,
       },
+      'phases': program.phases.isEmpty ? null : jsonEncode(map['phases']),
+      'tests': program.tests.isEmpty ? null : jsonEncode(map['tests']),
     };
   }
 }

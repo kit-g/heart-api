@@ -35,6 +35,8 @@ class ProgramCreateIn {
         rules: json.programRules(),
         constraint: json.programKey('constraint'),
         deload: json.programDeload(),
+        phases: json.programPhases(),
+        tests: json.programTests(),
       ),
       sessions: [
         for (final (index, session) in sessions.indexed)
@@ -67,6 +69,8 @@ class ProgramUpdateIn {
         rules: json.programRules(),
         constraint: json.programKey('constraint'),
         deload: json.programDeload(),
+        phases: json.programPhases(),
+        tests: json.programTests(),
         archived: json.boolean('archived'),
       ),
     );
@@ -143,6 +147,47 @@ extension on Map<String, dynamic> {
     };
   }
 
+  /// Blocks in order, each with its own sessions; only the last may run on.
+  List<ProgramPhase> programPhases() {
+    final raw = switch (this['phases']) {
+      null => const <Object?>[],
+      final List phases when phases.length <= 20 => phases,
+      _ => throw const BadRequest(code: 'invalid_phase', reason: 'phases must be a list of at most 20'),
+    };
+    final phases = [
+      for (final (index, phase) in raw.indexed)
+        switch (phase) {
+          final Map phase => _phase(index, phase),
+          _ => throw BadRequest(code: 'invalid_phase', reason: 'phases[$index] must be an object'),
+        },
+    ];
+    for (final (index, phase) in phases.indexed) {
+      if (phase.cycles == null && index != phases.length - 1) {
+        throw BadRequest(code: 'invalid_phase', reason: 'phases[$index] runs on, so it must be the last');
+      }
+    }
+    return phases;
+  }
+
+  /// Test sessions by template id, each `{share?}`.
+  Map<String, ProgramTest> programTests() {
+    final raw = switch (this['tests']) {
+      null => const <String, Object?>{},
+      final Map tests => tests,
+      _ => throw const BadRequest(code: 'invalid_test', reason: 'tests must be an object of session id to test'),
+    };
+    return {
+      for (final MapEntry(:key, :value) in raw.entries)
+        switch (key) {
+          final String id when isUuidV7(id) => id,
+          _ => throw BadRequest(code: 'invalid_test', reason: 'tests keys are session ids; $key is not one'),
+        }: switch (value) {
+          final Map test => _test(key, test),
+          _ => throw BadRequest(code: 'invalid_test', reason: 'tests.$key must be an object'),
+        },
+    };
+  }
+
   /// A rule per exercise id, read strictly: a newer kind is a 400 here until
   /// the server knows it, though a build that predates it carries it untouched.
   Map<String, GrowthRule> programRules() {
@@ -161,6 +206,27 @@ extension on Map<String, dynamic> {
           _ => throw BadRequest(code: 'invalid_rule', reason: 'rules.$key must be an object'),
         },
     };
+  }
+}
+
+ProgramPhase _phase(int index, Map json) {
+  final ProgramPhase phase;
+  try {
+    phase = ProgramPhase.fromJson(json);
+  } on ArgumentError catch (e) {
+    throw BadRequest(code: 'invalid_phase', reason: 'phases[$index].${e.name}: ${e.message}');
+  }
+  if (!phase.sessions.every(isUuidV7) || phase.sessions.length > ProgramCreateIn.maxSessions) {
+    throw BadRequest(code: 'invalid_phase', reason: 'phases[$index].sessions are session ids, at most 50');
+  }
+  return phase;
+}
+
+ProgramTest _test(Object? sessionId, Map json) {
+  try {
+    return ProgramTest.fromJson(json);
+  } on ArgumentError catch (e) {
+    throw BadRequest(code: 'invalid_test', reason: 'tests.$sessionId.${e.name}: ${e.message}');
   }
 }
 
@@ -184,11 +250,30 @@ GrowthRule _rule(String exerciseId, Map json) {
   if (rule.extra.isNotEmpty) {
     throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: unknown ${rule.extra.keys.join(', ')}');
   }
+  // and inside the miss rule and the AMRAP table, which read only what they know
+  final unknown = {
+    if (json['miss'] case final Map miss)
+      ...miss.keys.where((key) => !_missKeys.contains(key)).map((key) => 'miss.$key'),
+    if (json['amrap'] case final List amrap)
+      for (final (at, row) in amrap.indexed)
+        if (row case final Map row)
+          ...row.keys.where((key) => !_amrapKeys.contains(key)).map((key) => 'amrap[$at].$key'),
+  };
+  if (unknown.isNotEmpty) {
+    throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: unknown ${unknown.join(', ')}');
+  }
+  if (rule case Ladder(:final rungs) when !rungs.every(isUuidV7)) {
+    throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: a ladder\'s rungs are exercise ids');
+  }
   return rule;
 }
 
-/// `POST /programs/:programId/actions` — `{id?, kind, week?, at}`. Only a
-/// replay names a week.
+const _missKeys = {'when', 'floor', 'after', 'cut'};
+const _amrapKeys = {'reps', 'step'};
+
+/// `POST /programs/:programId/actions` — `{id?, kind, week?, from?, to?, workoutId?, at}`.
+/// Only a replay names a week; only an advance names the exercises it moved
+/// from and to, and the workout that caused it.
 class ProgramActionIn {
   final ProgramAction action;
 
@@ -203,8 +288,28 @@ class ProgramActionIn {
       (_, null) => null,
       (_, _) => throw BadRequest(reason: 'only a replay names a week, not a ${kind.value}'),
     };
+    final (from, to, workoutId) = (
+      json.uuidV7OrNull('from'),
+      json.uuidV7OrNull('to'),
+      json.uuidV7OrNull('workoutId'),
+    );
+    final advance = kind == .advance;
+    if (advance && (from == null || to == null)) {
+      throw const BadRequest(reason: 'an advance names the exercise it moved from and to');
+    }
+    if (!advance && (from != null || to != null || workoutId != null)) {
+      throw BadRequest(reason: 'only an advance names exercises or a workout, not a ${kind.value}');
+    }
     return ProgramActionIn._(
-      ProgramAction(id: json.uuidV7OrNull(), kind: kind, week: week, at: json.timestamp('at')),
+      ProgramAction(
+        id: json.uuidV7OrNull(),
+        kind: kind,
+        week: week,
+        from: from,
+        to: to,
+        workoutId: workoutId,
+        at: json.timestamp('at'),
+      ),
     );
   }
 }

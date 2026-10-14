@@ -48,6 +48,10 @@ abstract interface class ProgramPosition implements Model {
 
   bool get paused;
 
+  /// The phase the open cycle is in, an index into [Program.phases]; null
+  /// without phases. [week] stays the whole program's.
+  int? get phase;
+
   /// Whether the open cycle is a lighter one: one the program schedules
   /// ([Program.deload]) or one the user asked for. Nothing moves in it and
   /// nothing counts as a miss (`Progression.next`).
@@ -88,7 +92,19 @@ abstract interface class ProgramPosition implements Model {
     required DateTime now,
     int firstWeekday = DateTime.monday,
   }) {
-    final sessions = program.sessions;
+    // the sessions program week [at] runs: its phase's, or all of them, also
+    // when none of the phase's are left, so deleting them never stalls a week
+    List<String> sessionsOf(int at) {
+      final phase = switch (program.phaseOf(at)) {
+        final int phase => [
+          for (final id in program.phases[phase].sessions)
+            if (program.sessions.contains(id)) id,
+        ],
+        null => const <String>[],
+      };
+      return phase.isEmpty ? program.sessions : phase;
+    }
+
     DateTime? created(String id) => program.joined[id] ?? DateTime.tryParse(id) ?? timestampOfUuidV7(id);
 
     final events = <(DateTime, Object)>[
@@ -114,6 +130,7 @@ abstract interface class ProgramPosition implements Model {
         case ProgramMark mark:
           if (mark.isWorkout) paused = false;
           if (required == null) {
+            final sessions = sessionsOf(week);
             final existing = {
               for (final id in sessions)
                 if (created(id) case final c when c == null || !c.isAfter(at)) id,
@@ -140,6 +157,7 @@ abstract interface class ProgramPosition implements Model {
       }
     }
 
+    final sessions = sessionsOf(week);
     final cycle = required ?? sessions.toSet();
     final remaining = [
       for (final id in sessions)
@@ -163,6 +181,7 @@ abstract interface class ProgramPosition implements Model {
       remaining: remaining,
       next: finished ? null : remaining.firstOrNull,
       paused: paused,
+      phase: program.phaseOf(week),
       lighter: lighterNow || (program.deload?.lightens(week) ?? false),
       finished: finished,
       thisWeek: thisWeek,
@@ -202,6 +221,8 @@ class _ProgramPosition implements ProgramPosition {
   @override
   final bool paused;
   @override
+  final int? phase;
+  @override
   final bool lighter;
   @override
   final bool finished;
@@ -216,6 +237,7 @@ class _ProgramPosition implements ProgramPosition {
     required this.remaining,
     required this.next,
     required this.paused,
+    required this.phase,
     required this.lighter,
     required this.finished,
     required this.thisWeek,
@@ -230,6 +252,7 @@ class _ProgramPosition implements ProgramPosition {
       'remaining': remaining,
       'next': ?next,
       'paused': paused,
+      'phase': ?phase,
       'lighter': lighter,
       'finished': finished,
       'thisWeek': thisWeek,

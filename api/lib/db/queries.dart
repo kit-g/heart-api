@@ -2613,6 +2613,8 @@ const _programColumns = '''
   p.rules,
   p.constraint_key,
   p.deload,
+  p.phases,
+  p.tests,
   p.archived,
   p.created_at,
   coalesce(
@@ -2672,7 +2674,7 @@ _foreign AS (
     AND user_id <> @userId
 ),
 _ins AS (
-  INSERT INTO programs (id, user_id, name, note, source, per_week, days, weeks, rules, constraint_key, deload)
+  INSERT INTO programs (id, user_id, name, note, source, per_week, days, weeks, rules, constraint_key, deload, phases, tests)
   SELECT
     coalesce(@id::uuid, uuidv7()),
     @userId,
@@ -2684,7 +2686,9 @@ _ins AS (
     @weeks::smallint,
     @rules::jsonb,
     @constraintKey,
-    @deload::jsonb
+    @deload::jsonb,
+    @phases::jsonb,
+    @tests::jsonb
   WHERE NOT EXISTS (SELECT 1 FROM _by_id)
     AND (
       EXISTS (SELECT 1 FROM _foreign)
@@ -2714,6 +2718,8 @@ _updated AS (
     rules = @rules::jsonb,
     constraint_key = @constraintKey,
     deload = @deload::jsonb,
+    phases = @phases::jsonb,
+    tests = @tests::jsonb,
     archived = @archived::boolean,
     updated_at = now()
   WHERE id = @id::uuid
@@ -2743,7 +2749,7 @@ WHERE id = @id::uuid
 /// A program's steps in the order they were taken. Someone else's program
 /// reads as one with none.
 const _listProgramActions = '''
-SELECT id, program_id, kind, week, at
+SELECT id, program_id, kind, week, from_exercise, to_exercise, workout_id, at
 FROM program_actions
 WHERE program_id = @programId::uuid
   AND user_id = @userId
@@ -2756,28 +2762,51 @@ const _maxProgramActions = 1000;
 const _maxProgramBases = 5000;
 
 // Idempotent on the id, as the other creates. A program that isn't the
-// caller's trips program_actions_program_fk (404 unknown_program); an empty
-// result is the cap.
+// caller's trips program_actions_program_fk (404 unknown_program). An empty
+// result is the cap, or an advance naming a workout the caller doesn't own:
+// the db layer tells which.
 const _createProgramAction =
     '''
 WITH
 _by_id AS (
-  SELECT id, program_id, kind, week, at
+  SELECT id, program_id, kind, week, from_exercise, to_exercise, workout_id, at
   FROM program_actions
   WHERE id = @id::uuid
     AND user_id = @userId
 ),
 _ins AS (
-  INSERT INTO program_actions (id, user_id, program_id, kind, week, at)
-  SELECT coalesce(@id::uuid, uuidv7()), @userId, @programId::uuid, @kind, @week::smallint, @at::timestamptz
+  INSERT INTO program_actions (id, user_id, program_id, kind, week, from_exercise, to_exercise, workout_id, at)
+  SELECT
+    coalesce(@id::uuid, uuidv7()),
+    @userId,
+    @programId::uuid,
+    @kind,
+    @week::smallint,
+    @from::uuid,
+    @to::uuid,
+    @workoutId::uuid,
+    @at::timestamptz
   WHERE NOT EXISTS (SELECT 1 FROM _by_id)
+    AND (
+      @workoutId::uuid IS NULL
+      OR EXISTS (SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId)
+    )
     AND (SELECT count(*) FROM program_actions WHERE program_id = @programId::uuid) < $_maxProgramActions
-  RETURNING id, program_id, kind, week, at
+  RETURNING id, program_id, kind, week, from_exercise, to_exercise, workout_id, at
 )
-SELECT id, program_id, kind, week, at, true AS created FROM _ins
+SELECT id, program_id, kind, week, from_exercise, to_exercise, workout_id, at, true AS created FROM _ins
 UNION ALL
-SELECT id, program_id, kind, week, at, false AS created FROM _by_id
+SELECT id, program_id, kind, week, from_exercise, to_exercise, workout_id, at, false AS created FROM _by_id
 WHERE NOT EXISTS (SELECT 1 FROM _ins)
+''';
+
+/// Whether the caller owns a workout: why an advance wrote nothing, asked only
+/// when it didn't.
+const _ownsWorkout = '''
+SELECT 1
+FROM workouts
+WHERE id = @workoutId::uuid
+  AND user_id = @userId
 ''';
 
 const _deleteProgramAction = '''

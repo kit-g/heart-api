@@ -140,6 +140,33 @@ void main() {
       expect(rule.amrap.single.step, 5);
     });
 
+    test('a cut and a hold in the AMRAP table are steps too', () async {
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'rules': {
+              _bench: {
+                'kind': 'shareOfMax',
+                'step': 5,
+                'waves': [
+                  [
+                    {'share': 0.85, 'reps': 5, 'amrap': true},
+                  ],
+                ],
+                'amrap': [
+                  {'reps': 0, 'step': -5},
+                  {'reps': 5, 'step': 0},
+                  {'reps': 8, 'step': 5},
+                ],
+              },
+            },
+          },
+        ),
+      );
+      expect(input.program.rules[_bench]!.amrap.map((row) => row.step), [-5, 0, 5]);
+    });
+
     test('rules are read strictly', () async {
       for (final rules in [
         [],
@@ -165,6 +192,48 @@ void main() {
             'step': 2.5,
             'miss': {'after': 0},
           },
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'miss': {'after': 2, 'grace': 1},
+          },
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'miss': {'cut': 1},
+          },
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'miss': {'when': 'totalReps', 'floor': 0},
+          },
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'amrap': [
+              {'reps': 10, 'step': 5, 'per': 'side'},
+            ],
+          },
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'amrap': [
+              {'reps': -1, 'step': 5},
+            ],
+          },
+        },
+        {
+          _bench: {'kind': 'addWeight', 'step': 2.5, 'amrap': 'double'},
         },
       ]) {
         await expectLater(
@@ -204,9 +273,145 @@ void main() {
       }
     });
 
+    test('an advance names its exercises; nothing else does (heart-api#231)', () async {
+      const workout = '0198c1a2-b3c4-7d5e-8f60-718293a4b520';
+      final input = await ProgramActionIn.fromRequest(
+        req(
+          body: {'kind': 'advance', 'from': _bench, 'to': _squat, 'workoutId': workout, 'at': '2026-10-15T08:00:00Z'},
+        ),
+      );
+      expect((input.action.from, input.action.to, input.action.workoutId), (_bench, _squat, workout));
+      for (final body in [
+        {'kind': 'advance', 'from': _bench, 'at': '2026-10-15T08:00:00Z'},
+        {'kind': 'pause', 'from': _bench, 'to': _squat, 'at': '2026-10-15T08:00:00Z'},
+        {'kind': 'pause', 'workoutId': workout, 'at': '2026-10-15T08:00:00Z'},
+      ]) {
+        await expectLater(ProgramActionIn.fromRequest(req(body: body)), badRequest(), reason: '$body');
+      }
+    });
+
+    test('a ladder rule climbs exercise ids', () async {
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'rules': {
+              _bench: {
+                'kind': 'ladder',
+                'rungs': [_bench, _squat],
+                'top': 12,
+                'bottom': 8,
+              },
+            },
+          },
+        ),
+      );
+      expect(input.program.rules[_bench], isA<Ladder>());
+      await expectLater(
+        ProgramCreateIn.fromRequest(
+          req(
+            body: {
+              'name': 'p',
+              'rules': {
+                _bench: {
+                  'kind': 'ladder',
+                  'rungs': ['push-up', 'decline-push-up'],
+                  'top': 12,
+                  'bottom': 8,
+                },
+              },
+            },
+          ),
+        ),
+        badRequest('invalid_rule'),
+      );
+    });
+
     test('a lighter week is an action', () async {
       final input = await ProgramActionIn.fromRequest(req(body: {'kind': 'lighter', 'at': '2026-10-15T08:00:00Z'}));
       expect(input.action.kind, ProgramActionKind.lighter);
+    });
+  });
+
+  group('phases and tests (heart-api#233)', () {
+    const a = '0198c1a2-b3c4-7d5e-8f60-718293a4b530';
+    const b = '0198c1a2-b3c4-7d5e-8f60-718293a4b531';
+
+    test('a program runs in phases and names its tests', () async {
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'phases': [
+              {
+                'name': 'Volume',
+                'sessions': [a],
+                'cycles': 2,
+              },
+              {
+                'sessions': [b],
+              },
+            ],
+            'tests': {
+              b: {'share': 0.9},
+            },
+          },
+        ),
+      );
+      expect(input.program.phases.map((phase) => phase.cycles), [2, null]);
+      expect(input.program.tests[b]?.share, 0.9);
+    });
+
+    test('a phase that runs on must be last, and every phase is checked', () async {
+      for (final phases in [
+        [
+          {
+            'sessions': [a],
+          },
+          {
+            'sessions': [b],
+            'cycles': 2,
+          },
+        ],
+        [
+          {'sessions': <String>[]},
+        ],
+        [
+          {
+            'sessions': ['day-a'],
+          },
+        ],
+        [
+          {
+            'sessions': [a],
+            'cycles': 0,
+          },
+        ],
+      ]) {
+        await expectLater(
+          ProgramCreateIn.fromRequest(req(body: {'name': 'p', 'phases': phases})),
+          badRequest('invalid_phase'),
+          reason: '$phases',
+        );
+      }
+    });
+
+    test('a test is keyed by a session id, with a share up to 1', () async {
+      for (final tests in [
+        {
+          'day-a': {'share': 0.9},
+        },
+        {
+          a: {'share': 1.2},
+        },
+        {a: 0.9},
+      ]) {
+        await expectLater(
+          ProgramCreateIn.fromRequest(req(body: {'name': 'p', 'tests': tests})),
+          badRequest('invalid_test'),
+          reason: '$tests',
+        );
+      }
     });
   });
 

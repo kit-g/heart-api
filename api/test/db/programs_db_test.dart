@@ -208,6 +208,10 @@ FROM generate_series(1, 100) n
           archived: true,
           rules: {exerciseId: const NoGrowth()},
           deload: const Deload(every: 6),
+          phases: [
+            ProgramPhase(name: 'Volume', sessions: [stored.sessions.single], cycles: 4),
+          ],
+          tests: {stored.sessions.single: const ProgramTest()},
         ),
       );
 
@@ -219,6 +223,8 @@ FROM generate_series(1, 100) n
       expect(updated.rules[exerciseId], const NoGrowth());
       expect(updated.source, 'getting_stronger_1');
       expect(updated.deload, const Deload(every: 6));
+      expect(updated.phases.single.cycles, 4);
+      expect(updated.tests.keys, [stored.sessions.single]);
       expect(updated.sessions, stored.sessions);
     });
 
@@ -354,6 +360,37 @@ FROM generate_series(1, 100) n
 
       await h.db.deleteProgramAction(userId: userId, programId: programId, actionId: first.id!);
       expect(await h.db.getProgramActions(userId: userId, programId: programId), hasLength(1));
+    });
+
+    test('an advance names its exercises and the workout, and goes with the workout (heart-api#231)', () async {
+      final userId = await h.seedProfile();
+      final stranger = await h.seedProfile();
+      final (stored, _) = await h.db.createProgramOrExisting(userId: userId, program: program(), sessions: const []);
+      final workoutId = await h.seedWorkout(userId: userId);
+      final next = await h.seedGlobalExercise();
+      ProgramAction advance(String workout) => ProgramAction(
+        kind: .advance,
+        from: exerciseId,
+        to: next,
+        workoutId: workout,
+        at: DateTime.utc(2026, 10, 15),
+      );
+
+      final (made, _) = await h.db.createProgramAction(
+        userId: userId,
+        programId: stored.id!,
+        action: advance(workoutId),
+      );
+      expect((made.from, made.to, made.workoutId), (exerciseId, next, workoutId));
+
+      final theirs = await h.seedWorkout(userId: stranger);
+      expect(
+        () => h.db.createProgramAction(userId: userId, programId: stored.id!, action: advance(theirs)),
+        throwsA(isA<NotFound>().having((e) => e.code, 'code', 'unknown_workout')),
+      );
+
+      await h.exec('DELETE FROM workouts WHERE id = @id::uuid', {'id': workoutId});
+      expect(await h.db.getProgramActions(userId: userId, programId: stored.id!), isEmpty);
     });
 
     test("someone else's program is unknown_program, and its actions are invisible", () async {

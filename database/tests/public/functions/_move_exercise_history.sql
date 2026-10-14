@@ -290,6 +290,128 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION test__move_exercise_history_rekeys_ladders() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id   TEXT;
+    _source_id UUID;
+    _target_id UUID;
+    _next_id   UUID;
+    _program   UUID;
+    _r         RECORD;
+BEGIN
+    _user_id   := create_test_profile();
+    _source_id := create_test_exercise('Knee push-up of mine', 'Reps Only', 'Chest', _user_id);
+    _target_id := create_test_exercise(_category => 'Reps Only', _target => 'Chest');
+    _next_id   := create_test_exercise(_category => 'Reps Only', _target => 'Chest');
+
+    RETURN NEXT is((SELECT count(*) FROM programs WHERE user_id = _user_id), 0::bigint, 'no programs yet');
+    RETURN NEXT is((SELECT count(*) FROM program_actions WHERE user_id = _user_id), 0::bigint, 'no actions yet');
+
+    INSERT INTO programs (user_id, name, rules)
+    VALUES (
+        _user_id,
+        'ladder',
+        jsonb_build_object(
+            _next_id::text,
+            jsonb_build_object('kind', 'ladder', 'rungs', jsonb_build_array(_source_id, _next_id), 'top', 12, 'bottom', 8)
+        )
+    )
+    RETURNING id INTO _program;
+    INSERT INTO program_actions (user_id, program_id, kind, from_exercise, to_exercise, at)
+    VALUES (_user_id, _program, 'advance', _source_id, _next_id, now());
+
+    _r := (SELECT r FROM _move_exercise_history(_user_id, _source_id, _target_id) r);
+
+    RETURN NEXT is(_r.programs_moved, 1, 'the program counts once');
+    RETURN NEXT is(
+            (SELECT rules -> _next_id::text -> 'rungs' ->> 0 FROM programs WHERE id = _program),
+            _target_id::text,
+            'a rung names the target'
+        );
+    RETURN NEXT is(
+            (SELECT from_exercise FROM program_actions WHERE program_id = _program),
+            _target_id,
+            'an advance from the source is now from the target'
+        );
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__move_exercise_history_merges_rungs_shares_and_slots() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id   TEXT;
+    _source_id UUID;
+    _target_id UUID;
+    _next_id   UUID;
+    _program   UUID;
+    _template  UUID;
+    _te        UUID;
+    _set       UUID;
+    _w         UUID;
+    _slot_a    UUID := uuidv7();
+    _slot_b    UUID := uuidv7();
+BEGIN
+    _user_id   := create_test_profile();
+    _source_id := create_test_exercise('Squat of mine', 'Barbell', 'Legs', _user_id);
+    _target_id := create_test_exercise(_category => 'Barbell', _target => 'Legs');
+    _next_id   := create_test_exercise(_category => 'Barbell', _target => 'Legs');
+
+    RETURN NEXT is((SELECT count(*) FROM programs WHERE user_id = _user_id), 0::bigint, 'no programs yet');
+    RETURN NEXT is((SELECT count(*) FROM templates WHERE user_id = _user_id), 0::bigint, 'no templates yet');
+    RETURN NEXT is((SELECT count(*) FROM program_bases WHERE user_id = _user_id), 0::bigint, 'no bases yet');
+
+    -- one ladder already has the target after the source; another climbs only
+    -- from the source to the target
+    INSERT INTO programs (user_id, name, rules)
+    VALUES (
+        _user_id,
+        'ladders',
+        jsonb_build_object(
+            _next_id::text,
+            jsonb_build_object('kind', 'ladder', 'rungs', jsonb_build_array(_source_id, _target_id, _next_id), 'top', 12, 'bottom', 8),
+            _target_id::text,
+            jsonb_build_object('kind', 'ladder', 'rungs', jsonb_build_array(_source_id, _target_id), 'top', 12, 'bottom', 8)
+        )
+    )
+    RETURNING id INTO _program;
+
+    _template := create_test_template(_user_id => _user_id);
+    _te := create_test_template_exercise(_template, _next_id);
+    _set := create_test_template_set(_te);
+    UPDATE template_exercise_sets SET target = jsonb_build_object('share', 0.6, 'of', _source_id) WHERE id = _set;
+
+    -- one workout moved the source's base in slot A and the target's in slot B
+    _w := create_test_workout(_user_id => _user_id, _name => 'two slots');
+    INSERT INTO program_bases (user_id, program_id, exercise_id, slot, value, workout_id, at)
+    VALUES
+        (_user_id, _program, _source_id, _slot_a, 100, _w, now()),
+        (_user_id, _program, _target_id, _slot_b, 70, _w, now());
+
+    PERFORM _move_exercise_history(_user_id, _source_id, _target_id);
+
+    RETURN NEXT is(
+            (SELECT rules -> _next_id::text -> 'rungs' FROM programs WHERE id = _program),
+            jsonb_build_array(_target_id, _next_id),
+            'a ladder that had both keeps the target once, in the first place'
+        );
+    RETURN NEXT ok(
+            NOT (SELECT rules ? _target_id::text FROM programs WHERE id = _program),
+            'a ladder left with one rung is dropped'
+        );
+    RETURN NEXT is(
+            (SELECT target ->> 'of' FROM template_exercise_sets WHERE id = _set),
+            _target_id::text,
+            'a share of the source is a share of the target'
+        );
+    RETURN NEXT is(
+            (SELECT array_agg(slot ORDER BY value) FROM program_bases WHERE program_id = _program AND exercise_id = _target_id),
+            ARRAY [_slot_b, _slot_a],
+            'bases of other slots from the same workout both stay'
+        );
+END
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION test__move_exercise_history_refuses_what_the_user_cannot_see() RETURNS SETOF TEXT AS
 $$
 DECLARE

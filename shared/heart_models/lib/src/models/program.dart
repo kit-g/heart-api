@@ -160,6 +160,7 @@ sealed class GrowthRule implements Model {
         extra: rest(weighted),
       ),
       Longer.key => Longer(step: _positive(json, 'step'), extra: rest(const {'step'})),
+      Ladder.key => Ladder.fromParameters(json, extra: rest(const {'rungs', 'top', 'bottom'})),
       ShareOfMax.key => ShareOfMax(
         waves: switch (json['waves']) {
           final List waves when waves.isNotEmpty => [for (final wave in waves) _wave(wave)],
@@ -281,6 +282,52 @@ final class Longer extends GrowthRule {
 
   @override
   Map<String, dynamic> get _parameters => {'step': step};
+}
+
+/// Progress by moving to a harder exercise, not by adding load (heart-api#231):
+/// wall → incline → floor push-up. When every working set reaches [top] reps,
+/// the session's exercise advances to the next of [rungs] and its targets
+/// restart at [bottom]. The last rung grows by reps alone.
+final class Ladder extends GrowthRule {
+  static const key = 'ladder';
+
+  /// Exercise ids, easiest first.
+  final List<String> rungs;
+  final int top;
+  final int bottom;
+
+  const new({required this.rungs, required this.top, required this.bottom, super.extra});
+
+  factory fromParameters(Map json, {Map<String, Object?> extra = const {}}) {
+    final rungs = switch (json['rungs']) {
+      final List rungs when rungs.length >= 2 && rungs.every((rung) => rung is String) => [
+        for (final rung in rungs) rung as String,
+      ],
+      final other => throw ArgumentError.value(other, 'rungs', 'two or more exercise ids'),
+    };
+    if (rungs.toSet().length != rungs.length) throw ArgumentError.value(rungs, 'rungs', 'each rung once');
+    final top = switch (json['top']) {
+      final int top when top >= 2 => top,
+      final other => throw ArgumentError.value(other, 'top', 'a whole number of reps of at least 2'),
+    };
+    final bottom = switch (json['bottom']) {
+      final int bottom when bottom >= 1 && bottom < top => bottom,
+      final other => throw ArgumentError.value(other, 'bottom', 'a whole number of reps below top'),
+    };
+    return Ladder(rungs: rungs, top: top, bottom: bottom, extra: extra);
+  }
+
+  /// The rung after [exercise], or null on the last one or off the ladder.
+  String? after(String exercise) {
+    final at = rungs.indexOf(exercise);
+    return at < 0 || at == rungs.length - 1 ? null : rungs[at + 1];
+  }
+
+  @override
+  String get kind => key;
+
+  @override
+  Map<String, dynamic> get _parameters => {'rungs': rungs, 'top': top, 'bottom': bottom};
 }
 
 /// Sets as a share of a training max that changes by program week, 5/3/1 style.
@@ -447,8 +494,64 @@ final class Deload implements Model {
   int get hashCode => Object.hash(every, load, volume);
 }
 
+/// One block of a program (heart-api#233): its own [sessions] (template ids, in
+/// order) for [cycles] program weeks, then the next phase. The last phase may
+/// leave [cycles] out and repeat.
+final class ProgramPhase implements Model {
+  final String? name;
+  final List<String> sessions;
+  final int? cycles;
+
+  const new({this.name, required this.sessions, this.cycles});
+
+  factory fromJson(Map json) {
+    return ProgramPhase(
+      name: switch (json['name']) {
+        null => null,
+        final String name when name.trim().isNotEmpty && name.length <= 100 => name,
+        final other => throw ArgumentError.value(other, 'name', 'a name of at most 100 characters'),
+      },
+      sessions: switch (json['sessions']) {
+        final List ids when ids.isNotEmpty && ids.every((id) => id is String) => [for (final id in ids) id as String],
+        final other => throw ArgumentError.value(other, 'sessions', 'one session id or more'),
+      },
+      cycles: switch (json['cycles']) {
+        null => null,
+        final int cycles when cycles >= 1 && cycles <= 104 => cycles,
+        final other => throw ArgumentError.value(other, 'cycles', 'a whole number of weeks from 1 to 104'),
+      },
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() => {'name': ?name, 'sessions': sessions, 'cycles': ?cycles};
+}
+
+/// A test session (heart-api#233): a workout of it sets the bases of the
+/// exercises it tested to [share] of an estimated max (`Progression.test`).
+final class ProgramTest implements Model {
+  static const defaultShare = 0.9;
+
+  final num share;
+
+  const new({this.share = defaultShare});
+
+  factory fromJson(Map json) {
+    return ProgramTest(
+      share: switch (json['share']) {
+        null => defaultShare,
+        final num share when share > 0 && share <= 1 => share,
+        final other => throw ArgumentError.value(other, 'share', 'a share above 0 and at most 1'),
+      },
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() => {'share': share};
+}
+
 /// A field of a [Program] that can be left unset, for [Program.without].
-enum ProgramField { note, perWeek, weeks, constraint, deload }
+enum ProgramField { note, perWeek, weeks, constraint, deload, phases, tests }
 
 /// Templates on a plan, with targets that grow (heart-api#86). The design is
 /// `docs/2026-10-13.programs.md`.
@@ -487,6 +590,16 @@ abstract interface class Program implements Model {
   /// The lighter week it schedules, if any.
   Deload? get deload;
 
+  /// Its blocks, in order; empty is one repeating phase of every session.
+  List<ProgramPhase> get phases;
+
+  /// Its test sessions, by template id.
+  Map<String, ProgramTest> get tests;
+
+  /// The phase program [week] falls in: phases take their cycles in turn, and
+  /// the last one, or one without cycles, takes the rest. Null without phases.
+  int? phaseOf(int week);
+
   bool get archived;
 
   /// The ids of the program's session templates, in order. Read-only: a
@@ -516,6 +629,8 @@ abstract interface class Program implements Model {
     Map<String, GrowthRule> rules,
     String? constraint,
     Deload? deload,
+    List<ProgramPhase> phases,
+    Map<String, ProgramTest> tests,
     bool archived,
     List<String> sessions,
     Map<String, DateTime> joined,
@@ -548,6 +663,8 @@ abstract interface class Program implements Model {
     Map<String, GrowthRule>? rules,
     String? constraint,
     Deload? deload,
+    List<ProgramPhase>? phases,
+    Map<String, ProgramTest>? tests,
     bool? archived,
   });
 
@@ -578,6 +695,10 @@ class _Program implements Program {
   @override
   final Deload? deload;
   @override
+  final List<ProgramPhase> phases;
+  @override
+  final Map<String, ProgramTest> tests;
+  @override
   final bool archived;
   @override
   final List<String> sessions;
@@ -599,6 +720,8 @@ class _Program implements Program {
     this.rules = const {},
     this.constraint,
     this.deload,
+    this.phases = const [],
+    this.tests = const {},
     this.archived = false,
     this.sessions = const [],
     this.joined = const {},
@@ -641,6 +764,16 @@ class _Program implements Program {
         final Map deload => Deload.fromJson(deload),
         _ => null,
       },
+      phases: switch (_decoded(json['phases'])) {
+        final List phases => [for (final phase in phases) ProgramPhase.fromJson(phase as Map)],
+        _ => const [],
+      },
+      tests: switch (_decoded(json['tests'])) {
+        final Map tests => {
+          for (final MapEntry(:key, :value) in tests.entries) '$key': ProgramTest.fromJson(value as Map),
+        },
+        _ => const {},
+      },
       archived: json['archived'] == true,
       sessions: [
         for (final id in (json['sessions'] as List?) ?? const []) id.toString(),
@@ -669,6 +802,8 @@ class _Program implements Program {
     Map<String, GrowthRule>? rules,
     String? constraint,
     Deload? deload,
+    List<ProgramPhase>? phases,
+    Map<String, ProgramTest>? tests,
     bool? archived,
   }) {
     return _Program(
@@ -682,6 +817,8 @@ class _Program implements Program {
       rules: rules ?? this.rules,
       constraint: constraint ?? this.constraint,
       deload: deload ?? this.deload,
+      phases: phases ?? this.phases,
+      tests: tests ?? this.tests,
       archived: archived ?? this.archived,
       sessions: sessions,
       joined: joined,
@@ -707,12 +844,27 @@ class _Program implements Program {
       rules: rules,
       constraint: fields.contains(ProgramField.constraint) ? null : constraint,
       deload: fields.contains(ProgramField.deload) ? null : deload,
+      phases: fields.contains(ProgramField.phases) ? const [] : phases,
+      tests: fields.contains(ProgramField.tests) ? const {} : tests,
       archived: archived,
       sessions: sessions,
       joined: joined,
       createdAt: createdAt,
       unreadRules: unreadRules,
     );
+  }
+
+  @override
+  int? phaseOf(int week) {
+    if (phases.isEmpty) return null;
+    var through = 0;
+    for (final (index, phase) in phases.indexed) {
+      final cycles = phase.cycles;
+      if (cycles == null || index == phases.length - 1) return index;
+      through += cycles;
+      if (week <= through) return index;
+    }
+    return phases.length - 1;
   }
 
   @override
@@ -732,6 +884,8 @@ class _Program implements Program {
       },
       'constraint': ?constraint,
       'deload': ?deload?.toMap(),
+      if (phases.isNotEmpty) 'phases': [for (final phase in phases) phase.toMap()],
+      if (tests.isNotEmpty) 'tests': {for (final MapEntry(:key, :value) in tests.entries) key: value.toMap()},
       'archived': archived,
       'sessions': sessions,
       if (joined.isNotEmpty)
@@ -767,7 +921,11 @@ enum ProgramActionKind {
   replay('replay'),
 
   /// Makes the open cycle a lighter one, on demand (heart-api#229).
-  lighter('lighter');
+  lighter('lighter'),
+
+  /// A ladder moved an exercise to its next rung ([ProgramAction.from] →
+  /// [ProgramAction.to]), caused by [ProgramAction.workoutId] (heart-api#231).
+  advance('advance');
 
   /// The `kind` on the wire.
   final String value;
@@ -793,11 +951,27 @@ abstract interface class ProgramAction implements Model {
   /// The week a [ProgramActionKind.replay] goes back to, from 1; null otherwise.
   int? get week;
 
+  /// The exercise an [ProgramActionKind.advance] moved from, and to.
+  String? get from;
+
+  String? get to;
+
+  /// The workout that caused an advance; deleting it deletes the action.
+  String? get workoutId;
+
   /// When the user took it, by the device's clock.
   DateTime get at;
 
-  factory({String? id, String? programId, required ProgramActionKind kind, int? week, required DateTime at}) =
-      _ProgramAction;
+  factory({
+    String? id,
+    String? programId,
+    required ProgramActionKind kind,
+    int? week,
+    String? from,
+    String? to,
+    String? workoutId,
+    required DateTime at,
+  }) = _ProgramAction;
 
   factory fromJson(Map json) {
     return _ProgramAction(
@@ -805,6 +979,9 @@ abstract interface class ProgramAction implements Model {
       programId: json['programId']?.toString(),
       kind: ProgramActionKind.fromString(json['kind'] as String),
       week: (json['week'] as num?)?.toInt(),
+      from: json['from'] as String?,
+      to: json['to'] as String?,
+      workoutId: json['workoutId'] as String?,
       at: DateTime.parse(json['at'] as String),
     );
   }
@@ -815,6 +992,9 @@ abstract interface class ProgramAction implements Model {
       programId: row['program_id']?.toString(),
       kind: ProgramActionKind.fromString(row['kind'] as String),
       week: (row['week'] as num?)?.toInt(),
+      from: row['from_exercise']?.toString(),
+      to: row['to_exercise']?.toString(),
+      workoutId: row['workout_id']?.toString(),
       at: switch (row['at']) {
         final DateTime at => at,
         final String at => DateTime.parse(at),
@@ -834,9 +1014,24 @@ class _ProgramAction implements ProgramAction {
   @override
   final int? week;
   @override
+  final String? from;
+  @override
+  final String? to;
+  @override
+  final String? workoutId;
+  @override
   final DateTime at;
 
-  new({this.id, this.programId, required this.kind, this.week, required this.at});
+  new({
+    this.id,
+    this.programId,
+    required this.kind,
+    this.week,
+    this.from,
+    this.to,
+    this.workoutId,
+    required this.at,
+  });
 
   @override
   Map<String, dynamic> toMap() {
@@ -845,6 +1040,9 @@ class _ProgramAction implements ProgramAction {
       'programId': ?programId,
       'kind': kind.value,
       'week': ?week,
+      'from': ?from,
+      'to': ?to,
+      'workoutId': ?workoutId,
       'at': at.toUtc().toIso8601String(),
     };
   }
