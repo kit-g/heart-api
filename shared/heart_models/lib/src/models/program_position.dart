@@ -166,12 +166,15 @@ DateTime _weekStart(DateTime now, int firstWeekday) {
   return now.isUtc ? DateTime.utc(now.year, now.month, now.day - back) : DateTime(now.year, now.month, now.day - back);
 }
 
-/// The current base of each exercise: its latest value.
+/// The current base of each exercise, or of each slot that has its own: the
+/// latest value, keyed by [ProgramBase.slot] when it has one and by the
+/// exercise id otherwise.
 Map<String, ProgramBase> currentBases(Iterable<ProgramBase> bases) {
   final current = <String, ProgramBase>{};
   for (final base in bases) {
-    final held = current[base.exerciseId];
-    if (held == null || !base.at.isBefore(held.at)) current[base.exerciseId] = base;
+    final key = base.slot ?? base.exerciseId;
+    final held = current[key];
+    if (held == null || !base.at.isBefore(held.at)) current[key] = base;
   }
   return current;
 }

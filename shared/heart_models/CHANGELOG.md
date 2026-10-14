@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.28.0
+
+Slots: one lift with two bases, a share of another's, supplemental sets and
+open slots (heart-api#232).
+
+- New: `ProgramBase.slot`, the template exercise a base belongs to when one
+  lift has two. `currentBases` now keys a slotted base by its slot, and the
+  rest by exercise id as before.
+- New: `SetTarget.of` / `withOf`: whose base `share` is a share of, on the
+  wire as `of`. Null is the set's own exercise.
+- New: `WaveSet.supplemental`: takes its share but never counts for the AMRAP,
+  a miss or a bump.
+- New: `WorkoutExercise.pattern` (an open slot: any exercise of a movement
+  pattern) and `WorkoutExercise.totalReps` (reps across all sets), on the wire
+  as `pattern` / `totalReps`, carried into workouts like `rest` and cleared
+  like it (`toMap` sends a null once the key was read or assigned). A
+  `totalReps` in a shape this build predates is carried as it came, never a
+  failed read.
+- New: `TemplateExerciseRequest.pattern` / `setsPattern` and `totalReps` /
+  `setsTotalReps`, three-valued.
+
 ## 2.27.0
 
 Supersets and circuits (heart-api#234).

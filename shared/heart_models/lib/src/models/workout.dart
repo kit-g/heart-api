@@ -45,6 +45,15 @@ abstract interface class WorkoutExercise
   /// two. Null stands alone. Only meaningful within one template or workout.
   abstract int? superset;
 
+  /// An open slot: any exercise of this movement pattern (a library key such
+  /// as `vertical_pull`) will do, [exercise] being the one offered. Null is
+  /// this exercise and no other.
+  abstract String? pattern;
+
+  /// Reps across all of this exercise's sets, as a plan asks for them ("50 to
+  /// 100 reps of a pull, in as many sets as it takes"). Null asks for none.
+  abstract TargetRange? totalReps;
+
   void add(ExerciseSet set);
 
   bool remove(ExerciseSet set);
@@ -73,6 +82,10 @@ abstract interface class WorkoutExercise
   factory fromJson(Map json) {
     final exercise = Exercise.fromJson(json['exercise']);
     final sets = readIndexed(json['sets'], (e) => ExerciseSet.fromJson(exercise, e));
+    final total = switch (json['totalReps']) {
+      final Map total => _readTotal(total),
+      _ => (null, null),
+    };
     return _WorkoutExercise._(
       exercise: exercise,
       sets: sets.items,
@@ -83,6 +96,9 @@ abstract interface class WorkoutExercise
       note: json['note'] as String?,
       rest: (json['rest'] as num?)?.toInt(),
       superset: (json['superset'] as num?)?.toInt(),
+      pattern: json['pattern'] as String?,
+      totalReps: total.$1,
+      unreadTotalReps: total.$2,
       spoken: {
         for (final key in _clearable)
           if (json.containsKey(key)) key,
@@ -92,7 +108,17 @@ abstract interface class WorkoutExercise
 }
 
 /// The keys of a [WorkoutExercise] that a save clears by sending null.
-const _clearable = {'rest', 'superset'};
+const _clearable = {'rest', 'superset', 'pattern', 'totalReps'};
+
+/// A total this build can read, or the shape it can't, carried as it came, as
+/// a set's target carries a range it predates.
+(TargetRange?, Map?) _readTotal(Map json) {
+  try {
+    return (TargetRange.fromJson(json), null);
+  } on ArgumentError {
+    return (null, json);
+  }
+}
 
 abstract interface class HasExercises {
   /// starts a new exercise
@@ -367,6 +393,33 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
     _spoken.add('superset');
   }
 
+  String? _pattern;
+
+  @override
+  String? get pattern => _pattern;
+
+  @override
+  set pattern(String? value) {
+    _pattern = value;
+    _spoken.add('pattern');
+  }
+
+  TargetRange? _totalReps;
+
+  /// A total in a shape this build predates, written back as it came until
+  /// [totalReps] is assigned.
+  Map? _unreadTotalReps;
+
+  @override
+  TargetRange? get totalReps => _totalReps;
+
+  @override
+  set totalReps(TargetRange? value) {
+    _totalReps = value;
+    _unreadTotalReps = null;
+    _spoken.add('totalReps');
+  }
+
   new _({
     ExerciseSet? starter,
     DateTime? start,
@@ -376,6 +429,9 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
     this.note,
     this._rest,
     this._superset,
+    this._pattern,
+    this._totalReps,
+    this._unreadTotalReps,
     Set<String>? spoken,
     required this._exercise,
     List<ExerciseSet>? sets,
@@ -439,6 +495,9 @@ class _WorkoutExercise with Iterable<ExerciseSet>, HasUuid implements WorkoutExe
       'note': ?note,
       if (rest != null || _spoken.contains('rest')) 'rest': rest,
       if (superset != null || _spoken.contains('superset')) 'superset': superset,
+      if (pattern != null || _spoken.contains('pattern')) 'pattern': pattern,
+      if (totalReps != null || _unreadTotalReps != null || _spoken.contains('totalReps'))
+        'totalReps': totalReps?.toMap() ?? _unreadTotalReps,
       'sets': splice([for (final each in this) each.toMap()], _unread),
     };
   }
@@ -812,7 +871,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         exercise
           ..note = each.note
           ..rest = each.rest
-          ..superset = each.superset;
+          ..superset = each.superset
+          ..pattern = each.pattern
+          ..totalReps = each.totalReps;
 
         for (final set in each.skip(1)) {
           exercise.add(set.copy());
@@ -843,6 +904,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         note: e.note,
         rest: e.rest,
         superset: e.superset,
+        pattern: e.pattern,
+        totalReps: e.totalReps,
+        unreadTotalReps: e._unreadTotalReps,
         spoken: e._spoken,
         exercise: e._exercise,
         sets: sets,
@@ -857,6 +921,8 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
         note: exercise.note,
         rest: exercise.rest,
         superset: exercise.superset,
+        pattern: exercise.pattern,
+        totalReps: exercise.totalReps,
         exercise: exercise.exercise,
         sets: sets,
         unread: [for (final (index, json) in exercise.unread.indexed) (sets.length + index, json)],

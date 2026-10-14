@@ -165,13 +165,16 @@ final class ShareOfMax extends GrowthRule {
 }
 
 /// One working set of a [ShareOfMax] week: [share] of the training max for
-/// [reps], or at least [reps] when [amrap].
+/// [reps], or at least [reps] when [amrap]. A [supplemental] set (a
+/// first-set-last 5×5) takes its share like the others but never counts for
+/// the AMRAP, a miss or a bump.
 final class WaveSet implements Model {
   final num share;
   final int reps;
   final bool amrap;
+  final bool supplemental;
 
-  const new({required this.share, required this.reps, this.amrap = false});
+  const new({required this.share, required this.reps, this.amrap = false, this.supplemental = false});
 
   factory fromJson(Map json) {
     return WaveSet(
@@ -188,11 +191,18 @@ final class WaveSet implements Model {
         true => true,
         final other => throw ArgumentError.value(other, 'amrap', 'a boolean'),
       },
+      supplemental: switch (json['supplemental']) {
+        null || false => false,
+        true => true,
+        final other => throw ArgumentError.value(other, 'supplemental', 'a boolean'),
+      },
     );
   }
 
   @override
-  Map<String, dynamic> toMap() => {'share': share, 'reps': reps, if (amrap) 'amrap': true};
+  Map<String, dynamic> toMap() {
+    return {'share': share, 'reps': reps, if (amrap) 'amrap': true, if (supplemental) 'supplemental': true};
+  }
 }
 
 List<WaveSet> _wave(Object? wave) {
@@ -612,6 +622,11 @@ abstract interface class ProgramBase implements Model {
 
   String get exerciseId;
 
+  /// The occurrence this base belongs to, a template exercise id, when one
+  /// lift has two (heavy on Monday, light on Thursday). Null is the exercise's
+  /// own base.
+  String? get slot;
+
   num get value;
 
   String? get workoutId;
@@ -627,6 +642,7 @@ abstract interface class ProgramBase implements Model {
     String? id,
     String? programId,
     required String exerciseId,
+    String? slot,
     required num value,
     String? workoutId,
     String? actionId,
@@ -638,6 +654,7 @@ abstract interface class ProgramBase implements Model {
       id: json['id']?.toString(),
       programId: json['programId']?.toString(),
       exerciseId: json['exerciseId'] as String,
+      slot: json['slot'] as String?,
       value: json['value'] as num,
       workoutId: json['workoutId'] as String?,
       actionId: json['actionId'] as String?,
@@ -650,6 +667,7 @@ abstract interface class ProgramBase implements Model {
       id: row['id']?.toString(),
       programId: row['program_id']?.toString(),
       exerciseId: row['exercise_id'].toString(),
+      slot: row['slot']?.toString(),
       value: row['value'] as num,
       workoutId: row['workout_id']?.toString(),
       actionId: row['action_id']?.toString(),
@@ -670,6 +688,8 @@ class _ProgramBase implements ProgramBase {
   @override
   final String exerciseId;
   @override
+  final String? slot;
+  @override
   final num value;
   @override
   final String? workoutId;
@@ -682,6 +702,7 @@ class _ProgramBase implements ProgramBase {
     this.id,
     this.programId,
     required this.exerciseId,
+    this.slot,
     required this.value,
     this.workoutId,
     this.actionId,
@@ -697,6 +718,7 @@ class _ProgramBase implements ProgramBase {
       'id': ?id,
       'programId': ?programId,
       'exerciseId': exerciseId,
+      'slot': ?slot,
       'value': value,
       'workoutId': ?workoutId,
       'actionId': ?actionId,
