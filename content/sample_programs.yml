@@ -10,7 +10,10 @@
 # Targets per set:  reps: 5 (exactly)  |  reps: [8, 12] (a range)  |  reps: 5+ (as many as possible)
 #                   duration: 30 (seconds)  |  rir: 2 (stop with two reps left)
 # Exercise options: rest (seconds), superset (a number shared with its partner),
-#                   pattern + total_reps (an open slot: any exercise of the pattern)
+#                   pattern + total_reps (an open slot: any exercise of the pattern),
+#                   rule (this occurrence's own rule, before its exercise's)
+# Shares:           share: 0.9 of the exercise's base; of: <exercise> another's;
+#                   of_slot: <session> that exercise's occurrence in the session
 # Rules:            as on the wire (heart_models' GrowthRule), plus
 #                   {kind: ladder, ladder: push, top, bottom} naming a ladder in
 #                   exercise_ladders.yml
@@ -1664,3 +1667,323 @@ programs:
           - {exercise: hammer-curl-dumbbell, superset: 2, sets: 3, target: {reps: [10, 12], rir: 1}, rest: 60}
           - {exercise: triceps-pushdown-cable-straight-bar, superset: 2, sets: 3, target: {reps: [10, 15], rir: 1}, rest: 60}
           - {exercise: preacher-curl-dumbbell, sets: 3, target: {reps: [10, 15], rir: 1}, rest: 60}
+
+  - key: three_tiers
+    audience: getting_stronger
+    equipment: gym
+    per_week: 4
+    weeks: 12
+    minutes: 60
+    next: [strength_waves, weekly_top_sets]
+    safety: [start, stop_if, discomfort]
+    name: {en: Three tiers, es: Tres niveles, fr: Trois niveaux, ru: Три уровня}
+    note:
+      en: "Four workouts in turn. Each day has one heavy lift, one lift for more reps and lighter accessory work. When a lift stalls, its sets and reps change before the weight does."
+      es: "Cuatro entrenamientos por turnos. Cada día tiene un ejercicio pesado, uno con más repeticiones y trabajo accesorio más ligero. Cuando un ejercicio se estanca, cambian sus series y repeticiones antes que el peso."
+      fr: "Quatre séances en alternance. Chaque jour, un mouvement lourd, un mouvement à plus de répétitions et du travail accessoire plus léger. Quand un mouvement bloque, ses séries et répétitions changent avant la charge."
+      ru: "Четыре тренировки по очереди. В каждый день — одно тяжёлое упражнение, одно на больше повторений и более лёгкая подсобка. Когда упражнение застревает, сначала меняются подходы и повторения, а не вес."
+    who:
+      en: "For lifters a few months in, past the first easy gains, who want a plan that doesn't stall at the first missed rep."
+      es: "Para quien lleva unos meses entrenando, ya pasadas las primeras ganancias fáciles, y quiere un plan que no se atasque a la primera repetición fallada."
+      fr: "Pour ceux qui s’entraînent depuis quelques mois, après les premiers progrès faciles, et veulent un programme qui ne bloque pas à la première répétition manquée."
+      ru: "Для тех, кто тренируется уже несколько месяцев, прошёл первые лёгкие успехи и хочет план, который не застревает на первом недобранном повторении."
+    week:
+      en: "Four sessions of about an hour, in turn. The squat, bench, press and deadlift are each heavy on one day and for sets of ten on another; pulldowns and rows fill out every day."
+      es: "Cuatro sesiones de una hora, por turnos. Sentadilla, banca, press militar y peso muerto son pesados un día y en series de diez otro; jalones y remos completan cada día."
+      fr: "Quatre séances d’environ une heure, en alternance. Squat, développé couché, militaire et soulevé de terre sont lourds un jour et en séries de dix un autre ; tirages et rowings complètent chaque séance."
+      ru: "Четыре тренировки примерно по часу, по очереди. Присед, жим лёжа, жим стоя и становая тяга в один день тяжёлые, в другой — подходами по десять; тяги блока и тяги к поясу дополняют каждый день."
+    grows:
+      en: "Make every rep on a lift and it goes up next time: 2.5 kg, 5 on the heavy deadlift. Accessories go up 2.5 kg once the last set reaches 25."
+      es: "Completa todas las repeticiones de un ejercicio y sube la próxima vez: 2,5 kg, 5 en el peso muerto pesado. Los accesorios suben 2,5 kg cuando la última serie llega a 25."
+      fr: "Réussissez toutes les répétitions d’un mouvement et il monte la fois suivante : 2,5 kg, 5 au soulevé de terre lourd. Les accessoires montent de 2,5 kg quand la dernière série atteint 25."
+      ru: "Сделали все повторения — в следующий раз вес растёт: на 2,5 кг, в тяжёлой становой на 5. Подсобка растёт на 2,5 кг, когда последний подход доходит до 25."
+    misses:
+      en: "Miss on a heavy lift and keep the weight, in more sets of fewer reps: five triples, then six doubles, then ten singles. Miss on those and the weight drops about 15% and starts over. The sets of ten go to eight, then six, the same way."
+      es: "Si fallas un ejercicio pesado, mantén el peso en más series de menos repeticiones: cinco de tres, luego seis de dos, luego diez de una. Si fallas ahí, el peso baja un 15% y vuelves a empezar. Las series de diez pasan a ocho y luego a seis, igual."
+      fr: "Un mouvement lourd manqué, on garde la charge en plus de séries de moins de répétitions : cinq triples, puis six doubles, puis dix simples. Manqué là aussi, la charge baisse d’environ 15 % et on recommence. Les séries de dix passent à huit, puis à six, de la même façon."
+      ru: "Не справились с тяжёлым упражнением — вес остаётся, а подходов больше и повторений меньше: пять троек, потом шесть двоек, потом десять одиночных. Не справились и там — вес снижается примерно на 15%, и всё начинается заново. Подходы по десять так же переходят в восемь, потом в шесть."
+    why:
+      - sources: [currier_2023, acsm_2026]
+        about: [program, grows]
+        text:
+          en: "Heavy sets led the research for strength, and two to three sets of moderate reps build muscle. Few other details of a program mattered."
+          es: "Las series pesadas encabezaron la investigación sobre fuerza, y dos o tres series de repeticiones moderadas construyen músculo. Pocos otros detalles de un programa importaron."
+          fr: "Les séries lourdes sont arrivées en tête pour la force, et deux à trois séries de répétitions modérées construisent du muscle. Peu d’autres détails d’un programme ont compté."
+          ru: "Тяжёлые подходы лидировали в исследованиях силы, а два-три подхода средних повторений строят мышцы. Остальные детали программы почти не имели значения."
+      - sources: [acsm_2026]
+        about: [misses]
+        text:
+          en: "Changing sets and reps at a stall is a way to keep the weights heavy enough, which the research found mattered. The exact schemes are convention, not findings."
+          es: "Cambiar series y repeticiones al estancarse es una forma de mantener los pesos lo bastante altos, lo que la investigación vio que importaba. Los esquemas exactos son costumbre, no hallazgos."
+          fr: "Changer séries et répétitions quand ça bloque permet de garder des charges assez lourdes, ce qui comptait selon la recherche. Les schémas exacts sont des usages, pas des résultats."
+          ru: "Смена подходов и повторений при застое — способ сохранить достаточно тяжёлые веса, а это, по исследованиям, важно. Сами схемы — традиция, а не научный вывод."
+      - sources: [schoenfeld_2016]
+        about: [week]
+        text:
+          en: "Each big lift comes twice a week, once heavy and once lighter: training a muscle twice a week built more than once."
+          es: "Cada ejercicio grande va dos veces por semana, una pesada y otra más ligera: entrenar un músculo dos veces por semana construyó más que una."
+          fr: "Chaque grand mouvement revient deux fois par semaine, une fois lourd et une fois plus léger : entraîner un muscle deux fois par semaine a construit davantage qu’une."
+          ru: "Каждое базовое упражнение — дважды в неделю, один раз тяжело, другой легче: две тренировки мышцы в неделю дали больше, чем одна."
+      - sources: [rest_singer_2024]
+        about: [rest]
+        text:
+          en: "Three to four minutes after heavy sets, because a little longer rest does a little more on big lifts."
+          es: "De tres a cuatro minutos tras las series pesadas, porque descansar un poco más rinde un poco más en los ejercicios grandes."
+          fr: "Trois à quatre minutes après les séries lourdes, car un repos un peu plus long rapporte un peu plus sur les grands mouvements."
+          ru: "Три-четыре минуты после тяжёлых подходов: на базовых упражнениях чуть более долгий отдых даёт чуть больше."
+    rules:
+      squat-barbell: &three_tiers__heavy
+        kind: stages
+        step: 2.5
+        miss: {when: anySet, after: 1, cut: 0.15}
+        stages: [{sets: 5, reps: 3, amrap: true}, {sets: 6, reps: 2, amrap: true}, {sets: 10, reps: 1, amrap: true}]
+      bench-press-barbell: *three_tiers__heavy
+      overhead-press-barbell: *three_tiers__heavy
+      deadlift-barbell: {<<: *three_tiers__heavy, step: 5}
+      lat-pulldown-cable: &three_tiers__light {kind: rangeThenWeight, step: 2.5}
+      seated-row-cable: *three_tiers__light
+    sessions:
+      - key: a1
+        name: {en: Day A1, es: Día A1, fr: Jour A1, ru: День A1}
+        exercises:
+          - {exercise: squat-barbell, sets: &three_tiers__heavy_sets [{reps: 3}, {reps: 3}, {reps: 3}, {reps: 3}, {reps: 3+}], rest: 240}
+          - exercise: bench-press-barbell
+            sets: 3
+            target: {reps: 10}
+            rest: 150
+            rule: &three_tiers__second
+              kind: stages
+              step: 2.5
+              miss: {when: anySet, after: 1, cut: 0.15}
+              stages: [{sets: 3, reps: 10}, {sets: 3, reps: 8}, {sets: 3, reps: 6}]
+          - {exercise: lat-pulldown-cable, sets: &three_tiers__light_sets [{reps: 15}, {reps: 15}, {reps: [15, 25]}], rest: 75}
+      - key: b1
+        name: {en: Day B1, es: Día B1, fr: Jour B1, ru: День B1}
+        exercises:
+          - {exercise: overhead-press-barbell, sets: *three_tiers__heavy_sets, rest: 240}
+          - {exercise: deadlift-barbell, sets: 3, target: {reps: 10}, rest: 150, rule: {<<: *three_tiers__second, step: 5}}
+          - {exercise: seated-row-cable, sets: *three_tiers__light_sets, rest: 75}
+      - key: a2
+        name: {en: Day A2, es: Día A2, fr: Jour A2, ru: День A2}
+        exercises:
+          - {exercise: bench-press-barbell, sets: *three_tiers__heavy_sets, rest: 240}
+          - {exercise: squat-barbell, sets: 3, target: {reps: 10}, rest: 150, rule: *three_tiers__second}
+          - {exercise: lat-pulldown-cable, sets: *three_tiers__light_sets, rest: 75}
+      - key: b2
+        name: {en: Day B2, es: Día B2, fr: Jour B2, ru: День B2}
+        exercises:
+          - {exercise: deadlift-barbell, sets: *three_tiers__heavy_sets, rest: 240}
+          - {exercise: overhead-press-barbell, sets: 3, target: {reps: 10}, rest: 150, rule: *three_tiers__second}
+          - {exercise: seated-row-cable, sets: *three_tiers__light_sets, rest: 75}
+
+  - key: volume_light_heavy
+    audience: getting_stronger
+    equipment: gym
+    per_week: 3
+    weeks: 12
+    minutes: 75
+    next: [strength_waves, waves_and_volume]
+    safety: [start, stop_if, discomfort]
+    name: {en: "Volume, light, heavy", es: "Volumen, ligero, pesado", fr: "Volume, léger, lourd", ru: "Объём, лёгкий, тяжёлый"}
+    note:
+      en: "Three days with three jobs: a day of many sets, a light day to recover, and a heavy day that sets the pace. Progress comes week to week, not session to session."
+      es: "Tres días con tres tareas: un día de muchas series, un día ligero para recuperarse y un día pesado que marca el ritmo. Se progresa de semana en semana, no de sesión en sesión."
+      fr: "Trois jours, trois rôles : un jour de nombreuses séries, un jour léger pour récupérer et un jour lourd qui donne le rythme. On progresse de semaine en semaine, pas de séance en séance."
+      ru: "Три дня с тремя задачами: день многих подходов, лёгкий день для восстановления и тяжёлый день, задающий темп. Прогресс — от недели к неделе, а не от тренировки к тренировке."
+    who:
+      en: "For lifters whose every-session progress has run out, and who can train on three fixed days."
+      es: "Para quien ya no progresa en cada sesión y puede entrenar tres días fijos."
+      fr: "Pour ceux dont la progression à chaque séance s’est arrêtée, et qui peuvent s’entraîner trois jours fixes."
+      ru: "Для тех, у кого закончился прогресс от тренировки к тренировке и кто может заниматься в три фиксированных дня."
+    week:
+      en: "Monday is volume: five sets of five. Wednesday is light, with the press and pull-ups. Friday is heavy: one hard set of five that decides the week's weights."
+      es: "El lunes es volumen: cinco series de cinco. El miércoles es ligero, con press militar y dominadas. El viernes es pesado: una serie dura de cinco que decide los pesos de la semana."
+      fr: "Lundi, le volume : cinq séries de cinq. Mercredi, léger, avec le développé militaire et les tractions. Vendredi, lourd : une série difficile de cinq qui fixe les charges de la semaine."
+      ru: "Понедельник — объём: пять подходов по пять. Среда — лёгкий день с жимом стоя и подтягиваниями. Пятница — тяжёлый: один трудный подход на пять, который задаёт веса недели."
+    grows:
+      en: "Make Friday's set of five and it goes up 2.5 kg next Friday. Monday works at 90% of it and Wednesday's squat at about 70%, so the whole week moves with Friday."
+      es: "Completa la serie de cinco del viernes y sube 2,5 kg el viernes siguiente. El lunes se trabaja al 90% de ese peso y la sentadilla del miércoles a un 70%, así que toda la semana avanza con el viernes."
+      fr: "Réussissez la série de cinq du vendredi et elle monte de 2,5 kg le vendredi suivant. Le lundi se fait à 90 % de cette charge et le squat du mercredi à environ 70 % : toute la semaine suit le vendredi."
+      ru: "Справились с пятёркой в пятницу — в следующую пятницу +2,5 кг. В понедельник работаете с 90% от этого веса, а присед в среду — примерно с 70%, так что вся неделя движется вместе с пятницей."
+    misses:
+      en: "Miss Friday's five and keep the weight. Two Fridays in a row and it drops a tenth, and the rest of the week with it."
+      es: "Si fallas las cinco del viernes, mantén el peso. Dos viernes seguidos y baja una décima parte, y el resto de la semana con él."
+      fr: "Les cinq du vendredi manquées, on garde la charge. Deux vendredis d’affilée et elle baisse d’un dixième, et le reste de la semaine avec."
+      ru: "Не справились с пятёркой в пятницу — вес остаётся. Две пятницы подряд — он снижается на десятую часть, а с ним и вся неделя."
+    why:
+      - sources: [currier_2023]
+        about: [program, grows]
+        text:
+          en: "Heavy sets led the research for strength. Here one hard set a week carries the load, and the other days add practice and volume around it."
+          es: "Las series pesadas encabezaron la investigación sobre fuerza. Aquí una serie dura por semana lleva la carga, y los otros días suman práctica y volumen alrededor."
+          fr: "Les séries lourdes sont arrivées en tête pour la force. Ici, une série difficile par semaine porte la charge, et les autres jours ajoutent pratique et volume autour."
+          ru: "Тяжёлые подходы лидировали в исследованиях силы. Здесь нагрузку несёт один трудный подход в неделю, а остальные дни добавляют вокруг него практику и объём."
+      - sources: [schoenfeld_2016]
+        about: [week]
+        text:
+          en: "The squat comes three times a week and the bench twice: training a muscle more than once a week built more than once."
+          es: "La sentadilla va tres veces por semana y la banca dos: entrenar un músculo más de una vez por semana construyó más que una."
+          fr: "Le squat revient trois fois par semaine et le développé couché deux : entraîner un muscle plus d’une fois par semaine a construit davantage qu’une."
+          ru: "Присед — три раза в неделю, жим лёжа — два: тренировка мышцы чаще раза в неделю дала больше, чем один раз."
+      - sources: [rest_singer_2024]
+        about: [rest]
+        text:
+          en: "Three to five minutes before the heavy set, because a little longer rest does a little more on big lifts."
+          es: "De tres a cinco minutos antes de la serie pesada, porque descansar un poco más rinde un poco más en los ejercicios grandes."
+          fr: "Trois à cinq minutes avant la série lourde, car un repos un peu plus long rapporte un peu plus sur les grands mouvements."
+          ru: "Три-пять минут перед тяжёлым подходом: на базовых упражнениях чуть более долгий отдых даёт чуть больше."
+    rules:
+      deadlift-barbell: {kind: addWeight, step: 5}
+      overhead-press-barbell: {kind: addWeight, step: 2.5}
+      bent-over-row-barbell: {kind: addWeight, step: 2.5}
+      chin-up: {kind: rangeThenWeight, step: 2.5}
+      back-extension: {kind: rangeThenWeight, step: 2.5}
+    sessions:
+      - key: volume
+        name: {en: Volume day, es: Día de volumen, fr: Jour volume, ru: День объёма}
+        note:
+          en: "Five sets of five at 90% of Friday's weight. Hard, but every rep should be clean."
+          es: "Cinco series de cinco al 90% del peso del viernes. Duro, pero cada repetición debe salir limpia."
+          fr: "Cinq séries de cinq à 90 % de la charge du vendredi. Dur, mais chaque répétition doit rester propre."
+          ru: "Пять подходов по пять с 90% от пятничного веса. Тяжело, но каждое повторение должно быть чистым."
+        exercises:
+          - {exercise: squat-barbell, sets: 5, target: {reps: 5, share: 0.9, of: squat-barbell, of_slot: heavy}, rest: 180}
+          - {exercise: bench-press-barbell, sets: 5, target: {reps: 5, share: 0.9, of: bench-press-barbell, of_slot: heavy}, rest: 150}
+          - {exercise: deadlift-barbell, sets: 1, target: {reps: 5}, rest: 180}
+      - key: light
+        name: {en: Light day, es: Día ligero, fr: Jour léger, ru: Лёгкий день}
+        note:
+          en: "Easy on purpose: you should leave fresher than you came."
+          es: "Fácil a propósito: deberías salir más fresco de lo que llegaste."
+          fr: "Facile exprès : vous devriez repartir plus frais qu’en arrivant."
+          ru: "Легко нарочно: уходить нужно бодрее, чем пришли."
+        exercises:
+          - {exercise: squat-barbell, sets: 2, target: {reps: 5, share: 0.72, of: squat-barbell, of_slot: heavy}, rest: 120}
+          - {exercise: overhead-press-barbell, sets: 3, target: {reps: 5}, rest: 150}
+          - {exercise: chin-up, sets: 3, target: {reps: [5, 10], rir: 1}, rest: 120}
+          - {exercise: back-extension, sets: 2, target: {reps: [10, 15], rir: 2}, rest: 60}
+      - key: heavy
+        name: {en: Heavy day, es: Día pesado, fr: Jour lourd, ru: Тяжёлый день}
+        note:
+          en: "Warm up well, then one set of five as heavy as the plan says. This set sets the week."
+          es: "Calienta bien y haz una serie de cinco tan pesada como dice el plan. Esta serie marca la semana."
+          fr: "Échauffez-vous bien, puis une série de cinq aussi lourde que le prévoit le plan. Cette série donne le ton de la semaine."
+          ru: "Хорошо разомнитесь, затем один подход на пять с весом по плану. Этот подход задаёт неделю."
+        exercises:
+          - exercise: squat-barbell
+            sets: 1
+            target: {reps: 5}
+            rest: 300
+            rule: &volume_light_heavy__heavy {kind: addWeight, step: 2.5, miss: {when: anySet, after: 2, cut: 0.1}}
+          - {exercise: bench-press-barbell, sets: 1, target: {reps: 5}, rest: 300, rule: *volume_light_heavy__heavy}
+          - {exercise: bent-over-row-barbell, sets: 3, target: {reps: 5}, rest: 120}
+
+  - key: ramp_to_top_set
+    audience: getting_stronger
+    equipment: gym
+    per_week: 3
+    weeks: 12
+    minutes: 75
+    next: [volume_light_heavy, strength_waves]
+    safety: [start, stop_if, discomfort]
+    name: {en: Ramp to a top set, es: Rampa hasta la serie tope, fr: Montée vers la série de pointe, ru: Лесенка к пиковому подходу}
+    note:
+      en: "Five sets of five that climb to one top set. Monday aims for last week's best, Friday goes past it, and a light Wednesday sits between."
+      es: "Cinco series de cinco que suben hasta una serie tope. El lunes apunta a lo mejor de la semana pasada, el viernes lo supera y un miércoles ligero va en medio."
+      fr: "Cinq séries de cinq qui montent jusqu’à une série de pointe. Le lundi vise le meilleur de la semaine passée, le vendredi le dépasse, et un mercredi léger s’intercale."
+      ru: "Пять подходов по пять, поднимающихся к одному пиковому. В понедельник — цель прошлой недели, в пятницу — выше неё, а между ними лёгкая среда."
+    who:
+      en: "For lifters whose every-session progress has run out, who like warming up into their heaviest set."
+      es: "Para quien ya no progresa en cada sesión y prefiere llegar a su serie más pesada subiendo poco a poco."
+      fr: "Pour ceux dont la progression à chaque séance s’est arrêtée, et qui aiment monter progressivement jusqu’à leur série la plus lourde."
+      ru: "Для тех, у кого закончился прогресс от тренировки к тренировке и кому нравится подходить к самому тяжёлому подходу постепенно."
+    week:
+      en: "Three sessions of about 75 minutes. Monday and Friday: squat, bench and row, climbing to a top set. Wednesday: a lighter squat, the press and the deadlift."
+      es: "Tres sesiones de unos 75 minutos. Lunes y viernes: sentadilla, banca y remo, subiendo hasta una serie tope. Miércoles: sentadilla más ligera, press militar y peso muerto."
+      fr: "Trois séances d’environ 75 minutes. Lundi et vendredi : squat, développé couché et rowing, en montant jusqu’à une série de pointe. Mercredi : un squat plus léger, le développé militaire et le soulevé de terre."
+      ru: "Три тренировки примерно по 75 минут. Понедельник и пятница: присед, жим лёжа и тяга, с подъёмом к пиковому подходу. Среда: более лёгкий присед, жим стоя и становая тяга."
+    grows:
+      en: "Make every set on Friday, the top set and the triple after it included, and Friday's top set goes up 2.5 kg next week. Monday's climb follows it."
+      es: "Completa todas las series del viernes, incluidas la serie tope y la de tres que la sigue, y la serie tope del viernes sube 2,5 kg la semana siguiente. La subida del lunes la sigue."
+      fr: "Réussissez toutes les séries du vendredi, série de pointe et triple qui suit compris, et la série de pointe du vendredi monte de 2,5 kg la semaine suivante. La montée du lundi suit."
+      ru: "Справились со всеми подходами в пятницу, включая пиковый и тройку после него, — пятничный пиковый подход растёт на 2,5 кг на следующей неделе. Лесенка понедельника следует за ним."
+    misses:
+      en: "Miss on Friday and keep the weight. Two Fridays in a row and it drops a tenth, and Monday's climb with it."
+      es: "Si fallas el viernes, mantén el peso. Dos viernes seguidos y baja una décima parte, y la subida del lunes con él."
+      fr: "Raté le vendredi, on garde la charge. Deux vendredis d’affilée et elle baisse d’un dixième, et la montée du lundi avec."
+      ru: "Не справились в пятницу — вес остаётся. Две пятницы подряд — он снижается на десятую часть, а с ним и лесенка понедельника."
+    why:
+      - sources: [currier_2023, acsm_2026]
+        about: [program, grows]
+        text:
+          en: "Heavy sets led the research for strength, and few other details of a program mattered. Climbing to a top set is one way to get there warm and ready."
+          es: "Las series pesadas encabezaron la investigación sobre fuerza, y pocos otros detalles de un programa importaron. Subir hasta una serie tope es una forma de llegar a ella caliente y a punto."
+          fr: "Les séries lourdes sont arrivées en tête pour la force, et peu d’autres détails d’un programme ont compté. Monter jusqu’à une série de pointe est une façon d’y arriver chaud et prêt."
+          ru: "Тяжёлые подходы лидировали в исследованиях силы, а остальные детали программы почти не имели значения. Лесенка к пиковому подходу — способ подойти к нему разогретым и готовым."
+      - sources: [schoenfeld_2016]
+        about: [week]
+        text:
+          en: "The squat comes three times a week and the bench and row twice: training a muscle more than once a week built more than once."
+          es: "La sentadilla va tres veces por semana, y la banca y el remo dos: entrenar un músculo más de una vez por semana construyó más que una."
+          fr: "Le squat revient trois fois par semaine, le développé couché et le rowing deux : entraîner un muscle plus d’une fois par semaine a construit davantage qu’une."
+          ru: "Присед — три раза в неделю, жим лёжа и тяга — по два: тренировка мышцы чаще раза в неделю дала больше, чем один раз."
+      - sources: [rest_singer_2024]
+        about: [rest]
+        text:
+          en: "Longer rest before the top sets, because a little longer rest does a little more on big lifts."
+          es: "Más descanso antes de las series tope, porque descansar un poco más rinde un poco más en los ejercicios grandes."
+          fr: "Plus de repos avant les séries de pointe, car un repos un peu plus long rapporte un peu plus sur les grands mouvements."
+          ru: "Перед пиковыми подходами отдыхайте дольше: на базовых упражнениях чуть более долгий отдых даёт чуть больше."
+    rules:
+      overhead-press-barbell: {kind: addWeight, step: 2.5}
+      deadlift-barbell: {kind: addWeight, step: 5}
+    sessions:
+      - key: monday
+        name: {en: Monday, es: Lunes, fr: Lundi, ru: Понедельник}
+        note:
+          en: "Each set a little heavier, up to last Friday's top set."
+          es: "Cada serie un poco más pesada, hasta la serie tope del viernes pasado."
+          fr: "Chaque série un peu plus lourde, jusqu’à la série de pointe de vendredi dernier."
+          ru: "Каждый подход чуть тяжелее — до пикового подхода прошлой пятницы."
+        exercises:
+          - exercise: squat-barbell
+            rest: 180
+            sets: [{reps: 5, share: 0.5, of: squat-barbell, of_slot: friday}, {reps: 5, share: 0.625, of: squat-barbell, of_slot: friday},
+                   {reps: 5, share: 0.75, of: squat-barbell, of_slot: friday}, {reps: 5, share: 0.875, of: squat-barbell, of_slot: friday},
+                   {reps: 5, share: 0.975, of: squat-barbell, of_slot: friday}]
+          - exercise: bench-press-barbell
+            rest: 150
+            sets: [{reps: 5, share: 0.5, of: bench-press-barbell, of_slot: friday}, {reps: 5, share: 0.625, of: bench-press-barbell, of_slot: friday},
+                   {reps: 5, share: 0.75, of: bench-press-barbell, of_slot: friday}, {reps: 5, share: 0.875, of: bench-press-barbell, of_slot: friday},
+                   {reps: 5, share: 0.975, of: bench-press-barbell, of_slot: friday}]
+          - exercise: bent-over-row-barbell
+            rest: 120
+            sets: [{reps: 5, share: 0.5, of: bent-over-row-barbell, of_slot: friday}, {reps: 5, share: 0.625, of: bent-over-row-barbell, of_slot: friday},
+                   {reps: 5, share: 0.75, of: bent-over-row-barbell, of_slot: friday}, {reps: 5, share: 0.875, of: bent-over-row-barbell, of_slot: friday},
+                   {reps: 5, share: 0.975, of: bent-over-row-barbell, of_slot: friday}]
+      - key: wednesday
+        name: {en: Wednesday, es: Miércoles, fr: Mercredi, ru: Среда}
+        exercises:
+          - exercise: squat-barbell
+            rest: 120
+            sets: [{reps: 5, share: 0.5, of: squat-barbell, of_slot: friday}, {reps: 5, share: 0.625, of: squat-barbell, of_slot: friday},
+                   {reps: 5, share: 0.75, of: squat-barbell, of_slot: friday}, {reps: 5, share: 0.75, of: squat-barbell, of_slot: friday}]
+          - exercise: overhead-press-barbell
+            rest: 150
+            sets: &ramp_to_top_set__four [{reps: 5, share: 0.625}, {reps: 5, share: 0.75}, {reps: 5, share: 0.875}, {reps: 5, share: 1}]
+          - {exercise: deadlift-barbell, rest: 180, sets: *ramp_to_top_set__four}
+      - key: friday
+        name: {en: Friday, es: Viernes, fr: Vendredi, ru: Пятница}
+        note:
+          en: "Climb to a new top set of five, then one heavier triple, then one lighter set of eight."
+          es: "Sube hasta una nueva serie tope de cinco, luego una de tres más pesada y una de ocho más ligera."
+          fr: "Montez jusqu’à une nouvelle série de pointe de cinq, puis un triple plus lourd, puis une série de huit plus légère."
+          ru: "Поднимитесь к новому пиковому подходу на пять, затем одна более тяжёлая тройка и один более лёгкий подход на восемь."
+        exercises:
+          - exercise: squat-barbell
+            rest: 240
+            rule: &ramp_to_top_set__top {kind: addWeight, step: 2.5, miss: {when: anySet, after: 2, cut: 0.1}}
+            sets: &ramp_to_top_set__friday [{reps: 5, share: 0.5}, {reps: 5, share: 0.625}, {reps: 5, share: 0.75}, {reps: 5, share: 0.875},
+                   {reps: 5, share: 1}, {reps: 3, share: 1.025}, {reps: 8, share: 0.8}]
+          - {exercise: bench-press-barbell, rest: 180, rule: *ramp_to_top_set__top, sets: *ramp_to_top_set__friday}
+          - {exercise: bent-over-row-barbell, rest: 150, rule: *ramp_to_top_set__top, sets: *ramp_to_top_set__friday}
