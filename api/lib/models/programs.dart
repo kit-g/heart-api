@@ -124,3 +124,80 @@ class _ProgramBasesResponse implements ProgramBasesResponse {
   }
 }
 
+/// What caused a base: a workout's bump or cut, a test session, an action (a
+/// replay's cut), or the user setting it.
+enum BaseCause {
+  workout('workout'),
+  test('test'),
+  action('action'),
+  user('user');
+
+  /// The `cause` on the wire.
+  final String value;
+
+  new(this.value);
+}
+
+/// A program's history read back (heart-api#260): every base with its cause
+/// and the value it replaced, the actions, and the skips, each oldest first.
+abstract interface class ProgramHistory implements Model {
+  Iterable<ProgramBase> get bases;
+
+  Iterable<ProgramAction> get actions;
+
+  Iterable<TrainingSkip> get skips;
+
+  /// What caused [base].
+  BaseCause causeOf(ProgramBase base);
+
+  /// [tests] are the program's test sessions and [sessions] the session of
+  /// each of its workouts, as `getProgramWorkouts` reads them.
+  factory({
+    required Iterable<ProgramBase> bases,
+    required Iterable<ProgramAction> actions,
+    required Iterable<TrainingSkip> skips,
+    required Set<String> tests,
+    required Map<String, String?> sessions,
+  }) = _ProgramHistory.new;
+}
+
+class _ProgramHistory implements ProgramHistory {
+  @override
+  final Iterable<ProgramBase> bases;
+  @override
+  final Iterable<ProgramAction> actions;
+  @override
+  final Iterable<TrainingSkip> skips;
+  final Set<String> tests;
+  final Map<String, String?> sessions;
+
+  new({required this.bases, required this.actions, required this.skips, required this.tests, required this.sessions});
+
+  @override
+  BaseCause causeOf(ProgramBase base) {
+    return switch (base) {
+      ProgramBase(workoutId: final String workout) when tests.contains(sessions[workout]) => .test,
+      ProgramBase(workoutId: String()) => .workout,
+      ProgramBase(actionId: String()) => .action,
+      _ => .user,
+    };
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    // the value each base replaced: the one before it for its slot, or for
+    // its exercise when it has no slot
+    final held = <String, num>{};
+    final rows = <Map<String, dynamic>>[];
+    for (final base in bases) {
+      final key = base.slot ?? base.exerciseId;
+      rows.add({...base.toMap()..remove('programId'), 'cause': causeOf(base).value, 'previous': ?held[key]});
+      held[key] = base.value;
+    }
+    return {
+      'bases': rows,
+      'actions': [for (final action in actions) action.toMap()..remove('programId')],
+      'skips': [for (final skip in skips) skip.toMap()..remove('programId')],
+    };
+  }
+}
