@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.29.0
+
+The progression engine: what a session does to a base, misses, and a step set
+by the AMRAP set (heart-api#228).
+
+- New: `Progression.next(rule:, base:, sets:, misses:, lighter:, week:,
+  closesCycle:)` returns a sealed `ProgressionStep`: `Grow`, `Hold`, `Missed`,
+  `Cut` or `Advance`. `Progression.streak(rule, sessions, lighter:)` folds the
+  misses in a row, skipping sessions of a lighter week; `Progression.test` sets
+  a base from a test session (Brzycki, 10 reps at most). `Longer` grows the
+  measure the set's target names (distance or duration).
+- New: `MissRule` (`when`: `MissWhen.anySet` / `amrap` / `totalReps`, `floor`,
+  `after`, `cut`) and `AmrapStep` (`reps`, `step`). `AddWeight` and
+  `RangeThenWeight` take `miss` and `amrap`; `ShareOfMax` takes them too and
+  reads its `misses` / `missCut` as its miss rule. `GrowthRule.miss` and
+  `.amrap` read them for any rule.
+- New: `GrowthRule.extra` keeps fields a build doesn't know and writes them
+  back. The rule constructors gain an optional `extra`.
+- New: `ShareOfMax.closesWave(week)`.
+- New: `SetTarget.supplemental`, on the wire as `supplemental: true`: a set the
+  engine leaves out.
+
 ## 2.28.0
 
 Slots: one lift with two bases, a share of another's, supplemental sets and
