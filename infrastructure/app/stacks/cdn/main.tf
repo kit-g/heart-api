@@ -25,6 +25,16 @@ resource "aws_s3_bucket_policy" "content_cloudfront_access" {
             "AWS:SourceArn" = aws_cloudfront_distribution.media.arn
           }
         }
+      },
+      {
+        Sid       = "DenyPrivateRuntimeObjects"
+        Effect    = "Deny"
+        Principal = { Service = "cloudfront.amazonaws.com" }
+        Action    = "s3:GetObject"
+        Resource = [
+          for prefix in ["imports", "exports", "uploads", "exercise-uploads"] :
+          "${var.content_bucket.arn}/${prefix}/*"
+        ]
       }
     ]
   })

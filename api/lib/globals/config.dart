@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+import 'dart:io' show File, Platform, SecurityContext;
 
 import 'package:heart/models/tokens.dart';
 import 'package:postgres/postgres.dart' hide Connection;
@@ -50,6 +50,7 @@ class PostgresConfig {
   final String database;
   final String? user;
   final String? password;
+  final String? sslRootCertificate;
 
   const new({
     required this.host,
@@ -57,6 +58,7 @@ class PostgresConfig {
     required this.database,
     this.user,
     this.password,
+    this.sslRootCertificate,
   });
 
   /// The Postgres connection alone, from the same `PG_*` variables the API
@@ -71,8 +73,23 @@ class PostgresConfig {
       database: env['PG_DATABASE'] ?? 'heart',
       user: env['PG_USER'],
       password: env['PG_PASSWORD'],
+      sslRootCertificate: env['PG_SSL_ROOT_CERT'],
     );
   }
+
+  /// Only the literal local development endpoints may use plaintext.
+  SslMode get sslMode => switch (host) {
+    'localhost' || '127.0.0.1' || '::1' => .disable,
+    _ => .verifyFull,
+  };
+
+  SecurityContext? get securityContext => switch (sslMode) {
+    .disable => null,
+    _ =>
+      SecurityContext(withTrustedRoots: true)..setTrustedCertificates(
+        sslRootCertificate ?? File.fromUri(Platform.script.resolve('supabase-ca.crt')).path,
+      ),
+  };
 
   Endpoint get endpoint {
     return Endpoint(

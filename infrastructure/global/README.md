@@ -16,9 +16,17 @@ infrastructure/ci/
 
 ## Trust policy
 
-One `repo:<owner>/<name>:*` glob per repo. Listed in `stack/variables.tf` default:
+Each environment supplies `github_oidc_subjects`. Dev trusts all contexts of
+the two named repositories, heart-api and heart-of-yours, so development and
+manual workflows are not restricted to particular refs.
 
-- `kit-g/heart-api`
-- `kit-g/heart-of-yours`
+Prod permits heart-api main (the intentional assets exception) and v* tags, plus heart-of-yours
+main, v*, ios* and android* tags. Production manual deploys must run from one
+of those refs; PR, feature-branch and environment-shaped subjects are not trusted.
+The frontend deployment jobs currently have no GitHub environment attached; an
+environment input alone does not change the OIDC subject.
 
-Add more by overriding `github_repos` in the env's module call.
+Apply the production account-tier trust changes before running the updated workflows.
+Test and validation jobs have only contents:read; only deploy/notification jobs
+request id-token:write. Production ref restrictions remain in the trust policy
+even with those job permissions, because a PR can edit its own workflow.

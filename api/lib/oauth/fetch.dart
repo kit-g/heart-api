@@ -37,36 +37,40 @@ Future<Map<String, dynamic>> guardedJsonFetch(
   if (uri.scheme != 'https' || uri.host.isEmpty || uri.hasPort && uri.port != 443 || uri.userInfo.isNotEmpty) {
     throw const DocumentFetchError('only plain https URLs');
   }
-  final List<InternetAddress> addresses;
-  try {
-    addresses = await InternetAddress.lookup(uri.host).timeout(timeout);
-  } on Object {
-    throw const DocumentFetchError('host does not resolve');
-  }
-  if (addresses.isEmpty || addresses.any(isNonPublicAddress)) {
-    throw const DocumentFetchError('host is not on the public internet');
-  }
-
   final client = HttpClient()..connectionTimeout = timeout;
   try {
-    final request = await client.getUrl(uri).timeout(timeout);
-    request
-      ..followRedirects = false
-      ..headers.set(HttpHeaders.acceptHeader, 'application/json');
-    final response = await request.close().timeout(timeout);
-    if (response.statusCode != HttpStatus.ok) {
-      await response.drain<void>();
-      throw DocumentFetchError('answered ${response.statusCode}');
-    }
-    final bytes = <int>[];
-    await for (final chunk in response.timeout(timeout)) {
-      bytes.addAll(chunk);
-      if (bytes.length > maxBytes) throw const DocumentFetchError('document too large');
-    }
-    return switch (jsonDecode(utf8.decode(bytes))) {
-      final Map<String, dynamic> json => json,
-      _ => throw const DocumentFetchError('not a JSON object'),
-    };
+    // One deadline covers DNS, headers and the entire body. Per-chunk
+    // timeouts let a slow sender occupy an invocation indefinitely.
+    return await (() async {
+      final List<InternetAddress> addresses;
+      try {
+        addresses = await InternetAddress.lookup(uri.host);
+      } on Object {
+        throw const DocumentFetchError('host does not resolve');
+      }
+      if (addresses.isEmpty || addresses.any(isNonPublicAddress)) {
+        throw const DocumentFetchError('host is not on the public internet');
+      }
+      final request = await client.getUrl(uri);
+      request
+        ..followRedirects = false
+        ..headers.set(HttpHeaders.acceptHeader, 'application/json');
+      final response = await request.close();
+      // A rejected body is untrusted too. Closing the client below abandons
+      // it without waiting for the peer to finish sending it.
+      if (response.statusCode != HttpStatus.ok) {
+        throw DocumentFetchError('answered ${response.statusCode}');
+      }
+      final bytes = <int>[];
+      await for (final chunk in response) {
+        bytes.addAll(chunk);
+        if (bytes.length > maxBytes) throw const DocumentFetchError('document too large');
+      }
+      return switch (jsonDecode(utf8.decode(bytes))) {
+        final Map<String, dynamic> json => json,
+        _ => throw const DocumentFetchError('not a JSON object'),
+      };
+    })().timeout(timeout);
   } on DocumentFetchError {
     rethrow;
   } on Object {

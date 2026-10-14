@@ -7,6 +7,15 @@ locals {
 }
 
 module "deploy_role" {
+  github_oidc_subjects = [
+    # Assets intentionally ship from main, while API/Firebase use release tags.
+    "repo:kit-g/heart-api:ref:refs/heads/main",
+    "repo:kit-g/heart-api:ref:refs/tags/v*",
+    "repo:kit-g/heart-of-yours:ref:refs/heads/main",
+    "repo:kit-g/heart-of-yours:ref:refs/tags/v*",
+    "repo:kit-g/heart-of-yours:ref:refs/tags/ios*",
+    "repo:kit-g/heart-of-yours:ref:refs/tags/android*",
+  ]
   source                = "../../stack"
   static_bucket         = "922419543441-ca-central-1-static"
   buckets               = ["922419543441-ca-central-1-content"]

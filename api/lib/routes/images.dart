@@ -66,16 +66,24 @@ Future<PresignedUploadResponse> presignWorkoutImageById(Request request, String 
   );
 }
 
-Future<NoContent> deleteWorkoutImage(Request request) async {
-  final workoutId = request.pathParameters.raw[#workoutId]!;
+Future<NoContent> deleteWorkoutImage(Request request) =>
+    deleteWorkoutImageById(request, request.pathParameters.raw[#workoutId]!);
+
+Future<NoContent> deleteWorkoutImageById(Request request, String workoutId) async {
   final query = WorkoutImageDeleteQuery.fromRequest(request);
 
+  // Read only keys owned by this caller/workout before touching S3. Keep the
+  // row until S3 succeeds so a failed object deletion can still be retried.
+  final keys = await request.imageDbService.getWorkoutImageKeys(
+    userId: request.userId,
+    workoutId: workoutId,
+  );
+  if (!keys.contains(query.key)) throw NotFound(type: 'WorkoutImage', id: query.key);
   await request.imageStorageService.deleteObject(key: query.key);
   await request.imageDbService.deleteImageRecord(
     userId: request.userId,
     workoutId: workoutId,
     key: query.key,
   );
-
   throw const NoContent();
 }

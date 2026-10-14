@@ -3,6 +3,7 @@ BUILD_TIME ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 build-ApiFunction:
 	dart pub get
+	cp bin/supabase-ca.crt $(ARTIFACTS_DIR)/supabase-ca.crt
 	dart compile exe bin/main.dart \
 		-DCOMMIT='$(COMMIT)' \
 		-DBUILD_TIME='$(BUILD_TIME)' \

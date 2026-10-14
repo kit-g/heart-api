@@ -26,9 +26,15 @@ Future<void> main(List<String> args) async {
   final outDir = Directory(args[0]);
   final locales = args[1].split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
 
+  final config = PostgresConfig.fromEnv();
   final pool = Pool.withEndpoints(
-    [PostgresConfig.fromEnv().endpoint],
-    settings: const PoolSettings(maxConnectionCount: 1, applicationName: 'heart-api-publish-library'),
+    [config.endpoint],
+    settings: PoolSettings(
+      maxConnectionCount: 1,
+      applicationName: 'heart-api-publish-library',
+      sslMode: config.sslMode,
+      securityContext: config.securityContext,
+    ),
   );
   final database = Database(pool: pool);
 

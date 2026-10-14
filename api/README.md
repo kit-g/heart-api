@@ -4,6 +4,26 @@ Dart 3 backend running on AWS Lambda behind API Gateway via the [Lambda Web Adap
 
 ---
 
+## Database TLS
+
+Remote connections verify the server certificate and hostname. The literal
+loopback hosts `localhost`, `127.0.0.1` and `::1` keep local development
+usable without TLS. The API, cron setup and library publisher share this rule.
+
+`bin/supabase-ca.crt` is Supabase's **public** root CA, downloaded over HTTPS
+from the URL configured in its
+[official dashboard source](https://github.com/supabase/supabase/blob/master/apps/studio/hooks/custom-content/custom-content.json).
+It expires on 2031-04-26. Its SHA-256 fingerprint is
+`80:70:25:AD:50:D4:ED:21:9D:2C:9C:7D:29:9C:00:4F:82:4E:B0:0C:F7:F6:5A:FE:F6:07:D0:7B:72:E6:CA:FA`.
+Replace it from the authenticated official source before expiry or when
+Supabase rotates its CA.
+
+The build copies the CA beside `bootstrap`, and the deployment ZIP includes
+both files. Source entrypoints find the CA beside their script. An alternative
+trust file can be supplied with `PG_SSL_ROOT_CERT` for Dart, or
+`PGSSLROOTCERT` for the Python publisher and migration script. A missing or
+invalid CA fails closed; never restore `sslmode=require` as a workaround.
+
 ## Project layout
 
 ```

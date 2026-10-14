@@ -27,7 +27,12 @@ final _awsConfig = AwsConfig(credentialsProvider: _credentialsProvider, region: 
 
 final _pool = Pool.withEndpoints(
   [_config.db.endpoint],
-  settings: const PoolSettings(maxConnectionCount: 1, applicationName: 'heart-api'),
+  settings: PoolSettings(
+    maxConnectionCount: 1,
+    applicationName: 'heart-api',
+    sslMode: _config.db.sslMode,
+    securityContext: _config.db.securityContext,
+  ),
 );
 
 final _database = Database(pool: _pool);

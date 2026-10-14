@@ -28,6 +28,16 @@ if [ -z "${PGHOST:-}" ]; then
   export PGDATABASE="${PGDATABASE:-heart}"
 fi
 
+# A remote migration connection must authenticate the server too. Keep the
+# literal loopback addresses for the credential-free local/CI database.
+case "$PGHOST" in
+  localhost|127.0.0.1|::1) ;;
+  *)
+    export PGSSLMODE=verify-full
+    export PGSSLROOTCERT="${PGSSLROOTCERT:-$SCRIPT_DIR/../api/bin/supabase-ca.crt}"
+    ;;
+esac
+
 echo ">> Ensuring _schema_migrations table"
 psql -v ON_ERROR_STOP=1 --quiet <<'SQL'
 CREATE TABLE IF NOT EXISTS _schema_migrations (

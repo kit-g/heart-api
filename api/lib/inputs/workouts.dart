@@ -88,6 +88,9 @@ class ImportWorkoutsIn {
     required Duration utcOffset,
   }) {
     try {
+      // Check before parsing can return an unreadable export for retention.
+      final headers = parseCsv(csv).firstOrNull ?? const <String>[];
+      rejectHealthFields({for (final header in headers) header: null});
       return (source.parse(csv, unit: unit, utcOffset: utcOffset), null);
     } on UnreadableExport catch (e) {
       return (null, e.message);
