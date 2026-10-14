@@ -45,6 +45,21 @@ void main() {
       }
     });
 
+    test('what a user says hurts or limits them never arrives either (heart-api#236)', () {
+      for (final key in ['injuries', 'injury', 'limitations', 'goEasyOn', 'go_easy', 'painScore', 'pain_level']) {
+        expect(
+          jsonRequest(
+            body: {
+              'name': 'Push',
+              key: const ['knee'],
+            },
+          ).json(),
+          rejects(key),
+          reason: key,
+        );
+      }
+    });
+
     test('casing and separators do not hide a key', () {
       for (final key in ['heart_rate', 'Heart-Rate', 'BODY_MASS', 'avgHeartRate', 'sleepMinutes', 'body_weight']) {
         expect(jsonRequest(body: {key: 1}).json(), rejects(key), reason: key);

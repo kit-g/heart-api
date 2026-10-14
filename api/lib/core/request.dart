@@ -86,6 +86,13 @@ const _healthFragments = [
   'respiratoryrate',
   'bloodpressure',
   'bloodglucose',
+  // what a user says hurts or limits them: the "go easy on" list stays on the
+  // device (heart-api#236), so no body carries it either
+  'injur',
+  'limitation',
+  'goeasy',
+  'painscore',
+  'painlevel',
 ];
 
 extension Locale on Request {
