@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'exercise_set.dart';
 import 'program.dart';
-import 'set_target.dart';
+import 'program_math.dart';
 
 /// What one session did to an exercise's base under its growth rule.
 ///
@@ -145,7 +145,7 @@ abstract final class Progression {
         return const Hold();
       case ShareOfMax(:final step):
         final missed = _missed(rule.miss, working);
-        if (missed && misses + 1 >= rule.miss.after) return Cut(_down(base * (1 - rule.miss.cut), step));
+        if (missed && misses + 1 >= rule.miss.after) return Cut(roundDown(base * (1 - rule.miss.cut), step));
         if (missed) return Missed(misses + 1);
         if (!closesCycle || !rule.closesWave(week)) return const Hold();
         return _step(rule, base, step, working);
@@ -187,7 +187,7 @@ abstract final class Progression {
       if (best == null || estimate > best) best = estimate;
     }
     return switch (best) {
-      final double best => _down(best * share, step),
+      final double best => roundDown(best * share, step),
       null => null,
     };
   }
@@ -195,15 +195,7 @@ abstract final class Progression {
 
 /// What a [Longer] rule grows in [set]: the measure its target names, else
 /// distance for an exercise logged by weight and distance, else duration.
-num? _length(ExerciseSet set) {
-  final target = set.target;
-  final distance = switch ((target?[.distance], target?[.duration])) {
-    (final TargetRange _, _) => true,
-    (null, final TargetRange _) => false,
-    _ => set.category == .weightedDistance,
-  };
-  return distance ? set.distance : set.duration;
-}
+num? _length(ExerciseSet set) => growsDistance(set, set.target) ? set.distance : set.duration;
 
 Iterable<ExerciseSet> _working(Iterable<ExerciseSet> sets) {
   return sets.where(
@@ -245,7 +237,7 @@ bool _missed(MissRule? miss, List<ExerciseSet> working) {
 
 ProgressionStep _miss(MissRule miss, num base, num step, int misses) {
   final streak = misses + 1;
-  if (streak >= miss.after) return Cut(_down(base * (1 - miss.cut), step));
+  if (streak >= miss.after) return Cut(roundDown(base * (1 - miss.cut), step));
   return Missed(streak);
 }
 
@@ -266,13 +258,4 @@ ProgressionStep _step(GrowthRule rule, num base, num step, List<ExerciseSet> wor
   if (chosen == 0) return const Hold();
   final value = base + chosen;
   return chosen > 0 ? Grow(value) : Cut(max(value, 0));
-}
-
-/// [value] rounded down to a whole number of [step]s: a cut lands on a weight
-/// the plates can make.
-num _down(num value, num step) {
-  if (step <= 0) return value;
-  final steps = (value / step + 1e-9).floor();
-  final rounded = steps * step;
-  return rounded == rounded.roundToDouble() ? rounded.round() : double.parse(rounded.toStringAsFixed(3));
 }
