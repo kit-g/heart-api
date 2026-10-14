@@ -505,6 +505,52 @@ void main() {
       expect((goals.last as Map).containsKey('exerciseName'), isFalse);
     });
 
+    test('list_programs and get_program say where the user stands', () async {
+      const programId = '01900000-0000-7000-8000-000000000050';
+      const session = '01900000-0000-7000-8000-000000000051';
+      const bench = '01900000-0000-7000-8000-000000000001';
+      final program = Program(
+        id: programId,
+        name: 'Getting stronger',
+        sessions: [session],
+        rules: {bench: const AddWeight(step: 2.5)},
+      );
+      when(app.db.getPrograms('u1')).thenAnswer((_) async => [program]);
+      when(app.db.getProgram(userId: 'u1', programId: programId)).thenAnswer((_) async => program);
+      when(app.db.getProgramMarks(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
+      when(app.db.getProgramActions(userId: 'u1', programId: programId)).thenAnswer(
+        (_) async => [ProgramAction(kind: .pause, at: DateTime.utc(2026, 10, 2))],
+      );
+      when(app.db.getProgramBases(userId: 'u1', programId: programId)).thenAnswer(
+        (_) async => [ProgramBase(exerciseId: bench, value: 100, at: DateTime.utc(2026, 10, 1))],
+      );
+      when(app.db.getExercises('u1')).thenAnswer(
+        (_) async => {
+          'exercises': [
+            {'id': bench, 'name': 'Bench Press'},
+          ],
+        },
+      );
+      when(
+        app.db.getTemplate(userId: 'u1', templateId: session),
+      ).thenAnswer((_) async => Template.fromJson(const {'id': session, 'order': 0, 'name': 'A'}));
+
+      final listed = ((await call('list_programs'))['structuredContent'] as Map)['programs'] as List;
+      expect((listed.single as Map)['paused'], isTrue);
+      expect((listed.single as Map)['next'], session);
+
+      final detail = (await call('get_program', {'programId': programId}))['structuredContent'] as Map;
+      expect((detail['sessions'] as List).single, containsPair('name', 'A'));
+      expect(detail['exercises'], [
+        {
+          'name': 'Bench Press',
+          'rule': {'kind': 'addWeight', 'step': 2.5},
+          'base': 100,
+        },
+      ]);
+      expect((await call('get_program', {'programId': 'nope'}))['isError'], isTrue);
+    });
+
     test('an unknown tool is invalid params', () async {
       final response = await rpc('tools/call', params: {'name': 'delete_everything'});
       expect((response.body['error'] as Map)['code'], -32602);

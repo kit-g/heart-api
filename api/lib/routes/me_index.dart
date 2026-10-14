@@ -16,6 +16,8 @@ final RouteTable meRoutes = {
   ('/templates', .get): me.getMyTemplates,
   ('/template-folders', .get): me.getMyFolders,
   ('/goals', .get): me.getMyGoals,
+  ('/programs', .get): me.getMyPrograms,
+  ('/programs/:programId', .get): me.getMyProgram,
   ('/records', .get): me.getMyRecords,
   ('/library', .get): me.searchMyLibrary,
   ('/export', .get): me.exportMe,

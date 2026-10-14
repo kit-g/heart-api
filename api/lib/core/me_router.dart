@@ -20,6 +20,7 @@ RelicRouter buildMeRouter({required Database database, required ExportStorage st
     ..use('/', templatesDb(db: database))
     ..use('/', templateFoldersDb(db: database))
     ..use('/', goalsDb(db: database))
+    ..use('/', programsDb(db: database))
     ..use('/', exportStorage(storage: storage))
     ..addRoutes(meRoutes);
 }

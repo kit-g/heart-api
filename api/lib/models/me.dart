@@ -25,6 +25,7 @@ class _MeProfile implements MeProfile {
         'templateFolders': summary[.templateFolders].count,
         'goals': summary[.goals].count,
         'customExercises': summary[.customExercises].count,
+        'programs': summary[.programs].count,
       },
     };
   }
@@ -195,4 +196,50 @@ class MeLibrarySearch implements Model {
       ],
     };
   }
+}
+
+/// A program as `/me` shows it: the program, where the user stands in it
+/// (computed, never stored), and, for one program, each exercise's current
+/// base.
+abstract interface class MeProgram implements Model {
+  Program get program;
+
+  ProgramPosition get position;
+
+  factory(Program program, ProgramPosition position, {Map<String, ProgramBase>? bases}) = _MeProgram.new;
+}
+
+class _MeProgram implements MeProgram {
+  @override
+  final Program program;
+  @override
+  final ProgramPosition position;
+  final Map<String, ProgramBase>? bases;
+
+  new(this.program, this.position, {this.bases});
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      ...program.toMap(),
+      'position': position.toMap(),
+      if (bases case final Map<String, ProgramBase> bases)
+        'bases': {
+          for (final MapEntry(:key, :value) in bases.entries)
+            key: {'value': value.value, 'at': value.at.toUtc().toIso8601String()},
+        },
+    };
+  }
+}
+
+/// `GET /me/programs`.
+class MePrograms implements Model {
+  final Iterable<MeProgram> programs;
+
+  const new(this.programs);
+
+  @override
+  Map<String, dynamic> toMap() => {
+    'programs': [for (final program in programs) program.toMap()],
+  };
 }

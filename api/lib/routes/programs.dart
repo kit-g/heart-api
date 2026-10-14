@@ -111,3 +111,25 @@ Future<Model> deleteProgramBase(Request req) async {
   );
   throw const NoContent();
 }
+
+/// Where the user stands in [program], and each exercise's current base, read
+/// off its history the way the app reads it. The server's weeks are ISO weeks
+/// in UTC: it knows neither the user's zone nor their first weekday.
+Future<(ProgramPosition, Map<String, ProgramBase>)> programState(
+  Request req,
+  Program program, {
+  bool withBases = false,
+}) async {
+  final service = req.programService;
+  final programId = program.id!;
+  final (marks, actions, bases) = await (
+    service.getProgramMarks(userId: req.userId, programId: programId),
+    service.getProgramActions(userId: req.userId, programId: programId),
+    switch (withBases) {
+      true => service.getProgramBases(userId: req.userId, programId: programId),
+      false => Future.value(const <ProgramBase>[]),
+    },
+  ).wait;
+  final position = ProgramPosition.of(program, marks: marks, actions: actions, now: DateTime.timestamp());
+  return (position, currentBases(bases));
+}

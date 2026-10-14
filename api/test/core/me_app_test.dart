@@ -83,8 +83,44 @@ void main() {
       'id': 'u1',
       'username': 'Sam',
       'unitSystem': 'metric',
-      'counts': {'workouts': 412, 'templates': 0, 'templateFolders': 0, 'goals': 0, 'customExercises': 0},
+      'counts': {
+        'workouts': 412,
+        'templates': 0,
+        'templateFolders': 0,
+        'goals': 0,
+        'customExercises': 0,
+        'programs': 0,
+      },
     });
+  });
+
+  test('programs come with where the user stands, computed; one program adds its bases', () async {
+    const programId = '01900000-0000-7000-8000-000000000050';
+    const session = '01900000-0000-7000-8000-000000000051';
+    const bench = '01900000-0000-7000-8000-000000000001';
+    final program = Program(id: programId, name: 'Getting stronger', sessions: [session], perWeek: 3);
+    when(app.db.getPrograms('u1')).thenAnswer((_) async => [program]);
+    when(app.db.getProgram(userId: 'u1', programId: programId)).thenAnswer((_) async => program);
+    when(app.db.getProgramMarks(userId: 'u1', programId: programId)).thenAnswer(
+      (_) async => [ProgramMark(templateId: session, at: DateTime.utc(2026, 10, 2), isWorkout: true)],
+    );
+    when(app.db.getProgramActions(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
+    when(app.db.getProgramBases(userId: 'u1', programId: programId)).thenAnswer(
+      (_) async => [
+        ProgramBase(exerciseId: bench, value: 100, at: DateTime.utc(2026, 10, 1)),
+        ProgramBase(exerciseId: bench, value: 102.5, at: DateTime.utc(2026, 10, 2)),
+      ],
+    );
+
+    final list = await app.send('GET', '/me/programs', token: secret);
+    expect(list.status, 200);
+    final listed = ((jsonDecode(list.body) as Map)['programs'] as List).single as Map;
+    expect((listed['position'] as Map)['week'], 2, reason: 'its one session is done');
+    expect(listed.containsKey('bases'), isFalse);
+
+    final one = await app.send('GET', '/me/programs/$programId', token: secret);
+    expect(one.status, 200);
+    expect(((jsonDecode(one.body) as Map)['bases'] as Map)[bench], {'value': 102.5, 'at': '2026-10-02T00:00:00.000Z'});
   });
 
   test('workouts are paginated and images keep only id and url', () async {
