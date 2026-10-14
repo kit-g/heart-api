@@ -241,6 +241,26 @@ void main() {
       );
     });
 
+    test('a target whose sets cannot hold the source\'s is the service\'s 400 incompatible_exercise', () async {
+      when(
+        app.db.moveExerciseHistory(
+          userId: anyNamed('userId'),
+          sourceId: anyNamed('sourceId'),
+          targetId: anyNamed('targetId'),
+          dryRun: anyNamed('dryRun'),
+        ),
+      ).thenThrow(
+        const BadRequest(
+          code: 'incompatible_exercise',
+          reason: "the target's sets cannot hold the source's: Reps Only cannot move onto Cardio",
+        ),
+      );
+
+      final res = await app.send('POST', '/exercises/$source/moves?dryRun=true', body: {'targetId': target});
+      expect(res.status, 400);
+      expect(jsonDecode(res.body), containsPair('code', 'incompatible_exercise'));
+    });
+
     test('an exercise the user cannot reference is the service\'s 404 unknown_exercise', () async {
       when(
         app.db.moveExerciseHistory(

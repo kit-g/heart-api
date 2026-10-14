@@ -559,12 +559,13 @@ void main() {
   });
 
   group('moveExerciseHistory', () {
-    /// A custom of [userId], by id.
-    Future<String> seedCustom(String userId, String name) async {
+    /// A custom of [userId], by id; a barbell lift by default, like the
+    /// library exercises it moves onto.
+    Future<String> seedCustom(String userId, String name, {String category = 'Barbell'}) async {
       final row = await h.db.createExercise(
         userId: userId,
         name: h.uniqueName(name),
-        category: 'Reps Only',
+        category: category,
         target: 'Core',
       );
       return row['id'].toString();
@@ -744,6 +745,51 @@ void main() {
         throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'same_exercise')),
       );
       expect(await exerciseRows(mine), 1);
+    });
+
+    test('a target whose sets cannot hold the source\'s is BadRequest(incompatible_exercise), dry or not', () async {
+      final userId = await h.seedProfile();
+      final source = await seedCustom(userId, 'Ab wheel', category: 'Reps Only');
+      final ride = await seedCustom(userId, 'Ride', category: 'Cardio');
+
+      for (final dryRun in [true, false]) {
+        await expectLater(
+          h.db.moveExerciseHistory(userId: userId, sourceId: source, targetId: ride, dryRun: dryRun),
+          throwsA(
+            isA<BadRequest>()
+                .having((e) => e.code, 'code', 'incompatible_exercise')
+                .having((e) => e.reason, 'reason', contains('Reps Only cannot move onto Cardio')),
+          ),
+        );
+      }
+      // a move would have deleted the custom source
+      expect(await exerciseRows(source), 1);
+    });
+
+    test('the load-by-reps categories move onto one another, assisted body weight only onto its own', () async {
+      final userId = await h.seedProfile();
+      final dumbbell = await seedCustom(userId, 'Dumbbell press', category: 'Dumbbell');
+      final machine = await seedCustom(userId, 'Machine press', category: 'Machine');
+      final assisted = await seedCustom(userId, 'Assisted dip', category: 'Assisted Body Weight');
+      final assistedToo = await seedCustom(userId, 'Assisted dip too', category: 'Assisted Body Weight');
+
+      final moved = await h.db.moveExerciseHistory(userId: userId, sourceId: dumbbell, targetId: machine, dryRun: true);
+      expect(moved.sourceDeleted, isTrue);
+      await expectLater(
+        h.db.moveExerciseHistory(userId: userId, sourceId: assisted, targetId: machine, dryRun: true),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'incompatible_exercise')),
+      );
+      await expectLater(
+        h.db.moveExerciseHistory(userId: userId, sourceId: machine, targetId: assisted, dryRun: true),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'incompatible_exercise')),
+      );
+      final assistedMove = await h.db.moveExerciseHistory(
+        userId: userId,
+        sourceId: assisted,
+        targetId: assistedToo,
+        dryRun: true,
+      );
+      expect(assistedMove.sourceDeleted, isTrue);
     });
   });
 
