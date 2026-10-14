@@ -11,14 +11,24 @@ from programs_content import LIBRARY, SOURCE, check, load, parse_measure, render
 LIBRARY_DOC = load(LIBRARY)
 
 
+def _t(word: str) -> dict:
+    return {'en': word, 'es': word, 'fr': word, 'ru': word}
+
+
 def one(**program) -> dict:
     base = {
         'key': 'p',
         'audience': 'starting_out',
         'equipment': 'gym',
         'per_week': 3,
-        'name': {'en': 'P', 'es': 'P', 'fr': 'P', 'ru': 'P'},
-        'note': {'en': 'N', 'es': 'N', 'fr': 'N', 'ru': 'N'},
+        'minutes': 45,
+        'name': _t('P'),
+        'note': _t('N'),
+        'who': _t('W'),
+        'week': _t('K'),
+        'grows': _t('G'),
+        'misses': _t('M'),
+        'why': [{'text': _t('Y'), 'sources': ['acsm_2026']}],
         'rules': {'squat-barbell': {'kind': 'rangeThenWeight', 'step': 2.5}},
         'sessions': [
             {
@@ -89,6 +99,45 @@ def test_targets_fit_the_category():
     assert any('has no reps' in p for p in exercise({'exercise': 'plank', 'sets': 1, 'target': {'reps': 5}}))
 
 
+def test_a_claim_cites_a_source_that_exists():
+    assert any('no source' in p for p in check(one(why=[{'text': _t('Y'), 'sources': ['vibes']}]), LIBRARY_DOC))
+    assert any('cites a source' in p for p in check(one(why=[{'text': _t('Y'), 'sources': []}]), LIBRARY_DOC))
+
+
+def test_safety_notes_and_next_programs_exist():
+    assert any('no note' in p for p in check(one(safety=['be careful']), LIBRARY_DOC))
+    assert any('not another program' in p for p in check(one(next=['nowhere']), LIBRARY_DOC))
+
+
+def test_a_ladder_names_a_ladder_the_exercise_is_on_and_tops_out_with_it():
+    rule = {'wall-push-up': {'kind': 'ladder', 'ladder': 'push', 'top': 12, 'bottom': 8}}
+    ok = {'exercise': 'wall-push-up', 'sets': 3, 'target': {'reps': [8, 12]}}
+    assert exercise(ok, rule) == []
+    assert any('top out' in p for p in exercise({**ok, 'target': {'reps': [8, 10]}}, rule))
+    assert any(
+        'not on the pull ladder' in p
+        for p in exercise(ok, {'wall-push-up': {**rule['wall-push-up'], 'ladder': 'pull'}})
+    )
+
+
+def test_an_open_slot_names_the_pattern_its_exercise_has():
+    slot = {'exercise': 'lat-pulldown-cable', 'sets': 3, 'target': {'reps': [10, 20]}, 'total_reps': [50, 100]}
+    assert exercise({**slot, 'pattern': 'vertical_pull'}) == []
+    assert any('movement is' in p for p in exercise({**slot, 'pattern': 'horizontal_press'}))
+
+
+def test_a_superset_has_a_partner():
+    lone = {'exercise': 'bicep-curl-dumbbell', 'sets': 2, 'target': {'reps': [10, 15]}, 'superset': 1}
+    assert any('one exercise' in p for p in exercise(lone))
+
+
+def test_phases_name_sessions_and_only_the_last_runs_on():
+    bad = one(phases=[{'name': _t('A'), 'sessions': ['a']}, {'name': _t('B'), 'sessions': ['a'], 'cycles': 2}])
+    assert any('only the last phase runs on' in p for p in check(bad, LIBRARY_DOC))
+    missing = one(phases=[{'name': _t('A'), 'sessions': ['zz']}])
+    assert any("no session 'zz'" in p for p in check(missing, LIBRARY_DOC))
+
+
 def test_range_then_weight_needs_a_range():
     problems = exercise(
         {'exercise': 'squat-barbell', 'sets': 3, 'target': {'reps': 5}},
@@ -118,13 +167,24 @@ def test_render_is_stable_and_in_the_template_shape():
     assert first == second, 'ids must not change between renders'
 
     waves = next(p for p in first['programs'] if p['key'] == 'strength_waves')
-    squat = waves['sessions'][0]['exercises'][0]
+    squat_day = next(s for s in waves['sessions'] if s['key'] == 'squat')
+    squat = squat_day['exercises'][0]
     assert squat['exercise'] == {'key': 'squat-barbell'}
     assert squat['sets'][2]['target'] == {'share': 0.85, 'reps': {'min': 5}}
+    assert squat['sets'][3]['target']['supplemental'] is True
+    assert squat_day['exercises'][1]['pattern'] == 'vertical_pull'
+    assert squat_day['exercises'][1]['totalReps'] == {'min': 50, 'max': 100}
     assert waves['rules']['squat-barbell']['kind'] == 'shareOfMax'
     assert 'weeks' not in waves, 'ongoing'
+    test_lower = next(s for s in waves['sessions'] if s['key'] == 'test_lower')
+    assert waves['phases'][0]['sessions'] == [test_lower['id'], waves['phases'][0]['sessions'][1]]
+    assert waves['tests'][test_lower['id']] == {'share': 0.9}
 
     steps = next(p for p in first['programs'] if p['key'] == 'first_steps')
     assert steps['weeks'] == 8
     assert steps['i18n']['ru'] == 'Первые шаги'
-    assert steps['sessions'][0]['noteI18n']['es'].startswith('Piernas')
+    assert steps['rules']['wall-push-up']['rungs'][0] == 'wall-push-up'
+    assert steps['who']['es'].startswith('Para empezar')
+    assert {'acsm_2026', 'kotarsky_2018'} <= set(steps['sources'])
+    assert first['sources']['acsm_2026']['url'].startswith('https://')
+    assert first['safety']['mecfs']['sources'] == ['nice_mecfs']
