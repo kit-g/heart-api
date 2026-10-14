@@ -2627,6 +2627,136 @@ WHERE id = @id::uuid
   AND user_id = @userId
 ''';
 
+/// A program's steps in the order they were taken. Someone else's program
+/// reads as one with none.
+const _listProgramActions = '''
+SELECT id, program_id, kind, week, at
+FROM program_actions
+WHERE program_id = @programId::uuid
+  AND user_id = @userId
+ORDER BY at, id
+''';
+
+/// A program keeps at most this many steps, and this many bases: years of use,
+/// and a ceiling on what a fold reads.
+const _maxProgramActions = 1000;
+const _maxProgramBases = 5000;
+
+// Idempotent on the id, as the other creates. A program that isn't the
+// caller's trips program_actions_program_fk (404 unknown_program); an empty
+// result is the cap.
+const _createProgramAction =
+    '''
+WITH
+_by_id AS (
+  SELECT id, program_id, kind, week, at
+  FROM program_actions
+  WHERE id = @id::uuid
+    AND user_id = @userId
+),
+_ins AS (
+  INSERT INTO program_actions (id, user_id, program_id, kind, week, at)
+  SELECT coalesce(@id::uuid, uuidv7()), @userId, @programId::uuid, @kind, @week::smallint, @at::timestamptz
+  WHERE NOT EXISTS (SELECT 1 FROM _by_id)
+    AND (SELECT count(*) FROM program_actions WHERE program_id = @programId::uuid) < $_maxProgramActions
+  RETURNING id, program_id, kind, week, at
+)
+SELECT id, program_id, kind, week, at, true AS created FROM _ins
+UNION ALL
+SELECT id, program_id, kind, week, at, false AS created FROM _by_id
+WHERE NOT EXISTS (SELECT 1 FROM _ins)
+''';
+
+const _deleteProgramAction = '''
+DELETE FROM program_actions
+WHERE id = @id::uuid
+  AND program_id = @programId::uuid
+  AND user_id = @userId
+''';
+
+/// Every base of a program, oldest first: the latest per exercise is current.
+const _listProgramBases = '''
+SELECT id, program_id, exercise_id, value, workout_id, action_id, at
+FROM program_bases
+WHERE program_id = @programId::uuid
+  AND user_id = @userId
+ORDER BY at, id
+''';
+
+// Idempotent twice over: on the id, and on (exercise, workout), so a second
+// device replaying the same bump gets the first one back. The exercise must be
+// one the caller can see and the workout one they own; when either isn't, or
+// the program is full, nothing is written and the db layer tells which.
+const _createProgramBase =
+    '''
+WITH
+_existing AS (
+  SELECT id, program_id, exercise_id, value, workout_id, action_id, at
+  FROM program_bases
+  WHERE user_id = @userId
+    AND (
+      id = @id::uuid
+      OR (
+        program_id = @programId::uuid
+        AND exercise_id = @exerciseId::uuid
+        AND workout_id = @workoutId::uuid
+      )
+    )
+  LIMIT 1
+),
+_ins AS (
+  INSERT INTO program_bases (id, user_id, program_id, exercise_id, value, workout_id, action_id, at)
+  SELECT
+    coalesce(@id::uuid, uuidv7()),
+    @userId,
+    @programId::uuid,
+    @exerciseId::uuid,
+    @value::real,
+    @workoutId::uuid,
+    @actionId::uuid,
+    @at::timestamptz
+  WHERE NOT EXISTS (SELECT 1 FROM _existing)
+    AND EXISTS (
+      SELECT 1
+      FROM exercises
+      WHERE id = @exerciseId::uuid
+        AND (user_id IS NULL OR user_id = @userId)
+    )
+    AND (
+      @workoutId::uuid IS NULL
+      OR EXISTS (SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId)
+    )
+    AND (SELECT count(*) FROM program_bases WHERE program_id = @programId::uuid) < $_maxProgramBases
+  RETURNING id, program_id, exercise_id, value, workout_id, action_id, at
+)
+SELECT id, program_id, exercise_id, value, workout_id, action_id, at, true AS created FROM _ins
+UNION ALL
+SELECT id, program_id, exercise_id, value, workout_id, action_id, at, false AS created FROM _existing
+WHERE NOT EXISTS (SELECT 1 FROM _ins)
+''';
+
+/// Why `_createProgramBase` wrote nothing, asked only when it didn't.
+const _diagnoseProgramBase = '''
+SELECT
+  EXISTS (
+    SELECT 1
+    FROM exercises
+    WHERE id = @exerciseId::uuid
+      AND (user_id IS NULL OR user_id = @userId)
+  ) AS exercise_known,
+  (
+    @workoutId::uuid IS NULL
+    OR EXISTS (SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId)
+  ) AS workout_known
+''';
+
+const _deleteProgramBase = '''
+DELETE FROM program_bases
+WHERE id = @id::uuid
+  AND program_id = @programId::uuid
+  AND user_id = @userId
+''';
+
 // Personal access tokens (heart-api#111).
 //
 // The cap counts only active tokens, the same rule `ApiToken.isActive`
