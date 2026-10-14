@@ -106,9 +106,10 @@ WHERE id = @userId
 /// export has to match, so the app can compare it against its local mirror and
 /// know the export is complete rather than assume it.
 ///
-/// Ten independent counts in one round trip; the final cross join is ten
-/// one-row relations. Eight of the ten ride an existing index on their owner
-/// column. The exceptions are `comments` (no `author_id` index — the table's
+/// Fourteen independent counts in one round trip; the final cross join is
+/// fourteen one-row relations. Most ride an existing index on their owner
+/// column; `program_actions` and `program_bases` are indexed by program, not
+/// owner, and scan like the two below. The exceptions are `comments` (no `author_id` index — the table's
 /// indexes are all on the four target columns) and `goals` (`goals_user_id_idx`
 /// is partial on `NOT archived`, and an export counts archived goals too), both
 /// of which scan. Fine for a call made once before an export; the thing to
@@ -174,6 +175,22 @@ WITH
   _connections AS (
     SELECT count(*) AS n, NULL::text AS latest
     FROM connections WHERE initiator_id = @userId OR target_id = @userId
+  ),
+  _programs AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM programs WHERE user_id = @userId
+  ),
+  _program_actions AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM program_actions WHERE user_id = @userId
+  ),
+  _program_bases AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM program_bases WHERE user_id = @userId
+  ),
+  _skips AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM skips WHERE user_id = @userId
   )
 SELECT
   _custom_exercises.n         AS custom_exercises_count,
@@ -195,7 +212,15 @@ SELECT
   _comments.n                 AS comments_count,
   _comments.latest            AS comments_latest,
   _connections.n              AS connections_count,
-  _connections.latest         AS connections_latest
+  _connections.latest         AS connections_latest,
+  _programs.n                 AS programs_count,
+  _programs.latest            AS programs_latest,
+  _program_actions.n          AS program_actions_count,
+  _program_actions.latest     AS program_actions_latest,
+  _program_bases.n            AS program_bases_count,
+  _program_bases.latest       AS program_bases_latest,
+  _skips.n                    AS skips_count,
+  _skips.latest               AS skips_latest
 FROM _custom_exercises,
      _exercise_preferences,
      _template_folders,
@@ -205,7 +230,11 @@ FROM _custom_exercises,
      _workout_images,
      _goals,
      _comments,
-     _connections
+     _connections,
+     _programs,
+     _program_actions,
+     _program_bases,
+     _skips
 ''';
 
 const _listExercises = '''
@@ -2754,6 +2783,66 @@ const _deleteProgramBase = '''
 DELETE FROM program_bases
 WHERE id = @id::uuid
   AND program_id = @programId::uuid
+  AND user_id = @userId
+''';
+
+/// The caller's skips, newest first, a page at a time.
+const _listSkips = '''
+SELECT id, at, reason, weather, template_id, program_id
+FROM skips
+WHERE user_id = @userId
+  AND (@cursor::uuid IS NULL OR id < @cursor::uuid)
+ORDER BY id DESC
+LIMIT @limit
+''';
+
+/// Ten years of days, and then some.
+const _maxSkips = 10000;
+
+// Idempotent on the id, as the other creates. The template and program are the
+// caller's own or nothing, as on a workout: a skip always saves. An empty
+// result is the cap.
+const _createSkip =
+    '''
+WITH
+_by_id AS (
+  SELECT id, at, reason, weather, template_id, program_id
+  FROM skips
+  WHERE id = @id::uuid
+    AND user_id = @userId
+),
+_foreign AS (
+  SELECT 1
+  FROM skips
+  WHERE id = @id::uuid
+    AND user_id <> @userId
+),
+_ins AS (
+  INSERT INTO skips (id, user_id, at, reason, weather, template_id, program_id)
+  SELECT
+    coalesce(@id::uuid, uuidv7()),
+    @userId,
+    @at::timestamptz,
+    @reason,
+    @weather::jsonb,
+    (SELECT id FROM templates WHERE id = @templateId::uuid AND user_id = @userId),
+    (SELECT id FROM programs WHERE id = @programId::uuid AND user_id = @userId)
+  WHERE NOT EXISTS (SELECT 1 FROM _by_id)
+    AND (
+      EXISTS (SELECT 1 FROM _foreign)
+      OR (SELECT count(*) FROM skips WHERE user_id = @userId) < $_maxSkips
+    )
+  RETURNING id, at, reason, weather, template_id, program_id
+)
+SELECT id, at, reason, weather, template_id, program_id, true AS created FROM _ins
+UNION ALL
+SELECT id, at, reason, weather, template_id, program_id, false AS created FROM _by_id
+WHERE NOT EXISTS (SELECT 1 FROM _ins)
+''';
+
+const _deleteSkip = '''
+DELETE FROM skips
+WHERE id = @id::uuid
   AND user_id = @userId
 ''';
 

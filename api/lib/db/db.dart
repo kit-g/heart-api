@@ -14,6 +14,7 @@ import 'package:heart/models/imports.dart';
 import 'package:heart/models/oauth.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/programs.dart';
+import 'package:heart/models/skips.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart' hide WorkoutService, TemplateService, ExerciseService;
@@ -31,6 +32,7 @@ part 'oauth.dart';
 part 'profiles.dart';
 part 'programs.dart';
 part 'queries.dart';
+part 'skips.dart';
 part 'template_folders.dart';
 part 'templates.dart';
 part 'tokens.dart';
@@ -86,6 +88,7 @@ abstract class _DatabaseBase {
     'programs_pkey',
     'program_actions_pkey',
     'program_bases_pkey',
+    'skips_pkey',
   };
 
   Forbidden get _idTaken => const Forbidden(code: 'id_taken', reason: 'this id belongs to another account');
@@ -205,6 +208,7 @@ class Database extends _DatabaseBase
         _Images,
         _Profiles,
         _Programs,
+        _Skips,
         _Workouts,
         _Templates,
         _TemplateFolders,
@@ -221,6 +225,7 @@ class Database extends _DatabaseBase
         ApiImageDbService,
         ApiProfileService,
         ProgramService,
+        SkipService,
         ApiWorkoutService,
         IdempotentTemplateService,
         IdempotentTemplateFolderService,
