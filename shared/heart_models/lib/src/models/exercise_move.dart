@@ -33,6 +33,11 @@ abstract interface class ExerciseMoveReport implements Model {
   /// Goals re-keyed.
   int get goals;
 
+  /// Programs whose rules or bases named the source and now name the target.
+  /// A rule on both sides keeps the target's. Zero from a server that predates
+  /// it.
+  int get programs;
+
   /// Whether the source was (or, dry, would be) deleted: true for the user's
   /// own custom exercise, never for a library one.
   bool get sourceDeleted;
@@ -47,6 +52,7 @@ abstract interface class ExerciseMoveReport implements Model {
     required int preferencesDropped,
     required int chartPreferences,
     required int goals,
+    int programs,
     required bool sourceDeleted,
   }) = _ExerciseMoveReport;
 
@@ -62,6 +68,7 @@ abstract interface class ExerciseMoveReport implements Model {
       preferencesDropped: json['preferencesDropped'] as int,
       chartPreferences: json['chartPreferences'] as int,
       goals: json['goals'] as int,
+      programs: json['programs'] as int? ?? 0,
       sourceDeleted: json['sourceDeleted'] as bool,
     );
   }
@@ -84,6 +91,7 @@ abstract interface class ExerciseMoveReport implements Model {
       preferencesDropped: row['preferences_dropped'] as int,
       chartPreferences: row['chart_preferences_moved'] as int,
       goals: row['goals_moved'] as int,
+      programs: row['programs_moved'] as int? ?? 0,
       sourceDeleted: row['source_deleted'] as bool,
     );
   }
@@ -109,6 +117,8 @@ class _ExerciseMoveReport implements ExerciseMoveReport {
   @override
   final int goals;
   @override
+  final int programs;
+  @override
   final bool sourceDeleted;
 
   const new({
@@ -121,6 +131,7 @@ class _ExerciseMoveReport implements ExerciseMoveReport {
     required this.preferencesDropped,
     required this.chartPreferences,
     required this.goals,
+    this.programs = 0,
     required this.sourceDeleted,
   });
 
@@ -136,6 +147,7 @@ class _ExerciseMoveReport implements ExerciseMoveReport {
       'preferencesDropped': preferencesDropped,
       'chartPreferences': chartPreferences,
       'goals': goals,
+      'programs': programs,
       'sourceDeleted': sourceDeleted,
     };
   }
