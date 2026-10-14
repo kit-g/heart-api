@@ -161,6 +161,7 @@ mixin _Programs on _DatabaseBase implements ProgramService {
             ...references,
             'id': base.id,
             'programId': programId,
+            'slot': base.slot,
             'value': base.value,
             'actionId': base.actionId,
             'at': base.at.toUtc(),

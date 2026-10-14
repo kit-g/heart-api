@@ -395,6 +395,43 @@ FROM generate_series(1, 100) n
       expect(await h.db.getProgramBases(userId: userId, programId: stored.id!), hasLength(1));
     });
 
+    test('two occurrences of a lift each move their own base from the same workout (heart-api#232)', () async {
+      final userId = await h.seedProfile();
+      final (stored, _) = await h.db.createProgramOrExisting(userId: userId, program: program(), sessions: const []);
+      final workoutId = await h.seedWorkout(userId: userId);
+      final heavy = uuidV7();
+      final light = uuidV7();
+      ProgramBase bump(String slot, num value) => ProgramBase(
+        exerciseId: exerciseId,
+        slot: slot,
+        value: value,
+        workoutId: workoutId,
+        at: DateTime.utc(2026, 10, 14),
+      );
+
+      final (first, firstNew) = await h.db.createProgramBase(
+        userId: userId,
+        programId: stored.id!,
+        base: bump(heavy, 100),
+      );
+      final (second, secondNew) = await h.db.createProgramBase(
+        userId: userId,
+        programId: stored.id!,
+        base: bump(light, 80),
+      );
+      final (again, againNew) = await h.db.createProgramBase(
+        userId: userId,
+        programId: stored.id!,
+        base: bump(heavy, 100),
+      );
+
+      expect((firstNew, secondNew, againNew), (true, true, false));
+      expect(again.id, first.id);
+      expect(second.slot, light);
+      final current = currentBases(await h.db.getProgramBases(userId: userId, programId: stored.id!));
+      expect((current[heavy]?.value, current[light]?.value), (100, 80));
+    });
+
     test('deleting the workout or the action deletes the move it caused', () async {
       final userId = await h.seedProfile();
       final (stored, _) = await h.db.createProgramOrExisting(userId: userId, program: program(), sessions: const []);
