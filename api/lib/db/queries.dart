@@ -1461,7 +1461,10 @@ _order_to_id AS (
   SELECT
     (ex->>'id')::uuid AS id,
     (ex->>'order')::int AS exercise_order,
-    (ex->>'exercise_id')::uuid AS exercise_id
+    (ex->>'exercise_id')::uuid AS exercise_id,
+    (ex->>'rest')::int AS rest,
+    -- a body that leaves rest out (a build that predates it) keeps the stored one
+    ex ? 'rest' AS sets_rest
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -1488,7 +1491,7 @@ _template AS (
 -- from a workout carries the workout's ids, and saving it twice must not
 -- collide, so that row gets a fresh id instead
 _inserted_exercises AS (
-  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order)
+  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order, rest)
   SELECT
     CASE
       WHEN otn.id IS NULL OR EXISTS (SELECT 1 FROM template_exercises x WHERE x.id = otn.id) THEN uuidv7()
@@ -1496,11 +1499,12 @@ _inserted_exercises AS (
     END,
     t.id,
     el.id,
-    otn.exercise_order
+    otn.exercise_order,
+    otn.rest
   FROM _template t
   CROSS JOIN _order_to_id otn
   JOIN _exercise_lookup el ON el.id = otn.exercise_id
-  RETURNING id, exercise_id, exercise_order
+  RETURNING id, exercise_id, exercise_order, rest
 ),
 _sets_input AS (
   SELECT
@@ -1550,6 +1554,7 @@ _exercises_json AS (
       'id', ie.id,
       'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
       'exercise_order', ie.exercise_order,
+      'rest', ie.rest,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ie.exercise_order
   ) AS exercises_json
@@ -1619,7 +1624,10 @@ _order_to_id AS (
   SELECT
     (ex->>'id')::uuid AS id,
     (ex->>'order')::int AS exercise_order,
-    (ex->>'exercise_id')::uuid AS exercise_id
+    (ex->>'exercise_id')::uuid AS exercise_id,
+    (ex->>'rest')::int AS rest,
+    -- a body that leaves rest out (a build that predates it) keeps the stored one
+    ex ? 'rest' AS sets_rest
   FROM jsonb_array_elements(@exercises::jsonb) ex
 ),
 _exercise_lookup AS (
@@ -1668,15 +1676,18 @@ _previous_sets AS (
 -- statement and would take the re-inserted sets with it.
 _updated_exercises AS (
   UPDATE template_exercises te
-  SET exercise_id = el.id, exercise_order = otn.exercise_order
+  SET
+    exercise_id = el.id,
+    exercise_order = otn.exercise_order,
+    rest = CASE WHEN otn.sets_rest THEN otn.rest ELSE te.rest END
   FROM _order_to_id otn
   JOIN _exercise_lookup el ON el.id = otn.exercise_id
   WHERE te.id = otn.id AND te.id IN (SELECT id FROM _previous_exercises)
-  RETURNING te.id, te.exercise_id, te.exercise_order
+  RETURNING te.id, te.exercise_id, te.exercise_order, te.rest
 ),
 -- an id another template holds gets a fresh one, as on create
 _inserted_exercises AS (
-  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order)
+  INSERT INTO template_exercises (id, template_id, exercise_id, exercise_order, rest)
   SELECT
     CASE
       WHEN otn.id IS NULL OR EXISTS (SELECT 1 FROM template_exercises x WHERE x.id = otn.id) THEN uuidv7()
@@ -1684,17 +1695,18 @@ _inserted_exercises AS (
     END,
     t.id,
     el.id,
-    otn.exercise_order
+    otn.exercise_order,
+    otn.rest
   FROM _template t
   CROSS JOIN _order_to_id otn
   JOIN _exercise_lookup el ON el.id = otn.exercise_id
   WHERE otn.id IS NULL OR otn.id NOT IN (SELECT id FROM _previous_exercises)
-  RETURNING id, exercise_id, exercise_order
+  RETURNING id, exercise_id, exercise_order, rest
 ),
 _kept_exercises AS (
-  SELECT id, exercise_id, exercise_order FROM _updated_exercises
+  SELECT id, exercise_id, exercise_order, rest FROM _updated_exercises
   UNION ALL
-  SELECT id, exercise_id, exercise_order FROM _inserted_exercises
+  SELECT id, exercise_id, exercise_order, rest FROM _inserted_exercises
 ),
 _deleted AS (
   DELETE FROM template_exercises
@@ -1783,6 +1795,7 @@ _exercises_json AS (
       'id', ke.id,
       'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
       'exercise_order', ke.exercise_order,
+      'rest', ke.rest,
       'sets', COALESCE(sj.sets_json, '[]'::jsonb)
     ) ORDER BY ke.exercise_order
   ) AS exercises_json
@@ -1963,6 +1976,7 @@ _master_exercises AS (
     te.template_id AS master_id,
     te.id AS source_te_id,
     te.exercise_order,
+    te.rest,
     e.name, e.category, e.target, e.instructions, e.asset, e.thumbnail, e.muscles, e.movement, e.health,
     (
       SELECT e2.id FROM exercises e2
@@ -1992,6 +2006,7 @@ _resolved_exercises AS (
     me.master_id,
     me.exercise_order,
     me.source_te_id,
+    me.rest,
     coalesce(me.resolved_id, c.id) AS exercise_id
   FROM _master_exercises me
   LEFT JOIN _copied_exercises c ON c.name = me.name AND me.resolved_id IS NULL
@@ -2005,8 +2020,8 @@ _new_template AS (
   RETURNING id, source_template_id
 ),
 _new_exercises AS (
-  INSERT INTO template_exercises (template_id, exercise_id, exercise_order)
-  SELECT nt.id, re.exercise_id, re.exercise_order
+  INSERT INTO template_exercises (template_id, exercise_id, exercise_order, rest)
+  SELECT nt.id, re.exercise_id, re.exercise_order, re.rest
   FROM _new_template nt
   JOIN _resolved_exercises re ON re.master_id = nt.source_template_id
   RETURNING id, template_id, exercise_order
