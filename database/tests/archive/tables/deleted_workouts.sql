@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(24);
+SELECT plan(26);
 
 SELECT has_schema('archive'::name);
 SELECT has_table('archive'::name, 'deleted_workouts'::name);
@@ -20,7 +20,9 @@ SELECT columns_are(
                    'deleted_at',
                    'note',
                    'pauses',
-                   'deleted_xid'
+                   'deleted_xid',
+                   'template_id',
+                   'program_id'
                    ]
        );
 
@@ -34,6 +36,8 @@ SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'calories'::name, 
 SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'exercises'::name, 'jsonb'::name);
 SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'note'::name, 'text'::name);
 SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'pauses'::name, 'jsonb'::name);
+SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'template_id'::name, 'uuid'::name);
+SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'program_id'::name, 'uuid'::name);
 SELECT col_type_is('archive'::name, 'deleted_workouts'::name, 'deleted_at'::name, 'timestamp with time zone'::name);
 
 SELECT has_pk('archive'::name, 'deleted_workouts'::name, 'deleted_workouts has a primary key');
