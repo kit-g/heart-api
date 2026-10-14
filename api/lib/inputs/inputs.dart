@@ -28,6 +28,7 @@ part 'images.dart';
 part 'me.dart';
 part 'pagination.dart';
 part 'programs.dart';
+part 'skips.dart';
 part 'parse.dart';
 part 'template_folders.dart';
 part 'templates.dart';

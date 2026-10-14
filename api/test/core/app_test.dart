@@ -174,6 +174,16 @@ void main() {
       verify(db.deleteProgram(userId: 'u1', programId: 'p-1', keepTemplates: true)).called(1);
     });
 
+    test('skips are wired', () async {
+      when(
+        db.getSkips(userId: anyNamed('userId'), cursor: anyNamed('cursor'), limit: anyNamed('limit')),
+      ).thenAnswer((_) async => const Page<TrainingSkip>(items: [], hasMore: false));
+
+      final res = await send('GET', '/skips', token: 'good');
+      expect(res.status, 200);
+      expect(jsonDecode(res.body), containsPair('skips', isEmpty));
+    });
+
     test('a :pathParameter is captured and passed to the service', () async {
       when(db.deleteGoal(any, any)).thenAnswer((_) async {});
 
