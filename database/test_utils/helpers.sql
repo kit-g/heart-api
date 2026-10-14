@@ -219,7 +219,9 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION validate_format_template_exercise(_te JSONB) RETURNS SETOF BOOL AS
 $$
 BEGIN
-    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_te)) = 6;
+    RETURN NEXT (SELECT count(*) FROM jsonb_object_keys(_te)) = 8;
+    RETURN NEXT jsonb_typeof(_te -> 'pattern') IN ('string', 'null');
+    RETURN NEXT jsonb_typeof(_te -> 'totalReps') IN ('object', 'null');
     RETURN NEXT jsonb_typeof(_te -> 'superset') IN ('number', 'null');
     RETURN NEXT jsonb_typeof(_te -> 'id') = 'string';
     RETURN NEXT jsonb_typeof(_te -> 'rest') IN ('number', 'null');

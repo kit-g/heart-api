@@ -1,13 +1,13 @@
 BEGIN;
 
-SELECT plan(24);
+SELECT plan(25);
 
 SELECT has_table('public'::name, 'program_bases'::name);
 
 SELECT columns_are(
                'public',
                'program_bases',
-               ARRAY ['id', 'user_id', 'program_id', 'exercise_id', 'value', 'workout_id', 'action_id', 'at', 'created_at']
+               ARRAY ['id', 'user_id', 'program_id', 'exercise_id', 'value', 'workout_id', 'action_id', 'at', 'created_at', 'slot']
        );
 
 SELECT col_type_is('public'::name, 'program_bases'::name, 'id'::name, 'uuid'::name);
@@ -17,6 +17,7 @@ SELECT col_type_is('public'::name, 'program_bases'::name, 'exercise_id'::name, '
 SELECT col_type_is('public'::name, 'program_bases'::name, 'value'::name, 'real'::name);
 SELECT col_type_is('public'::name, 'program_bases'::name, 'workout_id'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'program_bases'::name, 'action_id'::name, 'uuid'::name);
+SELECT col_type_is('public'::name, 'program_bases'::name, 'slot'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'program_bases'::name, 'at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'program_bases'::name, 'created_at'::name, 'timestamp with time zone'::name);
 
