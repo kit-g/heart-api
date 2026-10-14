@@ -2526,6 +2526,7 @@ RETURNING id, metric, exercise_id, pattern, muscle, cadence, stages, archived, c
 /// The columns `Program.fromRow` reads, from a row aliased `p`. `sessions` is
 /// the program's templates in their order, the same `(order_index, id)` the
 /// template list walks.
+/// `joined` says when each one joined the program.
 const _programColumns = '''
   p.id,
   p.name,
@@ -2545,7 +2546,12 @@ const _programColumns = '''
       WHERE t.program_id = p.id
     ),
     '{}'
-  ) AS sessions
+  ) AS sessions,
+  (
+    SELECT jsonb_object_agg(t.id, t.joined_program_at)
+    FROM templates t
+    WHERE t.program_id = p.id
+  ) AS joined
 ''';
 
 /// Archived ones included: the cap counts them, so the list stays small, and

@@ -76,6 +76,7 @@ void main() {
       expect(created.rules[exerciseId], const AddWeight(step: 2.5));
       expect(created.sessions, hasLength(2));
 
+      expect(created.joined.keys, unorderedEquals(created.sessions));
       final first = await h.db.getTemplate(userId: userId, templateId: created.sessions.first);
       expect(first.name, 'A');
       expect(first.programId, created.id);
