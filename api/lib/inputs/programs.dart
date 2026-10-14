@@ -183,7 +183,7 @@ class ProgramActionIn {
   }
 }
 
-/// `POST /programs/:programId/bases` — `{id?, exerciseId, value, workoutId?, actionId?, at}`.
+/// `POST /programs/:programId/bases` — `{id?, exerciseId, slot?, value, workoutId?, actionId?, at}`.
 /// A base names at most one cause; with none, the user set it.
 class ProgramBaseIn {
   final ProgramBase base;
@@ -204,6 +204,7 @@ class ProgramBaseIn {
           final String id => id,
           null => throw const BadRequest(reason: 'exerciseId is required'),
         },
+        slot: json.uuidV7OrNull('slot'),
         value: json.number('value', exclusiveMin: 0),
         workoutId: workoutId,
         actionId: actionId,

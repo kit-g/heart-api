@@ -187,6 +187,20 @@ void main() {
     const workout = '0198c1a2-b3c4-7d5e-8f60-718293a4b520';
     const action = '0198c1a2-b3c4-7d5e-8f60-718293a4b521';
 
+    test('a base may belong to one occurrence of a lift', () async {
+      const slot = '0198c1a2-b3c4-7d5e-8f60-718293a4b522';
+      final input = await ProgramBaseIn.fromRequest(
+        req(body: {'exerciseId': _bench, 'slot': slot, 'value': 80, 'at': '2026-10-14T18:00:00Z'}),
+      );
+      expect(input.base.slot, slot);
+      await expectLater(
+        ProgramBaseIn.fromRequest(
+          req(body: {'exerciseId': _bench, 'slot': 'monday', 'value': 80, 'at': '2026-10-14T18:00:00Z'}),
+        ),
+        badRequest(),
+      );
+    });
+
     test('reads a bump caused by a workout', () async {
       final input = await ProgramBaseIn.fromRequest(
         req(body: {'exerciseId': _bench, 'value': 102.5, 'workoutId': workout, 'at': '2026-10-14T18:00:00Z'}),

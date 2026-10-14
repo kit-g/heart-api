@@ -209,12 +209,21 @@ TemplateExerciseRequest _exercise(Map<String, dynamic> json, int index) {
     },
     setsRest: json.containsKey('rest'),
     // absent keeps a stored superset; null takes the exercise out of it
-    superset: switch (json['superset']) {
-      null => null,
-      final int n when n >= 1 && n <= 50 => n,
-      _ => throw BadRequest(reason: 'exercises[$index].superset must be a whole number from 1 to 50, or null'),
-    },
+    superset: superset(json['superset'], at: 'exercises[$index]'),
     setsSuperset: json.containsKey('superset'),
+    // an open slot: any exercise of a movement pattern; spelling only, the
+    // patterns are the library's
+    pattern: switch (json['pattern']) {
+      null => null,
+      final String key when RegExp(r'^[a-z][a-z0-9_]{0,63}$').hasMatch(key) => key,
+      _ => throw BadRequest(code: 'invalid_key', reason: 'exercises[$index].pattern must be a snake_case key'),
+    },
+    setsPattern: json.containsKey('pattern'),
+    totalReps: switch (json['totalReps']) {
+      null => null,
+      final total => targetRange(total, at: 'exercises[$index].totalReps', whole: true, amrap: false),
+    },
+    setsTotalReps: json.containsKey('totalReps'),
     sets: switch (json['sets']) {
       null => const [],
       final List l => [

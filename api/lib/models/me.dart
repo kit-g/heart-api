@@ -226,7 +226,13 @@ class _MeProgram implements MeProgram {
       if (bases case final Map<String, ProgramBase> bases)
         'bases': {
           for (final MapEntry(:key, :value) in bases.entries)
-            key: {'value': value.value, 'at': value.at.toUtc().toIso8601String()},
+            key: {
+              'value': value.value,
+              'at': value.at.toUtc().toIso8601String(),
+              // keyed by the slot when it has one, which names no exercise
+              'exerciseId': value.exerciseId,
+              'slot': ?value.slot,
+            },
         },
     };
   }

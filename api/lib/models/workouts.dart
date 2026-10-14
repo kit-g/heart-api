@@ -236,7 +236,7 @@ class WorkoutRequest {
         'met': ?ex['met'],
         'note': ?_note(ex['note']),
         // absent keeps a stored superset (a build that predates it); null clears
-        if (ex.containsKey('superset')) 'superset': _superset(ex['superset'], at: 'exercises[$index]'),
+        if (ex.containsKey('superset')) 'superset': superset(ex['superset'], at: 'exercises[$index]'),
         'sets': [
           for (final (setIndex, set) in (ex['sets'] as List? ?? []).cast<Map>().indexed)
             _set(set, at: 'exercises[$index].sets[$setIndex]'),
@@ -389,13 +389,4 @@ extension WindowEdge on String {
     final moment = RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(this) ? '${this}T00:00:00Z' : this;
     return DateTime.tryParse(moment)?.toUtc();
   }
-}
-
-/// A superset number within one workout: 1 to 50, or null for none.
-int? _superset(Object? value, {required String at}) {
-  return switch (value) {
-    null => null,
-    final int n when n >= 1 && n <= 50 => n,
-    _ => throw BadRequest(reason: '$at.superset must be a whole number from 1 to 50, or null'),
-  };
 }
