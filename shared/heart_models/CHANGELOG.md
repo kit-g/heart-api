@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.31.0
+
+Variation ladders (heart-api#231).
+
+- New: `Ladder`, a growth rule (`kind: ladder`) of `rungs` (exercise ids,
+  easiest first), `top` and `bottom`; `after(exercise)`. `Progression.next`
+  returns `Advance(nextRung)` once every working set reaches `top`. Exhaustive
+  switches over `GrowthRule` gain a case.
+- New: `ProgramActionKind.advance` and `ProgramAction.from` / `to` /
+  `workoutId`: the swap a ladder made, and what caused it.
+
 ## 2.30.0
 
 Lighter weeks (heart-api#229).

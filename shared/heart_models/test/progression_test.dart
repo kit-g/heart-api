@@ -490,4 +490,63 @@ void main() {
       }
     });
   });
+
+  group('ladders (heart-api#231)', () {
+    Exercise bodyweight(String id) =>
+        Exercise.fromJson({'id': id, 'name': id, 'category': 'Reps Only', 'target': 'Chest'});
+    final incline = bodyweight('018f2c9a-0000-7000-8000-0000000000a1');
+    final knees = bodyweight('018f2c9a-0000-7000-8000-0000000000a2');
+    final floor = bodyweight('018f2c9a-0000-7000-8000-0000000000a3');
+    final rule = Ladder(rungs: [incline.id, knees.id, floor.id], top: 12, bottom: 8);
+    ExerciseSet rep(Exercise on, int reps) => ExerciseSet(on, reps: reps)..isCompleted = true;
+
+    test('every set at the top moves to the next rung', () {
+      // a bodyweight ladder keeps no base
+      expect(Progression.next(rule: rule, base: null, sets: [rep(incline, 12), rep(incline, 12)]), Advance(knees.id));
+      expect(Progression.next(rule: rule, base: null, sets: [rep(incline, 12), rep(incline, 10)]), const Hold());
+    });
+
+    test('the last rung grows by reps alone; off the ladder nothing moves', () {
+      expect(Progression.next(rule: rule, base: null, sets: [rep(floor, 15)]), const Hold());
+      expect(
+        Progression.next(rule: rule, base: null, sets: [rep(bodyweight('018f2c9a-0000-7000-8000-0000000000a9'), 15)]),
+        const Hold(),
+      );
+    });
+
+    test('a ladder round-trips and is checked', () {
+      final json = {
+        'kind': 'ladder',
+        'rungs': [incline.id, knees.id],
+        'top': 12,
+        'bottom': 8,
+      };
+      expect(GrowthRule.fromJson(json).toMap(), json);
+      for (final bad in [
+        {
+          ...json,
+          'rungs': [incline.id],
+        },
+        {
+          ...json,
+          'rungs': [incline.id, incline.id],
+        },
+        {...json, 'bottom': 12},
+        {...json, 'top': 1},
+      ]) {
+        expect(() => GrowthRule.fromJson(bad), throwsArgumentError, reason: '$bad');
+      }
+    });
+
+    test('an advance action round-trips its exercises and cause', () {
+      final json = {
+        'kind': 'advance',
+        'from': incline.id,
+        'to': knees.id,
+        'workoutId': 'w1',
+        'at': '2026-10-15T08:00:00.000Z',
+      };
+      expect(ProgramAction.fromJson(json).toMap(), json);
+    });
+  });
 }

@@ -113,9 +113,16 @@ abstract final class Progression {
     int week = 1,
     bool closesCycle = true,
   }) {
-    if (lighter || base == null) return const Hold();
+    if (lighter) return const Hold();
     final working = _working(sets).toList();
     if (working.isEmpty) return const Hold();
+    // a ladder climbs on reps alone and keeps no base
+    if (rule case Ladder(:final top)) {
+      final reached = working.every((set) => (set.reps ?? 0) >= top);
+      final next = rule.after(working.first.exercise.id);
+      return reached && next != null ? Advance(next) : const Hold();
+    }
+    if (base == null) return const Hold();
 
     switch (rule) {
       case NoGrowth():
@@ -134,6 +141,8 @@ abstract final class Progression {
           return aim == null || (set.reps ?? 0) >= aim;
         });
         return top ? _step(rule, base, step, working) : const Hold();
+      case Ladder():
+        return const Hold();
       case ShareOfMax(:final step):
         final missed = _missed(rule.miss, working);
         if (missed && misses + 1 >= rule.miss.after) return Cut(_down(base * (1 - rule.miss.cut), step));

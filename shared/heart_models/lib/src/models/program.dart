@@ -160,6 +160,7 @@ sealed class GrowthRule implements Model {
         extra: rest(weighted),
       ),
       Longer.key => Longer(step: _positive(json, 'step'), extra: rest(const {'step'})),
+      Ladder.key => Ladder.fromParameters(json, extra: rest(const {'rungs', 'top', 'bottom'})),
       ShareOfMax.key => ShareOfMax(
         waves: switch (json['waves']) {
           final List waves when waves.isNotEmpty => [for (final wave in waves) _wave(wave)],
@@ -281,6 +282,52 @@ final class Longer extends GrowthRule {
 
   @override
   Map<String, dynamic> get _parameters => {'step': step};
+}
+
+/// Progress by moving to a harder exercise, not by adding load (heart-api#231):
+/// wall → incline → floor push-up. When every working set reaches [top] reps,
+/// the session's exercise advances to the next of [rungs] and its targets
+/// restart at [bottom]. The last rung grows by reps alone.
+final class Ladder extends GrowthRule {
+  static const key = 'ladder';
+
+  /// Exercise ids, easiest first.
+  final List<String> rungs;
+  final int top;
+  final int bottom;
+
+  const new({required this.rungs, required this.top, required this.bottom, super.extra});
+
+  factory fromParameters(Map json, {Map<String, Object?> extra = const {}}) {
+    final rungs = switch (json['rungs']) {
+      final List rungs when rungs.length >= 2 && rungs.every((rung) => rung is String) => [
+        for (final rung in rungs) rung as String,
+      ],
+      final other => throw ArgumentError.value(other, 'rungs', 'two or more exercise ids'),
+    };
+    if (rungs.toSet().length != rungs.length) throw ArgumentError.value(rungs, 'rungs', 'each rung once');
+    final top = switch (json['top']) {
+      final int top when top >= 2 => top,
+      final other => throw ArgumentError.value(other, 'top', 'a whole number of reps of at least 2'),
+    };
+    final bottom = switch (json['bottom']) {
+      final int bottom when bottom >= 1 && bottom < top => bottom,
+      final other => throw ArgumentError.value(other, 'bottom', 'a whole number of reps below top'),
+    };
+    return Ladder(rungs: rungs, top: top, bottom: bottom, extra: extra);
+  }
+
+  /// The rung after [exercise], or null on the last one or off the ladder.
+  String? after(String exercise) {
+    final at = rungs.indexOf(exercise);
+    return at < 0 || at == rungs.length - 1 ? null : rungs[at + 1];
+  }
+
+  @override
+  String get kind => key;
+
+  @override
+  Map<String, dynamic> get _parameters => {'rungs': rungs, 'top': top, 'bottom': bottom};
 }
 
 /// Sets as a share of a training max that changes by program week, 5/3/1 style.
@@ -767,7 +814,11 @@ enum ProgramActionKind {
   replay('replay'),
 
   /// Makes the open cycle a lighter one, on demand (heart-api#229).
-  lighter('lighter');
+  lighter('lighter'),
+
+  /// A ladder moved an exercise to its next rung ([ProgramAction.from] →
+  /// [ProgramAction.to]), caused by [ProgramAction.workoutId] (heart-api#231).
+  advance('advance');
 
   /// The `kind` on the wire.
   final String value;
@@ -793,11 +844,27 @@ abstract interface class ProgramAction implements Model {
   /// The week a [ProgramActionKind.replay] goes back to, from 1; null otherwise.
   int? get week;
 
+  /// The exercise an [ProgramActionKind.advance] moved from, and to.
+  String? get from;
+
+  String? get to;
+
+  /// The workout that caused an advance; deleting it deletes the action.
+  String? get workoutId;
+
   /// When the user took it, by the device's clock.
   DateTime get at;
 
-  factory({String? id, String? programId, required ProgramActionKind kind, int? week, required DateTime at}) =
-      _ProgramAction;
+  factory({
+    String? id,
+    String? programId,
+    required ProgramActionKind kind,
+    int? week,
+    String? from,
+    String? to,
+    String? workoutId,
+    required DateTime at,
+  }) = _ProgramAction;
 
   factory fromJson(Map json) {
     return _ProgramAction(
@@ -805,6 +872,9 @@ abstract interface class ProgramAction implements Model {
       programId: json['programId']?.toString(),
       kind: ProgramActionKind.fromString(json['kind'] as String),
       week: (json['week'] as num?)?.toInt(),
+      from: json['from'] as String?,
+      to: json['to'] as String?,
+      workoutId: json['workoutId'] as String?,
       at: DateTime.parse(json['at'] as String),
     );
   }
@@ -815,6 +885,9 @@ abstract interface class ProgramAction implements Model {
       programId: row['program_id']?.toString(),
       kind: ProgramActionKind.fromString(row['kind'] as String),
       week: (row['week'] as num?)?.toInt(),
+      from: row['from_exercise']?.toString(),
+      to: row['to_exercise']?.toString(),
+      workoutId: row['workout_id']?.toString(),
       at: switch (row['at']) {
         final DateTime at => at,
         final String at => DateTime.parse(at),
@@ -834,9 +907,24 @@ class _ProgramAction implements ProgramAction {
   @override
   final int? week;
   @override
+  final String? from;
+  @override
+  final String? to;
+  @override
+  final String? workoutId;
+  @override
   final DateTime at;
 
-  new({this.id, this.programId, required this.kind, this.week, required this.at});
+  new({
+    this.id,
+    this.programId,
+    required this.kind,
+    this.week,
+    this.from,
+    this.to,
+    this.workoutId,
+    required this.at,
+  });
 
   @override
   Map<String, dynamic> toMap() {
@@ -845,6 +933,9 @@ class _ProgramAction implements ProgramAction {
       'programId': ?programId,
       'kind': kind.value,
       'week': ?week,
+      'from': ?from,
+      'to': ?to,
+      'workoutId': ?workoutId,
       'at': at.toUtc().toIso8601String(),
     };
   }
