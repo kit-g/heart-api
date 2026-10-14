@@ -752,6 +752,30 @@ void main() {
       expect(cleared.single.rest, isNull);
     });
 
+    test('a superset is stored, kept by a replace that leaves it out, and cleared by null', () async {
+      final teId = uuidV7();
+      TemplateRequest grouped({int? superset, bool sets = false}) => TemplateRequest(
+        userId: coachId,
+        name: 'Paired',
+        exercises: [
+          TemplateExerciseRequest(
+            id: teId,
+            exerciseId: exerciseId,
+            order: 0,
+            superset: superset,
+            setsSuperset: sets,
+            sets: [const TemplateSetRequest(reps: 10)],
+          ),
+        ],
+      );
+      final created = await h.db.createTemplate(userId: coachId, body: grouped(superset: 1, sets: true));
+      expect(created.single.superset, 1);
+      final kept = await h.db.updateTemplate(userId: coachId, templateId: created.id, body: grouped());
+      expect(kept.single.superset, 1);
+      final cleared = await h.db.updateTemplate(userId: coachId, templateId: created.id, body: grouped(sets: true));
+      expect(cleared.single.superset, isNull);
+    });
+
     test('reps in reserve and a capped AMRAP round-trip', () async {
       final target = SetTarget({.reps: const TargetRange(min: 5, max: 10, amrap: true)}, rir: 1);
       final created = await h.db.createTemplate(

@@ -120,6 +120,36 @@ void main() {
     final afterProgram = await h.db.getWorkout(userId: userId, workoutId: workout.id, imageUrl: imageUrl);
     expect(afterProgram.programId, isNull);
   });
+
+  test('a superset is stored on a logged exercise and kept by a replace that leaves it out (heart-api#234)', () async {
+    final exerciseId = await h.seedGlobalExercise();
+    final exerciseRowId = uuidV7();
+    WorkoutRequest grouped(Map<String, dynamic> extra) => WorkoutRequest(
+      userId: userId,
+      body: {
+        'name': 'Arms',
+        'start': DateTime.utc(2026, 10, 15, 18).toIso8601String(),
+        'exercises': [
+          {
+            'id': exerciseRowId,
+            'exercise': exerciseId,
+            'order': 0,
+            ...extra,
+            'sets': [
+              {'reps': 10, 'completed': true},
+            ],
+          },
+        ],
+      },
+    );
+
+    final (workout, _) = await h.db.createWorkout(userId: userId, body: grouped({'superset': 2}), imageUrl: imageUrl);
+    expect(workout.single.superset, 2);
+    final kept = await h.db.updateWorkout(userId: userId, workoutId: workout.id, body: grouped({}), imageUrl: imageUrl);
+    expect(kept.single.superset, 2);
+    final read = await h.db.getWorkout(userId: userId, workoutId: workout.id, imageUrl: imageUrl);
+    expect(read.single.superset, 2);
+  });
 }
 
 class _Harness extends DatabaseTestBase;
