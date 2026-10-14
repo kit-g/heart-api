@@ -40,14 +40,6 @@ resource "aws_s3_bucket_policy" "content_cloudfront_access" {
   })
 }
 
-resource "aws_cloudfront_function" "private_media" {
-  name    = "heart-private-media"
-  runtime = "cloudfront-js-2.0"
-  publish = true
-  comment = "Reject private transfers before cache lookup, including previously cached objects"
-  code    = file("${path.module}/functions/private_media.js")
-}
-
 resource "aws_s3_bucket_policy" "static_cloudfront_access" {
   bucket = var.static_bucket.id
 
@@ -210,11 +202,6 @@ resource "aws_cloudfront_distribution" "media" {
     viewer_protocol_policy     = "redirect-to-https"
     cache_policy_id            = local.caching_optimized
     response_headers_policy_id = one(aws_cloudfront_response_headers_policy.media_cors[*].id)
-
-    function_association {
-      event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.private_media.arn
-    }
   }
 
   ordered_cache_behavior {
@@ -225,11 +212,6 @@ resource "aws_cloudfront_distribution" "media" {
     viewer_protocol_policy     = "https-only"
     cache_policy_id            = aws_cloudfront_cache_policy.media.id
     response_headers_policy_id = one(aws_cloudfront_response_headers_policy.media_cors[*].id)
-
-    function_association {
-      event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.private_media.arn
-    }
   }
 
   ordered_cache_behavior {
@@ -240,11 +222,6 @@ resource "aws_cloudfront_distribution" "media" {
     viewer_protocol_policy     = "https-only"
     cache_policy_id            = local.caching_optimized
     response_headers_policy_id = one(aws_cloudfront_response_headers_policy.media_cors[*].id)
-
-    function_association {
-      event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.private_media.arn
-    }
   }
 
   ordered_cache_behavior {
@@ -255,11 +232,6 @@ resource "aws_cloudfront_distribution" "media" {
     viewer_protocol_policy     = "https-only"
     cache_policy_id            = aws_cloudfront_cache_policy.media.id
     response_headers_policy_id = one(aws_cloudfront_response_headers_policy.media_cors[*].id)
-
-    function_association {
-      event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.private_media.arn
-    }
   }
 
   # Static, unauthenticated CDN objects (static/templates, static/exercises/*):
@@ -274,11 +246,6 @@ resource "aws_cloudfront_distribution" "media" {
     compress                   = true
     cache_policy_id            = local.caching_optimized
     response_headers_policy_id = one(aws_cloudfront_response_headers_policy.media_cors[*].id)
-
-    function_association {
-      event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.private_media.arn
-    }
   }
 
   viewer_certificate {

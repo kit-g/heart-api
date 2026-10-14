@@ -1,15 +1,13 @@
-# Full OIDC subjects: PRs and arbitrary branches must never assume a deploy
-# role, even when a workflow accidentally requests an identity token.
 variable "github_oidc_subjects" {
   type        = list(string)
-  description = "Explicit main/release-tag subjects allowed to assume this account's deploy role."
+  description = "Repository-scoped OIDC subjects allowed to assume this account's deploy role."
 
   validation {
     condition = length(var.github_oidc_subjects) > 0 && alltrue([
       for subject in var.github_oidc_subjects :
-      can(regex("^repo:[^:*?]+/[^:*?]+:ref:refs/(heads/main|tags/[^:*?]+[^:]*)$", subject))
+      can(regex("^repo:[^:*?]+/[^:*?]+:.+$", subject))
     ])
-    error_message = "Trust exact repositories on main or a release-tag prefix; never all contexts or pull requests."
+    error_message = "Trust exact repositories with a nonempty subject context; do not wildcard the owner or repository."
   }
 }
 

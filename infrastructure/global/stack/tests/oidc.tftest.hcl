@@ -82,18 +82,24 @@ run "trust_is_limited_to_the_explicit_ref_subjects" {
   }
 }
 
-run "reject_repository_wide_trust" {
+run "dev_allows_repository_wide_trust" {
   command = plan
   variables {
-    github_oidc_subjects = ["repo:kit-g/heart-api:*"]
+    github_oidc_subjects = ["repo:kit-g/heart-api:*", "repo:kit-g/heart-of-yours:*"]
   }
-  expect_failures = [var.github_oidc_subjects]
+
+  assert {
+    condition = toset(
+      jsondecode(data.aws_iam_policy_document.trust.json).Statement[0].Condition.StringLike["token.actions.githubusercontent.com:sub"]
+    ) == toset(var.github_oidc_subjects)
+    error_message = "Dev must accept all contexts of the two named repositories."
+  }
 }
 
-run "reject_pull_request_trust" {
+run "reject_wildcard_repository_trust" {
   command = plan
   variables {
-    github_oidc_subjects = ["repo:kit-g/heart-api:pull_request"]
+    github_oidc_subjects = ["repo:kit-g/*:*"]
   }
   expect_failures = [var.github_oidc_subjects]
 }

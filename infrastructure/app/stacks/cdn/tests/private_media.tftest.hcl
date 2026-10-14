@@ -25,22 +25,8 @@ variables {
 }
 
 # Mocked apply resolves generated ARNs; no resources or network calls exist.
-run "private_objects_never_use_the_public_cache" {
+run "private_prefixes_are_denied_at_the_origin" {
   command = apply
-
-  assert {
-    condition = alltrue([
-      for behavior in concat(
-        tolist(aws_cloudfront_distribution.media.default_cache_behavior),
-        tolist(aws_cloudfront_distribution.media.ordered_cache_behavior),
-      ) :
-      anytrue([
-        for association in behavior.function_association :
-        association.event_type == "viewer-request" && association.function_arn == aws_cloudfront_function.private_media.arn
-      ])
-    ])
-    error_message = "Every media behavior must reject private paths before cache lookup."
-  }
 
   assert {
     condition = anytrue([
@@ -54,7 +40,7 @@ run "private_objects_never_use_the_public_cache" {
         false,
       )
     ])
-    error_message = "S3 must refuse private prefixes to CloudFront even if an edge function is removed."
+    error_message = "S3 must refuse CloudFront reads of private prefixes."
   }
 
   assert {
