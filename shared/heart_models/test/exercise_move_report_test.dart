@@ -16,6 +16,7 @@ void main() {
       preferencesDropped: 0,
       chartPreferences: 0,
       goals: 1,
+      programs: 2,
       sourceDeleted: true,
     );
 
@@ -30,6 +31,7 @@ void main() {
       'preferencesDropped': 0,
       'chartPreferences': 0,
       'goals': 1,
+      'programs': 2,
       'sourceDeleted': true,
     });
 
@@ -48,6 +50,7 @@ void main() {
         'preferences_dropped': 1,
         'chart_preferences_moved': 0,
         'goals_moved': 2,
+        'programs_moved': 1,
         'source_deleted': false,
       },
       sourceId: source,
@@ -58,7 +61,24 @@ void main() {
     expect(report.workoutExercises, 3);
     expect(report.preferencesDropped, 1);
     expect(report.goals, 2);
+    expect(report.programs, 1);
     expect(report.sourceDeleted, isFalse);
+  });
+
+  test('a server that predates programs reads as none moved', () {
+    final report = ExerciseMoveReport.fromJson({
+      'sourceId': source,
+      'targetId': target,
+      'dryRun': true,
+      'workoutExercises': 0,
+      'templateExercises': 0,
+      'preferences': 0,
+      'preferencesDropped': 0,
+      'chartPreferences': 0,
+      'goals': 0,
+      'sourceDeleted': false,
+    });
+    expect(report.programs, 0);
   });
 
   test('fromJson rejects a missing count', () {

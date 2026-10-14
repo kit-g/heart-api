@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.25.0
+
+A history move re-keys programs (heart-api#226).
+
+- New: `ExerciseMoveReport.programs`, the programs whose rules or bases moved
+  from the source to the target, on the wire as `programs`. Optional in the
+  factory and read as 0 when absent.
+
 ## 2.24.0
 
 Four gaps the app ran into (heart-api#227).
