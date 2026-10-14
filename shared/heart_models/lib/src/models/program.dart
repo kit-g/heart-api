@@ -494,8 +494,64 @@ final class Deload implements Model {
   int get hashCode => Object.hash(every, load, volume);
 }
 
+/// One block of a program (heart-api#233): its own [sessions] (template ids, in
+/// order) for [cycles] program weeks, then the next phase. The last phase may
+/// leave [cycles] out and repeat.
+final class ProgramPhase implements Model {
+  final String? name;
+  final List<String> sessions;
+  final int? cycles;
+
+  const new({this.name, required this.sessions, this.cycles});
+
+  factory fromJson(Map json) {
+    return ProgramPhase(
+      name: switch (json['name']) {
+        null => null,
+        final String name when name.trim().isNotEmpty && name.length <= 100 => name,
+        final other => throw ArgumentError.value(other, 'name', 'a name of at most 100 characters'),
+      },
+      sessions: switch (json['sessions']) {
+        final List ids when ids.isNotEmpty && ids.every((id) => id is String) => [for (final id in ids) id as String],
+        final other => throw ArgumentError.value(other, 'sessions', 'one session id or more'),
+      },
+      cycles: switch (json['cycles']) {
+        null => null,
+        final int cycles when cycles >= 1 && cycles <= 104 => cycles,
+        final other => throw ArgumentError.value(other, 'cycles', 'a whole number of weeks from 1 to 104'),
+      },
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() => {'name': ?name, 'sessions': sessions, 'cycles': ?cycles};
+}
+
+/// A test session (heart-api#233): a workout of it sets the bases of the
+/// exercises it tested to [share] of an estimated max (`Progression.test`).
+final class ProgramTest implements Model {
+  static const defaultShare = 0.9;
+
+  final num share;
+
+  const new({this.share = defaultShare});
+
+  factory fromJson(Map json) {
+    return ProgramTest(
+      share: switch (json['share']) {
+        null => defaultShare,
+        final num share when share > 0 && share <= 1 => share,
+        final other => throw ArgumentError.value(other, 'share', 'a share above 0 and at most 1'),
+      },
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() => {'share': share};
+}
+
 /// A field of a [Program] that can be left unset, for [Program.without].
-enum ProgramField { note, perWeek, weeks, constraint, deload }
+enum ProgramField { note, perWeek, weeks, constraint, deload, phases, tests }
 
 /// Templates on a plan, with targets that grow (heart-api#86). The design is
 /// `docs/2026-10-13.programs.md`.
@@ -534,6 +590,16 @@ abstract interface class Program implements Model {
   /// The lighter week it schedules, if any.
   Deload? get deload;
 
+  /// Its blocks, in order; empty is one repeating phase of every session.
+  List<ProgramPhase> get phases;
+
+  /// Its test sessions, by template id.
+  Map<String, ProgramTest> get tests;
+
+  /// The phase program [week] falls in: phases take their cycles in turn, and
+  /// the last one, or one without cycles, takes the rest. Null without phases.
+  int? phaseOf(int week);
+
   bool get archived;
 
   /// The ids of the program's session templates, in order. Read-only: a
@@ -563,6 +629,8 @@ abstract interface class Program implements Model {
     Map<String, GrowthRule> rules,
     String? constraint,
     Deload? deload,
+    List<ProgramPhase> phases,
+    Map<String, ProgramTest> tests,
     bool archived,
     List<String> sessions,
     Map<String, DateTime> joined,
@@ -595,6 +663,8 @@ abstract interface class Program implements Model {
     Map<String, GrowthRule>? rules,
     String? constraint,
     Deload? deload,
+    List<ProgramPhase>? phases,
+    Map<String, ProgramTest>? tests,
     bool? archived,
   });
 
@@ -625,6 +695,10 @@ class _Program implements Program {
   @override
   final Deload? deload;
   @override
+  final List<ProgramPhase> phases;
+  @override
+  final Map<String, ProgramTest> tests;
+  @override
   final bool archived;
   @override
   final List<String> sessions;
@@ -646,6 +720,8 @@ class _Program implements Program {
     this.rules = const {},
     this.constraint,
     this.deload,
+    this.phases = const [],
+    this.tests = const {},
     this.archived = false,
     this.sessions = const [],
     this.joined = const {},
@@ -688,6 +764,16 @@ class _Program implements Program {
         final Map deload => Deload.fromJson(deload),
         _ => null,
       },
+      phases: switch (_decoded(json['phases'])) {
+        final List phases => [for (final phase in phases) ProgramPhase.fromJson(phase as Map)],
+        _ => const [],
+      },
+      tests: switch (_decoded(json['tests'])) {
+        final Map tests => {
+          for (final MapEntry(:key, :value) in tests.entries) '$key': ProgramTest.fromJson(value as Map),
+        },
+        _ => const {},
+      },
       archived: json['archived'] == true,
       sessions: [
         for (final id in (json['sessions'] as List?) ?? const []) id.toString(),
@@ -716,6 +802,8 @@ class _Program implements Program {
     Map<String, GrowthRule>? rules,
     String? constraint,
     Deload? deload,
+    List<ProgramPhase>? phases,
+    Map<String, ProgramTest>? tests,
     bool? archived,
   }) {
     return _Program(
@@ -729,6 +817,8 @@ class _Program implements Program {
       rules: rules ?? this.rules,
       constraint: constraint ?? this.constraint,
       deload: deload ?? this.deload,
+      phases: phases ?? this.phases,
+      tests: tests ?? this.tests,
       archived: archived ?? this.archived,
       sessions: sessions,
       joined: joined,
@@ -754,12 +844,27 @@ class _Program implements Program {
       rules: rules,
       constraint: fields.contains(ProgramField.constraint) ? null : constraint,
       deload: fields.contains(ProgramField.deload) ? null : deload,
+      phases: fields.contains(ProgramField.phases) ? const [] : phases,
+      tests: fields.contains(ProgramField.tests) ? const {} : tests,
       archived: archived,
       sessions: sessions,
       joined: joined,
       createdAt: createdAt,
       unreadRules: unreadRules,
     );
+  }
+
+  @override
+  int? phaseOf(int week) {
+    if (phases.isEmpty) return null;
+    var through = 0;
+    for (final (index, phase) in phases.indexed) {
+      final cycles = phase.cycles;
+      if (cycles == null || index == phases.length - 1) return index;
+      through += cycles;
+      if (week <= through) return index;
+    }
+    return phases.length - 1;
   }
 
   @override
@@ -779,6 +884,8 @@ class _Program implements Program {
       },
       'constraint': ?constraint,
       'deload': ?deload?.toMap(),
+      if (phases.isNotEmpty) 'phases': [for (final phase in phases) phase.toMap()],
+      if (tests.isNotEmpty) 'tests': {for (final MapEntry(:key, :value) in tests.entries) key: value.toMap()},
       'archived': archived,
       'sessions': sessions,
       if (joined.isNotEmpty)

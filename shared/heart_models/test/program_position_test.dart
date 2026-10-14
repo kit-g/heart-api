@@ -228,4 +228,90 @@ void main() {
       expect(() => Deload.fromJson(const {'every': 4, 'load': 0}), throwsArgumentError);
     });
   });
+
+  group('phases and tests (heart-api#233)', () {
+    final phased = Program(
+      name: 'p',
+      sessions: [a, b, c],
+      phases: [
+        ProgramPhase(name: 'Volume', sessions: [a, b], cycles: 2),
+        ProgramPhase(name: 'Test', sessions: [c], cycles: 1),
+        ProgramPhase(name: 'Again', sessions: [a, b]),
+      ],
+    );
+    ProgramPosition at(List<ProgramMark> marks, [List<ProgramAction> actions = const []]) =>
+        ProgramPosition.of(phased, marks: marks, actions: actions, now: now);
+
+    test('each phase runs its own sessions for its cycles, the last repeating', () {
+      expect(phased.phaseOf(1), 0);
+      expect(phased.phaseOf(2), 0);
+      expect(phased.phaseOf(3), 1);
+      expect(phased.phaseOf(4), 2);
+      expect(phased.phaseOf(40), 2);
+
+      expect(at([]).remaining, [a, b]);
+      final third = at([done(a, 2), done(b, 3), done(a, 5), done(b, 6)]);
+      expect((third.week, third.phase), (3, 1));
+      expect(third.remaining, [c]);
+      final fourth = at([done(a, 2), done(b, 3), done(a, 5), done(b, 6), done(c, 8)]);
+      expect((fourth.week, fourth.phase, fourth.next), (4, 2, a));
+    });
+
+    test('a phase whose sessions are all gone runs every session, never stalls', () {
+      final gone = Program(name: 'p', sessions: [a, b], phases: phased.phases);
+      final third = ProgramPosition.of(
+        gone,
+        marks: [done(a, 2), done(b, 3), done(a, 5), done(b, 6)],
+        actions: const [],
+        now: now,
+      );
+      expect(third.week, 3);
+      expect(third.remaining, [a, b]);
+      final after = ProgramPosition.of(
+        gone,
+        marks: [done(a, 2), done(b, 3), done(a, 5), done(b, 6), done(a, 8), done(b, 9)],
+        actions: const [],
+        now: now,
+      );
+      expect(after.week, 4);
+    });
+
+    test('replay goes back across phases', () {
+      final replayed = at([done(a, 2), done(b, 3), done(a, 5), done(b, 6)], [act(.replay, 7, week: 1)]);
+      expect((replayed.week, replayed.phase), (1, 0));
+    });
+
+    test('without phases, one repeating phase of every session', () {
+      expect(Program(name: 'p', sessions: [a]).phaseOf(9), isNull);
+      expect(fold([]).phase, isNull);
+    });
+
+    test('phases and tests round-trip, and are checked', () {
+      final json = {
+        'name': 'p',
+        'rules': {},
+        'phases': [
+          {
+            'name': 'Volume',
+            'sessions': [a],
+            'cycles': 2,
+          },
+          {
+            'sessions': [b],
+          },
+        ],
+        'tests': {
+          c: {'share': 0.9},
+        },
+        'archived': false,
+        'sessions': [a, b, c],
+      };
+      final program = Program.fromJson(json);
+      expect(program.tests[c]?.share, 0.9);
+      expect(program.toMap(), json);
+      expect(program.without({.phases, .tests}).toMap().keys, isNot(contains('phases')));
+      expect(() => ProgramPhase.fromJson(const {'sessions': []}), throwsArgumentError);
+      expect(() => ProgramTest.fromJson(const {'share': 1.5}), throwsArgumentError);
+    });
+  });
 }

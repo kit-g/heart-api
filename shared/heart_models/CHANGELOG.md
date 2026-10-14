@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.32.0
+
+Phases and test sessions (heart-api#233).
+
+- New: `ProgramPhase` (`name`, `sessions`, `cycles`) and `Program.phases`; a
+  program week falls in a phase by the phases' cycles in turn, the last (or
+  one without cycles) taking the rest: `Program.phaseOf(week)`.
+- New: `ProgramTest` (`share`) and `Program.tests`, by template id: a workout
+  of a test session sets bases through `Progression.test`.
+- New: `ProgramPosition.phase`, on the wire as `phase`; `remaining` and `next`
+  come from the phase's sessions, or from every session when none of the
+  phase's are left, so a deleted session never stalls a week. `week` stays the
+  whole program's.
+- New: `ProgramField.phases` / `tests` for `without`.
+
 ## 2.31.0
 
 Variation ladders (heart-api#231).
