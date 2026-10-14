@@ -90,6 +90,10 @@ def target_of(spec: dict) -> dict:
             if not _number(value, 0, 10) or value * 2 != int(value * 2):
                 raise ValueError(f'rir {value!r} must be 0 to 10, in halves')
             target['rir'] = value
+        elif key == 'of':
+            if not isinstance(value, str) or not value:
+                raise ValueError('of names the exercise whose base the share is of, by key')
+            target['of'] = value
         elif key == 'supplemental':
             if value is not True:
                 raise ValueError('supplemental is true or left out')
@@ -98,6 +102,8 @@ def target_of(spec: dict) -> dict:
             target[key] = parse_measure(value)
         else:
             raise ValueError(f'unknown target measure {key!r}')
+    if 'of' in target and 'share' not in target:
+        raise ValueError('of goes with a share')
     return target
 
 
@@ -401,12 +407,16 @@ def check(document: dict, library: dict, sources=None, safety=None, ladders=None
             problems += check_rule(
                 f'{where}.rules.{exercise}', rule, exercises[exercise]['category'], used[exercise], ladders
             )
+        on_a_max = {key for key, rule in rules.items() if (rule or {}).get('kind') == 'shareOfMax'}
         for exercise, targets in used.items():
-            if (
-                any('share' in t for sets in targets for t in sets)
-                and (rules.get(exercise) or {}).get('kind') != 'shareOfMax'
-            ):
-                problems.append(f'{where}.{exercise}: a share target needs a shareOfMax rule')
+            for target in (t for sets in targets for t in sets if 'share' in t):
+                # a share of another lift's training max, or of its own
+                if (of := target.get('of')) is not None:
+                    if of not in on_a_max:
+                        problems.append(f'{where}.{exercise}: of {of!r} names no exercise with a shareOfMax rule')
+                elif exercise not in on_a_max:
+                    problems.append(f'{where}.{exercise}: a share target needs a shareOfMax rule')
+                    break
     return problems
 
 

@@ -885,3 +885,782 @@ programs:
                    {share: 0.65, reps: 5, supplemental: true}, {share: 0.65, reps: 5, supplemental: true}, {share: 0.65, reps: 5, supplemental: true}]
           - {exercise: lat-pulldown-cable, pattern: vertical_pull, total_reps: [50, 100], sets: 5, target: {reps: [10, 20]}, rest: 60}
           - {exercise: chest-dip-assisted, pattern: chest_dip, total_reps: [30, 50], sets: 3, target: {reps: [8, 15]}, rest: 60}
+
+  - key: five_by_five
+    audience: starting_out
+    equipment: gym
+    per_week: 3
+    weeks: 12
+    minutes: 45
+    next: [power_and_size, upper_lower, strength_waves]
+    safety: [start, stop_if, discomfort]
+    name: {en: Five by five, es: Cinco por cinco, fr: Cinq par cinq, ru: Пять по пять}
+    note:
+      en: "Two workouts in turn, three days a week: five sets of five on a few big lifts, a little heavier every time."
+      es: "Dos entrenamientos por turnos, tres días por semana: cinco series de cinco en unos pocos ejercicios grandes, un poco más pesado cada vez."
+      fr: "Deux séances en alternance, trois jours par semaine : cinq séries de cinq sur quelques grands mouvements, un peu plus lourd à chaque fois."
+      ru: "Две тренировки по очереди, три дня в неделю: пять подходов по пять в нескольких базовых упражнениях, каждый раз чуть тяжелее."
+    who:
+      en: "For starting out with a barbell, with the simplest plan there is."
+      es: "Para empezar con barra, con el plan más sencillo que hay."
+      fr: "Pour débuter à la barre, avec le programme le plus simple qui soit."
+      ru: "Для начала работы со штангой по самому простому плану."
+    week:
+      en: "Three sessions of about 45 minutes, A and B in turn. The squat comes every time."
+      es: "Tres sesiones de unos 45 minutos, A y B por turnos. La sentadilla va siempre."
+      fr: "Trois séances d’environ 45 minutes, A et B en alternance. Le squat revient à chaque fois."
+      ru: "Три тренировки примерно по 45 минут, A и B по очереди. Присед — в каждой."
+    grows:
+      en: "Get all five sets of five and the lift goes up 2.5 kg next time; the deadlift goes up 5."
+      es: "Completa las cinco series de cinco y el ejercicio sube 2,5 kg la próxima vez; el peso muerto sube 5."
+      fr: "Réussissez les cinq séries de cinq et le mouvement monte de 2,5 kg la fois suivante ; le soulevé de terre de 5."
+      ru: "Сделали все пять подходов по пять — в следующий раз вес растёт на 2,5 кг; в становой тяге на 5."
+    misses:
+      en: "Miss a rep and keep the weight. Three sessions in a row short on a lift and it drops a tenth, then climbs again."
+      es: "Si fallas una repetición, mantén el peso. Tres sesiones seguidas sin completar un ejercicio y baja una décima parte, y vuelve a subir."
+      fr: "Une répétition manquée, on garde la charge. Trois séances d’affilée incomplètes sur un mouvement et il baisse d’un dixième, puis remonte."
+      ru: "Не добрали повторение — вес остаётся. Три тренировки подряд не справились с упражнением — вес снижается на десятую часть и снова растёт."
+    why:
+      - sources: [acsm_2009, currier_2023]
+        about: [program, grows]
+        text:
+          en: "Beginners can add weight almost every session for a while, and heavy sets three times a week led the research for strength."
+          es: "Los principiantes pueden subir peso casi en cada sesión durante un tiempo, y las series pesadas tres veces por semana fueron lo mejor para la fuerza."
+          fr: "Les débutants peuvent ajouter du poids presque à chaque séance pendant un temps, et des séries lourdes trois fois par semaine sont arrivées en tête pour la force."
+          ru: "Новички какое-то время могут прибавлять вес почти каждую тренировку, а тяжёлые подходы три раза в неделю лучше всего развивали силу."
+      - sources: [rest_singer_2024]
+        about: [rest]
+        text:
+          en: "Three minutes between heavy sets, because a little longer rest does a little more."
+          es: "Tres minutos entre series pesadas, porque descansar un poco más rinde un poco más."
+          fr: "Trois minutes entre les séries lourdes, car un repos un peu plus long rapporte un peu plus."
+          ru: "Три минуты между тяжёлыми подходами: чуть более долгий отдых даёт чуть больше."
+    rules:
+      squat-barbell: &five_by_five__five {kind: addWeight, step: 2.5}
+      bench-press-barbell: *five_by_five__five
+      bent-over-row-barbell: *five_by_five__five
+      overhead-press-barbell: *five_by_five__five
+      deadlift-barbell: {kind: addWeight, step: 5}
+    sessions:
+      - key: a
+        name: {en: Day A, es: Día A, fr: Jour A, ru: День A}
+        exercises:
+          - {exercise: squat-barbell, sets: 5, target: {reps: 5}, rest: 180}
+          - {exercise: bench-press-barbell, sets: 5, target: {reps: 5}, rest: 180}
+          - {exercise: bent-over-row-barbell, sets: 5, target: {reps: 5}, rest: 150}
+      - key: b
+        name: {en: Day B, es: Día B, fr: Jour B, ru: День B}
+        exercises:
+          - {exercise: squat-barbell, sets: 5, target: {reps: 5}, rest: 180}
+          - {exercise: overhead-press-barbell, sets: 5, target: {reps: 5}, rest: 180}
+          - {exercise: deadlift-barbell, sets: 1, target: {reps: 5}, rest: 180}
+
+  - key: three_by_five
+    audience: starting_out
+    equipment: gym
+    per_week: 3
+    weeks: 12
+    minutes: 50
+    next: [power_and_size, upper_lower, strength_waves]
+    safety: [start, stop_if, discomfort]
+    name: {en: "Three by five, with cleans", es: "Tres por cinco, con cargadas", fr: "Trois par cinq, avec épaulés", ru: "Три по пять, со взятием на грудь"}
+    note:
+      en: "Three sets of five on the big lifts, and the power clean: a fast pull from the floor to the shoulders. A little heavier every session."
+      es: "Tres series de cinco en los ejercicios grandes, y la cargada de potencia: un tirón rápido del suelo a los hombros. Un poco más pesado en cada sesión."
+      fr: "Trois séries de cinq sur les grands mouvements, et l’épaulé en puissance : un tirage rapide du sol aux épaules. Un peu plus lourd à chaque séance."
+      ru: "Три подхода по пять в базовых упражнениях и силовое взятие на грудь — быстрый подъём штанги с пола на плечи. Каждую тренировку чуть тяжелее."
+    who:
+      en: "For starting out with a barbell, with some speed and power in the mix."
+      es: "Para empezar con barra, con algo de velocidad y potencia."
+      fr: "Pour débuter à la barre, avec un peu de vitesse et de puissance."
+      ru: "Для начала работы со штангой, с долей скорости и мощности."
+    week:
+      en: "Three sessions of about 50 minutes, A and B in turn. Squat every time; the bench and the press take turns."
+      es: "Tres sesiones de unos 50 minutos, A y B por turnos. Sentadilla siempre; press de banca y press militar se alternan."
+      fr: "Trois séances d’environ 50 minutes, A et B en alternance. Squat à chaque fois ; développé couché et militaire alternent."
+      ru: "Три тренировки примерно по 50 минут, A и B по очереди. Присед — всегда; жим лёжа и жим стоя чередуются."
+    grows:
+      en: "Three clean sets of five and the lift goes up 2.5 kg next time; the deadlift 5. The clean goes up 2.5 kg once all five triples are fast and tidy."
+      es: "Tres series limpias de cinco y el ejercicio sube 2,5 kg la próxima vez; el peso muerto 5. La cargada sube 2,5 kg cuando las cinco series de tres salen rápidas y limpias."
+      fr: "Trois séries propres de cinq et le mouvement monte de 2,5 kg la fois suivante ; le soulevé de terre de 5. L’épaulé monte de 2,5 kg quand les cinq séries de trois sont rapides et propres."
+      ru: "Три чистых подхода по пять — в следующий раз +2,5 кг; в становой +5. Взятие на грудь растёт на 2,5 кг, когда все пять троек быстрые и чистые."
+    misses:
+      en: "Miss and keep the weight. Three sessions in a row short on a lift and it drops a tenth, then climbs again."
+      es: "Si fallas, mantén el peso. Tres sesiones seguidas sin completar un ejercicio y baja una décima parte, y vuelve a subir."
+      fr: "Raté, on garde la charge. Trois séances d’affilée incomplètes sur un mouvement et il baisse d’un dixième, puis remonte."
+      ru: "Не справились — вес остаётся. Три тренировки подряд не справились — вес снижается на десятую часть и снова растёт."
+    why:
+      - sources: [acsm_2009, currier_2023]
+        about: [program, grows]
+        text:
+          en: "Beginners can add weight almost every session for a while, and heavy sets three times a week led the research for strength."
+          es: "Los principiantes pueden subir peso casi en cada sesión durante un tiempo, y las series pesadas tres veces por semana fueron lo mejor para la fuerza."
+          fr: "Les débutants peuvent ajouter du poids presque à chaque séance pendant un temps, et des séries lourdes trois fois par semaine sont arrivées en tête pour la force."
+          ru: "Новички какое-то время могут прибавлять вес почти каждую тренировку, а тяжёлые подходы три раза в неделю лучше всего развивали силу."
+      - sources: [rest_singer_2024]
+        about: [rest]
+        text:
+          en: "Three minutes between heavy sets, because a little longer rest does a little more."
+          es: "Tres minutos entre series pesadas, porque descansar un poco más rinde un poco más."
+          fr: "Trois minutes entre les séries lourdes, car un repos un peu plus long rapporte un peu plus."
+          ru: "Три минуты между тяжёлыми подходами: чуть более долгий отдых даёт чуть больше."
+    rules:
+      squat-barbell: &three_by_five__three {kind: addWeight, step: 2.5}
+      bench-press-barbell: *three_by_five__three
+      overhead-press-barbell: *three_by_five__three
+      power-clean: *three_by_five__three
+      deadlift-barbell: {kind: addWeight, step: 5}
+    sessions:
+      - key: a
+        name: {en: Day A, es: Día A, fr: Jour A, ru: День A}
+        exercises:
+          - {exercise: squat-barbell, sets: 3, target: {reps: 5}, rest: 180}
+          - {exercise: bench-press-barbell, sets: 3, target: {reps: 5}, rest: 180}
+          - {exercise: deadlift-barbell, sets: 1, target: {reps: 5}, rest: 180}
+      - key: b
+        name: {en: Day B, es: Día B, fr: Jour B, ru: День B}
+        note:
+          en: "The clean is a skill: start with an empty bar, and end the set when it gets slow or untidy."
+          es: "La cargada es una técnica: empieza con la barra vacía y termina la serie cuando salga lenta o sucia."
+          fr: "L’épaulé est une technique : commencez à barre vide, et arrêtez la série quand elle devient lente ou brouillonne."
+          ru: "Взятие на грудь — это навык: начните с пустого грифа и заканчивайте подход, когда он становится медленным или неряшливым."
+        exercises:
+          - {exercise: squat-barbell, sets: 3, target: {reps: 5}, rest: 180}
+          - {exercise: overhead-press-barbell, sets: 3, target: {reps: 5}, rest: 180}
+          - {exercise: power-clean, sets: 5, target: {reps: 3}, rest: 120}
+
+  - key: push_pull_legs
+    audience: getting_stronger
+    equipment: gym
+    per_week: 6
+    weeks: 12
+    minutes: 60
+    next: [weekly_top_sets, upper_lower]
+    safety: [start, stop_if, discomfort]
+    name: {en: "Push, pull, legs", es: "Empuje, tirón, piernas", fr: "Poussée, tirage, jambes", ru: "Жим, тяга, ноги"}
+    note:
+      en: "Six days: pull, push and legs, twice through. The first lift each day gets heavier every session; the rest work in a rep range."
+      es: "Seis días: tirón, empuje y piernas, dos veces. El primer ejercicio de cada día sube en cada sesión; el resto trabaja en un rango de repeticiones."
+      fr: "Six jours : tirage, poussée et jambes, deux fois. Le premier mouvement de chaque jour s’alourdit à chaque séance ; les autres se font dans une fourchette."
+      ru: "Шесть дней: тяга, жим и ноги, дважды по кругу. Первое упражнение дня тяжелеет каждую тренировку, остальные — в диапазоне повторений."
+    who:
+      en: "For lifters who like training most days and have about an hour."
+      es: "Para quien disfruta entrenando casi a diario y tiene alrededor de una hora."
+      fr: "Pour ceux qui aiment s’entraîner presque tous les jours et ont environ une heure."
+      ru: "Для тех, кто любит тренироваться почти каждый день и располагает примерно часом."
+    week:
+      en: "Six sessions of about an hour: pull, push, legs, then again, and a day off. Fewer days work too; carry on where you left off."
+      es: "Seis sesiones de una hora: tirón, empuje, piernas, otra vez, y un día libre. Con menos días también funciona; sigue donde lo dejaste."
+      fr: "Six séances d’environ une heure : tirage, poussée, jambes, puis à nouveau, et un jour de repos. Moins de jours, ça marche aussi ; reprenez où vous en étiez."
+      ru: "Шесть тренировок примерно по часу: тяга, жим, ноги, ещё раз — и день отдыха. Можно и реже: продолжайте с того места, где остановились."
+    grows:
+      en: "The first lift adds 2.5 kg every session you get all its reps (the deadlift 5), and the last set goes for as many as you can. The rest go up once every set reaches the top of its range."
+      es: "El primer ejercicio sube 2,5 kg cada sesión en que completas todas sus repeticiones (el peso muerto 5), y la última serie va al máximo de repeticiones. El resto sube cuando todas las series llegan al tope de su rango."
+      fr: "Le premier mouvement prend 2,5 kg à chaque séance réussie (le soulevé de terre 5), et la dernière série se fait au maximum de répétitions. Les autres montent quand toutes les séries atteignent le haut de leur fourchette."
+      ru: "Первое упражнение прибавляет 2,5 кг каждую тренировку, где сделаны все повторения (становая — 5), а последний подход — на максимум. Остальные растут, когда все подходы дошли до верха диапазона."
+    misses:
+      en: "Miss and keep the weight. Three sessions in a row short on a lift and it drops a tenth."
+      es: "Si fallas, mantén el peso. Tres sesiones seguidas sin completar un ejercicio y baja una décima parte."
+      fr: "Raté, on garde la charge. Trois séances d’affilée incomplètes sur un mouvement et il baisse d’un dixième."
+      ru: "Не справились — вес остаётся. Три тренировки подряд не справились — вес снижается на десятую часть."
+    why:
+      - sources: [schoenfeld_2016]
+        about: [program, week]
+        text:
+          en: "Each muscle gets worked twice a week, which builds more than once."
+          es: "Cada músculo se trabaja dos veces por semana, lo que construye más que una."
+          fr: "Chaque muscle est travaillé deux fois par semaine, ce qui construit plus qu’une fois."
+          ru: "Каждая мышца работает дважды в неделю — это даёт больше, чем один раз."
+      - sources: [acsm_2026]
+        about: [grows]
+        text:
+          en: "Heavy enough weights and two or three hard sets an exercise matter most; the split itself is a matter of taste."
+          es: "Lo que más importa son pesos suficientes y dos o tres series duras por ejercicio; la división en sí es cuestión de gustos."
+          fr: "Ce qui compte le plus : des charges suffisantes et deux ou trois séries dures par exercice ; la répartition elle-même est affaire de goût."
+          ru: "Важнее всего достаточный вес и два-три тяжёлых подхода на упражнение; сама схема разбивки — дело вкуса."
+    rules:
+      deadlift-barbell: {kind: addWeight, step: 5}
+      bent-over-row-barbell: &push_pull_legs__main {kind: addWeight, step: 2.5}
+      bench-press-barbell: *push_pull_legs__main
+      overhead-press-barbell: *push_pull_legs__main
+      squat-barbell: *push_pull_legs__main
+      lat-pulldown-cable: &push_pull_legs__cable {kind: rangeThenWeight, step: 2.5}
+      seated-row-cable: *push_pull_legs__cable
+      face-pull-cable: *push_pull_legs__cable
+      triceps-pushdown-cable-straight-bar: *push_pull_legs__cable
+      triceps-extension-cable: *push_pull_legs__cable
+      romanian-deadlift-barbell: *push_pull_legs__cable
+      lying-leg-curl-machine: *push_pull_legs__cable
+      hammer-curl-dumbbell: &push_pull_legs__dumbbell {kind: rangeThenWeight, step: 2}
+      bicep-curl-dumbbell: *push_pull_legs__dumbbell
+      seated-overhead-press-dumbbell: *push_pull_legs__dumbbell
+      incline-bench-press-dumbbell: *push_pull_legs__dumbbell
+      bench-press-dumbbell: *push_pull_legs__dumbbell
+      lateral-raise-dumbbell: *push_pull_legs__dumbbell
+      leg-press: &push_pull_legs__heavy_machine {kind: rangeThenWeight, step: 5}
+      standing-calf-raise-machine: *push_pull_legs__heavy_machine
+    sessions:
+      - key: pull_a
+        name: {en: Pull A, es: Tirón A, fr: Tirage A, ru: Тяга A}
+        exercises:
+          - {exercise: deadlift-barbell, sets: [{reps: 5+}], rest: 180}
+          - {exercise: lat-pulldown-cable, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: seated-row-cable, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: face-pull-cable, sets: 5, target: {reps: [15, 20], rir: 2}, rest: 60}
+          - {exercise: hammer-curl-dumbbell, sets: 4, target: {reps: [8, 12], rir: 2}, rest: 60}
+          - {exercise: bicep-curl-dumbbell, sets: 4, target: {reps: [8, 12], rir: 2}, rest: 60}
+      - key: push_a
+        name: {en: Push A, es: Empuje A, fr: Poussée A, ru: Жим A}
+        exercises:
+          - {exercise: bench-press-barbell, sets: [{reps: 5}, {reps: 5}, {reps: 5}, {reps: 5}, {reps: 5+}], rest: 180}
+          - {exercise: seated-overhead-press-dumbbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: incline-bench-press-dumbbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: triceps-pushdown-cable-straight-bar, superset: 1, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 60}
+          - {exercise: lateral-raise-dumbbell, superset: 1, sets: 3, target: {reps: [15, 20], rir: 2}, rest: 60}
+          - {exercise: triceps-extension-cable, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 60}
+      - key: legs_a
+        name: {en: Legs A, es: Piernas A, fr: Jambes A, ru: Ноги A}
+        exercises:
+          - {exercise: squat-barbell, sets: [{reps: 5}, {reps: 5}, {reps: 5+}], rest: 180}
+          - {exercise: romanian-deadlift-barbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 120}
+          - {exercise: leg-press, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: lying-leg-curl-machine, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 60}
+          - {exercise: standing-calf-raise-machine, sets: 5, target: {reps: [8, 12], rir: 2}, rest: 60}
+      - key: pull_b
+        name: {en: Pull B, es: Tirón B, fr: Tirage B, ru: Тяга B}
+        exercises:
+          - {exercise: bent-over-row-barbell, sets: [{reps: 5}, {reps: 5}, {reps: 5}, {reps: 5}, {reps: 5+}], rest: 150}
+          - {exercise: lat-pulldown-cable, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: seated-row-cable, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: face-pull-cable, sets: 5, target: {reps: [15, 20], rir: 2}, rest: 60}
+          - {exercise: hammer-curl-dumbbell, sets: 4, target: {reps: [8, 12], rir: 2}, rest: 60}
+          - {exercise: bicep-curl-dumbbell, sets: 4, target: {reps: [8, 12], rir: 2}, rest: 60}
+      - key: push_b
+        name: {en: Push B, es: Empuje B, fr: Poussée B, ru: Жим B}
+        exercises:
+          - {exercise: overhead-press-barbell, sets: [{reps: 5}, {reps: 5}, {reps: 5}, {reps: 5}, {reps: 5+}], rest: 180}
+          - {exercise: bench-press-dumbbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: incline-bench-press-dumbbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: triceps-pushdown-cable-straight-bar, superset: 1, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 60}
+          - {exercise: lateral-raise-dumbbell, superset: 1, sets: 3, target: {reps: [15, 20], rir: 2}, rest: 60}
+          - {exercise: triceps-extension-cable, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 60}
+      - key: legs_b
+        name: {en: Legs B, es: Piernas B, fr: Jambes B, ru: Ноги B}
+        exercises:
+          - {exercise: squat-barbell, sets: [{reps: 5}, {reps: 5}, {reps: 5+}], rest: 180}
+          - {exercise: romanian-deadlift-barbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 120}
+          - {exercise: leg-press, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: lying-leg-curl-machine, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 60}
+          - {exercise: standing-calf-raise-machine, sets: 5, target: {reps: [8, 12], rir: 2}, rest: 60}
+
+  - key: power_and_size
+    audience: getting_stronger
+    equipment: gym
+    per_week: 4
+    weeks: 12
+    minutes: 70
+    next: [strength_waves, weekly_top_sets]
+    safety: [start, stop_if, discomfort]
+    deload: {every: 6, load: 0.9, volume: 0.5}
+    name: {en: "Power and size, four days", es: "Fuerza y volumen, cuatro días", fr: "Force et volume, quatre jours", ru: "Сила и объём, четыре дня"}
+    note:
+      en: "Four days: a heavy upper and lower day for strength, then an upper and lower day with more reps for size."
+      es: "Cuatro días: un día pesado de tren superior y otro de inferior para la fuerza, y luego superior e inferior con más repeticiones para el volumen."
+      fr: "Quatre jours : un jour lourd haut du corps et un bas du corps pour la force, puis haut et bas avec plus de répétitions pour le volume."
+      ru: "Четыре дня: тяжёлые день верха и день низа — для силы, затем верх и низ с большим числом повторений — для объёма."
+    who:
+      en: "For getting both stronger and bigger, four days a week."
+      es: "Para ganar a la vez fuerza y músculo, cuatro días por semana."
+      fr: "Pour gagner à la fois en force et en muscle, quatre jours par semaine."
+      ru: "Чтобы прибавлять и в силе, и в мышцах, четыре дня в неделю."
+    week:
+      en: "Four sessions of about 70 minutes: heavy upper, heavy lower, a day off, then upper and lower for size. Every sixth week is lighter."
+      es: "Cuatro sesiones de unos 70 minutos: superior pesado, inferior pesado, un día libre, y superior e inferior para volumen. Cada sexta semana es más ligera."
+      fr: "Quatre séances d’environ 70 minutes : haut lourd, bas lourd, un jour de repos, puis haut et bas pour le volume. Une semaine sur six est allégée."
+      ru: "Четыре тренировки примерно по 70 минут: тяжёлый верх, тяжёлый низ, день отдыха, затем верх и низ на объём. Каждая шестая неделя — лёгкая."
+    grows:
+      en: "Every set aims for its range, a rep or two short of failing. When all of them reach the top, the weight goes up."
+      es: "Cada serie busca su rango, a una o dos repeticiones del fallo. Cuando todas llegan al tope, el peso sube."
+      fr: "Chaque série vise sa fourchette, une ou deux répétitions avant l’échec. Quand toutes atteignent le haut, la charge augmente."
+      ru: "Каждый подход — в своём диапазоне, за одно-два повторения до отказа. Когда все дошли до верха, вес растёт."
+    misses:
+      en: "Three sessions in a row below the range take that lift down a tenth."
+      es: "Tres sesiones seguidas por debajo del rango bajan ese ejercicio una décima parte."
+      fr: "Trois séances d’affilée sous la fourchette font baisser ce mouvement d’un dixième."
+      ru: "Три тренировки подряд ниже диапазона снижают вес в этом упражнении на десятую часть."
+    why:
+      - sources: [currier_2023, acsm_2026]
+        about: [program, sessions.upper_power, sessions.lower_power]
+        text:
+          en: "Heavy sets lead for strength, and moderate ones build size as well, so the week has both."
+          es: "Las series pesadas son las mejores para la fuerza y las moderadas construyen músculo igual de bien, así que la semana tiene ambas."
+          fr: "Les séries lourdes mènent pour la force, et les modérées construisent autant de muscle : la semaine a les deux."
+          ru: "Тяжёлые подходы лучше для силы, а умеренные не хуже строят мышцы, поэтому в неделе есть и те и другие."
+      - sources: [schoenfeld_2016]
+        about: [week]
+        text:
+          en: "Each muscle gets two sessions a week, which builds more than one."
+          es: "Cada músculo recibe dos sesiones por semana, lo que construye más que una."
+          fr: "Chaque muscle a deux séances par semaine, ce qui construit plus qu’une."
+          ru: "Каждая мышца получает две тренировки в неделю — это даёт больше, чем одна."
+      - sources: [bell_2023, coleman_2024]
+        about: [deload]
+        text:
+          en: "A lighter week every six keeps you fresh without a week off."
+          es: "Una semana más ligera cada seis te mantiene fresco sin una semana libre."
+          fr: "Une semaine allégée toutes les six vous garde frais sans semaine de repos."
+          ru: "Лёгкая неделя раз в шесть недель сохраняет свежесть без недели отдыха."
+    rules:
+      bench-press-barbell: &power_and_size__barbell {kind: rangeThenWeight, step: 2.5}
+      bent-over-row-barbell: *power_and_size__barbell
+      lat-pulldown-cable: *power_and_size__barbell
+      overhead-press-barbell: *power_and_size__barbell
+      bicep-curl-barbell: *power_and_size__barbell
+      skullcrusher-barbell: *power_and_size__barbell
+      squat-barbell: *power_and_size__barbell
+      lying-leg-curl-machine: *power_and_size__barbell
+      incline-bench-press-barbell: *power_and_size__barbell
+      seated-row-cable: *power_and_size__barbell
+      triceps-pushdown-cable-straight-bar: *power_and_size__barbell
+      front-squat-barbell: *power_and_size__barbell
+      leg-extension-machine: *power_and_size__barbell
+      seated-leg-curl-machine: *power_and_size__barbell
+      deadlift-barbell: {kind: rangeThenWeight, step: 5}
+      leg-press: &power_and_size__heavy {kind: rangeThenWeight, step: 5}
+      standing-calf-raise-machine: *power_and_size__heavy
+      seated-calf-raise-machine: *power_and_size__heavy
+      incline-bench-press-dumbbell: &power_and_size__dumbbell {kind: rangeThenWeight, step: 2}
+      chest-fly-dumbbell: *power_and_size__dumbbell
+      bent-over-one-arm-row-dumbbell: *power_and_size__dumbbell
+      lateral-raise-dumbbell: *power_and_size__dumbbell
+      hammer-curl-dumbbell: *power_and_size__dumbbell
+      lunge-dumbbell: *power_and_size__dumbbell
+    sessions:
+      - key: upper_power
+        name: {en: "Upper, heavy", es: "Superior, pesado", fr: "Haut, lourd", ru: "Верх, тяжёлый"}
+        exercises:
+          - {exercise: bench-press-barbell, sets: 3, target: {reps: [3, 5], rir: 1}, rest: 180}
+          - {exercise: incline-bench-press-dumbbell, sets: 3, target: {reps: [6, 10], rir: 2}, rest: 120}
+          - {exercise: bent-over-row-barbell, sets: 3, target: {reps: [3, 5], rir: 1}, rest: 180}
+          - {exercise: lat-pulldown-cable, sets: 3, target: {reps: [6, 10], rir: 2}, rest: 120}
+          - {exercise: overhead-press-barbell, sets: 2, target: {reps: [5, 8], rir: 2}, rest: 120}
+          - {exercise: bicep-curl-barbell, superset: 1, sets: 2, target: {reps: [6, 10], rir: 2}, rest: 60}
+          - {exercise: skullcrusher-barbell, superset: 1, sets: 2, target: {reps: [6, 10], rir: 2}, rest: 60}
+      - key: lower_power
+        name: {en: "Lower, heavy", es: "Inferior, pesado", fr: "Bas, lourd", ru: "Низ, тяжёлый"}
+        exercises:
+          - {exercise: squat-barbell, sets: 3, target: {reps: [3, 5], rir: 1}, rest: 180}
+          - {exercise: deadlift-barbell, sets: 3, target: {reps: [3, 5], rir: 1}, rest: 210}
+          - {exercise: leg-press, sets: 3, target: {reps: [10, 15], rir: 2}, rest: 120}
+          - {exercise: lying-leg-curl-machine, sets: 3, target: {reps: [6, 10], rir: 2}, rest: 90}
+          - {exercise: standing-calf-raise-machine, sets: 4, target: {reps: [6, 10], rir: 2}, rest: 60}
+      - key: upper_size
+        name: {en: "Upper, for size", es: "Superior, volumen", fr: "Haut, volume", ru: "Верх, объём"}
+        exercises:
+          - {exercise: incline-bench-press-barbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 120}
+          - {exercise: chest-fly-dumbbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: seated-row-cable, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: bent-over-one-arm-row-dumbbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: lateral-raise-dumbbell, sets: 3, target: {reps: [10, 15], rir: 2}, rest: 60}
+          - {exercise: hammer-curl-dumbbell, superset: 1, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 60}
+          - {exercise: triceps-pushdown-cable-straight-bar, superset: 1, sets: 3, target: {reps: [10, 15], rir: 2}, rest: 60}
+      - key: lower_size
+        name: {en: "Lower, for size", es: "Inferior, volumen", fr: "Bas, volume", ru: "Низ, объём"}
+        exercises:
+          - {exercise: front-squat-barbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 150}
+          - {exercise: lunge-dumbbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: leg-extension-machine, sets: 3, target: {reps: [10, 15], rir: 2}, rest: 60}
+          - {exercise: seated-leg-curl-machine, sets: 3, target: {reps: [10, 15], rir: 2}, rest: 60}
+          - {exercise: seated-calf-raise-machine, sets: 3, target: {reps: [10, 15], rir: 2}, rest: 60}
+
+  - key: waves_and_volume
+    audience: getting_stronger
+    equipment: gym
+    per_week: 4
+    minutes: 75
+    next: [weekly_top_sets]
+    safety: [start, stop_if, discomfort]
+    name: {en: Waves and volume, es: Olas y volumen, fr: Vagues et volume, ru: Волны и объём}
+    note:
+      en: "The four-lift training-max waves, with five sets of ten at half your max after the main work: more muscle from the same plan."
+      es: "Las olas de máximo de entrenamiento en cuatro ejercicios, con cinco series de diez a la mitad de tu máximo tras el trabajo principal: más músculo con el mismo plan."
+      fr: "Les vagues sur maximum d’entraînement en quatre mouvements, avec cinq séries de dix à la moitié de votre max après le travail principal : plus de muscle avec le même plan."
+      ru: "Те же волны по тренировочному максимуму в четырёх упражнениях, плюс пять подходов по десять на половине максимума после основной работы: больше мышц по тому же плану."
+    who:
+      en: "For lifters who like the wave plan and want more size from it."
+      es: "Para quien disfruta del plan por olas y quiere sacarle más músculo."
+      fr: "Pour ceux qui aiment le plan en vagues et veulent en tirer plus de muscle."
+      ru: "Для тех, кому нравится план волнами и хочется получить от него больше мышц."
+    week:
+      en: "Four sessions of about 75 minutes: squat, bench, deadlift and press days, each with five sets of ten and some pulling. The first week finds your maxes."
+      es: "Cuatro sesiones de unos 75 minutos: días de sentadilla, banca, peso muerto y press, cada uno con cinco series de diez y algo de tirón. La primera semana encuentra tus máximos."
+      fr: "Quatre séances d’environ 75 minutes : jours squat, développé couché, soulevé de terre et militaire, chacun avec cinq séries de dix et du tirage. La première semaine trouve vos max."
+      ru: "Четыре тренировки примерно по 75 минут: дни приседа, жима лёжа, становой и жима стоя, в каждом — пять подходов по десять и немного тяги. Первая неделя находит ваши максимумы."
+    grows:
+      en: "Each lift runs on a training max, 90% of what the first week's test says you could lift once. After each four-week wave it goes up 2.5 kg for the presses and 5 kg for the squat and deadlift."
+      es: "Cada ejercicio va con un máximo de entrenamiento, el 90% de lo que la prueba de la primera semana dice que podrías levantar una vez. Tras cada ola de cuatro semanas sube 2,5 kg en los press y 5 kg en sentadilla y peso muerto."
+      fr: "Chaque mouvement suit un maximum d’entraînement, 90 % de ce que le test de la première semaine dit que vous pourriez soulever une fois. Après chaque vague de quatre semaines, il monte de 2,5 kg pour les développés et de 5 kg pour le squat et le soulevé de terre."
+      ru: "Каждое упражнение идёт от тренировочного максимума — 90% от того, что, по тесту первой недели, вы могли бы поднять один раз. После каждой четырёхнедельной волны он растёт на 2,5 кг в жимах и на 5 кг в приседе и становой."
+    misses:
+      en: "Fall short on the last heavy set two waves in a row and that lift's max drops a tenth."
+      es: "Si te quedas corto en la última serie pesada dos olas seguidas, el máximo de ese ejercicio baja una décima parte."
+      fr: "Échouez sur la dernière série lourde deux vagues d’affilée et le max de ce mouvement baisse d’un dixième."
+      ru: "Не справились с последним тяжёлым подходом две волны подряд — максимум в этом упражнении снижается на десятую часть."
+    why:
+      - sources: [acsm_2026]
+        about: [program, grows]
+        text:
+          en: "Waves aren't magic; research finds a small edge for strength at most. But a plan you enjoy is one you keep."
+          es: "Las olas no son magia; la investigación encuentra como mucho una pequeña ventaja para la fuerza. Pero un plan que disfrutas es un plan que mantienes."
+          fr: "Les vagues n’ont rien de magique ; la recherche trouve au mieux un petit avantage pour la force. Mais un plan qu’on aime est un plan qu’on garde."
+          ru: "Волны — не волшебство: исследования находят разве что небольшое преимущество для силы. Но план, который нравится, — это план, который не бросаешь."
+      - sources: [iversen_2021, currier_2023]
+        about: [rules.squat-barbell, rules.bench-press-barbell, rules.deadlift-barbell, rules.overhead-press-barbell]
+        text:
+          en: "The heavy sets drive strength; the five sets of ten add the volume that builds size."
+          es: "Las series pesadas impulsan la fuerza; las cinco series de diez añaden el volumen que construye músculo."
+          fr: "Les séries lourdes font la force ; les cinq séries de dix ajoutent le volume qui construit le muscle."
+          ru: "Тяжёлые подходы развивают силу, а пять подходов по десять добавляют объём, который строит мышцы."
+      - sources: [bell_2023, coleman_2024]
+        about: [grows]
+        text:
+          en: "Every fourth week is light, not off."
+          es: "Cada cuarta semana es ligera, no libre."
+          fr: "Une semaine sur quatre est légère, pas off."
+          ru: "Каждая четвёртая неделя — лёгкая, а не выходная."
+    phases:
+      - name: {en: Find your maxes, es: Encuentra tus máximos, fr: Trouvez vos max, ru: Найдите максимумы}
+        sessions: [test_lower, test_upper]
+        cycles: 1
+      - name: {en: Waves, es: Olas, fr: Vagues, ru: Волны}
+        sessions: [squat, bench, deadlift, press]
+    tests:
+      test_lower: {share: 0.9}
+      test_upper: {share: 0.9}
+    rules:
+      squat-barbell: &waves_and_volume__lower_volume
+        kind: shareOfMax
+        step: 5
+        waves: &waves_and_volume__volume_waves
+          - [{share: 0.65, reps: 5}, {share: 0.75, reps: 5}, {share: 0.85, reps: 5, amrap: true},
+             {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true},
+             {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true}]
+          - [{share: 0.70, reps: 3}, {share: 0.80, reps: 3}, {share: 0.90, reps: 3, amrap: true},
+             {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true},
+             {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true}]
+          - [{share: 0.75, reps: 5}, {share: 0.85, reps: 3}, {share: 0.95, reps: 1, amrap: true},
+             {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true},
+             {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true}]
+          - [{share: 0.40, reps: 5}, {share: 0.50, reps: 5}, {share: 0.60, reps: 5},
+             {share: 0.4, reps: 5, supplemental: true}, {share: 0.4, reps: 5, supplemental: true}, {share: 0.4, reps: 5, supplemental: true},
+             {share: 0.4, reps: 5, supplemental: true}, {share: 0.4, reps: 5, supplemental: true}]
+      deadlift-barbell: *waves_and_volume__lower_volume
+      bench-press-barbell: &waves_and_volume__upper_volume
+        kind: shareOfMax
+        step: 2.5
+        waves: *waves_and_volume__volume_waves
+      overhead-press-barbell: *waves_and_volume__upper_volume
+    sessions:
+      - key: test_lower
+        name: {en: Test the squat and deadlift, es: Test de sentadilla y peso muerto, fr: Test du squat et du soulevé de terre, ru: Тест приседа и становой}
+        note:
+          en: "Work up to one heavy set of three to five reps, with a rep left in the tank."
+          es: "Sube hasta una serie pesada de tres a cinco repeticiones, dejando una en reserva."
+          fr: "Montez jusqu’à une série lourde de trois à cinq répétitions, en gardant une répétition en réserve."
+          ru: "Дойдите до одного тяжёлого подхода на три–пять повторений, оставив одно в запасе."
+        exercises:
+          - {exercise: squat-barbell, sets: 1, target: {reps: [3, 5], rir: 1}, rest: 240}
+          - {exercise: deadlift-barbell, sets: 1, target: {reps: [3, 5], rir: 1}, rest: 240}
+      - key: test_upper
+        name: {en: Test the bench and press, es: Test de press de banca y militar, fr: Test du développé couché et militaire, ru: Тест жима лёжа и стоя}
+        note:
+          en: "Work up to one heavy set of three to five reps, with a rep left in the tank."
+          es: "Sube hasta una serie pesada de tres a cinco repeticiones, dejando una en reserva."
+          fr: "Montez jusqu’à une série lourde de trois à cinq répétitions, en gardant une répétition en réserve."
+          ru: "Дойдите до одного тяжёлого подхода на три–пять повторений, оставив одно в запасе."
+        exercises:
+          - {exercise: bench-press-barbell, sets: 1, target: {reps: [3, 5], rir: 1}, rest: 240}
+          - {exercise: overhead-press-barbell, sets: 1, target: {reps: [3, 5], rir: 1}, rest: 240}
+      - key: squat
+        name: {en: Squat day, es: Día de sentadilla, fr: Jour squat, ru: День приседа}
+        exercises:
+          - exercise: squat-barbell
+            rest: 150
+            sets: &waves_and_volume__week_one [{share: 0.65, reps: 5}, {share: 0.75, reps: 5}, {share: 0.85, reps: 5+},
+                   {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true},
+                   {share: 0.5, reps: 10, supplemental: true}, {share: 0.5, reps: 10, supplemental: true}]
+          - {exercise: lat-pulldown-cable, pattern: vertical_pull, total_reps: [50, 100], sets: 5, target: {reps: [10, 20]}, rest: 60}
+      - key: bench
+        name: {en: Bench day, es: Día de press de banca, fr: Jour développé couché, ru: День жима лёжа}
+        exercises:
+          - {exercise: bench-press-barbell, rest: 120, sets: *waves_and_volume__week_one}
+          - {exercise: seated-row-cable, pattern: horizontal_row, total_reps: [50, 100], sets: 5, target: {reps: [10, 20]}, rest: 60}
+      - key: deadlift
+        name: {en: Deadlift day, es: Día de peso muerto, fr: Jour soulevé de terre, ru: День становой тяги}
+        exercises:
+          - {exercise: deadlift-barbell, rest: 180, sets: *waves_and_volume__week_one}
+          - {exercise: bent-over-row-dumbbell, pattern: horizontal_row, total_reps: [50, 100], sets: 5, target: {reps: [10, 20]}, rest: 60}
+      - key: press
+        name: {en: Press day, es: Día de press militar, fr: Jour développé militaire, ru: День жима стоя}
+        exercises:
+          - {exercise: overhead-press-barbell, rest: 120, sets: *waves_and_volume__week_one}
+          - {exercise: lat-pulldown-cable, pattern: vertical_pull, total_reps: [50, 100], sets: 5, target: {reps: [10, 20]}, rest: 60}
+
+  - key: weekly_top_sets
+    audience: getting_stronger
+    equipment: gym
+    per_week: 4
+    minutes: 90
+    safety: [start, stop_if, discomfort]
+    name: {en: "Top set, weekly steps", es: "Serie tope, pasos semanales", fr: "Série de pointe, paliers hebdomadaires", ru: "Пиковый подход, шаги по неделям"}
+    note:
+      en: "Four heavy days on a training max: a top set for as many reps as you can, a long way back down, then a second lift for volume. The top set picks next week's step."
+      es: "Cuatro días pesados con un máximo de entrenamiento: una serie tope al máximo de repeticiones, un largo descenso, y un segundo ejercicio para el volumen. La serie tope decide el paso de la semana siguiente."
+      fr: "Quatre jours lourds sur un maximum d’entraînement : une série de pointe au maximum de répétitions, une longue redescente, puis un second mouvement pour le volume. La série de pointe fixe le palier de la semaine suivante."
+      ru: "Четыре тяжёлых дня от тренировочного максимума: пиковый подход на максимум повторений, долгий спуск вниз и второе упражнение на объём. Пиковый подход определяет шаг следующей недели."
+    who:
+      en: "For experienced lifters with time for long sessions, who like fast, week-to-week progress."
+      es: "Para levantadores con experiencia y tiempo para sesiones largas, que disfrutan de un progreso rápido semana a semana."
+      fr: "Pour les pratiquants expérimentés qui ont le temps de longues séances et aiment progresser vite, de semaine en semaine."
+      ru: "Для опытных атлетов, у которых есть время на долгие тренировки и которым нравится быстрый прогресс от недели к неделе."
+    week:
+      en: "Four sessions of up to an hour and a half: bench, squat, press and deadlift days, each with a second lift. The first week finds your maxes."
+      es: "Cuatro sesiones de hasta hora y media: días de banca, sentadilla, press y peso muerto, cada uno con un segundo ejercicio. La primera semana encuentra tus máximos."
+      fr: "Quatre séances jusqu’à une heure et demie : jours développé couché, squat, militaire et soulevé de terre, chacun avec un second mouvement. La première semaine trouve vos max."
+      ru: "Четыре тренировки до полутора часов: дни жима лёжа, приседа, жима стоя и становой, в каждом — второе упражнение. Первая неделя находит ваши максимумы."
+    grows:
+      en: "Each main lift runs on a training max. The third set is as many as you can: 2 to 5 reps adds 2.5 kg next week, 6 or more adds 5 (7.5 on the squat and deadlift), and 1 holds. The second lift follows the main lift's max."
+      es: "Cada ejercicio principal va con un máximo de entrenamiento. La tercera serie es al máximo de repeticiones: de 2 a 5 suma 2,5 kg la semana siguiente, 6 o más suma 5 (7,5 en sentadilla y peso muerto), y 1 lo mantiene. El segundo ejercicio sigue el máximo del principal."
+      fr: "Chaque mouvement principal suit un maximum d’entraînement. La troisième série se fait au maximum : 2 à 5 répétitions ajoutent 2,5 kg la semaine suivante, 6 ou plus ajoutent 5 (7,5 au squat et au soulevé de terre), et 1 maintient. Le second mouvement suit le max du principal."
+      ru: "Каждое основное упражнение идёт от тренировочного максимума. Третий подход — на максимум: 2–5 повторений дают +2,5 кг на следующей неделе, 6 и больше — +5 (+7,5 в приседе и становой), 1 — без изменений. Второе упражнение следует за максимумом основного."
+    misses:
+      en: "No rep on the top set two weeks in a row and that max drops a tenth."
+      es: "Sin ninguna repetición en la serie tope dos semanas seguidas, ese máximo baja una décima parte."
+      fr: "Aucune répétition sur la série de pointe deux semaines d’affilée et ce max baisse d’un dixième."
+      ru: "Ни одного повторения в пиковом подходе две недели подряд — этот максимум снижается на десятую часть."
+    why:
+      - sources: [currier_2023]
+        about: [program, week]
+        text:
+          en: "Heavy sets lead the research for strength. This plan does a lot of them, so it needs the time and sleep to recover."
+          es: "Las series pesadas encabezan la investigación sobre fuerza. Este plan hace muchas, así que necesita tiempo y sueño para recuperarse."
+          fr: "Les séries lourdes mènent la recherche sur la force. Ce plan en fait beaucoup : il demande du temps et du sommeil pour récupérer."
+          ru: "Тяжёлые подходы лидируют в исследованиях силы. В этом плане их много, поэтому на восстановление нужны время и сон."
+      - sources: [acsm_2026]
+        about: [grows]
+        text:
+          en: "Letting the top set pick the step moves you as fast as you recover. It's a way to pace, not a magic number."
+          es: "Dejar que la serie tope decida el paso te hace avanzar tan rápido como te recuperas. Es una forma de dosificar, no un número mágico."
+          fr: "Laisser la série de pointe fixer le palier vous fait avancer aussi vite que vous récupérez. C’est une façon de doser, pas un chiffre magique."
+          ru: "Когда шаг выбирает пиковый подход, вы растёте настолько быстро, насколько восстанавливаетесь. Это способ дозировать, а не волшебное число."
+    phases:
+      - name: {en: Find your maxes, es: Encuentra tus máximos, fr: Trouvez vos max, ru: Найдите максимумы}
+        sessions: [test_lower, test_upper]
+        cycles: 1
+      - name: {en: Weekly steps, es: Pasos semanales, fr: Paliers hebdomadaires, ru: Шаги по неделям}
+        sessions: [bench, squat, press, deadlift]
+    tests:
+      test_lower: {share: 0.9}
+      test_upper: {share: 0.9}
+    rules:
+      bench-press-barbell: &weekly_top_sets__upper_top
+        kind: shareOfMax
+        step: 2.5
+        miss: {when: amrap, after: 2, cut: 0.1}
+        amrap: [{reps: 0, step: 0}, {reps: 2, step: 2.5}, {reps: 6, step: 5}]
+        waves: &weekly_top_sets__top_wave
+          - [{share: 0.75, reps: 5}, {share: 0.85, reps: 3}, {share: 0.95, reps: 1, amrap: true},
+             {share: 0.90, reps: 3}, {share: 0.85, reps: 3}, {share: 0.80, reps: 3},
+             {share: 0.75, reps: 5}, {share: 0.70, reps: 5}, {share: 0.65, reps: 5}]
+      overhead-press-barbell: *weekly_top_sets__upper_top
+      squat-barbell: &weekly_top_sets__lower_top
+        kind: shareOfMax
+        step: 5
+        miss: {when: amrap, after: 2, cut: 0.1}
+        amrap: [{reps: 0, step: 0}, {reps: 2, step: 2.5}, {reps: 4, step: 5}, {reps: 6, step: 7.5}]
+        waves: *weekly_top_sets__top_wave
+      deadlift-barbell: *weekly_top_sets__lower_top
+    sessions:
+      - key: test_lower
+        name: {en: Test the squat and deadlift, es: Test de sentadilla y peso muerto, fr: Test du squat et du soulevé de terre, ru: Тест приседа и становой}
+        note:
+          en: "Work up to one heavy set of three to five reps, with a rep left in the tank."
+          es: "Sube hasta una serie pesada de tres a cinco repeticiones, dejando una en reserva."
+          fr: "Montez jusqu’à une série lourde de trois à cinq répétitions, en gardant une répétition en réserve."
+          ru: "Дойдите до одного тяжёлого подхода на три–пять повторений, оставив одно в запасе."
+        exercises:
+          - {exercise: squat-barbell, sets: 1, target: {reps: [3, 5], rir: 1}, rest: 240}
+          - {exercise: deadlift-barbell, sets: 1, target: {reps: [3, 5], rir: 1}, rest: 240}
+      - key: test_upper
+        name: {en: Test the bench and press, es: Test de press de banca y militar, fr: Test du développé couché et militaire, ru: Тест жима лёжа и стоя}
+        note:
+          en: "Work up to one heavy set of three to five reps, with a rep left in the tank."
+          es: "Sube hasta una serie pesada de tres a cinco repeticiones, dejando una en reserva."
+          fr: "Montez jusqu’à une série lourde de trois à cinq répétitions, en gardant une répétition en réserve."
+          ru: "Дойдите до одного тяжёлого подхода на три–пять повторений, оставив одно в запасе."
+        exercises:
+          - {exercise: bench-press-barbell, sets: 1, target: {reps: [3, 5], rir: 1}, rest: 240}
+          - {exercise: overhead-press-barbell, sets: 1, target: {reps: [3, 5], rir: 1}, rest: 240}
+      - key: bench
+        name: {en: Bench day, es: Día de press de banca, fr: Jour développé couché, ru: День жима лёжа}
+        exercises:
+          - exercise: bench-press-barbell
+            rest: 150
+            sets: &weekly_top_sets__top_sets [{share: 0.75, reps: 5}, {share: 0.85, reps: 3}, {share: 0.95, reps: 1+},
+                   {share: 0.90, reps: 3}, {share: 0.85, reps: 3}, {share: 0.80, reps: 3},
+                   {share: 0.75, reps: 5}, {share: 0.70, reps: 5}, {share: 0.65, reps: 5}]
+          - exercise: incline-bench-press-barbell
+            rest: 90
+            sets: &weekly_top_sets__upper_second [{share: 0.40, of: bench-press-barbell, reps: 6}, {share: 0.50, of: bench-press-barbell, reps: 5},
+                   {share: 0.60, of: bench-press-barbell, reps: 3}, {share: 0.60, of: bench-press-barbell, reps: 5},
+                   {share: 0.60, of: bench-press-barbell, reps: 7}, {share: 0.60, of: bench-press-barbell, reps: 4},
+                   {share: 0.60, of: bench-press-barbell, reps: 6}, {share: 0.60, of: bench-press-barbell, reps: 8}]
+          - {exercise: lat-pulldown-cable, pattern: vertical_pull, total_reps: [50, 100], sets: 5, target: {reps: [10, 20]}, rest: 60}
+      - key: squat
+        name: {en: Squat day, es: Día de sentadilla, fr: Jour squat, ru: День приседа}
+        exercises:
+          - {exercise: squat-barbell, rest: 180, sets: *weekly_top_sets__top_sets}
+          - exercise: sumo-deadlift-barbell
+            rest: 120
+            sets: [{share: 0.50, of: deadlift-barbell, reps: 5}, {share: 0.60, of: deadlift-barbell, reps: 5},
+                   {share: 0.70, of: deadlift-barbell, reps: 3}, {share: 0.70, of: deadlift-barbell, reps: 5},
+                   {share: 0.70, of: deadlift-barbell, reps: 7}, {share: 0.70, of: deadlift-barbell, reps: 4},
+                   {share: 0.70, of: deadlift-barbell, reps: 6}, {share: 0.70, of: deadlift-barbell, reps: 8}]
+          - {exercise: lying-leg-curl-machine, sets: 3, target: {reps: [10, 15], rir: 2}, rest: 60}
+      - key: press
+        name: {en: Press day, es: Día de press militar, fr: Jour développé militaire, ru: День жима стоя}
+        exercises:
+          - {exercise: overhead-press-barbell, rest: 150, sets: *weekly_top_sets__top_sets}
+          - exercise: bench-press-close-grip-barbell
+            rest: 90
+            sets: [{share: 0.40, of: bench-press-barbell, reps: 6}, {share: 0.50, of: bench-press-barbell, reps: 5},
+                   {share: 0.60, of: bench-press-barbell, reps: 3}, {share: 0.60, of: bench-press-barbell, reps: 5},
+                   {share: 0.60, of: bench-press-barbell, reps: 7}, {share: 0.60, of: bench-press-barbell, reps: 4},
+                   {share: 0.60, of: bench-press-barbell, reps: 6}, {share: 0.60, of: bench-press-barbell, reps: 8}]
+          - {exercise: seated-row-cable, pattern: horizontal_row, total_reps: [50, 100], sets: 5, target: {reps: [10, 20]}, rest: 60}
+      - key: deadlift
+        name: {en: Deadlift day, es: Día de peso muerto, fr: Jour soulevé de terre, ru: День становой тяги}
+        exercises:
+          - {exercise: deadlift-barbell, rest: 180, sets: *weekly_top_sets__top_sets}
+          - exercise: front-squat-barbell
+            rest: 120
+            sets: [{share: 0.35, of: squat-barbell, reps: 5}, {share: 0.45, of: squat-barbell, reps: 5},
+                   {share: 0.55, of: squat-barbell, reps: 3}, {share: 0.55, of: squat-barbell, reps: 5},
+                   {share: 0.55, of: squat-barbell, reps: 7}, {share: 0.55, of: squat-barbell, reps: 4},
+                   {share: 0.55, of: squat-barbell, reps: 6}, {share: 0.55, of: squat-barbell, reps: 8}]
+          - {exercise: hanging-leg-raise, sets: 3, target: {reps: [10, 15], rir: 2}, rest: 60}
+
+  - key: one_muscle_a_day
+    audience: getting_stronger
+    equipment: gym
+    per_week: 5
+    weeks: 12
+    minutes: 60
+    next: [push_pull_legs, power_and_size, upper_lower]
+    safety: [start, stop_if, discomfort]
+    name: {en: One muscle group a day, es: Un grupo muscular al día, fr: Un groupe musculaire par jour, ru: Одна группа мышц в день}
+    note:
+      en: "Five days, one area each: chest, back, shoulders, legs, arms. Plenty of sets for one part at a time."
+      es: "Cinco días, una zona cada uno: pecho, espalda, hombros, piernas, brazos. Muchas series para una parte cada vez."
+      fr: "Cinq jours, une zone chacun : pectoraux, dos, épaules, jambes, bras. Beaucoup de séries pour une partie à la fois."
+      ru: "Пять дней, по одной зоне: грудь, спина, плечи, ноги, руки. Много подходов на одну часть за раз."
+    who:
+      en: "For lifters who enjoy a bodybuilding-style week and have five days. If you often skip days, a plan that works each muscle twice is more forgiving."
+      es: "Para quien disfruta de una semana al estilo culturismo y tiene cinco días. Si sueles saltarte días, un plan que trabaja cada músculo dos veces perdona más."
+      fr: "Pour ceux qui aiment une semaine façon bodybuilding et ont cinq jours. Si vous sautez souvent des séances, un plan qui travaille chaque muscle deux fois pardonne davantage."
+      ru: "Для тех, кому нравится неделя в стиле бодибилдинга и есть пять дней. Если вы часто пропускаете, план, где каждая мышца работает дважды, прощает больше."
+    week:
+      en: "Five sessions of about an hour, one area each, on any five days."
+      es: "Cinco sesiones de una hora, una zona cada una, en cualquiera cinco días."
+      fr: "Cinq séances d’environ une heure, une zone chacune, sur n’importe quels cinq jours."
+      ru: "Пять тренировок примерно по часу, по одной зоне, в любые пять дней."
+    grows:
+      en: "Every set aims for its range, a rep or two short of failing. When all of them reach the top, the weight goes up."
+      es: "Cada serie busca su rango, a una o dos repeticiones del fallo. Cuando todas llegan al tope, el peso sube."
+      fr: "Chaque série vise sa fourchette, une ou deux répétitions avant l’échec. Quand toutes atteignent le haut, la charge augmente."
+      ru: "Каждый подход — в своём диапазоне, за одно-два повторения до отказа. Когда все дошли до верха, вес растёт."
+    misses:
+      en: "Three sessions in a row below the range take that lift down a tenth."
+      es: "Tres sesiones seguidas por debajo del rango bajan ese ejercicio una décima parte."
+      fr: "Trois séances d’affilée sous la fourchette font baisser ce mouvement d’un dixième."
+      ru: "Три тренировки подряд ниже диапазона снижают вес в этом упражнении на десятую часть."
+    why:
+      - sources: [schoenfeld_2019]
+        about: [program, week]
+        text:
+          en: "With the same number of sets, once a week per muscle builds about as much as more often. So this works, if it's the week you enjoy."
+          es: "Con el mismo número de series, una vez por semana por músculo construye más o menos lo mismo que más a menudo. Así que funciona, si es la semana que disfrutas."
+          fr: "À nombre de séries égal, une fois par semaine par muscle construit à peu près autant que plus souvent. Donc ça marche, si c’est la semaine qui vous plaît."
+          ru: "При одинаковом числе подходов раз в неделю на мышцу даёт примерно столько же, сколько чаще. Так что это работает — если такая неделя вам нравится."
+      - sources: [schoenfeld_2016]
+        about: [who, next]
+        text:
+          en: "Working each muscle twice a week did a little more in other research, and it forgives a missed day better."
+          es: "Trabajar cada músculo dos veces por semana rindió algo más en otra investigación, y perdona mejor un día perdido."
+          fr: "Travailler chaque muscle deux fois par semaine a donné un peu plus dans d’autres études, et pardonne mieux une séance manquée."
+          ru: "Две тренировки каждой мышцы в неделю в других исследованиях дали немного больше и легче переносят пропуск."
+    rules:
+      bench-press-barbell: &one_muscle_a_day__barbell {kind: rangeThenWeight, step: 2.5}
+      pec-deck-machine: *one_muscle_a_day__barbell
+      bent-over-row-barbell: *one_muscle_a_day__barbell
+      lat-pulldown-cable: *one_muscle_a_day__barbell
+      seated-row-cable: *one_muscle_a_day__barbell
+      pull-up: *one_muscle_a_day__barbell
+      overhead-press-barbell: *one_muscle_a_day__barbell
+      face-pull-cable: *one_muscle_a_day__barbell
+      squat-barbell: *one_muscle_a_day__barbell
+      romanian-deadlift-barbell: *one_muscle_a_day__barbell
+      leg-extension-machine: *one_muscle_a_day__barbell
+      lying-leg-curl-machine: *one_muscle_a_day__barbell
+      bicep-curl-barbell: *one_muscle_a_day__barbell
+      skullcrusher-barbell: *one_muscle_a_day__barbell
+      triceps-pushdown-cable-straight-bar: *one_muscle_a_day__barbell
+      leg-press: &one_muscle_a_day__heavy {kind: rangeThenWeight, step: 5}
+      standing-calf-raise-machine: *one_muscle_a_day__heavy
+      incline-bench-press-dumbbell: &one_muscle_a_day__dumbbell {kind: rangeThenWeight, step: 2}
+      chest-fly-dumbbell: *one_muscle_a_day__dumbbell
+      shrug-dumbbell: *one_muscle_a_day__dumbbell
+      lateral-raise-dumbbell: *one_muscle_a_day__dumbbell
+      reverse-fly-dumbbell: *one_muscle_a_day__dumbbell
+      hammer-curl-dumbbell: *one_muscle_a_day__dumbbell
+      preacher-curl-dumbbell: *one_muscle_a_day__dumbbell
+    sessions:
+      - key: chest
+        name: {en: Chest, es: Pecho, fr: Pectoraux, ru: Грудь}
+        exercises:
+          - {exercise: bench-press-barbell, sets: 4, target: {reps: [6, 10], rir: 2}, rest: 150}
+          - {exercise: incline-bench-press-dumbbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 120}
+          - {exercise: chest-fly-dumbbell, sets: 3, target: {reps: [10, 15], rir: 2}, rest: 90}
+          - {exercise: pec-deck-machine, sets: 3, target: {reps: [12, 15], rir: 1}, rest: 60}
+      - key: back
+        name: {en: Back, es: Espalda, fr: Dos, ru: Спина}
+        exercises:
+          - {exercise: bent-over-row-barbell, sets: 4, target: {reps: [6, 10], rir: 2}, rest: 150}
+          - {exercise: pull-up, sets: 3, target: {reps: [6, 10], rir: 2}, rest: 120}
+          - {exercise: lat-pulldown-cable, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: seated-row-cable, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 90}
+          - {exercise: shrug-dumbbell, sets: 3, target: {reps: [10, 15], rir: 2}, rest: 60}
+      - key: shoulders
+        name: {en: Shoulders, es: Hombros, fr: Épaules, ru: Плечи}
+        exercises:
+          - {exercise: overhead-press-barbell, sets: 4, target: {reps: [6, 10], rir: 2}, rest: 150}
+          - {exercise: lateral-raise-dumbbell, sets: 4, target: {reps: [12, 15], rir: 1}, rest: 60}
+          - {exercise: reverse-fly-dumbbell, sets: 3, target: {reps: [12, 15], rir: 1}, rest: 60}
+          - {exercise: face-pull-cable, sets: 3, target: {reps: [15, 20], rir: 2}, rest: 60}
+      - key: legs
+        name: {en: Legs, es: Piernas, fr: Jambes, ru: Ноги}
+        exercises:
+          - {exercise: squat-barbell, sets: 4, target: {reps: [6, 10], rir: 2}, rest: 180}
+          - {exercise: romanian-deadlift-barbell, sets: 3, target: {reps: [8, 12], rir: 2}, rest: 120}
+          - {exercise: leg-press, sets: 3, target: {reps: [10, 15], rir: 2}, rest: 90}
+          - {exercise: leg-extension-machine, sets: 3, target: {reps: [12, 15], rir: 1}, rest: 60}
+          - {exercise: lying-leg-curl-machine, sets: 3, target: {reps: [10, 15], rir: 1}, rest: 60}
+          - {exercise: standing-calf-raise-machine, sets: 4, target: {reps: [10, 15], rir: 1}, rest: 60}
+      - key: arms
+        name: {en: Arms, es: Brazos, fr: Bras, ru: Руки}
+        exercises:
+          - {exercise: bicep-curl-barbell, superset: 1, sets: 4, target: {reps: [8, 12], rir: 2}, rest: 60}
+          - {exercise: skullcrusher-barbell, superset: 1, sets: 4, target: {reps: [8, 12], rir: 2}, rest: 60}
+          - {exercise: hammer-curl-dumbbell, superset: 2, sets: 3, target: {reps: [10, 12], rir: 1}, rest: 60}
+          - {exercise: triceps-pushdown-cable-straight-bar, superset: 2, sets: 3, target: {reps: [10, 15], rir: 1}, rest: 60}
+          - {exercise: preacher-curl-dumbbell, sets: 3, target: {reps: [10, 15], rir: 1}, rest: 60}

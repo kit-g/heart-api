@@ -184,6 +184,16 @@ sources:
       es: Entrenar cada músculo dos veces por semana construyó más que una; si eso son tres días de cuerpo completo o cuatro divididos, lo decides tú.
       fr: Travailler chaque muscle deux fois par semaine a construit plus qu’une fois ; trois jours corps entier ou quatre jours divisés, c’est à vous de voir.
       ru: Две тренировки каждой мышцы в неделю дали больше, чем одна; три дня на всё тело или четыре раздельных — решать вам.
+  schoenfeld_2019:
+    title: How many times per week should a muscle be trained to maximize muscle hypertrophy?
+    who: Schoenfeld, Grgic & Krieger, Journal of Sports Sciences
+    year: 2019
+    url: https://pubmed.ncbi.nlm.nih.gov/30558493/
+    finding:
+      en: With the same number of sets, training a muscle once a week built about as much as more often. More days help mostly by fitting in more sets.
+      es: Con el mismo número de series, entrenar un músculo una vez por semana construyó más o menos lo mismo que hacerlo más a menudo. Más días ayudan sobre todo porque caben más series.
+      fr: À nombre de séries égal, travailler un muscle une fois par semaine a construit à peu près autant que plus souvent. Plus de jours aident surtout à caser plus de séries.
+      ru: При одинаковом числе подходов тренировка мышцы раз в неделю дала примерно столько же, сколько и более частые. Больше дней помогают в основном тем, что в них помещается больше подходов.
   lee_mcgill_2015:
     title: Effect of long-term isometric training on core/torso stiffness
     who: Lee & McGill, Journal of Strength and Conditioning Research
