@@ -284,7 +284,7 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       }
     }
 
-    return Workout.fromExercises(exercises, name: name);
+    return Workout.fromExercises(exercises, name: name, templateId: id, programId: programId);
   }
 
   @override

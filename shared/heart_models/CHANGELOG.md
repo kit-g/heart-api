@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.20.0
+
+Workouts name the template and the program they were started from
+(heart-api#215, part of heart-api#86).
+
+- New: `Workout.templateId` and `Workout.programId`, on the wire as
+  `templateId` / `programId` and on the row as `template_id` / `program_id`;
+  left out of `toMap` when null, so a save never detaches a workout.
+- New: optional `templateId` and `programId` on `Workout.fromExercises`.
+- `Template.toWorkout` now sets both from the template. `Workout.copy` keeps
+  them for the same session and drops them for a repeat.
+
 ## 2.19.0
 
 Programs: the entity and its sessions (heart-api#214, part of heart-api#86).
