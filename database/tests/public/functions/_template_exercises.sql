@@ -70,6 +70,10 @@ BEGIN
     RETURN NEXT is(_result -> 0 -> 'exercise' ->> 'category', 'Barbell', 'exercise.category preserved');
     RETURN NEXT is(_result -> 0 -> 'exercise' ->> 'target', 'Legs', 'exercise.target preserved');
     RETURN NEXT is(jsonb_array_length(_result -> 0 -> 'sets'), 1, 'sets array populated');
+    RETURN NEXT is(_result -> 0 -> 'rest', 'null'::jsonb, 'rest is null until a template plans it');
+
+    UPDATE template_exercises SET rest = 150 WHERE id = _te_id;
+    RETURN NEXT is((_template_exercises(_t_id) -> 0 ->> 'rest')::int, 150, 'rest carried');
 END
 $$ LANGUAGE plpgsql;
 
