@@ -22,6 +22,7 @@ export 'src/models/records.dart';
 export 'src/models/search.dart' hide searchNormalized, withinOneEdit;
 export 'src/models/set_target.dart';
 export 'src/models/settings.dart';
+export 'src/models/skip.dart';
 export 'src/models/shares.dart';
 export 'src/models/stats.dart';
 export 'src/models/template.dart';

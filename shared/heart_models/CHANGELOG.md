@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.22.0
+
+Skips, and programs in the account summary (heart-api#202).
+
+- New: `TrainingSkip` ("Not today"): `id`, `at`, `reason` (a snake_case tag),
+  `weather`, `templateId`, `programId`. Named so it doesn't collide with
+  `package:test`'s `Skip`.
+- New: `Weather` (`temperature` °C, `humidity` %, `pressure` hPa,
+  `pressureTrend` hPa over 24 h), read tolerantly: an unknown field is kept
+  and written back.
+- New: `ExportableCollection.programs`, `programActions`, `programBases` and
+  `skips`, in upsync replay order. Exhaustive switches over the enum gain
+  these four cases; `tryParse` and the summary's reader were already tolerant.
+
 ## 2.21.0
 
 Program actions and bases (heart-api#216, part of heart-api#86).
