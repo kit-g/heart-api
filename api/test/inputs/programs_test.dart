@@ -273,6 +273,60 @@ void main() {
       }
     });
 
+    test('an advance names its exercises; nothing else does (heart-api#231)', () async {
+      const workout = '0198c1a2-b3c4-7d5e-8f60-718293a4b520';
+      final input = await ProgramActionIn.fromRequest(
+        req(
+          body: {'kind': 'advance', 'from': _bench, 'to': _squat, 'workoutId': workout, 'at': '2026-10-15T08:00:00Z'},
+        ),
+      );
+      expect((input.action.from, input.action.to, input.action.workoutId), (_bench, _squat, workout));
+      for (final body in [
+        {'kind': 'advance', 'from': _bench, 'at': '2026-10-15T08:00:00Z'},
+        {'kind': 'pause', 'from': _bench, 'to': _squat, 'at': '2026-10-15T08:00:00Z'},
+        {'kind': 'pause', 'workoutId': workout, 'at': '2026-10-15T08:00:00Z'},
+      ]) {
+        await expectLater(ProgramActionIn.fromRequest(req(body: body)), badRequest(), reason: '$body');
+      }
+    });
+
+    test('a ladder rule climbs exercise ids', () async {
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'rules': {
+              _bench: {
+                'kind': 'ladder',
+                'rungs': [_bench, _squat],
+                'top': 12,
+                'bottom': 8,
+              },
+            },
+          },
+        ),
+      );
+      expect(input.program.rules[_bench], isA<Ladder>());
+      await expectLater(
+        ProgramCreateIn.fromRequest(
+          req(
+            body: {
+              'name': 'p',
+              'rules': {
+                _bench: {
+                  'kind': 'ladder',
+                  'rungs': ['push-up', 'decline-push-up'],
+                  'top': 12,
+                  'bottom': 8,
+                },
+              },
+            },
+          ),
+        ),
+        badRequest('invalid_rule'),
+      );
+    });
+
     test('a lighter week is an action', () async {
       final input = await ProgramActionIn.fromRequest(req(body: {'kind': 'lighter', 'at': '2026-10-15T08:00:00Z'}));
       expect(input.action.kind, ProgramActionKind.lighter);

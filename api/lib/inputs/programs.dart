@@ -196,14 +196,18 @@ GrowthRule _rule(String exerciseId, Map json) {
   if (unknown.isNotEmpty) {
     throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: unknown ${unknown.join(', ')}');
   }
+  if (rule case Ladder(:final rungs) when !rungs.every(isUuidV7)) {
+    throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: a ladder\'s rungs are exercise ids');
+  }
   return rule;
 }
 
 const _missKeys = {'when', 'floor', 'after', 'cut'};
 const _amrapKeys = {'reps', 'step'};
 
-/// `POST /programs/:programId/actions` — `{id?, kind, week?, at}`. Only a
-/// replay names a week.
+/// `POST /programs/:programId/actions` — `{id?, kind, week?, from?, to?, workoutId?, at}`.
+/// Only a replay names a week; only an advance names the exercises it moved
+/// from and to, and the workout that caused it.
 class ProgramActionIn {
   final ProgramAction action;
 
@@ -218,8 +222,28 @@ class ProgramActionIn {
       (_, null) => null,
       (_, _) => throw BadRequest(reason: 'only a replay names a week, not a ${kind.value}'),
     };
+    final (from, to, workoutId) = (
+      json.uuidV7OrNull('from'),
+      json.uuidV7OrNull('to'),
+      json.uuidV7OrNull('workoutId'),
+    );
+    final advance = kind == .advance;
+    if (advance && (from == null || to == null)) {
+      throw const BadRequest(reason: 'an advance names the exercise it moved from and to');
+    }
+    if (!advance && (from != null || to != null || workoutId != null)) {
+      throw BadRequest(reason: 'only an advance names exercises or a workout, not a ${kind.value}');
+    }
     return ProgramActionIn._(
-      ProgramAction(id: json.uuidV7OrNull(), kind: kind, week: week, at: json.timestamp('at')),
+      ProgramAction(
+        id: json.uuidV7OrNull(),
+        kind: kind,
+        week: week,
+        from: from,
+        to: to,
+        workoutId: workoutId,
+        at: json.timestamp('at'),
+      ),
     );
   }
 }
