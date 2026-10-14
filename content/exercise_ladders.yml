@@ -1,0 +1,40 @@
+# Variation ladders (heart-api#231): exercises of one movement, easiest first.
+# A program's ladder rule climbs one when every working set reaches the top of
+# its range, and restarts the range at the bottom. Programs name a ladder by
+# its key; the CDN render resolves it to rungs, and the app to exercise ids
+# when it copies a program. Every rung is a library key that logs reps with
+# the body as the load (reps only, weighted or assisted body weight), so a
+# ladder never climbs into a barbell.
+#
+# The rungs the research asks for that the library lacks yet (a wall push-up,
+# a sit-to-stand from a chair, balance holds) join the library with the
+# program library's second draft (heart-api#235).
+
+version: 1
+
+ladders:
+  push:
+    - incline-push-up
+    - push-up-knees
+    - push-up
+    - decline-push-up
+  squat:
+    - squat-bodyweight
+    - jump-squat
+    - pistol-squat
+  single_leg:
+    - step-up-bodyweight
+    - lunge-bodyweight
+    - lateral-lunge
+  bridge:
+    - glute-bridge
+    - hip-thrust-bodyweight
+    - single-leg-bridge
+  pull:
+    - inverted-row-bodyweight
+    - chin-up-assisted
+    - chin-up
+    - pull-up
+  dip:
+    - bench-dip
+    - triceps-dip
