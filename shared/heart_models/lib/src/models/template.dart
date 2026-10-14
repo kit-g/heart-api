@@ -47,6 +47,14 @@ abstract interface class Template
   /// True when this template came from a coach rather than being written here.
   bool get isAssigned;
 
+  /// The program this template is a session of, or null for a plain template.
+  /// A session joins or leaves its program through this id.
+  String? get programId;
+
+  /// A line about the template: what a session is for, in the user's words or
+  /// the library's ("big lifts for the quads, chest and lats").
+  String? get note;
+
   /// When this template came to exist — recovered from the id, not stored.
   /// Server ids are v7 uuids minted by the same INSERT that stamps the row's
   /// `created_at`, so the embedded instant agrees with it to the millisecond;
@@ -100,6 +108,8 @@ abstract interface class Template
         _ => null,
       },
       syncEnabled: json['syncEnabled'] as bool?,
+      programId: json['programId']?.toString(),
+      note: json['note'] as String?,
       local: false,
     );
   }
@@ -145,6 +155,8 @@ abstract interface class Template
         _ => null,
       },
       syncEnabled: row['sync_enabled'] as bool?,
+      programId: row['program_id']?.toString(),
+      note: row['note'] as String?,
     );
   }
 }
@@ -170,6 +182,10 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
   final Profile? assignedBy;
   @override
   final bool? syncEnabled;
+  @override
+  final String? programId;
+  @override
+  final String? note;
 
   final List<WorkoutExercise> _exercises;
   final List<(int, Map)> _unread;
@@ -185,6 +201,8 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
     this.sourceTemplateId,
     this.assignedBy,
     this.syncEnabled,
+    this.programId,
+    this.note,
   }) : _unread = unread ?? [];
 
   @override
@@ -244,6 +262,8 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       sourceTemplateId: sourceTemplateId,
       assignedBy: assignedBy,
       syncEnabled: syncEnabled,
+      programId: programId,
+      note: note,
     );
   }
 
@@ -277,6 +297,8 @@ class _Template with Iterable<WorkoutExercise>, HasUuid implements Template {
       'sourceTemplateId': ?sourceTemplateId,
       'assignedBy': ?assignedBy?.toMap(),
       'syncEnabled': ?syncEnabled,
+      'programId': ?programId,
+      'note': ?note,
       'exercises': splice([for (final exercise in this) exercise.toMap()], _unread),
     };
   }

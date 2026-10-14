@@ -497,6 +497,43 @@ void main() {
     });
   });
 
+  group('TemplateUpdateIn — a program and a note, three-valued like filing', () {
+    const program = '0198c1a2-b3c4-7d5e-8f60-718293a4b510';
+
+    test('absent keys leave them as stored, which is what 1.13 sends', () async {
+      final input = await TemplateUpdateIn.fromRequest(req(body: {'name': 'A'}));
+      expect(input.request.movesProgram, isFalse);
+      expect(input.request.changesNote, isFalse);
+    });
+
+    test('null detaches and clears', () async {
+      final input = await TemplateUpdateIn.fromRequest(req(body: {'name': 'A', 'programId': null, 'note': null}));
+      expect(input.request.movesProgram, isTrue);
+      expect(input.request.programId, isNull);
+      expect(input.request.changesNote, isTrue);
+      expect(input.request.note, isNull);
+    });
+
+    test('a value attaches and sets', () async {
+      final input = await TemplateUpdateIn.fromRequest(
+        req(body: {'name': 'A', 'programId': program, 'note': ' heavy day '}),
+      );
+      expect(input.request.programId, program);
+      expect(input.request.note, 'heavy day');
+    });
+
+    test('rejects a program id that is not a uuid, and an overlong note', () async {
+      await expectLater(
+        TemplateCreateIn.fromRequest(req(body: {'programId': 'p1'})),
+        throwsA(isA<BadRequest>()),
+      );
+      await expectLater(
+        TemplateCreateIn.fromRequest(req(body: {'note': 'x' * 1001})),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+  });
+
   group('TemplateListQuery', () {
     test('defaults to no filter and no cursor', () {
       final query = TemplateListQuery.fromRequest(req());

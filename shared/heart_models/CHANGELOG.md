@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.19.0
+
+Programs: the entity and its sessions (heart-api#214, part of heart-api#86).
+
+- New: `Program`, a plan of the user's templates: `name`, `note`, `source`
+  (the library program it was copied from), `perWeek`, `days`, `weeks`,
+  `rules`, `constraint`, `archived`, `sessions` (its template ids, in order)
+  and `createdAt`. `fromJson`, `fromRow`, `toMap`, `copyWith`.
+- New: `GrowthRule`, sealed: `NoGrowth`, `AddWeight`, `RangeThenWeight`,
+  `Longer` and `ShareOfMax` (with `WaveSet`). `fromJson` is strict;
+  `Program` reads a rule it doesn't know into `unreadRules` and writes it back.
+- New: `Template.programId` and `Template.note`, on the wire as `programId` /
+  `note` and on the row as `program_id` / `note`; left out when null.
+- New: `TemplateRequest.programId` / `movesProgram` and `note` /
+  `changesNote`, three-valued like `folderId`.
+
 ## 2.18.0
 
 Goals about a movement pattern or a muscle (heart-api#196).

@@ -13,6 +13,7 @@ import 'package:heart/models/images.dart';
 import 'package:heart/models/imports.dart';
 import 'package:heart/models/oauth.dart';
 import 'package:heart/models/profile.dart';
+import 'package:heart/models/programs.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart' hide WorkoutService, TemplateService, ExerciseService;
@@ -28,6 +29,7 @@ part 'goals.dart';
 part 'images.dart';
 part 'oauth.dart';
 part 'profiles.dart';
+part 'programs.dart';
 part 'queries.dart';
 part 'template_folders.dart';
 part 'templates.dart';
@@ -81,6 +83,7 @@ abstract class _DatabaseBase {
     'templates_pkey',
     'template_folders_pkey',
     'goals_pkey',
+    'programs_pkey',
   };
 
   Forbidden get _idTaken => const Forbidden(code: 'id_taken', reason: 'this id belongs to another account');
@@ -134,6 +137,7 @@ const _missingReferenceCodes = <String, String>{
   'workout_exercises_exercise_id_fkey': 'unknown_exercise',
   'template_exercises_exercise_id_fkey': 'unknown_exercise',
   'templates_folder_fk': 'unknown_folder',
+  'templates_program_fk': 'unknown_program',
   'comments_workout_id_fkey': 'unknown_comment_target',
   'comments_workout_exercise_id_fkey': 'unknown_comment_target',
   'comments_exercise_set_id_fkey': 'unknown_comment_target',
@@ -191,6 +195,7 @@ class Database extends _DatabaseBase
         _Goals,
         _Images,
         _Profiles,
+        _Programs,
         _Workouts,
         _Templates,
         _TemplateFolders,
@@ -206,6 +211,7 @@ class Database extends _DatabaseBase
         IdempotentGoalService,
         ApiImageDbService,
         ApiProfileService,
+        ProgramService,
         ApiWorkoutService,
         IdempotentTemplateService,
         IdempotentTemplateFolderService,

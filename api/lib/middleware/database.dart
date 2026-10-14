@@ -3,6 +3,7 @@ import 'package:heart/models/exercise_preferences.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/oauth.dart';
 import 'package:heart/models/profile.dart';
+import 'package:heart/models/programs.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart';
@@ -13,6 +14,7 @@ final _imageDbProperty = ContextProperty<ApiImageDbService>('ApiImageDbService')
 final _chatsProperty = ContextProperty<ChartPreferenceService>('ChartPreferenceService');
 final _exercisePrefsProperty = ContextProperty<ApiExercisePreferenceService>('ApiExercisePreferenceService');
 final _goalsProperty = ContextProperty<IdempotentGoalService>('IdempotentGoalService');
+final _programsProperty = ContextProperty<ProgramService>('ProgramService');
 final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
 final _devicesProperty = ContextProperty<DeviceService>('DeviceService');
@@ -103,6 +105,15 @@ Middleware commentsDb({required CommentService db}) {
   };
 }
 
+Middleware programsDb({required ProgramService db}) {
+  return (Handler next) {
+    return (request) {
+      _programsProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
 Middleware templatesDb({required IdempotentTemplateService db}) {
   return (Handler next) {
     return (request) {
@@ -155,6 +166,10 @@ extension DatabaseContext on Request {
   IdempotentGoalService get goalService => _goalsProperty.get(this);
 
   set goalService(IdempotentGoalService v) => _goalsProperty[this] = v;
+
+  ProgramService get programService => _programsProperty.get(this);
+
+  set programService(ProgramService v) => _programsProperty[this] = v;
 
   ConnectionsService get connectionsService => _connectionsProperty.get(this);
 

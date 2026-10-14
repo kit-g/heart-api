@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(28);
+SELECT plan(32);
 
 SELECT has_table('public'::name, 'templates'::name);
 
@@ -16,7 +16,9 @@ SELECT columns_are(
                    'assigned_by',
                    'sync_enabled',
                    'created_at',
-                   'folder_id'
+                   'folder_id',
+                   'program_id',
+                   'note'
                    ]
        );
 
@@ -29,6 +31,8 @@ SELECT col_type_is('public'::name, 'templates'::name, 'assigned_by'::name, 'text
 SELECT col_type_is('public'::name, 'templates'::name, 'sync_enabled'::name, 'boolean'::name);
 SELECT col_type_is('public'::name, 'templates'::name, 'created_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'templates'::name, 'folder_id'::name, 'uuid'::name);
+SELECT col_type_is('public'::name, 'templates'::name, 'program_id'::name, 'uuid'::name);
+SELECT col_type_is('public'::name, 'templates'::name, 'note'::name, 'text'::name);
 
 SELECT has_pk('public'::name, 'templates'::name, 'templates has a primary key');
 SELECT col_is_pk('public'::name, 'templates'::name, 'id'::name, 'id is the primary key');
@@ -51,7 +55,14 @@ SELECT fk_ok(
                'public', 'template_folders', ARRAY ['id', 'user_id']
        );
 
+-- composite so a template can only be a session of a program owned by the same user
+SELECT fk_ok(
+               'public', 'templates', ARRAY ['program_id', 'user_id'],
+               'public', 'programs', ARRAY ['id', 'user_id']
+       );
+
 SELECT has_index('public'::name, 'templates'::name, 'templates_folder_id_idx'::name);
+SELECT has_index('public'::name, 'templates'::name, 'templates_program_id_idx'::name);
 -- keyset support for _listTemplates: ORDER BY (order_index, id) scoped to one owner
 SELECT has_index('public'::name, 'templates'::name, 'templates_user_order_idx'::name);
 SELECT has_index('public'::name, 'templates'::name, 'templates_source_template_id_idx'::name);
