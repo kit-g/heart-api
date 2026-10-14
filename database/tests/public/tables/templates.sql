@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(32);
+SELECT plan(33);
 
 SELECT has_table('public'::name, 'templates'::name);
 
@@ -18,7 +18,8 @@ SELECT columns_are(
                    'created_at',
                    'folder_id',
                    'program_id',
-                   'note'
+                   'note',
+                   'joined_program_at'
                    ]
        );
 
@@ -33,6 +34,7 @@ SELECT col_type_is('public'::name, 'templates'::name, 'created_at'::name, 'times
 SELECT col_type_is('public'::name, 'templates'::name, 'folder_id'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'templates'::name, 'program_id'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'templates'::name, 'note'::name, 'text'::name);
+SELECT col_type_is('public'::name, 'templates'::name, 'joined_program_at'::name, 'timestamp with time zone'::name);
 
 SELECT has_pk('public'::name, 'templates'::name, 'templates has a primary key');
 SELECT col_is_pk('public'::name, 'templates'::name, 'id'::name, 'id is the primary key');
