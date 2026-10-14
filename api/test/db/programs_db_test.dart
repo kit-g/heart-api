@@ -356,6 +356,37 @@ FROM generate_series(1, 100) n
       expect(await h.db.getProgramActions(userId: userId, programId: programId), hasLength(1));
     });
 
+    test('an advance names its exercises and the workout, and goes with the workout (heart-api#231)', () async {
+      final userId = await h.seedProfile();
+      final stranger = await h.seedProfile();
+      final (stored, _) = await h.db.createProgramOrExisting(userId: userId, program: program(), sessions: const []);
+      final workoutId = await h.seedWorkout(userId: userId);
+      final next = await h.seedGlobalExercise();
+      ProgramAction advance(String workout) => ProgramAction(
+        kind: .advance,
+        from: exerciseId,
+        to: next,
+        workoutId: workout,
+        at: DateTime.utc(2026, 10, 15),
+      );
+
+      final (made, _) = await h.db.createProgramAction(
+        userId: userId,
+        programId: stored.id!,
+        action: advance(workoutId),
+      );
+      expect((made.from, made.to, made.workoutId), (exerciseId, next, workoutId));
+
+      final theirs = await h.seedWorkout(userId: stranger);
+      expect(
+        () => h.db.createProgramAction(userId: userId, programId: stored.id!, action: advance(theirs)),
+        throwsA(isA<NotFound>().having((e) => e.code, 'code', 'unknown_workout')),
+      );
+
+      await h.exec('DELETE FROM workouts WHERE id = @id::uuid', {'id': workoutId});
+      expect(await h.db.getProgramActions(userId: userId, programId: stored.id!), isEmpty);
+    });
+
     test("someone else's program is unknown_program, and its actions are invisible", () async {
       final owner = await h.seedProfile();
       final stranger = await h.seedProfile();

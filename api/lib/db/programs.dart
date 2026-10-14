@@ -108,11 +108,18 @@ mixin _Programs on _DatabaseBase implements ProgramService {
             'programId': programId,
             'kind': action.kind.value,
             'week': action.week,
+            'from': action.from,
+            'to': action.to,
+            'workoutId': action.workoutId,
             'at': action.at.toUtc(),
           },
         ),
       );
       if (rows.isEmpty) {
+        final workoutId = action.workoutId;
+        if (workoutId != null && !await _owns(userId, workoutId)) {
+          throw NotFound(type: 'Workout', id: workoutId, code: 'unknown_workout');
+        }
         throw const BadRequest(
           code: 'program_history_limit',
           reason: 'a program keeps at most $_maxProgramActions actions',
@@ -213,6 +220,11 @@ mixin _Programs on _DatabaseBase implements ProgramService {
         isWorkout: map['is_workout'] as bool,
       );
     });
+  }
+
+  Future<bool> _owns(String userId, String workoutId) async {
+    final rows = await _pool.execute(_ownsWorkout.toSql(), parameters: {'userId': userId, 'workoutId': workoutId});
+    return rows.isNotEmpty;
   }
 
   Future<Program> _readProgram(Session session, {required String userId, required String programId}) async {
