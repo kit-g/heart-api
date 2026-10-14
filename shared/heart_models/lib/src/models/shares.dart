@@ -206,6 +206,22 @@ class TemplateRequest {
   /// `_replaceTemplate`, which leaves `folder_id` alone when this is false.
   final bool movesFolder;
 
+  /// The program the template is a session of. Three-valued like [folderId]: on
+  /// an update this is only consulted when [movesProgram] is true, and null with
+  /// it set detaches the template from its program. A build that predates
+  /// programs never sends the key, so its saves keep the session where it is.
+  final String? programId;
+
+  /// Whether the request spoke about the program at all.
+  final bool movesProgram;
+
+  /// The template's note. On an update only consulted when [changesNote] is
+  /// true, for the same reason as [programId].
+  final String? note;
+
+  /// Whether the request spoke about the note at all.
+  final bool changesNote;
+
   final List<TemplateExerciseRequest> exercises;
 
   const new({
@@ -215,6 +231,10 @@ class TemplateRequest {
     this.order = 0,
     this.folderId,
     this.movesFolder = false,
+    this.programId,
+    this.movesProgram = false,
+    this.note,
+    this.changesNote = false,
     this.exercises = const [],
   });
 
