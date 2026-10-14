@@ -1409,14 +1409,14 @@ _exercise_lookup AS (
 -- A folder the user does not own resolves to no row, so the INSERT selects
 -- nothing and the mixin reports NotFound rather than silently unfiling.
 _template AS (
-  INSERT INTO templates (id, user_id, name, order_index, folder_id)
-  SELECT coalesce(@id::uuid, uuidv7()), @userId, @name, @orderIndex, (SELECT id FROM _folder)
+  INSERT INTO templates (id, user_id, name, order_index, folder_id, program_id, note)
+  SELECT coalesce(@id::uuid, uuidv7()), @userId, @name, @orderIndex, (SELECT id FROM _folder), @programId::uuid, @note
   WHERE NOT EXISTS (SELECT 1 FROM _existing_template)
     AND (
       EXISTS (SELECT 1 FROM _foreign_template)
       OR (@folderId::uuid IS NULL OR EXISTS (SELECT 1 FROM _folder))
     )
-  RETURNING id, name, order_index, folder_id, source_template_id, assigned_by, sync_enabled, created_at
+  RETURNING id, name, order_index, folder_id, source_template_id, assigned_by, sync_enabled, created_at, program_id, note
 ),
 -- ids round-trip, except one another row already holds: a template saved
 -- from a workout carries the workout's ids, and saving it twice must not
@@ -1505,6 +1505,8 @@ SELECT
   p.avatar_url AS assigned_by_avatar,
   t.sync_enabled,
   t.created_at,
+  t.program_id,
+  t.note,
   COALESCE(ej.exercises_json, '[]'::jsonb) AS exercises,
   true AS created
 FROM _template t
@@ -1526,6 +1528,8 @@ SELECT
   p.avatar_url AS assigned_by_avatar,
   t.sync_enabled,
   t.created_at,
+  t.program_id,
+  t.note,
   _template_exercises(t.id) AS exercises,
   false AS created
 FROM templates t
@@ -1561,14 +1565,19 @@ _exercise_lookup AS (
 -- @movesFolder distinguishes "the body said nothing about folderId" (leave it
 -- where it is) from "the body said folderId: null" (unfile it). A folderId the
 -- user does not own matches no row, so the update reports NotFound.
+-- @movesProgram and @changesNote do the same for the program and the note: a
+-- body from a build that predates them keeps what is stored. A program the user
+-- does not own trips templates_program_fk.
 _template AS (
   UPDATE templates
   SET name = @name,
       order_index = @orderIndex,
-      folder_id = CASE WHEN @movesFolder::boolean THEN (SELECT id FROM _folder) ELSE folder_id END
+      folder_id = CASE WHEN @movesFolder::boolean THEN (SELECT id FROM _folder) ELSE folder_id END,
+      program_id = CASE WHEN @movesProgram::boolean THEN @programId::uuid ELSE program_id END,
+      note = CASE WHEN @changesNote::boolean THEN @note ELSE note END
   WHERE id = @templateId::uuid AND user_id = @userId
     AND (NOT @movesFolder::boolean OR @folderId::uuid IS NULL OR EXISTS (SELECT 1 FROM _folder))
-  RETURNING id, name, order_index, folder_id, source_template_id, assigned_by, sync_enabled, created_at
+  RETURNING id, name, order_index, folder_id, source_template_id, assigned_by, sync_enabled, created_at, program_id, note
 ),
 -- The body as stored, read from the statement's snapshot. Empty unless the
 -- template update above matched, so a refused folder move writes nothing.
@@ -1723,6 +1732,8 @@ SELECT
   p.avatar_url AS assigned_by_avatar,
   t.sync_enabled,
   t.created_at,
+  t.program_id,
+  t.note,
   COALESCE(ej.exercises_json, '[]'::jsonb) AS exercises
 FROM _template t
 LEFT JOIN template_folders f ON f.id = t.folder_id
@@ -1745,6 +1756,8 @@ SELECT
   p.avatar_url AS assigned_by_avatar,
   t.sync_enabled,
   t.created_at,
+  t.program_id,
+  t.note,
   _template_exercises(t.id) AS exercises
 FROM templates t
 LEFT JOIN template_folders f ON f.id = t.folder_id
@@ -1775,6 +1788,8 @@ SELECT
   p.avatar_url AS assigned_by_avatar,
   t.sync_enabled,
   t.created_at,
+  t.program_id,
+  t.note,
   _template_exercises(t.id) AS exercises
 FROM templates t
 LEFT JOIN template_folders f ON f.id = t.folder_id
@@ -2441,6 +2456,139 @@ WHERE id = @goalId::uuid
       WHERE stage ->> 'id' = @stageId
   )
 RETURNING id, metric, exercise_id, pattern, muscle, cadence, stages, archived, created_at
+''';
+
+/// The columns `Program.fromRow` reads, from a row aliased `p`. `sessions` is
+/// the program's templates in their order, the same `(order_index, id)` the
+/// template list walks.
+const _programColumns = '''
+  p.id,
+  p.name,
+  p.note,
+  p.source,
+  p.per_week,
+  p.days,
+  p.weeks,
+  p.rules,
+  p.constraint_key,
+  p.archived,
+  p.created_at,
+  coalesce(
+    (
+      SELECT array_agg(t.id ORDER BY t.order_index, t.id)
+      FROM templates t
+      WHERE t.program_id = p.id
+    ),
+    '{}'
+  ) AS sessions
+''';
+
+/// Archived ones included: the cap counts them, so the list stays small, and
+/// the app needs both to sync.
+const _listPrograms =
+    '''
+SELECT $_programColumns
+FROM programs p
+WHERE p.user_id = @userId
+ORDER BY p.id
+''';
+
+const _getProgram =
+    '''
+SELECT $_programColumns
+FROM programs p
+WHERE p.id = @id::uuid
+  AND p.user_id = @userId
+''';
+
+/// A user keeps at most this many programs, archived ones included. The ceiling
+/// guards the table, not anyone's training.
+const _maxPrograms = 100;
+
+// Idempotent create, as `_createGoal`: an id the caller owns returns that
+// program with `created = false` and never counts against the cap; an id owned
+// by someone else reaches the INSERT and trips `programs_pkey` (403 id_taken)
+// even at the cap. An empty result is the cap.
+const _createProgram =
+    '''
+WITH
+_by_id AS (
+  SELECT id
+  FROM programs
+  WHERE id = @id::uuid
+    AND user_id = @userId
+),
+_foreign AS (
+  SELECT 1
+  FROM programs
+  WHERE id = @id::uuid
+    AND user_id <> @userId
+),
+_ins AS (
+  INSERT INTO programs (id, user_id, name, note, source, per_week, days, weeks, rules, constraint_key)
+  SELECT
+    coalesce(@id::uuid, uuidv7()),
+    @userId,
+    @name,
+    @note,
+    @source,
+    @perWeek::smallint,
+    @days::smallint[],
+    @weeks::smallint,
+    @rules::jsonb,
+    @constraintKey
+  WHERE NOT EXISTS (SELECT 1 FROM _by_id)
+    AND (
+      EXISTS (SELECT 1 FROM _foreign)
+      OR (SELECT count(*) FROM programs WHERE user_id = @userId) < $_maxPrograms
+    )
+  RETURNING id
+)
+SELECT id, true AS created FROM _ins
+UNION ALL
+SELECT id, false AS created FROM _by_id
+WHERE NOT EXISTS (SELECT 1 FROM _ins)
+''';
+
+/// A full replace of the program's own fields. Its sessions are templates and
+/// change through the template routes, never here.
+const _replaceProgram =
+    '''
+WITH
+_updated AS (
+  UPDATE programs
+  SET
+    name = @name,
+    note = @note,
+    per_week = @perWeek::smallint,
+    days = @days::smallint[],
+    weeks = @weeks::smallint,
+    rules = @rules::jsonb,
+    constraint_key = @constraintKey,
+    archived = @archived::boolean,
+    updated_at = now()
+  WHERE id = @id::uuid
+    AND user_id = @userId
+  RETURNING *
+)
+SELECT $_programColumns
+FROM _updated p
+''';
+
+/// The other way out of deleting a program: its templates stay, as plain ones.
+/// Run before `_deleteProgram`, in the same transaction.
+const _detachProgramTemplates = '''
+UPDATE templates
+SET program_id = NULL
+WHERE program_id = @id::uuid
+  AND user_id = @userId
+''';
+
+/// Deleting a program deletes the templates still attached to it.
+const _deleteProgram = '''
+DELETE FROM programs
+WHERE id = @id::uuid
+  AND user_id = @userId
 ''';
 
 // Personal access tokens (heart-api#111).
