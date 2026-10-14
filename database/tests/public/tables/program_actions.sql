@@ -1,13 +1,13 @@
 BEGIN;
 
-SELECT plan(21);
+SELECT plan(24);
 
 SELECT has_table('public'::name, 'program_actions'::name);
 
 SELECT columns_are(
                'public',
                'program_actions',
-               ARRAY ['id', 'user_id', 'program_id', 'kind', 'week', 'at', 'created_at']
+               ARRAY ['id', 'user_id', 'program_id', 'kind', 'week', 'at', 'created_at', 'from_exercise', 'to_exercise', 'workout_id']
        );
 
 SELECT col_type_is('public'::name, 'program_actions'::name, 'id'::name, 'uuid'::name);
@@ -72,6 +72,28 @@ SELECT lives_ok(
                SELECT user_id, id, 'lighter', now() FROM _p
                $$,
                'a lighter week is an action'
+       );
+
+SELECT fk_ok('public', 'program_actions', 'workout_id', 'public', 'workouts', 'id');
+SELECT throws_ok(
+               $$
+               WITH _p AS (
+                   INSERT INTO programs (user_id, name) VALUES (create_test_profile(), 'p') RETURNING user_id, id
+               )
+               INSERT INTO program_actions (user_id, program_id, kind, at)
+               SELECT user_id, id, 'advance', now() FROM _p
+               $$,
+               '23514', NULL, 'an advance names its exercises'
+       );
+SELECT throws_ok(
+               $$
+               WITH _p AS (
+                   INSERT INTO programs (user_id, name) VALUES (create_test_profile(), 'p') RETURNING user_id, id
+               )
+               INSERT INTO program_actions (user_id, program_id, kind, from_exercise, to_exercise, at)
+               SELECT user_id, id, 'pause', gen_random_uuid(), gen_random_uuid(), now() FROM _p
+               $$,
+               '23514', NULL, 'only an advance names exercises'
        );
 
 SELECT * FROM finish();
