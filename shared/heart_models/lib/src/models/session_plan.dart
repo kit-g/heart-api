@@ -7,6 +7,7 @@ import 'program_math.dart';
 import 'program_position.dart';
 import 'set_target.dart';
 import 'template.dart';
+import 'workout.dart';
 
 /// A program session as the user will meet it: its sets with this week's
 /// targets and the weights worked out from the current bases (heart-api#260).
@@ -43,8 +44,13 @@ abstract interface class PlannedSession implements Model {
   /// - A set with a share weighs the share of its base: the slot's, else the
   ///   exercise's, or the exercise's that `of` names. Rounded down to that
   ///   exercise's rule step, else to 2.5 kg.
-  /// - A set without a share under `addWeight` or `rangeThenWeight` weighs
-  ///   the base; under `longer`, the base is its duration or distance, the
+  /// - A slot's own rule comes before its exercise's ([Program.ruleFor]).
+  /// - A `stages` rule lays out the stage [stages] has it on
+  ///   ([currentStages]): that many sets of its reps, the last as many as
+  ///   possible when the stage says so, each like the session's first working
+  ///   set.
+  /// - A set without a share under `addWeight`, `rangeThenWeight` or `stages`
+  ///   weighs the base; under `longer`, the base is its duration or distance, the
   ///   measure its target names.
   /// - Any other set keeps what its template stores, and a set's stored reps
   ///   stand only where its target names none.
@@ -57,6 +63,7 @@ abstract interface class PlannedSession implements Model {
     Template session, {
     required ProgramPosition position,
     required Map<String, ProgramBase> bases,
+    Map<String, int> stages = const {},
   }) {
     final week = position.week;
     final lighter = position.lighter;
@@ -65,14 +72,14 @@ abstract interface class PlannedSession implements Model {
     final volume = deload?.volume ?? Deload.defaultVolume;
     final test = program.tests[session.id]?.share;
 
-    num stepOf(String exerciseId) => switch (program.rules[exerciseId]) {
-      AddWeight(:final step) || RangeThenWeight(:final step) || ShareOfMax(:final step) => step,
+    num stepOf(String exerciseId, {String? slot}) => switch (program.ruleFor(exerciseId, slot: slot)) {
+      AddWeight(:final step) || RangeThenWeight(:final step) || ShareOfMax(:final step) || Stages(:final step) => step,
       _ => 2.5,
     };
 
-    num? weigh(num share, String exerciseId, ProgramBase? base) {
+    num? weigh(num share, String exerciseId, ProgramBase? base, {String? slot}) {
       if (base == null) return null;
-      final step = stepOf(exerciseId);
+      final step = stepOf(exerciseId, slot: slot);
       final weight = roundDown(share * base.value, step);
       return lighter ? roundDown(weight * load, step) : weight;
     }
@@ -80,23 +87,27 @@ abstract interface class PlannedSession implements Model {
     final exercises = <PlannedExercise>[];
     for (final exercise in session) {
       final exerciseId = exercise.exercise.id;
-      final rule = program.rules[exerciseId];
-      final base = bases[exercise.id] ?? bases[exerciseId];
+      final slot = exercise.id;
+      final rule = program.ruleFor(exerciseId, slot: slot);
+      final base = bases[slot] ?? bases[exerciseId];
       final wave = switch (rule) {
         ShareOfMax() when test == null => rule.week(week),
         _ => const <WaveSet>[],
       };
 
-      final all = exercise.toList();
-      final working = all.where((set) => set.setType != .warmup).length;
+      final List<(ExerciseSet, SetTarget?)> all = switch ((rule, test)) {
+        (final Stages rule, null) => exercise.laidOut(rule.stage(stages[slot] ?? stages[exerciseId] ?? 0)),
+        _ => [for (final set in exercise) (set, set.target)],
+      };
+      final working = all.where((each) => each.$1.setType != .warmup).length;
       final keep = lighter ? max(1, (working * volume).ceil()) : working;
 
       final sets = <PlannedSet>[];
       var index = 0;
-      for (final set in all) {
+      for (final (set, planned) in all) {
         final warmup = set.setType == .warmup;
         if (!warmup && index >= keep) continue;
-        var target = set.target;
+        var target = planned;
         if (!warmup && index < wave.length) target = wave[index].onto(target);
         if (!warmup) index++;
 
@@ -111,12 +122,12 @@ abstract interface class PlannedSession implements Model {
         } else if (target?.share case final num share) {
           weight = switch (target?.of) {
             final String of => weigh(share, of, bases[of]),
-            null => weigh(share, exerciseId, base),
+            null => weigh(share, exerciseId, base, slot: slot),
           };
         } else if (base != null) {
           switch (rule) {
-            case AddWeight() || RangeThenWeight():
-              weight = lighter ? roundDown(base.value * load, stepOf(exerciseId)) : base.value;
+            case AddWeight() || RangeThenWeight() || Stages():
+              weight = lighter ? roundDown(base.value * load, stepOf(exerciseId, slot: slot)) : base.value;
             case Longer():
               if (growsDistance(set, target)) {
                 distance = base.value;
@@ -139,7 +150,15 @@ abstract interface class PlannedSession implements Model {
           ),
         );
       }
-      exercises.add(PlannedExercise(slot: exercise.id, exerciseId: exerciseId, base: base?.value, sets: sets));
+      exercises.add(
+        PlannedExercise(
+          slot: slot,
+          exerciseId: exerciseId,
+          base: base?.value,
+          stage: rule is Stages ? stages[slot] ?? stages[exerciseId] ?? 0 : null,
+          sets: sets,
+        ),
+      );
     }
     return _PlannedSession(templateId: session.id, week: week, lighter: lighter, test: test, exercises: exercises);
   }
@@ -155,9 +174,12 @@ final class PlannedExercise implements Model {
   /// The base its sets were worked out from, when it has one.
   final num? base;
 
+  /// The stage a stages rule is on, from 0; null under any other rule.
+  final int? stage;
+
   final List<PlannedSet> sets;
 
-  const new({required this.slot, required this.exerciseId, required this.base, required this.sets});
+  const new({required this.slot, required this.exerciseId, required this.base, this.stage, required this.sets});
 
   @override
   Map<String, dynamic> toMap() {
@@ -165,6 +187,7 @@ final class PlannedExercise implements Model {
       'slot': slot,
       'exerciseId': exerciseId,
       'base': ?base,
+      'stage': ?stage,
       'sets': [for (final set in sets) set.toMap()],
     };
   }
@@ -227,6 +250,27 @@ class _PlannedSession implements PlannedSession {
       'test': ?test,
       'exercises': [for (final exercise in exercises) exercise.toMap()],
     };
+  }
+}
+
+extension on WorkoutExercise {
+  /// The sets [stage] lays out: the warm-ups as they are, then that many sets
+  /// of its reps, each like the first working set, the last as many as
+  /// possible when the stage says so.
+  List<(ExerciseSet, SetTarget?)> laidOut(Stage stage) {
+    final pattern = where((set) => set.setType != .warmup).firstOrNull;
+    return [
+      for (final set in where((set) => set.setType == .warmup)) (set, set.target),
+      if (pattern != null)
+        for (var at = 0; at < stage.sets; at++)
+          (
+            pattern,
+            (pattern.target ?? SetTarget.none).withRange(
+              .reps,
+              stage.amrap && at == stage.sets - 1 ? TargetRange(min: stage.reps) : .exactly(stage.reps),
+            ),
+          ),
+    ];
   }
 }
 

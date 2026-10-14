@@ -209,6 +209,21 @@ Map<String, ProgramBase> currentBases(Iterable<ProgramBase> bases) {
   return current;
 }
 
+/// The stage each stages rule is on: the latest [ProgramActionKind.stage]
+/// action, keyed by its slot when it has one and by the exercise otherwise.
+/// One without an action is on its first stage.
+Map<String, int> currentStages(Iterable<ProgramAction> actions) {
+  final current = <String, (DateTime, int)>{};
+  for (final action in actions) {
+    if (action case ProgramAction(kind: .stage, :final exercise?, :final stage?)) {
+      final key = action.slot ?? exercise;
+      final held = current[key];
+      if (held == null || !action.at.isBefore(held.$1)) current[key] = (action.at, stage);
+    }
+  }
+  return {for (final MapEntry(:key, :value) in current.entries) key: value.$2};
+}
+
 class _ProgramPosition implements ProgramPosition {
   @override
   final int week;

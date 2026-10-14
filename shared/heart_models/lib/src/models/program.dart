@@ -161,6 +161,22 @@ sealed class GrowthRule implements Model {
       ),
       Longer.key => Longer(step: _positive(json, 'step'), extra: rest(const {'step'})),
       Ladder.key => Ladder.fromParameters(json, extra: rest(const {'rungs', 'top', 'bottom'})),
+      Stages.key => Stages(
+        stages: switch (json['stages']) {
+          final List stages when stages.length >= 2 && stages.length <= Stages.maxStages => [
+            for (final stage in stages)
+              switch (stage) {
+                final Map stage => Stage.fromJson(stage),
+                _ => throw ArgumentError.value(stage, 'stages', 'a list of {sets, reps, amrap?}'),
+              },
+          ],
+          final other => throw ArgumentError.value(other, 'stages', 'two to twenty {sets, reps, amrap?}'),
+        },
+        step: _positive(json, 'step'),
+        miss: miss(),
+        amrap: amrap(),
+        extra: rest(const {'stages', ...weighted}),
+      ),
       ShareOfMax.key => ShareOfMax(
         waves: switch (json['waves']) {
           final List waves when waves.isNotEmpty => [for (final wave in waves) _wave(wave)],
@@ -328,6 +344,81 @@ final class Ladder extends GrowthRule {
 
   @override
   Map<String, dynamic> get _parameters => {'rungs': rungs, 'top': top, 'bottom': bottom};
+}
+
+/// Progress through set schemes on a miss, not only through weight
+/// (heart-api#256): 5×3+ → 6×2+ → 10×1+ at the same weight. A run of misses
+/// ([miss], one by default) moves the exercise to the next of [stages]; one on
+/// the last stage cuts the base by the miss rule's cut and starts over from the
+/// first. A session that makes its targets grows the base by [step], or by the
+/// [amrap] table. The stage an exercise is on is the latest
+/// [ProgramActionKind.stage] for it ([currentStages]), the first without one.
+final class Stages extends GrowthRule {
+  static const key = 'stages';
+
+  static const maxStages = 20;
+
+  /// Two to [maxStages], in the order a miss moves through them.
+  final List<Stage> stages;
+  final num step;
+  final MissRule? _miss;
+  @override
+  final List<AmrapStep> amrap;
+
+  const new({required this.stages, required this.step, this._miss, this.amrap = const [], super.extra});
+
+  /// Any set short moves on, the first time, unless the rule says otherwise.
+  @override
+  MissRule get miss => _miss ?? const MissRule(after: 1);
+
+  /// Stage [index], held to the list: an index past it, from a rule edited
+  /// shorter since, is the last stage.
+  Stage stage(int index) => stages[index.clamp(0, stages.length - 1)];
+
+  @override
+  String get kind => key;
+
+  @override
+  Map<String, dynamic> get _parameters => {
+    'stages': [for (final stage in stages) stage.toMap()],
+    ..._weighted(step, _miss, amrap),
+  };
+}
+
+/// One set scheme of a [Stages] rule: [sets] sets of [reps], the last one as
+/// many as possible when [amrap] ("5×3+").
+final class Stage implements Model {
+  final int sets;
+  final int reps;
+  final bool amrap;
+
+  const new({required this.sets, required this.reps, this.amrap = false});
+
+  factory fromJson(Map json) {
+    final sets = switch (json['sets']) {
+      final int sets when sets >= 1 && sets <= 20 => sets,
+      final other => throw ArgumentError.value(other, 'sets', 'a whole number from 1 to 20'),
+    };
+    final reps = switch (json['reps']) {
+      final int reps when reps >= 1 && reps <= 100 => reps,
+      final other => throw ArgumentError.value(other, 'reps', 'a whole number from 1 to 100'),
+    };
+    final amrap = switch (json['amrap']) {
+      null => false,
+      final bool amrap => amrap,
+      final other => throw ArgumentError.value(other, 'amrap', 'true or false'),
+    };
+    return Stage(sets: sets, reps: reps, amrap: amrap);
+  }
+
+  @override
+  Map<String, dynamic> toMap() => {'sets': sets, 'reps': reps, if (amrap) 'amrap': true};
+
+  @override
+  bool operator ==(Object other) => other is Stage && other.sets == sets && other.reps == reps && other.amrap == amrap;
+
+  @override
+  int get hashCode => Object.hash(sets, reps, amrap);
 }
 
 /// Sets as a share of a training max that changes by program week, 5/3/1 style.
@@ -579,9 +670,14 @@ abstract interface class Program implements Model {
   /// The length in program weeks; null runs on.
   int? get weeks;
 
-  /// The growth rule of each exercise, by exercise id. An exercise without one
-  /// is done as written.
+  /// The growth rule of each exercise, by exercise id, or of one occurrence of
+  /// it, by its slot (a template exercise id), when a lift has two jobs: the
+  /// squat heavy on Monday and for volume on Thursday (heart-api#256). An
+  /// exercise without one is done as written. [ruleFor] picks.
   Map<String, GrowthRule> get rules;
+
+  /// The rule for [exerciseId] at [slot]: the slot's own, else the exercise's.
+  GrowthRule? ruleFor(String exerciseId, {String? slot});
 
   /// A content key, such as `avoid_high_axial_load`, that filters suggestions
   /// inside the program.
@@ -855,6 +951,9 @@ class _Program implements Program {
   }
 
   @override
+  GrowthRule? ruleFor(String exerciseId, {String? slot}) => rules[slot] ?? rules[exerciseId];
+
+  @override
   int? phaseOf(int week) {
     if (phases.isEmpty) return null;
     var through = 0;
@@ -925,7 +1024,12 @@ enum ProgramActionKind {
 
   /// A ladder moved an exercise to its next rung ([ProgramAction.from] →
   /// [ProgramAction.to]), caused by [ProgramAction.workoutId] (heart-api#231).
-  advance('advance');
+  advance('advance'),
+
+  /// A stages rule moved [ProgramAction.exercise] (at [ProgramAction.slot],
+  /// when its rule is the slot's) to [ProgramAction.stage], caused by
+  /// [ProgramAction.workoutId] (heart-api#256).
+  stage('stage');
 
   /// The `kind` on the wire.
   final String value;
@@ -956,7 +1060,16 @@ abstract interface class ProgramAction implements Model {
 
   String? get to;
 
-  /// The workout that caused an advance; deleting it deletes the action.
+  /// The exercise a [ProgramActionKind.stage] moved, the slot whose rule it
+  /// was when the rule is a slot's, and the stage it moved to, from 0.
+  String? get exercise;
+
+  String? get slot;
+
+  int? get stage;
+
+  /// The workout that caused an advance or a stage; deleting it deletes the
+  /// action.
   String? get workoutId;
 
   /// When the user took it, by the device's clock.
@@ -969,6 +1082,9 @@ abstract interface class ProgramAction implements Model {
     int? week,
     String? from,
     String? to,
+    String? exercise,
+    String? slot,
+    int? stage,
     String? workoutId,
     required DateTime at,
   }) = _ProgramAction;
@@ -981,6 +1097,9 @@ abstract interface class ProgramAction implements Model {
       week: (json['week'] as num?)?.toInt(),
       from: json['from'] as String?,
       to: json['to'] as String?,
+      exercise: json['exercise'] as String?,
+      slot: json['slot'] as String?,
+      stage: (json['stage'] as num?)?.toInt(),
       workoutId: json['workoutId'] as String?,
       at: DateTime.parse(json['at'] as String),
     );
@@ -994,6 +1113,9 @@ abstract interface class ProgramAction implements Model {
       week: (row['week'] as num?)?.toInt(),
       from: row['from_exercise']?.toString(),
       to: row['to_exercise']?.toString(),
+      exercise: row['exercise_id']?.toString(),
+      slot: row['slot']?.toString(),
+      stage: (row['stage'] as num?)?.toInt(),
       workoutId: row['workout_id']?.toString(),
       at: switch (row['at']) {
         final DateTime at => at,
@@ -1018,6 +1140,12 @@ class _ProgramAction implements ProgramAction {
   @override
   final String? to;
   @override
+  final String? exercise;
+  @override
+  final String? slot;
+  @override
+  final int? stage;
+  @override
   final String? workoutId;
   @override
   final DateTime at;
@@ -1029,6 +1157,9 @@ class _ProgramAction implements ProgramAction {
     this.week,
     this.from,
     this.to,
+    this.exercise,
+    this.slot,
+    this.stage,
     this.workoutId,
     required this.at,
   });
@@ -1042,6 +1173,9 @@ class _ProgramAction implements ProgramAction {
       'week': ?week,
       'from': ?from,
       'to': ?to,
+      'exercise': ?exercise,
+      'slot': ?slot,
+      'stage': ?stage,
       'workoutId': ?workoutId,
       'at': at.toUtc().toIso8601String(),
     };

@@ -272,6 +272,85 @@ void main() {
       expect([for (final set in plain.exercises.single.sets) set.reps], [8, null]);
     });
 
+    test('stages: the stage\'s sets at the base, the last as many as possible (heart-api#256)', () {
+      const slot = '019a0000-0000-7000-8000-0000000000b1';
+      const tiers = Stages(
+        step: 2.5,
+        stages: [
+          Stage(sets: 5, reps: 3, amrap: true),
+          Stage(sets: 3, reps: 10),
+        ],
+      );
+      final session = _template([
+        (
+          slot,
+          _exercise(_squat, 'Squat'),
+          [
+            _set(1, _reps(5), type: 'warmup', weight: 40),
+            _set(2, {..._reps(3, 3), 'rir': 1}),
+          ],
+        ),
+      ]);
+      final program = Program(name: 'Tiers', sessions: const [_session], rules: {_squat: tiers});
+      final first = PlannedSession.of(
+        program,
+        session,
+        position: _at(program),
+        bases: currentBases([_base(_squat, 100)]),
+      ).exercises.single;
+      expect(first.stage, 0);
+      expect(first.sets.length, 6, reason: 'the warm-up, then five sets');
+      expect(first.sets.first.weight, 40);
+      expect([for (final set in first.sets.skip(1)) set.weight], [100, 100, 100, 100, 100]);
+      expect(first.sets[1].target?[.reps], TargetRange.exactly(3));
+      expect(first.sets[1].target?.rir, 1, reason: 'each set is like the first working set');
+      expect(first.sets.last.target?[.reps], const TargetRange(min: 3));
+
+      final second = PlannedSession.of(
+        program,
+        session,
+        position: _at(program),
+        bases: currentBases([_base(_squat, 100)]),
+        stages: {slot: 1},
+      ).exercises.single;
+      expect(second.stage, 1);
+      expect(
+        [for (final set in second.sets.skip(1)) set.target?[.reps]],
+        [
+          for (var i = 0; i < 3; i++) TargetRange.exactly(10),
+        ],
+      );
+      expect(second.toMap()['stage'], 1);
+    });
+
+    test('a slot\'s own rule and base come before the exercise\'s', () {
+      const heavy = '019a0000-0000-7000-8000-0000000000b1';
+      const light = '019a0000-0000-7000-8000-0000000000b2';
+      final session = _template([
+        (heavy, _exercise(_squat, 'Squat'), [_set(1, _reps(5, 5))]),
+        (light, _exercise(_squat, 'Squat'), [_set(2, _reps(10, 10))]),
+      ]);
+      final program = Program(
+        name: 'Heavy and light',
+        sessions: const [_session],
+        rules: {_squat: const AddWeight(step: 2.5), light: const RangeThenWeight(step: 5)},
+      );
+      final plan = PlannedSession.of(
+        program,
+        session,
+        position: _at(program, lighter: true),
+        bases: currentBases([_base(_squat, 100), _base(_squat, 60, slot: light)]),
+      );
+      expect(
+        [for (final exercise in plan.exercises) exercise.sets.single.weight],
+        [
+          90,
+          50,
+        ],
+        reason: 'lighter: 90% of 100 at 2.5 kg, and 90% of 60 is 54, down to the slot rule\'s 5 kg',
+      );
+    });
+
     test('on the wire', () {
       final program = Program(name: 'Waves', sessions: const [_session], rules: {_squat: waves});
       final map = _plan(program, squatDay, [_base(_squat, 140)]).toMap();

@@ -93,6 +93,25 @@ final class Advance extends ProgressionStep {
   String toString() => 'Advance($to)';
 }
 
+/// A stages rule moved the exercise to [stage] (heart-api#256). At the same
+/// base, unless [base] says otherwise: a miss on the last stage cuts the base
+/// and starts over from the first.
+final class ToStage extends ProgressionStep {
+  final int stage;
+  final num? base;
+
+  const new(this.stage, {this.base});
+
+  @override
+  bool operator ==(Object other) => other is ToStage && other.stage == stage && other.base == base;
+
+  @override
+  int get hashCode => Object.hash(stage, base);
+
+  @override
+  String toString() => 'ToStage($stage${base == null ? '' : ', $base'})';
+}
+
 /// The one reading of the growth rules (heart-api#228). The app runs it after
 /// a program workout; the server stores what the app wrote and never runs it.
 abstract final class Progression {
@@ -103,7 +122,9 @@ abstract final class Progression {
   /// session ([streak]). [lighter] is a lighter week: nothing moves and
   /// nothing counts. [week] is the program week the session belongs to and
   /// [closesCycle] whether it completed that week's cycle; a rule that grows
-  /// per cycle or per wave reads them.
+  /// per cycle or per wave reads them. [stage] is the stage a stages rule is
+  /// on ([currentStages]); its [misses] count only sessions since it moved
+  /// there.
   static ProgressionStep next({
     required GrowthRule rule,
     required num? base,
@@ -112,6 +133,7 @@ abstract final class Progression {
     bool lighter = false,
     int week = 1,
     bool closesCycle = true,
+    int stage = 0,
   }) {
     if (lighter) return const Hold();
     final working = _working(sets).toList();
@@ -143,6 +165,13 @@ abstract final class Progression {
         return top ? _step(rule, base, step, working) : const Hold();
       case Ladder():
         return const Hold();
+      case Stages(:final step, :final stages, miss: final miss):
+        if (!_missed(miss, working)) return _step(rule, base, step, working);
+        final streak = misses + 1;
+        if (streak < miss.after) return Missed(streak);
+        final at = stage.clamp(0, stages.length - 1);
+        if (at < stages.length - 1) return ToStage(at + 1);
+        return ToStage(0, base: roundDown(base * (1 - miss.cut), step));
       case ShareOfMax(:final step):
         final missed = _missed(rule.miss, working);
         if (missed && misses + 1 >= rule.miss.after) return Cut(roundDown(base * (1 - rule.miss.cut), step));
