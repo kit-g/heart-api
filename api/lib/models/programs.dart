@@ -52,6 +52,9 @@ abstract interface class ProgramService {
   });
 
   Future<void> deleteProgramBase({required String userId, required String programId, required String baseId});
+
+  /// The program's workouts and skips, as its position reads them.
+  Future<Iterable<ProgramMark>> getProgramMarks({required String userId, required String programId});
 }
 
 abstract interface class ProgramsResponse implements Model {

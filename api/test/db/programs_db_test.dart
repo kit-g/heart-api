@@ -422,6 +422,44 @@ FROM generate_series(1, 100) n
       );
     });
   });
+
+  group('marks', () {
+    test("the program's workouts at their start and its skips, nobody else's", () async {
+      final userId = await h.seedProfile();
+      final (stored, _) = await h.db.createProgramOrExisting(
+        userId: userId,
+        program: program(),
+        sessions: [session(userId, 'A', 0)],
+      );
+      final programId = stored.id!;
+      final templateId = stored.sessions.single;
+      final workoutId = await h.seedWorkout(userId: userId, start: DateTime.utc(2026, 10, 2, 18));
+      await h.exec(
+        'UPDATE workouts SET template_id = @t::uuid, program_id = @p::uuid WHERE id = @w::uuid',
+        {'t': templateId, 'p': programId, 'w': workoutId},
+      );
+      await h.seedWorkout(userId: userId); // not the program's
+      await h.db.createSkip(
+        userId: userId,
+        skip: TrainingSkip(at: DateTime.utc(2026, 10, 3), templateId: templateId, programId: programId),
+      );
+
+      final marks = (await h.db.getProgramMarks(userId: userId, programId: programId)).toList()
+        ..sort((a, b) => a.at.compareTo(b.at));
+
+      expect(marks.map((m) => (m.templateId, m.at, m.isWorkout)), [
+        (templateId, DateTime.utc(2026, 10, 2, 18), true),
+        (templateId, DateTime.utc(2026, 10, 3), false),
+      ]);
+      final position = ProgramPosition.of(
+        await h.db.getProgram(userId: userId, programId: programId),
+        marks: marks,
+        actions: await h.db.getProgramActions(userId: userId, programId: programId),
+        now: DateTime.utc(2026, 10, 4),
+      );
+      expect(position.week, 3, reason: 'one session per cycle: the workout closes week 1, the skip week 2');
+    });
+  });
 }
 
 class _Harness extends DatabaseTestBase;

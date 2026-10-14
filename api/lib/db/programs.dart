@@ -197,6 +197,22 @@ mixin _Programs on _DatabaseBase implements ProgramService {
     );
   }
 
+  @override
+  Future<Iterable<ProgramMark>> getProgramMarks({required String userId, required String programId}) async {
+    final rows = await _pool.execute(
+      _listProgramMarks.toSql(),
+      parameters: {'userId': userId, 'programId': programId},
+    );
+    return rows.map((row) {
+      final map = row.toColumnMap();
+      return ProgramMark(
+        templateId: map['template_id']?.toString(),
+        at: map['at'] as DateTime,
+        isWorkout: map['is_workout'] as bool,
+      );
+    });
+  }
+
   Future<Program> _readProgram(Session session, {required String userId, required String programId}) async {
     final rows = await session.execute(_getProgram.toSql(), parameters: {'id': programId, 'userId': userId});
     if (rows.isEmpty) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');

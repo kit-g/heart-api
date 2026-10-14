@@ -2846,6 +2846,21 @@ WHERE id = @id::uuid
   AND user_id = @userId
 ''';
 
+/// What a program's position is folded from besides its actions: its workouts,
+/// at their start, and its skips.
+const _listProgramMarks = '''
+SELECT template_id, started_at AS at, true AS is_workout
+FROM workouts
+WHERE program_id = @programId::uuid
+  AND user_id = @userId
+  AND started_at IS NOT NULL
+UNION ALL
+SELECT template_id, at, false AS is_workout
+FROM skips
+WHERE program_id = @programId::uuid
+  AND user_id = @userId
+''';
+
 // Personal access tokens (heart-api#111).
 //
 // The cap counts only active tokens, the same rule `ApiToken.isActive`
