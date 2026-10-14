@@ -385,6 +385,7 @@ SELECT
   preferences_dropped,
   chart_preferences_moved,
   goals_moved,
+  programs_moved,
   source_deleted
 FROM _move_exercise_history(@userId, @sourceId::uuid, @targetId::uuid, @dryRun)
 ''';

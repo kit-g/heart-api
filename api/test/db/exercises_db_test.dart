@@ -620,9 +620,22 @@ void main() {
         {'u': userId, 'e': source},
       );
       await seedGoal(userId, source);
+      final (program, _) = await h.db.createProgramOrExisting(
+        userId: userId,
+        program: Program(name: 'p', rules: {source: const AddWeight(step: 2.5)}),
+        sessions: const [],
+      );
+      await h.db.createProgramBase(
+        userId: userId,
+        programId: program.id!,
+        base: ProgramBase(exerciseId: source, value: 100, at: DateTime.utc(2026, 10, 1)),
+      );
 
       final report = await h.db.moveExerciseHistory(userId: userId, sourceId: source, targetId: target, dryRun: false);
 
+      final moved = await h.db.getProgram(userId: userId, programId: program.id!);
+      expect(moved.rules.keys, [target]);
+      expect((await h.db.getProgramBases(userId: userId, programId: program.id!)).single.exerciseId, target);
       expect(report.toMap(), {
         'sourceId': source,
         'targetId': target,
@@ -633,6 +646,7 @@ void main() {
         'preferencesDropped': 0,
         'chartPreferences': 1,
         'goals': 1,
+        'programs': 1,
         'sourceDeleted': true,
       });
       expect(await exerciseRows(source), 0);
