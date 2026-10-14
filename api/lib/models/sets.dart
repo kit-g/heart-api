@@ -122,12 +122,17 @@ SetTarget setTarget(Object? value, {required String at}) {
     final Map m => SetTarget(
       {
         for (final MapEntry(:key, :value) in m.entries)
-          if (key != 'share' && key != 'rir' && key != 'of')
+          if (!const {'share', 'rir', 'of', 'supplemental'}.contains(key))
             if (measure(key) case final measure) measure: range(measure, value),
       },
       share: share(m['share']),
       rir: rir(m['rir']),
       of: of(m['of'], shared: m['share'] != null),
+      supplemental: switch (m['supplemental']) {
+        null || false => false,
+        true => true,
+        _ => invalid('.supplemental must be true or false'),
+      },
     ),
     _ => invalid('must be an object or null'),
   };

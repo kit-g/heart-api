@@ -424,6 +424,7 @@ void main() {
       ),
       ({'share': 0}, 'a share of nothing'),
       ({'rir': -1}, 'negative reps in reserve'),
+      ({'supplemental': 'yes'}, 'a supplemental set that is not true or false'),
       ({'of': '0198c1a2-b3c4-7d5e-8f60-718293a4b501'}, 'whose base, without a share'),
       ({'share': 0.6, 'of': 'squat'}, 'whose base, not by id'),
       ({'rir': 11}, 'reps in reserve past 10'),

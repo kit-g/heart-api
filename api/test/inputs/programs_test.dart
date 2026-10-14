@@ -117,6 +117,29 @@ void main() {
       );
     });
 
+    test('a rule says what a miss does and how the AMRAP set moves it (heart-api#228)', () async {
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'rules': {
+              _bench: {
+                'kind': 'addWeight',
+                'step': 2.5,
+                'miss': {'when': 'totalReps', 'floor': 15, 'after': 1, 'cut': 0.1},
+                'amrap': [
+                  {'reps': 10, 'step': 5},
+                ],
+              },
+            },
+          },
+        ),
+      );
+      final rule = input.program.rules[_bench]!;
+      expect(rule.miss?.floor, 15);
+      expect(rule.amrap.single.step, 5);
+    });
+
     test('rules are read strictly', () async {
       for (final rules in [
         [],
@@ -132,6 +155,16 @@ void main() {
         },
         {
           _bench: {'kind': 'shareOfMax', 'step': 5, 'waves': []},
+        },
+        {
+          _bench: {'kind': 'addWeight', 'step': 2.5, 'tempo': '3-1-1'},
+        },
+        {
+          _bench: {
+            'kind': 'addWeight',
+            'step': 2.5,
+            'miss': {'after': 0},
+          },
         },
       ]) {
         await expectLater(

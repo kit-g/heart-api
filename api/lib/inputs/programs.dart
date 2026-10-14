@@ -154,11 +154,18 @@ extension on Map<String, dynamic> {
 }
 
 GrowthRule _rule(String exerciseId, Map json) {
+  final GrowthRule rule;
   try {
-    return GrowthRule.fromJson(json);
+    rule = GrowthRule.fromJson(json);
   } on ArgumentError catch (e) {
     throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: ${e.name} ${e.message}');
   }
+  // a client carries fields it doesn't know; the server knows every field it
+  // accepts, so one it doesn't is a mistake, not a newer vocabulary
+  if (rule.extra.isNotEmpty) {
+    throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: unknown ${rule.extra.keys.join(', ')}');
+  }
+  return rule;
 }
 
 /// `POST /programs/:programId/actions` — `{id?, kind, week?, at}`. Only a
