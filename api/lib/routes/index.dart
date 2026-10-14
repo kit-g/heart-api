@@ -15,6 +15,7 @@ import 'package:heart/routes/me_index.dart';
 import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
 import 'package:heart/routes/oauth.dart' as oauth;
+import 'package:heart/routes/programs.dart' as programs;
 import 'package:heart/routes/template_folders.dart' as folders;
 import 'package:heart/routes/templates.dart' as templates;
 import 'package:heart/routes/tokens.dart' as tokens;
@@ -61,6 +62,11 @@ final routes = <(String, Method), ModelHandler>{
   ('/goals/:goalId', .put): goals.updateGoal,
   ('/goals/:goalId', .delete): goals.deleteGoal,
   ('/goals/:goalId/stages/:stageId', .put): goals.markStageAchieved,
+  ('/programs', .get): programs.getMyPrograms,
+  ('/programs', .post): programs.createProgram,
+  ('/programs/:programId', .get): programs.getMyProgram,
+  ('/programs/:programId', .put): programs.updateProgram,
+  ('/programs/:programId', .delete): programs.deleteProgram,
   ('/events', .post): events.handler,
   ('/template-folders', .get): folders.getMyFolders,
   ('/template-folders', .post): folders.createFolder,

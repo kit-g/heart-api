@@ -9,6 +9,7 @@ import 'package:heart/models/exports.dart';
 import 'package:heart/models/images.dart';
 import 'package:heart/models/imports.dart';
 import 'package:heart/models/profile.dart';
+import 'package:heart/models/programs.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart/storage/s3.dart';
@@ -29,6 +30,7 @@ import 'package:mockito/annotations.dart';
   ChartPreferenceService,
   ApiExercisePreferenceService,
   IdempotentGoalService,
+  ProgramService,
   CommentService,
   ConnectionsService,
   DeviceService,

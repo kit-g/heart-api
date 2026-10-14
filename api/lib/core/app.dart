@@ -88,6 +88,7 @@ RelicApp buildApp({
     ..use('/devices', devicesDb(db: database))
     ..use('/exercises', exercisesDb(db: database))
     ..use('/goals', goalsDb(db: database))
+    ..use('/programs', programsDb(db: database))
     ..use('/feedback', imageStorageDb(db: storage))
     ..use('/workouts', workoutsDb(db: database))
     ..use('/workouts', imageDb(db: database))

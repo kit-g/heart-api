@@ -40,7 +40,7 @@ class TemplateListQuery {
   }
 }
 
-/// `POST /templates` — `{id?, name?, order?, folderId?, exercises: [...]}`.
+/// `POST /templates` — `{id?, name?, order?, folderId?, programId?, note?, exercises: [...]}`.
 class TemplateCreateIn {
   final TemplateRequest request;
 
@@ -55,6 +55,8 @@ class TemplateCreateIn {
         name: json.templateName(),
         order: json.templateOrder(),
         folderId: json.folderIdOrNull(),
+        programId: json.programIdOrNull(),
+        note: json.templateNote(),
         exercises: json.templateExercises(),
       ),
     );
@@ -66,6 +68,8 @@ class TemplateCreateIn {
 /// Filing is three-valued and the distinction is deliberate: no `folderId` key
 /// leaves the template where it is, `"folderId": null` unfiles it, and an id
 /// files it there. That is what [TemplateRequest.movesFolder] carries.
+/// `programId` and `note` are three-valued the same way, so a build that
+/// predates them keeps a session in its program.
 class TemplateUpdateIn {
   final TemplateRequest request;
 
@@ -80,6 +84,10 @@ class TemplateUpdateIn {
         order: json.templateOrder(),
         folderId: json.folderIdOrNull(),
         movesFolder: json.containsKey('folderId'),
+        programId: json.programIdOrNull(),
+        movesProgram: json.containsKey('programId'),
+        note: json.templateNote(),
+        changesNote: json.containsKey('note'),
         exercises: json.templateExercises(),
       ),
     );
@@ -94,6 +102,24 @@ extension on Map<String, dynamic> {
       final String n when n.trim().isEmpty => null,
       final String n when n.length <= 200 => n.trim(),
       _ => throw const BadRequest(reason: 'name must be a string of at most 200 chars'),
+    };
+  }
+
+  /// Optional; a blank note is no note.
+  String? templateNote() {
+    return switch (this['note']) {
+      null => null,
+      final String n when n.trim().isEmpty => null,
+      final String n when n.trim().length <= 1000 => n.trim(),
+      _ => throw const BadRequest(reason: 'note must be a string of at most 1000 chars'),
+    };
+  }
+
+  String? programIdOrNull() {
+    return switch (this['programId']) {
+      null => null,
+      final String id when isUuidV7(id) => id,
+      _ => throw const BadRequest(reason: 'programId must be a v7 uuid string or null'),
     };
   }
 

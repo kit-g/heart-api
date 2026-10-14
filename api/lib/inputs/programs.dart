@@ -1,0 +1,161 @@
+part of 'inputs.dart';
+
+/// `POST /programs` — the program and its sessions:
+/// `{id?, name, note?, source?, perWeek?, days?, weeks?, rules?, constraint?, sessions: [template, ...]}`.
+///
+/// Each session is a template body, as `POST /templates` takes one, and becomes
+/// a template of the program. Starting a library program is this call: the
+/// device makes the copy and sends it whole.
+class ProgramCreateIn {
+  /// More sessions than any plan has, few enough to keep one create cheap.
+  static const maxSessions = 50;
+
+  final Program program;
+  final List<TemplateRequest> sessions;
+
+  const new _({required this.program, required this.sessions});
+
+  static Future<ProgramCreateIn> fromRequest(Request req) async {
+    final json = await req.json();
+    final sessions = switch (json['sessions']) {
+      null => const <Object?>[],
+      final List l when l.length <= maxSessions => l,
+      final List _ => throw const BadRequest(reason: 'a program has at most $maxSessions sessions'),
+      _ => throw const BadRequest(reason: 'sessions must be an array'),
+    };
+    return ProgramCreateIn._(
+      program: Program(
+        id: json.uuidV7OrNull(),
+        name: json.programName(),
+        note: json.templateNote(),
+        source: json.programKey('source'),
+        perWeek: json.programCount('perWeek', max: 28),
+        days: json.programDays(),
+        weeks: json.programCount('weeks', max: 104),
+        rules: json.programRules(),
+        constraint: json.programKey('constraint'),
+      ),
+      sessions: [
+        for (final (index, session) in sessions.indexed)
+          switch (session) {
+            final Map m => _session(req.userId, m.cast<String, dynamic>()),
+            _ => throw BadRequest(reason: 'sessions[$index] must be an object'),
+          },
+      ],
+    );
+  }
+}
+
+/// `PUT /programs/:programId` — a full replace of the program's own fields.
+/// `source` is where it came from and never changes; sessions change through
+/// their templates.
+class ProgramUpdateIn {
+  final Program program;
+
+  const new _(this.program);
+
+  static Future<ProgramUpdateIn> fromRequest(Request req) async {
+    final json = await req.json();
+    return ProgramUpdateIn._(
+      Program(
+        name: json.programName(),
+        note: json.templateNote(),
+        perWeek: json.programCount('perWeek', max: 28),
+        days: json.programDays(),
+        weeks: json.programCount('weeks', max: 104),
+        rules: json.programRules(),
+        constraint: json.programKey('constraint'),
+        archived: json.boolean('archived'),
+      ),
+    );
+  }
+}
+
+/// `DELETE /programs/:programId?keepTemplates=` — by default the sessions go
+/// with the program; `keepTemplates=true` leaves them as plain templates.
+class ProgramDeleteQuery {
+  final bool keepTemplates;
+
+  const new _({required this.keepTemplates});
+
+  static ProgramDeleteQuery fromRequest(Request req) {
+    return ProgramDeleteQuery._(keepTemplates: req.url.queryParameters.boolean('keepTemplates'));
+  }
+}
+
+TemplateRequest _session(String userId, Map<String, dynamic> json) {
+  return TemplateRequest(
+    userId: userId,
+    id: json.uuidV7OrNull(),
+    name: json.templateName(),
+    order: json.templateOrder(),
+    folderId: json.folderIdOrNull(),
+    note: json.templateNote(),
+    exercises: json.templateExercises(),
+  );
+}
+
+final _programKey = RegExp(r'^[a-z][a-z0-9_]{0,63}$');
+
+extension on Map<String, dynamic> {
+  String programName() {
+    return switch (this['name']) {
+      final String n when n.trim().isNotEmpty && n.trim().length <= 100 => n.trim(),
+      _ => throw const BadRequest(reason: 'name must be a string of 1 to 100 chars'),
+    };
+  }
+
+  /// A content id: a library program, a constraint. Which ones exist is the
+  /// library's business, so only the spelling is checked.
+  String? programKey(String field) {
+    return switch (this[field]) {
+      null => null,
+      final String key when _programKey.hasMatch(key) => key,
+      _ => throw BadRequest(code: 'invalid_key', reason: '$field must be a snake_case key of at most 64 characters'),
+    };
+  }
+
+  int? programCount(String field, {required int max}) {
+    return switch (this[field]) {
+      null => null,
+      final int n when n >= 1 && n <= max => n,
+      _ => throw BadRequest(reason: '$field must be a whole number from 1 to $max'),
+    };
+  }
+
+  Set<int> programDays() {
+    return switch (this['days']) {
+      null => const {},
+      final List days when days.every((day) => day is int && day >= 1 && day <= 7) => {...days.cast<int>()},
+      _ => throw const BadRequest(reason: 'days must be an array of ISO weekdays, 1 Monday to 7 Sunday'),
+    };
+  }
+
+  /// A rule per exercise id, read strictly: a newer kind is a 400 here until
+  /// the server knows it, though a build that predates it carries it untouched.
+  Map<String, GrowthRule> programRules() {
+    final rules = switch (this['rules']) {
+      null => const <String, dynamic>{},
+      final Map m => m,
+      _ => throw const BadRequest(code: 'invalid_rule', reason: 'rules must be an object of exercise id to rule'),
+    };
+    return {
+      for (final MapEntry(:key, :value) in rules.entries)
+        switch (key) {
+          final String id when isUuidV7(id) => id,
+          _ => throw BadRequest(code: 'invalid_rule', reason: 'rules keys are exercise ids; $key is not one'),
+        }: switch (value) {
+          final Map rule => _rule(key, rule),
+          _ => throw BadRequest(code: 'invalid_rule', reason: 'rules.$key must be an object'),
+        },
+    };
+  }
+}
+
+GrowthRule _rule(String exerciseId, Map json) {
+  try {
+    return GrowthRule.fromJson(json);
+  } on ArgumentError catch (e) {
+    throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: ${e.name} ${e.message}');
+  }
+}

@@ -140,6 +140,29 @@ void main() {
       expect((await send('POST', '/version', token: 'good')).status, 405);
     });
 
+    test('programs are wired: the list and a delete that keeps the templates', () async {
+      when(db.getPrograms(any)).thenAnswer((_) async => [Program(id: 'p-1', name: 'Stretch')]);
+      when(
+        db.deleteProgram(
+          userId: anyNamed('userId'),
+          programId: anyNamed('programId'),
+          keepTemplates: anyNamed('keepTemplates'),
+        ),
+      ).thenAnswer((_) async {});
+
+      final list = await send('GET', '/programs', token: 'good');
+      expect(list.status, 200);
+      expect(jsonDecode(list.body), {
+        'programs': [
+          {'id': 'p-1', 'name': 'Stretch', 'rules': {}, 'archived': false, 'sessions': []},
+        ],
+      });
+
+      final deleted = await send('DELETE', '/programs/p-1?keepTemplates=true', token: 'good');
+      expect(deleted.status, 204);
+      verify(db.deleteProgram(userId: 'u1', programId: 'p-1', keepTemplates: true)).called(1);
+    });
+
     test('a :pathParameter is captured and passed to the service', () async {
       when(db.deleteGoal(any, any)).thenAnswer((_) async {});
 
