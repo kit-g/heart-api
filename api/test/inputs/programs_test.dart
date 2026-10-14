@@ -333,6 +333,88 @@ void main() {
     });
   });
 
+  group('phases and tests (heart-api#233)', () {
+    const a = '0198c1a2-b3c4-7d5e-8f60-718293a4b530';
+    const b = '0198c1a2-b3c4-7d5e-8f60-718293a4b531';
+
+    test('a program runs in phases and names its tests', () async {
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'phases': [
+              {
+                'name': 'Volume',
+                'sessions': [a],
+                'cycles': 2,
+              },
+              {
+                'sessions': [b],
+              },
+            ],
+            'tests': {
+              b: {'share': 0.9},
+            },
+          },
+        ),
+      );
+      expect(input.program.phases.map((phase) => phase.cycles), [2, null]);
+      expect(input.program.tests[b]?.share, 0.9);
+    });
+
+    test('a phase that runs on must be last, and every phase is checked', () async {
+      for (final phases in [
+        [
+          {
+            'sessions': [a],
+          },
+          {
+            'sessions': [b],
+            'cycles': 2,
+          },
+        ],
+        [
+          {'sessions': <String>[]},
+        ],
+        [
+          {
+            'sessions': ['day-a'],
+          },
+        ],
+        [
+          {
+            'sessions': [a],
+            'cycles': 0,
+          },
+        ],
+      ]) {
+        await expectLater(
+          ProgramCreateIn.fromRequest(req(body: {'name': 'p', 'phases': phases})),
+          badRequest('invalid_phase'),
+          reason: '$phases',
+        );
+      }
+    });
+
+    test('a test is keyed by a session id, with a share up to 1', () async {
+      for (final tests in [
+        {
+          'day-a': {'share': 0.9},
+        },
+        {
+          a: {'share': 1.2},
+        },
+        {a: 0.9},
+      ]) {
+        await expectLater(
+          ProgramCreateIn.fromRequest(req(body: {'name': 'p', 'tests': tests})),
+          badRequest('invalid_test'),
+          reason: '$tests',
+        );
+      }
+    });
+  });
+
   group('ProgramUpdateIn', () {
     test('a full replace: what is left out is cleared, source is never read', () async {
       final input = await ProgramUpdateIn.fromRequest(

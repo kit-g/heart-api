@@ -35,6 +35,8 @@ class ProgramCreateIn {
         rules: json.programRules(),
         constraint: json.programKey('constraint'),
         deload: json.programDeload(),
+        phases: json.programPhases(),
+        tests: json.programTests(),
       ),
       sessions: [
         for (final (index, session) in sessions.indexed)
@@ -67,6 +69,8 @@ class ProgramUpdateIn {
         rules: json.programRules(),
         constraint: json.programKey('constraint'),
         deload: json.programDeload(),
+        phases: json.programPhases(),
+        tests: json.programTests(),
         archived: json.boolean('archived'),
       ),
     );
@@ -143,6 +147,47 @@ extension on Map<String, dynamic> {
     };
   }
 
+  /// Blocks in order, each with its own sessions; only the last may run on.
+  List<ProgramPhase> programPhases() {
+    final raw = switch (this['phases']) {
+      null => const <Object?>[],
+      final List phases when phases.length <= 20 => phases,
+      _ => throw const BadRequest(code: 'invalid_phase', reason: 'phases must be a list of at most 20'),
+    };
+    final phases = [
+      for (final (index, phase) in raw.indexed)
+        switch (phase) {
+          final Map phase => _phase(index, phase),
+          _ => throw BadRequest(code: 'invalid_phase', reason: 'phases[$index] must be an object'),
+        },
+    ];
+    for (final (index, phase) in phases.indexed) {
+      if (phase.cycles == null && index != phases.length - 1) {
+        throw BadRequest(code: 'invalid_phase', reason: 'phases[$index] runs on, so it must be the last');
+      }
+    }
+    return phases;
+  }
+
+  /// Test sessions by template id, each `{share?}`.
+  Map<String, ProgramTest> programTests() {
+    final raw = switch (this['tests']) {
+      null => const <String, Object?>{},
+      final Map tests => tests,
+      _ => throw const BadRequest(code: 'invalid_test', reason: 'tests must be an object of session id to test'),
+    };
+    return {
+      for (final MapEntry(:key, :value) in raw.entries)
+        switch (key) {
+          final String id when isUuidV7(id) => id,
+          _ => throw BadRequest(code: 'invalid_test', reason: 'tests keys are session ids; $key is not one'),
+        }: switch (value) {
+          final Map test => _test(key, test),
+          _ => throw BadRequest(code: 'invalid_test', reason: 'tests.$key must be an object'),
+        },
+    };
+  }
+
   /// A rule per exercise id, read strictly: a newer kind is a 400 here until
   /// the server knows it, though a build that predates it carries it untouched.
   Map<String, GrowthRule> programRules() {
@@ -161,6 +206,27 @@ extension on Map<String, dynamic> {
           _ => throw BadRequest(code: 'invalid_rule', reason: 'rules.$key must be an object'),
         },
     };
+  }
+}
+
+ProgramPhase _phase(int index, Map json) {
+  final ProgramPhase phase;
+  try {
+    phase = ProgramPhase.fromJson(json);
+  } on ArgumentError catch (e) {
+    throw BadRequest(code: 'invalid_phase', reason: 'phases[$index].${e.name}: ${e.message}');
+  }
+  if (!phase.sessions.every(isUuidV7) || phase.sessions.length > ProgramCreateIn.maxSessions) {
+    throw BadRequest(code: 'invalid_phase', reason: 'phases[$index].sessions are session ids, at most 50');
+  }
+  return phase;
+}
+
+ProgramTest _test(Object? sessionId, Map json) {
+  try {
+    return ProgramTest.fromJson(json);
+  } on ArgumentError catch (e) {
+    throw BadRequest(code: 'invalid_test', reason: 'tests.$sessionId.${e.name}: ${e.message}');
   }
 }
 
