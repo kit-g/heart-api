@@ -85,6 +85,11 @@ final id = switch (json['id']) {
 pre-3.13 `ClassName({required this.id})` form — the `use_declaring_parameters`
 lint catches the parameter half, this covers the rest.
 
+**Enum values use dot shorthand when the type is known.** Write `.disable`
+and `.verifyFull` in an `SslMode` return or switch pattern, and `method: .get`
+in a typed argument. Keep the type name where there is no type context, such
+as `expect(config.sslMode, SslMode.verifyFull)`.
+
 **Private by default.** SQL constants (`_listExercises`), mixins
 (`_Goals`), helpers and test fakes are `_named` unless something outside the
 file needs them. Don't widen visibility to make a test easier; test through

@@ -53,14 +53,14 @@ void main() {
   }
 
   Request getReq({Map<String, String> query = const {}}) =>
-      wire(bareRequest(method: Method.get, path: '/workouts/images', query: query));
+      wire(bareRequest(method: .get, path: '/workouts/images', query: query));
 
   group('deleteWorkoutImage', () {
     for (final key in ['workouts/another-user/photo.jpg', 'static/exercises/en.json']) {
       test('an unowned key cannot reach S3: $key', () async {
         when(imageDb.getWorkoutImageKeys(userId: _meId, workoutId: 'w-1'))
             .thenAnswer((_) async => ['workouts/owned/photo.jpg']);
-        final request = wire(bareRequest(method: Method.delete, query: {'key': key}));
+        final request = wire(bareRequest(method: .delete, query: {'key': key}));
         await expectLater(deleteWorkoutImageById(request, 'w-1'), throwsA(isA<NotFound>()));
         verifyZeroInteractions(imageStorage);
         verifyNever(imageDb.deleteImageRecord(userId: _meId, workoutId: 'w-1', key: key));
@@ -70,7 +70,7 @@ void main() {
     test('an owned image is authorized before S3 deletion', () async {
       const key = 'workouts/owned/photo.jpg';
       when(imageDb.getWorkoutImageKeys(userId: _meId, workoutId: 'w-1')).thenAnswer((_) async => [key]);
-      final request = wire(bareRequest(method: Method.delete, query: {'key': key}));
+      final request = wire(bareRequest(method: .delete, query: {'key': key}));
       await expectLater(deleteWorkoutImageById(request, 'w-1'), throwsA(isA<NoContent>()));
       verifyInOrder([
         imageDb.getWorkoutImageKeys(userId: _meId, workoutId: 'w-1'),
@@ -83,7 +83,7 @@ void main() {
       const key = 'workouts/owned/photo.jpg';
       when(imageDb.getWorkoutImageKeys(userId: _meId, workoutId: 'w-1')).thenAnswer((_) async => [key]);
       when(imageStorage.deleteObject(key: key)).thenThrow(StateError('S3 unavailable'));
-      final request = wire(bareRequest(method: Method.delete, query: {'key': key}));
+      final request = wire(bareRequest(method: .delete, query: {'key': key}));
       await expectLater(deleteWorkoutImageById(request, 'w-1'), throwsStateError);
       verifyNever(imageDb.deleteImageRecord(userId: _meId, workoutId: 'w-1', key: key));
     });
@@ -100,7 +100,7 @@ void main() {
 
     Request presignReq(String workoutId) => wire(
       jsonRequest(
-        method: Method.put,
+        method: .put,
         path: '/workouts/$workoutId/images',
         body: const {'mimeType': 'image/jpeg'},
       ),

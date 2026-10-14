@@ -79,12 +79,12 @@ class PostgresConfig {
 
   /// Only the literal local development endpoints may use plaintext.
   SslMode get sslMode => switch (host) {
-    'localhost' || '127.0.0.1' || '::1' => SslMode.disable,
-    _ => SslMode.verifyFull,
+    'localhost' || '127.0.0.1' || '::1' => .disable,
+    _ => .verifyFull,
   };
 
   SecurityContext? get securityContext => switch (sslMode) {
-    SslMode.disable => null,
+    .disable => null,
     _ =>
       SecurityContext(withTrustedRoots: true)..setTrustedCertificates(
         sslRootCertificate ?? File.fromUri(Platform.script.resolve('supabase-ca.crt')).path,
