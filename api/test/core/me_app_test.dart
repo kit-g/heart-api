@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/tokens.dart';
@@ -248,6 +249,91 @@ void main() {
 
     final missing = await app.send('GET', '/me/programs/nope/history', token: secret);
     expect(missing.status, 404);
+  });
+
+  group('the program library (heart-api#259)', () {
+    const walking = '01900000-0000-7000-8000-0000000000e1';
+    Map<String, dynamic> library() => jsonDecode(File('test/fixtures/programs/library.json').readAsStringSync());
+
+    setUp(() {
+      when(app.config.supportedLocales).thenReturn(['en', 'es']);
+      when(app.config.defaultLocale).thenReturn('en');
+      when(app.db.getExercises('u1', locale: anyNamed('locale'))).thenAnswer(
+        (invocation) async => {
+          'exercises': [
+            {
+              'id': walking,
+              'key': 'walking',
+              'name': invocation.namedArguments[#locale] == 'es' ? 'Caminar' : 'Walking',
+            },
+            {'id': '01900000-0000-7000-8000-0000000000e9', 'name': 'My own walk'},
+          ],
+        },
+      );
+    });
+
+    test('lists the programs, and reads one in full, in the caller\'s language', () async {
+      when(app.storage.read()).thenAnswer((_) async => library());
+
+      final list = await app.send('GET', '/me/library/programs', token: secret);
+      expect(list.status, 200);
+      final programs = (jsonDecode(list.body) as Map)['programs'] as List;
+      expect(programs.map((program) => (program as Map)['key']), ['walk_and_move', 'full_body_three']);
+
+      final one = await app.send(
+        'GET',
+        '/me/library/programs/walk_and_move',
+        token: secret,
+        extraHeaders: {'accept-language': 'es'},
+      );
+      expect(one.status, 200);
+      final program = jsonDecode(one.body) as Map;
+      expect(program['name'], 'Camina y muévete');
+      expect((program['exercises'] as Map)['walking'], 'Caminar');
+      expect((program['research'] as List).first, containsPair('sources', ['who_2020']));
+
+      final missing = await app.send('GET', '/me/library/programs/nope', token: secret);
+      expect(missing.status, 404);
+      expect((jsonDecode(missing.body) as Map)['code'], 'library_program_not_found');
+    });
+
+    test('before the library is published: an empty list, and no program', () async {
+      when(app.storage.read()).thenAnswer((_) async => null);
+      final list = await app.send('GET', '/me/library/programs', token: secret);
+      expect(jsonDecode(list.body), {'programs': []});
+      expect((await app.send('GET', '/me/library/programs/walk_and_move', token: secret)).status, 404);
+    });
+
+    test('a copy of a library program carries the research behind it, anchored to the copy', () async {
+      const programId = '01900000-0000-7000-8000-000000000050';
+      const session = '01900000-0000-7000-8000-000000000051';
+      when(app.storage.read()).thenAnswer((_) async => library());
+      final program = Program(id: programId, name: 'Walk and move', source: 'walk_and_move', sessions: [session]);
+      when(app.db.getProgram(userId: 'u1', programId: programId)).thenAnswer((_) async => program);
+      when(app.db.getProgramMarks(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
+      when(app.db.getProgramActions(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
+      when(app.db.getProgramBases(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
+      when(app.db.getTemplate(userId: 'u1', templateId: session)).thenAnswer(
+        (_) async =>
+            Template.fromJson(const {'id': session, 'order': 0, 'name': 'Walk and strengthen', 'exercises': []}),
+      );
+
+      final one = await app.send('GET', '/me/programs/$programId', token: secret);
+      expect(one.status, 200);
+      final research = (jsonDecode(one.body) as Map)['research'] as Map;
+      expect(research['key'], 'walk_and_move');
+      final claims = (research['claims'] as List).cast<Map>();
+      expect(claims[1]['about'], [
+        {'on': 'grows'},
+        {'on': 'rule', 'exercise': walking},
+      ]);
+      expect(claims[2]['about'], [
+        {'on': 'week'},
+        {'on': 'session', 'session': session},
+      ], reason: 'the second session the claim names is not in this copy');
+      expect((research['sources'] as Map)['otago_2022'], containsPair('year', isA<int>()));
+      expect((jsonDecode(one.body) as Map)['nextSession'], containsPair('templateId', session));
+    });
   });
 
   test('workouts are paginated and images keep only id and url', () async {

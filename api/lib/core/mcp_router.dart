@@ -2,6 +2,7 @@ import 'package:heart/db/db.dart';
 import 'package:heart/mcp/server.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
+import 'package:heart/models/library.dart';
 import 'package:relic/relic.dart';
 
 /// Where the API attaches the MCP server. Its own function serves the same
@@ -12,7 +13,7 @@ const mcpPrefix = '/mcp';
 /// authenticated per request by the endpoint itself (whether a request counts
 /// against the rate limit depends on the JSON-RPC method in its body), and
 /// only the services its tools read.
-RelicRouter buildMcpRouter({required Database database}) {
+RelicRouter buildMcpRouter({required Database database, required ProgramLibrary library}) {
   return RelicRouter()
     ..use('/', apiTokensDb(db: database))
     ..use('/', profilesDb(db: database))
@@ -22,6 +23,7 @@ RelicRouter buildMcpRouter({required Database database}) {
     ..use('/', templateFoldersDb(db: database))
     ..use('/', goalsDb(db: database))
     ..use('/', programsDb(db: database))
+    ..use('/', programLibrary(library: library))
     ..add(.post, '/', mcpEndpoint)
     ..add(.get, '/.well-known/oauth-protected-resource', mcpResourceMetadata)
     ..add(.get, '/', mcpMethodNotAllowed)

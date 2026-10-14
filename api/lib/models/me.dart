@@ -200,7 +200,8 @@ class MeLibrarySearch implements Model {
 
 /// A program as `/me` shows it: the program, where the user stands in it
 /// (computed, never stored), and, for one program, each exercise's current
-/// base and the next session planned from them.
+/// base, the next session planned from them, and the research behind a copy
+/// of a library program.
 abstract interface class MeProgram implements Model {
   Program get program;
 
@@ -211,6 +212,7 @@ abstract interface class MeProgram implements Model {
     ProgramPosition position, {
     Map<String, ProgramBase>? bases,
     PlannedSession? nextSession,
+    Map<String, dynamic>? research,
   }) = _MeProgram.new;
 }
 
@@ -221,8 +223,9 @@ class _MeProgram implements MeProgram {
   final ProgramPosition position;
   final Map<String, ProgramBase>? bases;
   final PlannedSession? nextSession;
+  final Map<String, dynamic>? research;
 
-  new(this.program, this.position, {this.bases, this.nextSession});
+  new(this.program, this.position, {this.bases, this.nextSession, this.research});
 
   @override
   Map<String, dynamic> toMap() {
@@ -241,6 +244,7 @@ class _MeProgram implements MeProgram {
             },
         },
       'nextSession': ?nextSession?.toMap(),
+      'research': ?research,
     };
   }
 }

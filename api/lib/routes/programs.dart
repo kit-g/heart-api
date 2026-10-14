@@ -176,3 +176,13 @@ Future<PlannedSession?> nextSession(
   if (session == null) return null;
   return PlannedSession.of(program, session, position: position, bases: bases);
 }
+
+/// [program]'s session templates in its order, null for one that is gone.
+Future<List<Template?>> programSessions(Request req, Program program) {
+  return Future.wait([
+    for (final session in program.sessions)
+      req.templatesService
+          .getTemplate(userId: req.userId, templateId: session)
+          .then<Template?>((template) => template, onError: (_) => null),
+  ]);
+}

@@ -7,6 +7,8 @@ import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/me.dart';
 import 'package:heart/models/workouts.dart';
+import 'package:heart/models/library.dart';
+import 'package:heart/routes/library.dart' show libraryView;
 import 'package:heart/routes/programs.dart' as programs;
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
@@ -398,7 +400,9 @@ final List<McpTool> tools = [
         'the user logged against the program, never stored. nextSession is the session up next as the app will '
         "show it: this week's targets, weights worked out from the current bases (a share of a base, rounded down "
         'to the rule step; a lighter week at its deload share), and no weights in a test session, which is how a '
-        'base is found. It reads what is stored; it is not a forecast. get_program_history explains how bases moved.',
+        'base is found. It reads what is stored; it is not a forecast. get_program_history explains how bases moved. '
+        'A program started from the library (source) carries research: the claims behind it with their sources, '
+        'each placed on the part it explains.',
     inputSchema: {
       'type': 'object',
       'properties': {
@@ -418,12 +422,13 @@ final List<McpTool> tools = [
       }
       final (position, bases) = await programs.programState(request, program, withBases: true);
       final names = (await request.exerciseService.getExercises(request.userId)).toExerciseNames();
-      final templates = await Future.wait([
-        for (final session in program.sessions)
-          request.templatesService
-              .getTemplate(userId: request.userId, templateId: session)
-              .then<Template?>((template) => template, onError: (_) => null),
-      ]);
+      final (templates, view) = await (
+        programs.programSessions(request, program),
+        switch (program.source) {
+          String() => libraryView(request),
+          null => Future<LibraryView?>.value(),
+        },
+      ).wait;
       // the session each template exercise is in, for a base kept per slot
       final sessionOf = {
         for (final template in templates.nonNulls)
@@ -468,6 +473,8 @@ final List<McpTool> tools = [
                 'slots': slots,
             },
         ],
+        if (view?.researchFor(program, templates) case final Map<String, dynamic> research)
+          'research': _namedResearch(research, templates: templates.nonNulls, names: names),
         if (next != null)
           'nextSession': _namedPlan(
             next,
@@ -506,12 +513,7 @@ final List<McpTool> tools = [
       final (history, names, templates) = await (
         programs.programHistory(request, program),
         request.exerciseService.getExercises(request.userId).then((library) => library.toExerciseNames()),
-        Future.wait([
-          for (final session in program.sessions)
-            request.templatesService
-                .getTemplate(userId: request.userId, templateId: session)
-                .then<Template?>((template) => template, onError: (_) => null),
-        ]),
+        programs.programSessions(request, program),
       ).wait;
       final sessionNames = {for (final template in templates.nonNulls) template.id: template.name ?? 'Untitled'};
       final slotSessions = {
@@ -550,6 +552,46 @@ final List<McpTool> tools = [
             },
         ],
       };
+    },
+  ),
+  McpTool(
+    name: 'list_library_programs',
+    title: 'List library programs',
+    description:
+        "Heart's own ready-made programs, which anyone can start in the app: for each, who it is for (audience: "
+        'starting_out, getting_back, keep_muscle, getting_stronger), the equipment it needs (none, home, gym), days '
+        'a week, minutes a session and weeks long. Use get_library_program for one in full. Copy is in the '
+        "user's language where translated, else English. Starting one happens in the app.",
+    run: (request, _) async {
+      final view = await libraryView(request);
+      if (view == null) return {'programs': const [], 'note': 'The program library is not published yet.'};
+      return {'programs': view.list()};
+    },
+  ),
+  McpTool(
+    name: 'get_library_program',
+    title: 'Get a library program',
+    description:
+        'One library program in full: who it is for, what a week looks like, how it grows and what a missed '
+        'session does; its sessions with their sets and targets (exercises by library key, named under '
+        'exercises); its growth rules; the research behind it, each claim with its sources (title, authors, year, '
+        'a link, and the finding in plain words) and the part of the program it explains (about); safety notes; '
+        'and where to go next. A share in a target is of the training max. It describes the plan; it is not '
+        'medical advice.',
+    inputSchema: {
+      'type': 'object',
+      'properties': {
+        'key': {'type': 'string', 'description': 'A key from list_library_programs.'},
+      },
+      'required': ['key'],
+      'additionalProperties': false,
+    },
+    run: (request, arguments) async {
+      final key = arguments['key'];
+      if (key is! String) throw const ToolError('key must be a key from list_library_programs.');
+      final program = (await libraryView(request))?.program(key);
+      if (program == null) throw ToolError('No library program $key. Use list_library_programs for valid keys.');
+      return program;
     },
   ),
   McpTool(
@@ -593,6 +635,41 @@ Map<String, dynamic> _namedPlan(PlannedSession plan, {required String session, r
                 ...set,
                 if (set['target'] case final Map<String, dynamic> target)
                   'target': {...target, if (target['of'] case final String of) 'of': names[of] ?? of},
+              },
+          ],
+        },
+    ],
+  };
+}
+
+/// [research] for an assistant: each claim's anchors name the session and
+/// exercise they sit on instead of ids.
+Map<String, dynamic> _namedResearch(
+  Map<String, dynamic> research, {
+  required Iterable<Template> templates,
+  required Map<String, String> names,
+}) {
+  final sessions = {for (final template in templates) template.id: template};
+  return {
+    ...research,
+    'claims': [
+      for (final claim in (research['claims'] as List).cast<Map<String, dynamic>>())
+        {
+          ...claim,
+          'about': [
+            for (final about in (claim['about'] as List).cast<Map<String, dynamic>>())
+              switch (about) {
+                {'on': 'rule', 'exercise': final String id} => {'on': 'rule', 'exercise': names[id] ?? id},
+                {'on': 'session', 'session': final String id} => {
+                  'on': 'session',
+                  'session': sessions[id]?.name ?? 'Untitled',
+                },
+                {'on': 'exercise', 'session': final String id, 'exercise': final String slot} => {
+                  'on': 'exercise',
+                  'session': sessions[id]?.name ?? 'Untitled',
+                  'exercise': ?sessions[id]?.where((exercise) => exercise.id == slot).firstOrNull?.exercise.name,
+                },
+                _ => about,
               },
           ],
         },

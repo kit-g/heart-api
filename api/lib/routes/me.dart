@@ -11,6 +11,7 @@ import 'package:heart/models/errors.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:heart/models/exports.dart';
 import 'package:heart/models/goals.dart';
+import 'package:heart/models/library.dart';
 import 'package:heart/models/me.dart';
 import 'package:heart/models/pagination.dart';
 import 'package:heart/models/programs.dart';
@@ -18,6 +19,7 @@ import 'package:heart/models/template_folders.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/routes/exercises.dart' as exercises;
 import 'package:heart/routes/goals.dart' as goals;
+import 'package:heart/routes/library.dart' show libraryView;
 import 'package:heart/routes/programs.dart' as programs;
 import 'package:heart/routes/template_folders.dart' as folders;
 import 'package:heart/routes/templates.dart' as templates;
@@ -92,12 +94,39 @@ Future<MePrograms> getMyPrograms(Request req) async {
 Future<MeProgram> getMyProgram(Request req) => getMyProgramById(req, req.rawPathParameters[#programId]!);
 
 /// One program with where the user stands in it, each exercise's current
-/// base, and the next session planned from them.
+/// base, the next session planned from them, and, for a copy of a library
+/// program, the research behind it.
 Future<MeProgram> getMyProgramById(Request req, String programId) async {
   final program = await _myProgram(req, programId);
   final (position, bases) = await programs.programState(req, program, withBases: true);
-  final next = await programs.nextSession(req, program, position, bases);
-  return MeProgram(program, position, bases: bases, nextSession: next);
+  if (program.source == null) {
+    final next = await programs.nextSession(req, program, position, bases);
+    return MeProgram(program, position, bases: bases, nextSession: next);
+  }
+  final (sessions, view) = await (programs.programSessions(req, program), libraryView(req)).wait;
+  return MeProgram(
+    program,
+    position,
+    bases: bases,
+    nextSession: await programs.nextSession(req, program, position, bases, templates: sessions.nonNulls),
+    research: view?.researchFor(program, sessions),
+  );
+}
+
+/// The program library: every program with the facts that help choose one.
+/// Empty while none is published.
+Future<LibraryResponse> getMyLibraryPrograms(Request req) async {
+  final view = await libraryView(req);
+  return LibraryResponse({'programs': view?.list() ?? const []});
+}
+
+/// One library program in full, by its key.
+Future<LibraryResponse> getMyLibraryProgram(Request req) async {
+  final key = req.rawPathParameters[#key]!;
+  return switch ((await libraryView(req))?.program(key)) {
+    final Map<String, dynamic> program => LibraryResponse(program),
+    null => throw NotFound(type: 'LibraryProgram', id: key, code: 'library_program_not_found'),
+  };
 }
 
 Future<ProgramHistory> getMyProgramHistory(Request req) async {

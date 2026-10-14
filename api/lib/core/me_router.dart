@@ -4,13 +4,18 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/middleware/tokens.dart';
 import 'package:heart/models/exports.dart';
+import 'package:heart/models/library.dart';
 import 'package:heart/routes/me_index.dart';
 import 'package:relic/relic.dart';
 
 /// The `/me` surface as a router of its own: a personal access token instead
 /// of a Firebase session, its own rate limit and usage log, and only the
 /// services its routes read. The app's router attaches it at [tokenPrefix].
-RelicRouter buildMeRouter({required Database database, required ExportStorage storage}) {
+RelicRouter buildMeRouter({
+  required Database database,
+  required ExportStorage storage,
+  required ProgramLibrary library,
+}) {
   return RelicRouter()
     ..use('/', apiTokensDb(db: database))
     ..use('/', tokenAuthentication())
@@ -22,5 +27,6 @@ RelicRouter buildMeRouter({required Database database, required ExportStorage st
     ..use('/', goalsDb(db: database))
     ..use('/', programsDb(db: database))
     ..use('/', exportStorage(storage: storage))
+    ..use('/', programLibrary(library: library))
     ..addRoutes(meRoutes);
 }

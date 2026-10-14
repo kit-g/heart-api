@@ -4,11 +4,13 @@ import '../models/exercises.dart';
 import '../models/exports.dart';
 import '../models/images.dart';
 import '../models/imports.dart';
+import '../models/library.dart';
 
 final _exercisesProperty = ContextProperty<ExerciseService>('ExerciseService');
 final _imageStorageProperty = ContextProperty<ApiImageStorageService>('ApiImageStorageService');
 final _exportStorageProperty = ContextProperty<ExportStorage>('ExportStorage');
 final _importStorageProperty = ContextProperty<ImportStorage>('ImportStorage');
+final _programLibraryProperty = ContextProperty<ProgramLibrary>('ProgramLibrary');
 
 Middleware exercisesDb({required ExerciseService db}) {
   return (Handler next) {
@@ -46,6 +48,15 @@ Middleware importStorage({required ImportStorage storage}) {
   };
 }
 
+Middleware programLibrary({required ProgramLibrary library}) {
+  return (Handler next) {
+    return (request) {
+      _programLibraryProperty[request] = library;
+      return next(request);
+    };
+  };
+}
+
 extension StorageService on Request {
   ExerciseService get exerciseService => _exercisesProperty.get(this);
 
@@ -62,4 +73,8 @@ extension StorageService on Request {
   ImportStorage get importStorage => _importStorageProperty.get(this);
 
   set importStorage(ImportStorage v) => _importStorageProperty[this] = v;
+
+  ProgramLibrary get programLibrary => _programLibraryProperty.get(this);
+
+  set programLibrary(ProgramLibrary v) => _programLibraryProperty[this] = v;
 }
