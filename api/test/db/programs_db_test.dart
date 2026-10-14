@@ -393,6 +393,44 @@ FROM generate_series(1, 100) n
       expect(await h.db.getProgramActions(userId: userId, programId: stored.id!), isEmpty);
     });
 
+    test('a stage names its exercise, slot and stage, and goes with the workout (heart-api#256)', () async {
+      final userId = await h.seedProfile();
+      final (stored, _) = await h.db.createProgramOrExisting(userId: userId, program: program(), sessions: const []);
+      final programId = stored.id!;
+      final workoutId = await h.seedWorkout(userId: userId);
+      final slot = uuidV7();
+      expect(await h.db.getProgramActions(userId: userId, programId: programId), isEmpty);
+
+      final (made, created) = await h.db.createProgramAction(
+        userId: userId,
+        programId: programId,
+        action: ProgramAction(
+          kind: .stage,
+          exercise: exerciseId,
+          slot: slot,
+          stage: 1,
+          workoutId: workoutId,
+          at: DateTime.utc(2026, 10, 15),
+        ),
+      );
+      expect(created, isTrue);
+      expect(
+        (made.kind, made.exercise, made.slot, made.stage, made.workoutId),
+        (
+          ProgramActionKind.stage,
+          exerciseId,
+          slot,
+          1,
+          workoutId,
+        ),
+      );
+      final [read] = (await h.db.getProgramActions(userId: userId, programId: programId)).toList();
+      expect(currentStages([read]), {slot: 1});
+
+      await h.exec('DELETE FROM workouts WHERE id = @id::uuid', {'id': workoutId});
+      expect(await h.db.getProgramActions(userId: userId, programId: programId), isEmpty);
+    });
+
     test("someone else's program is unknown_program, and its actions are invisible", () async {
       final owner = await h.seedProfile();
       final stranger = await h.seedProfile();
