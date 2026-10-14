@@ -1,0 +1,48 @@
+# What the app says about safety around the free programs (heart-api#235).
+# Each program names the notes it shows; `start` once, when the program is
+# started, the rest on its page. Plain, once, never alarming: the research
+# behind the wording is in the Notion page "Programs — research".
+
+version: 1
+locales: [es, fr, ru]
+
+notes:
+  start:
+    sources: [acsm_screening_2015]
+    text:
+      en: Most people can start light to moderate exercise without seeing a doctor first. If you have a heart condition, chest pain or fainting, or a doctor has told you to limit activity, check with them before you start.
+      es: La mayoría de la gente puede empezar con ejercicio suave o moderado sin ir antes al médico. Si tienes una enfermedad del corazón, dolor en el pecho o desmayos, o un médico te ha dicho que limites la actividad, consúltale antes de empezar.
+      fr: La plupart des gens peuvent commencer une activité légère à modérée sans voir de médecin. Si vous avez une maladie cardiaque, des douleurs dans la poitrine ou des malaises, ou si un médecin vous a demandé de limiter l’activité, demandez-lui avant de commencer.
+      ru: Большинство людей могут начинать лёгкие и умеренные нагрузки без визита к врачу. Если у вас болезнь сердца, боли в груди или обмороки или врач велел ограничить активность, посоветуйтесь с ним перед началом.
+  stop_if:
+    text:
+      en: Stop and rest if you feel chest pain, dizziness, unusual breathlessness, an irregular heartbeat or sharp pain. Chest pain that doesn't ease with rest needs emergency help.
+      es: Para y descansa si notas dolor en el pecho, mareo, una falta de aire inusual, latidos irregulares o un dolor agudo. Un dolor en el pecho que no cede con el reposo necesita ayuda urgente.
+      fr: Arrêtez-vous et reposez-vous en cas de douleur dans la poitrine, de vertige, d’essoufflement inhabituel, de battements irréguliers ou de douleur vive. Une douleur dans la poitrine qui ne passe pas au repos demande une aide d’urgence.
+      ru: Остановитесь и отдохните, если чувствуете боль в груди, головокружение, необычную одышку, перебои в сердце или резкую боль. Боль в груди, которая не проходит в покое, требует экстренной помощи.
+  discomfort:
+    text:
+      en: Some discomfort is normal while you train. If pain is sharp, builds through the session, or is worse the next morning, ease off.
+      es: Cierta molestia es normal al entrenar. Si el dolor es agudo, va a más durante la sesión o empeora a la mañana siguiente, baja el ritmo.
+      fr: Un peu d’inconfort est normal à l’entraînement. Si la douleur est vive, augmente pendant la séance ou est pire le lendemain matin, levez le pied.
+      ru: Некоторый дискомфорт во время тренировки — это нормально. Если боль резкая, нарастает за тренировку или сильнее на следующее утро, снизьте нагрузку.
+  not_treatment:
+    text:
+      en: This plan is for getting your general fitness back. It isn't treatment for an injury or a condition; if you're recovering from one, your clinician or physio is the right guide.
+      es: Este plan sirve para recuperar la forma en general. No es un tratamiento para una lesión o una enfermedad; si te estás recuperando de una, tu médico o fisioterapeuta es quien debe guiarte.
+      fr: Ce programme sert à retrouver une forme générale. Ce n’est pas un traitement pour une blessure ou une maladie ; si vous vous en remettez, votre médecin ou votre kiné est le bon guide.
+      ru: Этот план — для возвращения общей формы. Это не лечение травмы или болезни; если вы восстанавливаетесь после них, лучший проводник — ваш врач или физиотерапевт.
+  mecfs:
+    sources: [nice_mecfs]
+    text:
+      en: If activity leaves you much worse a day or two later, or you have ME/CFS or long COVID, a plan that steps up week by week isn't right for you. Talk to a clinician instead.
+      es: Si la actividad te deja mucho peor uno o dos días después, o tienes EM/SFC o COVID persistente, un plan que sube semana a semana no es para ti. Habla mejor con un profesional sanitario.
+      fr: Si l’activité vous laisse bien plus mal un jour ou deux après, ou si vous avez une EM/SFC ou un COVID long, un programme qui augmente semaine après semaine ne vous convient pas. Parlez-en plutôt à un soignant.
+      ru: Если после нагрузки через день-два вам намного хуже или у вас МЭ/СХУ или постковидный синдром, план с ростом нагрузки по неделям вам не подходит. Лучше поговорите с врачом.
+  postpartum:
+    sources: [uk_cmo_postpartum]
+    text:
+      en: After having a baby, check in with your midwife or doctor before you start, usually at your postnatal check. Pelvic floor exercises come first, and every day.
+      es: Después de dar a luz, consulta con tu matrona o tu médico antes de empezar, normalmente en la revisión posparto. Los ejercicios de suelo pélvico van primero, y a diario.
+      fr: Après une naissance, parlez-en à votre sage-femme ou à votre médecin avant de commencer, en général à la visite postnatale. Les exercices du périnée passent en premier, et chaque jour.
+      ru: После родов посоветуйтесь с акушеркой или врачом перед началом, обычно на послеродовом осмотре. Упражнения для тазового дна — в первую очередь и каждый день.

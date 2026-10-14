@@ -6,19 +6,21 @@
 # the body as the load (reps only, weighted or assisted body weight), so a
 # ladder never climbs into a barbell.
 #
-# The rungs the research asks for that the library lacks yet (a wall push-up,
-# a sit-to-stand from a chair, balance holds) join the library with the
-# program library's second draft (heart-api#235).
+# The push ladder starts at the wall and the squat ladder at the chair, the
+# first rungs the beginner programs ask for (heart-api#235). A balance hold
+# such as the single-leg stand logs time, not reps, so it is no rung.
 
 version: 1
 
 ladders:
   push:
+    - wall-push-up
     - incline-push-up
     - push-up-knees
     - push-up
     - decline-push-up
   squat:
+    - sit-to-stand
     - squat-bodyweight
     - jump-squat
     - pistol-squat

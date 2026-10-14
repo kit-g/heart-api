@@ -1,0 +1,127 @@
+# "Go easy on" (heart-api#236): what the app's opt-in, on-device list of body
+# areas and movements maps to, served as CDN content so the mapping changes
+# without an app release. The user's list itself is health-shaped: it lives on
+# the phone and never reaches the server (Request.json() refuses its keys).
+#
+# Each entry says which exercises are harder on it (`easier`, any of the
+# predicates) and which are kinder (`prefer`). A predicate matches an
+# exercise's library movement data: its pattern `groups`, `axial_load`,
+# `impact`, `stability`, and its `category`. The app hides only from
+# suggestions, marks an exercise already in a plan with a neutral note and a
+# one-tap swap, and never blocks anything. Modify and monitor, not forbid
+# (the Notion page "Programs — research", section 5).
+#
+# The copy is plain and never alarming: "Easier on your knee", never "May
+# affect your injury". es/fr/ru are machine-translated, awaiting review.
+
+version: 1
+locales: [es, fr, ru]
+
+copy:
+  title:
+    en: Things to go easy on
+    es: Con qué ir con cuidado
+    fr: Ce qu’il faut ménager
+    ru: Что поберечь
+  explainer:
+    en: Heart uses this to suggest swaps. It stays on this phone and isn't medical advice.
+    es: Heart lo usa para sugerirte cambios. Se queda en este teléfono y no es consejo médico.
+    fr: Heart s’en sert pour suggérer des remplacements. Cela reste sur ce téléphone et ce n’est pas un avis médical.
+    ru: Heart использует это, чтобы предлагать замены. Это остаётся на телефоне и не является медицинским советом.
+  footer:
+    en: Some discomfort can be normal while you train. If pain is sharp, builds through the session, or is worse the next morning, ease off and check with a professional.
+    es: Cierta molestia puede ser normal al entrenar. Si el dolor es agudo, va a más durante la sesión o empeora a la mañana siguiente, baja el ritmo y consulta con un profesional.
+    fr: Un peu d’inconfort peut être normal à l’entraînement. Si la douleur est vive, augmente pendant la séance ou est pire le lendemain matin, levez le pied et consultez un professionnel.
+    ru: Некоторый дискомфорт на тренировке бывает нормальным. Если боль резкая, нарастает за тренировку или сильнее на следующее утро, снизьте нагрузку и обратитесь к специалисту.
+
+areas:
+  lower_back:
+    name: {en: Lower back, es: Zona lumbar, fr: Bas du dos, ru: Поясница}
+    easier_on: {en: Easier on your lower back, es: Más suave para la zona lumbar, fr: Plus doux pour le bas du dos, ru: Бережнее к пояснице}
+    easier:
+      - {axial_load: [high]}
+      - {groups: [deadlift_floor, hip_hinge_stifflegged, trunk_flexion]}
+      - {impact: [high]}
+    prefer:
+      - {stability: [supported, machine]}
+      - {axial_load: [none, low]}
+  knee:
+    name: {en: Knee, es: Rodilla, fr: Genou, ru: Колено}
+    easier_on: {en: Easier on your knee, es: Más suave para la rodilla, fr: Plus doux pour le genou, ru: Бережнее к колену}
+    easier:
+      - {impact: [high]}
+      - {groups: [plyometric_lower, lunge_split]}
+    prefer:
+      - {groups: [hip_extension_bridge, hip_hinge_stifflegged]}
+      - {stability: [machine]}
+  shoulder:
+    name: {en: Shoulder, es: Hombro, fr: Épaule, ru: Плечо}
+    easier_on: {en: Easier on your shoulder, es: Más suave para el hombro, fr: Plus doux pour l’épaule, ru: Бережнее к плечу}
+    easier:
+      - {groups: [vertical_press, chest_dip, upright_row, pullover]}
+    prefer:
+      - {stability: [supported, machine]}
+      - {groups: [horizontal_row]}
+  wrist:
+    name: {en: Wrist, es: Muñeca, fr: Poignet, ru: Запястье}
+    easier_on: {en: Easier on your wrist, es: Más suave para la muñeca, fr: Plus doux pour le poignet, ru: Бережнее к запястью}
+    easier:
+      - {groups: [horizontal_press, incline_press, decline_press], category: [Reps Only, Weighted Body Weight]}
+      - {groups: [core_bracing], category: [Duration]}
+      - {groups: [olympic_lift]}
+    prefer:
+      - {category: [Machine, Dumbbell]}
+  neck:
+    name: {en: Neck, es: Cuello, fr: Cou, ru: Шея}
+    easier_on: {en: Easier on your neck, es: Más suave para el cuello, fr: Plus doux pour le cou, ru: Бережнее к шее}
+    easier:
+      - {groups: [squat_bilateral, shrug], axial_load: [high]}
+      - {groups: [trunk_flexion]}
+    prefer:
+      - {axial_load: [none, low]}
+  hip:
+    name: {en: Hip, es: Cadera, fr: Hanche, ru: Бедро}
+    easier_on: {en: Easier on your hip, es: Más suave para la cadera, fr: Plus doux pour la hanche, ru: Бережнее к тазобедренному суставу}
+    easier:
+      - {groups: [lunge_split, plyometric_lower, hip_adduction, hip_abduction]}
+      - {impact: [high]}
+    prefer:
+      - {stability: [supported, machine]}
+  ankle:
+    name: {en: Ankle, es: Tobillo, fr: Cheville, ru: Лодыжка}
+    easier_on: {en: Easier on your ankle, es: Más suave para el tobillo, fr: Plus doux pour la cheville, ru: Бережнее к голеностопу}
+    easier:
+      - {impact: [high]}
+      - {groups: [plyometric_lower, calf_raise]}
+    prefer:
+      - {stability: [supported, machine]}
+  elbow:
+    name: {en: Elbow, es: Codo, fr: Coude, ru: Локоть}
+    easier_on: {en: Easier on your elbow, es: Más suave para el codo, fr: Plus doux pour le coude, ru: Бережнее к локтю}
+    easier:
+      - {groups: [elbow_extension, elbow_flexion, chest_dip]}
+    prefer:
+      - {stability: [machine]}
+
+movements:
+  jumping:
+    name: {en: Jumping and impact, es: Saltos e impacto, fr: Sauts et impacts, ru: Прыжки и удары}
+    easier_on: {en: No jumping, es: Sin saltos, fr: Sans sauts, ru: Без прыжков}
+    easier:
+      - {impact: [high]}
+    prefer:
+      - {impact: [none]}
+  spine_load:
+    name: {en: Heavy weight on the spine, es: Mucho peso sobre la columna, fr: Charges lourdes sur la colonne, ru: Большой вес на позвоночник}
+    easier_on: {en: Lighter on your spine, es: Menos carga en la columna, fr: Moins de charge sur la colonne, ru: Меньше нагрузки на позвоночник}
+    easier:
+      - {axial_load: [high]}
+    prefer:
+      - {axial_load: [none, low]}
+  overhead:
+    name: {en: Pressing overhead, es: Empujar por encima de la cabeza, fr: Pousser au-dessus de la tête, ru: Жимы над головой}
+    easier_on: {en: Without pressing overhead, es: Sin empujar por encima de la cabeza, fr: Sans pousser au-dessus de la tête, ru: Без жимов над головой}
+    easier:
+      - {groups: [vertical_press]}
+    prefer:
+      - {groups: [incline_press, horizontal_press]}

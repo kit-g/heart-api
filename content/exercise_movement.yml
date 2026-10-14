@@ -2648,3 +2648,27 @@ air-bike:
   unilateral: false
   impact: none
   skill: low
+wall-push-up:
+  groups:
+    - horizontal_press
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+sit-to-stand:
+  groups:
+    - squat_bilateral
+  axial_load: none
+  stability: free
+  unilateral: false
+  impact: none
+  skill: low
+single-leg-stand:
+  groups:
+    - mobility
+  axial_load: none
+  stability: free
+  unilateral: true
+  impact: none
+  skill: low

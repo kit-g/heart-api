@@ -21235,6 +21235,206 @@ exercises:
           - arms
           - core
           - hamstrings
+  wall-push-up:
+    category: Reps Only
+    target: Chest
+    movement:
+      groups:
+        - horizontal_press
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Wall Push Up"
+        aliases: ["wall push ups", "wall pushup"]
+        validated: true
+        instructions: |
+          ## Overview
+          The wall push up is a push up done standing, with your hands on a wall. Because you stay nearly upright, your arms carry only a small part of your bodyweight, which makes it the easiest push up there is. It trains the chest, front shoulders and triceps, and it is where to start if push ups on a bench or the floor are still too hard.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand facing a wall, about an arm's length away
+          - Place your hands flat on the wall at chest height, slightly wider than your shoulders
+          - Step your feet back a little so you lean in toward the wall
+          - Keep your body in a straight line from heels to head
+          - Brace your core and squeeze your glutes
+
+          ### 2. Movement
+          1. Bend your elbows to bring your chest toward the wall
+          2. Keep your elbows at about 45 degrees from your body
+          3. Lower until your nose is close to the wall
+          4. Press back until your arms are straight
+          5. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe in as you lower
+          - Breathe out as you press away
+
+          ### 4. Tips
+          - The further your feet are from the wall, the harder it gets
+          - Keep your heels down if you can, or let them lift a little
+          - Move slowly and keep the whole body moving as one piece
+          - When 15 easy reps feel comfortable, move on to a bench or counter
+
+          ### 5. Common Mistakes
+          - Letting the hips sag or stick out
+          - Flaring the elbows straight out to the sides
+          - Moving only the head toward the wall
+          - Using a short range that barely bends the elbows
+
+          ### 6. Safety / Modifications
+          - Wear shoes with grip or stand on a non-slip floor
+          - Stand closer to the wall if your shoulders or wrists feel strained
+          - Keep your wrists under your shoulders, not above your head
+          - Stop if you feel pain in your shoulders or wrists
+
+    muscles:
+      primary:
+        ids:
+          - pectoralis_major_l
+          - pectoralis_major_r
+      secondary:
+        groups:
+          - arms
+          - core
+          - shoulders
+  sit-to-stand:
+    category: Reps Only
+    target: Legs
+    movement:
+      groups:
+        - squat_bilateral
+      axial_load: none
+      stability: free
+      unilateral: false
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Sit to Stand"
+        aliases: ["chair stand", "chair squat", "sit to stands"]
+        validated: true
+        instructions: |
+          ## Overview
+          The sit to stand is standing up from a chair and sitting back down, without using your hands. It is the movement you use every day to get out of a seat, and it trains the thighs and glutes. It is the first step toward a full bodyweight squat, and a simple way to keep getting up easy.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Sit near the front edge of a sturdy chair with your feet flat on the floor
+          - Place your feet hip-width apart, slightly behind your knees
+          - Cross your arms over your chest or hold them out in front of you
+          - Sit tall with your chest up
+
+          ### 2. Movement
+          1. Lean your chest forward over your feet
+          2. Push through your heels to stand up all the way
+          3. Squeeze your glutes at the top
+          4. Push your hips back and bend your knees to sit down slowly
+          5. Touch the chair lightly, then stand again
+          6. Repeat for the target number of reps
+
+          ### 3. Breathing
+          - Breathe out as you stand up
+          - Breathe in as you sit back down
+
+          ### 4. Tips
+          - Sit down slowly rather than dropping into the chair
+          - Keep your knees in line with your toes
+          - A lower chair makes it harder, a higher one easier
+          - When it feels easy, hover just above the seat instead of sitting
+
+          ### 5. Common Mistakes
+          - Pushing off your thighs or the chair with your hands
+          - Dropping into the chair at the bottom
+          - Letting the knees cave inward
+          - Not standing up fully at the top
+
+          ### 6. Safety / Modifications
+          - Use a sturdy chair without wheels, placed against a wall so it can't slide
+          - Use your hands on the armrests at first if you need to, then wean off them
+          - Add a cushion to raise the seat if standing up is still hard
+          - Stop if you feel dizzy or have pain in your knees or hips
+
+    muscles:
+      primary:
+        groups:
+          - glutes
+          - legs
+      secondary:
+        groups:
+          - core
+          - hamstrings
+  single-leg-stand:
+    category: Duration
+    target: Legs
+    movement:
+      groups:
+        - mobility
+      axial_load: none
+      stability: free
+      unilateral: true
+      impact: none
+      skill: low
+    i18n:
+      en:
+        name: "Single Leg Stand"
+        aliases: ["single leg balance", "one leg stand"]
+        validated: true
+        instructions: |
+          ## Overview
+          The single leg stand is a balance hold: you stand on one leg for a set time, then switch. It trains the small muscles of the ankle, foot and hip that keep you steady, and better balance makes everyday moves like stairs and getting dressed safer. Do it next to a counter so support is always within reach.
+
+          ## How to Perform
+          ### 1. Starting Position
+          - Stand next to a kitchen counter or a sturdy chair, close enough to touch it
+          - Rest one hand lightly on the support
+          - Stand tall with your feet hip-width apart and your weight even
+          - Look straight ahead at a fixed point
+
+          ### 2. Movement
+          1. Shift your weight onto one foot
+          2. Lift the other foot a few inches off the floor
+          3. Keep your standing knee soft, not locked
+          4. Hold for the target time
+          5. Lower the foot, then switch sides
+
+          ### 3. Breathing
+          - Breathe slowly and steadily throughout
+          - Don't hold your breath to stay steady
+
+          ### 4. Tips
+          - Small wobbles are normal; they are your balance working
+          - Progress from two hands on the support, to one, to a fingertip, to none
+          - Closing your eyes or standing on a cushion makes it much harder
+          - Practice a little and often
+
+          ### 5. Common Mistakes
+          - Leaning on the support with your full weight
+          - Locking the standing knee
+          - Letting the hip of the lifted leg drop
+          - Looking down at your feet
+
+          ### 6. Safety / Modifications
+          - Always stand next to a counter, wall or sturdy chair you can grab
+          - Clear the floor around you of rugs and clutter
+          - Keep your hand on the support until you feel confident
+          - Stop and sit down if you feel dizzy
+
+    muscles:
+      primary:
+        ids:
+          - gluteus_medius_1_l
+          - gluteus_medius_1_r
+          - gluteus_medius_2_l
+          - gluteus_medius_2_r
+      secondary:
+        groups:
+          - legs
+          - core
   aerobics:
     category: Duration
     target: Cardio

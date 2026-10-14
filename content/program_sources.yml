@@ -1,0 +1,296 @@
+# What the free program library rests on (heart-api#235): the studies and
+# guidelines behind each program and each claim its copy makes, served with
+# the programs so the app can link them. From the research of 2026-10-14
+# (the Notion page "Programs — research").
+#
+# A link goes to the publisher's page, PubMed or PMC, or the author body's own
+# page: never a copy of a paper hosted by someone else.
+#
+# `finding` is the one line the app shows next to the link, in plain words;
+# it is copy, translated like every other line. `title`, `who` and `year` say
+# what the link is and stay as published.
+
+version: 1
+locales: [es, fr, ru]
+
+sources:
+  acsm_2026:
+    title: Resistance training prescription for muscle function, hypertrophy and physical performance
+    who: Currier et al., ACSM position stand, Medicine & Science in Sports & Exercise
+    year: 2026
+    url: https://pubmed.ncbi.nlm.nih.gov/41843416/
+    finding:
+      en: Across 137 reviews, few details of a program mattered. Heavy enough weights, two to three sets, and training each muscle twice a week did.
+      es: En 137 revisiones, pocos detalles de un programa importaron. Sí lo hicieron pesos suficientes, dos o tres series y entrenar cada músculo dos veces por semana.
+      fr: "Sur 137 revues, peu de détails d’un programme comptaient. Ce qui comptait : des charges suffisantes, deux à trois séries, et chaque muscle travaillé deux fois par semaine."
+      ru: В 137 обзорах мало какие детали программы имели значение. Значение имели достаточный вес, две-три серии и тренировка каждой мышцы два раза в неделю.
+  currier_2023:
+    title: Resistance training prescription for muscle strength and hypertrophy in healthy adults
+    who: Currier et al., British Journal of Sports Medicine (network meta-analysis)
+    year: 2023
+    url: https://pubmed.ncbi.nlm.nih.gov/37414459/
+    finding:
+      en: Every way of training beat not training. Heavy sets three times a week led for strength.
+      es: Cualquier forma de entrenar fue mejor que no entrenar. Las series pesadas tres veces por semana fueron las mejores para la fuerza.
+      fr: Toutes les façons de s’entraîner ont fait mieux que ne pas s’entraîner. Des séries lourdes trois fois par semaine sont arrivées en tête pour la force.
+      ru: Любой способ тренироваться оказался лучше, чем не тренироваться. Для силы лучше всего были тяжёлые подходы три раза в неделю.
+  iversen_2021:
+    title: No time to lift? Designing time-efficient training programs for strength and hypertrophy
+    who: Iversen et al., Sports Medicine
+    year: 2021
+    url: https://pmc.ncbi.nlm.nih.gov/articles/PMC8449772
+    finding:
+      en: About four hard sets per muscle a week, of 6 to 15 reps, is enough to make progress.
+      es: Unas cuatro series exigentes por músculo a la semana, de 6 a 15 repeticiones, bastan para progresar.
+      fr: Environ quatre séries difficiles par muscle et par semaine, de 6 à 15 répétitions, suffisent pour progresser.
+      ru: Около четырёх тяжёлых подходов на мышцу в неделю по 6–15 повторений достаточно для прогресса.
+  steele_2023:
+    title: Long-term time-course of strength adaptation to minimal dose resistance training
+    who: Steele et al., SportRxiv (14,690 adults)
+    year: 2023
+    url: https://sportrxiv.org/index.php/server/preprint/view/69
+    finding:
+      en: One full-body session a week, a single hard set per exercise, raised strength 30 to 50% in the first year.
+      es: Una sesión de cuerpo completo a la semana, con una sola serie exigente por ejercicio, aumentó la fuerza entre un 30 y un 50% el primer año.
+      fr: Une séance corps entier par semaine, une seule série difficile par exercice, a augmenté la force de 30 à 50 % la première année.
+      ru: Одна тренировка на всё тело в неделю, по одному тяжёлому подходу на упражнение, увеличила силу на 30–50% за первый год.
+  plotkin_2022:
+    title: Progressive overload without progressing load? The effects of load or repetition progression
+    who: Plotkin et al., PeerJ
+    year: 2022
+    url: https://pubmed.ncbi.nlm.nih.gov/36199287/
+    finding:
+      en: Adding reps built as much muscle as adding weight, so a rep range is a fair way to progress when the dumbbell steps are big.
+      es: Añadir repeticiones construyó tanto músculo como añadir peso, así que un rango de repeticiones es una buena forma de progresar cuando los saltos de mancuerna son grandes.
+      fr: "Ajouter des répétitions a construit autant de muscle qu’ajouter de la charge : une fourchette de répétitions est une bonne façon de progresser quand les haltères montent par gros paliers."
+      ru: Добавление повторений растило мышцы так же, как добавление веса, поэтому диапазон повторений — хороший способ прогрессировать, когда шаги гантелей большие.
+  acsm_2009:
+    title: Progression models in resistance training for healthy adults
+    who: American College of Sports Medicine, position stand
+    year: 2009
+    url: https://pubmed.ncbi.nlm.nih.gov/19204579/
+    finding:
+      en: Beginners do well on 8 to 12 reps, two or three days a week, adding 2 to 10% once they can do a rep or two more than asked.
+      es: A los principiantes les va bien con 8 a 12 repeticiones, dos o tres días por semana, añadiendo un 2 a 10% cuando pueden hacer una o dos repeticiones más de las pedidas.
+      fr: Les débutants progressent bien avec 8 à 12 répétitions, deux ou trois jours par semaine, en ajoutant 2 à 10 % dès qu’ils font une ou deux répétitions de plus que demandé.
+      ru: Новичкам подходят 8–12 повторений два-три раза в неделю с прибавкой 2–10%, когда получается сделать на одно-два повторения больше заданного.
+  bickel_2011:
+    title: Exercise dosing to retain resistance training adaptations in young and older adults
+    who: Bickel, Cross & Bamman, Medicine & Science in Sports & Exercise
+    year: 2011
+    url: https://pubmed.ncbi.nlm.nih.gov/21131862/
+    finding:
+      en: A third of the usual training kept the muscle for eight months; older adults needed a little more than younger ones.
+      es: Un tercio del entrenamiento habitual mantuvo el músculo durante ocho meses; los mayores necesitaron algo más que los jóvenes.
+      fr: Un tiers de l’entraînement habituel a maintenu le muscle pendant huit mois ; les plus âgés avaient besoin d’un peu plus que les jeunes.
+      ru: Трети обычной нагрузки хватило, чтобы сохранить мышцы на восемь месяцев; пожилым нужно было немного больше, чем молодым.
+  spiering_2021:
+    title: Maintaining physical performance — the minimal dose of exercise needed
+    who: Spiering et al., Journal of Strength and Conditioning Research
+    year: 2021
+    url: https://pubmed.ncbi.nlm.nih.gov/33629972/
+    finding:
+      en: Strength and muscle held for months on far fewer sets, as long as the weights stayed heavy.
+      es: La fuerza y el músculo se mantuvieron meses con muchas menos series, siempre que los pesos siguieran siendo altos.
+      fr: La force et le muscle ont tenu des mois avec bien moins de séries, tant que les charges restaient lourdes.
+      ru: Сила и мышцы держались месяцами при гораздо меньшем числе подходов, пока веса оставались тяжёлыми.
+  roth_2023:
+    title: Effects of resistance training volume on lean mass during energy restriction
+    who: Roth et al., Nutrients
+    year: 2023
+    url: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9012799/
+    finding:
+      en: While eating less, five sets per exercise kept no more muscle than three.
+      es: Comiendo menos, cinco series por ejercicio no conservaron más músculo que tres.
+      fr: En mangeant moins, cinq séries par exercice n’ont pas conservé plus de muscle que trois.
+      ru: При урезанном питании пять подходов на упражнение сохранили не больше мышц, чем три.
+  murphy_2022:
+    title: Energy deficiency impairs resistance training gains in lean mass but not strength
+    who: Murphy & Koehler, Scandinavian Journal of Medicine & Science in Sports
+    year: 2022
+    url: https://mediatum.ub.tum.de/node?id=1632530
+    finding:
+      en: Eating less blunted muscle gains but not strength gains. Holding steady is a good result.
+      es: Comer menos frenó la ganancia de músculo, pero no la de fuerza. Mantenerse es un buen resultado.
+      fr: Manger moins a freiné la prise de muscle, pas celle de force. Se maintenir est un bon résultat.
+      ru: Дефицит питания тормозил рост мышц, но не силы. Удержать результат — уже хорошо.
+  helms_2014:
+    title: Evidence-based recommendations for natural bodybuilding contest preparation
+    who: Helms, Aragon & Fitschen, Journal of the International Society of Sports Nutrition
+    year: 2014
+    url: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4033492/
+    finding:
+      en: Losing about 0.5 to 1% of body weight a week keeps the most muscle.
+      es: Perder alrededor del 0,5 al 1% del peso corporal por semana conserva más músculo.
+      fr: Perdre environ 0,5 à 1 % du poids du corps par semaine préserve le plus de muscle.
+      ru: Потеря примерно 0,5–1% веса тела в неделю лучше всего сохраняет мышцы.
+  sbs_detraining:
+    title: Detraining — how fast you lose strength and muscle, and how fast it comes back
+    who: Greg Nuckols, Stronger By Science
+    year: 2023
+    url: https://www.strongerbyscience.com/detraining/
+    finding:
+      en: A month off barely touches strength, and what is lost comes back in about half the time it took to lose.
+      es: Un mes de descanso apenas afecta a la fuerza, y lo perdido vuelve en más o menos la mitad del tiempo que tardó en irse.
+      fr: Un mois d’arrêt touche à peine la force, et ce qui est perdu revient en à peu près la moitié du temps qu’il a fallu pour le perdre.
+      ru: Месяц перерыва почти не сказывается на силе, а потерянное возвращается примерно за половину того времени, за которое ушло.
+  bosquet_2013:
+    title: Effect of training cessation on muscular performance — a meta-analysis
+    who: Bosquet et al., Scandinavian Journal of Medicine & Science in Sports
+    year: 2013
+    url: https://ekoizpen-zientifikoa.ehu.eus/documentos/5f1cda5129995265e44d37a4?lang=en
+    finding:
+      en: Up to four weeks off, maximal strength hardly changed; older adults lost about twice as much as younger ones.
+      es: Hasta cuatro semanas de parón, la fuerza máxima apenas cambió; los mayores perdieron alrededor del doble que los jóvenes.
+      fr: Jusqu’à quatre semaines d’arrêt, la force maximale a peu bougé ; les plus âgés en ont perdu environ deux fois plus que les jeunes.
+      ru: За перерыв до четырёх недель максимальная сила почти не изменилась; пожилые теряли примерно вдвое больше молодых.
+  ogasawara_2013:
+    title: Comparison of muscle hypertrophy following 6-month continuous and periodic strength training
+    who: Ogasawara et al., European Journal of Applied Physiology
+    year: 2013
+    url: https://link.springer.com/article/10.1007%2Fs00421-012-2511-9
+    finding:
+      en: Lifters who took three-week breaks ended up as strong and as muscular as those who never stopped.
+      es: Quienes hicieron pausas de tres semanas acabaron igual de fuertes y musculosos que quienes nunca pararon.
+      fr: Ceux qui faisaient des pauses de trois semaines ont fini aussi forts et musclés que ceux qui ne s’arrêtaient jamais.
+      ru: Те, кто делал трёхнедельные перерывы, в итоге были такими же сильными и мускулистыми, как те, кто не прерывался.
+  coleman_2024:
+    title: Gaining more from doing less? The effects of a one-week deload period during supervised resistance training
+    who: Coleman et al., PeerJ
+    year: 2024
+    url: https://peerj.com/articles/16777
+    finding:
+      en: A week fully off in the middle of a program slightly hurt lower-body strength. A lighter week should reduce training, not stop it.
+      es: Una semana entera sin entrenar a mitad del programa perjudicó algo la fuerza del tren inferior. Una semana ligera debería reducir el entrenamiento, no pararlo.
+      fr: Une semaine complète sans entraînement au milieu d’un programme a un peu nui à la force du bas du corps. Une semaine allégée doit réduire l’entraînement, pas l’arrêter.
+      ru: Полная неделя без тренировок посреди программы немного снизила силу ног. Лёгкая неделя должна сокращать нагрузку, а не отменять её.
+  bell_2023:
+    title: Integrating deloading into strength and physique sports training programmes — an international Delphi consensus
+    who: Bell et al., Sports Medicine – Open
+    year: 2023
+    url: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10511399/
+    finding:
+      en: Coaches agree on a lighter week every four to eight weeks, with less volume or load.
+      es: Los entrenadores coinciden en una semana más ligera cada cuatro a ocho semanas, con menos volumen o carga.
+      fr: Les entraîneurs s’accordent sur une semaine allégée toutes les quatre à huit semaines, avec moins de volume ou de charge.
+      ru: Тренеры сходятся на лёгкой неделе раз в четыре-восемь недель, с меньшим объёмом или весом.
+  schoenfeld_2016:
+    title: Effects of resistance training frequency on measures of muscle hypertrophy
+    who: Schoenfeld, Ogborn & Krieger, Sports Medicine
+    year: 2016
+    url: https://pubmed.ncbi.nlm.nih.gov/27102172/
+    finding:
+      en: Training each muscle twice a week built more than once a week; whether that's three full-body days or four split days is your call.
+      es: Entrenar cada músculo dos veces por semana construyó más que una; si eso son tres días de cuerpo completo o cuatro divididos, lo decides tú.
+      fr: Travailler chaque muscle deux fois par semaine a construit plus qu’une fois ; trois jours corps entier ou quatre jours divisés, c’est à vous de voir.
+      ru: Две тренировки каждой мышцы в неделю дали больше, чем одна; три дня на всё тело или четыре раздельных — решать вам.
+  schoenfeld_2019:
+    title: How many times per week should a muscle be trained to maximize muscle hypertrophy?
+    who: Schoenfeld, Grgic & Krieger, Journal of Sports Sciences
+    year: 2019
+    url: https://pubmed.ncbi.nlm.nih.gov/30558493/
+    finding:
+      en: With the same number of sets, training a muscle once a week built about as much as more often. More days help mostly by fitting in more sets.
+      es: Con el mismo número de series, entrenar un músculo una vez por semana construyó más o menos lo mismo que hacerlo más a menudo. Más días ayudan sobre todo porque caben más series.
+      fr: À nombre de séries égal, travailler un muscle une fois par semaine a construit à peu près autant que plus souvent. Plus de jours aident surtout à caser plus de séries.
+      ru: При одинаковом числе подходов тренировка мышцы раз в неделю дала примерно столько же, сколько и более частые. Больше дней помогают в основном тем, что в них помещается больше подходов.
+  lee_mcgill_2015:
+    title: Effect of long-term isometric training on core/torso stiffness
+    who: Lee & McGill, Journal of Strength and Conditioning Research
+    year: 2015
+    url: https://pubmed.ncbi.nlm.nih.gov/26010794/
+    finding:
+      en: Short holds built a stiffer, steadier core. Past about a minute, a longer plank trains little but holding a plank.
+      es: Los apoyos cortos construyeron un core más firme y estable. Pasado un minuto, una plancha más larga entrena poco más que aguantar la plancha.
+      fr: Des maintiens courts ont rendu le tronc plus solide et stable. Au-delà d’une minute environ, une planche plus longue n’entraîne guère que… tenir la planche.
+      ru: Короткие удержания делали кор крепче и устойчивее. После примерно минуты более долгая планка тренирует почти только саму планку.
+  kotarsky_2018:
+    title: Effect of progressive calisthenic push-up training on muscle strength and thickness
+    who: Kotarsky et al., Journal of Strength and Conditioning Research
+    year: 2018
+    url: https://library.ndsu.edu/ir/handle/10365/28060
+    finding:
+      en: A ladder of harder push-ups built bench-press strength much like bench training did.
+      es: Una escalera de flexiones cada vez más difíciles mejoró la fuerza en press de banca de forma parecida a entrenar el press.
+      fr: Une échelle de pompes de plus en plus dures a fait progresser le développé couché à peu près comme l’entraînement au banc.
+      ru: Лестница всё более трудных отжиманий развила силу в жиме лёжа почти так же, как тренировка жима.
+  who_2020:
+    title: WHO guidelines on physical activity and sedentary behaviour
+    who: World Health Organization
+    year: 2020
+    url: https://www.who.int/publications/i/item/9789240015128
+    finding:
+      en: Adults do best with 150 to 300 minutes of moderate activity a week, plus strength work on two days. Any amount is better than none.
+      es: A los adultos les va mejor con 150 a 300 minutos de actividad moderada a la semana, más fuerza dos días. Cualquier cantidad es mejor que nada.
+      fr: Les adultes s’en sortent le mieux avec 150 à 300 minutes d’activité modérée par semaine, plus du renforcement deux jours. Un peu vaut mieux que rien.
+      ru: Взрослым лучше всего 150–300 минут умеренной активности в неделю плюс силовые два дня. Любое количество лучше, чем ничего.
+  walk_with_ease:
+    title: Walk With Ease
+    who: Arthritis Foundation
+    year: 2023
+    url: https://www.arthritis.org/health-wellness/healthy-living/physical-activity/walking/walk-with-ease/wwe-about-the-program
+    finding:
+      en: Six weeks of three walks a week, starting around ten minutes and building to about half an hour.
+      es: Seis semanas de tres paseos semanales, empezando por unos diez minutos y llegando a una media hora.
+      fr: Six semaines, trois marches par semaine, en partant d’une dizaine de minutes pour arriver à une demi-heure environ.
+      ru: Шесть недель по три прогулки, начиная примерно с десяти минут и доходя до получаса.
+  paluch_2022:
+    title: Daily steps and all-cause mortality — a meta-analysis of 15 international cohorts
+    who: Paluch et al., The Lancet Public Health
+    year: 2022
+    url: https://pubmed.ncbi.nlm.nih.gov/35247352/
+    finding:
+      en: The benefit of more steps levels off around 6,000 to 8,000 a day after 60, and 8,000 to 10,000 before.
+      es: El beneficio de caminar más se estabiliza en unos 6.000 a 8.000 pasos al día a partir de los 60, y en 8.000 a 10.000 antes.
+      fr: Le bénéfice de marcher plus plafonne vers 6 000 à 8 000 pas par jour après 60 ans, et 8 000 à 10 000 avant.
+      ru: Польза от шагов выходит на плато около 6–8 тысяч в день после 60 лет и 8–10 тысяч до 60.
+  otago_2022:
+    title: Otago exercise programme compared with walking for older adults
+    who: PMC9631473
+    year: 2022
+    url: https://pmc.ncbi.nlm.nih.gov/articles/PMC9631473
+    finding:
+      en: Strength and balance three times a week, with walking between, did more for balance and getting up from a chair than walking alone.
+      es: Fuerza y equilibrio tres veces por semana, con paseos entre medias, mejoraron más el equilibrio y levantarse de una silla que solo caminar.
+      fr: Renforcement et équilibre trois fois par semaine, avec de la marche entre deux, ont fait plus pour l’équilibre et le lever de chaise que la marche seule.
+      ru: Сила и равновесие три раза в неделю с прогулками между ними улучшили равновесие и вставание со стула больше, чем одна ходьба.
+  nice_mecfs:
+    title: Myalgic encephalomyelitis (or encephalopathy)/chronic fatigue syndrome — diagnosis and management (NG206)
+    who: National Institute for Health and Care Excellence
+    year: 2021
+    url: https://www.nice.org.uk/guidance/ng206
+    finding:
+      en: People with ME/CFS should not be given a fixed program that steps exercise up week by week.
+      es: A las personas con EM/SFC no se les debe dar un programa fijo que aumente el ejercicio semana a semana.
+      fr: Aux personnes atteintes d’EM/SFC, on ne doit pas proposer de programme fixe qui augmente l’exercice semaine après semaine.
+      ru: Людям с МЭ/СХУ не следует давать фиксированную программу, где нагрузка растёт неделя за неделей.
+  uk_cmo_postpartum:
+    title: Physical activity for women after childbirth (birth to 12 months)
+    who: UK Chief Medical Officers
+    year: 2019
+    url: https://www.gov.uk/government/publications/physical-activity-guidelines-pregnancy-and-after-childbirth/physical-activity-for-women-after-childbirth-birth-to-12-months-text-of-the-infographic
+    finding:
+      en: Start gently, do pelvic floor exercises daily, and build back up to activity at your own pace after your postnatal check.
+      es: Empieza con suavidad, haz ejercicios de suelo pélvico a diario y vuelve a la actividad a tu ritmo después de la revisión posparto.
+      fr: Commencez en douceur, faites des exercices du périnée chaque jour, et reprenez l’activité à votre rythme après la visite postnatale.
+      ru: Начинайте мягко, ежедневно делайте упражнения для мышц тазового дна и возвращайтесь к нагрузкам в своём темпе после послеродового осмотра.
+  acsm_screening_2015:
+    title: Updating ACSM's recommendations for exercise preparticipation health screening
+    who: Riebe et al., Medicine & Science in Sports & Exercise
+    year: 2015
+    url: https://pubmed.ncbi.nlm.nih.gov/26473759/
+    finding:
+      en: Most people can start light to moderate exercise without seeing a doctor first; heart, metabolic or kidney disease, or symptoms, are the reason to check.
+      es: La mayoría puede empezar con ejercicio suave o moderado sin ir antes al médico; una enfermedad del corazón, metabólica o renal, o síntomas, son el motivo para consultar.
+      fr: La plupart des gens peuvent commencer une activité légère à modérée sans voir de médecin ; une maladie cardiaque, métabolique ou rénale, ou des symptômes, sont la raison de consulter.
+      ru: Большинству можно начинать лёгкие и умеренные нагрузки без визита к врачу; поводом проконсультироваться служат болезни сердца, обмена веществ или почек и симптомы.
+  rest_singer_2024:
+    title: Give it a rest — a systematic review with Bayesian meta-analysis on the effect of inter-set rest interval duration
+    who: Singer et al., Frontiers in Sports and Active Living
+    year: 2024
+    url: https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2024.1429789/full
+    finding:
+      en: Resting longer than a minute or so between sets did a little more, especially on big lifts.
+      es: Descansar más de un minuto o así entre series dio algo más, sobre todo en los ejercicios grandes.
+      fr: Se reposer plus d’une minute environ entre les séries a donné un peu plus, surtout sur les gros mouvements.
+      ru: Отдых между подходами дольше минуты давал немного больше, особенно в базовых упражнениях.

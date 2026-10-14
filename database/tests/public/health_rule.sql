@@ -13,7 +13,7 @@ SELECT is_empty(
                CROSS JOIN LATERAL (SELECT regexp_replace(lower(column_name), '[^a-z0-9]', '', 'g') AS normalized) n
                WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
                  AND (
-                   n.normalized ~ '(heartrate|hrv|sleep|bodymass|bodyweight|bodyfat|activeenergy|restingenergy|basalenergy|stepcount|oxygensaturation|spo2|vo2max|respiratoryrate|bloodpressure|bloodglucose)'
+                   n.normalized ~ '(heartrate|hrv|sleep|bodymass|bodyweight|bodyfat|activeenergy|restingenergy|basalenergy|stepcount|oxygensaturation|spo2|vo2max|respiratoryrate|bloodpressure|bloodglucose|injur|limitation|goeasy|painscore|painlevel)'
                    OR n.normalized = 'steps'
                  )
                $$,

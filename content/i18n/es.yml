@@ -14578,6 +14578,139 @@ exercises:
       - Detente si sientes dolor en la zona lumbar, las muñecas o los hombros
     validated: false
     source_digest: a742d6ba97f1
+  wall-push-up:
+    name: Flexiones en pared
+    instructions: |
+      ## Resumen
+      La flexión en pared es una flexión de pie, con las manos apoyadas en una pared. Como el cuerpo queda casi vertical, los brazos cargan solo una pequeña parte del peso corporal, así que es la flexión más fácil que existe. Trabaja el pecho, los deltoides anteriores y los tríceps, y es el punto de partida si las flexiones en un banco o en el suelo todavía son demasiado difíciles.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ponte de pie frente a una pared, a la distancia de un brazo
+      - Apoya las manos en la pared a la altura del pecho, algo más abiertas que los hombros
+      - Lleva los pies un poco hacia atrás para inclinarte hacia la pared
+      - Mantén el cuerpo en línea recta de los talones a la cabeza
+      - Activa el core y aprieta los glúteos
+
+      ### 2. Movimiento
+      1. Flexiona los codos para acercar el pecho a la pared
+      2. Mantén los codos a unos 45 grados del cuerpo
+      3. Baja hasta que la nariz quede cerca de la pared
+      4. Empuja de nuevo hasta estirar los brazos
+      5. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Inhala al bajar
+      - Exhala al empujar para alejarte
+
+      ### 4. Consejos
+      - Cuanto más lejos estén los pies de la pared, más difícil será
+      - Mantén los talones en el suelo si puedes, o deja que se levanten un poco
+      - Muévete despacio y mueve todo el cuerpo como una sola pieza
+      - Cuando hagas 15 repeticiones cómodas, pasa a un banco o una encimera
+
+      ### 5. Errores comunes
+      - Dejar que la cadera se hunda o se salga hacia atrás
+      - Abrir los codos hacia los lados
+      - Acercar solo la cabeza a la pared
+      - Hacer un recorrido tan corto que apenas se doblan los codos
+
+      ### 6. Seguridad y modificaciones
+      - Usa calzado que agarre o ponte sobre un suelo antideslizante
+      - Acércate a la pared si notas tensión en los hombros o las muñecas
+      - Mantén las muñecas a la altura de los hombros, no por encima de la cabeza
+      - Detente si sientes dolor en los hombros o las muñecas
+    validated: false
+    source_digest: 37917292ce6d
+  sit-to-stand:
+    name: Levantarse de la silla
+    aliases: ["sentarse y levantarse"]
+    instructions: |
+      ## Resumen
+      Levantarse de la silla consiste en ponerse de pie desde una silla y volver a sentarse, sin usar las manos. Es el movimiento que haces cada día para levantarte de un asiento, y trabaja los muslos y los glúteos. Es el primer paso hacia la sentadilla completa con el peso corporal y una forma sencilla de que levantarte siga siendo fácil.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Siéntate cerca del borde delantero de una silla firme, con los pies apoyados en el suelo
+      - Separa los pies a la anchura de las caderas, un poco por detrás de las rodillas
+      - Cruza los brazos sobre el pecho o estíralos hacia delante
+      - Siéntate erguido, con el pecho arriba
+
+      ### 2. Movimiento
+      1. Inclina el pecho hacia delante, por encima de los pies
+      2. Empuja con los talones para ponerte de pie por completo
+      3. Aprieta los glúteos arriba
+      4. Lleva la cadera hacia atrás y flexiona las rodillas para sentarte despacio
+      5. Toca la silla suavemente y vuelve a levantarte
+      6. Repite hasta completar las repeticiones objetivo
+
+      ### 3. Respiración
+      - Exhala al levantarte
+      - Inhala al volver a sentarte
+
+      ### 4. Consejos
+      - Siéntate despacio en lugar de dejarte caer en la silla
+      - Mantén las rodillas alineadas con los dedos de los pies
+      - Una silla más baja lo hace más difícil; una más alta, más fácil
+      - Cuando te resulte fácil, quédate justo por encima del asiento en lugar de sentarte
+
+      ### 5. Errores comunes
+      - Empujarte con las manos en los muslos o en la silla
+      - Dejarte caer en la silla al bajar
+      - Dejar que las rodillas se vayan hacia dentro
+      - No llegar a ponerte de pie del todo
+
+      ### 6. Seguridad y modificaciones
+      - Usa una silla firme sin ruedas, apoyada contra una pared para que no se deslice
+      - Al principio apoya las manos en los reposabrazos si lo necesitas y deja de hacerlo poco a poco
+      - Pon un cojín para elevar el asiento si levantarte todavía cuesta
+      - Detente si te mareas o sientes dolor en las rodillas o la cadera
+    validated: false
+    source_digest: 20b77a2b89f7
+  single-leg-stand:
+    name: Equilibrio sobre una pierna
+    aliases: ["apoyo monopodal"]
+    instructions: |
+      ## Resumen
+      El equilibrio sobre una pierna es un ejercicio de mantenimiento: te sostienes sobre un pie durante un tiempo y luego cambias. Trabaja los pequeños músculos del tobillo, el pie y la cadera que te mantienen estable, y un mejor equilibrio hace más seguros los gestos cotidianos, como subir escaleras o vestirte. Hazlo junto a una encimera para tener siempre un apoyo a mano.
+
+      ## Ejecución
+      ### 1. Posición inicial
+      - Ponte de pie junto a la encimera de la cocina o una silla firme, lo bastante cerca para tocarla
+      - Apoya una mano suavemente en el soporte
+      - Ponte erguido, con los pies a la anchura de las caderas y el peso repartido
+      - Mira al frente, a un punto fijo
+
+      ### 2. Movimiento
+      1. Pasa el peso a un pie
+      2. Levanta el otro pie unos centímetros del suelo
+      3. Mantén la rodilla de apoyo ligeramente flexionada, sin bloquearla
+      4. Aguanta el tiempo objetivo
+      5. Baja el pie y cambia de lado
+
+      ### 3. Respiración
+      - Respira de forma lenta y constante durante todo el ejercicio
+      - No contengas la respiración para mantenerte estable
+
+      ### 4. Consejos
+      - Los pequeños balanceos son normales: es tu equilibrio trabajando
+      - Progresa de dos manos en el apoyo a una, luego a la punta de un dedo y después a ninguna
+      - Cerrar los ojos o ponerte sobre un cojín lo hace mucho más difícil
+      - Practica poco y a menudo
+
+      ### 5. Errores comunes
+      - Cargar todo el peso sobre el apoyo
+      - Bloquear la rodilla de la pierna de apoyo
+      - Dejar caer la cadera de la pierna levantada
+      - Mirarte los pies
+
+      ### 6. Seguridad y modificaciones
+      - Colócate siempre junto a una encimera, una pared o una silla firme que puedas agarrar
+      - Retira alfombras y objetos del suelo a tu alrededor
+      - Mantén la mano en el apoyo hasta que te sientas seguro
+      - Detente y siéntate si te mareas
+    validated: false
+    source_digest: 9571c9ffa23d
   aerobics:
     name: Aeróbicos
     instructions: |
