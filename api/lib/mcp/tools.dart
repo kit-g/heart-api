@@ -468,7 +468,10 @@ final List<McpTool> tools = [
         ],
         'exercises': [
           for (final exerciseId in {
-            for (final key in program.rules.keys) exerciseOf[key] ?? key,
+            // a key is a slot's or an exercise's; a slot whose session is gone
+            // names nothing left to show
+            for (final key in program.rules.keys)
+              if (exerciseOf[key] ?? (names.containsKey(key) ? key : null) case final String exercise) exercise,
             for (final base in bases.values) base.exerciseId,
           })
             {

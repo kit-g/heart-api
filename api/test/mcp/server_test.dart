@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:heart/models/errors.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart_models/heart_models.dart';
@@ -685,6 +686,13 @@ void main() {
       ]);
       final next = (detail['nextSession'] as Map)['exercises'] as List;
       expect((next.single as Map)['sets'], hasLength(5), reason: 'Monday is up next: the first stage, five sets');
+
+      // the Thursday session is deleted: its slot's rule names nothing left
+      when(
+        app.db.getTemplate(userId: 'u1', templateId: thursday),
+      ).thenAnswer((_) async => throw const NotFound(type: 'Template', id: thursday));
+      final gone = (await call('get_program', {'programId': programId}))['structuredContent'] as Map;
+      expect([for (final exercise in gone['exercises'] as List) (exercise as Map)['name']], ['Squat']);
     });
 
     test('get_program_history explains each base by name, with the steps and skips', () async {
