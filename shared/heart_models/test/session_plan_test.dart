@@ -223,6 +223,55 @@ void main() {
       expect(plan.exercises.single.sets.single.weight, isNull);
     });
 
+    test('a test session plans no weight even where the template stores one; warm-ups keep theirs', () {
+      final stored = _template([
+        (
+          '019a0000-0000-7000-8000-0000000000b1',
+          _exercise(_squat, 'Squat'),
+          [
+            _set(1, _reps(5), type: 'warmup', weight: 40),
+            _set(2, _reps(3, 5), weight: 100),
+          ],
+        ),
+      ]);
+      final program = Program(
+        name: 'Waves',
+        sessions: const [_session],
+        rules: {_squat: const AddWeight(step: 2.5)},
+        tests: {_session: const ProgramTest()},
+      );
+      final plan = _plan(program, stored, [_base(_squat, 140)]);
+      expect([for (final set in plan.exercises.single.sets) set.weight], [40, null]);
+    });
+
+    test('a set\'s stored reps stand only where its target names none', () {
+      final session = _template([
+        (
+          '019a0000-0000-7000-8000-0000000000b1',
+          _exercise(_squat, 'Squat'),
+          [
+            {
+              ..._set(1, {'share': 0.6}),
+              'reps': 8,
+            },
+            {..._set(2, _reps(5, 5)), 'reps': 8},
+          ],
+        ),
+      ]);
+      const wave = ShareOfMax(
+        step: 5,
+        waves: [
+          [WaveSet(share: 0.7, reps: 3), WaveSet(share: 0.8, reps: 3)],
+        ],
+      );
+      final plan = _plan(Program(name: 'Waves', sessions: const [_session], rules: {_squat: wave}), session, [
+        _base(_squat, 100),
+      ]);
+      expect([for (final set in plan.exercises.single.sets) set.reps], [null, null], reason: 'the wave sets the reps');
+      final plain = _plan(Program(name: 'Plain', sessions: const [_session]), session, const []);
+      expect([for (final set in plain.exercises.single.sets) set.reps], [8, null]);
+    });
+
     test('on the wire', () {
       final program = Program(name: 'Waves', sessions: const [_session], rules: {_squat: waves});
       final map = _plan(program, squatDay, [_base(_squat, 140)]).toMap();

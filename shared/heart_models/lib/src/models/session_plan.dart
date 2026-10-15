@@ -46,7 +46,9 @@ abstract interface class PlannedSession implements Model {
   /// - A set without a share under `addWeight` or `rangeThenWeight` weighs
   ///   the base; under `longer`, the base is its duration or distance, the
   ///   measure its target names.
-  /// - Any other set keeps what its template stores.
+  /// - Any other set keeps what its template stores, and a set's stored reps
+  ///   stand only where its target names none.
+  /// - A test session's working sets plan no weight.
   /// - A lighter cycle keeps the first [Deload.volume] of the working sets
   ///   (rounded up, at least one), warm-ups all, and takes [Deload.load] of
   ///   each worked-out weight, rounded down the same way.
@@ -101,8 +103,11 @@ abstract interface class PlannedSession implements Model {
         num? weight = set.weight;
         num? duration = set.duration;
         num? distance = set.distance;
-        if (test != null || warmup) {
-          // a test finds the base; a warm-up keeps what it stores
+        if (warmup) {
+          // a warm-up keeps what it stores
+        } else if (test != null) {
+          // a test finds the base, so it plans no weight
+          weight = null;
         } else if (target?.share case final num share) {
           weight = switch (target?.of) {
             final String of => weigh(share, of, bases[of]),
@@ -127,7 +132,8 @@ abstract interface class PlannedSession implements Model {
             setType: set.setType,
             target: target,
             weight: weight,
-            reps: set.reps,
+            // what the template stores, unless the target names the reps
+            reps: target?[.reps] == null ? set.reps : null,
             duration: duration,
             distance: distance,
           ),
@@ -170,6 +176,9 @@ final class PlannedSet implements Model {
   final SetType setType;
   final SetTarget? target;
   final num? weight;
+
+  /// The reps the template stores, where the target names none; with a reps
+  /// target, the target is the plan.
   final num? reps;
   final num? duration;
   final num? distance;
