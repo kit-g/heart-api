@@ -279,6 +279,7 @@ void main() {
       expect(list.status, 200);
       final programs = (jsonDecode(list.body) as Map)['programs'] as List;
       expect(programs.map((program) => (program as Map)['key']), ['walk_and_move', 'full_body_three']);
+      verifyNever(app.db.getExercises('u1', locale: anyNamed('locale')));
 
       final one = await app.send(
         'GET',

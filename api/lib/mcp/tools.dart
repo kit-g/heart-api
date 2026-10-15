@@ -421,11 +421,13 @@ final List<McpTool> tools = [
         throw ToolError('No program $id. Use list_programs for valid ids.');
       }
       final (position, bases) = await programs.programState(request, program, withBases: true);
-      final names = (await request.exerciseService.getExercises(request.userId)).toExerciseNames();
+      final library = await request.exerciseService.getExercises(request.userId);
+      final names = library.toExerciseNames();
       final (templates, view) = await (
         programs.programSessions(request, program),
         switch (program.source) {
-          String() => libraryView(request),
+          // the research anchors by id, so the library already read will do
+          String() => libraryView(request, library: library),
           null => Future<LibraryView?>.value(),
         },
       ).wait;
@@ -563,7 +565,7 @@ final List<McpTool> tools = [
         'a week, minutes a session and weeks long. Use get_library_program for one in full. Copy is in the '
         "user's language where translated, else English. Starting one happens in the app.",
     run: (request, _) async {
-      final view = await libraryView(request);
+      final view = await libraryView(request, named: false);
       if (view == null) return {'programs': const [], 'note': 'The program library is not published yet.'};
       return {'programs': view.list()};
     },

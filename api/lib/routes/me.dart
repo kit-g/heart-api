@@ -116,7 +116,7 @@ Future<MeProgram> getMyProgramById(Request req, String programId) async {
 /// The program library: every program with the facts that help choose one.
 /// Empty while none is published.
 Future<LibraryResponse> getMyLibraryPrograms(Request req) async {
-  final view = await libraryView(req);
+  final view = await libraryView(req, named: false);
   return LibraryResponse({'programs': view?.list() ?? const []});
 }
 
