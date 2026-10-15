@@ -215,7 +215,7 @@ TemplateExerciseRequest _exercise(Map<String, dynamic> json, int index) {
     // patterns are the library's
     pattern: switch (json['pattern']) {
       null => null,
-      final String key when RegExp(r'^[a-z][a-z0-9_]{0,63}$').hasMatch(key) => key,
+      final String key when _contentKey.hasMatch(key) => key,
       _ => throw BadRequest(code: 'invalid_key', reason: 'exercises[$index].pattern must be a snake_case key'),
     },
     setsPattern: json.containsKey('pattern'),

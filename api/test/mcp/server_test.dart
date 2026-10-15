@@ -830,6 +830,31 @@ void main() {
       expect(listed['note'], contains('not published'));
     });
 
+    test('list_custom_exercises names the pattern a user gave one (heart-api#269)', () async {
+      when(app.config.supportedLocales).thenReturn(['en']);
+      when(app.config.defaultLocale).thenReturn('en');
+      when(app.db.getExercises('u1', locale: 'en', owned: true)).thenAnswer(
+        (_) async => {
+          'exercises': [
+            {
+              'name': 'Landmine press',
+              'category': 'Barbell',
+              'target': 'Shoulders',
+              'movement': {
+                'groups': ['vertical_press'],
+              },
+            },
+            {'name': 'Mystery machine', 'category': 'Machine', 'target': 'Back', 'movement': null},
+          ],
+        },
+      );
+      final listed = ((await call('list_custom_exercises'))['structuredContent'] as Map)['exercises'] as List;
+      expect(listed, [
+        {'name': 'Landmine press', 'category': 'Barbell', 'target': 'Shoulders', 'pattern': 'vertical_press'},
+        {'name': 'Mystery machine', 'category': 'Machine', 'target': 'Back'},
+      ]);
+    });
+
     test('an unknown tool is invalid params', () async {
       final response = await rpc('tools/call', params: {'name': 'delete_everything'});
       expect((response.body['error'] as Map)['code'], -32602);

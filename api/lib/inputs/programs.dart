@@ -102,8 +102,6 @@ TemplateRequest _session(String userId, Map<String, dynamic> json) {
   );
 }
 
-final _programKey = RegExp(r'^[a-z][a-z0-9_]{0,63}$');
-
 extension on Map<String, dynamic> {
   String programName() {
     return switch (this['name']) {
@@ -117,7 +115,7 @@ extension on Map<String, dynamic> {
   String? programKey(String field) {
     return switch (this[field]) {
       null => null,
-      final String key when _programKey.hasMatch(key) => key,
+      final String key when _contentKey.hasMatch(key) => key,
       _ => throw BadRequest(code: 'invalid_key', reason: '$field must be a snake_case key of at most 64 characters'),
     };
   }

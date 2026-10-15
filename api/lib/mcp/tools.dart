@@ -626,7 +626,8 @@ final List<McpTool> tools = [
     name: 'list_custom_exercises',
     title: 'List custom exercises',
     description:
-        'Exercises the user created themselves. Library exercises appear by name inside workouts and templates.',
+        'Exercises the user created themselves, with the movement pattern they gave one (such as horizontal_press), '
+        'if any. Library exercises appear by name inside workouts and templates.',
     run: (request, _) async {
       final library = await request.exerciseService.getExercises(
         request.userId,
@@ -636,7 +637,13 @@ final List<McpTool> tools = [
       return {
         'exercises': [
           for (final exercise in (library['exercises'] as List? ?? const []).cast<Map>())
-            {'name': exercise['name'], 'category': exercise['category'], 'target': exercise['target']},
+            {
+              'name': exercise['name'],
+              'category': exercise['category'],
+              'target': exercise['target'],
+              // the movement pattern the user gave it (heart-api#269)
+              if (exercise['movement'] case {'groups': [final String pattern, ...]}) 'pattern': pattern,
+            },
         ],
       };
     },

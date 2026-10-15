@@ -163,7 +163,7 @@ extension on Map<String, dynamic> {
   String? subjectKey(String field) {
     return switch (this[field]) {
       null => null,
-      final String key when _subjectKey.hasMatch(key) => key,
+      final String key when _contentKey.hasMatch(key) => key,
       _ => throw BadRequest(
         code: 'invalid_subject',
         reason: '$field must be a snake_case key of at most 64 characters',
@@ -171,8 +171,6 @@ extension on Map<String, dynamic> {
     };
   }
 }
-
-final _subjectKey = RegExp(r'^[a-z][a-z0-9_]{0,63}$');
 
 /// The shape rules, mirrored by the CHECK constraints on `goals`.
 void _validate({

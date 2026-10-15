@@ -306,6 +306,89 @@ void main() {
     });
   });
 
+  group('a custom exercise\'s pattern (heart-api#269)', () {
+    test('created with it, the movement is that one group and nothing else', () async {
+      final row = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('Landmine'),
+        category: 'Barbell',
+        target: 'Shoulders',
+        pattern: 'vertical_press',
+      );
+      expect(row['movement'], {
+        'groups': ['vertical_press'],
+      });
+      final listed = findEx((await h.db.getExercises(ownerId, owned: true))['exercises'] as List, '${row['id']}');
+      expect(listed!['movement'], {
+        'groups': ['vertical_press'],
+      }, reason: 'wherever the user\'s own exercises are returned');
+    });
+
+    test('an edit sets, keeps and clears it', () async {
+      final created = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('Patterned'),
+        category: 'Barbell',
+        target: 'Back',
+      );
+      final id = created['id'].toString();
+      expect(created['movement'], isNull);
+
+      final set = await h.db.updateExercise(userId: ownerId, exerciseId: id, pattern: (value: 'horizontal_row'));
+      expect(set['movement'], {
+        'groups': ['horizontal_row'],
+      });
+      final kept = await h.db.updateExercise(userId: ownerId, exerciseId: id, target: 'Lats');
+      expect(kept['movement'], {
+        'groups': ['horizontal_row'],
+      }, reason: 'an edit without a pattern, as an older build sends, keeps it');
+      final cleared = await h.db.updateExercise(userId: ownerId, exerciseId: id, pattern: (value: null));
+      expect(cleared['movement'], isNull);
+    });
+
+    test('a replay of an existing exercise keeps what is stored', () async {
+      final first = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('Replayed'),
+        category: 'Barbell',
+        target: 'Back',
+        pattern: 'horizontal_row',
+      );
+      final again = await h.db.createExercise(
+        userId: ownerId,
+        id: first['id'].toString(),
+        name: first['name'] as String,
+        category: 'Barbell',
+        target: 'Back',
+      );
+      expect(again['created'], isFalse);
+      expect(again['movement'], {
+        'groups': ['horizontal_row'],
+      });
+    });
+
+    test('clearing it leaves what else the movement says', () async {
+      final created = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('Annotated'),
+        category: 'Barbell',
+        target: 'Legs',
+      );
+      final id = created['id'].toString();
+      await h.exec(
+        'UPDATE exercises SET movement = @m::jsonb WHERE id = @id::uuid',
+        {'m': '{"groups": ["squat_bilateral"], "axialLoad": "high"}', 'id': id},
+      );
+      final moved = await h.db.updateExercise(userId: ownerId, exerciseId: id, pattern: (value: 'lunge_split'));
+      expect(moved['movement'], {
+        'groups': ['lunge_split'],
+        'axialLoad': 'high',
+      });
+      final cleared = await h.db.updateExercise(userId: ownerId, exerciseId: id, pattern: (value: null));
+      expect(cleared['movement'], {'axialLoad': 'high'});
+    });
+  });
+
   group('health', () {
     /// The blob exactly as scripts/library_locales.py writes it — the activity
     /// camelCased, so storage and wire are the same shape.
