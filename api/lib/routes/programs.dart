@@ -133,3 +133,46 @@ Future<(ProgramPosition, Map<String, ProgramBase>)> programState(
   final position = ProgramPosition.of(program, marks: marks, actions: actions, now: DateTime.timestamp());
   return (position, currentBases(bases));
 }
+
+/// [program]'s history: its bases with their causes, its actions and its
+/// skips (heart-api#260).
+Future<ProgramHistory> programHistory(Request req, Program program) async {
+  final service = req.programService;
+  final programId = program.id!;
+  final (bases, actions, skips, sessions) = await (
+    service.getProgramBases(userId: req.userId, programId: programId),
+    service.getProgramActions(userId: req.userId, programId: programId),
+    service.getProgramSkips(userId: req.userId, programId: programId),
+    service.getProgramWorkouts(userId: req.userId, programId: programId),
+  ).wait;
+  return ProgramHistory(
+    bases: bases,
+    actions: actions,
+    skips: skips,
+    tests: program.tests.keys.toSet(),
+    sessions: sessions,
+  );
+}
+
+/// The session [position] puts next, planned from [bases]; null when there is
+/// none, or its template is gone. [templates] spares a read when the caller
+/// has them already.
+Future<PlannedSession?> nextSession(
+  Request req,
+  Program program,
+  ProgramPosition position,
+  Map<String, ProgramBase> bases, {
+  Iterable<Template>? templates,
+}) async {
+  final next = position.next;
+  if (next == null) return null;
+  final Template? session = switch (templates) {
+    final Iterable<Template> templates => templates.where((template) => template.id == next).firstOrNull,
+    null =>
+      await req.templatesService
+          .getTemplate(userId: req.userId, templateId: next)
+          .then<Template?>((template) => template, onError: (_) => null),
+  };
+  if (session == null) return null;
+  return PlannedSession.of(program, session, position: position, bases: bases);
+}

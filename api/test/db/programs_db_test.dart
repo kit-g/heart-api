@@ -564,6 +564,60 @@ FROM generate_series(1, 100) n
       expect(position.week, 3, reason: 'one session per cycle: the workout closes week 1, the skip week 2');
     });
   });
+
+  group('history (heart-api#260)', () {
+    test("the program's skips oldest first with their reasons, and each workout's session", () async {
+      final userId = await h.seedProfile();
+      final stranger = await h.seedProfile();
+      final (stored, _) = await h.db.createProgramOrExisting(
+        userId: userId,
+        program: program(),
+        sessions: [session(userId, 'A', 0)],
+      );
+      final programId = stored.id!;
+      final templateId = stored.sessions.single;
+
+      expect(await h.db.getProgramSkips(userId: userId, programId: programId), isEmpty);
+      expect(await h.db.getProgramWorkouts(userId: userId, programId: programId), isEmpty);
+
+      final workoutId = await h.seedWorkout(userId: userId);
+      final loose = await h.seedWorkout(userId: userId);
+      await h.exec(
+        'UPDATE workouts SET template_id = @t::uuid, program_id = @p::uuid WHERE id = @w::uuid',
+        {'t': templateId, 'p': programId, 'w': workoutId},
+      );
+      await h.exec('UPDATE workouts SET program_id = @p::uuid WHERE id = @w::uuid', {'p': programId, 'w': loose});
+      await h.seedWorkout(userId: userId); // not the program's
+      for (final (day, reason) in [(5, 'sore'), (3, 'busy')]) {
+        await h.db.createSkip(
+          userId: userId,
+          skip: TrainingSkip(
+            at: DateTime.utc(2026, 10, day),
+            reason: reason,
+            templateId: templateId,
+            programId: programId,
+          ),
+        );
+      }
+      await h.db.createSkip(
+        userId: userId,
+        skip: TrainingSkip(at: DateTime.utc(2026, 10, 4), reason: 'tired'),
+      );
+
+      final skips = await h.db.getProgramSkips(userId: userId, programId: programId);
+      expect(skips.map((skip) => (skip.at, skip.reason, skip.templateId)), [
+        (DateTime.utc(2026, 10, 3), 'busy', templateId),
+        (DateTime.utc(2026, 10, 5), 'sore', templateId),
+      ]);
+      expect(await h.db.getProgramWorkouts(userId: userId, programId: programId), {workoutId: templateId, loose: null});
+      expect(
+        await h.db.getProgramSkips(userId: stranger, programId: programId),
+        isEmpty,
+        reason: 'only the owner',
+      );
+      expect(await h.db.getProgramWorkouts(userId: stranger, programId: programId), isEmpty);
+    });
+  });
 }
 
 class _Harness extends DatabaseTestBase;

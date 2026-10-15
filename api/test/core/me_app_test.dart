@@ -99,8 +99,38 @@ void main() {
     const session = '01900000-0000-7000-8000-000000000051';
     const bench = '01900000-0000-7000-8000-000000000001';
     const slot = '01900000-0000-7000-8000-000000000052';
-    final program = Program(id: programId, name: 'Getting stronger', sessions: [session], perWeek: 3);
+    final program = Program(
+      id: programId,
+      name: 'Getting stronger',
+      sessions: [session],
+      perWeek: 3,
+      rules: {bench: const AddWeight(step: 2.5)},
+    );
     when(app.db.getPrograms('u1')).thenAnswer((_) async => [program]);
+    when(app.db.getTemplate(userId: 'u1', templateId: session)).thenAnswer(
+      (_) async => Template.fromJson(const {
+        'id': session,
+        'order': 0,
+        'name': 'A',
+        'exercises': [
+          {
+            'id': slot,
+            'exercise': {'id': bench, 'name': 'Bench Press', 'category': 'Barbell', 'target': 'Chest'},
+            'sets': [
+              {
+                'id': '01900000-0000-7000-8000-000000000053',
+                'completed': false,
+                'started_at': '2026-10-01T08:00:00.000Z',
+                'target': {
+                  'reps': {'min': 5, 'max': 5},
+                  'share': 0.9,
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    );
     when(app.db.getProgram(userId: 'u1', programId: programId)).thenAnswer((_) async => program);
     when(app.db.getProgramMarks(userId: 'u1', programId: programId)).thenAnswer(
       (_) async => [ProgramMark(templateId: session, at: DateTime.utc(2026, 10, 2), isWorkout: true)],
@@ -129,6 +159,95 @@ void main() {
       {'value': 80, 'at': '2026-10-02T00:00:00.000Z', 'exerciseId': bench, 'slot': slot},
       reason: 'a base kept per occurrence is keyed by its slot, and says which exercise it is',
     );
+    expect((jsonDecode(one.body) as Map)['nextSession'], {
+      'templateId': session,
+      'week': 2,
+      'lighter': false,
+      'exercises': [
+        {
+          'slot': slot,
+          'exerciseId': bench,
+          'base': 80,
+          'sets': [
+            {
+              'target': {
+                'reps': {'min': 5, 'max': 5},
+                'share': 0.9,
+              },
+              'weight': 70,
+            },
+          ],
+        },
+      ],
+    }, reason: "the slot's own base: 90% of 80 is 72, down to the rule's 2.5 kg");
+  });
+
+  test("a program's history: each base with its cause and the value before it, actions, skips", () async {
+    const programId = '01900000-0000-7000-8000-000000000050';
+    const test = '01900000-0000-7000-8000-000000000051';
+    const session = '01900000-0000-7000-8000-000000000054';
+    const bench = '01900000-0000-7000-8000-000000000001';
+    const tested = '01900000-0000-7000-8000-000000000061';
+    const worked = '01900000-0000-7000-8000-000000000062';
+    const missed = '01900000-0000-7000-8000-000000000063';
+    const replay = '01900000-0000-7000-8000-000000000071';
+    final program = Program(
+      id: programId,
+      name: 'Getting stronger',
+      sessions: [test, session],
+      tests: {test: const ProgramTest()},
+    );
+    when(app.db.getProgram(userId: 'u1', programId: programId)).thenAnswer((_) async => program);
+    when(app.db.getProgramBases(userId: 'u1', programId: programId)).thenAnswer(
+      (_) async => [
+        ProgramBase(exerciseId: bench, value: 100, workoutId: tested, at: DateTime.utc(2026, 10, 1)),
+        ProgramBase(exerciseId: bench, value: 102.5, workoutId: worked, at: DateTime.utc(2026, 10, 2)),
+        ProgramBase(exerciseId: bench, value: 92.5, workoutId: missed, at: DateTime.utc(2026, 10, 3)),
+        ProgramBase(exerciseId: bench, value: 90, actionId: replay, at: DateTime.utc(2026, 10, 4)),
+        ProgramBase(exerciseId: bench, value: 95, at: DateTime.utc(2026, 10, 5)),
+      ],
+    );
+    when(app.db.getProgramActions(userId: 'u1', programId: programId)).thenAnswer(
+      (_) async => [ProgramAction(id: replay, kind: .replay, week: 1, at: DateTime.utc(2026, 10, 4))],
+    );
+    when(app.db.getProgramSkips(userId: 'u1', programId: programId)).thenAnswer(
+      (_) async => [
+        TrainingSkip(at: DateTime.utc(2026, 10, 6), reason: 'sore', templateId: session, programId: programId),
+      ],
+    );
+    when(app.db.getProgramWorkouts(userId: 'u1', programId: programId)).thenAnswer(
+      (_) async => {tested: test, worked: session, missed: session},
+    );
+
+    final response = await app.send('GET', '/me/programs/$programId/history', token: secret);
+    expect(response.status, 200);
+    final body = jsonDecode(response.body) as Map;
+    expect(
+      [for (final base in body['bases'] as List) ((base as Map)['cause'], base['previous'])],
+      [
+        ('test', null),
+        ('workout', 100),
+        ('workout', 102.5),
+        ('action', 92.5),
+        ('user', 90),
+      ],
+    );
+    expect((body['bases'] as List).first, {
+      'exerciseId': bench,
+      'value': 100,
+      'workoutId': tested,
+      'at': '2026-10-01T00:00:00.000Z',
+      'cause': 'test',
+    });
+    expect(body['actions'], [
+      {'id': replay, 'kind': 'replay', 'week': 1, 'at': '2026-10-04T00:00:00.000Z'},
+    ]);
+    expect(body['skips'], [
+      {'at': '2026-10-06T00:00:00.000Z', 'reason': 'sore', 'templateId': session},
+    ]);
+
+    final missing = await app.send('GET', '/me/programs/nope/history', token: secret);
+    expect(missing.status, 404);
   });
 
   test('workouts are paginated and images keep only id and url', () async {

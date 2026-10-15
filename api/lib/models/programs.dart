@@ -55,6 +55,13 @@ abstract interface class ProgramService {
 
   /// The program's workouts and skips, as its position reads them.
   Future<Iterable<ProgramMark>> getProgramMarks({required String userId, required String programId});
+
+  /// The program's skips, oldest first.
+  Future<Iterable<TrainingSkip>> getProgramSkips({required String userId, required String programId});
+
+  /// The session each of the program's workouts was, by workout id; null for
+  /// one that named none, or whose template is gone.
+  Future<Map<String, String?>> getProgramWorkouts({required String userId, required String programId});
 }
 
 abstract interface class ProgramsResponse implements Model {
@@ -113,6 +120,91 @@ class _ProgramBasesResponse implements ProgramBasesResponse {
   Map<String, dynamic> toMap() {
     return {
       'bases': bases.map((each) => each.toMap()).toList(),
+    };
+  }
+}
+
+/// What caused a base: a workout's bump or cut, a test session, an action (a
+/// replay's cut), or the user setting it.
+enum BaseCause {
+  workout('workout'),
+  test('test'),
+  action('action'),
+  user('user');
+
+  /// The `cause` on the wire.
+  final String value;
+
+  new(this.value);
+}
+
+/// A program's history read back (heart-api#260): every base with its cause
+/// and the value it replaced, the actions, and the skips, each oldest first.
+abstract interface class ProgramHistory implements Model {
+  /// Every base, oldest first, with its cause and the value it replaced: the
+  /// one before it for its slot, or for its exercise when it has no slot.
+  List<({ProgramBase base, BaseCause cause, num? previous})> get bases;
+
+  List<ProgramAction> get actions;
+
+  List<TrainingSkip> get skips;
+
+  /// [tests] are the program's test sessions and [sessions] the session of
+  /// each of its workouts, as `getProgramWorkouts` reads them.
+  factory({
+    required Iterable<ProgramBase> bases,
+    required Iterable<ProgramAction> actions,
+    required Iterable<TrainingSkip> skips,
+    required Set<String> tests,
+    required Map<String, String?> sessions,
+  }) = _ProgramHistory.new;
+}
+
+class _ProgramHistory implements ProgramHistory {
+  @override
+  final List<({ProgramBase base, BaseCause cause, num? previous})> bases;
+  @override
+  final List<ProgramAction> actions;
+  @override
+  final List<TrainingSkip> skips;
+
+  factory({
+    required Iterable<ProgramBase> bases,
+    required Iterable<ProgramAction> actions,
+    required Iterable<TrainingSkip> skips,
+    required Set<String> tests,
+    required Map<String, String?> sessions,
+  }) {
+    BaseCause causeOf(ProgramBase base) {
+      return switch (base) {
+        ProgramBase(workoutId: final String workout) when tests.contains(sessions[workout]) => .test,
+        ProgramBase(workoutId: String()) => .workout,
+        ProgramBase(actionId: String()) => .action,
+        _ => .user,
+      };
+    }
+
+    final held = <String, num>{};
+    final timeline = <({ProgramBase base, BaseCause cause, num? previous})>[];
+    for (final base in bases) {
+      final key = base.slot ?? base.exerciseId;
+      timeline.add((base: base, cause: causeOf(base), previous: held[key]));
+      held[key] = base.value;
+    }
+    return _ProgramHistory._(timeline, actions.toList(), skips.toList());
+  }
+
+  new _(this.bases, this.actions, this.skips);
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'bases': [
+        for (final (:base, :cause, :previous) in bases)
+          {...base.toMap()..remove('programId'), 'cause': cause.value, 'previous': ?previous},
+      ],
+      'actions': [for (final action in actions) action.toMap()..remove('programId')],
+      'skips': [for (final skip in skips) skip.toMap()..remove('programId')],
     };
   }
 }

@@ -395,7 +395,10 @@ final List<McpTool> tools = [
         "exercise's growth rule and current base. A base is the number the rule grows: a training max or working "
         'weight in kg, a duration in seconds, a distance in km. A lift used in two sessions (heavy one day, light '
         'another) may keep a base per session, under slots. The position is computed from the workouts and skips '
-        'the user logged against the program, never stored.',
+        'the user logged against the program, never stored. nextSession is the session up next as the app will '
+        "show it: this week's targets, weights worked out from the current bases (a share of a base, rounded down "
+        'to the rule step; a lighter week at its deload share), and no weights in a test session, which is how a '
+        'base is found. It reads what is stored; it is not a forecast. get_program_history explains how bases moved.',
     inputSchema: {
       'type': 'object',
       'properties': {
@@ -426,6 +429,7 @@ final List<McpTool> tools = [
         for (final template in templates.nonNulls)
           for (final exercise in template) exercise.id: template.name ?? 'Untitled',
       };
+      final next = await programs.nextSession(request, program, position, bases, templates: templates.nonNulls);
       return {
         'id': program.id,
         'name': program.name,
@@ -464,6 +468,87 @@ final List<McpTool> tools = [
                 'slots': slots,
             },
         ],
+        if (next != null)
+          'nextSession': _namedPlan(
+            next,
+            session: templates.nonNulls.firstWhere((template) => template.id == next.templateId).name ?? 'Untitled',
+            names: names,
+          ),
+      };
+    },
+  ),
+  McpTool(
+    name: 'get_program_history',
+    title: "Get a program's history",
+    description:
+        "How a program got where it is: every value of each exercise's base, oldest first, with what caused it "
+        '(workout: a session grew it, or cut it after misses when it went down; test: a test session set it; '
+        'action: replaying a week set it; user: the user set it) and the value before it. Also the steps the user '
+        'took (pause, resume, repeat, replay, a lighter week, a ladder moving to its next exercise) and the sessions '
+        'skipped, with the reason given. Bases are in kg, seconds or km, as in get_program.',
+    inputSchema: {
+      'type': 'object',
+      'properties': {
+        'programId': {'type': 'string', 'description': 'An id from list_programs.'},
+      },
+      'required': ['programId'],
+      'additionalProperties': false,
+    },
+    run: (request, arguments) async {
+      final id = arguments['programId'];
+      if (id is! String || !isUuidV7(id)) throw const ToolError('programId must be an id from list_programs.');
+      final Program program;
+      try {
+        program = await request.programService.getProgram(userId: request.userId, programId: id);
+      } on NotFound {
+        throw ToolError('No program $id. Use list_programs for valid ids.');
+      }
+      final (history, names, templates) = await (
+        programs.programHistory(request, program),
+        request.exerciseService.getExercises(request.userId).then((library) => library.toExerciseNames()),
+        Future.wait([
+          for (final session in program.sessions)
+            request.templatesService
+                .getTemplate(userId: request.userId, templateId: session)
+                .then<Template?>((template) => template, onError: (_) => null),
+        ]),
+      ).wait;
+      final sessionNames = {for (final template in templates.nonNulls) template.id: template.name ?? 'Untitled'};
+      final slotSessions = {
+        for (final template in templates.nonNulls)
+          for (final exercise in template) exercise.id: template.name ?? 'Untitled',
+      };
+      String name(String exerciseId) => names[exerciseId] ?? exerciseId;
+      return {
+        'bases': [
+          for (final (:base, :cause, :previous) in history.bases)
+            {
+              'exercise': name(base.exerciseId),
+              if (base.slot case final String slot) 'session': slotSessions[slot] ?? slot,
+              'value': base.value,
+              'previous': ?previous,
+              'cause': cause.value,
+              'at': base.at.toUtc().toIso8601String(),
+            },
+        ],
+        'actions': [
+          for (final action in history.actions)
+            {
+              'kind': action.kind.value,
+              'week': ?action.week,
+              if (action.from case final String from) 'from': name(from),
+              if (action.to case final String to) 'to': name(to),
+              'at': action.at.toUtc().toIso8601String(),
+            },
+        ],
+        'skips': [
+          for (final skip in history.skips)
+            {
+              'at': skip.at.toUtc().toIso8601String(),
+              'reason': ?skip.reason,
+              if (skip.templateId case final String session) 'session': sessionNames[session] ?? session,
+            },
+        ],
       };
     },
   ),
@@ -487,6 +572,33 @@ final List<McpTool> tools = [
     },
   ),
 ];
+
+/// [plan] for an assistant: exercises by name, and a share of another lift
+/// naming that lift.
+Map<String, dynamic> _namedPlan(PlannedSession plan, {required String session, required Map<String, String> names}) {
+  final map = plan.toMap();
+  return {
+    'session': session,
+    'week': map['week'],
+    'lighter': map['lighter'],
+    'test': ?map['test'],
+    'exercises': [
+      for (final exercise in (map['exercises'] as List).cast<Map<String, dynamic>>())
+        {
+          'name': names[exercise['exerciseId']] ?? exercise['exerciseId'],
+          'base': ?exercise['base'],
+          'sets': [
+            for (final set in (exercise['sets'] as List).cast<Map<String, dynamic>>())
+              {
+                ...set,
+                if (set['target'] case final Map<String, dynamic> target)
+                  'target': {...target, if (target['of'] case final String of) 'of': names[of] ?? of},
+              },
+          ],
+        },
+    ],
+  };
+}
 
 final Map<String, McpTool> toolsByName = {for (final tool in tools) tool.name: tool};
 

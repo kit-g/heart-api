@@ -13,6 +13,7 @@ import 'package:heart/models/exports.dart';
 import 'package:heart/models/goals.dart';
 import 'package:heart/models/me.dart';
 import 'package:heart/models/pagination.dart';
+import 'package:heart/models/programs.dart';
 import 'package:heart/models/template_folders.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/routes/exercises.dart' as exercises;
@@ -90,13 +91,23 @@ Future<MePrograms> getMyPrograms(Request req) async {
 
 Future<MeProgram> getMyProgram(Request req) => getMyProgramById(req, req.rawPathParameters[#programId]!);
 
-/// One program with where the user stands in it and each exercise's current
-/// base.
+/// One program with where the user stands in it, each exercise's current
+/// base, and the next session planned from them.
 Future<MeProgram> getMyProgramById(Request req, String programId) async {
-  if (!isUuidV7(programId)) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
-  final program = await req.programService.getProgram(userId: req.userId, programId: programId);
+  final program = await _myProgram(req, programId);
   final (position, bases) = await programs.programState(req, program, withBases: true);
-  return MeProgram(program, position, bases: bases);
+  final next = await programs.nextSession(req, program, position, bases);
+  return MeProgram(program, position, bases: bases, nextSession: next);
+}
+
+Future<ProgramHistory> getMyProgramHistory(Request req) async {
+  final program = await _myProgram(req, req.rawPathParameters[#programId]!);
+  return programs.programHistory(req, program);
+}
+
+Future<Program> _myProgram(Request req, String programId) {
+  if (!isUuidV7(programId)) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
+  return req.programService.getProgram(userId: req.userId, programId: programId);
 }
 
 /// Larger than this, an export goes out through a presigned link instead of

@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.33.0
+
+A program session as planned (heart-api#260). App side: heart-of-yours#349,
+#350.
+
+- New: `PlannedSession.of(program, template, position:, bases:)`, a session's
+  sets with this week's targets and the weights worked out from the current
+  bases: a `shareOfMax` wave applied to the working sets in order, shares of
+  the slot's, the exercise's or `of`'s base rounded down to the rule step, a
+  lighter cycle at `deload.load` and `deload.volume`, no weights in a test
+  session. `PlannedExercise` (`slot`, `exerciseId`, `base`, `sets`) and
+  `PlannedSet` (`setType`, `target`, `weight`, `reps`, `duration`,
+  `distance`) carry it, with `toMap` for the developer API and MCP.
+- `Progression` rounds the same way through a shared helper; no change in what
+  it returns.
+
 ## 2.32.0
 
 Phases and test sessions (heart-api#233). App side: heart-of-yours#346, #350.

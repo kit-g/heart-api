@@ -2976,6 +2976,25 @@ WHERE program_id = @programId::uuid
   AND user_id = @userId
 ''';
 
+/// A program's skips with what the user said, oldest first: its history read
+/// back (heart-api#260).
+const _listProgramSkips = '''
+SELECT id, at, reason, weather, template_id, program_id
+FROM skips
+WHERE program_id = @programId::uuid
+  AND user_id = @userId
+ORDER BY at, id
+''';
+
+/// The session each of a program's workouts was, by workout id: a base a
+/// workout caused reads as a test when the session is one.
+const _listProgramWorkouts = '''
+SELECT id, template_id
+FROM workouts
+WHERE program_id = @programId::uuid
+  AND user_id = @userId
+''';
+
 // Personal access tokens (heart-api#111).
 //
 // The cap counts only active tokens, the same rule `ApiToken.isActive`

@@ -222,6 +222,28 @@ mixin _Programs on _DatabaseBase implements ProgramService {
     });
   }
 
+  @override
+  Future<Iterable<TrainingSkip>> getProgramSkips({required String userId, required String programId}) async {
+    final rows = await _pool.execute(
+      _listProgramSkips.toSql(),
+      parameters: {'userId': userId, 'programId': programId},
+    );
+    return rows.map((row) => TrainingSkip.fromRow(row.toColumnMap()));
+  }
+
+  @override
+  Future<Map<String, String?>> getProgramWorkouts({required String userId, required String programId}) async {
+    final rows = await _pool.execute(
+      _listProgramWorkouts.toSql(),
+      parameters: {'userId': userId, 'programId': programId},
+    );
+    return {
+      for (final row in rows)
+        if (row.toColumnMap() case {'id': final Object id, 'template_id': final Object? template})
+          '$id': template?.toString(),
+    };
+  }
+
   Future<bool> _owns(String userId, String workoutId) async {
     final rows = await _pool.execute(_ownsWorkout.toSql(), parameters: {'userId': userId, 'workoutId': workoutId});
     return rows.isNotEmpty;

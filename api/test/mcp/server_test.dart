@@ -546,7 +546,18 @@ void main() {
             {
               'id': slot,
               'exercise': {'id': bench, 'name': 'Bench Press', 'category': 'Barbell', 'target': 'Chest'},
-              'sets': [],
+              'sets': [
+                {
+                  'id': '01900000-0000-7000-8000-000000000053',
+                  'completed': false,
+                  'started_at': '2026-10-01T08:00:00.000Z',
+                  'target': {
+                    'reps': {'min': 5},
+                    'share': 0.5,
+                    'of': bench,
+                  },
+                },
+              ],
             },
           ],
         }),
@@ -568,7 +579,98 @@ void main() {
           ],
         },
       ]);
+      expect(detail['nextSession'], {
+        'session': 'A',
+        'week': 1,
+        'lighter': false,
+        'exercises': [
+          {
+            'name': 'Bench Press',
+            'base': 80,
+            'sets': [
+              {
+                'target': {
+                  'reps': {'min': 5},
+                  'share': 0.5,
+                  'of': 'Bench Press',
+                },
+                'weight': 50,
+              },
+            ],
+          },
+        ],
+      }, reason: "a share of a named lift weighs that lift's own base, not the slot's, and names it");
       expect((await call('get_program', {'programId': 'nope'}))['isError'], isTrue);
+    });
+
+    test('get_program_history explains each base by name, with the steps and skips', () async {
+      const programId = '01900000-0000-7000-8000-000000000050';
+      const session = '01900000-0000-7000-8000-000000000051';
+      const bench = '01900000-0000-7000-8000-000000000001';
+      const row = '01900000-0000-7000-8000-000000000002';
+      const slot = '01900000-0000-7000-8000-000000000052';
+      const workout = '01900000-0000-7000-8000-000000000061';
+      final program = Program(id: programId, name: 'Getting stronger', sessions: [session]);
+      when(app.db.getProgram(userId: 'u1', programId: programId)).thenAnswer((_) async => program);
+      when(app.db.getProgramBases(userId: 'u1', programId: programId)).thenAnswer(
+        (_) async => [
+          ProgramBase(exerciseId: bench, slot: slot, value: 80, at: DateTime.utc(2026, 10, 1)),
+          ProgramBase(exerciseId: bench, slot: slot, value: 82.5, workoutId: workout, at: DateTime.utc(2026, 10, 2)),
+        ],
+      );
+      when(app.db.getProgramActions(userId: 'u1', programId: programId)).thenAnswer(
+        (_) async => [
+          ProgramAction(kind: .advance, from: row, to: bench, workoutId: workout, at: DateTime.utc(2026, 10, 2)),
+        ],
+      );
+      when(app.db.getProgramSkips(userId: 'u1', programId: programId)).thenAnswer(
+        (_) async => [TrainingSkip(at: DateTime.utc(2026, 10, 3), reason: 'busy', templateId: session)],
+      );
+      when(app.db.getProgramWorkouts(userId: 'u1', programId: programId)).thenAnswer((_) async => {workout: session});
+      when(app.db.getExercises('u1')).thenAnswer(
+        (_) async => {
+          'exercises': [
+            {'id': bench, 'name': 'Bench Press'},
+            {'id': row, 'name': 'Incline Push-up'},
+          ],
+        },
+      );
+      when(app.db.getTemplate(userId: 'u1', templateId: session)).thenAnswer(
+        (_) async => Template.fromJson(const {
+          'id': session,
+          'order': 0,
+          'name': 'A',
+          'exercises': [
+            {
+              'id': slot,
+              'exercise': {'id': bench, 'name': 'Bench Press', 'category': 'Barbell', 'target': 'Chest'},
+              'sets': [],
+            },
+          ],
+        }),
+      );
+
+      final history = (await call('get_program_history', {'programId': programId}))['structuredContent'] as Map;
+      expect(history, {
+        'bases': [
+          {'exercise': 'Bench Press', 'session': 'A', 'value': 80, 'cause': 'user', 'at': '2026-10-01T00:00:00.000Z'},
+          {
+            'exercise': 'Bench Press',
+            'session': 'A',
+            'value': 82.5,
+            'previous': 80,
+            'cause': 'workout',
+            'at': '2026-10-02T00:00:00.000Z',
+          },
+        ],
+        'actions': [
+          {'kind': 'advance', 'from': 'Incline Push-up', 'to': 'Bench Press', 'at': '2026-10-02T00:00:00.000Z'},
+        ],
+        'skips': [
+          {'at': '2026-10-03T00:00:00.000Z', 'reason': 'busy', 'session': 'A'},
+        ],
+      });
+      expect((await call('get_program_history', {'programId': 'nope'}))['isError'], isTrue);
     });
 
     test('an unknown tool is invalid params', () async {
