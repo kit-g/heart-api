@@ -29,6 +29,7 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
     required String category,
     required String target,
     String? instructions,
+    String? pattern,
   }) async {
     try {
       final rows = await _retryOnCreateRace(
@@ -41,6 +42,7 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
             'category': category,
             'target': target,
             'instructions': instructions,
+            'pattern': pattern,
           },
         ),
       );
@@ -65,6 +67,7 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
     String? target,
     String? instructions,
     bool? archived,
+    ({String? value})? pattern,
   }) async {
     final rows = await _pool.execute(
       _updateExercise.toSql(),
@@ -75,6 +78,8 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
         'target': target,
         'instructions': instructions,
         'archived': archived,
+        'setsPattern': pattern != null,
+        'pattern': pattern?.value,
       },
     );
     if (rows.isEmpty) throw NotFound(type: 'Exercise', id: exerciseId);

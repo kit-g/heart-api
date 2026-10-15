@@ -325,11 +325,20 @@ _by_name AS (
   LIMIT 1
 ),
 _ins AS (
-  INSERT INTO exercises (id, name, category, target, instructions, user_id)
+  INSERT INTO exercises (id, name, category, target, instructions, movement, user_id)
   -- the app mints a v7 id at construction (offline-first needs identity
   -- before the server ack) and it round-trips here; absent, the column
-  -- default mints one
-  SELECT coalesce(@id::uuid, uuidv7()), @name, @category, @target, @instructions, @userId
+  -- default mints one. A pattern the user gave is the movement's one group:
+  -- what the library knows about a movement besides its pattern, a custom
+  -- exercise doesn't say
+  SELECT
+    coalesce(@id::uuid, uuidv7()),
+    @name,
+    @category,
+    @target,
+    @instructions,
+    CASE WHEN @pattern::text IS NOT NULL THEN jsonb_build_object('groups', jsonb_build_array(@pattern::text)) END,
+    @userId
   WHERE NOT EXISTS (SELECT 1 FROM _by_id) AND NOT EXISTS (SELECT 1 FROM _by_name)
   RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived, user_id
 )
@@ -354,7 +363,15 @@ SET
   category = coalesce(@category, category),
   target = coalesce(@target, target),
   instructions = coalesce(@instructions, instructions),
-  archived = coalesce(@archived, archived)
+  archived = coalesce(@archived, archived),
+  -- the pattern is the movement's groups: set, or cleared, with whatever else
+  -- the movement says kept; a movement left empty is none
+  movement = CASE
+    WHEN NOT @setsPattern::boolean THEN movement
+    WHEN @pattern::text IS NOT NULL
+      THEN jsonb_set(coalesce(movement, '{}'), '{groups}', jsonb_build_array(@pattern::text))
+    ELSE nullif(movement - 'groups', '{}')
+  END
 WHERE id = @exerciseId::uuid 
   AND user_id = @userId
 RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived,

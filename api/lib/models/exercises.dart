@@ -10,8 +10,11 @@ abstract interface class ExerciseService {
     required String category,
     required String target,
     String? instructions,
+    String? pattern,
   });
 
+  /// [pattern] null leaves the movement pattern alone; `(value: null)` clears
+  /// it.
   Future<Map<String, dynamic>> updateExercise({
     required String userId,
     required String exerciseId,
@@ -19,6 +22,7 @@ abstract interface class ExerciseService {
     String? target,
     String? instructions,
     bool? archived,
+    ({String? value})? pattern,
   });
 
   /// Persists processed media onto the global exercise (user_id IS NULL) named
