@@ -89,14 +89,15 @@ abstract interface class PlannedSession implements Model {
       final exerciseId = exercise.exercise.id;
       final slot = exercise.id;
       final rule = program.ruleFor(exerciseId, slot: slot);
-      final base = bases[slot] ?? bases[exerciseId];
+      final base = program.atSlot(bases, exerciseId, slot: slot);
+      final stage = program.atSlot(stages, exerciseId, slot: slot) ?? 0;
       final wave = switch (rule) {
         ShareOfMax() when test == null => rule.week(week),
         _ => const <WaveSet>[],
       };
 
       final List<(ExerciseSet, SetTarget?)> all = switch ((rule, test)) {
-        (final Stages rule, null) => exercise.laidOut(rule.stage(stages[slot] ?? stages[exerciseId] ?? 0)),
+        (final Stages rule, null) => exercise.laidOut(rule.stage(stage)),
         _ => [for (final set in exercise) (set, set.target)],
       };
       final working = all.where((each) => each.$1.setType != .warmup).length;
@@ -155,7 +156,7 @@ abstract interface class PlannedSession implements Model {
           slot: slot,
           exerciseId: exerciseId,
           base: base?.value,
-          stage: rule is Stages ? stages[slot] ?? stages[exerciseId] ?? 0 : null,
+          stage: rule is Stages ? stage : null,
           sets: sets,
         ),
       );

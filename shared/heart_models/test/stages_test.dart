@@ -52,6 +52,24 @@ void main() {
         expect(rule.stage(7), const Stage(sets: 3, reps: 6, amrap: true), reason: 'past the list is the last stage');
       });
 
+      test('a miss rule that says only its cut still moves on the first miss', () {
+        final rule = GrowthRule.fromJson({
+          'kind': 'stages',
+          'step': 2.5,
+          'stages': [
+            {'sets': 5, 'reps': 3},
+            {'sets': 6, 'reps': 2},
+          ],
+          'miss': {'cut': 0.15},
+        }) as Stages;
+        expect((rule.miss.after, rule.miss.cut), (1, 0.15));
+        final waiting = GrowthRule.fromJson({
+          ...rule.toMap(),
+          'miss': {'after': 2},
+        }) as Stages;
+        expect(waiting.miss.after, 2, reason: 'a run the rule asks for stands');
+      });
+
       test('refuses fewer than two stages, or a stage out of range', () {
         Map<String, dynamic> stages(List<Object?> list) => {'kind': 'stages', 'step': 2.5, 'stages': list};
         expect(
@@ -126,9 +144,14 @@ void main() {
         expect(Progression.next(rule: patient, base: 60, sets: short, misses: 1, stage: 1), const ToStage(0, base: 50));
       });
 
-      test('a lighter week, or no base yet, moves nothing', () {
+      test('a lighter week moves nothing', () {
         expect(Progression.next(rule: _t1, base: 100, sets: short, lighter: true), const Hold());
-        expect(Progression.next(rule: _t1, base: null, sets: short), const Hold());
+      });
+
+      test('without a base yet a miss still moves the stage; only growing and cutting need one', () {
+        expect(Progression.next(rule: _t1, base: null, sets: short), const ToStage(1));
+        expect(Progression.next(rule: _t1, base: null, sets: short, stage: 2), const ToStage(0));
+        expect(Progression.next(rule: _t1, base: null, sets: made), const Hold());
       });
     });
 
@@ -180,6 +203,15 @@ void main() {
     });
 
     group('rules per slot', () {
+      test('atSlot: a slot\'s own entry, else the exercise\'s, never that when the slot has its own rule', () {
+        final program = Program(name: 'Tiers', rules: {_squat.id: _t1, 'thursday': _t1});
+        final bases = {_squat.id: 140, 'monday-light': 100};
+        expect(program.atSlot(bases, _squat.id), 140);
+        expect(program.atSlot(bases, _squat.id, slot: 'monday-light'), 100);
+        expect(program.atSlot(bases, _squat.id, slot: 'friday'), 140, reason: 'no rule of its own: the lift\'s');
+        expect(program.atSlot(bases, _squat.id, slot: 'thursday'), isNull, reason: 'its own rule keeps its own');
+      });
+
       test('a slot\'s own rule comes before its exercise\'s', () {
         final program = Program(
           name: 'Tiers',

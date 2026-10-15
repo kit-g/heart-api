@@ -173,7 +173,12 @@ sealed class GrowthRule implements Model {
           final other => throw ArgumentError.value(other, 'stages', 'two to twenty {sets, reps, amrap?}'),
         },
         step: _positive(json, 'step'),
-        miss: miss(),
+        // moving on the first miss is the default, also when the miss rule
+        // says only what the cut is
+        miss: switch (json['miss']) {
+          final Map miss when !miss.containsKey('after') => MissRule.fromJson({...miss, 'after': 1}),
+          _ => miss(),
+        },
         amrap: amrap(),
         extra: rest(const {'stages', ...weighted}),
       ),
@@ -679,6 +684,13 @@ abstract interface class Program implements Model {
   /// The rule for [exerciseId] at [slot]: the slot's own, else the exercise's.
   GrowthRule? ruleFor(String exerciseId, {String? slot});
 
+  /// [byKey]'s entry for [exerciseId] at [slot], keyed as `currentBases` and
+  /// `currentStages` key them: the slot's own, else the exercise's. A slot
+  /// with a rule of its own keeps its own base and stage, so it never falls
+  /// back to the exercise's: a tier-two squat isn't planned at the tier-one
+  /// weight.
+  V? atSlot<V>(Map<String, V> byKey, String exerciseId, {String? slot});
+
   /// A content key, such as `avoid_high_axial_load`, that filters suggestions
   /// inside the program.
   String? get constraint;
@@ -952,6 +964,13 @@ class _Program implements Program {
 
   @override
   GrowthRule? ruleFor(String exerciseId, {String? slot}) => rules[slot] ?? rules[exerciseId];
+
+  @override
+  V? atSlot<V>(Map<String, V> byKey, String exerciseId, {String? slot}) {
+    if (byKey[slot] case final V own) return own;
+    if (slot != null && rules.containsKey(slot)) return null;
+    return byKey[exerciseId];
+  }
 
   @override
   int? phaseOf(int week) {

@@ -144,6 +144,14 @@ abstract final class Progression {
       final next = rule.after(working.first.exercise.id);
       return reached && next != null ? Advance(next) : const Hold();
     }
+    // a stage move keeps the weight, so it needs no base; only a cut does
+    if (rule case Stages(:final stages, miss: final miss) when _missed(miss, working)) {
+      final streak = misses + 1;
+      if (streak < miss.after) return Missed(streak);
+      final at = stage.clamp(0, stages.length - 1);
+      if (at < stages.length - 1) return ToStage(at + 1);
+      return ToStage(0, base: base == null ? null : roundDown(base * (1 - miss.cut), rule.step));
+    }
     if (base == null) return const Hold();
 
     switch (rule) {
@@ -165,13 +173,9 @@ abstract final class Progression {
         return top ? _step(rule, base, step, working) : const Hold();
       case Ladder():
         return const Hold();
-      case Stages(:final step, :final stages, miss: final miss):
-        if (!_missed(miss, working)) return _step(rule, base, step, working);
-        final streak = misses + 1;
-        if (streak < miss.after) return Missed(streak);
-        final at = stage.clamp(0, stages.length - 1);
-        if (at < stages.length - 1) return ToStage(at + 1);
-        return ToStage(0, base: roundDown(base * (1 - miss.cut), step));
+      case Stages(:final step):
+        // a miss moved it above
+        return _step(rule, base, step, working);
       case ShareOfMax(:final step):
         final missed = _missed(rule.miss, working);
         if (missed && misses + 1 >= rule.miss.after) return Cut(roundDown(base * (1 - rule.miss.cut), step));

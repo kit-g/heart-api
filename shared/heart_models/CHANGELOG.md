@@ -6,17 +6,23 @@ Stages, and rules per slot (heart-api#256). App side: heart-of-yours#350.
 
 - New: `Stages`, a growth rule (`kind: stages`) of two or more `Stage`s
   (`sets`, `reps`, `amrap`), a `step`, and `miss` (moving on the first miss
-  by default) and `amrap` like the weighted rules. Exhaustive switches over
+  by default, also when `miss` gives only its cut) and `amrap` like the
+  weighted rules. Exhaustive switches over
   `GrowthRule` gain a case.
 - New: `ToStage(stage, base:)`, a `ProgressionStep`. `Progression.next` takes
   `stage` and returns `ToStage(next)` on a miss, or `ToStage(0, base: cut)` on
-  the last stage. Exhaustive switches over `ProgressionStep` gain a case.
+  the last stage. A stage move needs no base: without one, a miss still
+  moves the stage, and the last stage starts over with `base` null. Exhaustive switches over `ProgressionStep` gain a case.
 - New: `ProgramActionKind.stage` and `ProgramAction.exercise` / `slot` /
   `stage`; `currentStages(actions)`, keyed like `currentBases`.
 - New: `Program.ruleFor(exerciseId, slot:)`. `rules` may also be keyed by a
   slot (a template exercise id), whose rule comes before its exercise's.
+- New: `Program.atSlot(byKey, exerciseId, slot:)`, the one lookup of a base or
+  a stage: the slot's own, else the exercise's, never that when the slot has
+  a rule of its own.
 - `PlannedSession.of` takes `stages`, plans a stages rule's sets for its
-  stage, and reads a slot's rule first. `PlannedExercise.stage`.
+  stage, and reads a slot's rule, base and stage through `ruleFor` and
+  `atSlot`. `PlannedExercise.stage`.
 
 ## 2.33.0
 

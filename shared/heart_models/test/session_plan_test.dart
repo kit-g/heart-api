@@ -323,6 +323,40 @@ void main() {
       expect(second.toMap()['stage'], 1);
     });
 
+    test('a slot with its own rule never takes the lift\'s base or stage (heart-api#256)', () {
+      const heavy = '019a0000-0000-7000-8000-0000000000b1';
+      const volume = '019a0000-0000-7000-8000-0000000000b2';
+      const t1 = Stages(
+        step: 2.5,
+        stages: [Stage(sets: 5, reps: 3, amrap: true), Stage(sets: 6, reps: 2, amrap: true), Stage(sets: 10, reps: 1)],
+      );
+      const t2 = Stages(
+        step: 2.5,
+        stages: [Stage(sets: 3, reps: 10), Stage(sets: 3, reps: 8), Stage(sets: 3, reps: 6)],
+      );
+      final session = _template([
+        (heavy, _exercise(_squat, 'Squat'), [_set(1, _reps(3, 3))]),
+        (volume, _exercise(_squat, 'Squat'), [_set(2, _reps(10, 10))]),
+      ]);
+      final program = Program(name: 'Tiers', sessions: const [_session], rules: {_squat: t1, volume: t2});
+      final plan = PlannedSession.of(
+        program,
+        session,
+        position: _at(program),
+        bases: currentBases([_base(_squat, 140)]),
+        stages: {_squat: 2},
+      );
+      final [first, second] = plan.exercises;
+      expect((first.stage, first.sets.length, first.sets.first.weight), (2, 10, 140));
+      expect((second.stage, second.base), (0, null), reason: 'tier two keeps its own: none yet');
+      expect(
+        [for (final set in second.sets) (set.target?[.reps], set.weight)],
+        [
+          for (var i = 0; i < 3; i++) (TargetRange.exactly(10), null),
+        ],
+      );
+    });
+
     test('a slot\'s own rule and base come before the exercise\'s', () {
       const heavy = '019a0000-0000-7000-8000-0000000000b1';
       const light = '019a0000-0000-7000-8000-0000000000b2';
