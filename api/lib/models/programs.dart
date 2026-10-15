@@ -141,14 +141,13 @@ enum BaseCause {
 /// A program's history read back (heart-api#260): every base with its cause
 /// and the value it replaced, the actions, and the skips, each oldest first.
 abstract interface class ProgramHistory implements Model {
-  Iterable<ProgramBase> get bases;
+  /// Every base, oldest first, with its cause and the value it replaced: the
+  /// one before it for its slot, or for its exercise when it has no slot.
+  List<({ProgramBase base, BaseCause cause, num? previous})> get bases;
 
-  Iterable<ProgramAction> get actions;
+  List<ProgramAction> get actions;
 
-  Iterable<TrainingSkip> get skips;
-
-  /// What caused [base].
-  BaseCause causeOf(ProgramBase base);
+  List<TrainingSkip> get skips;
 
   /// [tests] are the program's test sessions and [sessions] the session of
   /// each of its workouts, as `getProgramWorkouts` reads them.
@@ -163,39 +162,47 @@ abstract interface class ProgramHistory implements Model {
 
 class _ProgramHistory implements ProgramHistory {
   @override
-  final Iterable<ProgramBase> bases;
+  final List<({ProgramBase base, BaseCause cause, num? previous})> bases;
   @override
-  final Iterable<ProgramAction> actions;
+  final List<ProgramAction> actions;
   @override
-  final Iterable<TrainingSkip> skips;
-  final Set<String> tests;
-  final Map<String, String?> sessions;
+  final List<TrainingSkip> skips;
 
-  new({required this.bases, required this.actions, required this.skips, required this.tests, required this.sessions});
+  factory({
+    required Iterable<ProgramBase> bases,
+    required Iterable<ProgramAction> actions,
+    required Iterable<TrainingSkip> skips,
+    required Set<String> tests,
+    required Map<String, String?> sessions,
+  }) {
+    BaseCause causeOf(ProgramBase base) {
+      return switch (base) {
+        ProgramBase(workoutId: final String workout) when tests.contains(sessions[workout]) => .test,
+        ProgramBase(workoutId: String()) => .workout,
+        ProgramBase(actionId: String()) => .action,
+        _ => .user,
+      };
+    }
 
-  @override
-  BaseCause causeOf(ProgramBase base) {
-    return switch (base) {
-      ProgramBase(workoutId: final String workout) when tests.contains(sessions[workout]) => .test,
-      ProgramBase(workoutId: String()) => .workout,
-      ProgramBase(actionId: String()) => .action,
-      _ => .user,
-    };
+    final held = <String, num>{};
+    final timeline = <({ProgramBase base, BaseCause cause, num? previous})>[];
+    for (final base in bases) {
+      final key = base.slot ?? base.exerciseId;
+      timeline.add((base: base, cause: causeOf(base), previous: held[key]));
+      held[key] = base.value;
+    }
+    return _ProgramHistory._(timeline, actions.toList(), skips.toList());
   }
+
+  new _(this.bases, this.actions, this.skips);
 
   @override
   Map<String, dynamic> toMap() {
-    // the value each base replaced: the one before it for its slot, or for
-    // its exercise when it has no slot
-    final held = <String, num>{};
-    final rows = <Map<String, dynamic>>[];
-    for (final base in bases) {
-      final key = base.slot ?? base.exerciseId;
-      rows.add({...base.toMap()..remove('programId'), 'cause': causeOf(base).value, 'previous': ?held[key]});
-      held[key] = base.value;
-    }
     return {
-      'bases': rows,
+      'bases': [
+        for (final (:base, :cause, :previous) in bases)
+          {...base.toMap()..remove('programId'), 'cause': cause.value, 'previous': ?previous},
+      ],
       'actions': [for (final action in actions) action.toMap()..remove('programId')],
       'skips': [for (final skip in skips) skip.toMap()..remove('programId')],
     };

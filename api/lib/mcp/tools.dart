@@ -521,14 +521,14 @@ final List<McpTool> tools = [
       String name(String exerciseId) => names[exerciseId] ?? exerciseId;
       return {
         'bases': [
-          for (final base in (history.toMap()['bases'] as List).cast<Map<String, dynamic>>())
+          for (final (:base, :cause, :previous) in history.bases)
             {
-              'exercise': name(base['exerciseId'] as String),
-              if (base['slot'] case final String slot) 'session': slotSessions[slot] ?? slot,
-              'value': base['value'],
-              'previous': ?base['previous'],
-              'cause': base['cause'],
-              'at': base['at'],
+              'exercise': name(base.exerciseId),
+              if (base.slot case final String slot) 'session': slotSessions[slot] ?? slot,
+              'value': base.value,
+              'previous': ?previous,
+              'cause': cause.value,
+              'at': base.at.toUtc().toIso8601String(),
             },
         ],
         'actions': [
