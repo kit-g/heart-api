@@ -166,3 +166,8 @@ extension on int {
     return this;
   }
 }
+
+/// A content key: a snake_case identifier the content owns, such as a movement
+/// pattern, a muscle group or a library program. Content can add one without a
+/// release, so only the spelling is checked, never a list.
+final _contentKey = RegExp(r'^[a-z][a-z0-9_]{0,63}$');

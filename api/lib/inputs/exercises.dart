@@ -111,7 +111,7 @@ extension on Map<String, dynamic> {
   String? pattern() {
     return switch (this['pattern']) {
       null => null,
-      final String key when _patternKey.hasMatch(key) => key,
+      final String key when _contentKey.hasMatch(key) => key,
       _ => throw const BadRequest(
         code: 'invalid_pattern',
         reason: 'pattern must be a snake_case key of at most 64 characters, or null',
@@ -119,5 +119,3 @@ extension on Map<String, dynamic> {
     };
   }
 }
-
-final _patternKey = RegExp(r'^[a-z][a-z0-9_]{0,63}$');
