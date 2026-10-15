@@ -91,9 +91,10 @@
         <p>Everything is <code>GET</code>, and everything is about the account the token belongs to. Lists that
             page carry a <code>cursor</code> while there’s more: pass it back as <code>?cursor=</code>. No
             <code>cursor</code> means the last page. <code>limit</code> is 1–100 (30 by default).</p>
-        <!-- a narrow phone scrolls the table rather than the page -->
+        <!-- a route stays on one line; where that makes the table wider than the
+             page, the table scrolls rather than the page -->
         <div class="overflow-x-auto">
-        <table class="[&_td:first-child]:break-all">
+        <table class="[&_td:first-child]:whitespace-nowrap">
             <thead><tr><th>Route</th><th>Returns</th></tr></thead>
             <tbody>
             <tr><td><code>/me</code></td><td>Your username, unit system, and how many workouts, templates, folders, goals, custom exercises and programs you have.</td></tr>
