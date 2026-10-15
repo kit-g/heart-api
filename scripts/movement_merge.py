@@ -80,8 +80,7 @@ def validate(annotations: dict, exercises: dict, enums: dict[str, set[str]]) -> 
         if unilateral is not None and not isinstance(unilateral, bool):
             errors.append(f'{name}: unilateral must be a boolean, got {unilateral!r}')
 
-        unknown = set(record) - {'groups', 'axial_load', 'stability',
-                                 'unilateral', 'impact', 'skill'}
+        unknown = set(record) - {'groups', 'axial_load', 'stability', 'unilateral', 'impact', 'skill'}
         if unknown:
             errors.append(f'{name}: unknown fields {sorted(unknown)}')
 
@@ -91,8 +90,10 @@ def validate(annotations: dict, exercises: dict, enums: dict[str, set[str]]) -> 
             by_group[group].append(name)
     for group, members in sorted(by_group.items()):
         if len(members) == 1 and group not in KNOWN_SINGLETONS:
-            errors.append(f'group {group!r} has one member ({members[0]}) — '
-                          f'no substitutes can be offered; merge it or add to KNOWN_SINGLETONS')
+            errors.append(
+                f'group {group!r} has one member ({members[0]}) — '
+                f'no substitutes can be offered; merge it or add to KNOWN_SINGLETONS'
+            )
 
     return errors
 
@@ -122,8 +123,7 @@ def merge(exercises, annotations) -> tuple[int, int]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--check', action='store_true',
-                        help='validate only; do not modify the master')
+    parser.add_argument('--check', action='store_true', help='validate only; do not modify the master')
     args = parser.parse_args()
 
     yaml = build_yaml()
@@ -144,8 +144,10 @@ def main() -> int:
 
     missing = [n for n in exercises if n not in annotations]
     if missing:
-        print(f'note: {len(missing)} exercise(s) have no movement record and will '
-              f'offer no substitutes: {", ".join(missing)}')
+        print(
+            f'note: {len(missing)} exercise(s) have no movement record and will '
+            f'offer no substitutes: {", ".join(missing)}'
+        )
 
     if args.check:
         print(f'ok: {len(annotations)} movement records valid')

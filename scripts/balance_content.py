@@ -36,8 +36,14 @@ def patterns(library: dict) -> set[str]:
 
 def check(document: dict, library: dict) -> list[str]:
     known = patterns(library)
-    locales = document.get('locales') or []
     problems = []
+    # what render() reads without asking
+    if not isinstance(document.get('version'), int):
+        problems.append('version: a whole number')
+    locales = document.get('locales')
+    if not isinstance(locales, list) or not all(isinstance(locale, str) for locale in locales):
+        problems.append('locales: a list of language codes')
+        locales = []
 
     def copy(where, text):
         if not isinstance(text, dict) or not str(text.get('en') or '').strip():
@@ -47,16 +53,21 @@ def check(document: dict, library: dict) -> list[str]:
             if not str(text.get(locale) or '').strip():
                 problems.append(f'{where}: missing {locale}')
 
-    pairs = document.get('pairs') or []
-    if not pairs:
+    pairs = document.get('pairs')
+    if not isinstance(pairs, list) or not pairs:
         problems.append('pairs: one pair or more')
+        pairs = []
     seen = set()
     for at, pair in enumerate(pairs):
+        if not isinstance(pair, dict):
+            problems.append(f'pairs[{at}]: a pair is {{key, left, right}}')
+            continue
         key = pair.get('key')
         where = f'pairs[{at}]' if not isinstance(key, str) else key
         if not isinstance(key, str) or not KEY.fullmatch(key) or key in seen:
             problems.append(f'{where}: key must be snake_case and unique')
-        seen.add(key)
+        if isinstance(key, str):
+            seen.add(key)
         sides = []
         for name in ('left', 'right'):
             side = pair.get(name)
@@ -71,6 +82,9 @@ def check(document: dict, library: dict) -> list[str]:
             listed = side.get('patterns')
             if not isinstance(listed, list) or not listed:
                 problems.append(f'{where}.{name}: patterns is a non-empty list')
+                continue
+            if not all(isinstance(pattern, str) for pattern in listed):
+                problems.append(f'{where}.{name}: patterns are pattern keys')
                 continue
             for pattern in listed:
                 if pattern not in known:

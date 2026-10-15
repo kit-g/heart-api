@@ -44,3 +44,21 @@ def test_every_side_is_named_in_every_locale():
 
 def test_a_side_carries_nothing_but_its_key_name_and_patterns():
     assert any('unknown' in p for p in check(_with(verdict={'en': 'Too much push'}), LIBRARY_DOC))
+
+
+def test_what_render_reads_is_checked_first():
+    document = copy.deepcopy(load(SOURCE))
+    del document['locales'], document['version']
+    problems = check(document, LIBRARY_DOC)
+    assert any(p.startswith('version') for p in problems)
+    assert any(p.startswith('locales') for p in problems)
+
+
+def test_a_malformed_pair_or_pattern_is_a_problem_not_a_crash():
+    assert any('patterns are pattern keys' in p for p in check(_with(patterns=[{'row': 1}]), LIBRARY_DOC))
+    document = copy.deepcopy(load(SOURCE))
+    document['pairs'].append('push_pull')
+    document['pairs'][1]['key'] = {'hinge': 'squat'}
+    problems = check(document, LIBRARY_DOC)
+    assert any('a pair is' in p for p in problems)
+    assert any('key must be snake_case' in p for p in problems)

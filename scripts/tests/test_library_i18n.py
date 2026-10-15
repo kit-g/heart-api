@@ -155,7 +155,7 @@ def test_merge_rejects_a_glossary_the_master_already_defines():
     overlay = {'locale': 'es', 'glossary': {'x': {'words': ['y']}}, 'exercises': {}}
     doc = vocabulary_master()
     doc['glossary']['es'] = {}
-    with pytest.raises(ValueError, match='already defines the \'es\' glossary'):
+    with pytest.raises(ValueError, match="already defines the 'es' glossary"):
         merge_overlays(doc, [('es.yml', overlay)])
 
 
@@ -257,4 +257,3 @@ def test_the_schema_bounds_a_share_to_a_fraction_of_a_set(share, valid):
     role = {'$defs': schema['$defs'], **schema['$defs']['muscleRole']}
     errors = list(jsonschema.Draft202012Validator(role).iter_errors({'ids': [], 'share': share}))
     assert (not errors) == valid
-
