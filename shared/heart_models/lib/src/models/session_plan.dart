@@ -123,7 +123,7 @@ abstract interface class PlannedSession implements Model {
           weight = null;
         } else if (target?.share case final num share) {
           weight = switch (target?.of) {
-            final String of => weigh(share, of, bases[target?.ofSlot] ?? bases[of], slot: target?.ofSlot),
+            final String of => weigh(share, of, program.atSlot(bases, of, slot: target?.ofSlot), slot: target?.ofSlot),
             null => weigh(share, exerciseId, base, slot: slot),
           };
         } else if (base != null) {

@@ -411,6 +411,21 @@ void main() {
         90,
         reason: 'no base for that occurrence: the lift\'s own',
       );
+      final ruled = Program(
+        name: 'Volume day',
+        sessions: const [_session],
+        rules: {intensity: const AddWeight(step: 2.5)},
+      );
+      expect(
+        PlannedSession.of(
+          ruled,
+          session,
+          position: _at(ruled),
+          bases: currentBases([_base(_squat, 100)]),
+        ).exercises.single.sets.single.weight,
+        isNull,
+        reason: 'an occurrence with its own rule has no base yet, and never borrows the lift\'s',
+      );
     });
 
     test('on the wire', () {

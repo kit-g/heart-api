@@ -9,7 +9,7 @@ A share of one slot's base (heart-api#257). App side: heart-of-yours#349.
   base per slot. `fromJson` reads it, `toMap` writes it, and every `with…`
   keeps it.
 - `PlannedSession.of` weighs such a share from that slot's base, else from
-  `of`'s own.
+  `of`'s own, unless the slot has a rule of its own (`Program.atSlot`).
 
 ## 2.34.0
 
