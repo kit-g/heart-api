@@ -30,6 +30,7 @@ Future<Model> createExercise(Request request) async {
     category: input.category,
     target: input.target,
     instructions: input.instructions,
+    pattern: input.pattern,
   );
   // `created` rides along in the row map (heart-api#66) purely to pick
   // the status code — it is never part of the wire body.
@@ -50,6 +51,7 @@ Future<ExerciseModel> updateExercise(Request request) async {
     target: input.target,
     instructions: input.instructions,
     archived: input.archived,
+    pattern: input.pattern,
   );
   return ExerciseModel(row);
 }

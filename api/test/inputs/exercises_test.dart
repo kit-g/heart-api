@@ -70,5 +70,31 @@ void main() {
     test('rejects an empty-string category', () async {
       await expectLater(parse({'category': ''}), throwsA(isA<BadRequest>()));
     });
+
+    test('a pattern is set, cleared with null, and left alone when absent (heart-api#269)', () async {
+      expect((await parse({'pattern': 'horizontal_press'})).pattern, (value: 'horizontal_press'));
+      expect((await parse({'pattern': null})).pattern, (value: null));
+      expect((await parse({'target': 'Chest'})).pattern, isNull, reason: 'an older build sends none');
+      for (final bad in ['Horizontal Press', '', 5, 'x' * 65]) {
+        await expectLater(
+          parse({'pattern': bad}),
+          throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'invalid_pattern')),
+          reason: '$bad',
+        );
+      }
+    });
+  });
+
+  group('ExerciseCreateIn — a movement pattern (heart-api#269)', () {
+    Future<ExerciseCreateIn> parse(Map<String, dynamic> body) => ExerciseCreateIn.fromRequest(
+      jsonRequest(body: {'name': 'Landmine press', 'category': 'Barbell', 'target': 'Shoulders', ...body}),
+    );
+
+    test('optional: a key, or none', () async {
+      expect((await parse({'pattern': 'vertical_press'})).pattern, 'vertical_press');
+      expect((await parse({})).pattern, isNull);
+      expect((await parse({'pattern': null})).pattern, isNull);
+      await expectLater(parse({'pattern': 'vertical press'}), throwsA(isA<BadRequest>()));
+    });
   });
 }

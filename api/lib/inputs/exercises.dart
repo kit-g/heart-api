@@ -7,12 +7,16 @@ class ExerciseCreateIn {
   final String target;
   final String? instructions;
 
+  /// The movement pattern the user gave it, a library key; null for none.
+  final String? pattern;
+
   const new _({
     required this.id,
     required this.name,
     required this.category,
     required this.target,
     required this.instructions,
+    required this.pattern,
   });
 
   static Future<ExerciseCreateIn> fromRequest(Request req) async {
@@ -28,6 +32,7 @@ class ExerciseCreateIn {
       category: json.string('category', maxLength: 100),
       target: json.string('target', maxLength: 100),
       instructions: json.stringOrNull('instructions', maxLength: 10000),
+      pattern: json.pattern(),
     );
   }
 }
@@ -72,11 +77,16 @@ class ExerciseUpdateIn {
   final String? instructions;
   final bool? archived;
 
+  /// Null leaves the pattern alone; `(value: null)` clears it. A build that
+  /// predates patterns sends no key, so its edit never clears one.
+  final ({String? value})? pattern;
+
   const new _({
     required this.category,
     required this.target,
     required this.instructions,
     required this.archived,
+    required this.pattern,
   });
 
   static Future<ExerciseUpdateIn> fromRequest(Request req) async {
@@ -86,6 +96,28 @@ class ExerciseUpdateIn {
       target: json.stringOrNull('target', maxLength: 100),
       instructions: json.stringOrNull('instructions', maxLength: 10000),
       archived: json.booleanOrNull('archived'),
+      pattern: switch (json.containsKey('pattern')) {
+        true => (value: json.pattern()),
+        false => null,
+      },
     );
   }
 }
+
+extension on Map<String, dynamic> {
+  /// A custom exercise's movement pattern: a library pattern key, such as
+  /// `horizontal_press`, or null for none. The library can add a pattern
+  /// without a release, so the spelling is what is checked, as for a goal's.
+  String? pattern() {
+    return switch (this['pattern']) {
+      null => null,
+      final String key when _patternKey.hasMatch(key) => key,
+      _ => throw const BadRequest(
+        code: 'invalid_pattern',
+        reason: 'pattern must be a snake_case key of at most 64 characters, or null',
+      ),
+    };
+  }
+}
+
+final _patternKey = RegExp(r'^[a-z][a-z0-9_]{0,63}$');
