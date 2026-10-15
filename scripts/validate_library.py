@@ -47,14 +47,42 @@ def validate_schema(document: dict, schema: dict, label: str) -> int:
 
 # Mirrors searchNormalized in shared/heart_models (src/models/search.dart):
 # the app matches in this form, so uniqueness and shadowing are checked in it.
-_FOLDS = str.maketrans({
-    'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae',
-    'ç': 'c', 'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
-    'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i', 'ñ': 'n',
-    'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', 'ø': 'o', 'œ': 'oe',
-    'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u', 'ý': 'y', 'ÿ': 'y', 'ß': 'ss',
-    'ё': 'е',
-})
+_FOLDS = str.maketrans(
+    {
+        'à': 'a',
+        'á': 'a',
+        'â': 'a',
+        'ã': 'a',
+        'ä': 'a',
+        'å': 'a',
+        'æ': 'ae',
+        'ç': 'c',
+        'è': 'e',
+        'é': 'e',
+        'ê': 'e',
+        'ë': 'e',
+        'ì': 'i',
+        'í': 'i',
+        'î': 'i',
+        'ï': 'i',
+        'ñ': 'n',
+        'ò': 'o',
+        'ó': 'o',
+        'ô': 'o',
+        'õ': 'o',
+        'ö': 'o',
+        'ø': 'o',
+        'œ': 'oe',
+        'ù': 'u',
+        'ú': 'u',
+        'û': 'u',
+        'ü': 'u',
+        'ý': 'y',
+        'ÿ': 'y',
+        'ß': 'ss',
+        'ё': 'е',
+    }
+)
 
 
 def search_words(s: str) -> list[str]:
@@ -111,7 +139,7 @@ def search_problems(library: Library, muscle_groups: set[str], muscle_ids: set[s
                 elif not any(
                     muscle in role.groups or any(each.startswith(muscle) for each in role.ids) for role in primaries
                 ):
-                    problems.append(f'{locale}: glossary word {word!r} names {muscle!r}, no exercise\'s primary muscle')
+                    problems.append(f"{locale}: glossary word {word!r} names {muscle!r}, no exercise's primary muscle")
     return problems
 
 
@@ -136,8 +164,7 @@ def coverage(master: dict, overlays: list[tuple[str, dict]], detailed: bool) -> 
             continue
         entries = by_locale.get(locale, {})
         concrete = {
-            name: entry for name, entry in entries.items()
-            if entry.get('fallback_to') is None and entry.get('name')
+            name: entry for name, entry in entries.items() if entry.get('fallback_to') is None and entry.get('name')
         }
 
         stale = []

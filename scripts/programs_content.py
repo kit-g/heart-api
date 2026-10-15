@@ -143,7 +143,7 @@ def _check_miss(where: str, miss) -> list[str]:
     return problems
 
 
-def check_rule(where, rule, category, targets, ladders) -> list[str]:
+def check_rule(where, rule, exercise, category, targets, ladders) -> list[str]:
     if not isinstance(rule, dict) or rule.get('kind') not in RULES:
         return [f'{where}: unknown rule {rule!r}']
     params, fits = RULES[rule['kind']]
@@ -169,7 +169,6 @@ def check_rule(where, rule, category, targets, ladders) -> list[str]:
             if not any('max' in t.get('reps', {}) and t['reps']['max'] > t['reps']['min'] for t in sets):
                 problems.append(f'{where}: rangeThenWeight needs a rep range to reach the top of')
     if rule['kind'] == 'ladder':
-        exercise = where.rsplit('.', 1)[-1]
         rungs = ladders.get(rule.get('ladder'))
         if rungs is None:
             problems.append(f'{where}: no ladder {rule.get("ladder")!r} in exercise_ladders.yml')
@@ -429,7 +428,9 @@ def check(document: dict, library: dict, sources=None, safety=None, ladders=None
                 # an occurrence with a rule of its own is held to it, not to its
                 # exercise's
                 if 'rule' in entry:
-                    problems += check_rule(f'{at}.{exercise}.rule', entry['rule'], category, [targets], ladders)
+                    problems += check_rule(
+                        f'{at}.{exercise}.rule', entry['rule'], exercise, category, [targets], ladders
+                    )
                     slot_rules[(session.get('key'), exercise)] = entry['rule']
                 else:
                     used.setdefault(exercise, []).append(targets)
@@ -462,7 +463,7 @@ def check(document: dict, library: dict, sources=None, safety=None, ladders=None
                 problems.append(f'{where}.rules.{exercise}: no session does this exercise')
                 continue
             problems += check_rule(
-                f'{where}.rules.{exercise}', rule, exercises[exercise]['category'], used[exercise], ladders
+                f'{where}.rules.{exercise}', rule, exercise, exercises[exercise]['category'], used[exercise], ladders
             )
 
         def keeps_base(rule) -> bool:

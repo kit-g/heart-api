@@ -214,10 +214,7 @@ class Exercise:
             muscles=Muscles.parse(source.get('muscles')),
             movement=Movement.parse(source.get('movement')),
             health=Health.parse(source.get('health')),
-            localizations={
-                locale: ExerciseLocalization.parse(loc)
-                for locale, loc in source.get('i18n', {}).items()
-            },
+            localizations={locale: ExerciseLocalization.parse(loc) for locale, loc in source.get('i18n', {}).items()},
             fallback=source.get('fallback') or global_fallback,
         )
 
@@ -246,8 +243,7 @@ class Library:
             locales=source['locales'],
             fallback_to=fallback_to,
             exercises={
-                key: Exercise.parse(ex, key, global_fallback=fallback_to)
-                for key, ex in source['exercises'].items()
+                key: Exercise.parse(ex, key, global_fallback=fallback_to) for key, ex in source['exercises'].items()
             },
             glossaries=source.get('glossary') or {},
         )
@@ -368,7 +364,7 @@ def get_source() -> dict:
     return merge_overlays(master, load_overlays(content))
 
 
-UPSERT_EXERCISE = '''
+UPSERT_EXERCISE = """
 INSERT INTO exercises (
     key, name, category, target, instructions, muscles, movement, health, validated, aliases, archived
 )
@@ -386,9 +382,9 @@ DO UPDATE SET
     aliases = EXCLUDED.aliases,
     archived = false
 RETURNING id
-'''
+"""
 
-UPSERT_TRANSLATION = '''
+UPSERT_TRANSLATION = """
 INSERT INTO exercise_translations (exercise_id, locale, name, instructions, validated, aliases)
 VALUES (%s, %s, %s, %s, %s, %s)
 ON CONFLICT (exercise_id, locale)
@@ -397,37 +393,37 @@ DO UPDATE SET
     instructions = EXCLUDED.instructions,
     validated = EXCLUDED.validated,
     aliases = EXCLUDED.aliases
-'''
+"""
 
-UPSERT_GLOSSARY = '''
+UPSERT_GLOSSARY = """
 INSERT INTO search_glossaries (locale, terms)
 VALUES (%s, %s)
 ON CONFLICT (locale) DO UPDATE SET terms = EXCLUDED.terms
-'''
+"""
 
-PRUNE_GLOSSARIES = '''
+PRUNE_GLOSSARIES = """
 DELETE FROM search_glossaries
 WHERE locale <> ALL(%s)
-'''
+"""
 
-ARCHIVE_MISSING = '''
+ARCHIVE_MISSING = """
 UPDATE exercises
 SET archived = true
 WHERE user_id IS NULL AND key <> ALL(%s) AND archived = false
-'''
+"""
 
 # A translation the source no longer defines must stop being served, or it
 # lingers with stale copy forever. Scoped to the exercises this run touched:
 # archived exercises (absent from the source) keep whatever translations they
 # had when they shipped.
-PRUNE_TRANSLATIONS = '''
+PRUNE_TRANSLATIONS = """
 DELETE FROM exercise_translations t
 WHERE t.exercise_id = ANY(%s::uuid[])
   AND NOT EXISTS (
     SELECT 1 FROM unnest(%s::uuid[], %s::text[]) AS kept(exercise_id, locale)
     WHERE kept.exercise_id = t.exercise_id AND kept.locale = t.locale
   )
-'''
+"""
 
 
 def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int, int, int]:
@@ -439,18 +435,21 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int, int
         for key, exercise in library.exercises.items():
             fallback = exercise.fallback_localization()
 
-            cur.execute(UPSERT_EXERCISE, (
-                key,
-                fallback.exercise_name,
-                exercise.category,
-                exercise.target,
-                fallback.instructions,
-                Json(exercise.muscles.to_dict()) if exercise.muscles else None,
-                Json(exercise.movement.to_dict()) if exercise.movement else None,
-                Json(exercise.health.to_dict()) if exercise.health else None,
-                fallback.validated,
-                fallback.aliases,
-            ))
+            cur.execute(
+                UPSERT_EXERCISE,
+                (
+                    key,
+                    fallback.exercise_name,
+                    exercise.category,
+                    exercise.target,
+                    fallback.instructions,
+                    Json(exercise.muscles.to_dict()) if exercise.muscles else None,
+                    Json(exercise.movement.to_dict()) if exercise.movement else None,
+                    Json(exercise.health.to_dict()) if exercise.health else None,
+                    fallback.validated,
+                    fallback.aliases,
+                ),
+            )
             exercise_id = cur.fetchone()[0]
             exercise_ids.append(exercise_id)
             upserted += 1
@@ -459,19 +458,19 @@ def sync(library: Library, conn: psycopg.Connection) -> tuple[int, int, int, int
                 if locale == exercise.fallback or not loc.is_concrete():
                     continue
                 cur.execute(
-                    UPSERT_TRANSLATION, (
-                        exercise_id, locale, loc.exercise_name, loc.instructions, loc.validated, loc.aliases
-                    )
+                    UPSERT_TRANSLATION,
+                    (exercise_id, locale, loc.exercise_name, loc.instructions, loc.validated, loc.aliases),
                 )
                 kept.append((exercise_id, locale))
                 translations += 1
 
         cur.execute(
-            PRUNE_TRANSLATIONS, (
+            PRUNE_TRANSLATIONS,
+            (
                 exercise_ids,
                 [exercise_id for exercise_id, _ in kept],
                 [locale for _, locale in kept],
-            )
+            ),
         )
         pruned = cur.rowcount
 

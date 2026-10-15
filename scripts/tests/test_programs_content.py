@@ -305,3 +305,10 @@ def test_a_share_of_one_occurrence_names_its_session_and_renders_its_id():
     assert any('no rule that keeps a base' in p for p in check(_two_days(unruled, volume, {}), LIBRARY_DOC))
     lone = {'exercise': 'squat-barbell', 'sets': 1, 'target': {'reps': 5, 'share': 0.9, 'of_slot': 'monday'}}
     assert any('of_slot goes with of' in p for p in check(_two_days(heavy, lone, {}), LIBRARY_DOC))
+
+
+def test_an_occurrence_s_own_ladder_is_checked_against_its_own_exercise():
+    ladder = {'kind': 'ladder', 'ladder': 'push', 'top': 12, 'bottom': 8}
+    entry = {'exercise': 'push-up', 'sets': 3, 'target': {'reps': [8, 12]}, 'rule': ladder}
+    plain = {'exercise': 'push-up', 'sets': 3, 'target': {'reps': [8, 12]}}
+    assert not [p for p in check(_two_days(entry, plain, {}), LIBRARY_DOC) if 'ladder' in p]
