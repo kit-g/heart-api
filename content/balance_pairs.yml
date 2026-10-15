@@ -1,0 +1,51 @@
+# Balance pairs (heart-api#270): opposing movement patterns the app sets against
+# each other over the user's recent weeks (heart-of-yours#342), served as CDN
+# content so the pairs change without an app release. Each side names the
+# library movement patterns whose sets it counts.
+#
+# Counts only: the content names the sides and carries no verdict, threshold or
+# advice. es/fr/ru are machine-translated, awaiting review.
+
+version: 1
+locales: [es, fr, ru]
+
+pairs:
+  - key: push_pull
+    left:
+      key: push
+      name: {en: Push, es: Empuje, fr: Poussée, ru: Жимы}
+      patterns: [horizontal_press, incline_press, decline_press, vertical_press, chest_dip]
+    right:
+      key: pull
+      name: {en: Pull, es: Tracción, fr: Tirage, ru: Тяги}
+      patterns: [horizontal_row, vertical_pull]
+
+  - key: hinge_squat
+    left:
+      key: hinge
+      name: {en: Hinge, es: Bisagra, fr: Charnière, ru: Наклоны}
+      patterns: [deadlift_floor, hip_hinge_stifflegged]
+    right:
+      key: squat
+      name: {en: Squat, es: Sentadilla, fr: Squat, ru: Приседания}
+      patterns: [squat_bilateral, lunge_split]
+
+  - key: elbow
+    left:
+      key: elbow_flexion
+      name: {en: Curls, es: Curls, fr: Curls, ru: Сгибания рук}
+      patterns: [elbow_flexion]
+    right:
+      key: elbow_extension
+      name: {en: Triceps extensions, es: Extensiones de tríceps, fr: Extensions des triceps, ru: Разгибания рук}
+      patterns: [elbow_extension]
+
+  - key: knee
+    left:
+      key: knee_extension
+      name: {en: Leg extensions, es: Extensiones de pierna, fr: Extensions de jambes, ru: Разгибания ног}
+      patterns: [knee_extension]
+    right:
+      key: knee_flexion
+      name: {en: Leg curls, es: Curl femoral, fr: Leg curls, ru: Сгибания ног}
+      patterns: [knee_flexion]
