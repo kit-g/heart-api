@@ -337,6 +337,79 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION test__move_exercise_history_rekeys_stages() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id   TEXT;
+    _source_id UUID;
+    _target_id UUID;
+    _program   UUID;
+    _slot      UUID := uuidv7();
+    _r         RECORD;
+BEGIN
+    _user_id   := create_test_profile();
+    _source_id := create_test_exercise('Squat of mine', 'Barbell', 'Legs', _user_id);
+    _target_id := create_test_exercise(_category => 'Barbell', _target => 'Legs');
+
+    RETURN NEXT is((SELECT count(*) FROM programs WHERE user_id = _user_id), 0::bigint, 'no programs yet');
+    RETURN NEXT is((SELECT count(*) FROM program_actions WHERE user_id = _user_id), 0::bigint, 'no actions yet');
+
+    INSERT INTO programs (user_id, name)
+    VALUES (_user_id, 'tiers')
+    RETURNING id INTO _program;
+    INSERT INTO program_actions (user_id, program_id, kind, exercise_id, slot, stage, at)
+    VALUES (_user_id, _program, 'stage', _source_id, _slot, 1, now());
+
+    _r := (SELECT r FROM _move_exercise_history(_user_id, _source_id, _target_id) r);
+
+    RETURN NEXT is(_r.programs_moved, 1, 'the program counts');
+    RETURN NEXT is(
+            (SELECT (exercise_id, slot, stage) FROM program_actions WHERE program_id = _program),
+            (_target_id, _slot, 1::smallint),
+            'a stage of the source is now the target''s, at the same slot and stage'
+        );
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__move_exercise_history_drops_overruled_stages() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id   TEXT;
+    _source_id UUID;
+    _target_id UUID;
+    _program   UUID;
+    _slot      UUID := uuidv7();
+    _stages    JSONB := '{"kind": "stages", "step": 2.5, "stages": [{"sets": 5, "reps": 3}, {"sets": 6, "reps": 2}]}';
+BEGIN
+    _user_id   := create_test_profile();
+    _source_id := create_test_exercise('Squat of mine', 'Barbell', 'Legs', _user_id);
+    _target_id := create_test_exercise(_category => 'Barbell', _target => 'Legs');
+
+    RETURN NEXT is((SELECT count(*) FROM programs WHERE user_id = _user_id), 0::bigint, 'no programs yet');
+    RETURN NEXT is((SELECT count(*) FROM program_actions WHERE user_id = _user_id), 0::bigint, 'no actions yet');
+
+    INSERT INTO programs (user_id, name, rules)
+    VALUES (_user_id, 'both', jsonb_build_object(_source_id::text, _stages, _target_id::text, _stages))
+    RETURNING id INTO _program;
+    INSERT INTO program_actions (user_id, program_id, kind, exercise_id, slot, stage, at)
+    VALUES (_user_id, _program, 'stage', _source_id, NULL, 1, now()),
+           (_user_id, _program, 'stage', _source_id, _slot, 1, now());
+
+    PERFORM _move_exercise_history(_user_id, _source_id, _target_id);
+
+    RETURN NEXT is(
+            (SELECT count(*) FROM program_actions WHERE program_id = _program AND slot IS NULL),
+            0::bigint,
+            'the source''s stage went with its rule: the target''s rule kept its own stage'
+        );
+    RETURN NEXT is(
+            (SELECT exercise_id FROM program_actions WHERE program_id = _program AND slot = _slot),
+            _target_id,
+            'a stage of a slot''s own rule follows the slot'
+        );
+END
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION test__move_exercise_history_merges_rungs_shares_and_slots() RETURNS SETOF TEXT AS
 $$
 DECLARE

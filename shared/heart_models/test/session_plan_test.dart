@@ -272,6 +272,162 @@ void main() {
       expect([for (final set in plain.exercises.single.sets) set.reps], [8, null]);
     });
 
+    test('stages: the stage\'s sets at the base, the last as many as possible (heart-api#256)', () {
+      const slot = '019a0000-0000-7000-8000-0000000000b1';
+      const tiers = Stages(
+        step: 2.5,
+        stages: [
+          Stage(sets: 5, reps: 3, amrap: true),
+          Stage(sets: 3, reps: 10),
+        ],
+      );
+      final session = _template([
+        (
+          slot,
+          _exercise(_squat, 'Squat'),
+          [
+            _set(1, _reps(5), type: 'warmup', weight: 40),
+            _set(2, {..._reps(3, 3), 'rir': 1}),
+          ],
+        ),
+      ]);
+      final program = Program(name: 'Tiers', sessions: const [_session], rules: {_squat: tiers});
+      final first = PlannedSession.of(
+        program,
+        session,
+        position: _at(program),
+        bases: currentBases([_base(_squat, 100)]),
+      ).exercises.single;
+      expect(first.stage, 0);
+      expect(first.sets.length, 6, reason: 'the warm-up, then five sets');
+      expect(first.sets.first.weight, 40);
+      expect([for (final set in first.sets.skip(1)) set.weight], [100, 100, 100, 100, 100]);
+      expect(first.sets[1].target?[.reps], TargetRange.exactly(3));
+      expect(first.sets[1].target?.rir, 1, reason: 'each set is like the first working set');
+      expect(first.sets.last.target?[.reps], const TargetRange(min: 3));
+
+      final second = PlannedSession.of(
+        program,
+        session,
+        position: _at(program),
+        bases: currentBases([_base(_squat, 100)]),
+        stages: {slot: 1},
+      ).exercises.single;
+      expect(second.stage, 1);
+      expect(
+        [for (final set in second.sets.skip(1)) set.target?[.reps]],
+        [
+          for (var i = 0; i < 3; i++) TargetRange.exactly(10),
+        ],
+      );
+      expect(second.toMap()['stage'], 1);
+    });
+
+    test('a slot with its own rule never takes the lift\'s base or stage (heart-api#256)', () {
+      const heavy = '019a0000-0000-7000-8000-0000000000b1';
+      const volume = '019a0000-0000-7000-8000-0000000000b2';
+      const t1 = Stages(
+        step: 2.5,
+        stages: [Stage(sets: 5, reps: 3, amrap: true), Stage(sets: 6, reps: 2, amrap: true), Stage(sets: 10, reps: 1)],
+      );
+      const t2 = Stages(
+        step: 2.5,
+        stages: [Stage(sets: 3, reps: 10), Stage(sets: 3, reps: 8), Stage(sets: 3, reps: 6)],
+      );
+      final session = _template([
+        (heavy, _exercise(_squat, 'Squat'), [_set(1, _reps(3, 3))]),
+        (volume, _exercise(_squat, 'Squat'), [_set(2, _reps(10, 10))]),
+      ]);
+      final program = Program(name: 'Tiers', sessions: const [_session], rules: {_squat: t1, volume: t2});
+      final plan = PlannedSession.of(
+        program,
+        session,
+        position: _at(program),
+        bases: currentBases([_base(_squat, 140)]),
+        stages: {_squat: 2},
+      );
+      final [first, second] = plan.exercises;
+      expect((first.stage, first.sets.length, first.sets.first.weight), (2, 10, 140));
+      expect((second.stage, second.base), (0, null), reason: 'tier two keeps its own: none yet');
+      expect(
+        [for (final set in second.sets) (set.target?[.reps], set.weight)],
+        [
+          for (var i = 0; i < 3; i++) (TargetRange.exactly(10), null),
+        ],
+      );
+    });
+
+    test('a slot\'s own rule and base come before the exercise\'s', () {
+      const heavy = '019a0000-0000-7000-8000-0000000000b1';
+      const light = '019a0000-0000-7000-8000-0000000000b2';
+      final session = _template([
+        (heavy, _exercise(_squat, 'Squat'), [_set(1, _reps(5, 5))]),
+        (light, _exercise(_squat, 'Squat'), [_set(2, _reps(10, 10))]),
+      ]);
+      final program = Program(
+        name: 'Heavy and light',
+        sessions: const [_session],
+        rules: {_squat: const AddWeight(step: 2.5), light: const RangeThenWeight(step: 5)},
+      );
+      final plan = PlannedSession.of(
+        program,
+        session,
+        position: _at(program, lighter: true),
+        bases: currentBases([_base(_squat, 100), _base(_squat, 60, slot: light)]),
+      );
+      expect(
+        [for (final exercise in plan.exercises) exercise.sets.single.weight],
+        [
+          90,
+          50,
+        ],
+        reason: 'lighter: 90% of 100 at 2.5 kg, and 90% of 60 is 54, down to the slot rule\'s 5 kg',
+      );
+    });
+
+    test('a share of one slot\'s base: that occurrence\'s, else the lift\'s own (heart-api#257)', () {
+      const intensity = '019a0000-0000-7000-8000-0000000000b1';
+      const volume = '019a0000-0000-7000-8000-0000000000b2';
+      final session = _template([
+        (
+          volume,
+          _exercise(_squat, 'Squat'),
+          [
+            _set(1, {..._reps(5, 5), 'share': 0.9, 'of': _squat, 'ofSlot': intensity}),
+          ],
+        ),
+      ]);
+      final program = Program(
+        name: 'Volume day',
+        sessions: const [_session],
+        rules: {_squat: const AddWeight(step: 2.5)},
+      );
+      PlannedSession plan(List<ProgramBase> bases) =>
+          PlannedSession.of(program, session, position: _at(program), bases: currentBases(bases));
+      final both = [_base(_squat, 100), _base(_squat, 120, slot: intensity), _base(_squat, 80, slot: volume)];
+      expect(plan(both).exercises.single.sets.single.weight, 107.5, reason: '90% of the intensity day\'s 120');
+      expect(
+        plan([_base(_squat, 100)]).exercises.single.sets.single.weight,
+        90,
+        reason: 'no base for that occurrence: the lift\'s own',
+      );
+      final ruled = Program(
+        name: 'Volume day',
+        sessions: const [_session],
+        rules: {intensity: const AddWeight(step: 2.5)},
+      );
+      expect(
+        PlannedSession.of(
+          ruled,
+          session,
+          position: _at(ruled),
+          bases: currentBases([_base(_squat, 100)]),
+        ).exercises.single.sets.single.weight,
+        isNull,
+        reason: 'an occurrence with its own rule has no base yet, and never borrows the lift\'s',
+      );
+    });
+
     test('on the wire', () {
       final program = Program(name: 'Waves', sessions: const [_session], rules: {_squat: waves});
       final map = _plan(program, squatDay, [_base(_squat, 140)]).toMap();

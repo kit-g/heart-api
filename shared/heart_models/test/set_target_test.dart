@@ -84,6 +84,24 @@ void main() {
     });
   });
 
+  group('a share of one slot\'s base (heart-api#257)', () {
+    test('ofSlot round-trips beside of, and survives every other change', () {
+      final json = {
+        'reps': {'min': 5, 'max': 5},
+        'share': 0.9,
+        'of': 'squat',
+        'ofSlot': 'monday-squat',
+      };
+      final target = SetTarget.fromJson(json);
+      expect((target.of, target.ofSlot), ('squat', 'monday-squat'));
+      expect(target.toMap(), json);
+      final changed = target.withShare(0.8).withRir(2).withOf('squat').withRange(.reps, .exactly(3));
+      expect(changed.ofSlot, 'monday-squat');
+      expect(changed.withOfSlot(null).toMap(), isNot(contains('ofSlot')));
+      expect(SetTarget(const {}, ofSlot: 'x').isEmpty, isFalse);
+    });
+  });
+
   group('ExerciseSet.target', () {
     test('a set that never spoke about a target writes no key', () {
       final logged = ExerciseSet.fromJson(bench, const {'id': 's1', 'reps': 5, 'weight': 100});

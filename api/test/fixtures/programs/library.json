@@ -1,0 +1,1129 @@
+{
+ "version": 2,
+ "programs": [
+  {
+   "key": "walk_and_move",
+   "audience": "getting_back",
+   "equipment": "none",
+   "name": "Walk and move",
+   "i18n": {
+    "es": "Camina y muévete",
+    "fr": "Marcher et bouger",
+    "ru": "Ходьба и движение"
+   },
+   "note": "Three walks a week, five minutes longer each week, with a few minutes of strength and balance around them.",
+   "noteI18n": {
+    "es": "Tres paseos a la semana, cinco minutos más largos cada semana, con unos minutos de fuerza y equilibrio alrededor.",
+    "fr": "Trois marches par semaine, cinq minutes de plus chaque semaine, avec quelques minutes de renforcement et d’équilibre autour.",
+    "ru": "Три прогулки в неделю, каждую неделю на пять минут длиннее, и несколько минут силы и равновесия вокруг них."
+   },
+   "who": {
+    "en": "For starting from very little — after an illness, a long break, or a long time sitting down.",
+    "es": "Para empezar casi desde cero: tras una enfermedad, un largo descanso o mucho tiempo sentado.",
+    "fr": "Pour repartir de presque rien : après une maladie, une longue pause ou beaucoup de temps assis.",
+    "ru": "Для старта почти с нуля — после болезни, долгого перерыва или долгого сидячего образа жизни."
+   },
+   "week": {
+    "en": "Three walks, any days. Two of them come with ten minutes of strength or balance.",
+    "es": "Tres paseos, cualquier día. Dos de ellos van con diez minutos de fuerza o equilibrio.",
+    "fr": "Trois marches, n’importe quels jours. Deux d’entre elles s’accompagnent de dix minutes de renforcement ou d’équilibre.",
+    "ru": "Три прогулки, в любые дни. К двум из них — десять минут силы или равновесия."
+   },
+   "grows": {
+    "en": "Each walk gets five minutes longer every week, from ten minutes to half an hour. Balance holds get five seconds longer.",
+    "es": "Cada paseo se alarga cinco minutos cada semana, de diez minutos a media hora. Los ejercicios de equilibrio, cinco segundos.",
+    "fr": "Chaque marche s’allonge de cinq minutes par semaine, de dix minutes à une demi-heure. Les maintiens d’équilibre, de cinq secondes.",
+    "ru": "Каждая прогулка каждую неделю становится на пять минут длиннее — от десяти минут до получаса. Удержания равновесия — на пять секунд."
+   },
+   "misses": {
+    "en": "Missed a walk? Take it the next day; the week waits for you.",
+    "es": "¿Te saltaste un paseo? Dalo al día siguiente; la semana te espera.",
+    "fr": "Une marche manquée ? Faites-la le lendemain ; la semaine vous attend.",
+    "ru": "Пропустили прогулку? Пройдитесь на следующий день — неделя вас подождёт."
+   },
+   "why": [
+    {
+     "text": {
+      "en": "Any amount of activity is better than none; the goal is 150 minutes a week, which is where this plan ends.",
+      "es": "Cualquier cantidad de actividad es mejor que nada; el objetivo son 150 minutos a la semana, justo donde termina este plan.",
+      "fr": "Toute activité vaut mieux que rien ; l’objectif est de 150 minutes par semaine, là où ce programme se termine.",
+      "ru": "Любая активность лучше, чем никакой; цель — 150 минут в неделю, ровно там, где заканчивается этот план."
+     },
+     "sources": [
+      "who_2020"
+     ],
+     "about": [
+      {
+       "on": "program"
+      },
+      {
+       "on": "grows"
+      }
+     ]
+    },
+    {
+     "text": {
+      "en": "Starting around ten minutes and building to half an hour over a few weeks is how proven walking programs begin.",
+      "es": "Empezar con unos diez minutos y llegar a media hora en unas semanas es como empiezan los programas de caminar que funcionan.",
+      "fr": "Commencer vers dix minutes et monter à une demi-heure en quelques semaines, c’est ainsi que débutent les programmes de marche qui ont fait leurs preuves.",
+      "ru": "Начать примерно с десяти минут и за несколько недель дойти до получаса — так устроены проверенные программы ходьбы."
+     },
+     "sources": [
+      "walk_with_ease"
+     ],
+     "about": [
+      {
+       "on": "grows"
+      },
+      {
+       "on": "rule",
+       "exercise": "walking"
+      }
+     ]
+    },
+    {
+     "text": {
+      "en": "Strength and balance between walks does more for steadiness and getting up from a chair than walking alone.",
+      "es": "Fuerza y equilibrio entre paseos hacen más por la estabilidad y por levantarse de una silla que solo caminar.",
+      "fr": "Du renforcement et de l’équilibre entre les marches font plus pour la stabilité et le lever de chaise que la marche seule.",
+      "ru": "Сила и равновесие между прогулками дают больше для устойчивости и вставания со стула, чем одна ходьба."
+     },
+     "sources": [
+      "otago_2022"
+     ],
+     "about": [
+      {
+       "on": "week"
+      },
+      {
+       "on": "session",
+       "session": "005c3fc2-9781-5405-a449-2f4482cac600"
+      },
+      {
+       "on": "session",
+       "session": "5ca23b29-cfc3-5b2e-8713-4a595bd1619f"
+      }
+     ]
+    }
+   ],
+   "sources": [
+    "otago_2022",
+    "walk_with_ease",
+    "who_2020"
+   ],
+   "safety": [
+    "start",
+    "stop_if",
+    "not_treatment",
+    "mecfs"
+   ],
+   "next": [
+    "first_steps"
+   ],
+   "perWeek": 3,
+   "minutes": 25,
+   "weeks": 5,
+   "rules": {
+    "walking": {
+     "kind": "longer",
+     "step": 300
+    },
+    "single-leg-stand": {
+     "kind": "longer",
+     "step": 5
+    }
+   },
+   "sessions": [
+    {
+     "id": "005c3fc2-9781-5405-a449-2f4482cac600",
+     "key": "strength",
+     "name": "Walk and strengthen",
+     "i18n": {
+      "es": "Paseo y fuerza",
+      "fr": "Marche et renforcement",
+      "ru": "Прогулка и сила"
+     },
+     "note": "A walk, then standing up and rising onto your toes.",
+     "noteI18n": {
+      "es": "Un paseo y después levantarte de la silla y ponerte de puntillas.",
+      "fr": "Une marche, puis se lever d’une chaise et monter sur la pointe des pieds.",
+      "ru": "Прогулка, потом вставания со стула и подъёмы на носки."
+     },
+     "order": 0,
+     "exercises": [
+      {
+       "id": "029264be-a51f-5116-b74f-34e6fceee5d7",
+       "exercise": {
+        "key": "walking"
+       },
+       "exercise_order": 0,
+       "sets": [
+        {
+         "id": "cd98e756-0ab4-52ca-a52e-d744c92657bd",
+         "completed": false,
+         "target": {
+          "duration": {
+           "min": 600,
+           "max": 600
+          }
+         }
+        }
+       ]
+      },
+      {
+       "id": "9247e311-12d0-57e9-b2ef-97cbd6459df7",
+       "exercise": {
+        "key": "sit-to-stand"
+       },
+       "exercise_order": 1,
+       "rest": 60,
+       "sets": [
+        {
+         "id": "3ac9dced-f788-5400-9760-d69416b5824f",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 8,
+           "max": 12
+          },
+          "rir": 3
+         }
+        },
+        {
+         "id": "9a5d0227-f4c2-5cfb-b724-a8e11f6cf84f",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 8,
+           "max": 12
+          },
+          "rir": 3
+         }
+        }
+       ]
+      },
+      {
+       "id": "18c2a276-c655-5449-b123-b1e002ca8096",
+       "exercise": {
+        "key": "standing-calf-raise-bodyweight"
+       },
+       "exercise_order": 2,
+       "rest": 60,
+       "sets": [
+        {
+         "id": "efeed16a-224b-5aa0-bd2a-0b198a3b8d95",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 10,
+           "max": 15
+          }
+         }
+        },
+        {
+         "id": "db24a4ba-0287-5c6e-894c-9d9721478318",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 10,
+           "max": 15
+          }
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "5ca23b29-cfc3-5b2e-8713-4a595bd1619f",
+     "key": "balance",
+     "name": "Walk and balance",
+     "i18n": {
+      "es": "Paseo y equilibrio",
+      "fr": "Marche et équilibre",
+      "ru": "Прогулка и равновесие"
+     },
+     "note": "A walk, then standing on one leg near a counter, and an easy stretch.",
+     "noteI18n": {
+      "es": "Un paseo, luego mantenerte sobre una pierna junto a una encimera y un estiramiento suave.",
+      "fr": "Une marche, puis tenir sur une jambe près d’un plan de travail, et un étirement doux.",
+      "ru": "Прогулка, потом стойка на одной ноге у столешницы и лёгкая растяжка."
+     },
+     "order": 1,
+     "exercises": [
+      {
+       "id": "829dbf40-3ab9-5f7d-952f-bb5a66a6e0ae",
+       "exercise": {
+        "key": "walking"
+       },
+       "exercise_order": 0,
+       "sets": [
+        {
+         "id": "2c41dc6a-f5ef-5316-bfc9-139aeebae924",
+         "completed": false,
+         "target": {
+          "duration": {
+           "min": 600,
+           "max": 600
+          }
+         }
+        }
+       ]
+      },
+      {
+       "id": "2e94ea0f-38e5-58f6-9d55-6ad7ef4955f4",
+       "exercise": {
+        "key": "single-leg-stand"
+       },
+       "exercise_order": 1,
+       "rest": 30,
+       "sets": [
+        {
+         "id": "553507d0-2fef-5097-8c8d-34d83fa5d5e9",
+         "completed": false,
+         "target": {
+          "duration": {
+           "min": 20,
+           "max": 20
+          }
+         }
+        },
+        {
+         "id": "50c4cb25-c03f-5d08-aabb-3189266c8e0b",
+         "completed": false,
+         "target": {
+          "duration": {
+           "min": 20,
+           "max": 20
+          }
+         }
+        }
+       ]
+      },
+      {
+       "id": "839f8241-22f4-51de-ba10-1c13325a8b8e",
+       "exercise": {
+        "key": "stretching"
+       },
+       "exercise_order": 2,
+       "sets": [
+        {
+         "id": "a5ac0cf1-7850-5a7a-ba75-dcc825b84078",
+         "completed": false,
+         "target": {
+          "duration": {
+           "min": 300,
+           "max": 300
+          }
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bcae140e-6843-51fa-9ace-d0ffdf6d4833",
+     "key": "walk",
+     "name": "Walk",
+     "i18n": {
+      "es": "Paseo",
+      "fr": "Marche",
+      "ru": "Прогулка"
+     },
+     "order": 2,
+     "exercises": [
+      {
+       "id": "36cdf9b0-2b76-5a10-9696-c3c08e6969cf",
+       "exercise": {
+        "key": "walking"
+       },
+       "exercise_order": 0,
+       "sets": [
+        {
+         "id": "1e702057-784a-536c-a9f7-5f01d0ee60ae",
+         "completed": false,
+         "target": {
+          "duration": {
+           "min": 600,
+           "max": 600
+          }
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "full_body_three",
+   "audience": "starting_out",
+   "equipment": "gym",
+   "name": "Full body, three days",
+   "i18n": {
+    "es": "Cuerpo completo, tres días",
+    "fr": "Corps entier, trois jours",
+    "ru": "Всё тело, три дня"
+   },
+   "note": "The classic way to start with a barbell, for about three months. A little heavier every session while the sets stay clean, and more pulling than the old classics had.",
+   "noteI18n": {
+    "es": "La forma clásica de empezar con barra, durante unos tres meses. Un poco más de peso cada sesión mientras las series salgan limpias, y más tirones que los clásicos de siempre.",
+    "fr": "La façon classique de débuter à la barre, pour environ trois mois. Un peu plus lourd à chaque séance tant que les séries restent propres, et plus de tirage que les classiques d’antan.",
+    "ru": "Классический старт со штангой примерно на три месяца. Каждую тренировку чуть тяжелее, пока подходы чистые, и больше тяг, чем в старых классических программах."
+   },
+   "who": {
+    "en": "For starting out in a gym with a barbell, three days a week.",
+    "es": "Para empezar en el gimnasio con barra, tres días por semana.",
+    "fr": "Pour débuter en salle à la barre, trois jours par semaine.",
+    "ru": "Для старта в зале со штангой, три дня в неделю."
+   },
+   "week": {
+    "en": "Three sessions, each about fifty minutes. The squat comes every time; the rest take turns.",
+    "es": "Tres sesiones de unos cincuenta minutos. La sentadilla va siempre; el resto se turna.",
+    "fr": "Trois séances d’une cinquantaine de minutes. Le squat revient à chaque fois ; le reste alterne.",
+    "ru": "Три тренировки примерно по пятьдесят минут. Присед — каждый раз, остальное чередуется."
+   },
+   "grows": {
+    "en": "Squat, bench and press add 2.5 kg every session the sets are clean; the deadlift adds 5. Beat 10 reps on the last set and the step doubles. Rows and pulldowns go up once every set reaches 12.",
+    "es": "Sentadilla, press de banca y press militar suman 2,5 kg cada sesión con series limpias; el peso muerto suma 5. Supera 10 repeticiones en la última serie y el salto se duplica. Remos y jalones suben cuando todas las series llegan a 12.",
+    "fr": "Squat, développé couché et développé militaire prennent 2,5 kg à chaque séance propre ; le soulevé de terre prend 5. Dépassez 10 répétitions à la dernière série et le saut double. Rowings et tirages montent quand toutes les séries atteignent 12.",
+    "ru": "Присед, жим лёжа и жим стоя прибавляют 2,5 кг за каждую чистую тренировку, становая — 5. Больше 10 повторений в последнем подходе — шаг удваивается. Тяги растут, когда во всех подходах выходит 12."
+   },
+   "misses": {
+    "en": "Fewer than 15 reps across a lift's three sets and it drops a tenth next time, then climbs again. After about three months the steps stop coming; that's the sign to move on.",
+    "es": "Menos de 15 repeticiones en las tres series de un ejercicio y la próxima vez baja una décima parte, para volver a subir. A los tres meses más o menos los saltos dejan de llegar; es la señal para pasar al siguiente.",
+    "fr": "Moins de 15 répétitions sur les trois séries d’un mouvement, et il baisse d’un dixième la fois suivante, puis remonte. Vers trois mois, les sauts ne viennent plus : c’est le signal pour passer à la suite.",
+    "ru": "Меньше 15 повторений за три подхода — и в следующий раз вес снижается на десятую часть, а потом снова растёт. Примерно через три месяца прибавки прекращаются — пора переходить дальше."
+   },
+   "why": [
+    {
+     "text": {
+      "en": "Heavy sets three times a week led the research for strength, and beginners can add weight almost every session for a while.",
+      "es": "Las series pesadas tres veces por semana encabezaron la investigación en fuerza, y un principiante puede sumar peso casi cada sesión durante un tiempo.",
+      "fr": "Des séries lourdes trois fois par semaine arrivent en tête de la recherche pour la force, et un débutant peut ajouter de la charge presque à chaque séance pendant un temps.",
+      "ru": "Тяжёлые подходы три раза в неделю лидируют в исследованиях силы, и новичок какое-то время может прибавлять вес почти каждую тренировку."
+     },
+     "sources": [
+      "acsm_2009",
+      "currier_2023"
+     ],
+     "about": [
+      {
+       "on": "program"
+      },
+      {
+       "on": "week"
+      },
+      {
+       "on": "grows"
+      }
+     ]
+    },
+    {
+     "text": {
+      "en": "Rest is two to three minutes on the big lifts, because a little longer rest does a little more.",
+      "es": "El descanso es de dos a tres minutos en los ejercicios grandes, porque descansar algo más da algo más.",
+      "fr": "Le repos est de deux à trois minutes sur les gros mouvements, parce qu’un peu plus de repos donne un peu plus.",
+      "ru": "Отдых в базовых упражнениях — две-три минуты: чуть дольше отдых — чуть больше результат."
+     },
+     "sources": [
+      "rest_singer_2024"
+     ],
+     "about": [
+      {
+       "on": "rest"
+      }
+     ]
+    }
+   ],
+   "sources": [
+    "acsm_2009",
+    "currier_2023",
+    "rest_singer_2024"
+   ],
+   "safety": [
+    "start",
+    "stop_if",
+    "discomfort"
+   ],
+   "next": [
+    "upper_lower",
+    "strength_waves"
+   ],
+   "perWeek": 3,
+   "minutes": 50,
+   "weeks": 12,
+   "rules": {
+    "squat-barbell": {
+     "kind": "addWeight",
+     "step": 2.5,
+     "miss": {
+      "when": "totalReps",
+      "floor": 15,
+      "after": 1,
+      "cut": 0.1
+     },
+     "amrap": [
+      {
+       "reps": 10,
+       "step": 5
+      }
+     ]
+    },
+    "bench-press-barbell": {
+     "kind": "addWeight",
+     "step": 2.5,
+     "miss": {
+      "when": "totalReps",
+      "floor": 15,
+      "after": 1,
+      "cut": 0.1
+     },
+     "amrap": [
+      {
+       "reps": 10,
+       "step": 5
+      }
+     ]
+    },
+    "overhead-press-barbell": {
+     "kind": "addWeight",
+     "step": 2.5,
+     "miss": {
+      "when": "totalReps",
+      "floor": 15,
+      "after": 1,
+      "cut": 0.1
+     },
+     "amrap": [
+      {
+       "reps": 10,
+       "step": 5
+      }
+     ]
+    },
+    "deadlift-barbell": {
+     "kind": "addWeight",
+     "step": 5,
+     "miss": {
+      "when": "totalReps",
+      "floor": 5,
+      "after": 1,
+      "cut": 0.1
+     },
+     "amrap": [
+      {
+       "reps": 10,
+       "step": 10
+      }
+     ]
+    },
+    "bent-over-row-barbell": {
+     "kind": "rangeThenWeight",
+     "step": 2.5
+    },
+    "seated-row-cable": {
+     "kind": "rangeThenWeight",
+     "step": 2.5
+    },
+    "lat-pulldown-cable": {
+     "kind": "rangeThenWeight",
+     "step": 2.5
+    }
+   },
+   "sessions": [
+    {
+     "id": "edd17bbf-b87a-50dd-9e19-ae9e862af56a",
+     "key": "a",
+     "name": "Day A",
+     "i18n": {
+      "es": "Día A",
+      "fr": "Jour A",
+      "ru": "День A"
+     },
+     "note": "Squat, bench and a row.",
+     "noteI18n": {
+      "es": "Sentadilla, press de banca y remo.",
+      "fr": "Squat, développé couché et rowing.",
+      "ru": "Присед, жим лёжа и тяга."
+     },
+     "order": 0,
+     "exercises": [
+      {
+       "id": "c37dd4f0-6a61-5274-99c0-0a3f2192bd0f",
+       "exercise": {
+        "key": "squat-barbell"
+       },
+       "exercise_order": 0,
+       "rest": 180,
+       "sets": [
+        {
+         "id": "880e620b-671b-57cb-833e-865c7d5d764d",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "24495c0e-4781-5e9a-955f-8e87409564da",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "41a48830-0742-5af7-8fb4-d8162580340b",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5
+          }
+         }
+        }
+       ]
+      },
+      {
+       "id": "918733f1-2231-5b8c-b650-17be40f47df2",
+       "exercise": {
+        "key": "bench-press-barbell"
+       },
+       "exercise_order": 1,
+       "rest": 180,
+       "sets": [
+        {
+         "id": "0f270741-67a9-5834-ab4d-6d0bc9516583",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "61d56c35-7e12-5e49-8988-9382bc45d712",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "f9d5dc11-6945-5109-b7fb-afbe3d61ed96",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5
+          }
+         }
+        }
+       ]
+      },
+      {
+       "id": "ffe2a608-e4f6-5048-b4fa-925e250e979d",
+       "exercise": {
+        "key": "bent-over-row-barbell"
+       },
+       "exercise_order": 2,
+       "rest": 120,
+       "sets": [
+        {
+         "id": "0ecdfb67-675c-5610-bb4e-cb053b0c194f",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 8,
+           "max": 12
+          },
+          "rir": 2
+         }
+        },
+        {
+         "id": "badffd40-634c-5a0b-937b-7280c0a335b2",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 8,
+           "max": 12
+          },
+          "rir": 2
+         }
+        },
+        {
+         "id": "34b2832b-ef7b-5aa9-b1b7-f9b299fd55a4",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 8,
+           "max": 12
+          },
+          "rir": 2
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "7b7db7b4-46c6-557a-9285-699219cb2bd6",
+     "key": "b",
+     "name": "Day B",
+     "i18n": {
+      "es": "Día B",
+      "fr": "Jour B",
+      "ru": "День B"
+     },
+     "note": "Squat, press overhead, pull from the floor and a row.",
+     "noteI18n": {
+      "es": "Sentadilla, press por encima de la cabeza, tirón desde el suelo y remo.",
+      "fr": "Squat, développé au-dessus de la tête, tirage depuis le sol et rowing.",
+      "ru": "Присед, жим стоя, тяга с пола и тяга сидя."
+     },
+     "order": 1,
+     "exercises": [
+      {
+       "id": "d800d19d-2148-5f10-acf0-39475d2f6b57",
+       "exercise": {
+        "key": "squat-barbell"
+       },
+       "exercise_order": 0,
+       "rest": 180,
+       "sets": [
+        {
+         "id": "ce098826-eb86-5fb6-b147-e3dbf16eca2c",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "54631406-95f4-54a2-bbaa-1fcb95057096",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "e89b222b-1a48-5cf9-8919-858f08271f9c",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5
+          }
+         }
+        }
+       ]
+      },
+      {
+       "id": "b32b567e-e85e-5e2d-98ee-7fbe2c902e42",
+       "exercise": {
+        "key": "overhead-press-barbell"
+       },
+       "exercise_order": 1,
+       "rest": 180,
+       "sets": [
+        {
+         "id": "b4e14d19-c4bf-5727-ba32-360da77282b8",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "c3a95dae-8d40-5239-ad64-28d74bc97ec7",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "c4bd2fb1-4717-5d63-9a3b-9af0f17931df",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5
+          }
+         }
+        }
+       ]
+      },
+      {
+       "id": "fc0c75bd-28c1-5184-b634-1091b532d5aa",
+       "exercise": {
+        "key": "deadlift-barbell"
+       },
+       "exercise_order": 2,
+       "rest": 180,
+       "sets": [
+        {
+         "id": "c95b5aa6-e264-5e6f-859b-de08d96cf4ef",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5
+          }
+         }
+        }
+       ]
+      },
+      {
+       "id": "1db43dda-5dfe-55c8-8dc6-557b9342449d",
+       "exercise": {
+        "key": "seated-row-cable"
+       },
+       "exercise_order": 3,
+       "rest": 90,
+       "sets": [
+        {
+         "id": "e169280c-9e2d-5f35-be17-69e747f3b01f",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 8,
+           "max": 12
+          },
+          "rir": 2
+         }
+        },
+        {
+         "id": "87212890-5db0-5295-badd-23fca8e2e4ff",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 8,
+           "max": 12
+          },
+          "rir": 2
+         }
+        },
+        {
+         "id": "b11610ba-4522-5909-8f62-453185d0099e",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 8,
+           "max": 12
+          },
+          "rir": 2
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "76d3dfaa-89f9-589f-bc96-e62914c09273",
+     "key": "c",
+     "name": "Day C",
+     "i18n": {
+      "es": "Día C",
+      "fr": "Jour C",
+      "ru": "День C"
+     },
+     "note": "Squat, bench and a pull from above.",
+     "noteI18n": {
+      "es": "Sentadilla, press de banca y un tirón desde arriba.",
+      "fr": "Squat, développé couché et un tirage vertical.",
+      "ru": "Присед, жим лёжа и тяга сверху."
+     },
+     "order": 2,
+     "exercises": [
+      {
+       "id": "d6ab3d05-055e-5703-ac21-ad965db4aed9",
+       "exercise": {
+        "key": "squat-barbell"
+       },
+       "exercise_order": 0,
+       "rest": 180,
+       "sets": [
+        {
+         "id": "d10d759c-7f77-5a4f-9af0-066a92a5573b",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "c6fb8b5a-23dd-5e50-965f-eeda0eabc412",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "1cbd6a28-841b-5d86-8075-2d38b5c0677b",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5
+          }
+         }
+        }
+       ]
+      },
+      {
+       "id": "a7bf4bcd-0af7-5cbe-b91a-44939d324452",
+       "exercise": {
+        "key": "bench-press-barbell"
+       },
+       "exercise_order": 1,
+       "rest": 180,
+       "sets": [
+        {
+         "id": "8dbb7725-1022-5cdd-b35a-f11397995d2d",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "64196be8-708c-57aa-8142-b364615d212b",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5,
+           "max": 5
+          }
+         }
+        },
+        {
+         "id": "d3787c64-8758-5829-b26f-465fc3c04c96",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 5
+          }
+         }
+        }
+       ]
+      },
+      {
+       "id": "e29bea82-d1f2-5d79-aba4-7c68f76fd574",
+       "exercise": {
+        "key": "lat-pulldown-cable"
+       },
+       "exercise_order": 2,
+       "rest": 90,
+       "sets": [
+        {
+         "id": "8fc92ff9-3b15-58e3-a5dc-791cc9608b16",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 8,
+           "max": 12
+          },
+          "rir": 2
+         }
+        },
+        {
+         "id": "dcf833c3-923f-508f-9441-4c87890ec83c",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 8,
+           "max": 12
+          },
+          "rir": 2
+         }
+        },
+        {
+         "id": "e510894d-5581-52a9-930b-f585f85d0756",
+         "completed": false,
+         "target": {
+          "reps": {
+           "min": 8,
+           "max": 12
+          },
+          "rir": 2
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "sources": {
+  "currier_2023": {
+   "title": "Resistance training prescription for muscle strength and hypertrophy in healthy adults",
+   "who": "Currier et al., British Journal of Sports Medicine (network meta-analysis)",
+   "year": 2023,
+   "url": "https://pubmed.ncbi.nlm.nih.gov/37414459/",
+   "finding": {
+    "en": "Every way of training beat not training. Heavy sets three times a week led for strength.",
+    "es": "Cualquier forma de entrenar fue mejor que no entrenar. Las series pesadas tres veces por semana fueron las mejores para la fuerza.",
+    "fr": "Toutes les façons de s’entraîner ont fait mieux que ne pas s’entraîner. Des séries lourdes trois fois par semaine sont arrivées en tête pour la force.",
+    "ru": "Любой способ тренироваться оказался лучше, чем не тренироваться. Для силы лучше всего были тяжёлые подходы три раза в неделю."
+   },
+   "usedBy": [
+    "five_by_five",
+    "full_body_three",
+    "power_and_size",
+    "three_by_five",
+    "waves_and_volume",
+    "weekly_top_sets"
+   ]
+  },
+  "acsm_2009": {
+   "title": "Progression models in resistance training for healthy adults",
+   "who": "American College of Sports Medicine, position stand",
+   "year": 2009,
+   "url": "https://pubmed.ncbi.nlm.nih.gov/19204579/",
+   "finding": {
+    "en": "Beginners do well on 8 to 12 reps, two or three days a week, adding 2 to 10% once they can do a rep or two more than asked.",
+    "es": "A los principiantes les va bien con 8 a 12 repeticiones, dos o tres días por semana, añadiendo un 2 a 10% cuando pueden hacer una o dos repeticiones más de las pedidas.",
+    "fr": "Les débutants progressent bien avec 8 à 12 répétitions, deux ou trois jours par semaine, en ajoutant 2 à 10 % dès qu’ils font une ou deux répétitions de plus que demandé.",
+    "ru": "Новичкам подходят 8–12 повторений два-три раза в неделю с прибавкой 2–10%, когда получается сделать на одно-два повторения больше заданного."
+   },
+   "usedBy": [
+    "five_by_five",
+    "full_body_three",
+    "three_by_five"
+   ]
+  },
+  "who_2020": {
+   "title": "WHO guidelines on physical activity and sedentary behaviour",
+   "who": "World Health Organization",
+   "year": 2020,
+   "url": "https://www.who.int/publications/i/item/9789240015128",
+   "finding": {
+    "en": "Adults do best with 150 to 300 minutes of moderate activity a week, plus strength work on two days. Any amount is better than none.",
+    "es": "A los adultos les va mejor con 150 a 300 minutos de actividad moderada a la semana, más fuerza dos días. Cualquier cantidad es mejor que nada.",
+    "fr": "Les adultes s’en sortent le mieux avec 150 à 300 minutes d’activité modérée par semaine, plus du renforcement deux jours. Un peu vaut mieux que rien.",
+    "ru": "Взрослым лучше всего 150–300 минут умеренной активности в неделю плюс силовые два дня. Любое количество лучше, чем ничего."
+   },
+   "usedBy": [
+    "walk_and_move"
+   ]
+  },
+  "walk_with_ease": {
+   "title": "Walk With Ease",
+   "who": "Arthritis Foundation",
+   "year": 2023,
+   "url": "https://www.arthritis.org/health-wellness/healthy-living/physical-activity/walking/walk-with-ease/wwe-about-the-program",
+   "finding": {
+    "en": "Six weeks of three walks a week, starting around ten minutes and building to about half an hour.",
+    "es": "Seis semanas de tres paseos semanales, empezando por unos diez minutos y llegando a una media hora.",
+    "fr": "Six semaines, trois marches par semaine, en partant d’une dizaine de minutes pour arriver à une demi-heure environ.",
+    "ru": "Шесть недель по три прогулки, начиная примерно с десяти минут и доходя до получаса."
+   },
+   "usedBy": [
+    "walk_and_move"
+   ]
+  },
+  "otago_2022": {
+   "title": "Otago exercise programme compared with walking for older adults",
+   "who": "PMC9631473",
+   "year": 2022,
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9631473",
+   "finding": {
+    "en": "Strength and balance three times a week, with walking between, did more for balance and getting up from a chair than walking alone.",
+    "es": "Fuerza y equilibrio tres veces por semana, con paseos entre medias, mejoraron más el equilibrio y levantarse de una silla que solo caminar.",
+    "fr": "Renforcement et équilibre trois fois par semaine, avec de la marche entre deux, ont fait plus pour l’équilibre et le lever de chaise que la marche seule.",
+    "ru": "Сила и равновесие три раза в неделю с прогулками между ними улучшили равновесие и вставание со стула больше, чем одна ходьба."
+   },
+   "usedBy": [
+    "walk_and_move"
+   ]
+  },
+  "rest_singer_2024": {
+   "title": "Give it a rest — a systematic review with Bayesian meta-analysis on the effect of inter-set rest interval duration",
+   "who": "Singer et al., Frontiers in Sports and Active Living",
+   "year": 2024,
+   "url": "https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2024.1429789/full",
+   "finding": {
+    "en": "Resting longer than a minute or so between sets did a little more, especially on big lifts.",
+    "es": "Descansar más de un minuto o así entre series dio algo más, sobre todo en los ejercicios grandes.",
+    "fr": "Se reposer plus d’une minute environ entre les séries a donné un peu plus, surtout sur les gros mouvements.",
+    "ru": "Отдых между подходами дольше минуты давал немного больше, особенно в базовых упражнениях."
+   },
+   "usedBy": [
+    "five_by_five",
+    "full_body_three",
+    "three_by_five"
+   ]
+  }
+ },
+ "safety": {
+  "start": {
+   "text": {
+    "en": "Most people can start light to moderate exercise without seeing a doctor first. If you have a heart condition, chest pain or fainting, or a doctor has told you to limit activity, check with them before you start.",
+    "es": "La mayoría de la gente puede empezar con ejercicio suave o moderado sin ir antes al médico. Si tienes una enfermedad del corazón, dolor en el pecho o desmayos, o un médico te ha dicho que limites la actividad, consúltale antes de empezar.",
+    "fr": "La plupart des gens peuvent commencer une activité légère à modérée sans voir de médecin. Si vous avez une maladie cardiaque, des douleurs dans la poitrine ou des malaises, ou si un médecin vous a demandé de limiter l’activité, demandez-lui avant de commencer.",
+    "ru": "Большинство людей могут начинать лёгкие и умеренные нагрузки без визита к врачу. Если у вас болезнь сердца, боли в груди или обмороки или врач велел ограничить активность, посоветуйтесь с ним перед началом."
+   },
+   "sources": [
+    "acsm_screening_2015"
+   ]
+  },
+  "stop_if": {
+   "text": {
+    "en": "Stop and rest if you feel chest pain, dizziness, unusual breathlessness, an irregular heartbeat or sharp pain. Chest pain that doesn't ease with rest needs emergency help.",
+    "es": "Para y descansa si notas dolor en el pecho, mareo, una falta de aire inusual, latidos irregulares o un dolor agudo. Un dolor en el pecho que no cede con el reposo necesita ayuda urgente.",
+    "fr": "Arrêtez-vous et reposez-vous en cas de douleur dans la poitrine, de vertige, d’essoufflement inhabituel, de battements irréguliers ou de douleur vive. Une douleur dans la poitrine qui ne passe pas au repos demande une aide d’urgence.",
+    "ru": "Остановитесь и отдохните, если чувствуете боль в груди, головокружение, необычную одышку, перебои в сердце или резкую боль. Боль в груди, которая не проходит в покое, требует экстренной помощи."
+   },
+   "sources": []
+  },
+  "discomfort": {
+   "text": {
+    "en": "Some discomfort is normal while you train. If pain is sharp, builds through the session, or is worse the next morning, ease off.",
+    "es": "Cierta molestia es normal al entrenar. Si el dolor es agudo, va a más durante la sesión o empeora a la mañana siguiente, baja el ritmo.",
+    "fr": "Un peu d’inconfort est normal à l’entraînement. Si la douleur est vive, augmente pendant la séance ou est pire le lendemain matin, levez le pied.",
+    "ru": "Некоторый дискомфорт во время тренировки — это нормально. Если боль резкая, нарастает за тренировку или сильнее на следующее утро, снизьте нагрузку."
+   },
+   "sources": []
+  },
+  "not_treatment": {
+   "text": {
+    "en": "This plan is for getting your general fitness back. It isn't treatment for an injury or a condition; if you're recovering from one, your clinician or physio is the right guide.",
+    "es": "Este plan sirve para recuperar la forma en general. No es un tratamiento para una lesión o una enfermedad; si te estás recuperando de una, tu médico o fisioterapeuta es quien debe guiarte.",
+    "fr": "Ce programme sert à retrouver une forme générale. Ce n’est pas un traitement pour une blessure ou une maladie ; si vous vous en remettez, votre médecin ou votre kiné est le bon guide.",
+    "ru": "Этот план — для возвращения общей формы. Это не лечение травмы или болезни; если вы восстанавливаетесь после них, лучший проводник — ваш врач или физиотерапевт."
+   },
+   "sources": []
+  },
+  "mecfs": {
+   "text": {
+    "en": "If activity leaves you much worse a day or two later, or you have ME/CFS or long COVID, a plan that steps up week by week isn't right for you. Talk to a clinician instead.",
+    "es": "Si la actividad te deja mucho peor uno o dos días después, o tienes EM/SFC o COVID persistente, un plan que sube semana a semana no es para ti. Habla mejor con un profesional sanitario.",
+    "fr": "Si l’activité vous laisse bien plus mal un jour ou deux après, ou si vous avez une EM/SFC ou un COVID long, un programme qui augmente semaine après semaine ne vous convient pas. Parlez-en plutôt à un soignant.",
+    "ru": "Если после нагрузки через день-два вам намного хуже или у вас МЭ/СХУ или постковидный синдром, план с ростом нагрузки по неделям вам не подходит. Лучше поговорите с врачом."
+   },
+   "sources": [
+    "nice_mecfs"
+   ]
+  }
+ }
+}

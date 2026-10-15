@@ -200,7 +200,7 @@ extension on Map<String, dynamic> {
       for (final MapEntry(:key, :value) in rules.entries)
         switch (key) {
           final String id when isUuidV7(id) => id,
-          _ => throw BadRequest(code: 'invalid_rule', reason: 'rules keys are exercise ids; $key is not one'),
+          _ => throw BadRequest(code: 'invalid_rule', reason: 'rules keys are exercise or slot ids; $key is not one'),
         }: switch (value) {
           final Map rule => _rule(key, rule),
           _ => throw BadRequest(code: 'invalid_rule', reason: 'rules.$key must be an object'),
@@ -258,6 +258,10 @@ GrowthRule _rule(String exerciseId, Map json) {
       for (final (at, row) in amrap.indexed)
         if (row case final Map row)
           ...row.keys.where((key) => !_amrapKeys.contains(key)).map((key) => 'amrap[$at].$key'),
+    if (json['stages'] case final List stages)
+      for (final (at, stage) in stages.indexed)
+        if (stage case final Map stage)
+          ...stage.keys.where((key) => !_stageKeys.contains(key)).map((key) => 'stages[$at].$key'),
   };
   if (unknown.isNotEmpty) {
     throw BadRequest(code: 'invalid_rule', reason: 'rules.$exerciseId: unknown ${unknown.join(', ')}');
@@ -270,10 +274,13 @@ GrowthRule _rule(String exerciseId, Map json) {
 
 const _missKeys = {'when', 'floor', 'after', 'cut'};
 const _amrapKeys = {'reps', 'step'};
+const _stageKeys = {'sets', 'reps', 'amrap'};
 
-/// `POST /programs/:programId/actions` — `{id?, kind, week?, from?, to?, workoutId?, at}`.
+/// `POST /programs/:programId/actions` —
+/// `{id?, kind, week?, from?, to?, exercise?, slot?, stage?, workoutId?, at}`.
 /// Only a replay names a week; only an advance names the exercises it moved
-/// from and to, and the workout that caused it.
+/// from and to; only a stage names its exercise, slot and stage; only those
+/// two name the workout that caused them.
 class ProgramActionIn {
   final ProgramAction action;
 
@@ -297,8 +304,23 @@ class ProgramActionIn {
     if (advance && (from == null || to == null)) {
       throw const BadRequest(reason: 'an advance names the exercise it moved from and to');
     }
-    if (!advance && (from != null || to != null || workoutId != null)) {
-      throw BadRequest(reason: 'only an advance names exercises or a workout, not a ${kind.value}');
+    if (!advance && (from != null || to != null)) {
+      throw BadRequest(reason: 'only an advance names the exercises it moved from and to, not a ${kind.value}');
+    }
+    final (exercise, slot) = (json.uuidV7OrNull('exercise'), json.uuidV7OrNull('slot'));
+    final staged = kind == .stage;
+    final stage = switch ((staged, json['stage'])) {
+      (true, final int stage) when stage >= 0 && stage < Stages.maxStages => stage,
+      (true, _) => throw const BadRequest(reason: 'a stage names the stage it moved to, a whole number from 0 to 19'),
+      (false, null) => null,
+      (false, _) => throw BadRequest(reason: 'only a stage names a stage, not a ${kind.value}'),
+    };
+    if (staged && exercise == null) throw const BadRequest(reason: 'a stage names the exercise it moved');
+    if (!staged && (exercise != null || slot != null)) {
+      throw BadRequest(reason: 'only a stage names an exercise or a slot, not a ${kind.value}');
+    }
+    if (!advance && !staged && workoutId != null) {
+      throw BadRequest(reason: 'only an advance or a stage names a workout, not a ${kind.value}');
     }
     return ProgramActionIn._(
       ProgramAction(
@@ -307,6 +329,9 @@ class ProgramActionIn {
         week: week,
         from: from,
         to: to,
+        exercise: exercise,
+        slot: slot,
+        stage: stage,
         workoutId: workoutId,
         at: json.timestamp('at'),
       ),

@@ -5,6 +5,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/config.dart';
 import 'package:heart/middleware/logging.dart';
 import 'package:heart/middleware/origin.dart';
+import 'package:heart/models/library.dart';
 import 'package:relic/relic.dart' hide Logger;
 
 /// The MCP host's whole app (`mcp.heart-of.me`): the MCP router at the root,
@@ -14,11 +15,16 @@ import 'package:relic/relic.dart' hide Logger;
 ///
 /// [originSecret] locks the app to its CloudFront distribution: the function
 /// URL behind it is public. Null (locally, in tests) leaves it open.
-RelicApp buildMcpApp({required AppConfig config, required Database database, String? originSecret}) {
+RelicApp buildMcpApp({
+  required AppConfig config,
+  required Database database,
+  required ProgramLibrary library,
+  String? originSecret,
+}) {
   final app = RelicApp()..use('/', requestLogging());
   if (originSecret case final String secret when secret.isNotEmpty) app.use('/', cloudFrontOnly(secret));
   return app
     ..use('/', configuration(override: config))
-    ..attach('/', buildMcpRouter(database: database), consume: true)
+    ..attach('/', buildMcpRouter(database: database, library: library), consume: true)
     ..fallback = requestLogging()(respondWith((_) => JsonResponse.noSuchRoute()));
 }

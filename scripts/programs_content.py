@@ -49,7 +49,10 @@ RULES = {
     'longer': ({'step'}, TIMED),
     'shareOfMax': ({'step', 'waves', 'missCut', 'misses', 'miss', 'amrap'}, WEIGHTED),
     'ladder': ({'ladder', 'top', 'bottom'}, BODYWEIGHT),
+    'stages': ({'stages', 'step', 'miss', 'amrap'}, WEIGHTED),
 }
+# The rules that keep a base a share can be of.
+BASED = {'addWeight', 'rangeThenWeight', 'shareOfMax', 'stages'}
 MISS_WHEN = {'anySet', 'amrap', 'totalReps'}
 
 # Ids are stable across renders, so a republish doesn't look like new content.
@@ -94,6 +97,10 @@ def target_of(spec: dict) -> dict:
             if not isinstance(value, str) or not value:
                 raise ValueError('of names the exercise whose base the share is of, by key')
             target['of'] = value
+        elif key == 'of_slot':
+            if not isinstance(value, str) or not value:
+                raise ValueError('of_slot names the session whose occurrence of the lift the share is of, by key')
+            target['of_slot'] = value
         elif key == 'supplemental':
             if value is not True:
                 raise ValueError('supplemental is true or left out')
@@ -104,6 +111,8 @@ def target_of(spec: dict) -> dict:
             raise ValueError(f'unknown target measure {key!r}')
     if 'of' in target and 'share' not in target:
         raise ValueError('of goes with a share')
+    if 'of_slot' in target and 'of' not in target:
+        raise ValueError('of_slot goes with of, the lift it is an occurrence of')
     return target
 
 
@@ -134,7 +143,7 @@ def _check_miss(where: str, miss) -> list[str]:
     return problems
 
 
-def check_rule(where, rule, category, targets, ladders) -> list[str]:
+def check_rule(where, rule, exercise, category, targets, ladders) -> list[str]:
     if not isinstance(rule, dict) or rule.get('kind') not in RULES:
         return [f'{where}: unknown rule {rule!r}']
     params, fits = RULES[rule['kind']]
@@ -160,7 +169,6 @@ def check_rule(where, rule, category, targets, ladders) -> list[str]:
             if not any('max' in t.get('reps', {}) and t['reps']['max'] > t['reps']['min'] for t in sets):
                 problems.append(f'{where}: rangeThenWeight needs a rep range to reach the top of')
     if rule['kind'] == 'ladder':
-        exercise = where.rsplit('.', 1)[-1]
         rungs = ladders.get(rule.get('ladder'))
         if rungs is None:
             problems.append(f'{where}: no ladder {rule.get("ladder")!r} in exercise_ladders.yml')
@@ -173,6 +181,33 @@ def check_rule(where, rule, category, targets, ladders) -> list[str]:
             for sets in targets:
                 if not all(t.get('reps', {}).get('max') == top for t in sets):
                     problems.append(f"{where}: the sets' range must top out where the ladder climbs ({top})")
+    if rule['kind'] == 'stages':
+        stages = rule.get('stages')
+        ok = (
+            isinstance(stages, list)
+            and 2 <= len(stages) <= 20
+            and all(
+                isinstance(s, dict)
+                and set(s) <= {'sets', 'reps', 'amrap'}
+                and isinstance(s.get('sets'), int)
+                and 1 <= s['sets'] <= 20
+                and isinstance(s.get('reps'), int)
+                and 1 <= s['reps'] <= 100
+                and s.get('amrap', False) in (True, False)
+                for s in stages
+            )
+        )
+        if not ok:
+            problems.append(f'{where}: stages is 2 to 20 {{sets 1–20, reps 1–100, amrap?}}')
+        else:
+            # the session's sets are the first stage, as the plan lays it out
+            first = stages[0]
+            want = [{'min': first['reps'], 'max': first['reps']}] * first['sets']
+            if first.get('amrap'):
+                want = want[:-1] + [{'min': first['reps']}]
+            for sets in targets:
+                if [t.get('reps') for t in sets] != want:
+                    problems.append(f'{where}: the sets must be the first stage, {first["sets"]}×{first["reps"]}')
     if rule['kind'] == 'shareOfMax':
         waves = rule.get('waves')
         if not isinstance(waves, list) or not waves:
@@ -328,6 +363,9 @@ def check(document: dict, library: dict, sources=None, safety=None, ladders=None
         if not sessions or len(sessions) > 50:
             problems.append(f'{where}: a program has 1 to 50 sessions')
         used: dict[str, list[list[dict]]] = {}
+        occurrences: dict[tuple, list[dict]] = {}
+        slot_rules: dict[tuple, dict] = {}
+        shared: list[tuple] = []
         session_keys = set()
         for session in sessions:
             at = f'{where}.{session.get("key")}'
@@ -347,7 +385,16 @@ def check(document: dict, library: dict, sources=None, safety=None, ladders=None
                 except ValueError as e:
                     problems.append(f'{at}.{exercise}: {e}')
                     continue
-                if extra := set(entry) - {'exercise', 'sets', 'target', 'rest', 'superset', 'pattern', 'total_reps'}:
+                if extra := set(entry) - {
+                    'exercise',
+                    'sets',
+                    'target',
+                    'rest',
+                    'superset',
+                    'pattern',
+                    'total_reps',
+                    'rule',
+                }:
                     problems.append(f'{at}.{exercise}: unknown {sorted(extra)}')
                 if 'rest' in entry and not (isinstance(entry['rest'], int) and 0 <= entry['rest'] <= 1800):
                     problems.append(f'{at}.{exercise}: rest is whole seconds up to 1800')
@@ -375,8 +422,19 @@ def check(document: dict, library: dict, sources=None, safety=None, ladders=None
                         problems.append(f'{at}.{exercise}: a {category} exercise has no weight to share')
                 # a test session finds the bases its rules then grow, so it
                 # isn't held to them
-                if session.get('key') not in (program.get('tests') or {}):
+                if session.get('key') in (program.get('tests') or {}):
+                    continue
+                occurrences.setdefault((session.get('key'), exercise), []).append(entry)
+                # an occurrence with a rule of its own is held to it, not to its
+                # exercise's
+                if 'rule' in entry:
+                    problems += check_rule(
+                        f'{at}.{exercise}.rule', entry['rule'], exercise, category, [targets], ladders
+                    )
+                    slot_rules[(session.get('key'), exercise)] = entry['rule']
+                else:
                     used.setdefault(exercise, []).append(targets)
+                shared.append((f'{at}.{exercise}', exercise, entry.get('rule'), targets))
             for number, members in supersets.items():
                 if members < 2:
                     problems.append(f'{at}: superset {number} has one exercise')
@@ -405,17 +463,26 @@ def check(document: dict, library: dict, sources=None, safety=None, ladders=None
                 problems.append(f'{where}.rules.{exercise}: no session does this exercise')
                 continue
             problems += check_rule(
-                f'{where}.rules.{exercise}', rule, exercises[exercise]['category'], used[exercise], ladders
+                f'{where}.rules.{exercise}', rule, exercise, exercises[exercise]['category'], used[exercise], ladders
             )
-        on_a_max = {key for key, rule in rules.items() if (rule or {}).get('kind') == 'shareOfMax'}
-        for exercise, targets in used.items():
-            for target in (t for sets in targets for t in sets if 'share' in t):
-                # a share of another lift's training max, or of its own
-                if (of := target.get('of')) is not None:
-                    if of not in on_a_max:
-                        problems.append(f'{where}.{exercise}: of {of!r} names no exercise with a shareOfMax rule')
-                elif exercise not in on_a_max:
-                    problems.append(f'{where}.{exercise}: a share target needs a shareOfMax rule')
+
+        def keeps_base(rule) -> bool:
+            return (rule or {}).get('kind') in BASED
+
+        for at, exercise, own, targets in shared:
+            for target in (t for t in targets if 'share' in t):
+                # a share of one occurrence of a lift, of a lift, or of its own
+                if (slot := target.get('of_slot')) is not None:
+                    of = target['of']
+                    if len(occurrences.get((slot, of), [])) != 1:
+                        problems.append(f'{at}: of_slot {slot!r} must be a session doing {of} exactly once')
+                    elif not keeps_base(slot_rules.get((slot, of)) or rules.get(of)):
+                        problems.append(f'{at}: of_slot {slot!r} names an occurrence with no rule that keeps a base')
+                elif (of := target.get('of')) is not None:
+                    if not keeps_base(rules.get(of)):
+                        problems.append(f'{at}: of {of!r} names no exercise with a rule that keeps a base')
+                elif not keeps_base(own or rules.get(exercise)):
+                    problems.append(f'{at}: a share target needs a rule that keeps a base')
                     break
     return problems
 
@@ -430,8 +497,27 @@ def _texts(text: dict | None, locales: list[str]) -> tuple[str | None, dict]:
     return text['en'], {locale: text[locale] for locale in locales}
 
 
-def _wire_target(target: dict) -> dict:
-    return {key: value for key, value in target.items()}
+def _slot_id(program: dict, session: str, exercise: str) -> str:
+    """The template exercise id of [exercise]'s one occurrence in [session]."""
+    entries = next(s for s in program['sessions'] if s['key'] == session)['exercises']
+    order = next(i for i, entry in enumerate(entries) if entry['exercise'] == exercise)
+    return _id(program['key'], session, str(order))
+
+
+def _wire_target(program: dict, target: dict) -> dict:
+    """A target as the app reads it: `of_slot`, a session key here, is the
+    occurrence's template exercise id there, `ofSlot`."""
+    wired = {key: value for key, value in target.items() if key != 'of_slot'}
+    if (session := target.get('of_slot')) is not None:
+        wired['ofSlot'] = _slot_id(program, session, target['of'])
+    return wired
+
+
+def _wire_rule(rule: dict, ladders: dict) -> dict:
+    """A rule as heart_models reads it: a ladder's rungs spelled out."""
+    if rule['kind'] == 'ladder':
+        return {'kind': 'ladder', 'rungs': ladders[rule['ladder']], 'top': rule['top'], 'bottom': rule['bottom']}
+    return rule
 
 
 def _wire_anchor(program: dict, anchor: str, session_ids: dict[str, str]) -> dict:
@@ -443,13 +529,7 @@ def _wire_anchor(program: dict, anchor: str, session_ids: dict[str, str]) -> dic
         case ['sessions', session]:
             return {'on': 'session', 'session': session_ids[session]}
         case ['sessions', session, exercise]:
-            entries = next(s for s in program['sessions'] if s['key'] == session)['exercises']
-            order = next(i for i, entry in enumerate(entries) if entry['exercise'] == exercise)
-            return {
-                'on': 'exercise',
-                'session': session_ids[session],
-                'exercise': _id(program['key'], session, str(order)),
-            }
+            return {'on': 'exercise', 'session': session_ids[session], 'exercise': _slot_id(program, session, exercise)}
         case [name]:
             return {'on': name}
     raise ValueError(anchor)
@@ -492,7 +572,7 @@ def render(document: dict, sources=None, safety=None, ladders=None) -> dict:
                             {
                                 'id': _id(exercise_id, str(set_order)),
                                 'completed': False,
-                                'target': _wire_target(target),
+                                'target': _wire_target(program, target),
                             }
                             for set_order, target in enumerate(set_targets(entry))
                         ],
@@ -510,17 +590,13 @@ def render(document: dict, sources=None, safety=None, ladders=None) -> dict:
                 }
             )
 
-        rules = {}
-        for exercise, rule in (program.get('rules') or {}).items():
-            if rule['kind'] == 'ladder':
-                rules[exercise] = {
-                    'kind': 'ladder',
-                    'rungs': ladders[rule['ladder']],
-                    'top': rule['top'],
-                    'bottom': rule['bottom'],
-                }
-            else:
-                rules[exercise] = rule
+        # by exercise key, and an occurrence's own rule by its template
+        # exercise id, which the app's copy maps to the new one
+        rules = {exercise: _wire_rule(rule, ladders) for exercise, rule in (program.get('rules') or {}).items()}
+        for session in program['sessions']:
+            for order, entry in enumerate(session['exercises']):
+                if 'rule' in entry:
+                    rules[_id(program['key'], session['key'], str(order))] = _wire_rule(entry['rule'], ladders)
 
         name, name_i18n = _texts(program['name'], locales)
         note, note_i18n = _texts(program['note'], locales)

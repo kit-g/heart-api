@@ -2749,7 +2749,7 @@ WHERE id = @id::uuid
 /// A program's steps in the order they were taken. Someone else's program
 /// reads as one with none.
 const _listProgramActions = '''
-SELECT id, program_id, kind, week, from_exercise, to_exercise, workout_id, at
+SELECT id, program_id, kind, week, from_exercise, to_exercise, exercise_id, slot, stage, workout_id, at
 FROM program_actions
 WHERE program_id = @programId::uuid
   AND user_id = @userId
@@ -2769,13 +2769,15 @@ const _createProgramAction =
     '''
 WITH
 _by_id AS (
-  SELECT id, program_id, kind, week, from_exercise, to_exercise, workout_id, at
+  SELECT id, program_id, kind, week, from_exercise, to_exercise, exercise_id, slot, stage, workout_id, at
   FROM program_actions
   WHERE id = @id::uuid
     AND user_id = @userId
 ),
 _ins AS (
-  INSERT INTO program_actions (id, user_id, program_id, kind, week, from_exercise, to_exercise, workout_id, at)
+  INSERT INTO program_actions (
+    id, user_id, program_id, kind, week, from_exercise, to_exercise, exercise_id, slot, stage, workout_id, at
+  )
   SELECT
     coalesce(@id::uuid, uuidv7()),
     @userId,
@@ -2784,6 +2786,9 @@ _ins AS (
     @week::smallint,
     @from::uuid,
     @to::uuid,
+    @exercise::uuid,
+    @slot::uuid,
+    @stage::smallint,
     @workoutId::uuid,
     @at::timestamptz
   WHERE NOT EXISTS (SELECT 1 FROM _by_id)
@@ -2792,15 +2797,15 @@ _ins AS (
       OR EXISTS (SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId)
     )
     AND (SELECT count(*) FROM program_actions WHERE program_id = @programId::uuid) < $_maxProgramActions
-  RETURNING id, program_id, kind, week, from_exercise, to_exercise, workout_id, at
+  RETURNING id, program_id, kind, week, from_exercise, to_exercise, exercise_id, slot, stage, workout_id, at
 )
-SELECT id, program_id, kind, week, from_exercise, to_exercise, workout_id, at, true AS created FROM _ins
+SELECT id, program_id, kind, week, from_exercise, to_exercise, exercise_id, slot, stage, workout_id, at, true AS created FROM _ins
 UNION ALL
-SELECT id, program_id, kind, week, from_exercise, to_exercise, workout_id, at, false AS created FROM _by_id
+SELECT id, program_id, kind, week, from_exercise, to_exercise, exercise_id, slot, stage, workout_id, at, false AS created FROM _by_id
 WHERE NOT EXISTS (SELECT 1 FROM _ins)
 ''';
 
-/// Whether the caller owns a workout: why an advance wrote nothing, asked only
+/// Whether the caller owns a workout: why an advance or a stage wrote nothing, asked only
 /// when it didn't.
 const _ownsWorkout = '''
 SELECT 1

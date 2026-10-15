@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:heart/models/errors.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart_models/heart_models.dart';
@@ -603,6 +605,96 @@ void main() {
       expect((await call('get_program', {'programId': 'nope'}))['isError'], isTrue);
     });
 
+    test('get_program shows a slot\'s own rule, base and stage under its exercise (heart-api#256)', () async {
+      const programId = '01900000-0000-7000-8000-000000000050';
+      const monday = '01900000-0000-7000-8000-000000000051';
+      const thursday = '01900000-0000-7000-8000-000000000053';
+      const squat = '01900000-0000-7000-8000-000000000001';
+      const heavy = '01900000-0000-7000-8000-000000000052';
+      const volume = '01900000-0000-7000-8000-000000000054';
+      const t1 = Stages(
+        step: 2.5,
+        stages: [Stage(sets: 5, reps: 3, amrap: true), Stage(sets: 6, reps: 2, amrap: true)],
+      );
+      const t2 = Stages(
+        step: 2.5,
+        stages: [Stage(sets: 3, reps: 10), Stage(sets: 3, reps: 8)],
+      );
+      final program = Program(
+        id: programId,
+        name: 'Tiers',
+        sessions: [monday, thursday],
+        rules: {squat: t1, volume: t2},
+      );
+      when(app.db.getProgram(userId: 'u1', programId: programId)).thenAnswer((_) async => program);
+      when(app.db.getProgramMarks(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
+      when(app.db.getProgramActions(userId: 'u1', programId: programId)).thenAnswer(
+        (_) async => [
+          ProgramAction(kind: .stage, exercise: squat, slot: volume, stage: 1, at: DateTime.utc(2026, 10, 2)),
+        ],
+      );
+      when(app.db.getProgramBases(userId: 'u1', programId: programId)).thenAnswer(
+        (_) async => [
+          ProgramBase(exerciseId: squat, value: 100, at: DateTime.utc(2026, 10, 1)),
+          ProgramBase(exerciseId: squat, slot: volume, value: 70, at: DateTime.utc(2026, 10, 1)),
+        ],
+      );
+      when(app.db.getExercises('u1')).thenAnswer(
+        (_) async => {
+          'exercises': [
+            {'id': squat, 'name': 'Squat'},
+          ],
+        },
+      );
+      Template day(String id, String name, String slot) => Template.fromJson({
+        'id': id,
+        'order': 0,
+        'name': name,
+        'exercises': [
+          {
+            'id': slot,
+            'exercise': const {'id': squat, 'name': 'Squat', 'category': 'Barbell', 'target': 'Legs'},
+            'sets': [
+              {
+                'id': '01900000-0000-7000-8000-0000000000${slot.substring(slot.length - 2)}',
+                'completed': false,
+                'target': const {
+                  'reps': {'min': 3, 'max': 3},
+                },
+              },
+            ],
+          },
+        ],
+      });
+      when(
+        app.db.getTemplate(userId: 'u1', templateId: monday),
+      ).thenAnswer((_) async => day(monday, 'Monday', heavy));
+      when(
+        app.db.getTemplate(userId: 'u1', templateId: thursday),
+      ).thenAnswer((_) async => day(thursday, 'Thursday', volume));
+
+      final detail = (await call('get_program', {'programId': programId}))['structuredContent'] as Map;
+      expect(detail['exercises'], [
+        {
+          'name': 'Squat',
+          'rule': t1.toMap(),
+          'base': 100,
+          'slots': [
+            {'session': 'Thursday', 'rule': t2.toMap(), 'base': 70, 'stage': 1},
+          ],
+        },
+      ]);
+      final next = (detail['nextSession'] as Map)['exercises'] as List;
+      expect((next.single as Map)['sets'], hasLength(5), reason: 'Monday is up next: the first stage, five sets');
+
+      // the Thursday session is deleted: its slot's rule names nothing left
+      when(
+        app.db.getTemplate(userId: 'u1', templateId: thursday),
+      ).thenAnswer((_) async => throw const NotFound(type: 'Template', id: thursday));
+      final gone = (await call('get_program', {'programId': programId}))['structuredContent'] as Map;
+      expect([for (final exercise in gone['exercises'] as List) (exercise as Map)['name']], ['Squat']);
+    });
+
     test('get_program_history explains each base by name, with the steps and skips', () async {
       const programId = '01900000-0000-7000-8000-000000000050';
       const session = '01900000-0000-7000-8000-000000000051';
@@ -671,6 +763,71 @@ void main() {
         ],
       });
       expect((await call('get_program_history', {'programId': 'nope'}))['isError'], isTrue);
+    });
+
+    test('the library: list_library_programs and get_library_program, and research on a copy', () async {
+      const walking = '01900000-0000-7000-8000-0000000000e1';
+      const programId = '01900000-0000-7000-8000-000000000050';
+      const session = '01900000-0000-7000-8000-000000000051';
+      const slot = '01900000-0000-7000-8000-000000000052';
+      when(app.config.supportedLocales).thenReturn(['en', 'es']);
+      when(app.config.defaultLocale).thenReturn('en');
+      when(app.storage.read()).thenAnswer(
+        (_) async => jsonDecode(File('test/fixtures/programs/library.json').readAsStringSync()) as Map<String, dynamic>,
+      );
+      final exercises = {
+        'exercises': [
+          {'id': walking, 'key': 'walking', 'name': 'Walking'},
+        ],
+      };
+      when(app.db.getExercises('u1', locale: 'en')).thenAnswer((_) async => exercises);
+      when(app.db.getExercises('u1')).thenAnswer((_) async => exercises);
+
+      final listed = ((await call('list_library_programs'))['structuredContent'] as Map)['programs'] as List;
+      expect(listed.map((program) => (program as Map)['key']), ['walk_and_move', 'full_body_three']);
+      expect((listed.first as Map).keys, containsAll(['audience', 'equipment', 'perWeek', 'minutes', 'weeks', 'who']));
+
+      final one = (await call('get_library_program', {'key': 'walk_and_move'}))['structuredContent'] as Map;
+      expect(one['name'], 'Walk and move');
+      expect(((one['sources'] as Map)['who_2020'] as Map)['url'], startsWith('https://'));
+      expect((await call('get_library_program', {'key': 'nope'}))['isError'], isTrue);
+
+      final program = Program(id: programId, name: 'Walk and move', source: 'walk_and_move', sessions: [session]);
+      when(app.db.getProgram(userId: 'u1', programId: programId)).thenAnswer((_) async => program);
+      when(app.db.getProgramMarks(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
+      when(app.db.getProgramActions(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
+      when(app.db.getProgramBases(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
+      when(app.db.getTemplate(userId: 'u1', templateId: session)).thenAnswer(
+        (_) async => Template.fromJson(const {
+          'id': session,
+          'order': 0,
+          'name': 'Walk and strengthen',
+          'exercises': [
+            {
+              'id': slot,
+              'exercise': {'id': walking, 'name': 'Walking', 'category': 'Duration', 'target': 'Legs'},
+              'sets': [],
+            },
+          ],
+        }),
+      );
+      final detail = (await call('get_program', {'programId': programId}))['structuredContent'] as Map;
+      final claims = ((detail['research'] as Map)['claims'] as List).cast<Map>();
+      expect(claims[1]['about'], [
+        {'on': 'grows'},
+        {'on': 'rule', 'exercise': 'Walking'},
+      ]);
+      expect(claims[2]['about'], [
+        {'on': 'week'},
+        {'on': 'session', 'session': 'Walk and strengthen'},
+      ]);
+    });
+
+    test('before the library is published, list_library_programs says so', () async {
+      when(app.storage.read()).thenAnswer((_) async => null);
+      final listed = (await call('list_library_programs'))['structuredContent'] as Map;
+      expect(listed['programs'], isEmpty);
+      expect(listed['note'], contains('not published'));
     });
 
     test('an unknown tool is invalid params', () async {

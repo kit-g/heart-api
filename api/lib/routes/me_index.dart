@@ -21,5 +21,7 @@ final RouteTable meRoutes = {
   ('/programs/:programId/history', .get): me.getMyProgramHistory,
   ('/records', .get): me.getMyRecords,
   ('/library', .get): me.searchMyLibrary,
+  ('/library/programs', .get): me.getMyLibraryPrograms,
+  ('/library/programs/:key', .get): me.getMyLibraryProgram,
   ('/export', .get): me.exportMe,
 };

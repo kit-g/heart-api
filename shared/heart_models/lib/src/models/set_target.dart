@@ -101,6 +101,16 @@ abstract interface class SetTarget implements Model {
   /// [of] is null.
   SetTarget withOf(String? of);
 
+  /// Which occurrence of [of] the share is of, when the lift has a base per
+  /// slot: a template exercise id, the volume day at 90% of the intensity
+  /// day's squat (heart-api#257). Its base, else [of]'s own. On the wire as
+  /// `ofSlot`, only beside `of`.
+  String? get ofSlot;
+
+  /// The same target as a share of [ofSlot]'s base, or of [of]'s own when
+  /// null.
+  SetTarget withOfSlot(String? ofSlot);
+
   /// A supplemental set (a first-set-last 5×5 after the main sets): it takes
   /// its share like the others but never counts for an AMRAP, a miss or a bump.
   /// On the wire as `supplemental: true`.
@@ -124,8 +134,10 @@ abstract interface class SetTarget implements Model {
     num? share,
     num? rir,
     String? of,
+    String? ofSlot,
     bool supplemental = false,
-  }) => _SetTarget(Map.of(ranges), const {}, share: share, rir: rir, of: of, supplemental: supplemental);
+  }) =>
+      _SetTarget(Map.of(ranges), const {}, share: share, rir: rir, of: of, ofSlot: ofSlot, supplemental: supplemental);
 
   factory fromJson(Map json) {
     final ranges = <TargetMeasure, TargetRange>{};
@@ -133,6 +145,7 @@ abstract interface class SetTarget implements Model {
     num? share;
     num? rir;
     String? of;
+    String? ofSlot;
     var supplemental = false;
     for (final MapEntry(:key, :value) in json.entries) {
       if (key == 'supplemental' && value is bool) {
@@ -141,6 +154,10 @@ abstract interface class SetTarget implements Model {
       }
       if (key == 'of' && value is String) {
         of = value;
+        continue;
+      }
+      if (key == 'ofSlot' && value is String) {
+        ofSlot = value;
         continue;
       }
       if (key == 'share' && value is num && value > 0) {
@@ -163,7 +180,7 @@ abstract interface class SetTarget implements Model {
         unread['$key'] = value;
       }
     }
-    return _SetTarget(ranges, unread, share: share, rir: rir, of: of, supplemental: supplemental);
+    return _SetTarget(ranges, unread, share: share, rir: rir, of: of, ofSlot: ofSlot, supplemental: supplemental);
   }
 }
 
@@ -181,24 +198,65 @@ class _SetTarget implements SetTarget {
   @override
   final String? of;
   @override
+  final String? ofSlot;
+  @override
   final bool supplemental;
 
-  const new(this.ranges, this._unread, {this.share, this.rir, this.of, this.supplemental = false});
+  const new(this.ranges, this._unread, {this.share, this.rir, this.of, this.ofSlot, this.supplemental = false});
 
   @override
-  bool get isEmpty => ranges.isEmpty && _unread.isEmpty && share == null && rir == null && of == null && !supplemental;
+  bool get isEmpty =>
+      ranges.isEmpty &&
+      _unread.isEmpty &&
+      share == null &&
+      rir == null &&
+      of == null &&
+      ofSlot == null &&
+      !supplemental;
 
   @override
-  SetTarget withShare(num? share) =>
-      _SetTarget(ranges, {..._unread}..remove('share'), share: share, rir: rir, of: of, supplemental: supplemental);
+  SetTarget withShare(num? share) => _SetTarget(
+    ranges,
+    {..._unread}..remove('share'),
+    share: share,
+    rir: rir,
+    of: of,
+    ofSlot: ofSlot,
+    supplemental: supplemental,
+  );
 
   @override
-  SetTarget withRir(num? rir) =>
-      _SetTarget(ranges, {..._unread}..remove('rir'), share: share, rir: rir, of: of, supplemental: supplemental);
+  SetTarget withRir(num? rir) => _SetTarget(
+    ranges,
+    {..._unread}..remove('rir'),
+    share: share,
+    rir: rir,
+    of: of,
+    ofSlot: ofSlot,
+    supplemental: supplemental,
+  );
 
   @override
-  SetTarget withOf(String? of) =>
-      _SetTarget(ranges, {..._unread}..remove('of'), share: share, rir: rir, of: of, supplemental: supplemental);
+  SetTarget withOf(String? of) => _SetTarget(
+    ranges,
+    {..._unread}..remove('of'),
+    share: share,
+    rir: rir,
+    of: of,
+    ofSlot: ofSlot,
+    supplemental: supplemental,
+  );
+
+  @override
+  SetTarget withOfSlot(String? ofSlot) => _SetTarget(
+    ranges,
+    {..._unread}..remove('ofSlot'),
+    share: share,
+    rir: rir,
+    of: of,
+    ofSlot: ofSlot,
+    supplemental: supplemental,
+  );
 
   @override
   TargetRange? operator [](TargetMeasure measure) => ranges[measure];
@@ -220,6 +278,7 @@ class _SetTarget implements SetTarget {
       share: share,
       rir: rir,
       of: of,
+      ofSlot: ofSlot,
       supplemental: supplemental,
     );
   }
@@ -231,6 +290,7 @@ class _SetTarget implements SetTarget {
       for (final MapEntry(:key, :value) in ranges.entries) key.value: value.toMap(),
       'share': ?share,
       'of': ?of,
+      'ofSlot': ?ofSlot,
       'rir': ?rir,
       if (supplemental) 'supplemental': true,
     };

@@ -69,7 +69,8 @@ int? superset(Object? value, {required String at}) {
 /// `{min, max?}` range — at least zero, `max` no lower than `min`, reps and
 /// seconds whole, and `amrap` on a bounded range for "as many as you can, up to
 /// max" — plus `rir`, reps in reserve, and in a program `share`, the weight as
-/// a share of the exercise's base, or of another's named by `of`. Null (or `{}`) is no target, which clears a
+/// a share of the exercise's base, or of another's named by `of`, at the
+/// occurrence `ofSlot` names. Null (or `{}`) is no target, which clears a
 /// stored one.
 /// Anything else is a 400 naming the set at [at].
 SetTarget setTarget(Object? value, {required String at}) {
@@ -117,17 +118,29 @@ SetTarget setTarget(Object? value, {required String at}) {
     };
   }
 
+  // which occurrence of `of` the share is of: a template exercise, by id; only
+  // beside `of`, the lift it is an occurrence of
+  String? ofSlot(Object? value, {required bool named}) {
+    return switch (value) {
+      null => null,
+      final String id when isUuidV7(id) && named => id,
+      final String _ when !named => invalid('.ofSlot names an occurrence of the lift in of, so it needs of'),
+      _ => invalid('.ofSlot must be a template exercise id'),
+    };
+  }
+
   return switch (value) {
     null => SetTarget.none,
     final Map m => SetTarget(
       {
         for (final MapEntry(:key, :value) in m.entries)
-          if (!const {'share', 'rir', 'of', 'supplemental'}.contains(key))
+          if (!const {'share', 'rir', 'of', 'ofSlot', 'supplemental'}.contains(key))
             if (measure(key) case final measure) measure: range(measure, value),
       },
       share: share(m['share']),
       rir: rir(m['rir']),
       of: of(m['of'], shared: m['share'] != null),
+      ofSlot: ofSlot(m['ofSlot'], named: m['of'] != null),
       supplemental: switch (m['supplemental']) {
         null || false => false,
         true => true,

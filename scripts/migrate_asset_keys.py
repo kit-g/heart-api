@@ -55,9 +55,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--bucket', required=True, help='the content bucket holding exercises/')
     parser.add_argument('--dry-run', action='store_true', help='print the plan, copy nothing')
-    parser.add_argument('--delete-old', action='store_true',
-                        help='delete the name-keyed exercises/<Name>/ directories '
-                             '(run only after verifying the new links serve)')
+    parser.add_argument(
+        '--delete-old',
+        action='store_true',
+        help='delete the name-keyed exercises/<Name>/ directories (run only after verifying the new links serve)',
+    )
     args = parser.parse_args()
 
     keys = library_keys()
@@ -67,7 +69,7 @@ def main() -> None:
     # directory name -> its objects
     dirs: dict[str, list[str]] = {}
     for key in processed:
-        rest = key[len(DEST_PREFIX):]
+        rest = key[len(DEST_PREFIX) :]
         if '/' in rest:
             dirs.setdefault(rest.split('/', 1)[0], []).append(key)
 
@@ -98,8 +100,10 @@ def main() -> None:
                 s3.delete_object(Bucket=args.bucket, Key=key)
                 deleted += 1
 
-    print(f'>> {triggered} sent through the pipeline, {skipped} already slug-keyed, '
-          f'{deleted} old objects deleted, {len(unknown)} unmapped directories')
+    print(
+        f'>> {triggered} sent through the pipeline, {skipped} already slug-keyed, '
+        f'{deleted} old objects deleted, {len(unknown)} unmapped directories'
+    )
     for name in unknown:
         print(f'   unmapped: {name}')
     if args.dry_run:
