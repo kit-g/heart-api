@@ -76,6 +76,7 @@ DECLARE
     _goals_moved     INTEGER;
     _programs_moved  INTEGER;
     _programs        UUID[];
+    _kept            UUID[];
     _deleted         BOOLEAN := false;
 BEGIN
     IF _source_id = _target_id THEN
@@ -180,6 +181,13 @@ BEGIN
         -- own rule wins where a program has both, as with preferences. Bases move
         -- with their history; a source move from the same workout as a target
         -- move is the one dropped, since one workout moves a base once.
+        SELECT coalesce(array_agg(id), '{}')
+        INTO _kept
+        FROM programs
+        WHERE user_id = _user_id
+        AND rules ? _source_id::text
+        AND rules ? _target_id::text;
+
         WITH _moved AS (
             UPDATE programs
             SET rules = CASE
@@ -283,7 +291,22 @@ BEGIN
         INTO _programs
         FROM _moved;
 
-        -- and a stage names the exercise whose stage it moved
+        -- and a stage names the exercise whose stage it moved. Where the
+        -- target's own rule won, the source's stages went with its rule; a
+        -- stage of a slot's own rule follows the slot, so it stays
+        WITH _dropped AS (
+            DELETE FROM program_actions
+            WHERE user_id = _user_id
+            AND kind = 'stage'
+            AND exercise_id = _source_id
+            AND slot IS NULL
+            AND program_id = ANY (_kept)
+            RETURNING program_id
+        )
+        SELECT _programs || coalesce(array_agg(program_id), '{}')
+        INTO _programs
+        FROM _dropped;
+
         WITH _moved AS (
             UPDATE program_actions
             SET exercise_id = _target_id
@@ -320,4 +343,4 @@ END
 $$;
 
 COMMENT ON FUNCTION _move_exercise_history(TEXT, UUID, UUID, BOOLEAN) IS
-    'Re-keys one user''s workout exercises, template exercises, preferences, goals, and programs'' rules (ladder rungs included, a ladder left with one rung dropped), bases, ladder advances, stages and set targets'' share of another exercise from the source exercise to the target, then deletes the source if the user owns it; a dry run returns the same counts and writes nothing. Both exercises must be the library''s or the user''s own (no_data_found otherwise); source and target must differ (invalid_parameter_value); the target''s category must keep sets in the source''s columns, the four load-by-reps categories being interchangeable (datatype_mismatch otherwise). Where the user has a preference row on both, the target''s is kept and the source''s counted as dropped; where a program has a rule on both, the target''s is kept.';
+    'Re-keys one user''s workout exercises, template exercises, preferences, goals, and programs'' rules (ladder rungs included, a ladder left with one rung dropped), bases, ladder advances, stages (a stage of the source''s rule dropped where the target''s rule wins) and set targets'' share of another exercise from the source exercise to the target, then deletes the source if the user owns it; a dry run returns the same counts and writes nothing. Both exercises must be the library''s or the user''s own (no_data_found otherwise); source and target must differ (invalid_parameter_value); the target''s category must keep sets in the source''s columns, the four load-by-reps categories being interchangeable (datatype_mismatch otherwise). Where the user has a preference row on both, the target''s is kept and the source''s counted as dropped; where a program has a rule on both, the target''s is kept.';
