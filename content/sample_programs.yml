@@ -22,6 +22,9 @@
 #                   week, grows, misses, deload, phases, tests, next, rest,
 #                   rules.<exercise>, sessions.<session> or
 #                   sessions.<session>.<exercise>
+# min_app:         the oldest app version that can run a program, such as 1.15.0;
+#                   required once it uses a shape the first library build doesn't
+#                   read (heart-api#276), left out otherwise
 # Weights are never written: they come from the user's history and the
 # program's bases. Names stay generic, so no named program's licensing is
 # involved, and the copy never says "inspired by" one.
