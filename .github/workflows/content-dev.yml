@@ -1,0 +1,62 @@
+name: "Publish content, dev"
+
+on:
+  workflow_dispatch: { }
+  # On pull requests only the check job runs; the reusable workflow gates
+  # publish on `github.event_name != 'pull_request'`.
+  pull_request:
+    branches: [ main ]
+    paths:
+      - content/sample_programs.yml
+      - content/program_sources.yml
+      - content/program_safety.yml
+      - content/exercise_ladders.yml
+      - content/go_easy.yml
+      - content/balance_pairs.yml
+      - content/sample_templates_en.json
+      # the checkers read the library's keys and patterns
+      - content/exercise_library.yml
+      - scripts/programs_content.py
+      - scripts/go_easy_content.py
+      - scripts/balance_content.py
+      - scripts/library_locales.py
+      - scripts/publish_content.sh
+      - .github/workflows/content.yml
+      - .github/workflows/content-dev.yml
+  push:
+    branches: [ main ]
+    paths:
+      - content/sample_programs.yml
+      - content/program_sources.yml
+      - content/program_safety.yml
+      - content/exercise_ladders.yml
+      - content/go_easy.yml
+      - content/balance_pairs.yml
+      - content/sample_templates_en.json
+      - content/exercise_library.yml
+      - scripts/programs_content.py
+      - scripts/go_easy_content.py
+      - scripts/balance_content.py
+      - scripts/library_locales.py
+      - scripts/publish_content.sh
+      - .github/workflows/content.yml
+      - .github/workflows/content-dev.yml
+
+permissions:
+  id-token: write
+  contents: read
+
+# Two quick merges queue rather than race on the same objects; check-only PR
+# runs are superseded by each new push.
+concurrency:
+  group: content-dev-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  dev:
+    uses: ./.github/workflows/content.yml
+    with:
+      AWS_ROLE: 'arn:aws:iam::583168578067:role/heart-github-actions-deploy-role'
+      AWS_REGION: 'ca-central-1'
+      CONTENT_BUCKET: '583168578067-ca-central-1-content'
+      MEDIA_DISTRIBUTION_ID: 'E28G19V18R0DYG'
