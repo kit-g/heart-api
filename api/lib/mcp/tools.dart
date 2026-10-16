@@ -5,10 +5,12 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/lens.dart';
 import 'package:heart/models/me.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart/models/library.dart';
 import 'package:heart/routes/library.dart' show libraryView;
+import 'package:heart/routes/me.dart' as me;
 import 'package:heart/routes/programs.dart' as programs;
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
@@ -247,6 +249,48 @@ final List<McpTool> tools = [
         ],
         if (sessions.hasMore && sessions.items.isNotEmpty) 'cursor': sessions.items.last.workoutId,
       };
+    },
+  ),
+  McpTool(
+    name: 'get_training_volume',
+    title: 'Training volume',
+    description:
+        'Working sets (warm-ups left out) and sessions per muscle group and per movement pattern, week by week: '
+        'what the app counts on its weekly card. A set counts fully for the muscles an exercise works first and '
+        'partly (usually half) for the ones it works second, so sets per muscle may be fractional; round them '
+        'when answering. An exercise the user made counts toward the group its target names and the pattern they '
+        'gave it. untrained lists the muscle groups no set reached in the whole span ("which muscles did I skip"). '
+        'Weeks start on weekStart (ISO, 1 Monday) in UTC. Without `from`, the 4 weeks ending this one; at most a '
+        'year.',
+    inputSchema: const {
+      'type': 'object',
+      'properties': _windowSchema,
+      'additionalProperties': false,
+    },
+    run: (request, arguments) async {
+      final (:from, :to) = arguments.toLensWindow();
+      return (await me.volume(request, from: from, to: to)).toMap();
+    },
+  ),
+  McpTool(
+    name: 'get_balance',
+    title: 'Balance',
+    description:
+        "Opposing movements set against each other, the app's balance view: push against pull, hinge against "
+        'squat, curls against triceps extensions, leg extensions against leg curls. Per pair, the working sets of '
+        'each side (an exercise counts toward a side when one of its movement patterns is on it) and in how many '
+        'of the weeks either side was trained. Counts only: Heart draws no conclusion from them, and a few weeks of '
+        'a handful of sets say little. Weeks and the span as in get_training_volume.',
+    inputSchema: const {
+      'type': 'object',
+      'properties': _windowSchema,
+      'additionalProperties': false,
+    },
+    run: (request, arguments) async {
+      final (:from, :to) = arguments.toLensWindow();
+      final balance = (await me.balance(request, from: from, to: to)).toMap();
+      if ((balance['pairs'] as List).isEmpty) return {...balance, 'note': 'The balance pairs are not published yet.'};
+      return balance;
     },
   ),
   McpTool(
@@ -755,6 +799,15 @@ extension on Map<String, dynamic> {
 
     final (from, to) = (edge('from'), edge('to'));
     if (from != null && to != null && !from.isBefore(to)) throw const ToolError('from must be before to.');
+    return (from: from, to: to);
+  }
+
+  /// [toWindow] for a count over weeks, at most a year long.
+  ({DateTime? from, DateTime? to}) toLensWindow() {
+    final (:from, :to) = toWindow();
+    if (from != null && (to ?? DateTime.timestamp()).difference(from) > LensWindow.longest) {
+      throw const ToolError('from and to may be at most a year apart.');
+    }
     return (from: from, to: to);
   }
 

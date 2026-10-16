@@ -7,6 +7,7 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/lens.dart';
 import 'package:heart/routes/me.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -206,6 +207,57 @@ void main() {
 
       expect(records.map((r) => ((r as Map)['exercise'] as Map)['name']), ['Bench', 'squat']);
       expect(((records.first as Map)['heaviest'] as Map)['weight'], 100);
+    });
+  });
+
+  group('volume and balance', () {
+    test('weeks start on the user\'s day, and the sets read are the window\'s', () async {
+      when(profiles.getProfile('u1')).thenAnswer(
+        (_) async => User(
+          id: 'u1',
+          settings: const Settings(firstWeekday: DateTime.sunday),
+        ),
+      );
+      // a Wednesday: the default window is the four Sunday weeks ending with its
+      final to = DateTime.utc(2026, 10, 14);
+      when(
+        workouts.getRecordSets(userId: 'u1', from: DateTime.utc(2026, 9, 20), to: to),
+      ).thenAnswer((_) async => []);
+      when(exercises.getExercises('u1')).thenAnswer((_) async => {'exercises': const []});
+
+      final volume = (await getMyVolume(build('/me/volume', query: {'to': '2026-10-14'}))).toMap();
+
+      expect(volume['weekStart'], DateTime.sunday);
+      expect((volume['weeks'] as List).map((week) => (week as Map)['week']), [
+        '2026-09-20',
+        '2026-09-27',
+        '2026-10-04',
+        '2026-10-11',
+      ]);
+      expect(volume['untrained'], hasLength(MuscleGroupKey.values.length));
+    });
+
+    test('a span over a year is a 400', () {
+      expect(
+        () => getMyVolume(build('/me/volume', query: {'from': '2025-01-01', 'to': '2026-06-01'})),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
+    test('balance reads the published pairs, Monday weeks when the user has no day', () async {
+      final pairs = MockStorage();
+      when(pairs.readPairs()).thenAnswer((_) async => null);
+      when(profiles.getProfile('u1')).thenAnswer((_) async => User(id: 'u1'));
+      when(
+        workouts.getRecordSets(userId: 'u1', from: anyNamed('from'), to: anyNamed('to')),
+      ).thenAnswer((_) async => []);
+      when(exercises.getExercises('u1')).thenAnswer((_) async => {'exercises': const []});
+
+      final balance = (await getMyBalance(build('/me/balance')..balancePairs = pairs)).toMap();
+
+      expect(balance['weekStart'], DateTime.monday);
+      expect(balance['weeks'], LensWindow.defaultWeeks);
+      expect(balance['pairs'], isEmpty);
     });
   });
 

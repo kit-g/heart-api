@@ -830,6 +830,87 @@ void main() {
       expect(listed['note'], contains('not published'));
     });
 
+    test('get_training_volume and get_balance count the window\'s sets, and refuse a span over a year', () async {
+      when(app.config.supportedLocales).thenReturn(['en']);
+      when(app.config.defaultLocale).thenReturn('en');
+      when(app.db.getProfile('u1')).thenAnswer((_) async => User(id: 'u1'));
+      when(
+        app.db.getRecordSets(userId: 'u1', from: DateTime.utc(2026, 10, 5), to: DateTime.utc(2026, 10, 12)),
+      ).thenAnswer(
+        (_) async => [
+          (
+            exerciseId: 'bench',
+            name: 'Bench Press',
+            category: Category.barbell,
+            sets: [
+              for (var i = 0; i < 4; i++)
+                const RecordSet(
+                  weight: 80,
+                  reps: 5,
+                  duration: null,
+                  distance: null,
+                  workoutId: 'w',
+                  at: '2026-10-06T10:00:00.000Z',
+                ),
+            ],
+          ),
+        ],
+      );
+      when(app.db.getExercises('u1')).thenAnswer(
+        (_) async => {
+          'exercises': [
+            {
+              'id': 'bench',
+              'target': 'Chest',
+              'muscles': {
+                'primary': {
+                  'ids': ['pectoralis_major_l'],
+                },
+              },
+              'movement': {
+                'groups': ['horizontal_press'],
+              },
+            },
+          ],
+        },
+      );
+      when(app.storage.readPairs()).thenAnswer(
+        (_) async => {
+          'pairs': [
+            {
+              'key': 'push_pull',
+              'left': {
+                'key': 'push',
+                'name': {'en': 'Push'},
+                'patterns': ['horizontal_press'],
+              },
+              'right': {
+                'key': 'pull',
+                'name': {'en': 'Pull'},
+                'patterns': ['horizontal_row'],
+              },
+            },
+          ],
+        },
+      );
+      const span = {'from': '2026-10-05', 'to': '2026-10-12'};
+
+      final volume = (await call('get_training_volume', span))['structuredContent'] as Map;
+      final week = (volume['weeks'] as List).single as Map;
+      expect(week['muscles'], {
+        'chest': {'sets': 4, 'sessions': 1},
+      });
+      expect(volume['untrained'], isNot(contains('chest')));
+
+      final balance = (await call('get_balance', span))['structuredContent'] as Map;
+      final pair = (balance['pairs'] as List).single as Map;
+      expect([(pair['left'] as Map)['sets'], (pair['right'] as Map)['sets']], [4, 0]);
+      expect(balance.containsKey('note'), isFalse);
+
+      final long = await call('get_training_volume', {'from': '2024-01-01', 'to': '2026-01-01'});
+      expect(long['isError'], isTrue);
+    });
+
     test('list_custom_exercises names the pattern a user gave one (heart-api#269)', () async {
       when(app.config.supportedLocales).thenReturn(['en']);
       when(app.config.defaultLocale).thenReturn('en');

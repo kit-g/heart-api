@@ -5,6 +5,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/config.dart';
 import 'package:heart/middleware/logging.dart';
 import 'package:heart/middleware/origin.dart';
+import 'package:heart/models/lens.dart';
 import 'package:heart/models/library.dart';
 import 'package:relic/relic.dart' hide Logger;
 
@@ -19,12 +20,13 @@ RelicApp buildMcpApp({
   required AppConfig config,
   required Database database,
   required ProgramLibrary library,
+  required BalancePairs balance,
   String? originSecret,
 }) {
   final app = RelicApp()..use('/', requestLogging());
   if (originSecret case final String secret when secret.isNotEmpty) app.use('/', cloudFrontOnly(secret));
   return app
     ..use('/', configuration(override: config))
-    ..attach('/', buildMcpRouter(database: database, library: library), consume: true)
+    ..attach('/', buildMcpRouter(database: database, library: library, balance: balance), consume: true)
     ..fallback = requestLogging()(respondWith((_) => JsonResponse.noSuchRoute()));
 }

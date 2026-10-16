@@ -4,6 +4,7 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/middleware/tokens.dart';
 import 'package:heart/models/exports.dart';
+import 'package:heart/models/lens.dart';
 import 'package:heart/models/library.dart';
 import 'package:heart/routes/me_index.dart';
 import 'package:relic/relic.dart';
@@ -15,6 +16,7 @@ RelicRouter buildMeRouter({
   required Database database,
   required ExportStorage storage,
   required ProgramLibrary library,
+  required BalancePairs balance,
 }) {
   return RelicRouter()
     ..use('/', apiTokensDb(db: database))
@@ -28,5 +30,6 @@ RelicRouter buildMeRouter({
     ..use('/', programsDb(db: database))
     ..use('/', exportStorage(storage: storage))
     ..use('/', programLibrary(library: library))
+    ..use('/', balancePairs(pairs: balance))
     ..addRoutes(meRoutes);
 }

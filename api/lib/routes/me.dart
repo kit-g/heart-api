@@ -11,6 +11,7 @@ import 'package:heart/models/errors.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:heart/models/exports.dart';
 import 'package:heart/models/goals.dart';
+import 'package:heart/models/lens.dart';
 import 'package:heart/models/library.dart';
 import 'package:heart/models/me.dart';
 import 'package:heart/models/pagination.dart';
@@ -260,4 +261,44 @@ Future<MeRecords> getMyRecords(Request req) async {
     to: query.to,
   );
   return MeRecords.fold(sets);
+}
+
+/// Working sets and sessions per muscle group and per movement pattern, week
+/// by week, and the groups nothing reached; within `?from=&to=`.
+Future<MeVolume> getMyVolume(Request req) {
+  final query = LensQuery.fromRequest(req);
+  return volume(req, from: query.from, to: query.to);
+}
+
+/// Each balance pair's two sides set against each other, within `?from=&to=`.
+Future<MeBalance> getMyBalance(Request req) {
+  final query = LensQuery.fromRequest(req);
+  return balance(req, from: query.from, to: query.to);
+}
+
+/// [MeVolume] over the weeks [from] and [to] reach, the route's and the MCP
+/// tool's both.
+Future<MeVolume> volume(Request req, {DateTime? from, DateTime? to}) async {
+  final (window, rows) = await _lens(req, from: from, to: to);
+  return MeVolume.fold(window, rows);
+}
+
+/// [MeBalance] over the weeks [from] and [to] reach, the route's and the MCP
+/// tool's both. No pairs while none are published.
+Future<MeBalance> balance(Request req, {DateTime? from, DateTime? to}) async {
+  final ((window, rows), content) = await (_lens(req, from: from, to: to), req.balancePairs.readPairs()).wait;
+  final locale = req.locale(req.config.supportedLocales, req.config.defaultLocale);
+  return MeBalance.fold(window, rows, content: content, locale: locale);
+}
+
+/// The window, in the user's weeks, and the working sets in it with what
+/// each exercise trains.
+Future<(LensWindow, List<LensRow>)> _lens(Request req, {DateTime? from, DateTime? to}) async {
+  final user = await req.profileService.getProfile(req.userId);
+  final window = LensWindow.resolve(weekStart: user?.settings.firstWeekday ?? DateTime.monday, from: from, to: to);
+  final (sets, library) = await (
+    req.workoutsService.getRecordSets(userId: req.userId, from: window.from, to: window.to),
+    req.exerciseService.getExercises(req.userId),
+  ).wait;
+  return (window, sets.toLensRows(library));
 }

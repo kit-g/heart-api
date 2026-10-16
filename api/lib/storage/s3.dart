@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import '../models/exports.dart';
 import '../models/images.dart';
 import '../models/imports.dart';
+import '../models/lens.dart';
 import '../models/library.dart';
 import 'keys.dart';
 
@@ -42,8 +43,8 @@ abstract class _StorageBase extends S3Api {
 }
 
 class Storage extends _StorageBase
-    with _Images, _Exports, _Imports, _Library
-    implements ApiImageStorageService, ExportStorage, ImportStorage, ProgramLibrary {
+    with _Images, _Exports, _Imports, _Library, _Balance
+    implements ApiImageStorageService, ExportStorage, ImportStorage, ProgramLibrary, BalancePairs {
   final AWSCredentialsProvider _credentialsProvider;
 
   @override
