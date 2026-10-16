@@ -27,8 +27,11 @@ pass account-specific inputs (role ARN, bucket, function name).
   themselves (both wrapper and reusable), or workflow edits ship untested.
 - **Prod wrappers**: `push: tags ['v*']` + `workflow_dispatch`. No `paths:` with tag
   triggers (path filters don't apply to tags).
-- **Deliberate exception**: `deploy-assets-prod.yml` ships prod from `main` pushes, not
-  tags. This is intentional — do not "fix" it to match the others.
+- **Deliberate exceptions** — intentional; do not "fix" them to match the others:
+  - `deploy-assets-prod.yml` ships prod from `main` pushes, not tags.
+  - `content-prod.yml` is `workflow_dispatch` only, and refuses to run unless "Use
+    workflow from" is a `v*` tag. A tag push must not start it: it would race the API
+    deploy the same tag starts, and prod content ships only after its review.
 
 ## PR gating
 

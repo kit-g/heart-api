@@ -10,6 +10,9 @@ on:
       - 'firebase/**'
       - 'assets/**'
       - 'scripts/**'
+      # the scripts tests check content as written, so a content-only change
+      # runs them too
+      - 'content/**'
       - 'pyproject.toml'
       - 'uv.lock'
       - '.github/workflows/python-checks.yml'
@@ -19,6 +22,7 @@ on:
       - 'firebase/**'
       - 'assets/**'
       - 'scripts/**'
+      - 'content/**'
       - 'pyproject.toml'
       - 'uv.lock'
       - '.github/workflows/python-checks.yml'
