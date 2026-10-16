@@ -46,6 +46,10 @@ void main() {
       expect(spanish['who'], startsWith('Para empezar'));
       expect(_view('es_MX').list().first['name'], 'Camina y muévete', reason: 'a regional locale takes its language');
       expect(_view('de').list().first['name'], 'Walk and move', reason: 'English where untranslated');
+      expect(_view().list().first.containsKey('minApp'), isFalse);
+      final newer = _content();
+      ((newer['programs'] as List).first as Map)['minApp'] = '1.15.0';
+      expect(_view('en', newer).list().first['minApp'], '1.15.0', reason: 'heart-api#276');
     });
 
     test('one program in full: copy, sessions by name, research with its sources, safety, next', () {
