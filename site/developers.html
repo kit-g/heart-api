@@ -102,6 +102,8 @@
             <tr><td><code>/me/workouts/:id</code></td><td>One workout.</td></tr>
             <tr><td><code>/me/workouts/changes</code></td><td>What changed since a cursor: see <a href="#polling">Keeping a copy in sync</a>.</td></tr>
             <tr><td><code>/me/records</code></td><td>Personal records per exercise, the same ones the app shows; <code>?exerciseId=</code> for one.</td></tr>
+            <tr><td><code>/me/volume</code></td><td>Working sets and sessions per muscle group and per movement pattern, week by week, as the app’s weekly card counts them: a set counts fully for the muscles an exercise works first and partly (usually half) for the ones it works second, so sets per muscle can be fractional. <code>untrained</code> lists the muscle groups nothing reached. <code>?from=&amp;to=</code> for a span of up to a year; without <code>from</code>, the 4 weeks ending this one.</td></tr>
+            <tr><td><code>/me/balance</code></td><td>Opposing movements set against each other, as the app’s balance view shows them (push against pull, hinge against squat, and so on): each side’s working sets and how many of the weeks either was trained. Counts only. Same span as <code>/me/volume</code>.</td></tr>
             <tr><td><code>/me/exercises/:id/history</code></td><td>Every session of one exercise, newest first, with its working sets and the values the app’s progress chart plots.</td></tr>
             <tr><td><code>/me/library?q=</code></td><td>The exercise library and your own exercises, searched the way the app searches: word order free, abbreviations such as <code>db</code> or <code>rdl</code>, muscle words such as <code>lats</code>, one typo a word.</td></tr>
             <tr><td><code>/me/library/programs</code></td><td>Heart’s ready-made programs, with what helps choose one: who it’s for (<code>audience</code>), the <code>equipment</code> it needs, days a week, minutes a session and weeks long. In your language where translated, otherwise English.</td></tr>
@@ -117,7 +119,8 @@
         </table>
         </div>
         <p>Weights are in kilograms and distances in kilometres, whatever unit the app shows you. Durations are in
-            seconds, and times are ISO 8601 in UTC.</p>
+            seconds, and times are ISO 8601 in UTC. Counts by week use UTC weeks starting on the day you chose in
+            the app (<code>weekStart</code>, 1 for Monday), or Monday until the app has told us.</p>
 
         <h2 id="polling">Keeping a copy in sync</h2>
         <p>To keep a spreadsheet or a home dashboard current, poll <code>/me/workouts/changes</code> instead of
@@ -147,7 +150,8 @@
 }}}</code></pre>
         <p>The assistant can read your profile, workouts, templates and folders, goals, programs (with their history,
             the next session’s weights and the research behind them), Heart’s ready-made programs, personal
-            records, an exercise’s history, your custom exercises and the exercise library. It can’t change anything. Only the
+            records, an exercise’s history, your training volume per muscle and movement, your balance, your custom
+            exercises and the exercise library. It can’t change anything. Only the
             data it reads counts against your limits, not the tool listing it does at the start of a conversation.
             What it reads goes to the assistant’s provider and is covered by their privacy policy, not ours.</p>
 
