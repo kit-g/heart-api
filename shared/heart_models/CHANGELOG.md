@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.36.0
+
+Muscle groups and the user's week, for counts by muscle (heart-api#116).
+
+- New: `MuscleGroupKey`, the ten groups the body map draws (`legs` … `chest`),
+  with `tryParse` and `ofMuscle(id)`, the group a library muscle id belongs to
+  on either side.
+- New: `MuscleTagging.groupShares`, the share of a set each group the tags
+  reach receives; a group in both roles counts once, as primary.
+- New: `Target.muscleGroup`, the group an untagged exercise falls to.
+- New: `Settings.firstWeekday` (ISO, 1 Monday to 7 Sunday), on the wire as
+  `firstWeekday`; one out of range reads as null.
+- Fix: `MuscleTagging.shareOf` with a group matches the muscles in it, so
+  `shareOf('chest')` is 1 for an exercise tagged only `pectoralis_major`.
+
 ## 2.35.0
 
 A share of one slot's base (heart-api#257). App side: heart-of-yours#349.

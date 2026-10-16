@@ -148,6 +148,20 @@ enum Target implements ExerciseFilter {
     };
   }
 
+  /// The muscle group an exercise nobody tagged (one the user made) belongs
+  /// to by its target, or null for a target no group answers to.
+  MuscleGroupKey? get muscleGroup {
+    return switch (this) {
+      core => .core,
+      arms => .arms,
+      back => .back,
+      chest => .chest,
+      legs => .legs,
+      shoulder => .shoulders,
+      other || olympic || fullBody || cardio => null,
+    };
+  }
+
   @override
   String toString() => value;
 }
@@ -725,6 +739,107 @@ class _MuscleTag implements MuscleTag {
   bool get isEmpty => (ids?.isEmpty ?? true) && (groups?.isEmpty ?? true);
 }
 
+/// The groups the body map draws, and the key a count or a goal by muscle
+/// group uses (`chest`). A library tag may name a group directly; every muscle
+/// id it names belongs to exactly one, through [ofMuscle].
+enum MuscleGroupKey {
+  legs('legs'),
+  adductors('adductors'),
+  hamstrings('hamstrings'),
+  glutes('glutes'),
+  arms('arms'),
+  neck('neck'),
+  back('back'),
+  core('core'),
+  shoulders('shoulders'),
+  chest('chest');
+
+  final String value;
+
+  new(this.value);
+
+  /// The group named [value], or null for a word this build doesn't know.
+  static MuscleGroupKey? tryParse(String value) => _byValue[value];
+
+  /// The group muscle [id] belongs to, either side (`pectoralis_major_l`), or
+  /// null for an id this build doesn't know.
+  static MuscleGroupKey? ofMuscle(String id) => _byMuscle[id.replaceFirst(_side, '')];
+
+  static final _byValue = {for (final group in values) group.value: group};
+
+  static final _side = RegExp(r'_[lr]$');
+
+  /// Every muscle id the library tags, without its side, by group: the body
+  /// map's own grouping.
+  static const _muscles = {
+    legs: [
+      'extensor_digitorum_longus',
+      'extensor_hallucis_longus',
+      'fibularis_longus',
+      'gastrocnemius',
+      'gracilis',
+      'iliotibial_tract',
+      'rectus_femoris',
+      'sartoris',
+      'tibialis_anterior',
+      'vastus_lateralis',
+      'vastus_medialis',
+    ],
+    adductors: ['adductor_longus', 'adductor_magnus', 'pectineus'],
+    hamstrings: ['biceps_femoris', 'semimembranosus_1', 'semimembranosus_2', 'semitendinosus'],
+    glutes: ['gluteus_maximus', 'gluteus_medius_1', 'gluteus_medius_2'],
+    arms: [
+      'anconeus',
+      'biceps_brachii_caput_breve',
+      'biceps_brachii_caput_longum',
+      'brachioradialis',
+      'extensor_carpi_radialis_longus',
+      'extensor_carpi_ulnaris',
+      'extensor_digitorum',
+      'flexor_carpi_radialis',
+      'flexor_carpi_ulnaris',
+      'flexor_digitorum_superficialis',
+      'palmaris_longus',
+      'pronator_quadratus',
+      'pronator_teres',
+      'triceps_brachii_caput_laterale',
+      'triceps_brachii_caput_longum',
+      'triceps_brachii_caput_mediale',
+    ],
+    neck: ['platysma', 'sternocleidomastoid', 'sternohyoid'],
+    back: ['infraspinatus', 'latissimus_dorsi'],
+    core: [
+      'external_oblique',
+      'external_oblique_1',
+      'external_oblique_2',
+      'external_oblique_3',
+      'external_oblique_4',
+      'external_oblique_5',
+      'external_oblique_6',
+      'external_oblique_7',
+      'external_oblique_8',
+      'rectus_abdominis_1',
+      'rectus_abdominis_2',
+      'rectus_abdominis_3',
+      'rectus_abdominis_4',
+    ],
+    shoulders: [
+      'anterior_deltoid',
+      'lateral_deltoid',
+      'posterior_deltoid',
+      'trapezius_lower',
+      'trapezius_middle',
+      'trapezius_upper',
+    ],
+    chest: ['pectoralis_major'],
+  };
+
+  static final _byMuscle = {
+    for (final MapEntry(key: group, value: muscles) in _muscles.entries)
+      for (final muscle in muscles) muscle: group,
+  };
+}
+
 abstract interface class MuscleTagging implements Model {
   /// What a set counts for a primary muscle unless the library says otherwise:
   /// all of it.
@@ -747,10 +862,15 @@ abstract interface class MuscleTagging implements Model {
   double get secondaryShare;
 
   /// The share of one set of this exercise that [muscle] receives: a muscle
-  /// id prefix (`triceps_brachii`) or a muscle group (`chest`), matched as the
-  /// library search matches them. Primary involvement wins over secondary;
-  /// a muscle the exercise doesn't tag gets 0.
+  /// id prefix (`triceps_brachii`) or a muscle group (`chest`), which a tag
+  /// reaches by naming it or naming a muscle in it. Primary involvement wins
+  /// over secondary; a muscle the exercise doesn't tag gets 0.
   double shareOf(String muscle);
+
+  /// The share of one set each [MuscleGroupKey] the tags reach receives: the
+  /// groups named, and those of the muscles named. A group reached by both
+  /// roles counts once, as primary. Empty when nothing is tagged.
+  Map<MuscleGroupKey, double> get groupShares;
 
   factory fromJson(Map json) {
     return _MuscleTagging(
@@ -797,13 +917,30 @@ class _MuscleTagging implements MuscleTagging {
 
   @override
   double shareOf(String muscle) {
+    final group = MuscleGroupKey.tryParse(muscle);
     bool tags(MuscleTag? tag) {
-      return [...?tag?.ids].any((id) => id.startsWith(muscle)) || [...?tag?.groups].contains(muscle);
+      return [...?tag?.ids].any((id) => id.startsWith(muscle)) || (group != null && _groupsOf(tag).contains(group));
     }
 
     if (tags(primary)) return primaryShare;
     if (tags(secondary)) return secondaryShare;
     return 0;
+  }
+
+  @override
+  Map<MuscleGroupKey, double> get groupShares {
+    final first = _groupsOf(primary);
+    return {
+      for (final group in first) group: primaryShare,
+      for (final group in _groupsOf(secondary).difference(first)) group: secondaryShare,
+    };
+  }
+
+  static Set<MuscleGroupKey> _groupsOf(MuscleTag? tag) {
+    return {
+      ...?tag?.groups?.map(MuscleGroupKey.tryParse).nonNulls,
+      ...?tag?.ids?.map(MuscleGroupKey.ofMuscle).nonNulls,
+    };
   }
 }
 
