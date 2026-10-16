@@ -212,6 +212,8 @@ final class LibraryView {
       'perWeek': ?program['perWeek'],
       'minutes': ?program['minutes'],
       'weeks': ?program['weeks'],
+      // the oldest app build that can run it; none is any that reads the library
+      'minApp': ?program['minApp'],
       'who': ?_pick(program['who']),
     };
   }

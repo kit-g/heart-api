@@ -312,3 +312,27 @@ def test_an_occurrence_s_own_ladder_is_checked_against_its_own_exercise():
     entry = {'exercise': 'push-up', 'sets': 3, 'target': {'reps': [8, 12]}, 'rule': ladder}
     plain = {'exercise': 'push-up', 'sets': 3, 'target': {'reps': [8, 12]}}
     assert not [p for p in check(_two_days(entry, plain, {}), LIBRARY_DOC) if 'ladder' in p]
+
+
+def test_a_program_says_the_oldest_app_that_runs_it_and_renders_it():
+    assert check(one(min_app='1.15.0'), LIBRARY_DOC) == []
+    assert render(one(min_app='1.15.0'))['programs'][0]['minApp'] == '1.15.0'
+    assert 'minApp' not in render(one())['programs'][0], 'none: any build that reads the library'
+    assert any('min_app is an app version' in p for p in check(one(min_app='1.15'), LIBRARY_DOC))
+
+
+def test_a_shape_newer_than_the_first_library_build_needs_min_app(monkeypatch):
+    import programs_content
+
+    # a rule kind the checker learns later is a shape the first build can't run
+    monkeypatch.setitem(programs_content.RULES, 'tempo', ({'step'}, programs_content.WEIGHTED))
+    tempo = one(rules={'squat-barbell': {'kind': 'tempo', 'step': 2.5}})
+    assert any("['rule tempo']" in p and 'say min_app' in p for p in check(tempo, LIBRARY_DOC))
+    tempo['programs'][0]['min_app'] = '1.16.0'
+    assert check(tempo, LIBRARY_DOC) == []
+
+
+def test_every_program_today_runs_on_the_first_library_build():
+    from programs_content import _newer_shapes
+
+    assert [p['key'] for p in load(SOURCE)['programs'] if _newer_shapes(p)] == []

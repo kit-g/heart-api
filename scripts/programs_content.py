@@ -51,6 +51,16 @@ RULES = {
     'ladder': ({'ladder', 'top', 'bottom'}, BODYWEIGHT),
     'stages': ({'stages', 'step', 'miss', 'amrap'}, WEIGHTED),
 }
+# The shapes the first app build that copies library programs reads
+# (heart_models 2.35, heart-api#276). A program that uses anything newer says
+# the oldest app build that can run it, `min_app`, so an older build leaves it
+# out instead of copying it without its rules. Written out, never derived from
+# RULES: adding a kind there must not widen what that first build reads.
+FIRST_LIBRARY_RULES = {'none', 'addWeight', 'rangeThenWeight', 'longer', 'shareOfMax', 'ladder', 'stages'}
+FIRST_LIBRARY_TARGETS = {'reps', 'duration', 'distance', 'share', 'rir', 'of', 'of_slot', 'supplemental'}
+FIRST_LIBRARY_EXERCISE = {'exercise', 'sets', 'target', 'rest', 'superset', 'pattern', 'total_reps', 'rule'}
+APP_VERSION = re.compile(r'^\d+\.\d+\.\d+$')
+
 # The rules that keep a base a share can be of.
 BASED = {'addWeight', 'rangeThenWeight', 'shareOfMax', 'stages'}
 MISS_WHEN = {'anySet', 'amrap', 'totalReps'}
@@ -266,6 +276,28 @@ def _anchor_problem(program: dict, anchor) -> str | None:
     return f'is none of {sorted(ANCHORS)}, rules.<exercise>, sessions.<session>[.<exercise>]'
 
 
+def _newer_shapes(program: dict) -> set[str]:
+    """What [program] uses that the first library build doesn't read."""
+    newer = set()
+    rules = [*(program.get('rules') or {}).values()]
+    for session in program.get('sessions') or []:
+        for entry in session.get('exercises') or []:
+            if not isinstance(entry, dict):
+                continue
+            newer |= {f'exercise.{key}' for key in set(entry) - FIRST_LIBRARY_EXERCISE}
+            if 'rule' in entry:
+                rules.append(entry['rule'])
+            sets = entry.get('sets')
+            specs = [entry.get('target') or {}, *(sets if isinstance(sets, list) else [])]
+            for spec in specs:
+                if isinstance(spec, dict):
+                    newer |= {f'target.{key}' for key in set(spec) - FIRST_LIBRARY_TARGETS}
+    for rule in rules:
+        if isinstance(rule, dict) and rule.get('kind') not in FIRST_LIBRARY_RULES:
+            newer.add(f'rule {rule.get("kind")}')
+    return newer
+
+
 def check(document: dict, library: dict, sources=None, safety=None, ladders=None) -> list[str]:
     """Every problem in [document], or none."""
     sources = load(SOURCES) if sources is None else sources
@@ -350,6 +382,11 @@ def check(document: dict, library: dict, sources=None, safety=None, ladders=None
             for anchor in about:
                 if (why := _anchor_problem(program, anchor)) is not None:
                     problems.append(f'{where}.why[{at}].about: {anchor!r} {why}')
+        min_app = program.get('min_app')
+        if min_app is not None and not (isinstance(min_app, str) and APP_VERSION.fullmatch(min_app)):
+            problems.append(f'{where}: min_app is an app version, such as 1.15.0')
+        if min_app is None and (newer := _newer_shapes(program)):
+            problems.append(f'{where}: uses {sorted(newer)}, newer than the first library build reads: say min_app')
         if (deload := program.get('deload')) is not None and not (
             isinstance(deload, dict)
             and isinstance(deload.get('every'), int)
@@ -625,6 +662,7 @@ def render(document: dict, sources=None, safety=None, ladders=None) -> dict:
                 'sources': cited,
                 'safety': program.get('safety') or [],
                 'next': program.get('next') or [],
+                **({'minApp': program['min_app']} if program.get('min_app') else {}),
                 'perWeek': program['per_week'],
                 'minutes': program['minutes'],
                 **({'weeks': program['weeks']} if program.get('weeks') else {}),

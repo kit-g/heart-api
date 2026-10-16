@@ -589,7 +589,8 @@ final List<McpTool> tools = [
         "Heart's own ready-made programs, which anyone can start in the app: for each, who it is for (audience: "
         'starting_out, getting_back, keep_muscle, getting_stronger), the equipment it needs (none, home, gym), days '
         'a week, minutes a session and weeks long. Use get_library_program for one in full. Copy is in the '
-        "user's language where translated, else English. Starting one happens in the app.",
+        "user's language where translated, else English. Starting one happens in the app; a program with minApp "
+        'needs that app version or newer.',
     run: (request, _) async {
       final view = await libraryView(request, named: false);
       if (view == null) return {'programs': const [], 'note': 'The program library is not published yet.'};
