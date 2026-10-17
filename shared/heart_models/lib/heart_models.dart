@@ -1,6 +1,7 @@
 library;
 
 export 'src/models/account_summary.dart';
+export 'src/models/anomaly.dart';
 export 'src/models/api_token.dart';
 export 'src/models/act.dart';
 export 'src/models/auth.dart';
@@ -35,6 +36,7 @@ export 'src/models/utils.dart';
 export 'src/models/uuid.dart';
 export 'src/models/workout.dart';
 export 'src/services/accounts.dart';
+export 'src/services/anomalies.dart';
 export 'src/services/charts.dart';
 export 'src/services/comments.dart';
 export 'src/services/config.dart';
