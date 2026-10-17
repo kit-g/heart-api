@@ -126,7 +126,10 @@ void main() {
       expect(response.status, 200);
       final result = response.body['result'] as Map;
       expect(result['protocolVersion'], '2025-06-18');
-      expect((result['serverInfo'] as Map)['name'], 'heart');
+      final info = result['serverInfo'] as Map;
+      expect(info['name'], 'heart');
+      expect(info['websiteUrl'], 'https://heart-of.me');
+      expect((info['icons'] as List).single, containsPair('mimeType', 'image/png'));
       expect(result['instructions'], contains('no health data'));
       expect(response.headers.containsKey('mcp-session-id'), isFalse);
     });
