@@ -131,6 +131,7 @@ void main() {
       expect(info['websiteUrl'], 'https://heart-of.me');
       expect((info['icons'] as List).single, containsPair('mimeType', 'image/png'));
       expect(result['instructions'], contains('no health data'));
+      expect(result['instructions'], contains('as the user entered it'));
       expect(response.headers.containsKey('mcp-session-id'), isFalse);
     });
 
