@@ -12,7 +12,22 @@ import 'package:relic/relic.dart' hide Logger;
 
 final _logger = Logger('Mcp');
 
-const _serverInfo = {'name': 'heart', 'title': 'Heart', 'version': '1.0.0'};
+/// Who this server is, as a host shows it on the connector's page; the
+/// description, website and icons are read since 2025-11-25.
+const _serverInfo = {
+  'name': 'heart',
+  'title': 'Heart',
+  'version': '1.0.0',
+  'description': 'Your Heart workout log: workouts, sets, templates, programs and goals, read-only.',
+  'websiteUrl': 'https://heart-of.me',
+  'icons': [
+    {
+      'src': 'https://heart-of.me/assets/favicon.png',
+      'mimeType': 'image/png',
+      'sizes': ['256x256'],
+    },
+  ],
+};
 
 /// How long a client may cache the tool list and discovery result.
 const _listTtl = Duration(hours: 1);
