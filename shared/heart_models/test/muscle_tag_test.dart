@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:body_atlas/body_atlas.dart' show MuscleGroup;
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
@@ -196,7 +197,14 @@ void main() {
       expect(MuscleGroupKey.ofMuscle('pectoralis_major_l'), MuscleGroupKey.chest);
       expect(MuscleGroupKey.ofMuscle('latissimus_dorsi_r'), MuscleGroupKey.back);
       expect(MuscleGroupKey.ofMuscle('rectus_abdominis_2_l'), MuscleGroupKey.core);
+      expect(MuscleGroupKey.ofMuscle('pectoralis_major'), MuscleGroupKey.chest, reason: 'no side');
       expect(MuscleGroupKey.ofMuscle('not_a_muscle_l'), isNull);
+    });
+
+    test('the keys are the body map\'s own groups', () {
+      // goals store these keys: a group the atlas renames must fail here, not
+      // quietly stop counting
+      expect([for (final key in MuscleGroupKey.values) key.value], [for (final group in MuscleGroup.values) group.id]);
     });
 
     test('a group is reached by naming a muscle in it, not only by name', () {
@@ -230,7 +238,9 @@ void main() {
         },
       });
       expect(pullUp.groupShares, {MuscleGroupKey.back: 0.75, MuscleGroupKey.arms: 0.25});
+      expect(pullUp.primaryGroups, {MuscleGroupKey.back});
       expect(MuscleTagging.empty().groupShares, isEmpty);
+      expect(MuscleTagging.empty().primaryGroups, isEmpty);
     });
 
     test('every muscle id the library may tag belongs to a group', () {

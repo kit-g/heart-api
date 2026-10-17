@@ -1,12 +1,13 @@
 name: heart_models
 description: "Interfaces and data classes"
-version: 2.36.0
+version: 2.37.0
 publish_to: none
 
 environment:
   sdk: ">=3.13.0"
 
 dependencies:
+  body_atlas: ^0.1.0
   uuid: ^4.5.3
 
 dev_dependencies:

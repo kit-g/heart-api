@@ -3227,6 +3227,20 @@ WHERE w.user_id = @userId
 ORDER BY e.id, COALESCE(w.started_at, w.created_at), w.id, s.set_order
 ''';
 
+// Every finished workout the user started in the window, oldest first: what
+// counts of workouts and the time they took are folded from. The window
+// bounds start times, as the record sets' does; an unfinished workout is not
+// one you have done.
+const _workoutSpans = '''
+SELECT id AS workout_id, COALESCE(started_at, created_at) AS started_at, completed_at, pauses
+FROM workouts
+WHERE user_id = @userId
+  AND completed_at IS NOT NULL
+  AND (@from::timestamptz IS NULL OR COALESCE(started_at, created_at) >= @from::timestamptz)
+  AND (@to::timestamptz IS NULL OR COALESCE(started_at, created_at) < @to::timestamptz)
+ORDER BY COALESCE(started_at, created_at), id
+''';
+
 // OAuth (heart-api#115).
 
 const _getOAuthClient = '''

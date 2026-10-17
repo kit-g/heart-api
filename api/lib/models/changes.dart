@@ -55,6 +55,10 @@ class WorkoutChanges {
 /// [PersonalRecords.toPersonalRecords].
 typedef ExerciseRecordSets = ({String exerciseId, String name, Category category, List<RecordSet> sets});
 
+/// One finished workout: when it started, and how long it ran less its
+/// pauses. What counts of workouts and their time are folded from.
+typedef WorkoutSpan = ({String workoutId, DateTime start, Duration duration});
+
 /// One session of one exercise: its workout, when that started (ISO 8601),
 /// and its completed working sets in the order they were done.
 typedef ExerciseSession = ({String workoutId, String at, List<RecordSet> sets});

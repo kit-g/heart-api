@@ -1,3 +1,5 @@
+import 'package:body_atlas/body_atlas.dart' show MuscleCatalog, MuscleInfo;
+
 import 'misc.dart';
 import 'search.dart';
 import 'uuid.dart';
@@ -761,83 +763,17 @@ enum MuscleGroupKey {
   /// The group named [value], or null for a word this build doesn't know.
   static MuscleGroupKey? tryParse(String value) => _byValue[value];
 
-  /// The group muscle [id] belongs to, either side (`pectoralis_major_l`), or
-  /// null for an id this build doesn't know.
-  static MuscleGroupKey? ofMuscle(String id) => _byMuscle[id.replaceFirst(_side, '')];
+  /// The group muscle [id] belongs to, either side (`pectoralis_major_l`) or
+  /// none (`pectoralis_major`), as the body map groups it (`body_atlas`); null
+  /// for an id the atlas doesn't know.
+  static MuscleGroupKey? ofMuscle(String id) {
+    return switch (MuscleCatalog.tryById(id) ?? MuscleCatalog.tryById('${id}_l')) {
+      final MuscleInfo info => _byValue[info.group.id],
+      null => null,
+    };
+  }
 
   static final _byValue = {for (final group in values) group.value: group};
-
-  static final _side = RegExp(r'_[lr]$');
-
-  /// Every muscle id the library tags, without its side, by group: the body
-  /// map's own grouping.
-  static const _muscles = {
-    legs: [
-      'extensor_digitorum_longus',
-      'extensor_hallucis_longus',
-      'fibularis_longus',
-      'gastrocnemius',
-      'gracilis',
-      'iliotibial_tract',
-      'rectus_femoris',
-      'sartoris',
-      'tibialis_anterior',
-      'vastus_lateralis',
-      'vastus_medialis',
-    ],
-    adductors: ['adductor_longus', 'adductor_magnus', 'pectineus'],
-    hamstrings: ['biceps_femoris', 'semimembranosus_1', 'semimembranosus_2', 'semitendinosus'],
-    glutes: ['gluteus_maximus', 'gluteus_medius_1', 'gluteus_medius_2'],
-    arms: [
-      'anconeus',
-      'biceps_brachii_caput_breve',
-      'biceps_brachii_caput_longum',
-      'brachioradialis',
-      'extensor_carpi_radialis_longus',
-      'extensor_carpi_ulnaris',
-      'extensor_digitorum',
-      'flexor_carpi_radialis',
-      'flexor_carpi_ulnaris',
-      'flexor_digitorum_superficialis',
-      'palmaris_longus',
-      'pronator_quadratus',
-      'pronator_teres',
-      'triceps_brachii_caput_laterale',
-      'triceps_brachii_caput_longum',
-      'triceps_brachii_caput_mediale',
-    ],
-    neck: ['platysma', 'sternocleidomastoid', 'sternohyoid'],
-    back: ['infraspinatus', 'latissimus_dorsi'],
-    core: [
-      'external_oblique',
-      'external_oblique_1',
-      'external_oblique_2',
-      'external_oblique_3',
-      'external_oblique_4',
-      'external_oblique_5',
-      'external_oblique_6',
-      'external_oblique_7',
-      'external_oblique_8',
-      'rectus_abdominis_1',
-      'rectus_abdominis_2',
-      'rectus_abdominis_3',
-      'rectus_abdominis_4',
-    ],
-    shoulders: [
-      'anterior_deltoid',
-      'lateral_deltoid',
-      'posterior_deltoid',
-      'trapezius_lower',
-      'trapezius_middle',
-      'trapezius_upper',
-    ],
-    chest: ['pectoralis_major'],
-  };
-
-  static final _byMuscle = {
-    for (final MapEntry(key: group, value: muscles) in _muscles.entries)
-      for (final muscle in muscles) muscle: group,
-  };
 }
 
 abstract interface class MuscleTagging implements Model {
@@ -871,6 +807,10 @@ abstract interface class MuscleTagging implements Model {
   /// groups named, and those of the muscles named. A group reached by both
   /// roles counts once, as primary. Empty when nothing is tagged.
   Map<MuscleGroupKey, double> get groupShares;
+
+  /// The groups the primary tags reach: what [groupShares] counts as primary,
+  /// however the shares are set.
+  Set<MuscleGroupKey> get primaryGroups;
 
   factory fromJson(Map json) {
     return _MuscleTagging(
@@ -926,6 +866,9 @@ class _MuscleTagging implements MuscleTagging {
     if (tags(secondary)) return secondaryShare;
     return 0;
   }
+
+  @override
+  Set<MuscleGroupKey> get primaryGroups => _groupsOf(primary);
 
   @override
   Map<MuscleGroupKey, double> get groupShares {

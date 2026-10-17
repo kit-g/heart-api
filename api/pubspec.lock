@@ -65,6 +65,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.13"
+  body_atlas:
+    dependency: transitive
+    description:
+      name: body_atlas
+      sha256: "0a440674a38ede9cf97a1336b6cf7001c080413e1087257b4f80f60a6e88b923"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -286,7 +294,7 @@ packages:
       path: "../shared/heart_models"
       relative: true
     source: path
-    version: "2.18.0"
+    version: "2.37.0"
   http:
     dependency: transitive
     description:

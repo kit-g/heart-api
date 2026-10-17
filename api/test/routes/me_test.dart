@@ -207,6 +207,41 @@ void main() {
 
       expect(records.map((r) => ((r as Map)['exercise'] as Map)['name']), ['Bench', 'squat']);
       expect(((records.first as Map)['heaviest'] as Map)['weight'], 100);
+      expect((records.first as Map)['lastTrained'], '2026-01-01T00:00:00.000Z');
+    });
+  });
+
+  group('goal progress', () {
+    test('a workouts goal reads workouts only, in the user\'s week', () async {
+      when(profiles.getProfile('u1')).thenAnswer(
+        (_) async => User(
+          id: 'u1',
+          settings: const Settings(firstWeekday: DateTime.sunday),
+        ),
+      );
+      when(goals.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1')).thenAnswer(
+        (_) async => [
+          Goal(
+            id: 'g',
+            metric: .workouts,
+            cadence: .week,
+            stages: [GoalStage(id: 's', target: 3)],
+          ),
+        ],
+      );
+      final now = DateTime.timestamp();
+      when(workouts.getWorkoutSpans(userId: 'u1')).thenAnswer(
+        (_) async => [(workoutId: 'w', start: now, duration: const Duration(hours: 1))],
+      );
+
+      final progress = (await getMyGoalProgress(build('/me/goals/progress'))).toMap();
+
+      expect(progress['weekStart'], DateTime.sunday);
+      final goal = (progress['goals'] as List).single as Map;
+      expect([goal['current'], goal['progress']], [1, 0.33]);
+      expect(DateTime.parse((goal['period'] as Map)['from'] as String).weekday, DateTime.sunday);
+      verifyNever(workouts.getRecordSets(userId: anyNamed('userId')));
+      verifyNever(exercises.getExercises(any));
     });
   });
 
@@ -224,6 +259,9 @@ void main() {
         workouts.getRecordSets(userId: 'u1', from: DateTime.utc(2026, 9, 20), to: to),
       ).thenAnswer((_) async => []);
       when(exercises.getExercises('u1')).thenAnswer((_) async => {'exercises': const []});
+      when(workouts.getWorkoutSpans(userId: 'u1', from: DateTime.utc(2026, 9, 20), to: to)).thenAnswer(
+        (_) async => [(workoutId: 'w', start: DateTime.utc(2026, 10, 12, 18), duration: const Duration(hours: 1))],
+      );
 
       final volume = (await getMyVolume(build('/me/volume', query: {'to': '2026-10-14'}))).toMap();
 
@@ -235,6 +273,8 @@ void main() {
         '2026-10-11',
       ]);
       expect(volume['untrained'], hasLength(MuscleGroupKey.values.length));
+      final last = (volume['weeks'] as List).last as Map;
+      expect([last['workouts'], last['duration'], last['totalVolume']], [1, 3600, 0]);
     });
 
     test('a span over a year is a 400', () {
