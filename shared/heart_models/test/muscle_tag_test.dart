@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
@@ -186,6 +189,68 @@ void main() {
         },
       });
       expect(tagging.shareOf('back'), 1.0);
+    });
+  });
+  group('muscle groups', () {
+    test('a muscle id belongs to its group, either side', () {
+      expect(MuscleGroupKey.ofMuscle('pectoralis_major_l'), MuscleGroupKey.chest);
+      expect(MuscleGroupKey.ofMuscle('latissimus_dorsi_r'), MuscleGroupKey.back);
+      expect(MuscleGroupKey.ofMuscle('rectus_abdominis_2_l'), MuscleGroupKey.core);
+      expect(MuscleGroupKey.ofMuscle('not_a_muscle_l'), isNull);
+    });
+
+    test('a group is reached by naming a muscle in it, not only by name', () {
+      final bench = MuscleTagging.fromJson(const {
+        'primary': {
+          'ids': ['pectoralis_major_l', 'pectoralis_major_r'],
+        },
+        'secondary': {
+          'ids': ['anterior_deltoid_l', 'triceps_brachii_caput_longum_l'],
+        },
+      });
+      expect(bench.shareOf('chest'), 1.0);
+      expect(bench.shareOf('arms'), 0.5);
+      expect(bench.shareOf('legs'), 0.0);
+      expect(bench.groupShares, {
+        MuscleGroupKey.chest: 1.0,
+        MuscleGroupKey.shoulders: 0.5,
+        MuscleGroupKey.arms: 0.5,
+      });
+    });
+
+    test('a group in both roles counts once, as primary, at the role shares', () {
+      final pullUp = MuscleTagging.fromJson(const {
+        'primary': {
+          'ids': ['latissimus_dorsi_l'],
+          'share': 0.75,
+        },
+        'secondary': {
+          'groups': ['back', 'arms', 'unknown'],
+          'share': 0.25,
+        },
+      });
+      expect(pullUp.groupShares, {MuscleGroupKey.back: 0.75, MuscleGroupKey.arms: 0.25});
+      expect(MuscleTagging.empty().groupShares, isEmpty);
+    });
+
+    test('every muscle id the library may tag belongs to a group', () {
+      // the content schema is the library's muscle vocabulary: a muscle added
+      // there and not here would count toward no group
+      final schema = jsonDecode(File('../../content/exercise_library_schema.json').readAsStringSync());
+      final ids = switch (schema) {
+        {r'$defs': {'muscleList': {'items': {'enum': final List ids}}}} => ids,
+        _ => const [],
+      };
+      expect(ids, isNotEmpty);
+      expect([
+        for (final id in ids.cast<String>())
+          if (MuscleGroupKey.ofMuscle(id) == null) id,
+      ], isEmpty);
+    });
+
+    test('a target names the group an untagged exercise falls to', () {
+      expect(Target.shoulder.muscleGroup, MuscleGroupKey.shoulders);
+      expect(Target.cardio.muscleGroup, isNull);
     });
   });
 }

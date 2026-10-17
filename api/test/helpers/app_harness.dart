@@ -86,7 +86,13 @@ class AppHarness {
     }
 
     final app = switch (surface) {
-      'mcp' => buildMcpApp(config: config, database: db, library: storage, originSecret: originSecret),
+      'mcp' => buildMcpApp(
+        config: config,
+        database: db,
+        library: storage,
+        balance: storage,
+        originSecret: originSecret,
+      ),
       _ => buildApp(
         config: config,
         aws: AwsConfig(credentialsProvider: const AWSCredentialsProvider.defaultChain(), region: 'us-east-1'),

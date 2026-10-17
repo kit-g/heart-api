@@ -42,6 +42,14 @@ void main() {
       });
     });
 
+    test('reads the first weekday, 1 to 7, and drops one out of range', () {
+      expect(Settings.fromJson({'firstWeekday': 7}).firstWeekday, 7);
+      expect(Settings.fromJson({'firstWeekday': 7}).toMap(), {'firstWeekday': 7});
+      final bad = Settings.fromJson({'firstWeekday': 8});
+      expect(bad.firstWeekday, isNull);
+      expect(bad.toMap(), <String, dynamic>{});
+    });
+
     test('degrades an invalid unitSystem to null rather than throwing', () {
       final s = Settings.fromJson({'unitSystem': 'furlongs'});
       expect(s.unitSystem, isNull);

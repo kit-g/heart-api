@@ -69,6 +69,7 @@ Future<void> main() async {
       config: _config,
       database: _database,
       library: _storage,
+      balance: _storage,
       originSecret: Platform.environment['MCP_ORIGIN_SECRET'],
     ),
     _ => buildApp(

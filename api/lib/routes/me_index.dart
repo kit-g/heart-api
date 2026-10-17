@@ -20,6 +20,8 @@ final RouteTable meRoutes = {
   ('/programs/:programId', .get): me.getMyProgram,
   ('/programs/:programId/history', .get): me.getMyProgramHistory,
   ('/records', .get): me.getMyRecords,
+  ('/volume', .get): me.getMyVolume,
+  ('/balance', .get): me.getMyBalance,
   ('/library', .get): me.searchMyLibrary,
   ('/library/programs', .get): me.getMyLibraryPrograms,
   ('/library/programs/:key', .get): me.getMyLibraryProgram,

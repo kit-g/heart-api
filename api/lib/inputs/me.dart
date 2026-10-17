@@ -96,6 +96,24 @@ class ExerciseHistoryQuery {
   }
 }
 
+/// `GET /me/volume?from=&to=` and `GET /me/balance?from=&to=` — counts over
+/// whole weeks; without `from`, the weeks ending with `to`'s, itself now when
+/// absent. At most a year.
+class LensQuery {
+  final DateTime? from;
+  final DateTime? to;
+
+  const new _({required this.from, required this.to});
+
+  static LensQuery fromRequest(Request req) {
+    final (:from, :to) = req.url.queryParameters.window();
+    if (from != null && (to ?? DateTime.timestamp()).difference(from) > LensWindow.longest) {
+      throw const BadRequest(reason: 'from and to may be at most a year apart');
+    }
+    return LensQuery._(from: from, to: to);
+  }
+}
+
 extension on Map<String, String> {
   /// `from` and `to`: a window of workout start times, from inclusive and to
   /// exclusive, either open. Each is a date (`2026-01-01`, UTC) or an ISO

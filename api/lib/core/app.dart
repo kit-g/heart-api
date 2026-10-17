@@ -19,6 +19,7 @@ import 'package:heart/middleware/s3.dart';
 import 'package:heart/oauth/fetch.dart';
 import 'package:heart/middleware/version.dart';
 import 'package:heart/models/apple.dart';
+import 'package:heart/models/lens.dart';
 import 'package:heart/models/library.dart';
 import 'package:heart/routes/index.dart';
 import 'package:heart/routes/me_index.dart';
@@ -46,9 +47,10 @@ RelicApp buildApp({
   required AppleIdentityService apple,
   firebase.Authenticator? auth,
   JsonFetch fetch = guardedJsonFetch,
-  // the program library is read from the content bucket [storage] already
-  // reaches, unless given
+  // the program library and the balance pairs are read from the content
+  // bucket [storage] already reaches, unless given
   ProgramLibrary? library,
+  BalancePairs? balance,
 }) {
   bool shouldCheckVersion(Request request) {
     if (config.shouldCheckVersion) return isAppRoute(request);
@@ -121,10 +123,19 @@ RelicApp buildApp({
     ..addRoutes(routes)
     ..attach(
       tokenPrefix,
-      buildMeRouter(database: database, storage: storage, library: library ?? storage),
+      buildMeRouter(
+        database: database,
+        storage: storage,
+        library: library ?? storage,
+        balance: balance ?? storage,
+      ),
       consume: true,
     )
-    ..attach(mcpPrefix, buildMcpRouter(database: database, library: library ?? storage), consume: true)
+    ..attach(
+      mcpPrefix,
+      buildMcpRouter(database: database, library: library ?? storage, balance: balance ?? storage),
+      consume: true,
+    )
     ..attach(oauthPrefix, buildOAuthRouter(database: database, fetch: fetch), consume: true);
 
   return app;

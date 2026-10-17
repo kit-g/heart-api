@@ -10,16 +10,22 @@ class Settings implements Model {
   final MeasurementUnit? unitSystem;
   final String? themeMode;
   final String? accentColor;
+
+  /// The day the user's week starts on, ISO: 1 Monday to 7 Sunday. Null until
+  /// the app reports it.
+  final int? firstWeekday;
+
   final Map<String, dynamic> extra;
 
   const new({
     this.unitSystem,
     this.themeMode,
     this.accentColor,
+    this.firstWeekday,
     this.extra = const {},
   });
 
-  static const _known = {'unitSystem', 'unit_system', 'themeMode', 'accentColor'};
+  static const _known = {'unitSystem', 'unit_system', 'themeMode', 'accentColor', 'firstWeekday'};
 
   factory fromJson(Map? json) {
     if (json == null) return const Settings();
@@ -31,6 +37,10 @@ class Settings implements Model {
       },
       themeMode: json['themeMode'] as String?,
       accentColor: json['accentColor'] as String?,
+      firstWeekday: switch (json['firstWeekday']) {
+        final int day when day >= 1 && day <= 7 => day,
+        _ => null,
+      },
       extra: {
         for (final entry in json.entries)
           if (!_known.contains(entry.key)) entry.key as String: entry.value,
@@ -45,6 +55,7 @@ class Settings implements Model {
       'unitSystem': ?unitSystem?.name,
       'themeMode': ?themeMode,
       'accentColor': ?accentColor,
+      'firstWeekday': ?firstWeekday,
     };
   }
 
@@ -52,12 +63,14 @@ class Settings implements Model {
     MeasurementUnit? unitSystem,
     String? themeMode,
     String? accentColor,
+    int? firstWeekday,
     Map<String, dynamic>? extra,
   }) {
     return Settings(
       unitSystem: unitSystem ?? this.unitSystem,
       themeMode: themeMode ?? this.themeMode,
       accentColor: accentColor ?? this.accentColor,
+      firstWeekday: firstWeekday ?? this.firstWeekday,
       extra: extra ?? this.extra,
     );
   }
