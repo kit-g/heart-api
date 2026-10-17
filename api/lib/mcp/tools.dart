@@ -65,7 +65,10 @@ const instructions =
     'that never leaves the user\'s phone. Do not offer to look it up. Workout calories, where present, '
     'are an estimate, not a measurement. Weights are in kilograms and distances in kilometres; convert '
     "to the user's unitSystem from get_profile when answering. Lists are paged: pass back `cursor` while "
-    'one is returned. Everything here is read-only.';
+    'one is returned. Everything here is read-only. The log is as the user entered it, so expect timers '
+    'left running, typos and weights in the wrong unit: nothing is corrected or dropped. Prefer medians for '
+    'typical values, point out an outlier rather than quietly leave it out, and say you excluded something '
+    'only if you did.';
 
 final List<McpTool> tools = [
   McpTool(
