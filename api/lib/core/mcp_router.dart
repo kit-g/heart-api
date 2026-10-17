@@ -27,6 +27,7 @@ RelicRouter buildMcpRouter({
     ..use('/', templatesDb(db: database))
     ..use('/', templateFoldersDb(db: database))
     ..use('/', goalsDb(db: database))
+    ..use('/', anomaliesDb(db: database))
     ..use('/', programsDb(db: database))
     ..use('/', programLibrary(library: library))
     ..use('/', balancePairs(pairs: balance))

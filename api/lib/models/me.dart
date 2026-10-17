@@ -1,5 +1,6 @@
 import 'package:heart_models/heart_models.dart';
 
+import 'anomalies.dart';
 import 'changes.dart';
 
 /// `GET /me`: who a token acts as, and how much history there is to read.
@@ -86,18 +87,27 @@ class MeWorkoutChanges implements Model {
 /// computes them — the same records the app shows.
 class MeRecords implements Model {
   final List<({ExerciseRecordSets exercise, Map<String, Object> records})> entries;
+  final List<Anomaly> warnings;
 
-  const new(this.entries);
+  const new(this.entries, {this.warnings = const []});
 
   /// Folds each exercise's sets, leaving out exercises that never measured
-  /// anything, ordered by name.
-  factory fold(List<ExerciseRecordSets> exercises) {
+  /// anything, ordered by name. [pending] are the anomalies nobody has looked
+  /// at; those on the exercises folded come back as warnings.
+  factory fold(List<ExerciseRecordSets> exercises, {List<Anomaly> pending = const []}) {
     final entries = [
       for (final exercise in exercises)
         if (exercise.sets.toPersonalRecords(exercise.category) case final records?)
           (exercise: exercise, records: records),
     ]..sort((a, b) => a.exercise.name.toLowerCase().compareTo(b.exercise.name.toLowerCase()));
-    return MeRecords(entries);
+    final folded = {for (final entry in entries) entry.exercise.exerciseId};
+    return MeRecords(
+      entries,
+      warnings: [
+        for (final anomaly in pending)
+          if (folded.contains(anomaly.exerciseId)) anomaly,
+      ],
+    );
   }
 
   @override
@@ -111,6 +121,7 @@ class MeRecords implements Model {
             'lastTrained': ?exercise.sets.lastOrNull?.at,
           },
       ],
+      if (warnings.isNotEmpty) 'warnings': warnings.toWarnings(),
     };
   }
 }

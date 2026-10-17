@@ -1,3 +1,4 @@
+import 'package:heart/models/anomalies.dart';
 import 'package:heart/models/creates.dart';
 import 'package:heart/models/exercise_preferences.dart';
 import 'package:heart/models/images.dart';
@@ -11,6 +12,7 @@ import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
 final _profilesProperty = ContextProperty<ApiProfileService>('ApiProfileService');
+final _anomaliesProperty = ContextProperty<ApiAnomalyService>('ApiAnomalyService');
 final _imageDbProperty = ContextProperty<ApiImageDbService>('ApiImageDbService');
 final _chatsProperty = ContextProperty<ChartPreferenceService>('ChartPreferenceService');
 final _exercisePrefsProperty = ContextProperty<ApiExercisePreferenceService>('ApiExercisePreferenceService');
@@ -30,6 +32,15 @@ Middleware profilesDb({required ApiProfileService db}) {
   return (Handler next) {
     return (request) {
       _profilesProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
+Middleware anomaliesDb({required ApiAnomalyService db}) {
+  return (Handler next) {
+    return (request) {
+      _anomaliesProperty[request] = db;
       return next(request);
     };
   };
@@ -173,6 +184,10 @@ extension DatabaseContext on Request {
   ApiExercisePreferenceService get exercisePreferenceService => _exercisePrefsProperty.get(this);
 
   set exercisePreferenceService(ApiExercisePreferenceService v) => _exercisePrefsProperty[this] = v;
+
+  ApiAnomalyService get anomalyService => _anomaliesProperty.get(this);
+
+  set anomalyService(ApiAnomalyService v) => _anomaliesProperty[this] = v;
 
   IdempotentGoalService get goalService => _goalsProperty.get(this);
 

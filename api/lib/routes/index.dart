@@ -17,6 +17,7 @@ import 'package:heart/routes/misc.dart' as version;
 import 'package:heart/routes/oauth.dart' as oauth;
 import 'package:heart/routes/programs.dart' as programs;
 import 'package:heart/routes/skips.dart' as skips;
+import 'package:heart/routes/anomalies.dart' as anomalies;
 import 'package:heart/routes/template_folders.dart' as folders;
 import 'package:heart/routes/templates.dart' as templates;
 import 'package:heart/routes/tokens.dart' as tokens;
@@ -74,6 +75,8 @@ final routes = <(String, Method), ModelHandler>{
   ('/programs/:programId/bases', .get): programs.getProgramBases,
   ('/programs/:programId/bases', .post): programs.createProgramBase,
   ('/programs/:programId/bases/:baseId', .delete): programs.deleteProgramBase,
+  ('/anomalies', .get): anomalies.getAnomalies,
+  ('/anomalies/:anomalyId', .put): anomalies.resolveAnomaly,
   ('/skips', .get): skips.getMySkips,
   ('/skips', .post): skips.createSkip,
   ('/skips/:skipId', .delete): skips.deleteSkip,

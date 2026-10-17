@@ -18,6 +18,7 @@ import 'package:mime/mime.dart';
 import 'package:relic/relic.dart';
 
 part 'account.dart';
+part 'anomalies.dart';
 part 'charts.dart';
 part 'comments.dart';
 part 'connections.dart';

@@ -3184,6 +3184,10 @@ _sets AS (
     AND we.exercise_id = @exerciseId::uuid
     AND s.completed
     AND s.set_type IS DISTINCT FROM 'w'
+    AND NOT EXISTS (
+      -- the user called it invalid: it stays in the log and counts for nothing
+      SELECT 1 FROM anomalies a WHERE a.set_id = s.id AND a.status = 'invalid'
+    )
     AND (@cursor::uuid IS NULL OR w.id < @cursor::uuid)
     AND (@from::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) >= @from::timestamptz)
     AND (@to::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) < @to::timestamptz)
@@ -3221,6 +3225,10 @@ JOIN exercises e ON e.id = we.exercise_id
 WHERE w.user_id = @userId
   AND s.completed
   AND s.set_type IS DISTINCT FROM 'w'
+  AND NOT EXISTS (
+    -- the user called it invalid: it stays in the log and counts for nothing
+    SELECT 1 FROM anomalies a WHERE a.set_id = s.id AND a.status = 'invalid'
+  )
   AND (@exerciseId::uuid IS NULL OR we.exercise_id = @exerciseId::uuid)
   AND (@from::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) >= @from::timestamptz)
   AND (@to::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) < @to::timestamptz)
@@ -3230,9 +3238,14 @@ ORDER BY e.id, COALESCE(w.started_at, w.created_at), w.id, s.set_order
 // Every finished workout the user started in the window, oldest first: what
 // counts of workouts and the time they took are folded from. The window
 // bounds start times, as the record sets' does; an unfinished workout is not
-// one you have done.
+// one you have done. A duration the user called invalid still counts the
+// workout, not its time.
 const _workoutSpans = '''
-SELECT id AS workout_id, COALESCE(started_at, created_at) AS started_at, completed_at, pauses
+SELECT
+  id AS workout_id, COALESCE(started_at, created_at) AS started_at, completed_at, pauses,
+  EXISTS (
+    SELECT 1 FROM anomalies a WHERE a.workout_id = workouts.id AND a.set_id IS NULL AND a.status = 'invalid'
+  ) AS time_invalid
 FROM workouts
 WHERE user_id = @userId
   AND completed_at IS NOT NULL
@@ -3560,4 +3573,61 @@ WITH _grant AS (
   DELETE FROM oauth_refresh_tokens WHERE grant_id IN (SELECT id FROM _grant) RETURNING token_hash
 )
 SELECT id FROM _grant
+''';
+
+// Anomalies (heart-api#42). The sweep that finds them is _sweep_anomalies,
+// run by pg_cron; these read and resolve them.
+
+const _anomalyColumns = '''
+  a.id, a.workout_id, COALESCE(w.started_at, w.created_at) AS workout_start, a.set_id,
+  we.exercise_id, e.name AS exercise_name, a.reason, a.observed, a.typical, a.status, a.detected_at, a.resolved_at
+''';
+
+const _anomalyJoins = '''
+JOIN workouts w ON w.id = a.workout_id
+LEFT JOIN exercise_sets s ON s.id = a.set_id
+LEFT JOIN workout_exercises we ON we.id = s.workout_exercise_id
+LEFT JOIN exercises e ON e.id = we.exercise_id
+''';
+
+// Newest first, keyed on the id so the cursor is the last one's.
+const _getAnomalies =
+    '''
+SELECT $_anomalyColumns
+FROM anomalies a
+$_anomalyJoins
+WHERE a.user_id = @userId
+  AND (@status::text IS NULL OR a.status = @status::text)
+  AND (@cursor::uuid IS NULL OR a.id < @cursor::uuid)
+ORDER BY a.id DESC
+LIMIT @limit
+''';
+
+// The pending ones whose workout started in the window: what an aggregate of
+// that window was folded from without anyone having looked at them.
+const _getPendingAnomalies =
+    '''
+SELECT $_anomalyColumns
+FROM anomalies a
+$_anomalyJoins
+WHERE a.user_id = @userId
+  AND a.status = 'pending'
+  AND (@from::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) >= @from::timestamptz)
+  AND (@to::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) < @to::timestamptz)
+ORDER BY COALESCE(w.started_at, w.created_at), a.id
+''';
+
+const _resolveAnomaly =
+    '''
+WITH _resolved AS (
+  UPDATE anomalies
+  SET status      = @status,
+      resolved_at = now()
+  WHERE id = @anomalyId::uuid
+    AND user_id = @userId
+  RETURNING *
+)
+SELECT $_anomalyColumns
+FROM _resolved a
+$_anomalyJoins
 ''';

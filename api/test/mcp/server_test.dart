@@ -36,6 +36,9 @@ void main() {
     when(app.config.freeApiLimits).thenReturn(ApiLimits.free);
     when(app.config.cdnAssetUrl(any)).thenAnswer((i) => 'https://media.example/${i.positionalArguments.first}');
     when(app.db.useToken(TokenSecret.hash(secret), count: anyNamed('count'))).thenAnswer((_) async => use());
+    when(
+      app.db.getPendingAnomalies(userId: anyNamed('userId'), from: anyNamed('from'), to: anyNamed('to')),
+    ).thenAnswer((_) async => []);
   });
 
   tearDown(() => app.stop());
@@ -939,6 +942,33 @@ void main() {
       final progress = (await call('get_goal_progress'))['structuredContent'] as Map;
       final goal = (progress['goals'] as List).single as Map;
       expect([goal['id'], goal['current'], goal['progress']], ['g', 1, 0.25]);
+    });
+
+    test('list_anomalies pages them in the tools\' units, and refuses a status it does not know', () async {
+      when(app.db.getAnomalies(userId: 'u1', status: AnomalyStatus.pending, cursor: null, limit: 20)).thenAnswer(
+        (_) async => Page(
+          items: [
+            Anomaly.fromJson({
+              'id': '019def00-0000-7000-8000-000000000071',
+              'workoutId': '019def00-0000-7000-8000-000000000072',
+              'setId': '019def00-0000-7000-8000-000000000073',
+              'reason': 'outlier_weight',
+              'observed': {'weight': 630.0001, 'reps': 5},
+              'typical': 285,
+              'status': 'pending',
+              'detectedAt': '2026-10-17T12:00:00.000Z',
+            }),
+          ],
+          hasMore: false,
+        ),
+      );
+
+      final listed = (await call('list_anomalies', {'status': 'pending'}))['structuredContent'] as Map;
+      final anomaly = (listed['anomalies'] as List).single as Map;
+      expect(anomaly['observed'], {'weightKg': 630, 'reps': 5});
+      expect(listed.containsKey('cursor'), isFalse);
+
+      expect((await call('list_anomalies', {'status': 'maybe'}))['isError'], isTrue);
     });
 
     test('list_custom_exercises names the pattern a user gave one (heart-api#269)', () async {

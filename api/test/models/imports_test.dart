@@ -137,14 +137,16 @@ void main() {
       expect(batch.rowsSkipped, 0);
     });
 
-    test('drops the end timestamp when the duration is a left-running artifact', () {
+    test('keeps the end of a workout left running, for anomaly review to flag', () {
       const csv =
           'Date,Workout Name,Duration,Exercise Name,Weight,Reps\n'
           '2024-07-22 17:45:06,Legs,"3,527h 3min",Squat (Barbell),100,5\n'
           '2024-07-23 17:45:06,Push,12h 56min,Bench Press (Barbell),80,5\n';
       final batch = WorkoutImport.fromStrongCsv(csv);
-      expect(batch.workouts.first.end, isNull);
-      // under 24h is kept — a long day is not corrupt data
+      expect(
+        batch.workouts.first.end,
+        DateTime.utc(2024, 7, 22, 17, 45, 6).add(const Duration(hours: 3527, minutes: 3)),
+      );
       expect(batch.workouts.last.end, DateTime.utc(2024, 7, 24, 6, 41, 6));
     });
 
