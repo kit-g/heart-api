@@ -2,10 +2,15 @@
 
 ## 2.37.0
 
-Primary and secondary work per muscle group, for the server's volume counts.
+Primary and secondary work per muscle group, and the muscle map from the body
+atlas itself.
 
 - New: `MuscleTagging.primaryGroups`, the groups the primary tags reach: the
   ones `groupShares` counts as primary.
+- `MuscleGroupKey.ofMuscle` reads the body map's own grouping from
+  `body_atlas` (^0.1.0, pure Dart; what `flutter_body_atlas` 0.2.2 re-exports)
+  instead of a copy kept here. Every atlas muscle lands in the group it did.
+  New dependency: `body_atlas`.
 
 ## 2.36.0
 
