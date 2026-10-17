@@ -149,7 +149,9 @@ final List<McpTool> tools = [
         'many reps, so a higher count can be heavier. Weights in kg, distances in km, durations in seconds. '
         'Exercises come by name, a page at a time: pass `exercise` to narrow to names containing that text, or '
         'the returned cursor for the next page. Pass `from` and `to` for the records of a span ("heaviest this '
-        'year"): only workouts started in it count, and what a record beat is from the same span.',
+        'year"): only workouts started in it count, and what a record beat is from the same span. lastTrained is '
+        "when the exercise was last done in that span: a record that hasn't moved on a lift not done lately is "
+        'not a lift getting weaker.',
     inputSchema: {
       'type': 'object',
       'properties': {
@@ -190,6 +192,7 @@ final List<McpTool> tools = [
             {
               'exercise': {'id': exercise.exerciseId, 'name': exercise.name, 'category': exercise.category.value},
               ...records.toMcpUnits() as Map<String, dynamic>,
+              'lastTrained': ?exercise.sets.lastOrNull?.at,
             },
         ],
         if (start + page.length < entries.length) 'cursor': page.last.exercise.exerciseId,
@@ -255,13 +258,15 @@ final List<McpTool> tools = [
     name: 'get_training_volume',
     title: 'Training volume',
     description:
-        'Working sets (warm-ups left out) and sessions per muscle group and per movement pattern, week by week: '
-        'what the app counts on its weekly card. A set counts fully for the muscles an exercise works first and '
-        'partly (usually half) for the ones it works second, so sets per muscle may be fractional; round them '
-        'when answering. An exercise the user made counts toward the group its target names and the pattern they '
-        'gave it. untrained lists the muscle groups no set reached in the whole span ("which muscles did I skip"). '
-        'Weeks start on weekStart (ISO, 1 Monday) in UTC. Without `from`, the 4 weeks ending this one; at most a '
-        'year.',
+        'Week by week: the finished workouts, their time in seconds less pauses, totalVolume (weight times reps '
+        'of the working sets, in kg; bodyweight and assisted work add nothing), and working sets (warm-ups left '
+        'out) and sessions per muscle group and per movement pattern: what the app counts on its weekly card. A '
+        'set counts fully for the muscles an exercise works first and partly (usually half) for the ones it works '
+        'second, so sets per muscle may be fractional; round them when answering. primarySets is the part from '
+        'exercises that work the muscle first (direct work); the rest is indirect. An exercise the user made '
+        'counts toward the group its target names, as direct work, and the pattern they gave it. untrained lists '
+        'the muscle groups no set reached in the whole span ("which muscles did I skip"). Weeks start on '
+        'weekStart (ISO, 1 Monday) in UTC. Without `from`, the 4 weeks ending this one; at most a year.',
     inputSchema: const {
       'type': 'object',
       'properties': _windowSchema,
@@ -269,7 +274,7 @@ final List<McpTool> tools = [
     },
     run: (request, arguments) async {
       final (:from, :to) = arguments.toLensWindow();
-      return (await me.volume(request, from: from, to: to)).toMap();
+      return (await me.volume(request, from: from, to: to)).toMap().toMcpUnits() as Map<String, dynamic>;
     },
   ),
   McpTool(
@@ -404,6 +409,19 @@ final List<McpTool> tools = [
         ],
       };
     },
+  ),
+  McpTool(
+    name: 'get_goal_progress',
+    title: 'Goal progress',
+    description:
+        "Each live goal with where it stands now, the number the app's goal card shows: current is the measured "
+        'value and progress how far along the current stage it is, 0 to 1 (1 once a ladder is finished). A goal '
+        'with a cadence reads its current week or calendar month (period; weeks start on weekStart, ISO, 1 Monday, '
+        'in UTC); one without reads all time, where an exercise metric is its best session. Values are in the '
+        "goal's units: kg, km, seconds, seconds per km for pace; sets may be fractional for a muscle. current is "
+        'absent when there is nothing to read yet. Stages carry achievedAt once met. list_goals has archived goals.',
+    inputSchema: const {'type': 'object', 'properties': {}, 'additionalProperties': false},
+    run: (request, arguments) async => (await me.goalProgress(request)).toMap(),
   ),
   McpTool(
     name: 'list_programs',

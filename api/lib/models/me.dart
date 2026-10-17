@@ -108,6 +108,7 @@ class MeRecords implements Model {
           {
             'exercise': {'id': exercise.exerciseId, 'name': exercise.name, 'category': exercise.category.value},
             ...records,
+            'lastTrained': ?exercise.sets.lastOrNull?.at,
           },
       ],
     };

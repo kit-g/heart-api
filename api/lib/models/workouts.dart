@@ -30,6 +30,10 @@ abstract interface class ApiWorkoutService {
     DateTime? to,
   });
 
+  /// [userId]'s finished workouts, oldest first, within [from] (inclusive)
+  /// and [to] (exclusive) by start time.
+  Future<List<WorkoutSpan>> getWorkoutSpans({required String userId, DateTime? from, DateTime? to});
+
   /// [userId]'s sessions of [exerciseId], newest first, [limit] at a time
   /// after the workout id [cursor], within [from] (inclusive) and [to]
   /// (exclusive) by start time. Null when the exercise isn't one [userId] can

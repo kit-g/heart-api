@@ -896,13 +896,19 @@ void main() {
           ],
         },
       );
+      when(
+        app.db.getWorkoutSpans(userId: 'u1', from: DateTime.utc(2026, 10, 5), to: DateTime.utc(2026, 10, 12)),
+      ).thenAnswer(
+        (_) async => [(workoutId: 'w', start: DateTime.utc(2026, 10, 6, 10), duration: const Duration(minutes: 50))],
+      );
       const span = {'from': '2026-10-05', 'to': '2026-10-12'};
 
       final volume = (await call('get_training_volume', span))['structuredContent'] as Map;
       final week = (volume['weeks'] as List).single as Map;
       expect(week['muscles'], {
-        'chest': {'sets': 4, 'sessions': 1},
+        'chest': {'sets': 4, 'primarySets': 4, 'sessions': 1},
       });
+      expect([week['workouts'], week['seconds'], week['totalVolume']], [1, 3000, 1600]);
       expect(volume['untrained'], isNot(contains('chest')));
 
       final balance = (await call('get_balance', span))['structuredContent'] as Map;
@@ -912,6 +918,26 @@ void main() {
 
       final long = await call('get_training_volume', {'from': '2024-01-01', 'to': '2026-01-01'});
       expect(long['isError'], isTrue);
+    });
+
+    test('get_goal_progress measures each live goal', () async {
+      when(app.db.getProfile('u1')).thenAnswer((_) async => User(id: 'u1'));
+      when(app.db.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1')).thenAnswer(
+        (_) async => [
+          Goal(
+            id: 'g',
+            metric: .workouts,
+            stages: [GoalStage(id: 's', target: 4)],
+          ),
+        ],
+      );
+      when(app.db.getWorkoutSpans(userId: 'u1')).thenAnswer(
+        (_) async => [(workoutId: 'w', start: DateTime.utc(2026, 10, 6), duration: const Duration(hours: 1))],
+      );
+
+      final progress = (await call('get_goal_progress'))['structuredContent'] as Map;
+      final goal = (progress['goals'] as List).single as Map;
+      expect([goal['id'], goal['current'], goal['progress']], ['g', 1, 0.25]);
     });
 
     test('list_custom_exercises names the pattern a user gave one (heart-api#269)', () async {

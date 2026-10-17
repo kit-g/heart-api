@@ -82,6 +82,36 @@ Future<GoalsResponse> getMyGoals(Request req) => goals.getTargetUserGoalsById(
   archived: GoalsQuery.fromRequest(req).archived,
 );
 
+/// Each live goal with where it stands now, measured as the app measures it.
+Future<MeGoalProgress> getMyGoalProgress(Request req) => goalProgress(req);
+
+/// [MeGoalProgress] as of now, the route's and the MCP tool's both. Reads
+/// only what the goals need: all time's sets for any but a workouts goal, all
+/// time's workouts for one.
+Future<MeGoalProgress> goalProgress(Request req) async {
+  final (user, goals) = await (
+    req.profileService.getProfile(req.userId),
+    req.goalService.getTargetUserGoals(requesterId: req.userId, targetUserId: req.userId),
+  ).wait;
+  final weekStart = user?.settings.firstWeekday ?? DateTime.monday;
+  final bySets = goals.any((goal) => !goal.metric.isWholeWorkout);
+  final byWorkouts = goals.any((goal) => goal.metric.isWholeWorkout);
+  final (sets, library, spans) = await (
+    bySets ? req.workoutsService.getRecordSets(userId: req.userId) : Future.value(const <ExerciseRecordSets>[]),
+    bySets ? req.exerciseService.getExercises(req.userId) : Future.value(const <String, dynamic>{}),
+    byWorkouts ? req.workoutsService.getWorkoutSpans(userId: req.userId) : Future.value(const <WorkoutSpan>[]),
+  ).wait;
+  return MeGoalProgress.measure(
+    goals,
+    now: DateTime.timestamp(),
+    weekStart: weekStart,
+    sets: sets,
+    rows: sets.toLensRows(library),
+    spans: spans,
+    library: library,
+  );
+}
+
 /// The user's programs, each with where they stand in it.
 Future<MePrograms> getMyPrograms(Request req) async {
   final all = await req.programService.getPrograms(req.userId);
@@ -280,7 +310,8 @@ Future<MeBalance> getMyBalance(Request req) {
 /// tool's both.
 Future<MeVolume> volume(Request req, {DateTime? from, DateTime? to}) async {
   final (window, rows) = await _lens(req, from: from, to: to);
-  return MeVolume.fold(window, rows);
+  final spans = await req.workoutsService.getWorkoutSpans(userId: req.userId, from: window.from, to: window.to);
+  return MeVolume.fold(window, rows, spans: spans);
 }
 
 /// [MeBalance] over the weeks [from] and [to] reach, the route's and the MCP

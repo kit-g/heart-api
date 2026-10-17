@@ -166,6 +166,33 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   }
 
   @override
+  Future<List<WorkoutSpan>> getWorkoutSpans({required String userId, DateTime? from, DateTime? to}) async {
+    final rows = await _pool.execute(
+      _workoutSpans.toSql(),
+      parameters: {'userId': userId, 'from': from, 'to': to},
+    );
+    return [
+      for (final row in rows)
+        if (row.toColumnMap() case {
+          'workout_id': final Object id,
+          'started_at': final DateTime start,
+          'completed_at': final DateTime end,
+          'pauses': final Object? pauses,
+        })
+          (
+            workoutId: id.toString(),
+            start: start.toUtc(),
+            duration: switch (end.difference(start) - pauses.toPaused()) {
+              // an end before the start is a clock the user set wrong, not
+              // time spent
+              final Duration ran when ran.isNegative => Duration.zero,
+              final Duration ran => ran,
+            },
+          ),
+    ];
+  }
+
+  @override
   Future<Workout> getWorkout({
     required String userId,
     required String workoutId,
@@ -310,5 +337,19 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
       _deleteWorkout.toSql(),
       parameters: {'workoutId': workoutId, 'userId': userId},
     );
+  }
+}
+
+extension on Object? {
+  /// The time a workout's `pauses` column (`[{"start", "end"}]`) stood still.
+  /// A pause with no end stopped nothing that can be measured.
+  Duration toPaused() {
+    return switch (this) {
+      final List pauses => [
+        for (final pause in pauses)
+          if (pause case {'start': _, 'end': _?}) WorkoutPause.fromJson(pause),
+      ].fold(Duration.zero, (sum, pause) => sum + pause.duration),
+      _ => Duration.zero,
+    };
   }
 }

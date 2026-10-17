@@ -167,6 +167,43 @@ void main() {
     });
   });
 
+  group('getWorkoutSpans', () {
+    test('finished workouts in the window, oldest first, less their pauses', () async {
+      final user = await h.seedProfile();
+      final paused = await h.seedWorkout(
+        userId: user,
+        start: DateTime.utc(2026, 2, 1, 10),
+        end: DateTime.utc(2026, 2, 1, 11),
+      );
+      await h.exec(
+        'UPDATE workouts SET pauses = @p::jsonb WHERE id = @w',
+        {
+          'w': paused,
+          'p': '[{"start": "2026-02-01T10:20:00Z", "end": "2026-02-01T10:30:00Z"}]',
+        },
+      );
+      final first = await h.seedWorkout(
+        userId: user,
+        start: DateTime.utc(2026, 1, 1, 10),
+        end: DateTime.utc(2026, 1, 1, 10, 45),
+      );
+      await h.insertId(
+        'INSERT INTO workouts (user_id, name, started_at) VALUES (@u, @n, @s) RETURNING id',
+        {'u': user, 'n': 'unfinished', 's': DateTime.utc(2026, 1, 15)},
+      );
+
+      final spans = await h.db.getWorkoutSpans(userId: user);
+      expect([for (final span in spans) span.workoutId], [first, paused], reason: 'the unfinished one is not done');
+      expect([for (final span in spans) span.duration.inMinutes], [45, 50]);
+      expect(spans.first.start, DateTime.utc(2026, 1, 1, 10));
+
+      final february = await h.db.getWorkoutSpans(userId: user, from: DateTime.utc(2026, 2), to: DateTime.utc(2026, 3));
+      expect([for (final span in february) span.workoutId], [paused]);
+
+      await h.exec('DELETE FROM workouts WHERE user_id = @u', {'u': user});
+    });
+  });
+
   group('getRecordSets', () {
     test('only completed working sets count, oldest first, per exercise', () async {
       final user = await h.seedProfile();
