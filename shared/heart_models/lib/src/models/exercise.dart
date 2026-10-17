@@ -872,6 +872,10 @@ abstract interface class MuscleTagging implements Model {
   /// roles counts once, as primary. Empty when nothing is tagged.
   Map<MuscleGroupKey, double> get groupShares;
 
+  /// The groups the primary tags reach: what [groupShares] counts as primary,
+  /// however the shares are set.
+  Set<MuscleGroupKey> get primaryGroups;
+
   factory fromJson(Map json) {
     return _MuscleTagging(
       primary: MuscleTag.fromJson(json['primary'] ?? {}),
@@ -926,6 +930,9 @@ class _MuscleTagging implements MuscleTagging {
     if (tags(secondary)) return secondaryShare;
     return 0;
   }
+
+  @override
+  Set<MuscleGroupKey> get primaryGroups => _groupsOf(primary);
 
   @override
   Map<MuscleGroupKey, double> get groupShares {

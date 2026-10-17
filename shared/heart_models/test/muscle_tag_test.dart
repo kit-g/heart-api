@@ -230,7 +230,9 @@ void main() {
         },
       });
       expect(pullUp.groupShares, {MuscleGroupKey.back: 0.75, MuscleGroupKey.arms: 0.25});
+      expect(pullUp.primaryGroups, {MuscleGroupKey.back});
       expect(MuscleTagging.empty().groupShares, isEmpty);
+      expect(MuscleTagging.empty().primaryGroups, isEmpty);
     });
 
     test('every muscle id the library may tag belongs to a group', () {

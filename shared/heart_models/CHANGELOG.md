@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.37.0
+
+Primary and secondary work per muscle group, for the server's volume counts.
+
+- New: `MuscleTagging.primaryGroups`, the groups the primary tags reach: the
+  ones `groupShares` counts as primary.
+
 ## 2.36.0
 
 Muscle groups and the user's week, for counts by muscle (heart-api#116).
