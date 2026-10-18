@@ -2,9 +2,11 @@
 -- runs, resolved by the user. Nothing here changes what was logged: an entry
 -- the user calls invalid stays in the log and drops out of what is counted.
 
+DROP TABLE IF EXISTS anomalies;
+
 CREATE TABLE IF NOT EXISTS anomalies
 (
-    id          UUID        DEFAULT uuidv7() PRIMARY KEY,
+    id          UUID                 DEFAULT uuidv7() PRIMARY KEY,
     user_id     TEXT        NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
     workout_id  UUID        NOT NULL REFERENCES workouts (id) ON DELETE CASCADE,
     set_id      UUID REFERENCES exercise_sets (id) ON DELETE CASCADE,
@@ -13,60 +15,67 @@ CREATE TABLE IF NOT EXISTS anomalies
     typical     REAL,
     status      TEXT        NOT NULL DEFAULT 'pending',
     detected_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    resolved_at TIMESTAMPTZ
+    resolved_at TIMESTAMPTZ,
+
+    CONSTRAINT anomalies_reason_check CHECK (
+        reason IN ('duration_left_running', 'outlier_weight', 'implausible_reps', 'swap_suspected')
+    ),
+    CONSTRAINT anomalies_status_check CHECK (status IN ('pending', 'valid', 'invalid')),
+    CONSTRAINT anomalies_resolved_check CHECK ((status = 'pending') = (resolved_at IS NULL)),
+    CONSTRAINT anomalies_subject_check CHECK ((reason = 'duration_left_running') = (set_id IS NULL))
 );
 
-ALTER TABLE IF EXISTS anomalies DROP CONSTRAINT IF EXISTS anomalies_reason_check;
-ALTER TABLE IF EXISTS anomalies ADD CONSTRAINT anomalies_reason_check CHECK (
-    reason IN ('duration_left_running', 'outlier_weight', 'implausible_reps', 'swap_suspected')
-);
-
-ALTER TABLE IF EXISTS anomalies DROP CONSTRAINT IF EXISTS anomalies_status_check;
-ALTER TABLE IF EXISTS anomalies ADD CONSTRAINT anomalies_status_check CHECK (status IN ('pending', 'valid', 'invalid'));
-
--- resolved exactly when it isn't pending
-ALTER TABLE IF EXISTS anomalies DROP CONSTRAINT IF EXISTS anomalies_resolved_check;
-ALTER TABLE IF EXISTS anomalies ADD CONSTRAINT anomalies_resolved_check CHECK ((status = 'pending') = (resolved_at IS NULL));
-
--- a duration is the workout's; everything else is one set's
-ALTER TABLE IF EXISTS anomalies DROP CONSTRAINT IF EXISTS anomalies_subject_check;
-ALTER TABLE IF EXISTS anomalies ADD CONSTRAINT anomalies_subject_check CHECK (
-    (reason = 'duration_left_running') = (set_id IS NULL)
-);
-
--- one finding per entry: a set judged again under another rule is the same
--- question, and keeps what the user answered
 CREATE UNIQUE INDEX IF NOT EXISTS anomalies_set_idx ON anomalies (set_id) WHERE set_id IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS anomalies_workout_duration_idx ON anomalies (workout_id) WHERE set_id IS NULL;
--- what deleting a workout cascades through
 CREATE INDEX IF NOT EXISTS anomalies_workout_idx ON anomalies (workout_id);
--- the list, newest found first
 CREATE INDEX IF NOT EXISTS anomalies_user_detected_idx ON anomalies (user_id, detected_at, id);
 
 COMMENT ON TABLE anomalies IS
     'Suspicious entries in a user''s log, found by _sweep_anomalies: a set or a workout, why, and what the user made of it. Never a correction';
+COMMENT ON COLUMN anomalies.user_id IS 'Whose log it is in';
+COMMENT ON COLUMN anomalies.workout_id IS 'The workout it is in: the subject for a duration, the set''s workout otherwise';
+COMMENT ON COLUMN anomalies.set_id IS 'The set it is about; null for a workout''s duration';
+COMMENT ON COLUMN anomalies.reason IS
+    'Which rule found it: duration_left_running, outlier_weight, implausible_reps or swap_suspected';
 COMMENT ON COLUMN anomalies.observed IS
     'What was entered when it was judged: {"weight", "reps"} for a set, {"seconds"} for a workout. A resolution holds while the entry still reads this';
 COMMENT ON COLUMN anomalies.typical IS
     'The exercise''s median working weight it was judged against; null for a duration';
 COMMENT ON COLUMN anomalies.status IS
     'pending until the user decides: valid (it stands and counts), invalid (it stays in the log and drops out of every count)';
+COMMENT ON COLUMN anomalies.detected_at IS 'When it was found, or found again after the entry was edited';
+COMMENT ON COLUMN anomalies.resolved_at IS 'When the user last changed their decision; null while pending';
+COMMENT ON CONSTRAINT anomalies_reason_check ON anomalies IS
+    'The rules there are; a new one widens this';
+COMMENT ON CONSTRAINT anomalies_status_check ON anomalies IS 'Undecided, or what the user decided';
+COMMENT ON CONSTRAINT anomalies_resolved_check ON anomalies IS 'Resolved exactly when it is not pending';
+COMMENT ON CONSTRAINT anomalies_subject_check ON anomalies IS
+    'A duration is the workout''s; every other reason is one set''s';
+COMMENT ON INDEX anomalies_set_idx IS
+    'One finding per set: judged again under another rule, it is the same question and keeps its answer';
+COMMENT ON INDEX anomalies_workout_duration_idx IS 'One finding per workout''s duration';
+COMMENT ON INDEX anomalies_workout_idx IS 'What deleting a workout cascades through';
+COMMENT ON INDEX anomalies_user_detected_idx IS 'The owner''s anomalies, newest found first';
 
--- When the sweep last ran, so the next one reads only the users who wrote
--- since. One row.
+DROP TABLE IF EXISTS anomaly_sweeps;
+
 CREATE TABLE IF NOT EXISTS anomaly_sweeps
 (
     id       BOOLEAN     DEFAULT true PRIMARY KEY,
-    swept_at TIMESTAMPTZ NOT NULL
+    swept_at TIMESTAMPTZ NOT NULL,
+
+    CONSTRAINT anomaly_sweeps_one_row_check CHECK (id)
 );
 
-ALTER TABLE IF EXISTS anomaly_sweeps DROP CONSTRAINT IF EXISTS anomaly_sweeps_one_row_check;
-ALTER TABLE IF EXISTS anomaly_sweeps ADD CONSTRAINT anomaly_sweeps_one_row_check CHECK (id);
+COMMENT ON TABLE anomaly_sweeps IS
+    'When _sweep_anomalies last ran, so the next one reads only the users who wrote since; one row';
+COMMENT ON COLUMN anomaly_sweeps.id IS 'Always true: the key that keeps it to one row';
+COMMENT ON COLUMN anomaly_sweeps.swept_at IS 'When the last sweep started';
+COMMENT ON CONSTRAINT anomaly_sweeps_one_row_check ON anomaly_sweeps IS 'One row';
 
-COMMENT ON TABLE anomaly_sweeps IS 'When _sweep_anomalies last ran; one row';
-
--- who wrote since the last sweep, without reading every workout
 CREATE INDEX IF NOT EXISTS workouts_updated_idx ON workouts (updated_at);
+
+COMMENT ON INDEX workouts_updated_idx IS 'Workouts by when they last changed, across users: who wrote since a moment';
 
 -- One user's log judged whole, since a new session moves the baseline every
 -- other set is read against. The rules, kept conservative so that a flag is
