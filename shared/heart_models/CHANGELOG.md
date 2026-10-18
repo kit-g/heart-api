@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.39.0
+
+- New: `ExerciseSet.clearMeasurements(Set<ExerciseSetField>)`, with
+  `ExerciseSetField` (`weight`, `reps`, `duration`, `distance`): unsets those
+  measurements, leaving the others alone, and the set then writes as one
+  that never had them. `setMeasurements` still reads a null as "keep" (heart-api#212).
+- `ExerciseSet.toRow` always carries the measurements of the set's category,
+  a null one included, so an update from it clears a stored value; the
+  others stay out, as before.
+
 ## 2.38.0
 
 Suspicious entries and what the user makes of them (heart-api#42).

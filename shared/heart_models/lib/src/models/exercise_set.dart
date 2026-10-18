@@ -43,6 +43,10 @@ enum SetType {
   }
 }
 
+/// A measurement [ExerciseSet.clearMeasurements] can unset, since a null in
+/// [ExerciseSet.setMeasurements] keeps the value.
+enum ExerciseSetField { weight, reps, duration, distance }
+
 /// A single set of an exercise
 abstract interface class ExerciseSet implements Completes, Model, Storable, Comparable<ExerciseSet> {
   /// Client-minted v7 uuid. Firebase-era sets used the [start] timestamp as
@@ -222,12 +226,18 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
 
   Duration elapsed();
 
+  /// Sets the measurements the set's category has; a null keeps the value.
   void setMeasurements({
     double? weight,
     int? reps,
     int? duration,
     double? distance,
   });
+
+  /// Unsets [fields], leaving the others alone. A cleared set writes as one
+  /// that never had the value. A field the category doesn't have is already
+  /// unset.
+  void clearMeasurements(Set<ExerciseSetField> fields);
 }
 
 class _ExerciseSet implements ExerciseSet {
@@ -430,13 +440,32 @@ class _ExerciseSet implements ExerciseSet {
   }
 
   @override
+  void clearMeasurements(Set<ExerciseSetField> fields) {
+    for (final field in fields) {
+      switch (field) {
+        case .weight:
+          weight = null;
+        case .reps:
+          reps = null;
+        case .duration:
+          duration = null;
+        case .distance:
+          distance = null;
+      }
+    }
+  }
+
+  @override
   Map<String, dynamic> toRow() {
+    final measured = category.measurements;
     return {
       'id': id,
-      'reps': ?reps,
-      'weight': ?weight,
-      'duration': ?duration,
-      'distance': ?distance,
+      // the category's measurements always, so an update from this row writes
+      // a cleared one; none of the others, which a set never holds
+      if (measured.contains(ExerciseSetField.reps)) 'reps': reps,
+      if (measured.contains(ExerciseSetField.weight)) 'weight': weight,
+      if (measured.contains(ExerciseSetField.duration)) 'duration': duration,
+      if (measured.contains(ExerciseSetField.distance)) 'distance': distance,
       'completed': isCompleted ? 1 : 0,
     };
   }
@@ -478,5 +507,19 @@ class _ExerciseSet implements ExerciseSet {
   @override
   String toString() {
     return '$exercise $id';
+  }
+}
+
+extension on Category {
+  /// The measurements a set of this category has; the factory drops the rest.
+  Set<ExerciseSetField> get measurements {
+    return switch (this) {
+      .weightedBodyWeight || .assistedBodyWeight || .machine || .barbell || .dumbbell => const {.weight, .reps},
+      .repsOnly => const {.reps},
+      .cardio => const {.distance, .duration},
+      .duration => const {.duration},
+      .weightedDistance => const {.weight, .distance},
+      .weightedDuration => const {.weight, .duration},
+    };
   }
 }
