@@ -115,6 +115,13 @@ void main() {
       'UPDATE workout_exercises SET superset = 2 WHERE workout_id = @w::uuid',
       {'w': body['id']},
     );
+    // a target the set aimed for, which 1.13 predates (heart-api#286)
+    await h.exec(
+      'UPDATE exercise_sets es '
+      'SET target = \'{"reps": {"min": 6, "max": 10}}\' '
+      'FROM workout_exercises we WHERE we.id = es.workout_exercise_id AND we.workout_id = @w::uuid',
+      {'w': body['id']},
+    );
 
     final response = await send('GET', '/workouts/${body['id']}');
     expect(response.status, 200);
@@ -135,6 +142,7 @@ void main() {
     expect(save.containsKey('templateId'), isFalse);
     expect(save.containsKey('programId'), isFalse);
     expect(((save['exercises'] as List).single as Map).containsKey('superset'), isFalse);
+    expect((((save['exercises'] as List).single as Map)['sets'] as List).single, isNot(contains('target')));
     save['name'] = 'Edited by 1.13';
     final updated = await send('PUT', '/workouts/${body['id']}', body: save);
     expect(updated.status, 200, reason: jsonEncode(updated.body));
@@ -147,6 +155,7 @@ void main() {
     expect(stored.single.single.id, set['id']);
     expect(stored.single.single.weight, 80);
     expect(stored.single.single.isCompleted, isTrue);
+    expect(stored.single.single.target?[.reps], const TargetRange(min: 6, max: 10));
     expect(stored.note, 'A synthetic compatibility fixture');
     expect(stored.pauses, hasLength(1));
   });
