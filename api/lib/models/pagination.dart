@@ -9,7 +9,10 @@ class Paginated<T extends Model> with Iterable<T> implements Model {
   final String itemsKey;
   final String? cursor;
 
-  const new({required this.items, required this.itemsKey, this.cursor});
+  /// Keys beside the items, such as the `warnings` of what they count.
+  final Map<String, dynamic> extra;
+
+  const new({required this.items, required this.itemsKey, this.cursor, this.extra = const {}});
 
   /// Builds a [Paginated] from a service [Page]. [cursorOf] extracts the
   /// cursor value from the last item when `page.hasMore` is true.
@@ -17,11 +20,13 @@ class Paginated<T extends Model> with Iterable<T> implements Model {
     Page<T> page, {
     required String itemsKey,
     required String Function(T) cursorOf,
+    Map<String, dynamic> extra = const {},
   }) {
     return Paginated(
       items: page,
       itemsKey: itemsKey,
       cursor: page.hasMore && page.items.isNotEmpty ? cursorOf(page.items.last) : null,
+      extra: extra,
     );
   }
 
@@ -30,6 +35,7 @@ class Paginated<T extends Model> with Iterable<T> implements Model {
     return {
       itemsKey: map((i) => i.toMap()).toList(),
       'cursor': ?cursor,
+      ...extra,
     };
   }
 

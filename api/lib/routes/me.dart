@@ -6,6 +6,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/models/anomalies.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/exercises.dart';
@@ -115,7 +116,7 @@ Future<MeGoalProgress> goalProgress(Request req) async {
   );
 }
 
-/// The user's suspicious entries, newest first; `?status=` for one kind.
+/// The user's suspicious entries, newest found first; `?status=` for one kind.
 /// Read-only here: deciding is the app's.
 Future<Paginated<Anomaly>> getMyAnomalies(Request req) => anomalies.getAnomalies(req);
 
@@ -256,17 +257,19 @@ Future<Paginated<MeExerciseSession>> getMyExerciseHistory(Request req) {
 
 Future<Paginated<MeExerciseSession>> getMyExerciseHistoryById(Request req, String exerciseId) async {
   final query = ExerciseHistoryQuery.fromRequest(req, exerciseId: exerciseId);
-  final history =
-      await req.workoutsService.getExerciseHistory(
-        userId: req.userId,
-        exerciseId: query.exerciseId,
-        cursor: query.cursor,
-        limit: query.limit,
-        from: query.from,
-        to: query.to,
-      ) ??
-      (throw NotFound(type: 'Exercise', id: exerciseId));
-  final ExerciseHistory(:category, :sessions) = history;
+  final (history, pending) = await (
+    req.workoutsService.getExerciseHistory(
+      userId: req.userId,
+      exerciseId: query.exerciseId,
+      cursor: query.cursor,
+      limit: query.limit,
+      from: query.from,
+      to: query.to,
+    ),
+    req.anomalyService.getPendingAnomalies(userId: req.userId, from: query.from, to: query.to),
+  ).wait;
+  final ExerciseHistory(:category, :sessions) = history ?? (throw NotFound(type: 'Exercise', id: exerciseId));
+  final warnings = pending.onSessions(query.exerciseId, sessions.items);
   return Paginated<MeExerciseSession>.from(
     Page(
       items: [for (final session in sessions.items) MeExerciseSession(session, category)],
@@ -274,6 +277,7 @@ Future<Paginated<MeExerciseSession>> getMyExerciseHistoryById(Request req, Strin
     ),
     itemsKey: 'sessions',
     cursorOf: (session) => session.workoutId,
+    extra: {if (warnings.isNotEmpty) 'warnings': warnings.toWarnings()},
   );
 }
 
@@ -319,19 +323,17 @@ Future<MeBalance> getMyBalance(Request req) {
 /// [MeVolume] over the weeks [from] and [to] reach, the route's and the MCP
 /// tool's both.
 Future<MeVolume> volume(Request req, {DateTime? from, DateTime? to}) async {
-  final (window, rows) = await _lens(req, from: from, to: to);
-  final (spans, pending) = await (
-    req.workoutsService.getWorkoutSpans(userId: req.userId, from: window.from, to: window.to),
-    req.anomalyService.getPendingAnomalies(userId: req.userId, from: window.from, to: window.to),
-  ).wait;
+  final (:window, :rows, :pending, :spans) = await _lens(req, from: from, to: to, spans: true);
   return MeVolume.fold(window, rows, spans: spans, warnings: pending);
 }
 
 /// [MeBalance] over the weeks [from] and [to] reach, the route's and the MCP
 /// tool's both. No pairs while none are published.
 Future<MeBalance> balance(Request req, {DateTime? from, DateTime? to}) async {
-  final ((window, rows), content) = await (_lens(req, from: from, to: to), req.balancePairs.readPairs()).wait;
-  final pending = await req.anomalyService.getPendingAnomalies(userId: req.userId, from: window.from, to: window.to);
+  final ((:window, :rows, :pending, spans: _), content) = await (
+    _lens(req, from: from, to: to),
+    req.balancePairs.readPairs(),
+  ).wait;
   final locale = req.locale(req.config.supportedLocales, req.config.defaultLocale);
   return MeBalance.fold(
     window,
@@ -346,14 +348,21 @@ Future<MeBalance> balance(Request req, {DateTime? from, DateTime? to}) async {
   );
 }
 
-/// The window, in the user's weeks, and the working sets in it with what
-/// each exercise trains.
-Future<(LensWindow, List<LensRow>)> _lens(Request req, {DateTime? from, DateTime? to}) async {
+/// The window, in the user's weeks, the working sets in it with what each
+/// exercise trains, and the pending anomalies among them; the workouts' spans
+/// too when [spans].
+Future<_Lens> _lens(Request req, {DateTime? from, DateTime? to, bool spans = false}) async {
   final user = await req.profileService.getProfile(req.userId);
   final window = LensWindow.resolve(weekStart: user?.settings.firstWeekday ?? DateTime.monday, from: from, to: to);
-  final (sets, library) = await (
+  final (sets, library, pending, workoutSpans) = await (
     req.workoutsService.getRecordSets(userId: req.userId, from: window.from, to: window.to),
     req.exerciseService.getExercises(req.userId),
+    req.anomalyService.getPendingAnomalies(userId: req.userId, from: window.from, to: window.to),
+    spans
+        ? req.workoutsService.getWorkoutSpans(userId: req.userId, from: window.from, to: window.to)
+        : Future.value(const <WorkoutSpan>[]),
   ).wait;
-  return (window, sets.toLensRows(library));
+  return (window: window, rows: sets.toLensRows(library), pending: pending, spans: workoutSpans);
 }
+
+typedef _Lens = ({LensWindow window, List<LensRow> rows, List<Anomaly> pending, List<WorkoutSpan> spans});

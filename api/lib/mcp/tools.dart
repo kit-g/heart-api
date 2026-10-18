@@ -226,7 +226,7 @@ final List<McpTool> tools = [
         'chart plots for it (top set, estimated 1RM by Brzycki, volume, average working weight, reps; distance, '
         'duration and pace for cardio). Weights in kg, distances in km, durations in seconds, pace in seconds per '
         'km. Exercise ids come from get_workout or get_personal_records. Paged: pass the returned cursor for older '
-        'sessions. `from` and `to` keep to workouts started in that span.',
+        'sessions. `from` and `to` keep to workouts started in that span.$_warnings',
     inputSchema: {
       'type': 'object',
       'properties': {
@@ -247,17 +247,20 @@ final List<McpTool> tools = [
         throw const ToolError('cursor must be the string returned by the previous page.');
       }
       final (:from, :to) = arguments.toWindow();
-      final history =
-          await request.workoutsService.getExerciseHistory(
-            userId: request.userId,
-            exerciseId: id,
-            cursor: cursor,
-            limit: limit,
-            from: from,
-            to: to,
-          ) ??
-          (throw ToolError('No exercise $id. get_personal_records lists the exercises with history.'));
-      final ExerciseHistory(:exerciseId, :name, :category, :sessions) = history;
+      final (history, pending) = await (
+        request.workoutsService.getExerciseHistory(
+          userId: request.userId,
+          exerciseId: id,
+          cursor: cursor,
+          limit: limit,
+          from: from,
+          to: to,
+        ),
+        request.anomalyService.getPendingAnomalies(userId: request.userId, from: from, to: to),
+      ).wait;
+      final ExerciseHistory(:exerciseId, :name, :category, :sessions) =
+          history ?? (throw ToolError('No exercise $id. get_personal_records lists the exercises with history.'));
+      final warnings = pending.onSessions(exerciseId, sessions.items);
       return {
         'exercise': {'id': exerciseId, 'name': name, 'category': category.value},
         'sessions': [
@@ -270,6 +273,7 @@ final List<McpTool> tools = [
             },
         ],
         if (sessions.hasMore && sessions.items.isNotEmpty) 'cursor': sessions.items.last.workoutId,
+        if (warnings.isNotEmpty) 'warnings': warnings.toWarnings().toMcpUnits(),
       };
     },
   ),
@@ -447,7 +451,7 @@ final List<McpTool> tools = [
     name: 'list_anomalies',
     title: 'Suspicious entries',
     description:
-        "Entries in the user's log that look suspicious, newest first, and what the user made of each: a workout "
+        "Entries in the user's log that look suspicious, newest found first, and what the user made of each: a workout "
         'left running over 6 hours (seconds), a set far from the exercise\'s typical weight (typical, kg), over 100 '
         'reps on a loaded set, or weight and reps that read as each other\'s. Nothing is corrected: observed is what '
         'was entered. status is pending until the user decides in the app: valid (it stands and counts) or invalid '

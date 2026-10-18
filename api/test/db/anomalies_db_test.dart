@@ -97,6 +97,27 @@ void main() {
     await h.exec('DELETE FROM workouts WHERE user_id = @u', {'u': user});
   });
 
+  test('a decision can be changed, and one asked again comes back to the top', () async {
+    final (:user, exercise: _, :heavy, :running) = await seed();
+    await h.exec("UPDATE anomalies SET detected_at = detected_at - interval '1 day' WHERE set_id = @s", {'s': heavy});
+    final top = (await h.db.getAnomalies(userId: user, limit: 1)).single;
+    expect([top.workoutId, top.setId], [running, isNull], reason: 'newest found first');
+    final anomaly = (await h.db.getAnomalies(userId: user)).firstWhere((anomaly) => anomaly.setId == heavy);
+
+    final valid = await h.db.resolveAnomaly(userId: user, anomalyId: anomaly.id, status: AnomalyStatus.valid);
+    final again = await h.db.resolveAnomaly(userId: user, anomalyId: anomaly.id, status: AnomalyStatus.valid);
+    expect(again!.resolvedAt, valid!.resolvedAt, reason: 'the same decision again keeps when it was made');
+    final changed = await h.db.resolveAnomaly(userId: user, anomalyId: anomaly.id, status: AnomalyStatus.invalid);
+    expect(changed!.status, AnomalyStatus.invalid);
+
+    await h.exec('UPDATE exercise_sets SET weight = 650 WHERE id = @s', {'s': heavy});
+    await h.exec('SELECT _detect_anomalies(@u)', {'u': user});
+    final raised = (await h.db.getAnomalies(userId: user, limit: 1)).single;
+    expect([raised.id, raised.status], [anomaly.id, AnomalyStatus.pending], reason: 'edited and still odd');
+
+    await h.exec('DELETE FROM workouts WHERE user_id = @u', {'u': user});
+  });
+
   test('an invalid entry stays in the log and drops out of what is counted', () async {
     final (:user, :exercise, :heavy, :running) = await seed();
     for (final anomaly in await h.db.getAnomalies(userId: user)) {

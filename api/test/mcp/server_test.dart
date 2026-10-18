@@ -346,6 +346,21 @@ void main() {
           ),
         ),
       );
+      when(app.db.getPendingAnomalies(userId: 'u1')).thenAnswer(
+        (_) async => [
+          Anomaly.fromJson(const {
+            'id': '01900000-0000-7000-8000-0000000000b1',
+            'workoutId': workout,
+            'setId': '01900000-0000-7000-8000-0000000000c1',
+            'exerciseId': exercise,
+            'reason': 'outlier_weight',
+            'observed': {'weight': 630, 'reps': 5},
+            'typical': 100,
+            'status': 'pending',
+            'detectedAt': '2026-01-02T00:00:00.000Z',
+          }),
+        ],
+      );
 
       final found =
           (await rpc(
@@ -364,6 +379,7 @@ void main() {
       ]);
       expect((session['metrics'] as Map)['topSetWeight'], 100);
       expect(history['cursor'], workout);
+      expect((history['warnings'] as List).single, containsPair('reason', 'outlier_weight'));
 
       final malformed =
           (await rpc(

@@ -14,27 +14,20 @@ class AnomaliesQuery {
     if (page.cursor case final cursor? when !isUuidV7(cursor)) {
       throw const BadRequest(reason: 'cursor must be the one the previous page returned');
     }
+    final q = req.url.queryParameters;
     return AnomaliesQuery._(
-      status: switch (req.url.queryParameters['status']) {
+      status: switch (q.stringOrNull('status')) {
         null => null,
-        final raw => _status(raw),
+        _ => q.parsed('status', AnomalyStatus.fromString),
       },
       cursor: page.cursor,
       limit: page.limit,
     );
   }
-
-  static AnomalyStatus _status(String raw) {
-    try {
-      return AnomalyStatus.fromString(raw);
-    } on ArgumentError {
-      throw BadRequest(reason: 'status must be pending, valid or invalid: $raw');
-    }
-  }
 }
 
 /// `PUT /anomalies/:anomalyId`: `{status: valid|invalid}`, what the user made
-/// of it. Deciding is final; editing the entry is the way to change it.
+/// of it, replacing what it made of it before.
 class AnomalyResolveIn {
   final AnomalyStatus status;
 

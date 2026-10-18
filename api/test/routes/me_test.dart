@@ -416,6 +416,47 @@ void main() {
       expect((session['metrics'] as Map)['topSetWeight'], 110);
       expect((session['metrics'] as Map)['totalVolume'], 830);
       expect(page['cursor'], older);
+      expect(page.containsKey('warnings'), isFalse);
+    });
+
+    test("warnings name the pending anomalies on this exercise's sessions shown", () async {
+      Anomaly pending(String id, {required String workoutId, String? exerciseId}) => Anomaly.fromJson({
+        'id': id,
+        'workoutId': workoutId,
+        'setId': ?(exerciseId == null ? null : '019def00-0000-7000-8000-000000000063'),
+        'exerciseId': ?exerciseId,
+        'reason': exerciseId == null ? 'duration_left_running' : 'outlier_weight',
+        'observed': exerciseId == null ? {'seconds': 99999} : {'weight': 630, 'reps': 5},
+        'status': 'pending',
+        'detectedAt': '2026-01-02T00:00:00.000Z',
+      });
+      when(workouts.getExerciseHistory(userId: 'u1', exerciseId: exercise, cursor: null, limit: 20)).thenAnswer(
+        (_) async => (
+          exerciseId: exercise,
+          name: 'Bench',
+          category: Category.barbell,
+          sessions: Page<ExerciseSession>(
+            items: [
+              (workoutId: older, at: '2026-01-01T00:00:00.000Z', sets: [set(older, 630, 5)]),
+            ],
+            hasMore: false,
+          ),
+        ),
+      );
+      when(anomalies.getPendingAnomalies(userId: 'u1')).thenAnswer(
+        (_) async => [
+          pending('019def00-0000-7000-8000-000000000061', workoutId: older, exerciseId: exercise),
+          // another exercise in the same workout, the workout's own time, and a session not on this page
+          pending('019def00-0000-7000-8000-000000000062', workoutId: older, exerciseId: 'other'),
+          pending('019def00-0000-7000-8000-000000000064', workoutId: older),
+          pending('019def00-0000-7000-8000-000000000065', workoutId: newer, exerciseId: exercise),
+        ],
+      );
+
+      final page = (await getMyExerciseHistoryById(build('/me/exercises/$exercise/history'), exercise)).toMap();
+
+      expect((page['warnings'] as List).single, containsPair('workoutId', older));
+      expect((page['warnings'] as List).single, containsPair('exerciseId', exercise));
     });
   });
 

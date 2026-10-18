@@ -6,7 +6,7 @@ import 'package:heart/models/pagination.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
-/// The user's suspicious entries, newest first; `?status=` for one kind.
+/// The user's suspicious entries, newest found first; `?status=` for one kind.
 Future<Paginated<Anomaly>> getAnomalies(Request req) async {
   final query = AnomaliesQuery.fromRequest(req);
   final page = await req.anomalyService.getAnomalies(

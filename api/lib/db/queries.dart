@@ -3164,11 +3164,20 @@ LEFT JOIN workouts w ON NOT p.deleted AND w.id = p.id
 ORDER BY p.xid, p.id
 ''';
 
+// Whether set `s` counts: unless the user called it invalid, when it stays in
+// the log and counts for nothing. Every count of sets reads it; the anomaly
+// sweep's median keeps the same rule in SQL.
+const _setCounts = '''
+NOT EXISTS (
+  SELECT 1 FROM anomalies a WHERE a.set_id = s.id AND a.status = 'invalid'
+)''';
+
 // One exercise's sessions, newest first by workout id (ids follow start
 // times, imported ones included), each with its completed working sets. The
 // exercise row comes back even without sessions, so "never done" and "not
 // yours" stay apart. The window bounds start times like the records'.
-const _exerciseHistory = '''
+const _exerciseHistory =
+    '''
 WITH _exercise AS (
   SELECT id, name, category
   FROM exercises
@@ -3184,10 +3193,7 @@ _sets AS (
     AND we.exercise_id = @exerciseId::uuid
     AND s.completed
     AND s.set_type IS DISTINCT FROM 'w'
-    AND NOT EXISTS (
-      -- the user called it invalid: it stays in the log and counts for nothing
-      SELECT 1 FROM anomalies a WHERE a.set_id = s.id AND a.status = 'invalid'
-    )
+    AND $_setCounts
     AND (@cursor::uuid IS NULL OR w.id < @cursor::uuid)
     AND (@from::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) >= @from::timestamptz)
     AND (@to::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) < @to::timestamptz)
@@ -3213,7 +3219,8 @@ ORDER BY ses.id DESC NULLS LAST, s.exercise_order, s.set_order
 // workout first: the input personal records are folded from. Warm-ups are no
 // one's record. The window, from inclusive and to exclusive, bounds workout
 // start times, so a fold over it is the records of that span.
-const _recordSets = '''
+const _recordSets =
+    '''
 SELECT
   e.id AS exercise_id, e.name, e.category,
   s.weight, s.reps, s.duration, s.distance,
@@ -3225,10 +3232,7 @@ JOIN exercises e ON e.id = we.exercise_id
 WHERE w.user_id = @userId
   AND s.completed
   AND s.set_type IS DISTINCT FROM 'w'
-  AND NOT EXISTS (
-    -- the user called it invalid: it stays in the log and counts for nothing
-    SELECT 1 FROM anomalies a WHERE a.set_id = s.id AND a.status = 'invalid'
-  )
+  AND $_setCounts
   AND (@exerciseId::uuid IS NULL OR we.exercise_id = @exerciseId::uuid)
   AND (@from::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) >= @from::timestamptz)
   AND (@to::timestamptz IS NULL OR COALESCE(w.started_at, w.created_at) < @to::timestamptz)
@@ -3590,16 +3594,23 @@ LEFT JOIN workout_exercises we ON we.id = s.workout_exercise_id
 LEFT JOIN exercises e ON e.id = we.exercise_id
 ''';
 
-// Newest first, keyed on the id so the cursor is the last one's.
+// Newest found first, so one raised again by an edit comes back to the top.
+// The cursor is the last one's id, keyed on its place in that order.
 const _getAnomalies =
     '''
+WITH _after AS (
+  SELECT detected_at, id
+  FROM anomalies
+  WHERE id = @cursor::uuid
+    AND user_id = @userId
+)
 SELECT $_anomalyColumns
 FROM anomalies a
 $_anomalyJoins
 WHERE a.user_id = @userId
   AND (@status::text IS NULL OR a.status = @status::text)
-  AND (@cursor::uuid IS NULL OR a.id < @cursor::uuid)
-ORDER BY a.id DESC
+  AND (@cursor::uuid IS NULL OR (a.detected_at, a.id) < (SELECT detected_at, id FROM _after))
+ORDER BY a.detected_at DESC, a.id DESC
 LIMIT @limit
 ''';
 
@@ -3617,12 +3628,13 @@ WHERE a.user_id = @userId
 ORDER BY COALESCE(w.started_at, w.created_at), a.id
 ''';
 
+// A decision may be changed; deciding the same again keeps when it was made.
 const _resolveAnomaly =
     '''
 WITH _resolved AS (
   UPDATE anomalies
   SET status      = @status,
-      resolved_at = now()
+      resolved_at = CASE WHEN status = @status THEN resolved_at ELSE now() END
   WHERE id = @anomalyId::uuid
     AND user_id = @userId
   RETURNING *
