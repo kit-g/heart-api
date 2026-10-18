@@ -6,6 +6,7 @@ import 'package:heart/mcp/protocol.dart';
 import 'package:heart/mcp/tools.dart';
 import 'package:heart/mcp/widgets.dart';
 import 'package:heart/middleware/tokens.dart';
+import 'package:heart/models/tokens.dart';
 import 'package:heart/oauth/protocol.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart';
@@ -14,21 +15,29 @@ import 'package:relic/relic.dart' hide Logger;
 final _logger = Logger('Mcp');
 
 /// Who this server is, as a host shows it on the connector's page; the
-/// description, website and icons are read since 2025-11-25.
-const _serverInfo = {
-  'name': 'heart',
-  'title': 'Heart',
-  'version': '1.0.0',
-  'description': 'Your Heart workout log: workouts, sets, templates, programs and goals, read-only.',
-  'websiteUrl': 'https://heart-of.me',
-  'icons': [
-    {
-      'src': 'https://heart-of.me/assets/favicon.png',
-      'mimeType': 'image/png',
-      'sizes': ['256x256'],
+/// description, website and icons are read since 2025-11-25. [writes] is
+/// whether this credential is offered the template writes.
+Map<String, dynamic> _serverInfo({required bool writes}) {
+  return {
+    'name': 'heart',
+    'title': 'Heart',
+    'version': '1.0.0',
+    'description': switch (writes) {
+      true =>
+        'Your Heart workout log: workouts, sets, templates, programs and goals; templates can be built with '
+            'your permission.',
+      false => 'Your Heart workout log: workouts, sets, templates, programs and goals, read-only.',
     },
-  ],
-};
+    'websiteUrl': 'https://heart-of.me',
+    'icons': [
+      {
+        'src': 'https://heart-of.me/assets/favicon.png',
+        'mimeType': 'image/png',
+        'sizes': ['256x256'],
+      },
+    ],
+  };
+}
 
 /// How long a client may cache the tool list and discovery result.
 const _listTtl = Duration(hours: 1);
@@ -103,7 +112,7 @@ Future<Response> mcpEndpoint(Request request) async {
     challenge: [
       if (oauth != null) ...[
         AuthenticationParameter('resource_metadata', oauth.mcpResourceMetadata.toString()),
-        AuthenticationParameter('scope', supportedScopes.join(' ')),
+        AuthenticationParameter('scope', defaultScopes.join(' ')),
       ],
     ],
   );
@@ -113,7 +122,7 @@ Future<Response> mcpEndpoint(Request request) async {
       return response;
     case TokenAccepted(:final use):
       request.user = User(id: use.userId);
-      final response = await _respond(request, id: id, method: method, params: params, modern: modern);
+      final response = await _respond(request, use: use, id: id, method: method, params: params, modern: modern);
       logApiUsage(request, surface: 'mcp', status: response.statusCode, use: use, route: route, client: client);
       return response;
   }
@@ -121,6 +130,7 @@ Future<Response> mcpEndpoint(Request request) async {
 
 Future<Response> _respond(
   Request request, {
+  required TokenUse use,
   required Object? id,
   required String method,
   required Map<String, dynamic> params,
@@ -132,12 +142,22 @@ Future<Response> _respond(
     // A notification (no id) is accepted and has nothing to answer.
     if (id == null) return .new(202);
 
+    final writes = use.offersWrites;
+    if (method == 'tools/call') {
+      if (_scopeRefusal(request, use: use, id: id, params: params, modern: modern) case final Response refused) {
+        return refused;
+      }
+    }
+
     final result = switch (method) {
-      'initialize' => _initialize(params),
-      'server/discover' => _discover(),
+      'initialize' => _initialize(params, writes: writes),
+      'server/discover' => _discover(writes: writes),
       'ping' when modern == null => <String, dynamic>{},
       'tools/list' => {
-        'tools': [for (final tool in tools) tool.toJson()],
+        'tools': [
+          for (final tool in tools)
+            if (tool.scope == .read || writes) tool.toJson(),
+        ],
         if (modern != null) ...{'ttlMs': _listTtl.inMilliseconds, 'cacheScope': 'private'},
       },
       'tools/call' => await _callTool(request, params),
@@ -164,7 +184,7 @@ Future<Response> _respond(
         ...result,
         if (modern != null) ...{
           'resultType': 'complete',
-          '_meta': {metaServerInfo: _serverInfo},
+          '_meta': {metaServerInfo: _serverInfo(writes: writes)},
         },
       },
     });
@@ -216,7 +236,7 @@ void _checkModern(
   }
 }
 
-Map<String, dynamic> _initialize(Map<String, dynamic> params) {
+Map<String, dynamic> _initialize(Map<String, dynamic> params, {required bool writes}) {
   final requested = params['protocolVersion'];
   return {
     'protocolVersion': legacyVersions.contains(requested) ? requested : legacyVersions.first,
@@ -224,18 +244,19 @@ Map<String, dynamic> _initialize(Map<String, dynamic> params) {
       'tools': {'listChanged': false},
       'resources': {'listChanged': false},
     },
-    'serverInfo': _serverInfo,
-    'instructions': instructions,
+    'serverInfo': _serverInfo(writes: writes),
+    'instructions': instructionsFor(writes: writes),
   };
 }
 
-Map<String, dynamic> _discover() {
+Map<String, dynamic> _discover({required bool writes}) {
   return {
     'supportedVersions': supportedVersions,
     'capabilities': {'tools': <String, dynamic>{}, 'resources': <String, dynamic>{}},
-    'instructions': instructions,
+    'instructions': instructionsFor(writes: writes),
     'ttlMs': _listTtl.inMilliseconds,
-    'cacheScope': 'public',
+    // the instructions differ by credential: a grant is told about the writes
+    'cacheScope': 'private',
   };
 }
 
@@ -247,6 +268,63 @@ McpWidget _widgetOf(Map<String, dynamic> params) {
     final McpWidget widget => widget,
     null => throw RpcError(.invalidParams, 'Resource not found', data: {'uri': params['uri']}),
   };
+}
+
+/// A tool call the token's scopes don't cover, refused before it runs: `403`
+/// with the `insufficient_scope` challenge, which is what makes a compliant
+/// host ask the user to widen the grant and try again (the MCP authorization
+/// spec's step-up). The body is a tool error saying the same, with the
+/// challenge again under `_meta["mcp/www_authenticate"]`, where ChatGPT looks
+/// for it. Null when the call may go ahead, or names no tool this server has.
+Response? _scopeRefusal(
+  Request request, {
+  required TokenUse use,
+  required Object? id,
+  required Map<String, dynamic> params,
+  required Object? modern,
+}) {
+  final tool = switch (params['name']) {
+    final String name => toolsByName[name],
+    _ => null,
+  };
+  if (tool == null || use.scopes.contains(tool.scope.value)) return null;
+
+  final message = switch (use.clientId) {
+    // a personal token is read-only for good: there is nothing to widen
+    null =>
+      '${tool.name} needs a connection with the ${tool.scope.value} permission. Personal tokens only read; '
+          'connect Heart to this assistant by signing in to change templates.',
+    _ =>
+      '${tool.name} needs the ${tool.scope.value} permission, which this connection was not given. Ask the user '
+          'to allow it when the assistant offers to reconnect.',
+  };
+  final oauth = request.config.oauth;
+  final challenge = [
+    if (oauth != null) AuthenticationParameter('resource_metadata', oauth.mcpResourceMetadata.toString()),
+  ];
+  final headers = insufficientScopeHeaders(held: use.scopes, needed: tool.scope, challenge: challenge);
+  return .new(
+    403,
+    headers: headers,
+    body: .fromString(
+      jsonEncode({
+        'jsonrpc': '2.0',
+        'id': id,
+        'result': {
+          'content': [
+            {'type': 'text', 'text': message},
+          ],
+          'isError': true,
+          '_meta': {
+            'mcp/www_authenticate': [...?headers['www-authenticate']],
+            if (modern != null) metaServerInfo: _serverInfo(writes: use.offersWrites),
+          },
+          if (modern != null) 'resultType': 'complete',
+        },
+      }),
+      mimeType: .json,
+    ),
+  );
 }
 
 Future<Map<String, dynamic>> _callTool(Request request, Map<String, dynamic> params) async {
@@ -278,6 +356,15 @@ Future<Map<String, dynamic>> _callTool(Request request, Map<String, dynamic> par
       'isError': true,
     };
   }
+}
+
+extension on TokenUse {
+  /// Whether this credential is shown the write tools. An OAuth grant is,
+  /// whatever it holds: a host that calls one without the scope is told to
+  /// widen the grant, which is the only way it learns the writes exist. A
+  /// personal token never is. It stays read-only (`docs/2026-09-23.developer-api.md`,
+  /// *Phase 4*), so a write would only ever be refused.
+  bool get offersWrites => clientId != null;
 }
 
 Response _json(int status, Map<String, dynamic> body) {

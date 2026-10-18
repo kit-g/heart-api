@@ -11,6 +11,7 @@ part 'widgets/shell.dart';
 part 'widgets/workout.dart';
 part 'widgets/progress.dart';
 part 'widgets/records.dart';
+part 'widgets/template.dart';
 
 /// The MCP Apps resource type (`text/html;profile=mcp-app`).
 const _appMimeType = 'text/html;profile=mcp-app';
@@ -20,7 +21,7 @@ const _appMimeType = 'text/html;profile=mcp-app';
 /// The [uri] is a host's cache key for the page, so it carries a version: a
 /// change an installed host must not mix with a cached copy takes a new one.
 /// The shell in `widgets/shell.dart` is part of every page, so a change
-/// there that needs a new URI takes one for all three.
+/// there that needs a new URI takes one for all of them.
 class McpWidget {
   final String uri;
   final String name;
@@ -97,6 +98,14 @@ const recordsWidget = McpWidget(
   html: _recordsHtml,
 );
 
-const List<McpWidget> widgets = [workoutWidget, progressWidget, recordsWidget];
+const templateWidget = McpWidget(
+  uri: 'ui://heart/template.v1.html',
+  name: 'template',
+  title: 'Template preview',
+  description: 'A workout template as the app lays it out: before it is saved, or once it is.',
+  html: _templateHtml,
+);
+
+const List<McpWidget> widgets = [workoutWidget, progressWidget, recordsWidget, templateWidget];
 
 final Map<String, McpWidget> widgetsByUri = {for (final widget in widgets) widget.uri: widget};
