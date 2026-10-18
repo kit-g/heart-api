@@ -44,6 +44,8 @@ module "api" {
   monitoring_email    = "info@heart-of.me"
   media_distribution  = local.media_host
   events_enabled      = var.events_enabled
+  # Dev builds all read the custom domain; nothing calls execute-api.
+  close_execute_api = true
   custom_domain = {
     name            = local.api_host
     certificate_arn = module.api_certificate.arn

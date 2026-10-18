@@ -13,11 +13,11 @@ resource "aws_api_gateway_rest_api" "api" {
   # the API with an AWS-managed CloudFront distribution; every route here is
   # authenticated and uncacheable, so all that buys is TLS termination nearer
   # the caller, and it forces the custom domain's certificate into us-east-1.
-  # The execute-api hostname survives the switch, so builds pinned to it keep
-  # working through the cutover - they just reach the region directly.
   endpoint_configuration {
     types = ["REGIONAL"]
   }
+
+  disable_execute_api_endpoint = var.close_execute_api
 }
 
 locals {

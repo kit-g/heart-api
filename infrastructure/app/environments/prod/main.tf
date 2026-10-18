@@ -44,6 +44,11 @@ module "api" {
   media_distribution  = local.media_host
   allowed_origins     = ["https://heart-of.me", "https://www.heart-of.me"]
   site_origin         = "https://heart-of.me"
+  # Builds from before the custom domain (2026-09-20) call execute-api, and 1.8
+  # builds were in the field on 2026-10-08 (Sentry). Close it only once
+  # enforce_app_version turns them away with a 426, which they can act on; a
+  # closed hostname answers a bare 403.
+  close_execute_api = false
   custom_domain = {
     name            = local.api_host
     certificate_arn = module.api_certificate.arn
