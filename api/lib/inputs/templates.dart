@@ -47,10 +47,15 @@ class TemplateCreateIn {
   const new _(this.request);
 
   static Future<TemplateCreateIn> fromRequest(Request req) async {
-    final json = await req.json();
+    return fromJson(await req.json(), userId: req.userId);
+  }
+
+  /// [fromRequest] over a body already read: the MCP server's
+  /// `create_template` builds one, so both validate the same way.
+  static TemplateCreateIn fromJson(Map<String, dynamic> json, {required String userId}) {
     return TemplateCreateIn._(
       TemplateRequest(
-        userId: req.userId,
+        userId: userId,
         id: json.uuidV7OrNull(),
         name: json.templateName(),
         order: json.templateOrder(),
@@ -77,10 +82,14 @@ class TemplateUpdateIn {
   const new _(this.request);
 
   static Future<TemplateUpdateIn> fromRequest(Request req) async {
-    final json = await req.json();
+    return fromJson(await req.json(), userId: req.userId);
+  }
+
+  /// [fromRequest] over a body already read, as for [TemplateCreateIn.fromJson].
+  static TemplateUpdateIn fromJson(Map<String, dynamic> json, {required String userId}) {
     return TemplateUpdateIn._(
       TemplateRequest(
-        userId: req.userId,
+        userId: userId,
         name: json.templateName(),
         order: json.templateOrder(),
         folderId: json.folderIdOrNull(),
