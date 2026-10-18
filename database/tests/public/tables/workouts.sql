@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(49);
+SELECT plan(50);
 
 SELECT has_table('public'::name, 'workouts'::name);
 
@@ -58,6 +58,7 @@ SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_id_idx'::name)
 SELECT has_index('public'::name, 'workouts'::name, 'workouts_user_changed_idx'::name);
 SELECT has_index('public'::name, 'workouts'::name, 'workouts_template_id_idx'::name);
 SELECT has_index('public'::name, 'workouts'::name, 'workouts_program_id_idx'::name);
+SELECT has_index('public'::name, 'workouts'::name, 'workouts_updated_idx'::name, ARRAY ['updated_at']::name[]);
 SELECT col_type_is('public'::name, 'workouts'::name, 'updated_at'::name, 'timestamp with time zone'::name);
 SELECT col_not_null('public'::name, 'workouts'::name, 'updated_at'::name);
 SELECT col_default_is('public', 'workouts', 'updated_at', 'now()', 'updated_at defaults to now()');

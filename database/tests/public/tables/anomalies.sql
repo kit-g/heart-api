@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(30);
+SELECT plan(31);
 
 SELECT has_table('public'::name, 'anomalies'::name);
 
@@ -49,9 +49,13 @@ SELECT fk_ok('public', 'anomalies', 'user_id', 'public', 'profiles', 'id');
 SELECT fk_ok('public', 'anomalies', 'workout_id', 'public', 'workouts', 'id');
 SELECT fk_ok('public', 'anomalies', 'set_id', 'public', 'exercise_sets', 'id');
 
-SELECT index_is_unique('public'::name, 'anomalies'::name, 'anomalies_set_reason_idx'::name);
-SELECT index_is_unique('public'::name, 'anomalies'::name, 'anomalies_workout_reason_idx'::name);
-SELECT has_index('public'::name, 'anomalies'::name, 'anomalies_user_idx'::name, ARRAY ['user_id', 'id']::name[]);
+SELECT index_is_unique('public'::name, 'anomalies'::name, 'anomalies_set_idx'::name);
+SELECT index_is_unique('public'::name, 'anomalies'::name, 'anomalies_workout_duration_idx'::name);
+SELECT has_index('public'::name, 'anomalies'::name, 'anomalies_workout_idx'::name, ARRAY ['workout_id']::name[]);
+SELECT has_index(
+               'public'::name, 'anomalies'::name, 'anomalies_user_detected_idx'::name,
+               ARRAY ['user_id', 'detected_at', 'id']::name[]
+       );
 
 SELECT throws_ok(
                $$INSERT INTO anomalies (user_id, workout_id, reason, observed, status)

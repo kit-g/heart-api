@@ -171,6 +171,129 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION test__detect_anomalies_one_question_per_entry() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user  TEXT := create_test_profile();
+    _row   UUID := create_test_exercise(NULL, 'Barbell', 'Back', _user);
+    _odd   UUID;
+    _set   UUID;
+    _where TID;
+BEGIN
+    FOR d IN 1..3
+        LOOP
+            PERFORM _anomaly_session(_user, _row, d, ARRAY [[60, 5]]::real[][]);
+        END LOOP;
+    _odd := _anomaly_session(_user, _row, 4, ARRAY [[12, 150]]::real[][]);
+    _set := _anomaly_set(_odd, 12);
+    PERFORM _detect_anomalies(_user);
+    RETURN NEXT is(
+            (SELECT reason FROM anomalies WHERE set_id = _set),
+            'implausible_reps',
+            'with no baseline yet, 150 reps are only too many'
+                );
+    UPDATE anomalies SET status = 'valid', resolved_at = now() WHERE set_id = _set;
+
+    FOR d IN 5..9
+        LOOP
+            PERFORM _anomaly_session(_user, _row, d, ARRAY [[60, 5]]::real[][]);
+        END LOOP;
+    PERFORM _detect_anomalies(_user);
+    RETURN NEXT is(
+            (SELECT array_agg(reason || ' ' || status) FROM anomalies WHERE set_id = _set),
+            ARRAY ['swap_suspected valid'],
+            'a baseline reads it as a swap: the same question, already answered'
+                );
+
+    _where := (SELECT ctid FROM anomalies WHERE set_id = _set);
+    PERFORM _detect_anomalies(_user);
+    RETURN NEXT is((SELECT ctid FROM anomalies WHERE set_id = _set), _where, 'nothing changed, nothing is written');
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__detect_anomalies_bodyweight_by_reps_only() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user     TEXT := create_test_profile();
+    _assisted UUID := create_test_exercise(NULL, 'Assisted Body Weight', 'Back', _user);
+    _weighted UUID := create_test_exercise(NULL, 'Weighted Body Weight', 'Chest', _user);
+    _odd      UUID;
+BEGIN
+    FOR d IN 1..8
+        LOOP
+            PERFORM _anomaly_session(_user, _assisted, d, ARRAY [[40, 8]]::real[][]);
+            PERFORM _anomaly_session(_user, _weighted, d, ARRAY [[20, 8]]::real[][]);
+        END LOOP;
+    PERFORM _anomaly_session(_user, _assisted, 20, ARRAY [[15, 8]]::real[][]);
+    PERFORM _anomaly_session(_user, _weighted, 20, ARRAY [[5, 8]]::real[][]);
+    RETURN NEXT is(_detect_anomalies(_user), 0, 'less help or less extra load is not an outlier');
+
+    _odd := _anomaly_session(_user, _assisted, 21, ARRAY [[30, 150]]::real[][]);
+    PERFORM _detect_anomalies(_user);
+    RETURN NEXT is(
+            (SELECT reason FROM anomalies WHERE workout_id = _odd),
+            'implausible_reps',
+            'too many reps still are'
+                );
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__detect_anomalies_median_without_the_invalid() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user  TEXT := create_test_profile();
+    _curl  UUID := create_test_exercise(NULL, 'Dumbbell', 'Arms', _user);
+    _slips UUID[] := ARRAY []::uuid[];
+    _w     UUID;
+    _fine  UUID;
+BEGIN
+    FOR d IN 1..8
+        LOOP
+            PERFORM _anomaly_session(_user, _curl, d, ARRAY [[15, 10]]::real[][]);
+        END LOOP;
+    -- a block of sets in pounds entered as kg
+    FOR d IN 10..19
+        LOOP
+            _w := _anomaly_session(_user, _curl, d, ARRAY [[60, 10]]::real[][]);
+            _slips := _slips || _anomaly_set(_w, 60);
+        END LOOP;
+    PERFORM _detect_anomalies(_user);
+    INSERT INTO anomalies (user_id, workout_id, set_id, reason, observed, status, resolved_at)
+    SELECT _user, we.workout_id, s.id, 'outlier_weight', jsonb_build_object('weight', s.weight, 'reps', s.reps),
+           'invalid', now()
+    FROM exercise_sets s
+    JOIN workout_exercises we ON we.id = s.workout_exercise_id
+    WHERE s.id = ANY (_slips)
+    ON CONFLICT (set_id) WHERE set_id IS NOT NULL DO UPDATE SET status = 'invalid', resolved_at = now();
+
+    _fine := _anomaly_set(_anomaly_session(_user, _curl, 30, ARRAY [[16, 10]]::real[][]), 16);
+    PERFORM _detect_anomalies(_user);
+    RETURN NEXT is(
+            (SELECT count(*) FROM anomalies WHERE set_id = _fine),
+            0::bigint,
+            'the sets called invalid don''t move the median'
+                );
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__detect_anomalies_times_as_counted() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user    TEXT := create_test_profile();
+    _workout UUID := create_test_workout(_user);
+BEGIN
+    UPDATE workouts
+    SET started_at = NULL, created_at = now() - interval '3 days', completed_at = now()
+    WHERE id = _workout;
+    PERFORM _detect_anomalies(_user);
+    RETURN NEXT is(
+            (SELECT reason FROM anomalies WHERE workout_id = _workout),
+            'duration_left_running',
+            'a workout with no start kept is timed from its creation, as its time is counted'
+                );
+END
+$$ LANGUAGE plpgsql;
+
 SELECT * FROM runtests();
 
 ROLLBACK;
