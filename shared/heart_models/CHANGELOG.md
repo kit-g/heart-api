@@ -9,6 +9,12 @@
 - `ExerciseSet.toRow` always carries the measurements of the set's category,
   a null one included, so an update from it clears a stored value; the
   others stay out, as before.
+- New: `WorkoutAggregation.fromRows` and `fromJson` take `firstWeekday` (ISO,
+  1 Monday to 7 Sunday), the day its weeks start on; Monday when it is left
+  out, so a caller passing nothing gets the weeks it did (heart-api#203).
+- Fix: the weeks `WorkoutAggregation` fills in are calendar weeks, so near a
+  DST change none lands an hour off midnight and drops the workouts of the
+  week it stands for.
 
 ## 2.38.0
 

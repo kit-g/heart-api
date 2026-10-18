@@ -92,4 +92,98 @@ void main() {
       expect(weeks.every((w) => w.length == 1), isTrue);
     });
   });
+
+  group('WorkoutAggregation first weekday', () {
+    // Aug 9 2026 is a Sunday: the last day of a Monday week, the first of a
+    // Sunday one
+    final saturday = DateTime(2026, 8, 8, 10);
+    final sunday = DateTime(2026, 8, 9, 10);
+    final rows = [
+      {'id': 'sat', 'name': 'Saturday', 'start': saturday.toUtc().toIso8601String()},
+      {'id': 'sun', 'name': 'Sunday', 'start': sunday.toUtc().toIso8601String()},
+    ];
+
+    List<WeekSummary> nonEmptyWeeks(WorkoutAggregation agg) => agg.where((week) => week.isNotEmpty).toList();
+
+    test('weeks start on Monday when no day is given', () {
+      final weeks = nonEmptyWeeks(WorkoutAggregation.fromRows(rows));
+
+      expect(weeks.single.startDate, DateTime(2026, 8, 3));
+      expect(weeks.single.weekId, getMonday(sunday).toIso8601String());
+      expect(WorkoutAggregation.fromRows(rows, firstWeekday: DateTime.monday).map((w) => w.weekId), [
+        for (final week in WorkoutAggregation.fromRows(rows)) week.weekId,
+      ]);
+    });
+
+    test('fromRows buckets by the day supplied', () {
+      final weeks = nonEmptyWeeks(WorkoutAggregation.fromRows(rows, firstWeekday: DateTime.sunday));
+
+      expect(weeks.map((w) => w.startDate), [DateTime(2026, 8, 2), DateTime(2026, 8, 9)]);
+      expect(weeks.map((w) => w.single.id), ['sat', 'sun']);
+    });
+
+    test('every week, filled ones included, starts on that day', () {
+      final later = {'id': 'thu', 'name': 'Thursday', 'start': DateTime(2026, 8, 27, 10).toUtc().toIso8601String()};
+      for (final firstWeekday in [DateTime.sunday, DateTime.saturday, DateTime.wednesday]) {
+        final weeks = WorkoutAggregation.fromRows([...rows, later], firstWeekday: firstWeekday);
+        expect(weeks.length, greaterThan(3), reason: 'weekday $firstWeekday');
+        expect(weeks.every((w) => w.startDate.weekday == firstWeekday), isTrue, reason: 'weekday $firstWeekday');
+      }
+    });
+
+    test('fromJson matches stored weeks and fills the gaps on that day', () {
+      final agg = WorkoutAggregation.fromJson({
+        DateTime(2026, 8, 2).toIso8601String(): {'sat': 'Saturday'},
+        DateTime(2026, 8, 23).toIso8601String(): {'thu': 'Thursday'},
+      }, firstWeekday: DateTime.sunday);
+
+      expect(agg.take(5).map((w) => w.startDate), [
+        for (final day in [2, 9, 16, 23, 30]) DateTime(2026, 8, day),
+      ]);
+      expect(nonEmptyWeeks(agg).map((w) => w.single.id), ['sat', 'thu']);
+      expect(agg.workoutCount, 2);
+    });
+  });
+
+  group('WorkoutAggregation across DST changes', () {
+    // just after midnight the day after a change, and the week before one:
+    // North America (Mar 8), Europe (Mar 29), Sydney (Apr 5, Oct 4), New
+    // Zealand (Sep 27). In a zone without DST these pass trivially; in one
+    // with it, a week counted in 24-hour steps lands on the day before and
+    // drops the workouts of the week it should have been.
+    final starts = [
+      DateTime(2026, 3, 4, 10),
+      DateTime(2026, 3, 9, 0, 30),
+      DateTime(2026, 3, 30, 0, 30),
+      DateTime(2026, 4, 6, 0, 30),
+      DateTime(2026, 9, 28, 0, 30),
+      DateTime(2026, 9, 30, 10),
+      DateTime(2026, 10, 5, 0, 30),
+    ];
+    final rows = [
+      for (final (i, start) in starts.indexed) {'id': '$i', 'name': '$i', 'start': start.toUtc().toIso8601String()},
+    ];
+
+    for (final firstWeekday in [DateTime.monday, DateTime.sunday, DateTime.wednesday]) {
+      test('weeks on weekday $firstWeekday are whole calendar weeks holding every workout', () {
+        final weeks = WorkoutAggregation.fromRows(rows, firstWeekday: firstWeekday).toList();
+
+        expect(weeks.map((w) => w.weekId).toSet(), hasLength(weeks.length));
+        for (final week in weeks) {
+          expect(week.startDate, DateTime(week.startDate.year, week.startDate.month, week.startDate.day));
+          expect(week.startDate.weekday, firstWeekday, reason: week.weekId);
+        }
+        for (var i = 1; i < weeks.length; i++) {
+          final previous = weeks[i - 1].startDate;
+          expect(weeks[i].startDate, DateTime(previous.year, previous.month, previous.day + 7));
+        }
+        for (final (i, start) in starts.indexed) {
+          final week = weeks.singleWhere((w) => w.any((workout) => workout.id == '$i'));
+          final end = DateTime(week.startDate.year, week.startDate.month, week.startDate.day + 7);
+          expect(!start.isBefore(week.startDate) && start.isBefore(end), isTrue, reason: '$start in ${week.weekId}');
+        }
+        expect(weeks.fold(0, (total, week) => total + week.length), starts.length);
+      });
+    }
+  });
 }
