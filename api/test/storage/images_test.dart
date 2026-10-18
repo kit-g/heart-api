@@ -31,6 +31,20 @@ void main() {
       expect(policyConditions(presigned.fields), contains(equals({'Content-Type': 'image/jpeg'})));
     });
 
+    test('caps the upload size at 25 MiB in the policy', () async {
+      final presigned = await storage.presignUpload(key: 'k', mimeType: 'image/jpeg');
+
+      expect(policyConditions(presigned.fields), contains(equals(['content-length-range', 0, 26214400])));
+    });
+
+    test('keeps the size cap alongside tags', () async {
+      final presigned = await storage.presignUpload(key: 'k', mimeType: 'image/png', tags: const [('kind', 'avatar')]);
+      final conditions = policyConditions(presigned.fields);
+
+      expect(conditions, contains(equals(['content-length-range', 0, 26214400])));
+      expect(conditions.where((c) => c is List && c.first == 'content-length-range'), hasLength(1));
+    });
+
     test('omits the tagging field and condition when there are no tags', () async {
       final presigned = await storage.presignUpload(key: 'k', mimeType: 'image/jpeg');
 
