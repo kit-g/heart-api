@@ -22,6 +22,7 @@ void main() {
   late MockApiWorkoutService workouts;
   late MockExerciseService exercises;
   late MockIdempotentGoalService goals;
+  late MockApiAnomalyService anomalies;
   late MockAppConfig config;
 
   setUp(() {
@@ -29,6 +30,10 @@ void main() {
     workouts = MockApiWorkoutService();
     exercises = MockExerciseService();
     goals = MockIdempotentGoalService();
+    anomalies = MockApiAnomalyService();
+    when(
+      anomalies.getPendingAnomalies(userId: anyNamed('userId'), from: anyNamed('from'), to: anyNamed('to')),
+    ).thenAnswer((_) async => []);
     config = MockAppConfig();
     when(config.supportedLocales).thenReturn(['en']);
     when(config.defaultLocale).thenReturn('en');
@@ -41,7 +46,8 @@ void main() {
       ..profileService = profiles
       ..workoutsService = workouts
       ..exerciseService = exercises
-      ..goalService = goals;
+      ..goalService = goals
+      ..anomalyService = anomalies;
   }
 
   test('getMe is a 404 when the account has no profile', () {
@@ -208,7 +214,49 @@ void main() {
       expect(records.map((r) => ((r as Map)['exercise'] as Map)['name']), ['Bench', 'squat']);
       expect(((records.first as Map)['heaviest'] as Map)['weight'], 100);
       expect((records.first as Map)['lastTrained'], '2026-01-01T00:00:00.000Z');
+      expect(
+        (await getMyRecords(build('/me/records'))).toMap().containsKey('warnings'),
+        isFalse,
+        reason: 'nothing pending',
+      );
     });
+  });
+
+  test('records name the pending anomalies on the exercises they fold', () async {
+    Anomaly pending(String exerciseId) => Anomaly.fromJson({
+      'id': '019def00-0000-7000-8000-00000000006${exerciseId == 'a' ? 1 : 2}',
+      'workoutId': 'w1',
+      'setId': '019def00-0000-7000-8000-000000000063',
+      'exerciseId': exerciseId,
+      'reason': 'outlier_weight',
+      'observed': {'weight': 630, 'reps': 5},
+      'status': 'pending',
+      'detectedAt': '2026-01-02T00:00:00.000Z',
+    });
+    when(workouts.getRecordSets(userId: 'u1', exerciseId: null)).thenAnswer(
+      (_) async => [
+        (
+          exerciseId: 'a',
+          name: 'Bench',
+          category: Category.barbell,
+          sets: const [
+            RecordSet(
+              weight: 630,
+              reps: 5,
+              duration: null,
+              distance: null,
+              workoutId: 'w1',
+              at: '2026-01-01T00:00:00Z',
+            ),
+          ],
+        ),
+      ],
+    );
+    when(anomalies.getPendingAnomalies(userId: 'u1')).thenAnswer((_) async => [pending('a'), pending('gone')]);
+
+    final records = (await getMyRecords(build('/me/records'))).toMap();
+
+    expect((records['warnings'] as List).single, containsPair('exerciseId', 'a'));
   });
 
   group('goal progress', () {
@@ -368,6 +416,47 @@ void main() {
       expect((session['metrics'] as Map)['topSetWeight'], 110);
       expect((session['metrics'] as Map)['totalVolume'], 830);
       expect(page['cursor'], older);
+      expect(page.containsKey('warnings'), isFalse);
+    });
+
+    test("warnings name the pending anomalies on this exercise's sessions shown", () async {
+      Anomaly pending(String id, {required String workoutId, String? exerciseId}) => Anomaly.fromJson({
+        'id': id,
+        'workoutId': workoutId,
+        'setId': ?(exerciseId == null ? null : '019def00-0000-7000-8000-000000000063'),
+        'exerciseId': ?exerciseId,
+        'reason': exerciseId == null ? 'duration_left_running' : 'outlier_weight',
+        'observed': exerciseId == null ? {'seconds': 99999} : {'weight': 630, 'reps': 5},
+        'status': 'pending',
+        'detectedAt': '2026-01-02T00:00:00.000Z',
+      });
+      when(workouts.getExerciseHistory(userId: 'u1', exerciseId: exercise, cursor: null, limit: 20)).thenAnswer(
+        (_) async => (
+          exerciseId: exercise,
+          name: 'Bench',
+          category: Category.barbell,
+          sessions: Page<ExerciseSession>(
+            items: [
+              (workoutId: older, at: '2026-01-01T00:00:00.000Z', sets: [set(older, 630, 5)]),
+            ],
+            hasMore: false,
+          ),
+        ),
+      );
+      when(anomalies.getPendingAnomalies(userId: 'u1')).thenAnswer(
+        (_) async => [
+          pending('019def00-0000-7000-8000-000000000061', workoutId: older, exerciseId: exercise),
+          // another exercise in the same workout, the workout's own time, and a session not on this page
+          pending('019def00-0000-7000-8000-000000000062', workoutId: older, exerciseId: 'other'),
+          pending('019def00-0000-7000-8000-000000000064', workoutId: older),
+          pending('019def00-0000-7000-8000-000000000065', workoutId: newer, exerciseId: exercise),
+        ],
+      );
+
+      final page = (await getMyExerciseHistoryById(build('/me/exercises/$exercise/history'), exercise)).toMap();
+
+      expect((page['warnings'] as List).single, containsPair('workoutId', older));
+      expect((page['warnings'] as List).single, containsPair('exerciseId', exercise));
     });
   });
 

@@ -245,10 +245,10 @@ class WorkoutImport {
             importId: 'strong:${_opaque('$rawDate|${name ?? ''}')}',
             name: name,
             start: start,
-            // a "duration" past 24h is a workout left running, not a window
-            // worth storing
+            // a "duration" of days is a workout left running: kept as the file
+            // has it, for anomaly review (heart-api#42) to flag
             end: switch (_parseDuration(_cell(row, duration))) {
-              Duration d when d > Duration.zero && d <= const Duration(hours: 24) => start.add(d),
+              Duration d when d > Duration.zero => start.add(d),
               _ => null,
             },
           );
@@ -371,10 +371,10 @@ class WorkoutImport {
             importId: 'hevy:${_opaque('$identity|$run')}',
             name: name,
             start: startLocal.subtract(utcOffset),
-            // an end before the start, or past 24h, is a window not worth
-            // storing, as with Strong
+            // an end before the start is no window at all; one days later is
+            // kept, as with Strong, for anomaly review to flag
             end: switch (endLocal?.difference(startLocal)) {
-              Duration d when d > .zero && d <= const Duration(hours: 24) => endLocal!.subtract(utcOffset),
+              Duration d when d > .zero => endLocal!.subtract(utcOffset),
               _ => null,
             },
           )..note = _unescaped(_cell(row, description));
@@ -500,10 +500,10 @@ class WorkoutImport {
             workoutId: uuid,
             name: null,
             start: started,
-            // an end before the start, or past 24h, is a window not worth
-            // storing, as for the other sources
+            // an end before the start is no window at all; one days later is
+            // kept, as for the other sources, for anomaly review to flag
             end: switch (ended?.difference(started)) {
-              Duration d when d > .zero && d <= const Duration(hours: 24) => ended,
+              Duration d when d > .zero => ended,
               _ => null,
             },
           );

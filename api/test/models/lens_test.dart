@@ -192,6 +192,12 @@ void main() {
       expect(MeBalance.fold(window, rows, content: null, locale: 'en').toMap()['pairs'], isEmpty);
     });
 
+    test('volume names the pending anomalies it counted', () {
+      final volume = MeVolume.fold(window, rows, warnings: [_anomaly('bench', DateTime.utc(2026, 10, 13, 10))]).toMap();
+      expect((volume['warnings'] as List).single, containsPair('reason', 'outlier_weight'));
+      expect(MeVolume.fold(window, rows).toMap().containsKey('warnings'), isFalse);
+    });
+
     group('goal progress', () {
       // the Thursday of the second week
       final now = DateTime.utc(2026, 10, 15, 12);
@@ -259,6 +265,36 @@ void main() {
         expect(pace['progress'], 0);
       });
 
+      test('a goal names the pending anomalies on what it read, in its period', () {
+        final pending = [_anomaly('bench', DateTime.utc(2026, 10, 13, 10))];
+        Map<String, dynamic> with_(Goal goal) {
+          final progress = MeGoalProgress.measure(
+            [goal],
+            now: now,
+            weekStart: DateTime.monday,
+            sets: sets,
+            rows: rows,
+            library: library,
+            pending: pending,
+          );
+          return (progress.toMap()['goals'] as List).single as Map<String, dynamic>;
+        }
+
+        expect(with_(goal(.sets, 6, cadence: .week, muscle: 'chest')), contains('warnings'));
+        expect(with_(goal(.topSetWeight, 100, exerciseId: 'bench')), contains('warnings'));
+        expect(with_(goal(.sets, 6, cadence: .week, pattern: 'horizontal_row')), isNot(contains('warnings')));
+        expect(with_(goal(.workouts, 3, cadence: .week)), isNot(contains('warnings')));
+        // last week's, outside this one
+        final earlier = MeGoalProgress.measure(
+          [goal(.sets, 6, cadence: .week, muscle: 'chest')],
+          now: now,
+          weekStart: DateTime.monday,
+          rows: rows,
+          pending: [_anomaly('bench', DateTime.utc(2026, 10, 6, 10))],
+        );
+        expect((earlier.toMap()['goals'] as List).single, isNot(contains('warnings')));
+      });
+
       test('workouts count the finished ones; a finished ladder is all the way', () {
         final spans = [
           for (final day in [6, 13]) (workoutId: 'w$day', start: DateTime.utc(2026, 10, day), duration: Duration.zero),
@@ -272,5 +308,21 @@ void main() {
         expect(measure(done, spans: spans)['progress'], 1);
       });
     });
+  });
+}
+
+/// A pending outlier on [exerciseId]'s set, in a workout started at [start].
+Anomaly _anomaly(String exerciseId, DateTime start) {
+  return Anomaly.fromJson({
+    'id': '019def00-0000-7000-8000-000000000051',
+    'workoutId': 'w2',
+    'workoutStart': start.toIso8601String(),
+    'setId': '019def00-0000-7000-8000-000000000052',
+    'exerciseId': exerciseId,
+    'reason': 'outlier_weight',
+    'observed': {'weight': 600, 'reps': 8},
+    'typical': 60,
+    'status': 'pending',
+    'detectedAt': '2026-10-15T00:00:00.000Z',
   });
 }

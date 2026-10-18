@@ -27,6 +27,7 @@ RelicRouter buildMeRouter({
     ..use('/', templatesDb(db: database))
     ..use('/', templateFoldersDb(db: database))
     ..use('/', goalsDb(db: database))
+    ..use('/', anomaliesDb(db: database))
     ..use('/', programsDb(db: database))
     ..use('/', exportStorage(storage: storage))
     ..use('/', programLibrary(library: library))

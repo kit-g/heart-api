@@ -178,11 +178,15 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
           'started_at': final DateTime start,
           'completed_at': final DateTime end,
           'pauses': final Object? pauses,
+          'time_invalid': final bool timeInvalid,
         })
           (
             workoutId: id.toString(),
             start: start.toUtc(),
             duration: switch (end.difference(start) - pauses.toPaused()) {
+              // the user called this duration invalid: the workout counts,
+              // its time doesn't
+              _ when timeInvalid => Duration.zero,
               // an end before the start is a clock the user set wrong, not
               // time spent
               final Duration ran when ran.isNegative => Duration.zero,

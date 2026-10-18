@@ -210,14 +210,14 @@ void main() {
       expect(batch.rowsSkipped, 1);
     });
 
-    test('an end before the start, or past 24h, is not kept', () {
+    test('an end before the start is not kept; one days later is, for anomaly review', () {
       final batch = WorkoutImport.fromHeartCsv(
         '$_header'
         '${_row(end: '2026-03-01T09:00:00.000Z', reps: '5')}'
         '${_row(workout: _cardio, start: '2026-03-03T07:30:00.000Z', end: '2026-03-05T07:30:00.000Z', reps: '5')}'
         '${_row(workout: _carries, start: '2026-03-05T10:00:00.000Z', end: '', reps: '5')}',
       );
-      expect(batch.workouts.map((w) => w.end), everyElement(isNull));
+      expect(batch.workouts.map((w) => w.end), [null, DateTime.utc(2026, 3, 5, 7, 30), null]);
     });
 
     test('a header alone is an empty batch, not a refusal', () {

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.38.0
+
+Suspicious entries and what the user makes of them (heart-api#42).
+
+- New: `Anomaly`, a set or a workout's duration the server's sweep found
+  suspicious: why (`reason`, one of `AnomalyReason` or a newer word), what
+  was entered (`observed`), and the exercise's `typical` weight.
+- New: `AnomalyStatus` (`pending`, `valid`, `invalid`).
+- New: `AnomalyService`: list them, resolve one.
+
 ## 2.37.0
 
 Primary and secondary work per muscle group, and the muscle map from the body

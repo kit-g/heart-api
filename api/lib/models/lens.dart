@@ -1,5 +1,6 @@
 import 'package:heart_models/heart_models.dart';
 
+import 'anomalies.dart';
 import 'changes.dart';
 
 /// The balance pairs as the CDN serves them (`static/balance`,
@@ -161,11 +162,18 @@ final class _Week {
 final class MeVolume implements Model {
   final LensWindow window;
   final Map<DateTime, _Week> _weeks;
+  final List<Anomaly> warnings;
 
-  const new _(this.window, this._weeks);
+  const new _(this.window, this._weeks, this.warnings);
 
-  /// [spans] are the window's finished workouts.
-  factory fold(LensWindow window, Iterable<LensRow> rows, {Iterable<WorkoutSpan> spans = const []}) {
+  /// [spans] are the window's finished workouts; [warnings] the pending
+  /// anomalies among what was counted.
+  factory fold(
+    LensWindow window,
+    Iterable<LensRow> rows, {
+    Iterable<WorkoutSpan> spans = const [],
+    List<Anomaly> warnings = const [],
+  }) {
     final weeks = {for (final week in window.weeks) week: _Week()};
     for (final row in rows) {
       if (weeks[window.weekOf(row.start)] case final week?) {
@@ -188,7 +196,7 @@ final class MeVolume implements Model {
           ..duration += span.duration;
       }
     }
-    return MeVolume._(window, weeks);
+    return MeVolume._(window, weeks, warnings);
   }
 
   /// The muscle groups no set reached in the whole window.
@@ -217,6 +225,7 @@ final class MeVolume implements Model {
           },
       ],
       'untrained': untrained,
+      if (warnings.isNotEmpty) 'warnings': warnings.toWarnings(),
     };
   }
 }
@@ -250,8 +259,9 @@ extension on double {
 final class MeBalance implements Model {
   final LensWindow window;
   final List<Map<String, dynamic>> pairs;
+  final List<Anomaly> warnings;
 
-  const new _(this.window, this.pairs);
+  const new _(this.window, this.pairs, this.warnings);
 
   /// [content] read tolerantly, as the app reads it: a pair or side this
   /// server can't read is passed over. Side names are in [locale], else its
@@ -261,6 +271,7 @@ final class MeBalance implements Model {
     Iterable<LensRow> rows, {
     required Map<String, dynamic>? content,
     required String locale,
+    List<Anomaly> warnings = const [],
   }) {
     String? named(Object? names) {
       return switch (names) {
@@ -299,11 +310,18 @@ final class MeBalance implements Model {
               'right': right.side,
               'weeksTrained': {for (final row in left.rows.followedBy(right.rows)) window.weekOf(row.start)}.length,
             },
-    ]);
+    ], warnings);
   }
 
   @override
-  Map<String, dynamic> toMap() => {...window.toMap(), 'weeks': window.weeks.length, 'pairs': pairs};
+  Map<String, dynamic> toMap() {
+    return {
+      ...window.toMap(),
+      'weeks': window.weeks.length,
+      'pairs': pairs,
+      if (warnings.isNotEmpty) 'warnings': warnings.toWarnings(),
+    };
+  }
 }
 
 /// `GET /me/goals/progress`: each live goal with where it stands, measured as
@@ -331,7 +349,9 @@ final class MeGoalProgress implements Model {
   const new _(this.weekStart, this.goals);
 
   /// [sets], [rows] and [spans] are all time's: a milestone reads all of it.
-  /// [library] names the exercises goals point at.
+  /// [library] names the exercises goals point at. [pending] are the
+  /// anomalies nobody has looked at; each goal names those on the sets it
+  /// read, in its period.
   factory measure(
     Iterable<Goal> goals, {
     required DateTime now,
@@ -340,6 +360,7 @@ final class MeGoalProgress implements Model {
     List<LensRow> rows = const [],
     List<WorkoutSpan> spans = const [],
     Map<String, dynamic> library = const {},
+    List<Anomaly> pending = const [],
   }) {
     final names = {
       for (final exercise in (library['exercises'] as List? ?? const []).whereType<Map>())
@@ -364,8 +385,10 @@ final class MeGoalProgress implements Model {
       };
     }
 
-    num? subjectValue(Goal goal, (DateTime, DateTime)? period) {
-      final double Function(LensRow)? share = switch (goal.subject) {
+    /// How much of one row a sets or sessions goal counts; null for a subject
+    /// no row can reach.
+    double Function(LensRow)? shareOf(Goal goal) {
+      return switch (goal.subject) {
         ExerciseSubject(:final id) => (row) => row.exerciseId == id ? 1 : 0,
         PatternSubject(:final key) => (row) => row.patterns.contains(key) ? 1 : 0,
         MuscleSubject(:final key) => switch (MuscleGroupKey.tryParse(key)) {
@@ -374,6 +397,13 @@ final class MeGoalProgress implements Model {
         },
         null => null,
       };
+    }
+
+    // what each exercise trains, to tell which anomalies a subject goal read
+    final trains = {for (final row in rows) row.exerciseId: row};
+
+    num? subjectValue(Goal goal, (DateTime, DateTime)? period) {
+      final share = shareOf(goal);
       if (share == null) return null;
       var counted = .0;
       final workouts = <String>{};
@@ -418,12 +448,28 @@ final class MeGoalProgress implements Model {
         .sets || .sessions => subjectValue(goal, period),
         _ => exerciseValue(goal, period),
       };
+      final share = shareOf(goal);
+      final warnings = [
+        for (final anomaly in pending)
+          if (anomaly.workoutStart case final start? when within(start, period))
+            if (switch (goal.metric) {
+              // a workout counts whatever its time, so no anomaly moves it
+              .workouts => false,
+              .sets || .sessions => switch ((share, trains[anomaly.exerciseId])) {
+                (final share?, final row?) => share(row) > 0,
+                _ => false,
+              },
+              _ => anomaly.exerciseId != null && anomaly.exerciseId == goal.exerciseId,
+            })
+              anomaly,
+      ];
       return {
         ...goal.toMap(),
         'exerciseName': ?names[goal.exerciseId],
         if (period case (final from, final to)) 'period': {'from': from.toIso8601String(), 'to': to.toIso8601String()},
         'current': ?current,
         'progress': goal.progressAt(current).toTwoPlaces(),
+        if (warnings.isNotEmpty) 'warnings': warnings.toWarnings(),
       };
     }
 

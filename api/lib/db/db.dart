@@ -3,6 +3,7 @@ library;
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:heart/models/anomalies.dart';
 import 'package:heart/models/apple.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/creates.dart';
@@ -20,6 +21,7 @@ import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart' hide WorkoutService, TemplateService, ExerciseService;
 import 'package:postgres/postgres.dart' hide Connection;
 
+part 'anomalies.dart';
 part 'charts.dart';
 part 'comments.dart';
 part 'connections.dart';
@@ -198,6 +200,7 @@ ApiException? apiExceptionForDbError(Object error) {
 
 class Database extends _DatabaseBase
     with
+        _Anomalies,
         _Charts,
         _Comments,
         _Connections,
@@ -215,6 +218,7 @@ class Database extends _DatabaseBase
         _ApiTokens,
         _OAuth
     implements
+        ApiAnomalyService,
         ChartPreferenceService,
         ApiExercisePreferenceService,
         CommentService,

@@ -3,6 +3,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
+import 'package:heart/models/anomalies.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/lens.dart';
@@ -69,6 +70,12 @@ const instructions =
     'left running, typos and weights in the wrong unit: nothing is corrected or dropped. Prefer medians for '
     'typical values, point out an outlier rather than quietly leave it out, and say you excluded something '
     'only if you did.';
+
+/// What every count's `warnings` means, said once.
+const _warnings =
+    ' warnings names entries counted here that look suspicious and the user has not checked (a timer left running, '
+    'a weight in the wrong unit, weight and reps swapped): say so when one may skew the answer. Entries the user '
+    'called invalid are already left out.';
 
 final List<McpTool> tools = [
   McpTool(
@@ -154,7 +161,7 @@ final List<McpTool> tools = [
         'the returned cursor for the next page. Pass `from` and `to` for the records of a span ("heaviest this '
         'year"): only workouts started in it count, and what a record beat is from the same span. lastTrained is '
         "when the exercise was last done in that span: a record that hasn't moved on a lift not done lately is "
-        'not a lift getting weaker.',
+        'not a lift getting weaker.$_warnings',
     inputSchema: {
       'type': 'object',
       'properties': {
@@ -172,7 +179,10 @@ final List<McpTool> tools = [
       };
       final (limit, cursor) = arguments.toPaging(defaultLimit: 20, maxLimit: 50);
       final (:from, :to) = arguments.toWindow();
-      final sets = await request.workoutsService.getRecordSets(userId: request.userId, from: from, to: to);
+      final (sets, pending) = await (
+        request.workoutsService.getRecordSets(userId: request.userId, from: from, to: to),
+        request.anomalyService.getPendingAnomalies(userId: request.userId, from: from, to: to),
+      ).wait;
       final matching = [
         for (final exercise in sets)
           if (filter == null || exercise.name.toLowerCase().contains(filter)) exercise,
@@ -189,6 +199,11 @@ final List<McpTool> tools = [
         },
       };
       final page = entries.skip(start).take(limit).toList();
+      final shown = {for (final entry in page) entry.exercise.exerciseId};
+      final warnings = [
+        for (final anomaly in pending)
+          if (shown.contains(anomaly.exerciseId)) anomaly,
+      ];
       return {
         'records': [
           for (final (:exercise, :records) in page)
@@ -199,6 +214,7 @@ final List<McpTool> tools = [
             },
         ],
         if (start + page.length < entries.length) 'cursor': page.last.exercise.exerciseId,
+        if (warnings.isNotEmpty) 'warnings': warnings.toWarnings().toMcpUnits(),
       };
     },
   ),
@@ -210,7 +226,7 @@ final List<McpTool> tools = [
         'chart plots for it (top set, estimated 1RM by Brzycki, volume, average working weight, reps; distance, '
         'duration and pace for cardio). Weights in kg, distances in km, durations in seconds, pace in seconds per '
         'km. Exercise ids come from get_workout or get_personal_records. Paged: pass the returned cursor for older '
-        'sessions. `from` and `to` keep to workouts started in that span.',
+        'sessions. `from` and `to` keep to workouts started in that span.$_warnings',
     inputSchema: {
       'type': 'object',
       'properties': {
@@ -231,17 +247,20 @@ final List<McpTool> tools = [
         throw const ToolError('cursor must be the string returned by the previous page.');
       }
       final (:from, :to) = arguments.toWindow();
-      final history =
-          await request.workoutsService.getExerciseHistory(
-            userId: request.userId,
-            exerciseId: id,
-            cursor: cursor,
-            limit: limit,
-            from: from,
-            to: to,
-          ) ??
-          (throw ToolError('No exercise $id. get_personal_records lists the exercises with history.'));
-      final ExerciseHistory(:exerciseId, :name, :category, :sessions) = history;
+      final (history, pending) = await (
+        request.workoutsService.getExerciseHistory(
+          userId: request.userId,
+          exerciseId: id,
+          cursor: cursor,
+          limit: limit,
+          from: from,
+          to: to,
+        ),
+        request.anomalyService.getPendingAnomalies(userId: request.userId, from: from, to: to),
+      ).wait;
+      final ExerciseHistory(:exerciseId, :name, :category, :sessions) =
+          history ?? (throw ToolError('No exercise $id. get_personal_records lists the exercises with history.'));
+      final warnings = pending.onSessions(exerciseId, sessions.items);
       return {
         'exercise': {'id': exerciseId, 'name': name, 'category': category.value},
         'sessions': [
@@ -254,6 +273,7 @@ final List<McpTool> tools = [
             },
         ],
         if (sessions.hasMore && sessions.items.isNotEmpty) 'cursor': sessions.items.last.workoutId,
+        if (warnings.isNotEmpty) 'warnings': warnings.toWarnings().toMcpUnits(),
       };
     },
   ),
@@ -269,7 +289,7 @@ final List<McpTool> tools = [
         'exercises that work the muscle first (direct work); the rest is indirect. An exercise the user made '
         'counts toward the group its target names, as direct work, and the pattern they gave it. untrained lists '
         'the muscle groups no set reached in the whole span ("which muscles did I skip"). Weeks start on '
-        'weekStart (ISO, 1 Monday) in UTC. Without `from`, the 4 weeks ending this one; at most a year.',
+        'weekStart (ISO, 1 Monday) in UTC. Without `from`, the 4 weeks ending this one; at most a year.$_warnings',
     inputSchema: const {
       'type': 'object',
       'properties': _windowSchema,
@@ -288,7 +308,7 @@ final List<McpTool> tools = [
         'squat, curls against triceps extensions, leg extensions against leg curls. Per pair, the working sets of '
         'each side (an exercise counts toward a side when one of its movement patterns is on it) and in how many '
         'of the weeks either side was trained. Counts only: Heart draws no conclusion from them, and a few weeks of '
-        'a handful of sets say little. Weeks and the span as in get_training_volume.',
+        'a handful of sets say little. Weeks and the span as in get_training_volume.$_warnings',
     inputSchema: const {
       'type': 'object',
       'properties': _windowSchema,
@@ -296,7 +316,7 @@ final List<McpTool> tools = [
     },
     run: (request, arguments) async {
       final (:from, :to) = arguments.toLensWindow();
-      final balance = (await me.balance(request, from: from, to: to)).toMap();
+      final balance = (await me.balance(request, from: from, to: to)).toMap().toMcpUnits() as Map<String, dynamic>;
       if ((balance['pairs'] as List).isEmpty) return {...balance, 'note': 'The balance pairs are not published yet.'};
       return balance;
     },
@@ -422,9 +442,55 @@ final List<McpTool> tools = [
         'with a cadence reads its current week or calendar month (period; weeks start on weekStart, ISO, 1 Monday, '
         'in UTC); one without reads all time, where an exercise metric is its best session. Values are in the '
         "goal's units: kg, km, seconds, seconds per km for pace; sets may be fractional for a muscle. current is "
-        'absent when there is nothing to read yet. Stages carry achievedAt once met. list_goals has archived goals.',
+        'absent when there is nothing to read yet. Stages carry achievedAt once met. list_goals has archived goals. '
+        "A goal's$_warnings",
     inputSchema: const {'type': 'object', 'properties': {}, 'additionalProperties': false},
-    run: (request, arguments) async => (await me.goalProgress(request)).toMap(),
+    run: (request, arguments) async => (await me.goalProgress(request)).toMap().toMcpUnits() as Map<String, dynamic>,
+  ),
+  McpTool(
+    name: 'list_anomalies',
+    title: 'Suspicious entries',
+    description:
+        "Entries in the user's log that look suspicious, newest found first, and what the user made of each: a workout "
+        'left running over 6 hours (seconds), a set far from the exercise\'s typical weight (typical, kg), over 100 '
+        'reps on a loaded set, or weight and reps that read as each other\'s. Nothing is corrected: observed is what '
+        'was entered. status is pending until the user decides in the app: valid (it stands and counts) or invalid '
+        '(it stays in the log and is left out of every count). Pass status for one kind; paged by cursor.',
+    inputSchema: {
+      'type': 'object',
+      'properties': {
+        'status': {
+          'type': 'string',
+          'enum': ['pending', 'valid', 'invalid'],
+          'description': 'Only anomalies with this status.',
+        },
+        ..._pageSchema(maxLimit: 50)['properties'] as Map<String, dynamic>,
+      },
+      'additionalProperties': false,
+    },
+    run: (request, arguments) async {
+      final status = switch (arguments['status']) {
+        null => null,
+        final String raw when AnomalyStatus.values.any((status) => status.value == raw) => AnomalyStatus.fromString(
+          raw,
+        ),
+        _ => throw const ToolError('status must be pending, valid or invalid.'),
+      };
+      final (limit, cursor) = arguments.toPaging(defaultLimit: 20, maxLimit: 50);
+      if (cursor != null && !isUuidV7(cursor)) {
+        throw const ToolError('cursor must be the string returned by the previous page.');
+      }
+      final page = await request.anomalyService.getAnomalies(
+        userId: request.userId,
+        status: status,
+        cursor: cursor,
+        limit: limit,
+      );
+      return {
+        'anomalies': [for (final anomaly in page) anomaly.toMap()].toMcpUnits(),
+        if (page.hasMore && page.items.isNotEmpty) 'cursor': page.items.last.id,
+      };
+    },
   ),
   McpTool(
     name: 'list_programs',

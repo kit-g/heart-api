@@ -52,19 +52,25 @@ void main() {
       await h.exec(statement, {});
     }
     try {
-      expect(await declare(), 2);
+      expect(await declare(), 3);
       final calls = [
         for (final row in await h.exec('SELECT jobname, schedule, command, db FROM cron.calls ORDER BY jobname', {}))
           row.toColumnMap(),
       ];
-      expect(calls.map((c) => c['jobname']), ['cron-history-cleanup', 'oauth-cleanup']);
+      expect(calls.map((c) => c['jobname']), ['anomaly-sweep', 'cron-history-cleanup', 'oauth-cleanup']);
+      expect(calls.first, {
+        'jobname': 'anomaly-sweep',
+        'schedule': '37 3 * * *',
+        'command': 'SELECT _sweep_anomalies()',
+        'db': database,
+      });
       expect(calls.last, {
         'jobname': 'oauth-cleanup',
         'schedule': '17 4 * * *',
         'command': 'SELECT _clean_up_oauth()',
         'db': database,
       });
-      expect(calls.first['command'], contains('cron.job_run_details'));
+      expect(calls[1]['command'], contains('cron.job_run_details'));
     } finally {
       await h.exec('DROP SCHEMA cron CASCADE', {});
     }
