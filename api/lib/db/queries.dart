@@ -2719,6 +2719,27 @@ SELECT id, false AS created FROM _by_id
 WHERE NOT EXISTS (SELECT 1 FROM _ins)
 ''';
 
+/// Files the caller's own existing templates into a new program as its
+/// sessions (heart-api#244): a program made from a folder keeps the templates
+/// it was made of instead of copying them. `@sessions` is `[{id, order_index,
+/// joined}]`, one entry per id. Each template takes its place, which is also
+/// its place in its folder, since both orders are `order_index`; its name,
+/// body, note and folder stay. One already in another program moves, as a
+/// template edit naming the program would move it. A null `joined` leaves the
+/// stamp to the database's clock. An id that isn't the caller's template
+/// matches nothing and is left to the insert, which refuses a foreign one.
+const _joinProgram = '''
+UPDATE templates t
+SET
+  program_id = @programId::uuid,
+  order_index = s.order_index,
+  joined_program_at = s.joined
+FROM jsonb_to_recordset(@sessions::jsonb) AS s(id uuid, order_index int, joined timestamptz)
+WHERE t.id = s.id
+  AND t.user_id = @userId
+RETURNING t.id
+''';
+
 /// A full replace of the program's own fields. Its sessions are templates and
 /// change through the template routes, never here.
 const _replaceProgram =
