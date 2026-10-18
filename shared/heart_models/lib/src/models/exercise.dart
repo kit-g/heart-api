@@ -1002,6 +1002,12 @@ abstract interface class Exercise implements Searchable, Model, Comparable<Exerc
   /// with it, a query word may also match through what it stands for.
   SearchMatch? match(String query, {SearchGlossary? glossary});
 
+  /// Whether every word of [query] is part of a word of the name or slug, the
+  /// matcher search used before [match]. A hit here is a hit there.
+  @override
+  @Deprecated('Use match: a non-null result is a hit, and SearchMatch.words is this test.')
+  bool contains(String query);
+
   Exercise copyWith({
     Category? category,
     Target? target,

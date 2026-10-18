@@ -2,6 +2,9 @@
 
 ## 2.39.0
 
+Clearing a set's measurement, weeks on the user's first day, and a retired
+matcher.
+
 - New: `ExerciseSet.clearMeasurements(Set<ExerciseSetField>)`, with
   `ExerciseSetField` (`weight`, `reps`, `duration`, `distance`): unsets those
   measurements, leaving the others alone, and the set then writes as one
@@ -15,6 +18,8 @@
 - Fix: the weeks `WorkoutAggregation` fills in are calendar weeks, so near a
   DST change none lands an hour off midnight and drops the workouts of the
   week it stands for.
+- Deprecated: `Searchable` and `Exercise.contains`, which nothing calls; search
+  with `Exercise.match`. Both still work (heart-api#118).
 
 ## 2.38.0
 

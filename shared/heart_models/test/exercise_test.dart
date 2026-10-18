@@ -821,6 +821,24 @@ void main() {
         expect(eWithDash.contains('isolateral'), isTrue);
         expect(eWithDash.contains('press'), isTrue);
       });
+
+      test('whatever contains finds, match finds too', () {
+        for (final (exercise, query) in [
+          (e, ''),
+          (e, 'Bench'),
+          (e, 'barb'),
+          (e, 'press bench'),
+          (e, 'ben pre'),
+          (e, ' press '),
+          (e, 'bench   press'),
+          (eWithDash, 'isolateral'),
+          (eWithDash, 'press'),
+        ]) {
+          expect(exercise.contains(query), isTrue, reason: query);
+          expect(exercise.match(query), isNotNull, reason: query);
+        }
+        expect(e.match('squat'), isNull);
+      });
     });
 
     group('fits()', () {

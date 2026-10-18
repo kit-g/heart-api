@@ -4,6 +4,7 @@ abstract interface class SignOutStateSentry {
   FutureOr<void> onSignOut();
 }
 
+@Deprecated('Unused since search went through Exercise.match; use Exercise.match.')
 abstract interface class Searchable {
   bool contains(String query);
 }
