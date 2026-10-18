@@ -105,6 +105,17 @@ variable "apple_sign_in" {
   })
 }
 
+variable "close_execute_api" {
+  description = "Turns off the execute-api hostname, leaving the custom domain as the only way in. Builds from before the custom domain call execute-api directly, so this waits until they are turned away by the minimal-version gate."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !var.close_execute_api || var.custom_domain != null
+    error_message = "Closing execute-api without a custom domain leaves the API unreachable."
+  }
+}
+
 variable "custom_domain" {
   description = "Public DNS name for the API and the certificate that serves it. Null skips the domain and its base path mapping."
   default     = null
