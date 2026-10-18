@@ -313,7 +313,9 @@ switch (tags) {
 }
 ```
 
-Tags are written when the presigned upload URL is issued (`presignUpload(tags: [...])`).
+Tags are written when the presigned upload URL is issued (`presignUpload(tags: [...])`). The same policy
+caps every upload at 25 MiB (`content-length-range`); S3 refuses a larger file itself, so nothing oversized
+ever reaches the bucket or the handler.
 
 ---
 
