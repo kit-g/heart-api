@@ -142,12 +142,14 @@
         <p>You don’t need the API for this: the app exports too, under <strong>Settings → Export my data</strong>.</p>
 
         <h2 id="mcp">AI assistants (MCP)</h2>
-        <p>The same token connects an AI assistant to your log over MCP, read-only. In Claude Code:</p>
-        <pre><code>claude mcp add --transport http heart https://api.heart-of.me/v1/mcp \
+        <p>Heart’s MCP server is <code>https://mcp.heart-of.me</code>, read-only. In Claude, add it as a custom
+            connector with that address and sign in with your Heart account; no token needed. With a token, in Claude
+            Code:</p>
+        <pre><code>claude mcp add --transport http heart https://mcp.heart-of.me \
   --header "Authorization: Bearer hrt_…"</code></pre>
         <p>In Cursor, Claude Desktop or any client with a JSON config:</p>
         <pre><code>{"mcpServers": {"heart": {
-  "url": "https://api.heart-of.me/v1/mcp",
+  "url": "https://mcp.heart-of.me",
   "headers": {"Authorization": "Bearer hrt_…"}
 }}}</code></pre>
         <p>The assistant can read your profile, workouts, templates and folders, goals, programs (with their history,
@@ -156,6 +158,7 @@
             exercises and the exercise library. It can’t change anything. Only the
             data it reads counts against your limits, not the tool listing it does at the start of a conversation.
             What it reads goes to the assistant’s provider and is covered by their privacy policy, not ours.</p>
+        <p>The earlier address, <code>https://api.heart-of.me/v1/mcp</code>, keeps working with a token.</p>
 
         <h2 id="compatibility">Compatibility</h2>
         <p>Fields and routes may be added; none will be renamed or removed. Ignore fields you don’t know.</p>
