@@ -70,10 +70,18 @@ class TestRender:
     def test_handles_animated_gif_first_frame(self):
         # A 2-frame GIF; render should measure the canvas and thumbnail frame 0.
         buf = io.BytesIO()
-        frames = [Image.new('P', (500, 250), color=i) for i in range(2)]
+        frames = [Image.new('RGB', (500, 250), color=color) for color in ('red', 'blue')]
         frames[0].save(buf, format='GIF', save_all=True, append_images=frames[1:])
+        with Image.open(io.BytesIO(buf.getvalue())) as source:
+            assert source.n_frames == 2
         media = render(buf.getvalue())
         assert media.asset.width == 500
         assert media.asset.height == 250
         assert media.thumbnail.width == 320
         assert media.thumbnail.height == 160
+        with Image.open(io.BytesIO(media.thumbnail_bytes)) as thumb:
+            red, green, blue = thumb.getpixel((thumb.width // 2, thumb.height // 2))
+            # JPEG is lossy: distinguish the red first frame from the blue last one.
+            assert red > 240
+            assert green < 15
+            assert blue < 15

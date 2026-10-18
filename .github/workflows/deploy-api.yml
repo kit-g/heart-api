@@ -67,7 +67,9 @@ jobs:
 
       - name: "Run Analysis"
         working-directory: api
-        run: dart analyze
+        run: |
+          make -C .. prepare-compat-tests
+          dart analyze
 
   dart-test:
     permissions:
@@ -195,6 +197,9 @@ jobs:
       # Runs the FULL api suite — unit + `db`-tagged (unskipped via --run-skipped)
       # — against the Postgres provisioned above, so coverage reflects the code
       # the DB integration tests exercise. This subsumes the db-only run.
+      - name: "Prepare the installed-client contract"
+        run: make prepare-compat-tests
+
       - name: "Run tests with coverage"
         working-directory: api
         run: |

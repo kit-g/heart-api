@@ -8,28 +8,47 @@ import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
 
-/// Re-import against one real history exported four ways: Strong's export has
-/// two switches — rest timers, notes — and `content/assets/exports/strong`
-/// holds every combination. Whatever order they arrive in, the history must
+/// Re-import against one history exported four ways: Strong's export has
+/// two switches — rest timers, notes. Whatever order they arrive in, the history must
 /// end up exactly as if the complete export had been imported once, and a
 /// poorer export must never take anything away.
 ///
-/// The exports are the owner's real history and `content/assets/` is
-/// gitignored, so this suite runs where they exist (the owner's machine) and
-/// skips everywhere else, CI included.
+/// Synthetic fixtures always run, including in CI. The owner's gitignored
+/// exports remain a supplementary check when present locally.
 ///
 /// Tagged `db` — skipped by the default `dart test`. Run with:
 ///   dart test --run-skipped -t db
 void main() {
+  _exports(
+    'synthetic Strong history',
+    directory: 'test/fixtures/strong',
+    files: const {'bare': 'bare.csv', 'timers': 'timers.csv', 'notes': 'notes.csv', 'full': 'full.csv'},
+    expected: (warmups: 1, drops: 1, failures: 1, notes: 2, workoutNote: 'Weekend, "steady"'),
+  );
+  _exports(
+    'personal Strong history',
+    directory: '../content/assets/exports/strong',
+    files: const {
+      'bare': 'strong_workouts.csv',
+      'timers': 'strong_workouts 2.csv',
+      'notes': 'strong_workouts 3.csv',
+      'full': 'strong_workouts 4.csv',
+    },
+    expected: (warmups: 45, drops: 59, failures: 1, notes: 14, workoutNote: 'We’re'),
+    optional: true,
+  );
+}
+
+void _exports(
+  String label, {
+  required String directory,
+  required Map<String, String> files,
+  required ({int warmups, int drops, int failures, int notes, String workoutNote}) expected,
+  bool optional = false,
+}) {
   final h = _Harness();
 
-  const dir = '../content/assets/exports/strong';
-  final exports = {
-    'bare': '$dir/strong_workouts.csv',
-    'timers': '$dir/strong_workouts 2.csv',
-    'notes': '$dir/strong_workouts 3.csv',
-    'full': '$dir/strong_workouts 4.csv',
-  };
+  final exports = {for (final entry in files.entries) entry.key: '$directory/${entry.value}'};
   final present = exports.values.every((path) => File(path).existsSync());
   late Map<String, WorkoutImport> batches;
   final profiles = <String>[];
@@ -75,15 +94,15 @@ void main() {
   // `make test-api-db` passes --run-skipped (db tests are skip-tagged), which
   // would run a `skip:`ped group too — so the suite is only registered when
   // its files exist, and otherwise reports itself skipped at runtime.
-  if (!present) {
-    test('four exports of one Strong history', () {
-      markTestSkipped('the Strong exports are not in $dir (content/assets is gitignored)');
+  if (optional && !present) {
+    test(label, () {
+      markTestSkipped('the personal Strong exports are not in $directory');
     });
     return;
   }
 
   group(
-    'four exports of one Strong history',
+    label,
     () {
       setUpAll(() async {
         await h.setupDatabase();
@@ -113,16 +132,34 @@ void main() {
 
       test('the complete export lands everything it carries', () async {
         final typed = reference.where((r) => r['set_type'] != null).map((r) => r['set_type']);
-        expect(typed.where((t) => t == 'w'), hasLength(45));
-        expect(typed.where((t) => t == 'd'), hasLength(59));
-        expect(typed.where((t) => t == 'f'), hasLength(1));
+        expect(typed.where((t) => t == 'w'), hasLength(expected.warmups));
+        expect(typed.where((t) => t == 'd'), hasLength(expected.drops));
+        expect(typed.where((t) => t == 'f'), hasLength(expected.failures));
         final exerciseNotes = {
           for (final r in reference) '${r['import_id']}/${r['exercise_order']}': r['exercise_note'],
         }..removeWhere((_, note) => note == null);
-        expect(exerciseNotes, hasLength(14));
-        expect(reference.map((r) => r['workout_note']).whereType<String>().toSet(), {'We’re'});
+        expect(exerciseNotes, hasLength(expected.notes));
+        expect(reference.map((r) => r['workout_note']).whereType<String>().toSet(), {expected.workoutNote});
         expect(referenceTimers, isNotEmpty);
       });
+
+      if (!optional) {
+        test('the synthetic history retains measurements, ratings and quoted multiline notes', () {
+          expect(reference, hasLength(5));
+          expect(
+            reference.map((r) => (r['name'], r['weight'], r['reps'], r['duration'], r['rpe'])),
+            unorderedEquals([
+              ('Fixture Press (Barbell)', 20, 10, null, null),
+              ('Fixture Press (Barbell)', 80, 5, null, 8),
+              ('Fixture Press (Barbell)', 60, 8, null, 9),
+              ('Fixture Press (Barbell)', 50, 12, null, 10),
+              ('Fixture Plank', null, null, 60, null),
+            ]),
+          );
+          expect(reference.map((r) => r['exercise_note']).toSet(), {'Pause, then "press"\nSmoothly', 'Hold steady'});
+          expect(referenceTimers, {'Fixture Press (Barbell)': 120, 'Fixture Plank': 30});
+        });
+      }
 
       for (final order in const [
         ['bare', 'timers', 'notes', 'full'],

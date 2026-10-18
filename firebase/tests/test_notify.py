@@ -76,15 +76,19 @@ class TestPerTokenFailures:
             mocker, [True, False, False]
         )
 
+        tokens = ["ok-token-private", "bad-one-private", "bad-two-private"]
         with caplog.at_level(logging.WARNING, logger="notify"):
-            notify.send_push(_event(["token-ok", "token-bad-1", "token-bad-2"]))
+            notify.send_push(_event(tokens))
 
         warnings = [r for r in caplog.records if r.levelno == logging.WARNING]
         assert len(warnings) == 2
         # Only the token prefix goes to the log, never the full token.
-        assert "token-ba" in warnings[0].getMessage()
-        assert "token-ok" not in warnings[0].getMessage()
-        assert "unregistered" in warnings[0].getMessage()
+        for warning, token in zip(warnings, tokens[1:], strict=True):
+            assert token[:8] in warning.getMessage()
+            assert "unregistered" in warning.getMessage()
+        assert tokens[0][:8] not in caplog.text
+        for token in tokens:
+            assert token not in caplog.text
 
 
 class TestResponseCountInvariant:

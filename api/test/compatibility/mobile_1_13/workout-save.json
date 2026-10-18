@@ -1,0 +1,41 @@
+{
+  "id": "019a0000-0000-7000-8000-000000000001",
+  "name": "Compatibility session",
+  "start": "2026-10-01T18:00:00.000Z",
+  "end": "2026-10-01T19:00:00.000Z",
+  "note": "A synthetic compatibility fixture",
+  "pauses": [
+    {
+      "start": "2026-10-01T18:10:00.000Z",
+      "end": "2026-10-01T18:15:00.000Z"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "019a0000-0000-7000-8000-000000000002",
+      "exercise": {
+        "id": "019a0000-0000-7000-8000-000000000003",
+        "category": "Barbell",
+        "name": "Compatibility Bench",
+        "target": "Chest",
+        "own": 0,
+        "archived": 0
+      },
+      "start": "2026-10-01T18:00:00.000Z",
+      "sets": [
+        {
+          "id": "019a0000-0000-7000-8000-000000000004",
+          "completed": true,
+          "started_at": "2026-10-01T18:00:00.000Z",
+          "completed_at": "2026-10-01T18:01:00.000Z",
+          "reps": 5,
+          "weight": 80.0,
+          "set_type": "drop",
+          "rpe": 8.0
+        }
+      ],
+      "order": 0
+    }
+  ],
+  "images": []
+}

@@ -3,6 +3,7 @@ library;
 
 import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
+import 'package:postgres/postgres.dart' show Sql;
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -523,21 +524,35 @@ void main() {
         domain: ConnectionDomain.fitness,
       );
 
-      final outcomes = await Future.wait([
-        for (var i = 0; i < 8; i++)
-          h.db
-              .changeConnectionStatus(
-                actorId: b,
-                targetId: a,
-                role: ConnectionRole.peer,
-                domain: ConnectionDomain.fitness,
-                newStatus: ConnectionStatus.active,
-              )
-              .then((_) => true)
-              .onError((_, _) => false),
-      ]);
+      final outcomes = await h.runBlocked(
+        hold: (tx) async {
+          await tx.execute(
+            Sql.named('SELECT 1 FROM connections WHERE initiator_id = @a AND target_id = @b FOR UPDATE'),
+            parameters: {'a': a, 'b': b},
+          );
+        },
+        calls: [
+          for (var i = 0; i < 2; i++)
+            () async {
+              try {
+                await h.db.changeConnectionStatus(
+                  actorId: b,
+                  targetId: a,
+                  role: ConnectionRole.peer,
+                  domain: ConnectionDomain.fitness,
+                  newStatus: ConnectionStatus.active,
+                );
+                return true;
+              } on Forbidden catch (error) {
+                expect(error.code, 'forbidden');
+                return false;
+              }
+            },
+        ],
+      );
 
       expect(outcomes.where((won) => won), hasLength(1));
+      expect(outcomes.where((won) => !won), hasLength(1));
 
       final settled = await h.db.getConnection(
         actorId: a,

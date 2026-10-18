@@ -1,0 +1,13 @@
+name: mobile_1_13_contract
+publish_to: none
+
+environment:
+  sdk: ">=3.13.0"
+
+dependencies:
+  # From heart-of-yours v1.13.0's pubspec.lock, never the moving main branch.
+  heart_models:
+    git:
+      url: https://github.com/kit-g/heart-api.git
+      path: shared/heart_models
+      ref: 501a6f100a44e8ebb2c83b9e872472e0de4127c1

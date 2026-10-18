@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:heart/models/oauth.dart';
 import 'package:heart/models/tokens.dart';
+import 'package:postgres/postgres.dart' show Sql;
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -281,6 +282,34 @@ void main() {
         tokens: pair(),
       );
       expect(after.outcome, RefreshOutcome.invalid);
+    });
+
+    test('overlapping refreshes rotate once and leave the winning token usable', () async {
+      final (user, c, first) = await connected();
+      final candidates = [pair(), pair()];
+      final results = await h.runBlocked(
+        hold: (tx) async {
+          await tx.execute(
+            Sql.named('SELECT 1 FROM oauth_refresh_tokens WHERE token_hash = @hash::bytea FOR UPDATE'),
+            parameters: {'hash': first.refreshHash},
+          );
+        },
+        calls: [
+          for (final tokens in candidates)
+            () => h.db.rotateRefreshToken(refreshHash: first.refreshHash, clientId: c.clientId, tokens: tokens),
+        ],
+      );
+      expect(results.map((r) => r.outcome), unorderedEquals([RefreshOutcome.rotated, RefreshOutcome.invalid]));
+      for (final (index, result) in results.indexed) {
+        final token = await h.db.useToken(candidates[index].accessHash, resource: resource);
+        expect(token?.userId, result.outcome == RefreshOutcome.rotated ? user : isNull);
+        final rows = await h.exec(
+          'SELECT token_hash FROM oauth_refresh_tokens WHERE token_hash = @hash::bytea',
+          {'hash': candidates[index].refreshHash},
+        );
+        expect(rows, hasLength(result.outcome == RefreshOutcome.rotated ? 1 : 0));
+      }
+      expect(await h.db.listConnectedApps(user), hasLength(1), reason: 'parallel retries must not revoke the grant');
     });
 
     test("another client can't use or revoke a client's refresh token", () async {

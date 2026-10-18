@@ -5,7 +5,7 @@ import 'package:heart/db/db.dart' show apiExceptionForDbError;
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart' show SetType, Workout, WorkoutPause, timestampOfUuidV7, uuidV7;
-import 'package:postgres/postgres.dart' show ServerException;
+import 'package:postgres/postgres.dart' show ServerException, Sql;
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -194,6 +194,52 @@ void main() {
         {'id': exerciseId},
       );
       expect(sets.first.toColumnMap()['n'], 1);
+    });
+
+    test('a retry arriving before the first insert commits reads the committed workout', () async {
+      final owner = await h.seedProfile();
+      final exerciseId = await h.seedGlobalExercise();
+      final id = uuidV7();
+      final results = await h.runBlocked(
+        hold: (tx) async {
+          // The first save is still uncommitted when the retry checks the id.
+          await tx.execute(
+            Sql.named('INSERT INTO workouts (id, user_id, name, started_at) VALUES (@id::uuid, @u, @n, @s)'),
+            parameters: {'id': id, 'u': owner, 'n': 'First save', 's': DateTime.utc(2026, 10, 1, 18)},
+          );
+        },
+        calls: [
+          () => h.db.createWorkout(
+            userId: owner,
+            body: WorkoutRequest(
+              userId: owner,
+              body: {
+                'id': id,
+                'name': 'Retry',
+                'start': '2026-10-01T18:00:00Z',
+                'exercises': [
+                  {
+                    'exercise': exerciseId,
+                    'sets': [
+                      {'weight': 80, 'reps': 5},
+                    ],
+                  },
+                ],
+              },
+            ),
+            imageUrl: imageUrl,
+          ),
+        ],
+      );
+      final (saved, created) = results.single;
+      expect(created, isFalse);
+      expect(saved.id, id);
+      expect(saved.name, 'First save');
+      expect(saved, isEmpty);
+      final rows = await h.exec('SELECT id FROM workout_exercises WHERE workout_id = @id::uuid', {'id': id});
+      expect(rows, isEmpty, reason: 'the aborted insert leaves none of the retry children behind');
+      final stored = await h.exec('SELECT id FROM workouts WHERE user_id = @u', {'u': owner});
+      expect(stored, hasLength(1));
     });
 
     test('a workout id already owned by a different user throws Forbidden id_taken', () async {
