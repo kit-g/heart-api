@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(38);
+SELECT plan(42);
 
 SELECT has_table('public'::name, 'exercise_sets'::name);
 
@@ -19,7 +19,8 @@ SELECT columns_are(
                    'completed_at',
                    'set_order',
                    'set_type',
-                   'rpe'
+                   'rpe',
+                   'target'
                    ]
        );
 
@@ -35,6 +36,7 @@ SELECT col_type_is('public'::name, 'exercise_sets'::name, 'completed_at'::name, 
 SELECT col_type_is('public'::name, 'exercise_sets'::name, 'set_order'::name, 'integer'::name);
 SELECT col_type_is('public'::name, 'exercise_sets'::name, 'set_type'::name, 'character(1)'::name);
 SELECT col_type_is('public'::name, 'exercise_sets'::name, 'rpe'::name, 'real'::name);
+SELECT col_type_is('public'::name, 'exercise_sets'::name, 'target'::name, 'jsonb'::name);
 
 SELECT has_pk('public'::name, 'exercise_sets'::name, 'exercise_sets has a primary key');
 SELECT col_is_pk('public'::name, 'exercise_sets'::name, 'id'::name, 'id is the primary key');
@@ -234,6 +236,43 @@ SELECT throws_ok(
                '22001',
                NULL,
                'a word is too long for the one-letter column, never silently cut'
+       );
+
+SELECT lives_ok(
+               $$
+               INSERT INTO exercise_sets (workout_exercise_id, set_order, target)
+               VALUES (
+                   (SELECT we.id FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id WHERE w.name = 'es check workout'),
+                   1, '{"reps": {"min": 6, "max": 10}}'
+               )
+               $$,
+               'a target is an object naming a measure'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO exercise_sets (workout_exercise_id, set_order, target)
+               VALUES (
+                   (SELECT we.id FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id WHERE w.name = 'es check workout'),
+                   1, '{}'
+               )
+               $$,
+               '23514',
+               NULL,
+               'no target is NULL, never an empty object'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO exercise_sets (workout_exercise_id, set_order, target)
+               VALUES (
+                   (SELECT we.id FROM workout_exercises we JOIN workouts w ON w.id = we.workout_id WHERE w.name = 'es check workout'),
+                   1, '[6, 10]'
+               )
+               $$,
+               '23514',
+               NULL,
+               'a target that is not an object is rejected'
        );
 
 SELECT * FROM finish();
