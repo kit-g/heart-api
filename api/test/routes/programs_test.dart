@@ -66,6 +66,46 @@ void main() {
       expect(captured.map((s) => s.name), ['A', 'B']);
     });
 
+    test('a session naming a template passes on what joining it needs (heart-api#244)', () async {
+      when(
+        service.createProgramOrExisting(
+          userId: anyNamed('userId'),
+          program: anyNamed('program'),
+          sessions: anyNamed('sessions'),
+        ),
+      ).thenAnswer((i) async => (i.namedArguments[#program] as Program, true));
+      const templateId = '019def00-0000-7000-8000-000000000021';
+
+      await createProgram(
+        wire(
+          jsonRequest(
+            method: Method.post,
+            path: '/programs',
+            body: {
+              'name': 'From a folder',
+              'sessions': [
+                {'id': templateId, 'name': 'Push', 'order': 3, 'joined': '2026-10-01T08:00:00.000Z'},
+              ],
+            },
+          ),
+        ),
+      );
+
+      final captured =
+          verify(
+                service.createProgramOrExisting(
+                  userId: _meId,
+                  program: anyNamed('program'),
+                  sessions: captureAnyNamed('sessions'),
+                ),
+              ).captured.single
+              as List<TemplateRequest>;
+      final session = captured.single;
+      expect(session.id, templateId);
+      expect(session.order, 3);
+      expect(session.joined, DateTime.utc(2026, 10, 1, 8));
+    });
+
     test('a replay is the bare program, 200', () async {
       when(
         service.createProgramOrExisting(

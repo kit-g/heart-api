@@ -5,7 +5,9 @@ part of 'inputs.dart';
 ///
 /// Each session is a template body, as `POST /templates` takes one, and becomes
 /// a template of the program. Starting a library program is this call: the
-/// device makes the copy and sends it whole.
+/// device makes the copy and sends it whole. A session whose `id` is one of the
+/// caller's templates already, such as a folder's, joins as it is, at its
+/// `order` (heart-api#244).
 class ProgramCreateIn {
   /// More sessions than any plan has, few enough to keep one create cheap.
   static const maxSessions = 50;
