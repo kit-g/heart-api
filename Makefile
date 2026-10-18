@@ -1,12 +1,13 @@
 # Repo-wide entrypoints. `make test` runs the same matrix CI does.
 # Database targets need local Postgres + pgtap (see database/README.md).
 
-.PHONY: bootstrap test test-dart test-db test-api-db test-python test-tf lint format-check db-up db-down db-reset db-seed
+.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf lint format-check db-up db-down db-reset db-seed
 
 bootstrap:
 	cd api && dart pub get && dart run build_runner build
 	cd shared/heart_aws && dart pub get
 	cd shared/heart_models && dart pub get && dart run build_runner build
+	$(MAKE) prepare-compat-tests
 	uv sync --all-packages
 	uv run pre-commit install --hook-type pre-push
 
@@ -38,10 +39,14 @@ test-db:
 	PGHOST=$${PGHOST:-localhost} PGDATABASE=$${PGDATABASE:-heart} ./scripts/apply_migrations.sh
 	./scripts/db_tests.sh
 
+# The installed-client decoder is pinned independently of the current API.
+prepare-compat-tests:
+	cd api/test/compatibility/mobile_1_13 && dart pub get --enforce-lockfile
+
 # The api's `db`-tagged integration tests (dart_test.yaml skips them by
 # default). Expects migrations applied — `make test-db` does that; `make test`
 # runs it first.
-test-api-db:
+test-api-db: prepare-compat-tests
 	cd api && PGHOST=$${PGHOST:-localhost} PGDATABASE=$${PGDATABASE:-heart} dart test --run-skipped -t db
 
 # Deterministic local dataset: migrations, then the exercise library synced

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:heart/db/db.dart';
 import 'package:postgres/postgres.dart' hide Connection;
+import 'package:test/test.dart';
 
 /// Base for `db`-tagged integration tests. Owns the connection [pool] + the real
 /// [Database], and provides shared seed builders so each suite only writes the
@@ -27,6 +28,7 @@ abstract class DatabaseTestBase {
     // Standard PG* env vars with local defaults, so the same harness works on a
     // dev machine (peer auth as the OS user) and in CI (PGUSER=postgres).
     final env = Platform.environment;
+    token = DateTime.now().microsecondsSinceEpoch.toString();
     pool = Pool.withEndpoints(
       [
         Endpoint(
@@ -38,14 +40,13 @@ abstract class DatabaseTestBase {
         ),
       ],
       // Local Postgres has no TLS; the default requires it.
-      settings: const PoolSettings(
+      settings: PoolSettings(
         maxConnectionCount: 5,
-        applicationName: 'heart-test',
+        applicationName: 'heart-test-$token',
         sslMode: SslMode.disable,
       ),
     );
     db = Database(pool: pool);
-    token = DateTime.now().microsecondsSinceEpoch.toString();
   }
 
   Future<void> teardownDatabase() async {
@@ -55,6 +56,50 @@ abstract class DatabaseTestBase {
 
   Future<Result> exec(String sql, [Map<String, dynamic> params = const {}]) {
     return pool.execute(Sql.named(sql), parameters: params);
+  }
+
+  /// Starts calls while [hold] owns a database lock, releasing it only after
+  /// Postgres reports every call waiting. Unlike a sleep or Future.wait alone,
+  /// this proves the operations overlap at the intended SQL boundary.
+  /// Leave a connection for the holder and another for the lock observer.
+  Future<List<T>> runBlocked<T>({
+    required Future<void> Function(TxSession tx) hold,
+    required List<Future<T> Function()> calls,
+  }) async {
+    if (calls.isEmpty || calls.length > 3) throw ArgumentError('runBlocked needs one to three calls');
+    Future<List<T>>? pending;
+    Object? failure;
+    StackTrace? failureStack;
+    try {
+      await pool.runTx((tx) async {
+        await hold(tx);
+        // Observe errors immediately, but propagate them after releasing the
+        // lock and draining every call, even when the barrier itself fails.
+        pending = Future.wait(calls.map((call) => Future<T>.sync(call))).catchError((Object error, StackTrace stack) {
+          failure = error;
+          failureStack = stack;
+          return <T>[];
+        });
+        final elapsed = Stopwatch()..start();
+        while (true) {
+          final rows = await exec(
+            'SELECT count(*)::int AS n FROM pg_stat_activity '
+            "WHERE application_name = @app AND wait_event_type = 'Lock'",
+            {'app': 'heart-test-$token'},
+          );
+          final waiting = rows.single.toColumnMap()['n'];
+          if (waiting == calls.length) break;
+          if (failure != null || elapsed.elapsed > const Duration(seconds: 10)) {
+            fail('Expected ${calls.length} blocked database calls, saw $waiting. Error: $failure');
+          }
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+      });
+    } finally {
+      await pending;
+    }
+    if (failure case final error?) Error.throwWithStackTrace(error, failureStack!);
+    return pending!;
   }
 
   /// Runs [sql] and returns the `id` column of the first row as a string.
