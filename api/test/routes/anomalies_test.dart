@@ -57,7 +57,7 @@ void main() {
     test('an empty status is no status, as any optional parameter', () async {
       when(
         service.getAnomalies(userId: _meId, status: null, cursor: null, limit: 30),
-      ).thenAnswer((_) async => Page(items: const [], hasMore: false));
+      ).thenAnswer((_) async => const Page(items: [], hasMore: false));
 
       final page = await getAnomalies(
         wire(bareRequest(method: Method.get, path: '/anomalies', query: {'status': ''})),
