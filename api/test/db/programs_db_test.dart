@@ -157,6 +157,137 @@ void main() {
       expect(await count('SELECT count(*) AS n FROM programs WHERE id = @id::uuid', {'id': id}), 0);
     });
 
+    group('from templates the user already has (heart-api#244)', () {
+      test("a folder's templates join as they are, in the order given, beside new ones", () async {
+        final userId = await h.seedProfile();
+        final folder = await h.db.createFolder(
+          userId: userId,
+          folder: TemplateFolder(name: 'Push pull'),
+        );
+        final push = await h.db.createTemplate(
+          userId: userId,
+          body: session(userId, 'Push', 0, folderId: folder.id),
+        );
+        final pull = await h.db.createTemplate(
+          userId: userId,
+          body: session(userId, 'Pull', 1, folderId: folder.id),
+        );
+        final filed = DateTime.utc(2026, 1, 1, 8);
+
+        final (created, isNew) = await h.db.createProgramOrExisting(
+          userId: userId,
+          program: program(),
+          sessions: [
+            // the body of an existing template is not applied, only its place
+            TemplateRequest(userId: userId, id: pull.id, name: 'ignored', order: 0, joined: filed),
+            TemplateRequest(userId: userId, id: push.id, name: 'ignored', order: 1),
+            session(userId, 'Legs', 2),
+          ],
+        );
+
+        expect(isNew, isTrue);
+        expect(created.sessions, hasLength(3));
+        expect(created.sessions.take(2), [pull.id, push.id]);
+        expect(created.joined[pull.id], filed);
+        expect(created.joined[push.id], isNotNull);
+
+        final joined = await h.db.getTemplate(userId: userId, templateId: pull.id);
+        expect(joined.programId, created.id);
+        expect(joined.name, 'Pull');
+        expect(joined.note, 'why Pull');
+        expect(joined.folder?.id, folder.id);
+        expect(joined.single.single.reps, 5);
+        final legs = await h.db.getTemplate(userId: userId, templateId: created.sessions.last);
+        expect(legs.name, 'Legs');
+        expect(
+          await count('SELECT count(*) AS n FROM templates WHERE user_id = @userId', {'userId': userId}),
+          3,
+        );
+      });
+
+      test('one in another program moves to the new one', () async {
+        final userId = await h.seedProfile();
+        final (first, _) = await h.db.createProgramOrExisting(
+          userId: userId,
+          program: program(),
+          sessions: [session(userId, 'A', 0)],
+        );
+        final templateId = first.sessions.single;
+
+        final (second, _) = await h.db.createProgramOrExisting(
+          userId: userId,
+          program: program(name: 'Second'),
+          sessions: [TemplateRequest(userId: userId, id: templateId)],
+        );
+
+        expect(second.sessions, [templateId]);
+        expect((await h.db.getProgram(userId: userId, programId: first.id!)).sessions, isEmpty);
+      });
+
+      test("someone else's template is id_taken and nothing is written", () async {
+        final owner = await h.seedProfile();
+        final stranger = await h.seedProfile();
+        final theirs = await h.db.createTemplate(userId: owner, body: session(owner, 'Theirs', 0));
+        final id = uuidV7();
+
+        await expectLater(
+          h.db.createProgramOrExisting(
+            userId: stranger,
+            program: program(id: id),
+            sessions: [
+              session(stranger, 'Mine', 0),
+              TemplateRequest(userId: stranger, id: theirs.id),
+            ],
+          ),
+          throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+        );
+        expect(await count('SELECT count(*) AS n FROM programs WHERE id = @id::uuid', {'id': id}), 0);
+        expect(
+          await count('SELECT count(*) AS n FROM templates WHERE user_id = @userId', {'userId': stranger}),
+          0,
+        );
+        final untouched = await h.db.getTemplate(userId: owner, templateId: theirs.id);
+        expect(untouched.programId, isNull);
+      });
+
+      test('a template sent twice joins once, at its first place', () async {
+        final userId = await h.seedProfile();
+        final push = await h.db.createTemplate(userId: userId, body: session(userId, 'Push', 5));
+
+        final (created, _) = await h.db.createProgramOrExisting(
+          userId: userId,
+          program: program(),
+          sessions: [
+            TemplateRequest(userId: userId, id: push.id, order: 1),
+            TemplateRequest(userId: userId, id: push.id, order: 9),
+          ],
+        );
+
+        expect(created.sessions, [push.id]);
+        expect((await h.db.getTemplate(userId: userId, templateId: push.id)).order, 1);
+      });
+
+      test('a replay of the program leaves its existing templates where they are', () async {
+        final userId = await h.seedProfile();
+        final id = uuidV7();
+        await h.db.createProgramOrExisting(
+          userId: userId,
+          program: program(id: id),
+          sessions: const [],
+        );
+        final loose = await h.db.createTemplate(userId: userId, body: session(userId, 'Loose', 0));
+
+        final (again, isNew) = await h.db.createProgramOrExisting(
+          userId: userId,
+          program: program(id: id),
+          sessions: [TemplateRequest(userId: userId, id: loose.id)],
+        );
+
+        expect(isNew, isFalse);
+        expect(again.sessions, isEmpty);
+      });
+    });
+
     test('stops at the cap, archived programs included', () async {
       final userId = await h.seedProfile();
       await h.exec(

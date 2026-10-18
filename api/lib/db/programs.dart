@@ -37,7 +37,33 @@ mixin _Programs on _DatabaseBase implements ProgramService {
           final id = row['id'].toString();
           final created = row['created'] as bool;
           if (created) {
-            for (final session in sessions) {
+            // a session whose id the caller already has is one of their
+            // templates, such as a folder's, and joins as it is; the first
+            // mention of an id is its place, as it is for one created here
+            final named = <String, TemplateRequest>{
+              for (final session in sessions.reversed)
+                if (session.id case final String sessionId) sessionId: session,
+            };
+            final joined = <String>{};
+            if (named.isNotEmpty) {
+              final rows = await tx.execute(
+                _joinProgram.toSql(),
+                parameters: {
+                  'programId': id,
+                  'userId': userId,
+                  'sessions': jsonEncode([
+                    for (final MapEntry(key: sessionId, value: session) in named.entries)
+                      {
+                        'id': sessionId,
+                        'order_index': session.order,
+                        'joined': session.joined?.toUtc().toIso8601String(),
+                      },
+                  ]),
+                },
+              );
+              joined.addAll(rows.map((row) => '${row.toColumnMap()['id']}'));
+            }
+            for (final session in sessions.where((session) => !joined.contains(session.id))) {
               final saved = await tx.execute(
                 _saveTemplate.toSql(),
                 parameters: {
