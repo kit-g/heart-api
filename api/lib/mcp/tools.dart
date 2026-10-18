@@ -2,6 +2,7 @@ import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/mcp/widgets.dart';
 import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/anomalies.dart';
 import 'package:heart/models/changes.dart';
@@ -26,12 +27,17 @@ class McpTool {
   final Map<String, dynamic> inputSchema;
   final Future<Map<String, dynamic>> Function(Request request, Map<String, dynamic> arguments) run;
 
+  /// The MCP Apps page a host that renders them draws the result into. The
+  /// result itself is the same either way, so a text-only host loses nothing.
+  final McpWidget? widget;
+
   const new({
     required this.name,
     required this.title,
     required this.description,
     this.inputSchema = const {'type': 'object', 'properties': <String, dynamic>{}, 'additionalProperties': false},
     required this.run,
+    this.widget,
   });
 
   Map<String, dynamic> toJson() {
@@ -47,6 +53,7 @@ class McpTool {
         'idempotentHint': true,
         'openWorldHint': false,
       },
+      '_meta': ?widget?.toToolMeta(),
     };
   }
 }
@@ -138,6 +145,7 @@ final List<McpTool> tools = [
       'required': ['workoutId'],
       'additionalProperties': false,
     },
+    widget: workoutWidget,
     run: (request, arguments) async {
       final id = arguments['workoutId'];
       if (id is! String || !isUuidV7(id)) throw const ToolError('workoutId must be an id from list_workouts.');
@@ -181,6 +189,7 @@ final List<McpTool> tools = [
       },
       'additionalProperties': false,
     },
+    widget: recordsWidget,
     run: (request, arguments) async {
       final filter = switch (arguments['exercise']) {
         final String text when text.trim().isNotEmpty => text.trim().toLowerCase(),
@@ -247,6 +256,7 @@ final List<McpTool> tools = [
       'required': ['exerciseId'],
       'additionalProperties': false,
     },
+    widget: progressWidget,
     run: (request, arguments) async {
       final id = arguments['exerciseId'];
       if (id is! String || !isUuidV7(id)) {
@@ -959,6 +969,7 @@ extension on Workout {
           {
             'id': exercise.exercise.id,
             'name': exercise.exercise.name,
+            'category': exercise.exercise.category.value,
             'note': ?exercise.note,
             'sets': [
               for (final set in exercise) {...set.toMcp(), 'target': ?set.target?.toMcp(names: names)},

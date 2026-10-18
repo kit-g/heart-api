@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:heart/mcp/widgets.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/changes.dart';
@@ -1100,6 +1101,188 @@ void main() {
     test('an unknown tool is invalid params', () async {
       final response = await rpc('tools/call', params: {'name': 'delete_everything'});
       expect((response.body['error'] as Map)['code'], -32602);
+    });
+  });
+
+  group('widgets (MCP Apps)', () {
+    const rendered = {
+      'get_workout': 'ui://heart/workout.v1.html',
+      'get_exercise_history': 'ui://heart/exercise-progress.v1.html',
+      'get_personal_records': 'ui://heart/records.v1.html',
+    };
+
+    test('both eras advertise resources', () async {
+      final legacy = (await rpc('initialize', params: {'protocolVersion': '2025-06-18'})).body['result'] as Map;
+      expect((legacy['capabilities'] as Map)['resources'], {'listChanged': false});
+      expect((legacy['capabilities'] as Map)['tools'], {'listChanged': false});
+
+      final modern =
+          (await rpc(
+                'server/discover',
+                params: {'_meta': modernMeta()},
+                headers: modernHeaders('server/discover'),
+              )).body['result']
+              as Map;
+      expect((modern['capabilities'] as Map).keys, containsAll(['tools', 'resources']));
+    });
+
+    test('resources/list names each page as an MCP App, and is free', () async {
+      final resources = ((await rpc('resources/list')).body['result'] as Map)['resources'] as List;
+      expect(resources.map((r) => (r as Map)['uri']), unorderedEquals(rendered.values));
+      for (final resource in resources.cast<Map>()) {
+        expect(resource['mimeType'], 'text/html;profile=mcp-app');
+        expect(resource['name'], isNotEmpty);
+        expect(resource['description'], isNotEmpty);
+      }
+      verify(app.db.useToken(any, count: false)).called(1);
+
+      final modern =
+          (await rpc(
+                'resources/list',
+                params: {'_meta': modernMeta()},
+                headers: modernHeaders('resources/list'),
+              )).body['result']
+              as Map;
+      expect(modern['resultType'], 'complete');
+      expect(modern['ttlMs'], greaterThan(0));
+      expect(modern['cacheScope'], 'public');
+    });
+
+    test('resources/read serves the page, uncounted', () async {
+      for (final uri in rendered.values) {
+        final contents =
+            ((await rpc('resources/read', params: {'uri': uri})).body['result'] as Map)['contents'] as List;
+        final page = contents.single as Map;
+        expect(page['uri'], uri);
+        expect(page['mimeType'], 'text/html;profile=mcp-app');
+        expect(page['text'], startsWith('<!DOCTYPE html>'));
+        expect(((page['_meta'] as Map)['ui'] as Map)['prefersBorder'], isFalse);
+      }
+      verify(app.db.useToken(any, count: false)).called(rendered.length);
+      verifyNever(app.db.useToken(any, count: true));
+    });
+
+    test('a modern resources/read names the URI in Mcp-Name', () async {
+      const uri = 'ui://heart/records.v1.html';
+      final ok = await rpc(
+        'resources/read',
+        params: {'uri': uri, '_meta': modernMeta()},
+        headers: modernHeaders('resources/read', name: uri),
+      );
+      expect(ok.status, 200);
+      expect((ok.body['result'] as Map)['cacheScope'], 'public');
+
+      final mismatch = await rpc(
+        'resources/read',
+        params: {'uri': uri, '_meta': modernMeta()},
+        headers: modernHeaders('resources/read', name: 'ui://heart/workout.v1.html'),
+      );
+      expect((mismatch.body['error'] as Map)['code'], -32020);
+    });
+
+    test('there are no resource templates, and asking for them is not an error', () async {
+      final result = (await rpc('resources/templates/list')).body['result'] as Map;
+      expect(result['resourceTemplates'], isEmpty);
+    });
+
+    test('an unknown resource is invalid params naming the URI', () async {
+      final response = await rpc('resources/read', params: {'uri': 'ui://heart/nope.html'});
+      expect(response.status, 200);
+      final error = response.body['error'] as Map;
+      expect(error['code'], -32602);
+      expect(error['data'], {'uri': 'ui://heart/nope.html'});
+
+      final missing = await rpc('resources/read', params: <String, dynamic>{});
+      expect((missing.body['error'] as Map)['code'], -32602);
+    });
+
+    test('each rendered tool points at its page, under both keys; the rest carry none', () async {
+      final tools = ((await rpc('tools/list')).body['result'] as Map)['tools'] as List;
+      for (final tool in tools.cast<Map>()) {
+        final uri = rendered[tool['name']];
+        if (uri == null) {
+          expect(tool.containsKey('_meta'), isFalse, reason: tool['name'] as String);
+          continue;
+        }
+        expect(tool['_meta'], {
+          'ui': {'resourceUri': uri},
+          'ui/resourceUri': uri,
+          'openai/outputTemplate': uri,
+        });
+      }
+      expect(tools.where((tool) => (tool as Map).containsKey('_meta')), hasLength(rendered.length));
+    });
+
+    test('a rendered tool still answers in text and structured content alike', () async {
+      final workout = Workout.fromRow(
+        {
+          'id': '019a0000-0000-7000-8000-0000000000aa',
+          'name': 'Push',
+          'started_at': '2026-10-01T10:00:00Z',
+          'completed_at': '2026-10-01T11:00:00Z',
+          'exercises': [
+            {
+              'id': 'we-1',
+              'exercise': {
+                'id': 'e1',
+                'name': 'Assisted Pull Up',
+                'category': 'Assisted Body Weight',
+                'target': 'Back',
+              },
+              'exercise_order': 0,
+              'sets': <Object>[],
+            },
+          ],
+        },
+        imageUrl: (k) => k,
+      );
+      when(
+        app.db.getWorkout(userId: 'u1', workoutId: workout.id, imageUrl: anyNamed('imageUrl')),
+      ).thenAnswer((_) async => workout);
+
+      final result =
+          (await rpc(
+                'tools/call',
+                params: {
+                  'name': 'get_workout',
+                  'arguments': {'workoutId': workout.id},
+                },
+              )).body['result']
+              as Map;
+      expect(result.keys, unorderedEquals(['content', 'structuredContent', 'isError']));
+      expect((result['structuredContent'] as Map)['name'], 'Push');
+      // the card leaves assisted work out of volume, so it needs the category
+      final exercise = ((result['structuredContent'] as Map)['exercises'] as List).single as Map;
+      expect(exercise['category'], 'Assisted Body Weight');
+      expect(jsonDecode(((result['content'] as List).single as Map)['text'] as String), result['structuredContent']);
+    });
+  });
+
+  group('widget pages', () {
+    for (final widget in widgets) {
+      test('${widget.name} is self-contained and speaks the MCP Apps bridge', () {
+        final html = widget.html;
+        expect(widget.uri, startsWith('ui://heart/'));
+        expect(html, startsWith('<!DOCTYPE html>'));
+        expect(html, endsWith('</html>'));
+        // nothing the host's default CSP would block, and no data of its own
+        expect(html, isNot(matches(RegExp('(src|href)\\s*=\\s*["\']?https?:'))));
+        expect(html, isNot(matches(RegExp(r'\b(fetch|XMLHttpRequest|WebSocket|EventSource|importScripts)\b'))));
+        expect(html, isNot(contains('innerHTML')));
+        expect(html, isNot(contains('@import')));
+        for (final method in ['ui/initialize', 'ui/notifications/initialized', 'ui/notifications/tool-result']) {
+          expect(html, contains("'$method'"));
+        }
+        expect(html, contains('ui/notifications/size-changed'));
+        expect(html, contains('prefers-color-scheme: dark'));
+        expect(html, contains('[data-theme="dark"]'));
+        expect(utf8.encode(html).length, lessThan(16 * 1024));
+      });
+    }
+
+    test('calories show as an estimate', () {
+      expect(workoutWidget.html, contains('caloriesEstimate'));
+      expect(workoutWidget.html, contains('Calories, estimated'));
     });
   });
 }
