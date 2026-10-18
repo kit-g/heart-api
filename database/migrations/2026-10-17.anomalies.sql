@@ -230,10 +230,11 @@ $$;
 COMMENT ON FUNCTION _detect_anomalies(TEXT) IS
     'Judges one user''s whole log against the anomaly rules, recording what it finds and keeping what the user decided about entries unchanged since. Returns how many it found';
 
--- What pg_cron runs: every user who wrote since the last sweep, all of them
--- the first time, each judged on their own so one failure is only theirs. The window reaches back 10 minutes past the last sweep's
--- start, so a write committed while it ran is read next time; judging a
--- user twice changes nothing.
+-- What pg_cron runs, nightly: every user who wrote since the last sweep, all
+-- of them the first time, each judged on their own so one failure is only
+-- theirs. The window reaches back 10 minutes past the last sweep's start, so
+-- a write committed while it ran is read next time; judging a user twice
+-- changes nothing.
 DROP FUNCTION IF EXISTS _sweep_anomalies();
 
 CREATE OR REPLACE FUNCTION _sweep_anomalies()

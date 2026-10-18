@@ -60,7 +60,7 @@ void main() {
       expect(calls.map((c) => c['jobname']), ['anomaly-sweep', 'cron-history-cleanup', 'oauth-cleanup']);
       expect(calls.first, {
         'jobname': 'anomaly-sweep',
-        'schedule': '*/15 * * * *',
+        'schedule': '37 3 * * *',
         'command': 'SELECT _sweep_anomalies()',
         'db': database,
       });

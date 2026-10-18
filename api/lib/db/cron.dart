@@ -17,9 +17,9 @@ SELECT EXISTS (
 /// list is the whole truth: a job removed here needs a `cron.unschedule` in
 /// the same change. `@database` is the app's database, where each job runs.
 const _cronJobs = [
-  // every 15 minutes: suspicious entries in the logs written since the last
+  // 03:37 UTC daily: suspicious entries in the logs written since the last
   // sweep (heart-api#42)
-  "SELECT cron.schedule_in_database('anomaly-sweep', '*/15 * * * *', 'SELECT _sweep_anomalies()', @database)",
+  "SELECT cron.schedule_in_database('anomaly-sweep', '37 3 * * *', 'SELECT _sweep_anomalies()', @database)",
   // 04:17 UTC daily: OAuth rows no flow can use any more
   "SELECT cron.schedule_in_database('oauth-cleanup', '17 4 * * *', 'SELECT _clean_up_oauth()', @database)",
   // 04:47 UTC daily: pg_cron's own run log, which otherwise grows forever
