@@ -1,0 +1,102 @@
+/// The MCP Apps views: one static HTML page per widget, served as a `ui://`
+/// resource and named by its tool's `_meta`, for hosts that render them.
+///
+/// The pages are Dart constants so they ship inside the compiled binary,
+/// which is all the Lambda zip carries. Each is self-contained: inline CSS
+/// and script, no fetches, nothing a host's default CSP would block. A page
+/// draws only the tool result the host hands it over the `ui/*` bridge.
+library;
+
+part 'widgets/shell.dart';
+part 'widgets/workout.dart';
+part 'widgets/progress.dart';
+part 'widgets/records.dart';
+
+/// The MCP Apps resource type (`text/html;profile=mcp-app`).
+const _appMimeType = 'text/html;profile=mcp-app';
+
+/// One widget: a page a host renders a tool's result into.
+///
+/// The [uri] is a host's cache key for the page, so it carries a version: a
+/// change an installed host must not mix with a cached copy takes a new one.
+/// The shell in `widgets/shell.dart` is part of every page, so a change
+/// there that needs a new URI takes one for all three.
+class McpWidget {
+  final String uri;
+  final String name;
+  final String title;
+  final String description;
+  final String html;
+
+  const new({
+    required this.uri,
+    required this.name,
+    required this.title,
+    required this.description,
+    required this.html,
+  });
+
+  /// The page draws its own card, so the host's frame stays off.
+  static const _ui = {'prefersBorder': false};
+
+  /// Its entry in `resources/list`.
+  Map<String, dynamic> toResource() {
+    return {
+      'uri': uri,
+      'name': name,
+      'title': title,
+      'description': description,
+      'mimeType': _appMimeType,
+      '_meta': {'ui': _ui},
+    };
+  }
+
+  /// Its `resources/read` contents.
+  Map<String, dynamic> toContents() {
+    return {
+      'uri': uri,
+      'mimeType': _appMimeType,
+      'text': html,
+      '_meta': {'ui': _ui},
+    };
+  }
+
+  /// What a tool rendered by it carries in `_meta`: the MCP Apps key, the
+  /// flat key it replaced (still read by hosts on the extension's early
+  /// drafts), and ChatGPT's older Apps SDK alias.
+  Map<String, dynamic> toToolMeta() {
+    return {
+      'ui': {'resourceUri': uri},
+      'ui/resourceUri': uri,
+      'openai/outputTemplate': uri,
+    };
+  }
+}
+
+const workoutWidget = McpWidget(
+  uri: 'ui://heart/workout.v1.html',
+  name: 'workout',
+  title: 'Workout card',
+  description: 'One workout as the app lays it out when the session is done: duration, volume, every set.',
+  html: _workoutHtml,
+);
+
+const progressWidget = McpWidget(
+  uri: 'ui://heart/exercise-progress.v1.html',
+  name: 'exercise-progress',
+  title: 'Exercise progress',
+  description: "One exercise's progress chart, session by session, as the app plots it.",
+  html: _progressHtml,
+);
+
+const recordsWidget = McpWidget(
+  uri: 'ui://heart/records.v1.html',
+  name: 'records',
+  title: 'Personal records',
+  description: 'Personal records per exercise, with the date each was set and what it beat.',
+  html: _recordsHtml,
+);
+
+const List<McpWidget> widgets = [workoutWidget, progressWidget, recordsWidget];
+
+final Map<String, McpWidget> widgetsByUri = {for (final widget in widgets) widget.uri: widget};
