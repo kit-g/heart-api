@@ -5,9 +5,29 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/models/oauth.dart';
 import 'package:relic/relic.dart';
 
-/// Scopes this server grants. `read` covers everything under `/me` and the
-/// MCP server's read tools.
-const supportedScopes = {'read'};
+/// A scope this server grants, as a token carries it. Per resource, not per
+/// verb, so a user can let an assistant build templates without letting it
+/// touch their history (`docs/2026-10-04.oauth.md`, *Scopes*).
+enum Scope {
+  /// Everything under `/me` and every read-only MCP tool.
+  read('read'),
+
+  /// The MCP server's template writes: creating templates and folders, and
+  /// replacing a template.
+  writeTemplates('write:templates');
+
+  final String value;
+
+  new(this.value);
+}
+
+/// Every scope this server grants, as the metadata documents list them.
+final supportedScopes = {for (final scope in Scope.values) scope.value};
+
+/// What a client asking for no scope gets, and what a 401 challenge names:
+/// reading only. A write is asked for when a host first needs one, through
+/// the `insufficient_scope` step-up.
+final defaultScopes = {Scope.read.value};
 
 /// An OAuth protocol failure (RFC 6749 §5.2): the protocol's own error shape,
 /// `{error, error_description}`, not the API's.
@@ -80,12 +100,16 @@ extension OAuthScopes on String? {
   /// Requested scopes, space-separated, narrowed to what this server grants
   /// (RFC 6749 §3.3: the server may issue fewer, and says so in the token
   /// response). Hosts add scopes of their own, such as `offline_access`;
-  /// those are dropped, not refused. Absent asks for everything supported;
-  /// asking only for scopes this server has never heard of is an error.
-  List<String> toScopes() {
+  /// those are dropped, not refused. Absent asks for [defaultScopes], never a
+  /// write; asking only for scopes this server has never heard of is an error.
+  ///
+  /// [writes] is whether the resource asked for takes any: the MCP server
+  /// does, `/me` doesn't, so a write asked for there is dropped like a scope
+  /// this server has never heard of.
+  List<String> toScopes({bool writes = true}) {
     final asked = (this ?? '').split(' ').where((s) => s.isNotEmpty).toSet();
-    if (asked.isEmpty) return [...supportedScopes];
-    final granted = asked.intersection(supportedScopes);
+    if (asked.isEmpty) return [...defaultScopes];
+    final granted = asked.intersection(writes ? supportedScopes : defaultScopes);
     if (granted.isEmpty) throw OAuthError('invalid_scope', 'none of these scopes exist here: ${asked.join(' ')}');
     return [...granted]..sort();
   }

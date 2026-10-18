@@ -27,12 +27,18 @@ void main() {
     when(config.oauth).thenReturn(null);
   });
 
-  TokenUse use({int minute = 1, int day = 1, DateTime? minuteStart, DateTime? dayStart}) {
+  TokenUse use({
+    int minute = 1,
+    int day = 1,
+    DateTime? minuteStart,
+    DateTime? dayStart,
+    List<String> scopes = const ['read'],
+  }) {
     return (
       userId: 'u1',
       resource: null,
       clientId: null,
-      scopes: const ['read'],
+      scopes: scopes,
       purpose: ApiTokenPurpose.aiAssistant,
       minuteStart: minuteStart ?? now,
       minuteCount: minute,
@@ -68,6 +74,18 @@ void main() {
 
     expect(response.statusCode, 200);
     expect(await response.readAsString(), 'u1');
+  });
+
+  test('a token that holds no read scope is a 403 asking for it, and never reaches the handler', () async {
+    when(service.useToken(TokenSecret.hash(secret))).thenAnswer((_) async => use(scopes: const ['write:templates']));
+
+    final response = await run(build(bearer: secret), inner: (_) async => throw StateError('reached the handler'));
+
+    expect(response.statusCode, 403);
+    expect((jsonDecode(await response.readAsString()) as Map)['code'], 'insufficient_scope');
+    final challenge = response.headers['www-authenticate']!.single;
+    expect(challenge, contains('error="insufficient_scope"'));
+    expect(challenge, contains('scope="read write:templates"'));
   });
 
   test('missing, malformed and unknown tokens are the same 401 invalid_token', () async {
