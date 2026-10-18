@@ -4,6 +4,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/mcp/protocol.dart';
 import 'package:heart/mcp/tools.dart';
+import 'package:heart/mcp/widgets.dart';
 import 'package:heart/middleware/tokens.dart';
 import 'package:heart/oauth/protocol.dart';
 import 'package:heart_models/heart_models.dart';
@@ -43,7 +44,8 @@ const _listTtl = Duration(hours: 1);
 /// A request from a browser origin the API doesn't trust is refused outright.
 /// Authenticated with a personal access token. Only data calls (`tools/call`)
 /// count against the account's rate limits; a host repeats the handshake and
-/// the tool list at the start of every conversation.
+/// the tool list at the start of every conversation, and the resources are
+/// static widget pages, the same for every account.
 Future<Response> mcpEndpoint(Request request) async {
   // DNS-rebinding defence: hosts call from their servers and send no Origin;
   // a browser page that names one has to be one this API already trusts.
@@ -139,6 +141,19 @@ Future<Response> _respond(
         if (modern != null) ...{'ttlMs': _listTtl.inMilliseconds, 'cacheScope': 'private'},
       },
       'tools/call' => await _callTool(request, params),
+      'resources/list' => {
+        'resources': [for (final widget in widgets) widget.toResource()],
+        if (modern != null) ...{'ttlMs': _listTtl.inMilliseconds, 'cacheScope': 'public'},
+      },
+      // advertising resources makes some clients ask for templates too
+      'resources/templates/list' => {
+        'resourceTemplates': const <Object>[],
+        if (modern != null) ...{'ttlMs': _listTtl.inMilliseconds, 'cacheScope': 'public'},
+      },
+      'resources/read' => {
+        'contents': [_widgetOf(params).toContents()],
+        if (modern != null) ...{'ttlMs': _listTtl.inMilliseconds, 'cacheScope': 'public'},
+      },
       _ => throw RpcError(.methodNotFound, 'Method not found: $method', status: 404),
     };
 
@@ -207,6 +222,7 @@ Map<String, dynamic> _initialize(Map<String, dynamic> params) {
     'protocolVersion': legacyVersions.contains(requested) ? requested : legacyVersions.first,
     'capabilities': {
       'tools': {'listChanged': false},
+      'resources': {'listChanged': false},
     },
     'serverInfo': _serverInfo,
     'instructions': instructions,
@@ -216,10 +232,20 @@ Map<String, dynamic> _initialize(Map<String, dynamic> params) {
 Map<String, dynamic> _discover() {
   return {
     'supportedVersions': supportedVersions,
-    'capabilities': {'tools': <String, dynamic>{}},
+    'capabilities': {'tools': <String, dynamic>{}, 'resources': <String, dynamic>{}},
     'instructions': instructions,
     'ttlMs': _listTtl.inMilliseconds,
     'cacheScope': 'public',
+  };
+}
+
+/// A widget page by its `ui://` URI. An unknown one is invalid params, the
+/// code 2026-07-28 gives a missing resource; to a 2025 client, whose spec
+/// said -32002, it is still an error naming the URI.
+McpWidget _widgetOf(Map<String, dynamic> params) {
+  return switch (widgetsByUri[params['uri']]) {
+    final McpWidget widget => widget,
+    null => throw RpcError(.invalidParams, 'Resource not found', data: {'uri': params['uri']}),
   };
 }
 
