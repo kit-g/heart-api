@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.39.0
+
+Clearing a set's measurement, weeks on the user's first day, and a retired
+matcher.
+
+- New: `ExerciseSet.clearMeasurements(Set<ExerciseSetField>)`, with
+  `ExerciseSetField` (`weight`, `reps`, `duration`, `distance`): unsets those
+  measurements, leaving the others alone, and the set then writes as one
+  that never had them. `setMeasurements` still reads a null as "keep" (heart-api#212).
+- `ExerciseSet.toRow` always carries the measurements of the set's category,
+  a null one included, so an update from it clears a stored value; the
+  others stay out, as before.
+- New: `WorkoutAggregation.fromRows` and `fromJson` take `firstWeekday` (ISO,
+  1 Monday to 7 Sunday), the day its weeks start on; Monday when it is left
+  out, so a caller passing nothing gets the weeks it did (heart-api#203).
+- Fix: the weeks `WorkoutAggregation` fills in are calendar weeks, so near a
+  DST change none lands an hour off midnight and drops the workouts of the
+  week it stands for.
+- Deprecated: `Searchable` and `Exercise.contains`, which nothing calls; search
+  with `Exercise.match`. Both still work (heart-api#118).
+
 ## 2.38.0
 
 Suspicious entries and what the user makes of them (heart-api#42).

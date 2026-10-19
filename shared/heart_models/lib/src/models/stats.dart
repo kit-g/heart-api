@@ -37,9 +37,13 @@ abstract interface class WorkoutAggregation with Iterable<WeekSummary> {
   ///
   /// It also ensures that the weeks are represented in a reversed order (latest
   /// week first) and only retains the most recent weeks, up to the maximum defined.
-  factory fromJson(Map<String, dynamic> json) = _WorkoutAggregation.fromJson;
+  ///
+  /// Weeks start on [firstWeekday] (ISO, 1 Monday to 7 Sunday) here and in
+  /// [fromRows]. A stored week keeps its key as its [WeekSummary.weekId], so
+  /// one keyed on another first day still reads that day.
+  factory fromJson(Map<String, dynamic> json, {int firstWeekday}) = _WorkoutAggregation.fromJson;
 
-  factory fromRows(List<Map<String, dynamic>> rows) = _WorkoutAggregation.fromRows;
+  factory fromRows(List<Map<String, dynamic>> rows, {int firstWeekday}) = _WorkoutAggregation.fromRows;
 
   factory dummy() = _WorkoutAggregation.dummy;
 
@@ -124,7 +128,7 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
     return const _WorkoutAggregation(weeks: []);
   }
 
-  factory fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json, {int firstWeekday = DateTime.monday}) {
     final parsed = json.entries.map(
       (week) {
         return _WeekSummary(
@@ -143,16 +147,16 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
 
     // Anchor the trailing window to the local "now" so the current week turns over
     // at local midnight, not at UTC midnight (which shows an empty week early).
-    final currentWeekStart = getMonday(DateTime.now());
+    final currentWeekStart = DateTime.now().weekStart(firstWeekday);
 
     if (parsed.isEmpty) {
       return _WorkoutAggregation.empty();
     }
 
-    // startDate is already a local calendar Monday (getMonday builds an unzoned
-    // DateTime); keep it local so it shares a zone with currentWeekStart below.
-    final earliestParsedWeekStart = parsed.first.startDate;
-    final limit = currentWeekStart.subtract(const Duration(days: 7 * 7));
+    // a stored key is a local date, maybe bucketed on another first day; its
+    // week start keeps the grid local, like currentWeekStart, and on that day
+    final earliestParsedWeekStart = parsed.first.startDate.weekStart(firstWeekday);
+    final limit = currentWeekStart.plusDays(-7 * 7);
     final earliestWeekStart = switch (earliestParsedWeekStart.isAfter(limit)) {
       true => limit,
       false => earliestParsedWeekStart,
@@ -161,13 +165,13 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
     final completeWeeks =
         Iterable.generate(
               // how many weeks exist between earliestWeekStart and currentWeekStart
-              currentWeekStart.difference(earliestWeekStart).inDays ~/ 7 + 1,
-              (index) => earliestWeekStart.add(Duration(days: index * 7)),
+              currentWeekStart.weeksSince(earliestWeekStart) + 1,
+              (index) => earliestWeekStart.plusDays(index * 7),
             )
             .map(
               (iteration) {
                 return parsed.firstWhere(
-                  (w) => w.startDate.isAtSameWeekAs(iteration),
+                  (w) => w.startDate.isAtSameWeekAs(iteration, firstWeekday),
                   orElse: () => _WeekSummary.empty(weekId: iteration.toIso8601String()),
                 );
               },
@@ -180,14 +184,14 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
     return _WorkoutAggregation(weeks: completeWeeks);
   }
 
-  factory fromRows(List<Map<String, dynamic>> rows) {
+  factory fromRows(List<Map<String, dynamic>> rows, {int firstWeekday = DateTime.monday}) {
     final byWeek = <String, List<_WorkoutSummary>>{};
 
     for (final row in rows) {
       final DateTime start = DateTime.parse(row['start']);
       // Bucket by the user's calendar, not UTC: a Sunday-evening session west of
       // UTC is already Monday in UTC and would file into next week otherwise.
-      final String weekId = getMonday(start.toLocal()).toIso8601String();
+      final String weekId = start.toLocal().weekStart(firstWeekday).toIso8601String();
 
       byWeek
           .putIfAbsent(weekId, () => [])
@@ -214,19 +218,19 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
 
     // Local "now" anchor + a local earliest, matching fromRows — the keys parsed
     // above were bucketed on the local calendar, so the fill window must be too.
-    final currentWeekStart = getMonday(DateTime.now());
-    final earliestParsedWeekStart = parsed.first.startDate;
-    final limit = currentWeekStart.subtract(const Duration(days: 7 * 7));
+    final currentWeekStart = DateTime.now().weekStart(firstWeekday);
+    final earliestParsedWeekStart = parsed.first.startDate.weekStart(firstWeekday);
+    final limit = currentWeekStart.plusDays(-7 * 7);
     final earliestWeekStart = earliestParsedWeekStart.isAfter(limit) ? limit : earliestParsedWeekStart;
 
     final completeWeeks =
         Iterable.generate(
-              (currentWeekStart.difference(earliestWeekStart).inDays ~/ 7) + 1,
-              (index) => earliestWeekStart.add(Duration(days: index * 7)),
+              currentWeekStart.weeksSince(earliestWeekStart) + 1,
+              (index) => earliestWeekStart.plusDays(index * 7),
             )
             .map(
               (weekStart) => parsed.firstWhere(
-                (w) => w.startDate.isAtSameWeekAs(weekStart),
+                (w) => w.startDate.isAtSameWeekAs(weekStart, firstWeekday),
                 orElse: () => _WeekSummary.empty(weekId: weekStart.toIso8601String()),
               ),
             )
@@ -277,8 +281,24 @@ class _WorkoutAggregation with Iterable<WeekSummary> implements WorkoutAggregati
 }
 
 extension on DateTime {
-  bool isAtSameWeekAs(DateTime other) {
-    return _isTheSameDay(getMonday(this), getMonday(other));
+  // Weeks are counted in calendar days, never in 24-hour steps: across a DST
+  // change those land an hour off midnight, on the day before, and a week
+  // then matches the one before it.
+
+  /// Local midnight starting the week that holds this date.
+  DateTime weekStart(int firstWeekday) => DateTime(year, month, day - (weekday - firstWeekday) % 7);
+
+  /// Local midnight [days] calendar days on.
+  DateTime plusDays(int days) => DateTime(year, month, day + days);
+
+  /// Whole weeks from [earlier]'s date to this one's.
+  int weeksSince(DateTime earlier) {
+    return DateTime.utc(year, month, day).difference(DateTime.utc(earlier.year, earlier.month, earlier.day)).inDays ~/
+        7;
+  }
+
+  bool isAtSameWeekAs(DateTime other, int firstWeekday) {
+    return _isTheSameDay(weekStart(firstWeekday), other.weekStart(firstWeekday));
   }
 }
 
