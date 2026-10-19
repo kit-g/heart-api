@@ -1315,8 +1315,17 @@ void main() {
       );
       final page = await h.db.getWorkouts(userId: aimerId, targetUserId: aimerId, limit: 100, imageUrl: imageUrl);
       check(page.items.firstWhere((w) => w.id == workoutId), 'list');
-      final changes = await h.db.getWorkoutChanges(userId: aimerId, limit: 1000, imageUrl: imageUrl);
-      check(changes.upserted.firstWhere((w) => w.id == workoutId), 'changes');
+      // the feed waits for every transaction still writing, and the other
+      // suites run theirs in parallel against the same database
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      Workout? changed;
+      while (changed == null && DateTime.now().isBefore(deadline)) {
+        final changes = await h.db.getWorkoutChanges(userId: aimerId, limit: 1000, imageUrl: imageUrl);
+        changed = changes.upserted.where((w) => w.id == workoutId).firstOrNull;
+        if (changed == null) await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
+      expect(changed, isNotNull, reason: 'changes');
+      check(changed!, 'changes');
       final patched = await h.db.patchWorkout(userId: aimerId, workoutId: workoutId, name: 'x', imageUrl: imageUrl);
       check(patched, 'patch');
     });
