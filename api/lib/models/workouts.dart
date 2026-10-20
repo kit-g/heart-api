@@ -276,11 +276,11 @@ class WorkoutRequest {
   /// The same id round-trip for a set: keep a v7, strip anything else so the
   /// insert can cast-or-mint without tripping on a legacy id.
   ///
-  /// `set_type` and `rpe` are newer than most clients, so their *absence* is
-  /// meaningful: a replace keeps what is stored for a set whose payload leaves
-  /// the key out (a client that doesn't know the field), while an explicit
-  /// null clears it. Present values are checked here, so a bad one is a 400
-  /// naming the set rather than a raw CHECK violation.
+  /// `set_type`, `rpe` and `target` are newer than most clients, so their
+  /// *absence* is meaningful: a replace keeps what is stored for a set whose
+  /// payload leaves the key out (a client that doesn't know the field), while
+  /// an explicit null clears it. Present values are checked here, so a bad
+  /// type or RPE is a 400 naming the set rather than a raw CHECK violation.
   static Map _set(Map set, {required String at}) {
     final copy = {...set}..remove('id');
     if (_v7OrNull(set['id']) case String id) {
@@ -295,6 +295,17 @@ class WorkoutRequest {
         final num rpe when isRpe(rpe) => rpe,
         _ => throw BadRequest(code: 'invalid_rpe', reason: '$at.rpe must be 1-10 in half steps, or null'),
       };
+    }
+    // absent leaves a stored set's target alone; null and {} clear it. Unlike
+    // a template's, a target this layer can't read is never a 400: builds sent
+    // `target` on workout sets long before the server kept it, and a set is a
+    // record that must save whatever plan rides beside it. The parts it can
+    // read are kept; one with none is left unsaid
+    copy.remove('target');
+    if (set.containsKey('target')) {
+      if (workoutSetTarget(set['target']) case final SetTarget target) {
+        copy['target'] = target.isEmpty ? null : target.toMap();
+      }
     }
     return copy;
   }

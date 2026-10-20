@@ -125,7 +125,11 @@ final List<McpTool> tools = [
   McpTool(
     name: 'get_workout',
     title: 'Get a workout',
-    description: 'One workout in full: every exercise and set, with set types, RPE and notes.',
+    description:
+        'One workout in full: every exercise and set, with set types, RPE and notes, and the target a set aimed '
+        'for when the session came from a template or program: ranges with min and max (no max is as many as '
+        'possible, amrap up to max), rir as reps in reserve, and a share of the training max, of the lift named '
+        'by of when it is another. A target is the plan, not what was done.',
     inputSchema: {
       'type': 'object',
       'properties': {
@@ -143,7 +147,13 @@ final List<McpTool> tools = [
           workoutId: id,
           imageUrl: request.config.cdnAssetUrl,
         );
-        return workout.toMcpDetail();
+        // a share of another lift's base names that lift; the library is read
+        // only when a target has one
+        final names = switch (workout.any((exercise) => exercise.any((set) => set.target?.of != null))) {
+          true => (await request.exerciseService.getExercises(request.userId)).toExerciseNames(),
+          false => const <String, String>{},
+        };
+        return workout.toMcpDetail(names: names);
       } on NotFound {
         throw ToolError('No workout $id. Use list_workouts for valid ids.');
       }
@@ -936,8 +946,9 @@ extension on Workout {
     };
   }
 
-  /// `get_workout`: every exercise and set.
-  Map<String, dynamic> toMcpDetail() {
+  /// `get_workout`: every exercise and set, a target's lift by its name in
+  /// [names].
+  Map<String, dynamic> toMcpDetail({required Map<String, String> names}) {
     return {
       ..._toMcpHeader(),
       'end': ?end?.toUtc().toIso8601String(),
@@ -949,7 +960,9 @@ extension on Workout {
             'id': exercise.exercise.id,
             'name': exercise.exercise.name,
             'note': ?exercise.note,
-            'sets': [for (final set in exercise) set.toMcp()],
+            'sets': [
+              for (final set in exercise) {...set.toMcp(), 'target': ?set.target?.toMcp(names: names)},
+            ],
           },
       ],
     };
@@ -970,6 +983,16 @@ extension on ExerciseSet {
       'rpe': ?rpe,
       if (!isCompleted) 'completed': false,
     };
+  }
+}
+
+extension on SetTarget {
+  /// A workout set's target as the tools show it: units in the key names, and
+  /// a share of another lift naming it. `ofSlot` is left out: it is an id
+  /// inside a template, which says nothing about a workout.
+  Map<String, dynamic> toMcp({required Map<String, String> names}) {
+    final units = (toMap()..remove('ofSlot')).toMcpUnits() as Map<String, dynamic>;
+    return {...units, if (of case final String of) 'of': names[of] ?? of};
   }
 }
 

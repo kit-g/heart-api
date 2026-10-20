@@ -286,6 +286,91 @@ void main() {
       expect(((result['content'] as List).single as Map)['text'], contains('list_workouts'));
     });
 
+    test(
+      'get_workout shows the target a set aimed for, in the tools\' units, its lift by name (heart-api#286)',
+      () async {
+        const workoutId = '019a0000-0000-7000-8000-0000000000ab';
+        final workout = Workout.fromRow(
+          {
+            'id': workoutId,
+            'name': 'Push',
+            'started_at': '2026-10-01T10:00:00Z',
+            'completed_at': '2026-10-01T11:00:00Z',
+            'exercises': [
+              {
+                'id': '019a0000-0000-7000-8000-0000000000ac',
+                'exercise': {
+                  'id': '019a0000-0000-7000-8000-0000000000ad',
+                  'name': 'Bench Press',
+                  'category': 'Barbell',
+                  'target': 'Chest',
+                },
+                'exercise_order': 0,
+                'sets': [
+                  {
+                    'id': '019a0000-0000-7000-8000-0000000000ae',
+                    'weight': 80,
+                    'reps': 8,
+                    'completed': true,
+                    'set_order': 0,
+                    'target': {
+                      'reps': {'min': 6, 'max': 10},
+                      'weight': {'min': 80},
+                      'rir': 2,
+                      'share': 0.6,
+                      'of': '019a0000-0000-7000-8000-0000000000b0',
+                      'ofSlot': '019a0000-0000-7000-8000-0000000000b1',
+                    },
+                  },
+                  {
+                    'id': '019a0000-0000-7000-8000-0000000000af',
+                    'weight': 80,
+                    'reps': 6,
+                    'completed': true,
+                    'set_order': 1,
+                    'target': null,
+                  },
+                ],
+              },
+            ],
+          },
+          imageUrl: (k) => k,
+        );
+        when(
+          app.db.getWorkout(userId: 'u1', workoutId: workoutId, imageUrl: anyNamed('imageUrl')),
+        ).thenAnswer((_) async => workout);
+        when(app.db.getExercises('u1')).thenAnswer(
+          (_) async => {
+            'exercises': [
+              {'id': '019a0000-0000-7000-8000-0000000000b0', 'name': 'Squat'},
+            ],
+          },
+        );
+
+        final result =
+            (await rpc(
+                  'tools/call',
+                  params: {
+                    'name': 'get_workout',
+                    'arguments': {'workoutId': workoutId},
+                  },
+                )).body['result']
+                as Map;
+
+        expect(result['isError'], isFalse);
+        final sets = (((result['structuredContent'] as Map)['exercises'] as List).single as Map)['sets'] as List;
+        expect((sets.first as Map)['target'], {
+          'reps': {'min': 6, 'max': 10},
+          'weightKg': {'min': 80},
+          'share': 0.6,
+          'rir': 2,
+          // the lift the share is of, by name; the template slot says nothing here
+          'of': 'Squat',
+        });
+        expect(sets.last as Map, isNot(contains('target')));
+      },
+    );
+
     test('get_personal_records narrows by name, and says so when nothing matches', () async {
       when(app.db.getRecordSets(userId: 'u1', exerciseId: null)).thenAnswer(
         (_) async => [

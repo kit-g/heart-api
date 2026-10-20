@@ -90,11 +90,11 @@ abstract interface class ExerciseSet implements Completes, Model, Storable, Comp
   /// category.
   abstract double? rpe;
 
-  /// What a template set aims for; null when it aims for nothing in
-  /// particular. A target is a plan, never part of what was done: a session
-  /// started from a template carries its targets to show beside the values,
-  /// and the server keeps none on a workout. Assigning [SetTarget.none] or
-  /// null clears it.
+  /// What a template set aims for, or a logged set aimed for; null when it
+  /// aims for nothing in particular. A target is a plan, never part of what
+  /// was done: a session started from a template carries its targets to show
+  /// beside the values, and a workout's sets keep them on the server as a
+  /// template's do. Assigning [SetTarget.none] or null clears it.
   abstract SetTarget? target;
 
   factory(

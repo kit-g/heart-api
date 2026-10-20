@@ -262,6 +262,121 @@ void main() {
       });
     });
 
+    group('target (heart-api#286)', () {
+      List sets(List<Map<String, dynamic>> raw) {
+        final req = WorkoutRequest(
+          userId: 'u1',
+          body: {
+            'exercises': [
+              {'exercise': _bench, 'order': 0, 'sets': raw},
+            ],
+          },
+        );
+        return (jsonDecode(req.toParams()['exercises'] as String) as List).single['sets'] as List;
+      }
+
+      test('absent is unsaid, null and {} clear, a target is that target', () {
+        expect(
+          sets([
+            {'reps': 5},
+            {'reps': 5, 'target': null},
+            {'reps': 5, 'target': <String, dynamic>{}},
+            {
+              'reps': 5,
+              'target': {
+                'reps': {'min': 6, 'max': 10, 'amrap': true},
+                'weight': {'min': 60},
+                'duration': {'min': 30, 'max': 30},
+                'distance': {'min': 1.5, 'max': null},
+                'rir': 2,
+                'share': 0.8,
+                'of': _squat,
+              },
+            },
+          ]),
+          [
+            {'reps': 5},
+            {'reps': 5, 'target': null},
+            {'reps': 5, 'target': null},
+            {
+              'reps': 5,
+              'target': {
+                'reps': {'min': 6, 'max': 10, 'amrap': true},
+                'weight': {'min': 60},
+                'duration': {'min': 30, 'max': 30},
+                'distance': {'min': 1.5},
+                'share': 0.8,
+                'rir': 2,
+                'of': _squat,
+              },
+            },
+          ],
+        );
+      });
+
+      for (final (target, why) in [
+        ('6-10', 'not an object'),
+        (
+          {
+            'rpe': {'min': 8},
+          },
+          'an unknown measure',
+        ),
+        ({'reps': 8}, 'a bare number'),
+        (
+          {
+            'reps': {'min': 10, 'max': 6},
+          },
+          'max below min',
+        ),
+        (
+          {
+            'reps': {'min': 6.5},
+          },
+          'half a rep',
+        ),
+        ({'rir': 11}, 'a rir past 10'),
+      ]) {
+        test('a target with $why and nothing readable is left unsaid: the set still saves', () {
+          expect(
+            sets([
+              {'reps': 5, 'target': target},
+            ]).single,
+            {'reps': 5},
+          );
+        });
+      }
+
+      test('a target the input can read in part keeps those parts', () {
+        expect(
+          sets([
+            {
+              'reps': 5,
+              'target': {
+                'reps': {'min': 6, 'max': 10},
+                'tempo': {'eccentric': 3},
+                'weight': {'min': 60, 'max': 50},
+                'rir': 11,
+                'share': 0.8,
+                'of': _squat,
+                'ofSlot': 'not an id',
+                'supplemental': true,
+              },
+            },
+          ]).single,
+          {
+            'reps': 5,
+            'target': {
+              'reps': {'min': 6, 'max': 10},
+              'share': 0.8,
+              'of': _squat,
+              'supplemental': true,
+            },
+          },
+        );
+      });
+    });
+
     test('exercises encoded with the id flattened from {exercise: id} or {exercise: {id}}', () {
       final req = const WorkoutRequest(
         userId: 'u1',

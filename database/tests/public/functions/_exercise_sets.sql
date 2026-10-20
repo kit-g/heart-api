@@ -120,6 +120,34 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION test__exercise_sets_carries_the_target() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id TEXT;
+    _we_id   UUID;
+    _set_id  UUID;
+    _result  JSONB;
+BEGIN
+    _user_id := create_test_profile();
+    _we_id   := create_test_workout_exercise(
+        create_test_workout(_user_id => _user_id),
+        create_test_exercise(_user_id := _user_id),
+        0
+    );
+    PERFORM create_test_exercise_set(_we_id, 0, 100, 8);
+    _set_id := create_test_exercise_set(_we_id, 1, 100, 8);
+
+    UPDATE exercise_sets
+    SET target = '{"reps": {"min": 6, "max": 10}}'
+    WHERE id = _set_id;
+
+    _result := _exercise_sets(_we_id);
+
+    RETURN NEXT is(_result -> 0 -> 'target', 'null'::jsonb, 'a set without a target reads null');
+    RETURN NEXT is(_result -> 1 -> 'target', '{"reps": {"min": 6, "max": 10}}'::jsonb, 'a target reads back as stored');
+END
+$$ LANGUAGE plpgsql;
+
 SELECT * FROM runtests();
 
 ROLLBACK;

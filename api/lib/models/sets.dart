@@ -150,3 +150,50 @@ SetTarget setTarget(Object? value, {required String at}) {
     _ => invalid('must be an object or null'),
   };
 }
+
+/// [setTarget] for a workout set, which records what was done and carries a
+/// target only beside it, so a target is never a reason to refuse the set.
+/// What [setTarget] would refuse is dropped part by part, keeping every
+/// measure, `rir`, share and flag it can read. Null when a target has nothing
+/// readable at all, which says nothing about the stored one.
+SetTarget? workoutSetTarget(Object? value) {
+  // the refusal is the answer here: that part is left out
+  SetTarget? read(Map part) {
+    try {
+      return setTarget(part, at: 'set');
+    } on BadRequest {
+      return null;
+    }
+  }
+
+  SetTarget? readable(Map target) {
+    const beside = {'share', 'rir', 'of', 'ofSlot', 'supplemental'};
+    final ranges = <TargetMeasure, TargetRange>{
+      for (final MapEntry(:key, :value) in target.entries)
+        if (!beside.contains(key))
+          if (read({key: value}) case final SetTarget part) ...part.ranges,
+    };
+    // `of` needs a share and `ofSlot` needs `of`, so the share keeps as much
+    // of what names its base as reads
+    final shared = [
+      {'share': target['share'], 'of': target['of'], 'ofSlot': target['ofSlot']},
+      {'share': target['share'], 'of': target['of']},
+      {'share': target['share']},
+    ].map(read).nonNulls.firstOrNull;
+    final kept = SetTarget(
+      ranges,
+      share: shared?.share,
+      of: shared?.of,
+      ofSlot: shared?.ofSlot,
+      rir: read({'rir': target['rir']})?.rir,
+      supplemental: read({'supplemental': target['supplemental']})?.supplemental ?? false,
+    );
+    return kept.isEmpty ? null : kept;
+  }
+
+  return switch (value) {
+    null => SetTarget.none,
+    final Map target => read(target) ?? readable(target),
+    _ => null,
+  };
+}

@@ -67,9 +67,9 @@ final class TargetRange implements Model {
   String toString() => 'TargetRange($min, $max${amrap ? ', amrap' : ''})';
 }
 
-/// What a template set aims for, per measure: "6 to 10 reps", "hold 30 s",
-/// "8+". A target is a plan, never a record of what was done; a logged set
-/// carries none.
+/// What a template set aims for, or a logged set aimed for, per measure: "6
+/// to 10 reps", "hold 30 s", "8+". A target is a plan, never a record of what
+/// was done; a logged set carries it beside its values.
 ///
 /// Read tolerantly: a measure this build doesn't know, or a range of a shape it
 /// predates, is kept as it arrived and written back by [toMap], so a save by

@@ -701,7 +701,7 @@ _sets_input AS (
   LATERAL jsonb_array_elements(ex->'sets') WITH ORDINALITY t(s, ordinality)
 ),
 _inserted_sets AS (
-  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe)
+  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe, target)
   SELECT
     coalesce((si.set_data->>'id')::uuid, uuidv7()),
     ie.id,
@@ -714,10 +714,11 @@ _inserted_sets AS (
     (si.set_data->>'completed_at')::timestamptz,
     si.set_order,
     _set_type_code(si.set_data->>'set_type'),
-    (si.set_data->>'rpe')::real
+    (si.set_data->>'rpe')::real,
+    nullif(si.set_data->'target', 'null'::jsonb)
   FROM _sets_input si
   JOIN _inserted_exercises ie ON ie.exercise_order = si.exercise_order
-  RETURNING id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe
+  RETURNING id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe, target
 ),
 _sets_json AS (
   SELECT
@@ -734,7 +735,8 @@ _sets_json AS (
         'completed_at', completed_at,
         'set_order', set_order,
         'set_type', _set_type_name(set_type),
-        'rpe', rpe
+        'rpe', rpe,
+        'target', target
       ) ORDER BY set_order
     ) AS sets_json
   FROM _inserted_sets
@@ -1291,9 +1293,9 @@ _set_rows AS (
   FROM _sets_input si
   JOIN _kept_exercises ke ON ke.exercise_order = si.exercise_order
 ),
--- set_type and rpe are newer than most clients: a set whose payload leaves
--- the key out (a client that doesn't know the field) keeps the stored value,
--- while an explicit null clears it
+-- set_type, rpe and target are newer than most clients: a set whose payload
+-- leaves the key out (a client that doesn't know the field) keeps the stored
+-- value, while an explicit null clears it
 _updated_sets AS (
   UPDATE exercise_sets es
   SET
@@ -1307,13 +1309,14 @@ _updated_sets AS (
     completed_at = (sr.set_data->>'completed_at')::timestamptz,
     set_order = sr.set_order,
     set_type = CASE WHEN sr.set_data ? 'set_type' THEN _set_type_code(sr.set_data->>'set_type') ELSE es.set_type END,
-    rpe = CASE WHEN sr.set_data ? 'rpe' THEN (sr.set_data->>'rpe')::real ELSE es.rpe END
+    rpe = CASE WHEN sr.set_data ? 'rpe' THEN (sr.set_data->>'rpe')::real ELSE es.rpe END,
+    target = CASE WHEN sr.set_data ? 'target' THEN nullif(sr.set_data->'target', 'null'::jsonb) ELSE es.target END
   FROM _set_rows sr
   WHERE es.id = sr.id AND es.id IN (SELECT id FROM _previous_sets)
-  RETURNING es.id, es.workout_exercise_id, es.weight, es.reps, es.duration, es.distance, es.completed, es.started_at, es.completed_at, es.set_order, es.set_type, es.rpe
+  RETURNING es.id, es.workout_exercise_id, es.weight, es.reps, es.duration, es.distance, es.completed, es.started_at, es.completed_at, es.set_order, es.set_type, es.rpe, es.target
 ),
 _inserted_sets AS (
-  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe)
+  INSERT INTO exercise_sets (id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe, target)
   SELECT
     coalesce(sr.id, uuidv7()),
     sr.workout_exercise_id,
@@ -1326,10 +1329,11 @@ _inserted_sets AS (
     (sr.set_data->>'completed_at')::timestamptz,
     sr.set_order,
     _set_type_code(sr.set_data->>'set_type'),
-    (sr.set_data->>'rpe')::real
+    (sr.set_data->>'rpe')::real,
+    nullif(sr.set_data->'target', 'null'::jsonb)
   FROM _set_rows sr
   WHERE sr.id IS NULL OR sr.id NOT IN (SELECT id FROM _previous_sets)
-  RETURNING id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe
+  RETURNING id, workout_exercise_id, weight, reps, duration, distance, completed, started_at, completed_at, set_order, set_type, rpe, target
 ),
 -- every stored set the body no longer names, whether its exercise stays or
 -- goes; the cascade of a dropped exercise then finds nothing left
@@ -1360,7 +1364,8 @@ _sets_json AS (
         'completed_at', completed_at,
         'set_order', set_order,
         'set_type', _set_type_name(set_type),
-        'rpe', rpe
+        'rpe', rpe,
+        'target', target
       ) ORDER BY set_order
     ) AS sets_json
   FROM _written_sets

@@ -4,7 +4,8 @@ library;
 import 'package:heart/db/db.dart' show apiExceptionForDbError;
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/workouts.dart';
-import 'package:heart_models/heart_models.dart' show SetType, Workout, WorkoutPause, timestampOfUuidV7, uuidV7;
+import 'package:heart_models/heart_models.dart'
+    show SetType, TargetRange, Workout, WorkoutPause, timestampOfUuidV7, uuidV7;
 import 'package:postgres/postgres.dart' show ServerException, Sql;
 import 'package:test/test.dart';
 
@@ -1150,6 +1151,192 @@ void main() {
       final sets = replaced.single.toList();
       expect(sets.map((s) => s.setType), [SetType.warmup, SetType.drop]);
       expect(sets.map((s) => s.rpe), [6.5, 7.0]);
+    });
+  });
+
+  group('targets round-trip (heart-api#286)', () {
+    // a profile of its own, so every read below finds the workout on page one
+    late String aimerId;
+    late String aimerPeerId;
+    late String exId;
+    late String workoutId;
+    late String aimedSetId;
+    late String plainSetId;
+    late Workout created;
+
+    const range = {
+      'reps': {'min': 6, 'max': 10},
+      'rir': 2,
+    };
+    const open = {
+      'reps': {'min': 8},
+    };
+
+    Map<String, dynamic> set(String id, [Map<String, dynamic> extra = const {}]) => {
+      'id': id,
+      'weight': 80,
+      'reps': 8,
+      'completed': true,
+      ...extra,
+    };
+
+    WorkoutRequest body(List<Map<String, dynamic>> sets, {String? id}) => WorkoutRequest(
+      userId: aimerId,
+      body: {
+        'id': ?id,
+        'name': 'Aimed',
+        'start': '2026-10-18T08:00:00Z',
+        'exercises': [
+          {'exercise': exId, 'order': 0, 'sets': sets},
+        ],
+      },
+    );
+
+    Future<Workout> replace(List<Map<String, dynamic>> sets) {
+      return h.db.updateWorkout(userId: aimerId, workoutId: workoutId, body: body(sets), imageUrl: imageUrl);
+    }
+
+    Future<Object?> stored(String setId) async => (await h.exec(
+      'SELECT target FROM exercise_sets WHERE id = @id::uuid',
+      {'id': setId},
+    )).single.toColumnMap()['target'];
+
+    setUpAll(() async {
+      aimerId = await h.seedProfile();
+      aimerPeerId = await h.seedProfile();
+      await h.seedConnection(initiator: aimerPeerId, target: aimerId);
+    });
+
+    setUp(() async {
+      exId = await h.seedGlobalExercise(name: h.uniqueName('Aimed'));
+      aimedSetId = uuidV7();
+      plainSetId = uuidV7();
+      (created, _) = await h.db.createWorkout(
+        userId: aimerId,
+        body: body([
+          set(aimedSetId, {'target': range}),
+          set(plainSetId),
+        ], id: uuidV7()),
+        imageUrl: imageUrl,
+      );
+      workoutId = created.id;
+    });
+
+    test('a create stores the target, a set without one stores NULL, and the response says so', () async {
+      expect(await stored(aimedSetId), range);
+      expect(await stored(plainSetId), isNull);
+
+      final [aimed, plain] = created.single.toList();
+      expect(aimed.target?[.reps], const TargetRange(min: 6, max: 10));
+      expect(aimed.target?.rir, 2);
+      expect(aimed.toMap()['target'], range);
+      expect(plain.target, isNull);
+      expect(plain.toMap(), containsPair('target', null));
+    });
+
+    test('a retried create answers with the stored target, not the retry\'s', () async {
+      final (retried, created) = await h.db.createWorkout(
+        userId: aimerId,
+        body: body([
+          set(aimedSetId, {'target': open}),
+          set(plainSetId),
+        ], id: workoutId),
+        imageUrl: imageUrl,
+      );
+      expect(created, isFalse);
+      expect(retried.single.first.target?[.reps], const TargetRange(min: 6, max: 10));
+      expect(await stored(aimedSetId), range);
+    });
+
+    test('a replace without the key keeps the target; null and {} clear it; a value replaces it', () async {
+      // a build that predates targets saves the workout
+      final kept = await replace([set(aimedSetId), set(plainSetId)]);
+      expect(kept.single.first.target?[.reps], const TargetRange(min: 6, max: 10));
+      expect(await stored(aimedSetId), range);
+
+      final replaced = await replace([
+        set(aimedSetId, {'target': open}),
+        set(plainSetId, {'target': range}),
+      ]);
+      expect(replaced.single.map((s) => s.target?[.reps]), [
+        const TargetRange(min: 8),
+        const TargetRange(min: 6, max: 10),
+      ]);
+
+      final cleared = await replace([
+        set(aimedSetId, {'target': null}),
+        set(plainSetId, {'target': <String, dynamic>{}}),
+      ]);
+      expect(cleared.single.map((s) => s.target), [isNull, isNull]);
+      expect(await stored(aimedSetId), isNull);
+      expect(await stored(plainSetId), isNull);
+    });
+
+    test('a set a replace adds stores what it carries', () async {
+      final added = uuidV7();
+      final replaced = await replace([
+        set(aimedSetId),
+        set(plainSetId),
+        set(added, {'target': open}),
+      ]);
+      expect(replaced.single.last.target?[.reps], const TargetRange(min: 8));
+      expect(await stored(added), open);
+    });
+
+    test('a target the input cannot read is left unsaid: the workout saves and keeps the stored one', () async {
+      final kept = await replace([
+        set(aimedSetId, {
+          'target': {
+            'reps': {'min': 10, 'max': 6},
+          },
+        }),
+        set(plainSetId),
+      ]);
+      expect(kept.single.first.target?[.reps], const TargetRange(min: 6, max: 10));
+      expect(await stored(aimedSetId), range);
+    });
+
+    test('every read carries it to the model', () async {
+      void check(Workout workout, String read) {
+        final [aimed, plain] = workout.single.toList();
+        expect(aimed.target?[.reps], const TargetRange(min: 6, max: 10), reason: read);
+        expect(plain.target, isNull, reason: read);
+      }
+
+      check(await h.db.getWorkout(userId: aimerId, workoutId: workoutId, imageUrl: imageUrl), 'get');
+      check(
+        await h.db.getTargetWorkout(
+          requesterId: aimerPeerId,
+          targetUserId: aimerId,
+          workoutId: workoutId,
+          imageUrl: imageUrl,
+        ),
+        'a peer\'s get',
+      );
+      final page = await h.db.getWorkouts(userId: aimerId, targetUserId: aimerId, limit: 100, imageUrl: imageUrl);
+      check(page.items.firstWhere((w) => w.id == workoutId), 'list');
+      // the feed waits for every transaction still writing, and the other
+      // suites run theirs in parallel against the same database
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      Workout? changed;
+      while (changed == null && DateTime.now().isBefore(deadline)) {
+        final changes = await h.db.getWorkoutChanges(userId: aimerId, limit: 1000, imageUrl: imageUrl);
+        changed = changes.upserted.where((w) => w.id == workoutId).firstOrNull;
+        if (changed == null) await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
+      expect(changed, isNotNull, reason: 'changes');
+      check(changed!, 'changes');
+      final patched = await h.db.patchWorkout(userId: aimerId, workoutId: workoutId, name: 'x', imageUrl: imageUrl);
+      check(patched, 'patch');
+    });
+
+    test('deleting the workout archives its targets', () async {
+      await h.db.deleteWorkout(userId: aimerId, workoutId: workoutId);
+      final rows = await h.exec(
+        "SELECT exercises->0->'sets'->0->'target' AS target FROM archive.deleted_workouts WHERE id = @w::uuid",
+        {'w': workoutId},
+      );
+      expect(rows.single.toColumnMap()['target'], range);
     });
   });
 
