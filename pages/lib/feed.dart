@@ -59,9 +59,9 @@ extension on DateTime {
   static const _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   static const _months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  /// `Sun, 18 Oct 2026 00:00:00 GMT`. Posts carry a date only.
+  /// `Mon, 19 Oct 2026 19:12:00 GMT`; midnight for a post with a date only.
   String toRfc822() {
-    final date = day.toString().padLeft(2, '0');
-    return '${_days[weekday - 1]}, $date ${_months[month - 1]} $year 00:00:00 GMT';
+    String pad(int n) => n.toString().padLeft(2, '0');
+    return '${_days[weekday - 1]}, ${pad(day)} ${_months[month - 1]} $year ${pad(hour)}:${pad(minute)}:00 GMT';
   }
 }

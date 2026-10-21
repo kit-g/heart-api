@@ -27,6 +27,7 @@ class SiteLayout implements PageLayout {
     final title = data['title'] as String;
     final description = data['description'] as String;
     final url = '$origin${page.url}';
+    final image = post?.image ?? defaultImage;
 
     return Document(
       lang: 'en',
@@ -49,7 +50,12 @@ class SiteLayout implements PageLayout {
         meta(attributes: {'property': 'og:title', 'content': title}),
         meta(attributes: {'property': 'og:description', 'content': description}),
         meta(attributes: {'property': 'og:url', 'content': url}),
-        meta(attributes: {'property': 'og:image', 'content': post?.image ?? defaultImage}),
+        meta(attributes: {'property': 'og:image', 'content': image}),
+        if (image == defaultImage) ...[
+          const meta(attributes: {'property': 'og:image:width', 'content': '1200'}),
+          const meta(attributes: {'property': 'og:image:height', 'content': '630'}),
+          const meta(attributes: {'property': 'og:image:alt', 'content': defaultImageAlt}),
+        ],
         if (post != null) meta(attributes: {'property': 'article:published_time', 'content': post.date.toIsoDate()}),
         const meta(name: 'twitter:card', content: 'summary_large_image'),
         if (post != null) _structuredData(post),

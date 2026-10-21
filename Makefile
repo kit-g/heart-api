@@ -63,11 +63,15 @@ test-python:
 	uv run pytest assets/tests -o pythonpath=assets/assets
 	uv run pytest scripts/tests -o pythonpath=scripts
 
-# The blog: a full static build, so a post that doesn't parse or a page
-# that fails to render breaks here and not at deploy (scripts/pages.sh).
-# The build generates main.server.options.dart, which analysis needs.
+# The blog: a full static build per environment, so a post that doesn't
+# parse or a page that fails to render breaks here and not at deploy
+# (scripts/pages.sh). The build generates main.server.options.dart, which
+# analysis needs.
 test-pages:
-	cd pages && dart pub get && dart run jaspr_cli:jaspr build && dart analyze
+	cd pages && dart pub get \
+		&& dart run jaspr_cli:jaspr build --dart-define=HEART_ENV=dev \
+		&& dart run jaspr_cli:jaspr build --dart-define=HEART_ENV=prod \
+		&& dart analyze
 
 # The MCP Apps cards drawn by Jaspr components (pages/cards/), compiled to JS
 # and written into api/lib/mcp/widgets/cards.g.dart. The api doesn't compile

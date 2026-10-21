@@ -19,7 +19,7 @@ ENV=$4
 STAGE="$(cd "$(dirname "$0")/.." && pwd)/build/site"
 
 "$(dirname "$0")/tailwind/build.sh"
-"$(dirname "$0")/pages.sh" "$STAGE"
+"$(dirname "$0")/pages.sh" "$ENV" "$STAGE"
 
 # data/ belongs to heart-of-yours: its release workflow uploads the JSON the
 # feature and changelog pages render. Excluded, --delete would wipe it.
