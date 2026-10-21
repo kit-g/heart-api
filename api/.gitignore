@@ -2,5 +2,7 @@
 # Created by `dart pub`
 .dart_tool/
 *.mocks.dart
+# Compiled card scripts, written by `make cards` (pages/tool/emit_cards.dart)
+lib/mcp/widgets/cards.g.dart
 # Test coverage output
 coverage/

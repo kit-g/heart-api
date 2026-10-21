@@ -1,9 +1,10 @@
 # Repo-wide entrypoints. `make test` runs the same matrix CI does.
 # Database targets need local Postgres + pgtap (see database/README.md).
 
-.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages lint format-check db-up db-down db-reset db-seed
+.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages cards lint format-check db-up db-down db-reset db-seed
 
 bootstrap:
+	$(MAKE) cards
 	cd api && dart pub get && dart run build_runner build
 	cd shared/heart_aws && dart pub get
 	cd shared/heart_models && dart pub get && dart run build_runner build
@@ -67,6 +68,12 @@ test-python:
 # The build generates main.server.options.dart, which analysis needs.
 test-pages:
 	cd pages && dart pub get && dart run jaspr_cli:jaspr build && dart analyze
+
+# The MCP Apps cards drawn by Jaspr components (pages/cards/), compiled to JS
+# and written into api/lib/mcp/widgets/cards.g.dart. The api doesn't compile
+# without it, so everything that builds or analyzes the api runs this first.
+cards:
+	cd pages && dart pub get && dart run tool/emit_cards.dart
 
 # fmt + init/validate of every Terraform root + the native .tftest.hcl suites.
 # Credential-free; first run downloads providers (cached in ~/.terraform.d).

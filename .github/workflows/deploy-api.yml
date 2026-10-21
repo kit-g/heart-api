@@ -58,6 +58,9 @@ jobs:
             (cd "$pkg" && dart pub get)
           done
 
+      - name: "Compile cards"
+        run: make cards
+
       - name: "Generate Mocks"
         working-directory: api
         run: dart run build_runner build
@@ -92,6 +95,10 @@ jobs:
       - name: "Install dependencies"
         working-directory: ${{ matrix.package }}
         run: dart pub get
+
+      - name: "Compile cards"
+        if: matrix.package == 'api'
+        run: make cards
 
       # heart_aws has no build_runner; the other two generate their mocks
       # (mocks are gitignored, not checked in)
@@ -189,6 +196,9 @@ jobs:
       - name: "Install Dart dependencies"
         working-directory: api
         run: dart pub get
+
+      - name: "Compile cards"
+        run: make cards
 
       - name: "Generate mocks"
         working-directory: api

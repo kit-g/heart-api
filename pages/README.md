@@ -1,7 +1,7 @@
 # pages
 
 heart-of.me's rendered pages, built to static HTML with [Jaspr](https://jaspr.site) and
-`jaspr_content`. Today that is the blog (heart-api#302). The rest of the site is
+`jaspr_content`. Today that is the blog (heart-api#302), plus the MCP Apps cards (below). The rest of the site is
 hand-written HTML in `site/`. These pages wear the same header, footer, `site.css` and
 Tailwind build.
 
@@ -43,3 +43,12 @@ python3 -m http.server -d build/site              # http://localhost:8000/blog.h
 ```
 
 `scripts/site.sh` runs the same staging on deploy and syncs `build/site`.
+
+## MCP Apps cards
+
+`lib/cards/` holds cards the API's MCP server shows in an assistant (heart-api#303):
+`WorkoutCard`, a component with no browser imports so a server can render it too, and
+`McpAppsBridge`, which draws a card from the tool result a host posts. `cards/<name>.dart` is
+one page's script. `make cards` compiles each with dart2js into
+`api/lib/mcp/widgets/cards.g.dart`, and `api/tool/widget_harness.dart` shows the result in
+a browser. `docs/2026-10-18.mcp-widgets.md` has the rest.

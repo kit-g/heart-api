@@ -9,6 +9,11 @@ on:
     paths:
       - 'api/**'
       - 'shared/**'
+      # the MCP cards compile into the binary; the blog in pages/ doesn't
+      - 'pages/cards/**'
+      - 'pages/lib/cards/**'
+      - 'pages/tool/**'
+      - 'pages/pubspec.*'
       - 'database/**'
       - 'Makefile'
       - 'scripts/apply_migrations.sh'
@@ -21,6 +26,10 @@ on:
     paths:
       - 'api/**'
       - 'shared/**'
+      - 'pages/cards/**'
+      - 'pages/lib/cards/**'
+      - 'pages/tool/**'
+      - 'pages/pubspec.*'
       - 'database/**'
       - 'Makefile'
       - 'scripts/apply_migrations.sh'

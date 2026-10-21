@@ -1761,12 +1761,15 @@ void main() {
         expect(html, isNot(contains('innerHTML')));
         expect(html, isNot(contains('@import')));
         for (final method in ['ui/initialize', 'ui/notifications/initialized', 'ui/notifications/tool-result']) {
-          expect(html, contains("'$method'"));
+          // as a string literal in the script, whichever quotes its compiler chose
+          expect(html, matches(RegExp('[\'"]${RegExp.escape(method)}[\'"]')));
         }
         expect(html, contains('ui/notifications/size-changed'));
         expect(html, contains('prefers-color-scheme: dark'));
         expect(html, contains('[data-theme="dark"]'));
-        expect(utf8.encode(html).length, lessThan(16 * 1024));
+        // a card drawn by Jaspr inlines its compiled runtime, ~43 KB gzipped
+        // (heart-api#303); the hand-written pages are a fraction of this
+        expect(gzip.encode(utf8.encode(html)).length, lessThan(50 * 1024));
       });
     }
 
