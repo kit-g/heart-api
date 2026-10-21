@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Syncs site/ to S3 and invalidates the CloudFront distribution.
+# Syncs site/ to S3, with the pages Jaspr renders from pages/ (the blog)
+# staged in beside it, and invalidates the CloudFront distribution.
 #
 # Usage: scripts/site.sh <bucket> <aws-profile> <distribution-id> <env>
 #   env picks which .well-known/<env>/ association files and robots/<env>.txt ship.
@@ -15,11 +16,14 @@ PROFILE=$2
 DISTRIBUTION_ID=$3
 ENV=$4
 
+STAGE="$(cd "$(dirname "$0")/.." && pwd)/build/site"
+
 "$(dirname "$0")/tailwind/build.sh"
+"$(dirname "$0")/pages.sh" "$STAGE"
 
 # data/ belongs to heart-of-yours: its release workflow uploads the JSON the
 # feature and changelog pages render. Excluded, --delete would wipe it.
-aws s3 sync site "s3://$BUCKET/site" --delete --profile "$PROFILE" \
+aws s3 sync "$STAGE" "s3://$BUCKET/site" --delete --profile "$PROFILE" \
   --exclude ".well-known/*" --exclude "connect/*" --exclude "robots/*" --exclude "robots.txt" --exclude "data/*"
 
 aws s3 cp "site/.well-known/$ENV/apple-app-site-association" \

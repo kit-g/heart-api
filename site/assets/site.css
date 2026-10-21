@@ -256,3 +256,25 @@ body {
     font-weight: 600;
     white-space: nowrap;
 }
+
+/* Code in blog posts, highlighted at build time (pages/lib/code_block.dart).
+   Accent-ink for the language, ink for the names, the destructive red only
+   as a hue for literals: no new colours. */
+.tok-keyword {
+    color: var(--accent-ink);
+}
+
+.tok-type {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.tok-string,
+.tok-constant {
+    color: var(--destructive);
+}
+
+.tok-comment {
+    color: var(--faint);
+    font-style: italic;
+}

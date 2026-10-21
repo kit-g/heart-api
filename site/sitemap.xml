@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Every page a search engine should list. A new page goes here, with the
-     canonical URL its <link rel="canonical"> names. -->
+     canonical URL its <link rel="canonical"> names. The blog's pages are
+     added at deploy by scripts/pages.sh. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url><loc>https://heart-of.me/</loc></url>
     <url><loc>https://heart-of.me/features.html</loc></url>
