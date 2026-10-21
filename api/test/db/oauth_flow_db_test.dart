@@ -130,7 +130,7 @@ void main() {
     expect(denied.status, 401);
     final challenge = denied.headers.value('www-authenticate')!;
     expect(challenge, contains('resource_metadata="https://api.example/v1/mcp/.well-known/oauth-protected-resource"'));
-    expect(challenge, contains('scope="read"'));
+    expect(challenge, contains('scope="read write:templates"'));
 
     final metadata = await send('GET', '/mcp/.well-known/oauth-protected-resource');
     expect(body(metadata), containsPair('resource', 'https://api.example/v1/mcp'));
@@ -163,6 +163,7 @@ void main() {
     expect(shown['client'], {'id': clientId, 'name': 'Test Assistant'});
     expect(shown['redirectHost'], 'client.example');
     expect(shown['resource'], 'mcp');
+    expect(shown['scopes'], ['read', 'write:templates'], reason: 'asking for no scope connects with all of them');
 
     // approving sends the browser back with a code, the state and the issuer
     final approved = body(await send('POST', '/oauth/requests/$requestId/approve', bearer: firebaseToken));
@@ -220,7 +221,7 @@ void main() {
     final tokens = body(exchanged);
     expect(tokens['token_type'], 'Bearer');
     expect(tokens['expires_in'], 3600);
-    expect(tokens['scope'], 'read');
+    expect(tokens['scope'], 'read write:templates');
     final access = tokens['access_token'] as String;
     final refresh = tokens['refresh_token'] as String;
     expect(access, startsWith(TokenSecret.accessPrefix));
@@ -336,7 +337,7 @@ void main() {
 
     final bench = await h.seedGlobalExercise(name: h.uniqueName('Bench'));
 
-    // a host's first connection asks for nothing in particular, and reads only
+    // a host that asks for read alone is held to it
     final reader = await connect('read');
     expect(reader.shown, ['read']);
     expect(reader.scope, 'read');

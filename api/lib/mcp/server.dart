@@ -112,7 +112,7 @@ Future<Response> mcpEndpoint(Request request) async {
     challenge: [
       if (oauth != null) ...[
         AuthenticationParameter('resource_metadata', oauth.mcpResourceMetadata.toString()),
-        AuthenticationParameter('scope', defaultScopes.join(' ')),
+        AuthenticationParameter('scope', ([...supportedScopes]..sort()).join(' ')),
       ],
     ],
   );
@@ -295,8 +295,8 @@ Response? _scopeRefusal(
       '${tool.name} needs a connection with the ${tool.scope.value} permission. Personal tokens only read; '
           'connect Heart to this assistant by signing in to change templates.',
     _ =>
-      '${tool.name} needs the ${tool.scope.value} permission, which this connection was not given. Ask the user '
-          'to allow it when the assistant offers to reconnect.',
+      '${tool.name} needs the ${tool.scope.value} permission, which this connection was made without. Ask the user '
+          'to reconnect Heart to this assistant, which grants it.',
   };
   final oauth = request.config.oauth;
   final challenge = [
