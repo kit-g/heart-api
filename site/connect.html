@@ -93,15 +93,19 @@
                 <span class="material-symbols-outlined text-3xl">link</span>
             </div>
             <h1 class="font-title text-2xl font-semibold tracking-tight text-ink mb-2">
-                <span id="client-name"></span> wants to read your training log
+                <span id="client-name"></span> <span id="consent-ask">wants to read your training log</span>
             </h1>
             <p class="text-sm text-muted mb-6">
                 It will be sent to <strong id="redirect-host" class="text-ink"></strong>.
                 Only allow apps you started connecting yourself.
             </p>
             <ul class="text-left text-ink bg-fill rounded p-4 mb-4 text-sm leading-relaxed">
-                <li>Your workouts, templates, folders, goals and custom exercises, through <span id="surface"></span>.</li>
-                <li>Read only: it can't change or delete anything.</li>
+                <!-- One line per scope the request asks for; assets/connect.js shows the ones it names. -->
+                <li id="scope-read">Your workouts, templates, folders, goals and custom exercises, through <span id="surface"></span>.</li>
+                <li id="scope-read-only">Read only: it can't change or delete anything.</li>
+                <li id="scope-write-templates" hidden>Create templates and template folders, and change your
+                    templates when you ask it to, which replaces what they hold. It can't delete a template or a folder, and it
+                    can't touch your workouts.</li>
             </ul>
             <p class="text-sm text-muted text-left mb-8">
                 Heart doesn't have your heart rate, sleep or any other health data. It stays on your phone, so there

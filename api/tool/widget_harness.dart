@@ -231,4 +231,65 @@ const _samples = <String, Map<String, dynamic>>{
       },
     ],
   },
+  'template': {
+    'status': 'preview',
+    'template': {
+      'folder': {'id': 'f', 'name': 'Upper/lower'},
+      'name': 'Upper A',
+      'note': 'Heavy pressing, rows for balance.',
+      'exercises': [
+        {
+          'exerciseId': 'a',
+          'name': 'Bench Press',
+          'category': 'Barbell',
+          'rest': 150,
+          'sets': [
+            {'type': 'warmup', 'weightKg': 40, 'reps': 10},
+            {
+              'weightKg': 80,
+              'reps': 6,
+              'target': {
+                'reps': {'min': 6, 'max': 8},
+                'rir': 2,
+              },
+            },
+            {
+              'weightKg': 80,
+              'reps': 6,
+              'target': {
+                'reps': {'min': 6},
+              },
+            },
+          ],
+        },
+        {
+          'exerciseId': 'b',
+          'name': 'Bent Over Row',
+          'category': 'Barbell',
+          'superset': 1,
+          'sets': [
+            {
+              'target': {
+                'reps': {'min': 8, 'max': 12},
+              },
+            },
+          ],
+        },
+        {
+          'exerciseId': 'c',
+          'name': 'Plank',
+          'category': 'Duration',
+          'superset': 1,
+          'sets': [
+            {
+              'seconds': 45,
+              'target': {
+                'seconds': {'min': 45, 'max': 45},
+              },
+            },
+          ],
+        },
+      ],
+    },
+  },
 };

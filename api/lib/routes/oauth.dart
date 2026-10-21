@@ -82,7 +82,7 @@ Future<Response> authorize(Request req) async {
   }
   final List<String> scopes;
   try {
-    scopes = q['scope'].toScopes();
+    scopes = q['scope'].toScopes(writes: resource == oauth.mcpResource);
   } on OAuthError catch (e) {
     return back(e);
   }

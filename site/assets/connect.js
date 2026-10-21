@@ -1,5 +1,6 @@
 // The OAuth consent page: an app (Claude, ChatGPT, …) asked to read this
-// account's training log, and the account answers here. The page signs the
+// account's training log, or to build its templates, and the account answers
+// here. The page signs the
 // account in with Firebase, as the app does, then reads, approves or denies
 // the request through the API with that session. It holds no secret: the API
 // trusts the Firebase ID token, and the browser follows the redirect it gets
@@ -96,6 +97,16 @@ function start() {
         $('client-name').textContent = request.client.name;
         $('redirect-host').textContent = request.redirectHost;
         $('surface').textContent = request.resource === 'mcp' ? 'Heart\'s MCP server' : 'Heart\'s API';
+        // each scope asked for, in plain words; an older request carries read alone
+        const scopes = Array.isArray(request.scopes) ? request.scopes : ['read'];
+        const reads = scopes.includes('read');
+        const writes = scopes.includes('write:templates');
+        $('scope-read').hidden = !reads;
+        $('scope-read-only').hidden = writes;
+        $('scope-write-templates').hidden = !writes;
+        $('consent-ask').textContent = reads && writes
+            ? 'wants to read your training log and build your templates'
+            : writes ? 'wants to build your templates' : 'wants to read your training log';
         $('signed-in-as').textContent = user.email || 'your account';
         show('consent');
     });

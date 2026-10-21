@@ -9,7 +9,12 @@ class TemplateFolderCreateIn {
   const new _({required this.id, required this.name, required this.order});
 
   static Future<TemplateFolderCreateIn> fromRequest(Request req) async {
-    final json = await req.json();
+    return fromJson(await req.json());
+  }
+
+  /// [fromRequest] over a body already read: the MCP server's
+  /// `create_template_folder` builds one, so both validate the same way.
+  static TemplateFolderCreateIn fromJson(Map<String, dynamic> json) {
     return TemplateFolderCreateIn._(
       id: json.uuidV7OrNull(),
       name: json.folderName(),

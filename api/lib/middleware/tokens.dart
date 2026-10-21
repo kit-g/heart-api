@@ -7,6 +7,7 @@ import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/tokens.dart';
+import 'package:heart/oauth/protocol.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart';
 import 'package:relic/relic.dart' hide Logger;
@@ -23,6 +24,15 @@ Middleware tokenAuthentication({DateTime Function()? clock}) {
       switch (await checkToken(request, resource: request.config.oauth?.meResource, clock: clock)) {
         case TokenRefused(:final response):
           logApiUsage(request, surface: 'me', status: response.statusCode);
+          return response;
+        case TokenAccepted(:final use) when !use.scopes.contains(Scope.read.value):
+          // every /me route reads; a grant of writes alone reads nothing
+          final response = JsonResponse(
+            403,
+            body: const Forbidden(code: 'insufficient_scope', reason: 'reading needs the read scope'),
+            headers: insufficientScopeHeaders(held: use.scopes, needed: .read),
+          );
+          logApiUsage(request, surface: 'me', status: response.statusCode, use: use);
           return response;
         case TokenAccepted(:final use):
           request.user = User(id: use.userId);
@@ -137,6 +147,33 @@ Future<TokenCheck> checkToken(
     );
   }
   return TokenAccepted(use);
+}
+
+/// The step-up challenge for a good token that lacks [needed] (RFC 6750
+/// §3.1, and the MCP authorization spec's scope challenge):
+/// `WWW-Authenticate: Bearer error="insufficient_scope", scope="…"`, naming
+/// what the token holds plus what it needs, so a compliant host
+/// re-authorizes for the union instead of trading one scope for another.
+/// [challenge] adds parameters, such as where the resource's metadata is.
+/// Sent with a `403`.
+Headers insufficientScopeHeaders({
+  required Iterable<String> held,
+  required Scope needed,
+  List<AuthenticationParameter> challenge = const [],
+}) {
+  final scopes = {...held, needed.value}.where(supportedScopes.contains).toList()..sort();
+  return Headers.build(
+    (headers) => headers.wwwAuthenticate = .new(
+      scheme: 'Bearer',
+      parameters: [
+        const .new('realm', 'heart'),
+        const .new('error', 'insufficient_scope'),
+        .new('scope', scopes.join(' ')),
+        .new('error_description', 'this needs the ${needed.value} scope'),
+        ...challenge,
+      ],
+    ),
+  );
 }
 
 /// One structured line per request, for learning who uses the API and how
