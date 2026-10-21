@@ -106,8 +106,8 @@ String instructionsFor({required bool writes}) {
 const _writes =
     'Reading changes nothing. create_template_folder, create_template and update_template build templates when '
     'the user asks for that: call create_template or update_template with preview true first, show the user what '
-    'it returns, and save (the same call without preview) only once they agree. They need a permission the host '
-    'asks the user for on first use. Nothing here deletes a template or a folder, or logs a workout. ';
+    'it returns, and save (the same call without preview) only once they agree. Connecting to Heart grants them, '
+    'unless the connection was made for reading only. Nothing here deletes a template or a folder, or logs a workout. ';
 
 /// How text another account wrote comes back, said once.
 const _quotedRule =

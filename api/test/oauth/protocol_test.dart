@@ -45,7 +45,11 @@ void main() {
   });
 
   group('toScopes', () {
-    test('absent asks for reading only, never a write', () => expect((null as String?).toScopes(), ['read']));
+    test('absent asks for everything the resource grants', () {
+      expect((null as String?).toScopes(), ['read', 'write:templates']);
+      expect((null as String?).toScopes(writes: false), ['read']);
+    });
+    test('read alone is held to reading', () => expect('read'.toScopes(), ['read']));
     test('a write is granted when asked for, beside read', () {
       expect('write:templates read'.toScopes(), ['read', 'write:templates']);
     });

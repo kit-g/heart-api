@@ -24,9 +24,11 @@ enum Scope {
 /// Every scope this server grants, as the metadata documents list them.
 final supportedScopes = {for (final scope in Scope.values) scope.value};
 
-/// What a client asking for no scope gets, and what a 401 challenge names:
-/// reading only. A write is asked for when a host first needs one, through
-/// the `insufficient_scope` step-up.
+/// What `/me` grants, which has no writes. The MCP server grants every scope,
+/// to a client asking for none too, and its 401 names them all: the host
+/// confirms each write with the user as it runs, so connecting grants them up
+/// front. A host that asks for `read` alone is held to it, and a write then
+/// goes through the `insufficient_scope` step-up.
 final defaultScopes = {Scope.read.value};
 
 /// An OAuth protocol failure (RFC 6749 §5.2): the protocol's own error shape,
@@ -100,16 +102,18 @@ extension OAuthScopes on String? {
   /// Requested scopes, space-separated, narrowed to what this server grants
   /// (RFC 6749 §3.3: the server may issue fewer, and says so in the token
   /// response). Hosts add scopes of their own, such as `offline_access`;
-  /// those are dropped, not refused. Absent asks for [defaultScopes], never a
-  /// write; asking only for scopes this server has never heard of is an error.
+  /// those are dropped, not refused. Absent asks for everything the resource
+  /// grants; asking only for scopes this server has never heard of is an
+  /// error.
   ///
   /// [writes] is whether the resource asked for takes any: the MCP server
   /// does, `/me` doesn't, so a write asked for there is dropped like a scope
   /// this server has never heard of.
   List<String> toScopes({bool writes = true}) {
     final asked = (this ?? '').split(' ').where((s) => s.isNotEmpty).toSet();
-    if (asked.isEmpty) return [...defaultScopes];
-    final granted = asked.intersection(writes ? supportedScopes : defaultScopes);
+    final grantable = writes ? supportedScopes : defaultScopes;
+    if (asked.isEmpty) return [...grantable]..sort();
+    final granted = asked.intersection(grantable);
     if (granted.isEmpty) throw OAuthError('invalid_scope', 'none of these scopes exist here: ${asked.join(' ')}');
     return [...granted]..sort();
   }
