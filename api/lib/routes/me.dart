@@ -40,8 +40,7 @@ Future<MeProfile> getMe(Request req) async {
   return MeProfile(user: user, summary: summary);
 }
 
-Future<Paginated<MeWorkout>> getMyWorkouts(Request req) async {
-  final query = PageQuery.fromRequest(req);
+Future<Paginated<MeWorkout>> getMyWorkouts(Request req, PageQuery query) async {
   final page = await req.workoutsService.getWorkouts(
     userId: req.userId,
     targetUserId: req.userId,
@@ -56,9 +55,7 @@ Future<Paginated<MeWorkout>> getMyWorkouts(Request req) async {
   );
 }
 
-Future<MeWorkout> getMyWorkout(Request req) => getMyWorkoutById(req, req.rawPathParameters[#workoutId]!);
-
-Future<MeWorkout> getMyWorkoutById(Request req, String workoutId) async {
+Future<MeWorkout> getMyWorkout(Request req, String workoutId) async {
   if (!isUuidV7(workoutId)) throw NotFound(type: 'Workout', id: workoutId);
   final workout = await req.workoutsService.getWorkout(
     userId: req.userId,
@@ -163,8 +160,7 @@ Future<LibraryResponse> getMyLibraryPrograms(Request req) async {
 }
 
 /// One library program in full, by its key.
-Future<LibraryResponse> getMyLibraryProgram(Request req) async {
-  final key = req.rawPathParameters[#key]!;
+Future<LibraryResponse> getMyLibraryProgram(Request req, String key) async {
   return switch ((await libraryView(req))?.program(key)) {
     final Map<String, dynamic> program => LibraryResponse(program),
     null => throw NotFound(type: 'LibraryProgram', id: key, code: 'library_program_not_found'),
@@ -188,8 +184,8 @@ const _inlineExportLimit = 5 * 1024 * 1024;
 /// The whole account in another app's format: one a day, since it reads every
 /// workout. Small ones come back as the body, large ones as a `303` to a
 /// short-lived link.
-Future<Model> exportMe(Request req, {int inlineLimit = _inlineExportLimit}) async {
-  final format = ExportQuery.fromRequest(req).format;
+Future<Model> exportMe(Request req, ExportQuery query, {int inlineLimit = _inlineExportLimit}) async {
+  final format = query.format;
 
   if (await req.apiTokenService.claimExport(req.userId) case final last?) {
     final wait = last.add(const Duration(days: 1)).difference(DateTime.now().toUtc());
@@ -239,8 +235,7 @@ Future<List<Workout>> _everyWorkout(Request req) async {
 
 /// The change feed: what changed or was deleted since a cursor, oldest first.
 /// A change waits until no save that started before it is still running.
-Future<MeWorkoutChanges> getMyWorkoutChanges(Request req) async {
-  final query = ChangesQuery.fromRequest(req);
+Future<MeWorkoutChanges> getMyWorkoutChanges(Request req, ChangesQuery query) async {
   final changes = await req.workoutsService.getWorkoutChanges(
     userId: req.userId,
     since: query.since,
@@ -251,12 +246,7 @@ Future<MeWorkoutChanges> getMyWorkoutChanges(Request req) async {
 }
 
 /// One exercise's sessions, newest first, optionally within `?from=&to=`.
-Future<Paginated<MeExerciseSession>> getMyExerciseHistory(Request req) {
-  return getMyExerciseHistoryById(req, req.rawPathParameters[#exerciseId]!);
-}
-
-Future<Paginated<MeExerciseSession>> getMyExerciseHistoryById(Request req, String exerciseId) async {
-  final query = ExerciseHistoryQuery.fromRequest(req, exerciseId: exerciseId);
+Future<Paginated<MeExerciseSession>> getMyExerciseHistory(Request req, ExerciseHistoryQuery query) async {
   final (history, pending) = await (
     req.workoutsService.getExerciseHistory(
       userId: req.userId,
@@ -268,7 +258,7 @@ Future<Paginated<MeExerciseSession>> getMyExerciseHistoryById(Request req, Strin
     ),
     req.anomalyService.getPendingAnomalies(userId: req.userId, from: query.from, to: query.to),
   ).wait;
-  final ExerciseHistory(:category, :sessions) = history ?? (throw NotFound(type: 'Exercise', id: exerciseId));
+  final ExerciseHistory(:category, :sessions) = history ?? (throw NotFound(type: 'Exercise', id: query.exerciseId));
   final warnings = pending.onSessions(query.exerciseId, sessions.items);
   return Paginated<MeExerciseSession>.from(
     Page(
@@ -281,9 +271,11 @@ Future<Paginated<MeExerciseSession>> getMyExerciseHistoryById(Request req, Strin
   );
 }
 
-Future<MeLibrarySearch> searchMyLibrary(Request req) async {
+Future<MeLibrarySearch> searchMyLibrary(Request req, LibrarySearchQuery query) async {
   final config = req.config;
-  final query = LibrarySearchQuery.fromRequest(req, supportedLocales: config.supportedLocales);
+  if (query.locale case final locale? when !config.supportedLocales.contains(locale)) {
+    throw BadRequest(reason: 'locale must be one of ${config.supportedLocales.join(', ')}: $locale');
+  }
   final library = await req.exerciseService.getExercises(
     req.userId,
     locale: query.locale ?? req.locale(config.supportedLocales, config.defaultLocale),
@@ -293,8 +285,7 @@ Future<MeLibrarySearch> searchMyLibrary(Request req) async {
 
 /// Personal records per exercise; one exercise's with `?exerciseId=`, those
 /// of a span with `?from=&to=`.
-Future<MeRecords> getMyRecords(Request req) async {
-  final query = RecordsQuery.fromRequest(req);
+Future<MeRecords> getMyRecords(Request req, RecordsQuery query) async {
   final (sets, pending) = await (
     req.workoutsService.getRecordSets(
       userId: req.userId,
@@ -310,13 +301,13 @@ Future<MeRecords> getMyRecords(Request req) async {
 /// Working sets and sessions per muscle group and per movement pattern, week
 /// by week, and the groups nothing reached; within `?from=&to=`.
 Future<MeVolume> getMyVolume(Request req) {
-  final query = LensQuery.fromRequest(req);
+  final query = LensQuery.read(.of(req));
   return volume(req, from: query.from, to: query.to);
 }
 
 /// Each balance pair's two sides set against each other, within `?from=&to=`.
 Future<MeBalance> getMyBalance(Request req) {
-  final query = LensQuery.fromRequest(req);
+  final query = LensQuery.read(.of(req));
   return balance(req, from: query.from, to: query.to);
 }
 

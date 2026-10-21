@@ -1,4 +1,4 @@
-import 'package:heart/core/routing.dart';
+import 'package:heart/core/openapi/endpoint.dart';
 import 'package:heart/db/db.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/s3.dart';
@@ -32,5 +32,5 @@ RelicRouter buildMeRouter({
     ..use('/', exportStorage(storage: storage))
     ..use('/', programLibrary(library: library))
     ..use('/', balancePairs(pairs: balance))
-    ..addRoutes(meRoutes);
+    ..addEndpoints(meRoutes);
 }

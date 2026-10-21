@@ -9,9 +9,10 @@ class ExportQuery {
 
   const new _({required this.format});
 
-  static ExportQuery fromRequest(Request req) {
-    final q = req.url.queryParameters;
-    return ExportQuery._(format: q.parsed('format', ExportFormat.fromString));
+  static ExportQuery read(Query q) {
+    return ExportQuery._(
+      format: q.choice('format', ExportFormat.values, (format) => format.name, description: 'The other app\'s format.'),
+    );
   }
 }
 
@@ -24,10 +25,12 @@ class ChangesQuery {
 
   const new _({required this.since, required this.limit});
 
-  static ChangesQuery fromRequest(Request req) {
-    final q = req.url.queryParameters;
+  static ChangesQuery read(Query q) {
     return ChangesQuery._(
-      since: switch (q.stringOrNull('since')) {
+      since: switch (q.stringOrNull(
+        'since',
+        description: 'The `cursor` of the last page read; none starts from the beginning.',
+      )) {
         final String raw => ChangeCursor.parse(raw),
         null => null,
       },
@@ -45,11 +48,10 @@ class RecordsQuery {
 
   const new _({required this.exerciseId, required this.from, required this.to});
 
-  static RecordsQuery fromRequest(Request req) {
-    final q = req.url.queryParameters;
+  static RecordsQuery read(Query q) {
     final (:from, :to) = q.window();
     return RecordsQuery._(
-      exerciseId: switch (q.stringOrNull('exerciseId')) {
+      exerciseId: switch (q.stringOrNull('exerciseId', format: 'uuid', description: 'One exercise\'s records only.')) {
         null => null,
         final String id when isUuidV7(id) => id,
         final String id => throw BadRequest(reason: 'exerciseId is not an exercise id: $id'),
@@ -78,13 +80,13 @@ class ExerciseHistoryQuery {
     required this.to,
   });
 
-  static ExerciseHistoryQuery fromRequest(Request req, {required String exerciseId}) {
+  static ExerciseHistoryQuery read(Query q) {
+    final exerciseId = q.path('exerciseId', format: 'uuid');
     if (!isUuidV7(exerciseId)) throw NotFound(type: 'Exercise', id: exerciseId);
-    final q = req.url.queryParameters;
     final (:from, :to) = q.window();
     return ExerciseHistoryQuery._(
       exerciseId: exerciseId,
-      cursor: switch (q.stringOrNull('cursor')) {
+      cursor: switch (q.stringOrNull('cursor', description: 'The `cursor` of the last page.')) {
         null => null,
         final String id when isUuidV7(id) => id,
         final String id => throw BadRequest(reason: 'cursor is not one this list returned: $id'),
@@ -105,8 +107,8 @@ class LensQuery {
 
   const new _({required this.from, required this.to});
 
-  static LensQuery fromRequest(Request req) {
-    final (:from, :to) = req.url.queryParameters.window();
+  static LensQuery read(Query q) {
+    final (:from, :to) = q.window();
     if (from != null && (to ?? DateTime.timestamp()).difference(from) > LensWindow.longest) {
       throw const BadRequest(reason: 'from and to may be at most a year apart');
     }
@@ -114,20 +116,23 @@ class LensQuery {
   }
 }
 
-extension on Map<String, String> {
+extension on Query {
   /// `from` and `to`: a window of workout start times, from inclusive and to
   /// exclusive, either open. Each is a date (`2026-01-01`, UTC) or an ISO
   /// moment.
   ({DateTime? from, DateTime? to}) window() {
-    DateTime? edge(String key) {
-      return switch (stringOrNull(key)) {
+    DateTime? edge(String key, String bound) {
+      return switch (stringOrNull(
+        key,
+        description: 'Workouts started $bound: a date (2026-01-01, UTC) or an ISO moment.',
+      )) {
         null => null,
         final String raw =>
           raw.toWindowEdge() ?? (throw BadRequest(reason: '$key must be a date (2026-01-01) or an ISO moment: $raw')),
       };
     }
 
-    final (from, to) = (edge('from'), edge('to'));
+    final (from, to) = (edge('from', 'at or after'), edge('to', 'before'));
     if (from != null && to != null && !from.isBefore(to)) throw const BadRequest(reason: 'from must be before to');
     return (from: from, to: to);
   }
@@ -143,20 +148,15 @@ class LibrarySearchQuery {
 
   const new _({required this.query, required this.locale, required this.limit});
 
-  static LibrarySearchQuery fromRequest(Request req, {required List<String> supportedLocales}) {
-    final q = req.url.queryParameters;
+  /// [locale] is checked against the served ones by the route, which knows
+  /// them.
+  static LibrarySearchQuery read(Query q) {
     return LibrarySearchQuery._(
-      query: switch (q.stringOrNull('q')?.trim()) {
+      query: switch (q.stringOrNull('q', maxLength: 100, description: 'What to search for. Required.')?.trim()) {
         final String text when text.isNotEmpty && text.length <= 100 => text,
         _ => throw const BadRequest(reason: 'q is required: what to search for, up to 100 characters'),
       },
-      locale: switch (q.stringOrNull('locale')) {
-        null => null,
-        final String locale when supportedLocales.contains(locale) => locale,
-        final String locale => throw BadRequest(
-          reason: 'locale must be one of ${supportedLocales.join(', ')}: $locale',
-        ),
-      },
+      locale: q.stringOrNull('locale', description: 'A served locale; the request\'s Accept-Language when absent.'),
       limit: q.integer('limit', defaultValue: 20, min: 1, max: 50),
     );
   }
