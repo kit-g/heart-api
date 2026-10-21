@@ -59,6 +59,7 @@
           rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"/>
+    <link rel="stylesheet" href="assets/tokens.css">
     <link rel="stylesheet" href="assets/site.css">
     <link rel="stylesheet" href="assets/tailwind.css">
     <script src="assets/site.js"></script>
@@ -284,7 +285,7 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <!-- Forge -->
-            <div class="preset-forge rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
+            <div data-preset="forge" data-theme="dark" class="rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
                 <div class="workout-card">
                     <div class="wc-head"><span class="wc-title">Pull Day</span><span class="wc-more">•••</span></div>
                     <div class="wc-date">Friday, 21 Aug</div>
@@ -301,7 +302,7 @@
                 <div style="color: var(--muted); font-family: var(--font-text);" class="text-xs -mt-3">Volt on green-black. Onest and Unbounded.</div>
             </div>
             <!-- Ink -->
-            <div class="preset-ink rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
+            <div data-preset="ink" data-theme="light" class="rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
                 <div class="workout-card">
                     <div class="wc-head"><span class="wc-title">Pull Day</span><span class="wc-more">•••</span></div>
                     <div class="wc-date">Friday, 21 Aug</div>
@@ -318,7 +319,7 @@
                 <div style="color: var(--muted); font-family: var(--font-text);" class="text-xs -mt-3">Paper and cobalt. Plex Sans and Literata.</div>
             </div>
             <!-- Utility -->
-            <div class="preset-utility rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
+            <div data-preset="utility" data-theme="light" class="rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
                 <div class="workout-card">
                     <div class="wc-head"><span class="wc-title">Pull Day</span><span class="wc-more">•••</span></div>
                     <div class="wc-date">Friday, 21 Aug</div>
@@ -335,7 +336,7 @@
                 <div style="color: var(--muted); font-family: var(--font-text);" class="text-xs -mt-3">Forest on cool neutrals. Golos Text.</div>
             </div>
             <!-- Ember -->
-            <div class="preset-ember rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
+            <div data-preset="ember" data-theme="dark" class="rounded-xl border p-5 flex flex-col gap-4" style="background: var(--ground); border-color: var(--border);">
                 <div class="workout-card">
                     <div class="wc-head"><span class="wc-title">Pull Day</span><span class="wc-more">•••</span></div>
                     <div class="wc-date">Friday, 21 Aug</div>

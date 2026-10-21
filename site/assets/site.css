@@ -1,43 +1,7 @@
-/* Heart marketing site — Ink preset of the Heart design system.
-   Token values mirror lib/core/theme/tokens.dart in heart-of-yours.
-   Eleven tokens per brightness; the site never invents a twelfth. */
-
-:root {
-    --ground: #FFFFFF;
-    --surface: #FFFFFF;
-    --fill: #F4F1EA;
-    --ink: #1A1815;
-    --muted: #5D584E;
-    --faint: #948F85;
-    --border: #E2DED4;
-    --accent: #1F4EC8;
-    --on-accent: #FFFFFF;
-    --accent-ink: #1B43A8;
-    --destructive: #9E2B25;
-    --on-destructive: #FFFFFF;
-
-    --font-text: 'IBM Plex Sans', system-ui, sans-serif;
-    --font-title: 'Literata', Georgia, serif;
-
-    color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --ground: #141311;
-        --surface: #1E1C19;
-        --fill: #2A2721;
-        --ink: #F2F0EA;
-        --muted: #A29D93;
-        --faint: #6F6B63;
-        --border: #302D27;
-        --accent: #93ADFF;
-        --on-accent: #0F1526;
-        --accent-ink: #93ADFF;
-        --destructive: #FF7A66;
-        --on-destructive: #0F1526;
-    }
-}
+/* Heart marketing site, in the Ink preset of the Heart design system.
+   The tokens (colors, faces, radii) come from tokens.css, generated from
+   shared/heart_design/tokens.json; this file only uses them, and never
+   invents a twelfth. */
 
 /* In-page links (Get App, the support index) slide rather than jump. */
 @media (prefers-reduced-motion: no-preference) {
@@ -50,72 +14,6 @@ body {
     background: var(--ground);
     color: var(--ink);
     font-family: var(--font-text);
-}
-
-/* The other three presets, shown as swatches on the home page. Each is
-   pinned to the brightness the design system showcases it in. */
-.preset-forge {
-    --ground: #0F100D;
-    --surface: #191B15;
-    --fill: #232720;
-    --ink: #F1F2E9;
-    --muted: #9BA092;
-    --faint: #6F746A;
-    --border: #2A2D24;
-    --accent: #D4F547;
-    --on-accent: #121408;
-    --accent-ink: #D4F547;
-    --font-text: 'Onest', system-ui, sans-serif;
-    --font-title: 'Onest', system-ui, sans-serif;
-    --font-display: 'Unbounded', system-ui, sans-serif;
-}
-
-.preset-ink {
-    --ground: #FFFFFF;
-    --surface: #FFFFFF;
-    --fill: #F4F1EA;
-    --ink: #1A1815;
-    --muted: #5D584E;
-    --faint: #948F85;
-    --border: #E2DED4;
-    --accent: #1F4EC8;
-    --on-accent: #FFFFFF;
-    --accent-ink: #1B43A8;
-    --font-text: 'IBM Plex Sans', system-ui, sans-serif;
-    --font-title: 'Literata', Georgia, serif;
-    --font-display: 'Literata', Georgia, serif;
-}
-
-.preset-utility {
-    --ground: #FFFFFF;
-    --surface: #FFFFFF;
-    --fill: #F2F4F5;
-    --ink: #16181D;
-    --muted: #575D66;
-    --faint: #949AA4;
-    --border: #E1E4E8;
-    --accent: #2F7A5F;
-    --on-accent: #FFFFFF;
-    --accent-ink: #27664E;
-    --font-text: 'Golos Text', system-ui, sans-serif;
-    --font-title: 'Golos Text', system-ui, sans-serif;
-    --font-display: 'Golos Text', system-ui, sans-serif;
-}
-
-.preset-ember {
-    --ground: #14100C;
-    --surface: #1F1913;
-    --fill: #2B241C;
-    --ink: #F4EFE6;
-    --muted: #A69C8C;
-    --faint: #746A5C;
-    --border: #332B21;
-    --accent: #FF9E3D;
-    --on-accent: #211204;
-    --accent-ink: #FF9E3D;
-    --font-text: 'Rubik', system-ui, sans-serif;
-    --font-title: 'Rubik', system-ui, sans-serif;
-    --font-display: 'Rubik', system-ui, sans-serif;
 }
 
 /* Workout card, straight from the design system's component spec:
