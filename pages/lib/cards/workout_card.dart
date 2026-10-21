@@ -113,13 +113,14 @@ extension on Map<String, Object?> {
         if (set case final Map<String, Object?> set) set,
   ];
 
-  /// `225 kg × 5 · RPE 8`, `2 km · 8:00`, or a dash for a set with nothing in it.
+  /// `225 kg × 5 · RPE 8`, `8 reps`, `2 km · 8:00`, or a dash for a set with nothing in it.
   String toSetText(Format format) {
     final parts = [
       switch ((this['weightKg'], this['reps'])) {
         (final num weight, final num reps) => '${format.number(weight)} kg × $reps',
         (final num weight, _) => '${format.number(weight)} kg',
-        (_, final num reps) => '$reps×',
+        (_, 1) => '1 rep',
+        (_, final num reps) => '$reps reps',
         _ => null,
       },
       if (this['distanceKm'] case final num km) '${format.number(km, 2)} km',

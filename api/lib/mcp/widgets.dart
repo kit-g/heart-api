@@ -39,8 +39,21 @@ class McpWidget {
     required this.html,
   });
 
-  /// The page draws its own card, so the host's frame stays off.
-  static const _ui = {'prefersBorder': false};
+  /// What a host is told about the page, each under the MCP Apps key and
+  /// ChatGPT's alias where it has one: the page draws its own card, so the
+  /// host's frame stays off; it fetches nothing, so its CSP allows no domain;
+  /// and the model is told the user already sees the card, so it doesn't
+  /// redraw it in its reply.
+  static const _meta = {
+    'ui': {
+      'prefersBorder': false,
+      'csp': {'connectDomains': <String>[], 'resourceDomains': <String>[]},
+    },
+    'openai/widgetCSP': {'connect_domains': <String>[], 'resource_domains': <String>[]},
+    'openai/widgetDescription':
+        'The user sees this result drawn as a card above your reply. Do not repeat what the card shows or draw '
+        'it again; answer the question, or add what the card does not say.',
+  };
 
   /// Its entry in `resources/list`.
   Map<String, dynamic> toResource() {
@@ -50,7 +63,7 @@ class McpWidget {
       'title': title,
       'description': description,
       'mimeType': _appMimeType,
-      '_meta': {'ui': _ui},
+      '_meta': _meta,
     };
   }
 
@@ -60,7 +73,7 @@ class McpWidget {
       'uri': uri,
       'mimeType': _appMimeType,
       'text': html,
-      '_meta': {'ui': _ui},
+      '_meta': _meta,
     };
   }
 

@@ -1163,7 +1163,11 @@ void main() {
         expect(page['uri'], uri);
         expect(page['mimeType'], 'text/html;profile=mcp-app');
         expect(page['text'], startsWith('<!DOCTYPE html>'));
-        expect(((page['_meta'] as Map)['ui'] as Map)['prefersBorder'], isFalse);
+        final meta = page['_meta'] as Map;
+        expect((meta['ui'] as Map)['prefersBorder'], isFalse);
+        expect((meta['ui'] as Map)['csp'], {'connectDomains': isEmpty, 'resourceDomains': isEmpty});
+        expect(meta['openai/widgetCSP'], {'connect_domains': isEmpty, 'resource_domains': isEmpty});
+        expect(meta['openai/widgetDescription'], isA<String>());
       }
       verify(app.db.useToken(any, count: false)).called(rendered.length);
       verifyNever(app.db.useToken(any, count: true));
