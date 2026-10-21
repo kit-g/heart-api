@@ -25,4 +25,4 @@ Two promises:
 
 This sub is for bugs, requests, questions, and showing off new stuff. I read everything. I'm the whole team, plus a few AI agents I keep on a leash.
 
-[heart-of.me](https://heart-of.me) · App Store · Google Play
+[heart-of.me](https://heart-of.me) · [App Store](https://apps.apple.com/app/id6777837444) · [Google Play](https://play.google.com/store/apps/details?id=me.heart.android)
