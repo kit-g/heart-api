@@ -7,4 +7,10 @@ abstract interface class Format {
 
   /// An ISO timestamp as a weekday, date and time.
   String dateTime(String iso);
+
+  /// An ISO timestamp as a day, short month and year.
+  String date(String iso);
+
+  /// An ISO timestamp as a day and short month: a chart's axis.
+  String dayMonth(String iso);
 }

@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
 import 'format.dart';
+import 'kit.dart';
 import 'units.dart';
 
 /// `get_workout`'s card: the design system's workout card, which the app's
@@ -51,9 +52,9 @@ class WorkoutCard extends StatelessComponent {
       if ((workout['start'], workout['end']) case (final String start, final String end))
         if ((DateTime.tryParse(start), DateTime.tryParse(end)) case (final start?, final end?)
             when !end.isBefore(start))
-          _stat(end.difference(start).toSpan(), 'Duration'),
-      if (volume > 0) _stat('${format.number(units.fromKg(volume).round())} ${units.weight}', 'Total volume'),
-      if (distance > 0) _stat('${format.number(units.fromKm(distance), 2)} ${units.distance}', 'Distance'),
+          _stat(end.difference(start).inSeconds.toSpan(), 'Duration'),
+      if (volume > 0) _stat(format.weight(volume, units, 0), 'Total volume'),
+      if (distance > 0) _stat(format.distance(distance, units), 'Distance'),
       if (workout['caloriesEstimate'] case final num kcal)
         _stat(
           '${format.number(kcal, 0)} kcal',
@@ -139,55 +140,5 @@ extension on List<Map<String, Object?>> {
           done: run.done,
         ),
     ];
-  }
-}
-
-extension on Map<String, Object?> {
-  String? text(String key) => switch (this[key]) {
-    final String text => text,
-    _ => null,
-  };
-
-  List<Map<String, Object?>> get sets => [
-    if (this['sets'] case final List sets)
-      for (final set in sets)
-        if (set case final Map<String, Object?> set) set,
-  ];
-
-  /// `225 kg × 5 · RPE 8`, `8 reps`, `2 km · 8:00`, or a dash for a set with
-  /// nothing in it, in [units].
-  String toSetText(Format format, Units units) {
-    final parts = [
-      switch ((this['weightKg'], this['reps'])) {
-        (final num kg, final num reps) => '${format.number(units.fromKg(kg))} ${units.weight} × $reps',
-        (final num kg, _) => '${format.number(units.fromKg(kg))} ${units.weight}',
-        (_, 1) => '1 rep',
-        (_, final num reps) => '$reps reps',
-        _ => null,
-      },
-      if (this['distanceKm'] case final num km) '${format.number(units.fromKm(km), 2)} ${units.distance}',
-      if (this['seconds'] case final num seconds) Duration(seconds: seconds.round()).toClock(),
-    ].nonNulls;
-    final text = parts.isEmpty ? '—' : parts.join(' · ');
-    return switch (this['rpe']) {
-      final num rpe => '$text · RPE ${format.number(rpe)}',
-      _ => text,
-    };
-  }
-}
-
-extension on Duration {
-  /// `1 h 24 m`, `52 m`, `40 s`.
-  String toSpan() {
-    if (inSeconds < 60) return '$inSeconds s';
-    final minutes = (inSeconds / 60).round();
-    return minutes >= 60 ? '${minutes ~/ 60} h ${minutes % 60} m' : '$minutes m';
-  }
-
-  /// `8:00`, `1:02:05`.
-  String toClock() {
-    String pad(int n) => n.toString().padLeft(2, '0');
-    final hours = inHours, minutes = inMinutes % 60, seconds = inSeconds % 60;
-    return hours > 0 ? '$hours:${pad(minutes)}:${pad(seconds)}' : '$minutes:${pad(seconds)}';
   }
 }

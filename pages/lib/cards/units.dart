@@ -20,4 +20,7 @@ enum Units {
 
   /// [km] in this system's distance unit.
   num fromKm(num km) => this == imperial ? km * 0.621371192 : km;
+
+  /// A time per kilometre as the time per this system's distance unit.
+  num perKm(num seconds) => this == imperial ? seconds * 1.609344 : seconds;
 }
