@@ -8,7 +8,7 @@
   "paths": {
     "/me": {
       "get": {
-        "operationId": "get",
+        "operationId": "getMe",
         "summary": "Who the token acts as",
         "responses": {
           "200": {
@@ -95,7 +95,7 @@
     },
     "/me/workouts": {
       "get": {
-        "operationId": "getWorkouts",
+        "operationId": "getMeWorkouts",
         "summary": "Workouts, newest first",
         "parameters": [
           {
@@ -221,7 +221,7 @@
     },
     "/me/workouts/changes": {
       "get": {
-        "operationId": "getWorkoutsChanges",
+        "operationId": "getMeWorkoutsChanges",
         "summary": "What changed or was deleted since a cursor, oldest first",
         "parameters": [
           {
@@ -331,7 +331,7 @@
     },
     "/me/workouts/{workoutId}": {
       "get": {
-        "operationId": "getWorkoutsWorkoutId",
+        "operationId": "getMeWorkoutsWorkoutId",
         "summary": "One workout in full",
         "parameters": [
           {
@@ -452,7 +452,7 @@
     },
     "/me/exercises": {
       "get": {
-        "operationId": "getExercises",
+        "operationId": "getMeExercises",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -509,7 +509,7 @@
     },
     "/me/exercises/{exerciseId}/history": {
       "get": {
-        "operationId": "getExercisesExerciseIdHistory",
+        "operationId": "getMeExercisesExerciseIdHistory",
         "summary": "One exercise's sessions, newest first",
         "parameters": [
           {
@@ -691,7 +691,7 @@
     },
     "/me/templates": {
       "get": {
-        "operationId": "getTemplates",
+        "operationId": "getMeTemplates",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -748,7 +748,7 @@
     },
     "/me/template-folders": {
       "get": {
-        "operationId": "getTemplateFolders",
+        "operationId": "getMeTemplateFolders",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -805,7 +805,7 @@
     },
     "/me/goals": {
       "get": {
-        "operationId": "getGoals",
+        "operationId": "getMeGoals",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -862,7 +862,7 @@
     },
     "/me/goals/progress": {
       "get": {
-        "operationId": "getGoalsProgress",
+        "operationId": "getMeGoalsProgress",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -919,7 +919,7 @@
     },
     "/me/anomalies": {
       "get": {
-        "operationId": "getAnomalies",
+        "operationId": "getMeAnomalies",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -976,7 +976,7 @@
     },
     "/me/programs": {
       "get": {
-        "operationId": "getPrograms",
+        "operationId": "getMePrograms",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -1033,7 +1033,7 @@
     },
     "/me/programs/{programId}": {
       "get": {
-        "operationId": "getProgramsProgramId",
+        "operationId": "getMeProgramsProgramId",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -1100,7 +1100,7 @@
     },
     "/me/programs/{programId}/history": {
       "get": {
-        "operationId": "getProgramsProgramIdHistory",
+        "operationId": "getMeProgramsProgramIdHistory",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -1167,7 +1167,7 @@
     },
     "/me/records": {
       "get": {
-        "operationId": "getRecords",
+        "operationId": "getMeRecords",
         "summary": "Personal records per exercise",
         "parameters": [
           {
@@ -1284,7 +1284,7 @@
     },
     "/me/volume": {
       "get": {
-        "operationId": "getVolume",
+        "operationId": "getMeVolume",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -1341,7 +1341,7 @@
     },
     "/me/balance": {
       "get": {
-        "operationId": "getBalance",
+        "operationId": "getMeBalance",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -1398,7 +1398,7 @@
     },
     "/me/library": {
       "get": {
-        "operationId": "getLibrary",
+        "operationId": "getMeLibrary",
         "summary": "Search the exercise library and the user's own exercises",
         "parameters": [
           {
@@ -1519,7 +1519,7 @@
     },
     "/me/library/programs": {
       "get": {
-        "operationId": "getLibraryPrograms",
+        "operationId": "getMeLibraryPrograms",
         "x-undeclared": true,
         "responses": {
           "200": {
@@ -1576,7 +1576,7 @@
     },
     "/me/library/programs/{key}": {
       "get": {
-        "operationId": "getLibraryProgramsKey",
+        "operationId": "getMeLibraryProgramsKey",
         "summary": "One library program in full",
         "parameters": [
           {
@@ -1696,7 +1696,7 @@
     },
     "/me/export": {
       "get": {
-        "operationId": "getExport",
+        "operationId": "getMeExport",
         "summary": "The whole account in another app's format, once a day",
         "parameters": [
           {

@@ -313,7 +313,7 @@ Map<String, Object?> openApiDocument(
   final paths = <String, Map<String, Object?>>{};
   for (final MapEntry(key: (route, verb), value: endpoint) in table.entries) {
     final path = '$prefix${route == '/' ? '' : route}'.replaceAllMapped(RegExp(r':(\w+)'), (m) => '{${m[1]}}');
-    final operation = endpoint.operation(components, id: _operationId(verb, route));
+    final operation = endpoint.operation(components, id: _operationId(verb, '$prefix$route'));
     // a segment the route has but its input never read, as on an undeclared
     // route, is still a parameter the path requires
     final parameters = [...?operation['parameters'] as List?];
