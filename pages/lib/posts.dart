@@ -1,15 +1,22 @@
 import 'package:jaspr_content/jaspr_content.dart';
 
+/// Which site this build is for, `dev` or `prod`: `jaspr build
+/// --dart-define=HEART_ENV=prod` (scripts/pages.sh passes it). It picks the
+/// posts (`posts/<env>/`) and the [origin].
+const environment = String.fromEnvironment('HEART_ENV', defaultValue: 'dev');
+
 /// The site's origin: link previews and feeds need absolute URLs, because
-/// crawlers don't resolve relative ones.
-const origin = 'https://heart-of.me';
+/// crawlers don't resolve relative ones. Each environment's links stay on
+/// its own site, so a dev-only post never points at prod.
+const origin = environment == 'prod' ? 'https://heart-of.me' : 'https://dev.heart-of.me';
 
 /// The image a page shows in link previews unless it names its own.
 const defaultImage = '$origin/assets/og.png?v=3';
 
 /// A post's frontmatter, read once for the layout, the index and the feed.
 ///
-/// `date` is written as `2026-10-18`, which YAML hands over as a string.
+/// `date` is written as `2026-10-18`, or with a UTC time (`2026-10-19T19:12Z`)
+/// to order posts from the same day; YAML hands either over as a string.
 class Post {
   const new _(this.url, this.title, this.description, this.date, this.image);
 
@@ -29,7 +36,9 @@ class Post {
             _ => defaultImage,
           },
         ),
-      _ => throw StateError('${page.path}: a post needs title, description and date (YYYY-MM-DD) in its frontmatter'),
+      _ => throw StateError(
+        '${page.path}: a post needs title, description and date (YYYY-MM-DD, optionally with a UTC time) in its frontmatter',
+      ),
     };
   }
 
