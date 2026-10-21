@@ -10,8 +10,14 @@ const environment = String.fromEnvironment('HEART_ENV', defaultValue: 'dev');
 /// its own site, so a dev-only post never points at prod.
 const origin = environment == 'prod' ? 'https://heart-of.me' : 'https://dev.heart-of.me';
 
-/// The image a page shows in link previews unless it names its own.
+/// The image a page shows in link previews unless it names its own: the
+/// site's card (scripts/og/render.sh), with the size and alt text the site's
+/// pages give it. Declaring the size lets a crawler lay the card out before
+/// fetching the image.
 const defaultImage = '$origin/assets/og.png?v=3';
+const defaultImageAlt =
+    'Heart of Yours: a workout log that gets out of your way. Free, no account needed, '
+    'health data stays on your phone. Beside it, the app’s workouts-per-week chart and goals.';
 
 /// A post's frontmatter, read once for the layout, the index and the feed.
 ///
