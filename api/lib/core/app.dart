@@ -1,3 +1,4 @@
+import 'package:heart/core/docs_router.dart';
 import 'package:heart/core/mcp_router.dart';
 import 'package:heart/core/me_router.dart';
 import 'package:heart/core/oauth_router.dart';
@@ -51,6 +52,9 @@ RelicApp buildApp({
   // bucket [storage] already reaches, unless given
   ProgramLibrary? library,
   BalancePairs? balance,
+  // the Developer API's spec and Swagger UI, at [docsPrefix]: each
+  // environment chooses whether to publish them
+  bool docs = false,
 }) {
   bool shouldCheckVersion(Request request) {
     if (config.shouldCheckVersion) return isAppRoute(request);
@@ -138,6 +142,7 @@ RelicApp buildApp({
       consume: true,
     )
     ..attach(oauthPrefix, buildOAuthRouter(database: database, fetch: fetch), consume: true);
+  if (docs) app.attach(docsPrefix, buildDocsRouter(), consume: true);
 
   return app;
 }

@@ -148,13 +148,15 @@ class LibrarySearchQuery {
 
   const new _({required this.query, required this.locale, required this.limit});
 
+  static const _qRequired = 'q is required: what to search for, up to 100 characters';
+
   /// [locale] is checked against the served ones by the route, which knows
   /// them.
   static LibrarySearchQuery read(Query q) {
     return LibrarySearchQuery._(
-      query: switch (q.stringOrNull('q', maxLength: 100, description: 'What to search for. Required.')?.trim()) {
-        final String text when text.isNotEmpty && text.length <= 100 => text,
-        _ => throw const BadRequest(reason: 'q is required: what to search for, up to 100 characters'),
+      query: switch (q.string('q', maxLength: 100, reason: _qRequired, description: 'What to search for.').trim()) {
+        final String text when text.isNotEmpty => text,
+        _ => throw const BadRequest(reason: _qRequired),
       },
       locale: q.stringOrNull('locale', description: 'A served locale; the request\'s Accept-Language when absent.'),
       limit: q.integer('limit', defaultValue: 20, min: 1, max: 50),

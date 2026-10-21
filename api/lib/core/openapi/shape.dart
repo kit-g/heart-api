@@ -161,8 +161,9 @@ class _DateTime extends Shape<DateTime> {
 
   @override
   Iterable<String> check(Object? json, String at) sync* {
-    if (json is! String || DateTime.tryParse(json) == null)
+    if (json is! String || DateTime.tryParse(json) == null) {
       yield '$at: expected an ISO-8601 moment, got ${_kind(json)}';
+    }
   }
 }
 

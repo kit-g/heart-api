@@ -314,8 +314,16 @@ Map<String, Object?> openApiDocument(
   for (final MapEntry(key: (route, verb), value: endpoint) in table.entries) {
     final path = '$prefix${route == '/' ? '' : route}'.replaceAllMapped(RegExp(r':(\w+)'), (m) => '{${m[1]}}');
     final operation = endpoint.operation(components, id: _operationId(verb, route));
+    // a segment the route has but its input never read, as on an undeclared
+    // route, is still a parameter the path requires
+    final parameters = [...?operation['parameters'] as List?];
+    for (final match in RegExp(r':(\w+)').allMatches(route)) {
+      if (parameters.any((parameter) => (parameter as Map)['name'] == match[1])) continue;
+      parameters.add(Parameter(match[1]!, location: 'path', required: true, schema: const {'type': 'string'}).toMap());
+    }
     (paths[path.isEmpty ? '/' : path] ??= {})[verb.name] = {
       ...operation,
+      if (parameters.isNotEmpty) 'parameters': parameters,
       'responses': {
         ...operation['responses'] as Map<String, Object?>,
         ...describeFailures(everywhere, components),

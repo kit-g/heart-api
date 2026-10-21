@@ -11,6 +11,7 @@ import 'package:heart/routes/exercise_preferences.dart' as exercise_preferences;
 import 'package:heart/routes/exercises.dart' as exercises;
 import 'package:heart/routes/feedback.dart' as feedback;
 import 'package:heart/routes/goals.dart' as goals;
+import 'package:heart/core/docs_router.dart';
 import 'package:heart/routes/me_index.dart';
 import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
@@ -114,5 +115,5 @@ bool isAppRoute(Request request) {
   final path = request.url.path;
   if (_publicRoutes.contains(path)) return false;
   bool under(String prefix) => path == prefix || path.startsWith('$prefix/');
-  return !under(tokenPrefix) && !under(mcpPrefix) && !under(oauthPrefix);
+  return !under(tokenPrefix) && !under(mcpPrefix) && !under(oauthPrefix) && !under(docsPrefix);
 }

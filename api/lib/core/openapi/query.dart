@@ -55,17 +55,23 @@ class Query {
     return _path(name)!;
   }
 
-  /// Required non-empty query param.
-  String string(String field, {String? description}) {
+  /// Required non-empty query param, at most [maxLength] long. [reason] is
+  /// the refusal's wording when it isn't.
+  String string(String field, {String? description, int? maxLength, String? reason}) {
     if (_isRecording) {
       return _note(
-        .new(field, required: true, schema: {'type': 'string', 'minLength': 1}, description: description),
+        .new(
+          field,
+          required: true,
+          schema: {'type': 'string', 'minLength': 1, 'maxLength': ?maxLength},
+          description: description,
+        ),
         'x',
       );
     }
     return switch (_query[field]) {
-      String s when s.isNotEmpty => s,
-      _ => throw BadRequest(reason: '$field is required'),
+      String s when s.isNotEmpty && (maxLength == null || s.length <= maxLength) => s,
+      _ => throw BadRequest(reason: reason ?? '$field is required'),
     };
   }
 

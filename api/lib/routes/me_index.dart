@@ -11,7 +11,12 @@ const tokenPrefix = '/me';
 /// Published and additive-only, unlike the app's own table. Each route says
 /// what it reads and answers, so this table is also `openapi.json`.
 final EndpointTable meRoutes = {
-  ('/', .get): .none(me.getMe, summary: 'Who the token acts as', reply: .json(MeProfile.shape), errors: [.notFound()]),
+  ('/', .get): .none(
+    me.getMe,
+    summary: 'Who the token acts as',
+    reply: .json(MeProfile.shape),
+    errors: [const .notFound()],
+  ),
   ('/workouts', .get): .of(
     me.getMyWorkouts,
     summary: 'Workouts, newest first',
@@ -29,7 +34,7 @@ final EndpointTable meRoutes = {
     summary: 'One workout in full',
     input: _id('workoutId'),
     reply: .json(MeWorkout.shape),
-    errors: [.notFound()],
+    errors: [const .notFound()],
   ),
   ('/exercises', .get): .undeclared(me.getMyExercises),
   ('/exercises/:exerciseId/history', .get): .of(
@@ -37,7 +42,7 @@ final EndpointTable meRoutes = {
     summary: 'One exercise\'s sessions, newest first',
     input: ExerciseHistoryQuery.read,
     reply: .json(.page('sessions', MeExerciseSession.shape, extra: {'warnings': warningsShape})),
-    errors: [.notFound()],
+    errors: [const .notFound()],
   ),
   ('/templates', .get): .undeclared(me.getMyTemplates),
   ('/template-folders', .get): .undeclared(me.getMyFolders),
@@ -67,14 +72,14 @@ final EndpointTable meRoutes = {
     summary: 'One library program in full',
     input: _key('key'),
     reply: .json(.unknown('a library program as the content publishes it')),
-    errors: [.notFound('library_program_not_found')],
+    errors: [const .notFound('library_program_not_found')],
   ),
   ('/export', .get): .of(
     me.exportMe,
     summary: 'The whole account in another app\'s format, once a day',
     input: ExportQuery.read,
     reply: .download(mimeType: 'text/csv'),
-    errors: [.tooManyRequests('export_limit', 'one export a day')],
+    errors: [const .tooManyRequests('export_limit', 'one export a day')],
   ),
 };
 

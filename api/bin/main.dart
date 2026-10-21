@@ -80,6 +80,7 @@ Future<void> main() async {
       eventPublisher: _events,
       apple: _apple,
       auth: testAuth,
+      docs: Platform.environment['API_DOCS'] == 'true',
     ),
   };
 
