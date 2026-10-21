@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
+    <!-- CloudFront answers any missing path with this page (the web app's
+         fallback), so a deep link like /profile/settings/whats-new opened in
+         a browser lands here. Its relative assets and links must resolve from
+         the root, not from that path. -->
+    <base href="/">
     <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
