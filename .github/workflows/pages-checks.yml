@@ -1,0 +1,40 @@
+name: "Pages checks"
+
+# The blog (pages/): analysis and a full Jaspr build, so a post that doesn't
+# parse fails the PR. Its own workflow because no deploy watches pages/: the
+# site ships by hand through scripts/site.sh.
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'pages/**'
+      - 'Makefile'
+      - '.github/workflows/pages-checks.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'pages/**'
+      - 'Makefile'
+      - '.github/workflows/pages-checks.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-checks-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dart-lang/setup-dart@v1
+      - uses: actions/cache@v6
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-
+
+      - name: "Build and analyze"
+        run: make test-pages

@@ -2,9 +2,10 @@
 // site/assets/tailwind.css. Every color resolves to a CSS variable declared in
 // site/assets/site.css, so the pages share one palette and dark mode is driven
 // by the OS via prefers-color-scheme rather than a class on <html>.
-// Paths are relative to the repo root, where build.sh runs.
+// Paths are relative to the repo root, where build.sh runs. pages/ is the
+// Jaspr-rendered blog: its class names live in the Dart that writes them.
 module.exports = {
-    content: ["site/**/*.html", "site/assets/*.js"],
+    content: ["site/**/*.html", "site/assets/*.js", "pages/lib/**/*.dart"],
     darkMode: "media",
     theme: {
         extend: {
@@ -52,6 +53,8 @@ module.exports = {
                         "--tw-prose-quote-borders": "var(--border)",
                         "--tw-prose-captions": "var(--muted)",
                         "--tw-prose-code": "var(--ink)",
+                        "--tw-prose-pre-code": "var(--ink)",
+                        "--tw-prose-pre-bg": "var(--fill)",
                         "--tw-prose-th-borders": "var(--border)",
                         "--tw-prose-td-borders": "var(--border)",
                         h1: {fontFamily: "Literata, Georgia, serif", fontWeight: "600"},

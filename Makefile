@@ -1,17 +1,18 @@
 # Repo-wide entrypoints. `make test` runs the same matrix CI does.
 # Database targets need local Postgres + pgtap (see database/README.md).
 
-.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf lint format-check db-up db-down db-reset db-seed
+.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages lint format-check db-up db-down db-reset db-seed
 
 bootstrap:
 	cd api && dart pub get && dart run build_runner build
 	cd shared/heart_aws && dart pub get
 	cd shared/heart_models && dart pub get && dart run build_runner build
+	cd pages && dart pub get && dart run build_runner build
 	$(MAKE) prepare-compat-tests
 	uv sync --all-packages
 	uv run pre-commit install --hook-type pre-push
 
-test: test-dart test-db test-api-db test-python test-tf
+test: test-dart test-db test-api-db test-python test-tf test-pages
 
 test-dart:
 	cd api && dart test
@@ -61,6 +62,12 @@ test-python:
 	uv run pytest assets/tests -o pythonpath=assets/assets
 	uv run pytest scripts/tests -o pythonpath=scripts
 
+# The blog: a full static build, so a post that doesn't parse or a page
+# that fails to render breaks here and not at deploy (scripts/pages.sh).
+# The build generates main.server.options.dart, which analysis needs.
+test-pages:
+	cd pages && dart pub get && dart run jaspr_cli:jaspr build && dart analyze
+
 # fmt + init/validate of every Terraform root + the native .tftest.hcl suites.
 # Credential-free; first run downloads providers (cached in ~/.terraform.d).
 test-tf:
@@ -70,12 +77,13 @@ lint:
 	cd api && dart analyze
 	cd shared/heart_aws && dart analyze
 	cd shared/heart_models && dart analyze
+	cd pages && dart analyze
 	uv run ruff check firebase assets scripts
 
 # The invariant is "the whole repo is formatted", so this checks everything
 # (minus generated files), not a changed-files subset.
 format-check:
-	find api shared -name '*.dart' \
+	find api shared pages -name '*.dart' \
 		-not -path '*/.dart_tool/*' \
 		-not -name '*.mocks.dart' \
 		-not -name '*.g.dart' \
