@@ -17,15 +17,14 @@ const _recordsCss = r'''
 /// The headline records in the order the app lists them, each formatted
 /// from its own fields; `repMaxes` and the totals follow.
 const _recordsJs = r'''
-function pace(n) { return clock(n) + ' /km'; }
 var recordKinds = [
   ['heaviest', 'Heaviest', function (r) { return setText(r); }],
-  ['oneRepMax', 'Estimated 1RM', function (r) { return kg(r.value); }, function (r) { return setText(r); }],
-  ['bestVolume', 'Best set volume', function (r) { return kg(Math.round(r.value)); }, function (r) { return setText(r); }],
-  ['mostReps', 'Most reps', function (r) { return r.reps + ' reps' + (isNum(r.weightKg) ? ' · ' + kg(r.weightKg) : ''); }],
+  ['oneRepMax', 'Estimated 1RM', function (r) { return weight(r.value); }, function (r) { return setText(r); }],
+  ['bestVolume', 'Best set volume', function (r) { return weight(r.value, 0); }, function (r) { return setText(r); }],
+  ['mostReps', 'Most reps', function (r) { return r.reps + ' reps' + (isNum(r.weightKg) ? ' · ' + weight(r.weightKg) : ''); }],
   ['lightestAssistance', 'Lightest assistance', function (r) { return setText(r); }],
-  ['longestDistance', 'Longest distance', function (r) { return km(r.distanceKm); }, function (r) {
-    return [isNum(r.weightKg) ? kg(r.weightKg) : '', isNum(r.seconds) ? clock(r.seconds) : ''].filter(Boolean).join(' · ');
+  ['longestDistance', 'Longest distance', function (r) { return distance(r.distanceKm); }, function (r) {
+    return [isNum(r.weightKg) ? weight(r.weightKg) : '', isNum(r.seconds) ? clock(r.seconds) : ''].filter(Boolean).join(' · ');
   }],
   ['longestDuration', 'Longest', function (r) { return clock(r.seconds); }],
   ['bestPace', 'Best pace', function (r) { return pace(r.pace); }, function (r) { return setText(r); }]
@@ -60,13 +59,13 @@ function render(root, data) {
     });
     if (Array.isArray(entry.repMaxes)) {
       entry.repMaxes.forEach(function (r) {
-        if (isNum(r.reps) && isNum(r.weightKg)) record(card, r.reps + '-rep max', kg(r.weightKg), null, r.at, null);
+        if (isNum(r.reps) && isNum(r.weightKg)) record(card, r.reps + '-rep max', weight(r.weightKg), null, r.at, null);
       });
     }
     var totals = [];
-    if (isNum(entry.totalVolume)) totals.push(kg(Math.round(entry.totalVolume)) + ' volume');
+    if (isNum(entry.totalVolume)) totals.push(weight(entry.totalVolume, 0) + ' volume');
     if (isNum(entry.totalReps)) totals.push(num(entry.totalReps, 0) + ' reps');
-    if (isNum(entry.totalDistance)) totals.push(km(entry.totalDistance));
+    if (isNum(entry.totalDistance)) totals.push(distance(entry.totalDistance));
     if (isNum(entry.totalDuration)) totals.push(span(entry.totalDuration));
     if (totals.length) card.append(el('p', 'note', 'In all: ' + totals.join(' · ')));
     root.append(card);

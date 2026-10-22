@@ -1,7 +1,8 @@
 part of '../widgets.dart';
 
 /// `get_workout`'s card: the design system's workout card (title, date, hero
-/// stats, hairline, roster), with every set under its exercise.
+/// stats, hairline, roster), with every set under its exercise; the roster
+/// flows into columns when the frame is wide.
 ///
 /// Drawn by `WorkoutCard`, a Jaspr component in `pages/lib/cards/` that a
 /// share page can render too, with its own MCP Apps bridge; `make cards`
@@ -11,10 +12,10 @@ const _workoutHtml =
     '<body><main id="root" aria-live="polite"></main><script>$_workoutCardJs</script></body></html>';
 
 const _workoutCss = r'''
-.exercise + .exercise { margin-top: 12px; }
+.exercises { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px 28px; }
 .exercise .name { font-weight: 600; }
 .exercise .sets { margin-top: 4px; }
-.exercise .tag { display: inline-block; width: 1.6em; color: var(--muted); font-variant-numeric: tabular-nums; }
+.exercise .tag { display: inline-block; min-width: 2.8em; color: var(--muted); font-variant-numeric: tabular-nums; }
 .exercise .undone { color: var(--faint); }
 .exercise .exercise-note { color: var(--muted); font-style: italic; margin-top: 2px; }
 ''';

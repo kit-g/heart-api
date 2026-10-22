@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 
 import 'format.dart';
+import 'units.dart';
 
 /// `get_workout`'s card: the design system's workout card, which the app's
 /// done screen ends on (title, date, hero stats, hairline, then every set
@@ -14,17 +15,21 @@ import 'format.dart';
 ///
 /// Volume counts done working sets, as the app's does: warm-ups and sets not
 /// done are left out, and so is assisted work, whose weight is help, not load.
-/// Calories are the MET estimate and say so wherever they show.
+/// Calories are the MET estimate and say so wherever they show. Weights and
+/// distances show in the user's units (`unitSystem` on the result).
+///
+/// Sets in a row that read the same collapse into one line ("1–3  59 kg ×
+/// 14"), and exercises flow into columns when the frame is wide enough, so a
+/// long session stays short.
 class WorkoutCard extends StatelessComponent {
   const new(this.workout, this.format, {super.key});
 
   final Map<String, Object?> workout;
   final Format format;
 
-  static const _setTags = {'warmup': 'W', 'drop': 'D', 'failure': 'F'};
-
   @override
   Component build(BuildContext context) {
+    final units = Units.of(workout['unitSystem']);
     final exercises = [
       if (workout['exercises'] case final List exercises)
         for (final exercise in exercises)
@@ -47,8 +52,8 @@ class WorkoutCard extends StatelessComponent {
         if ((DateTime.tryParse(start), DateTime.tryParse(end)) case (final start?, final end?)
             when !end.isBefore(start))
           _stat(end.difference(start).toSpan(), 'Duration'),
-      if (volume > 0) _stat('${format.number(volume.round())} kg', 'Total volume'),
-      if (distance > 0) _stat('${format.number(distance, 2)} km', 'Distance'),
+      if (volume > 0) _stat('${format.number(units.fromKg(volume).round())} ${units.weight}', 'Total volume'),
+      if (distance > 0) _stat('${format.number(units.fromKm(distance), 2)} ${units.distance}', 'Distance'),
       if (workout['caloriesEstimate'] case final num kcal)
         _stat(
           '${format.number(kcal, 0)} kcal',
@@ -63,7 +68,8 @@ class WorkoutCard extends StatelessComponent {
       if (stats.isNotEmpty) div(classes: 'stats', stats),
       if (workout['note'] case final String note) p(classes: 'note', [.text(note)]),
       if (exercises.isNotEmpty) const div(classes: 'rule', []),
-      for (final exercise in exercises) _exercise(exercise),
+      if (exercises.isNotEmpty)
+        div(classes: 'exercises', [for (final exercise in exercises) _exercise(exercise, units)]),
     ]);
   }
 
@@ -78,9 +84,8 @@ class WorkoutCard extends StatelessComponent {
     );
   }
 
-  Component _exercise(Map<String, Object?> exercise) {
+  Component _exercise(Map<String, Object?> exercise, Units units) {
     final sets = exercise.sets;
-    var n = 0;
     return div(classes: 'exercise', [
       div(classes: 'row', [
         span(classes: 'name', [.text(exercise.text('name') ?? 'Exercise')]),
@@ -88,16 +93,52 @@ class WorkoutCard extends StatelessComponent {
       ]),
       if (exercise['note'] case final String note) div(classes: 'exercise-note', [.text(note)]),
       div(classes: 'sets', [
-        for (final set in sets)
-          div(classes: set['completed'] == false ? 'row undone' : 'row', [
+        for (final run in sets.toRuns(format, units))
+          div(classes: run.done ? 'row' : 'row undone', [
             span([
-              span(classes: 'tag', [.text(_setTags[set['type']] ?? '${++n}')]),
-              if (set['completed'] == false) const .text('not done'),
+              span(classes: 'tag', [.text(run.label)]),
+              if (!run.done) const .text('not done'),
             ]),
-            span([.text(set.toSetText(format))]),
+            span([.text(run.text)]),
           ]),
       ]),
     ]);
+  }
+}
+
+/// Sets in a row that read the same, drawn as one line: numbered `1–3` when
+/// they are working sets, tagged `W ×2` when they share a type.
+typedef _Run = ({String label, String text, bool done});
+
+extension on List<Map<String, Object?>> {
+  List<_Run> toRuns(Format format, Units units) {
+    const tags = {'warmup': 'W', 'drop': 'D', 'failure': 'F'};
+    final runs = <({String? tag, int first, int count, String text, bool done})>[];
+    var n = 0;
+    for (final set in this) {
+      final tag = tags[set['type']];
+      final text = set.toSetText(format, units);
+      final done = set['completed'] != false;
+      if (tag == null) n++;
+      if (runs.lastOrNull case final last? when last.tag == tag && last.text == text && last.done == done) {
+        runs.last = (tag: tag, first: last.first, count: last.count + 1, text: text, done: done);
+      } else {
+        runs.add((tag: tag, first: n, count: 1, text: text, done: done));
+      }
+    }
+    return [
+      for (final run in runs)
+        (
+          label: switch ((run.tag, run.count)) {
+            (final String tag, 1) => tag,
+            (final String tag, final count) => '$tag ×$count',
+            (null, 1) => '${run.first}',
+            (null, final count) => '${run.first}–${run.first + count - 1}',
+          },
+          text: run.text,
+          done: run.done,
+        ),
+    ];
   }
 }
 
@@ -113,17 +154,18 @@ extension on Map<String, Object?> {
         if (set case final Map<String, Object?> set) set,
   ];
 
-  /// `225 kg × 5 · RPE 8`, `8 reps`, `2 km · 8:00`, or a dash for a set with nothing in it.
-  String toSetText(Format format) {
+  /// `225 kg × 5 · RPE 8`, `8 reps`, `2 km · 8:00`, or a dash for a set with
+  /// nothing in it, in [units].
+  String toSetText(Format format, Units units) {
     final parts = [
       switch ((this['weightKg'], this['reps'])) {
-        (final num weight, final num reps) => '${format.number(weight)} kg × $reps',
-        (final num weight, _) => '${format.number(weight)} kg',
+        (final num kg, final num reps) => '${format.number(units.fromKg(kg))} ${units.weight} × $reps',
+        (final num kg, _) => '${format.number(units.fromKg(kg))} ${units.weight}',
         (_, 1) => '1 rep',
         (_, final num reps) => '$reps reps',
         _ => null,
       },
-      if (this['distanceKm'] case final num km) '${format.number(km, 2)} km',
+      if (this['distanceKm'] case final num km) '${format.number(units.fromKm(km), 2)} ${units.distance}',
       if (this['seconds'] case final num seconds) Duration(seconds: seconds.round()).toClock(),
     ].nonNulls;
     final text = parts.isEmpty ? '—' : parts.join(' · ');

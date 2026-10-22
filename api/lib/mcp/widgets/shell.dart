@@ -66,11 +66,12 @@ body {
 .warn { color: var(--destructive); font-size: 12px; margin: 10px 0 0; }
 ''';
 
-/// Formatting in the tools' units (kg, km, seconds), in the host's locale
-/// and time zone once it has said them. Every string from a result goes
-/// into the page as text, never as markup.
+/// Formatting from the tools' units (kg, km, seconds) into the user's
+/// (`unitSystem` on the result: pounds and miles when imperial), in the
+/// host's locale and time zone once it has said them. Every string from a
+/// result goes into the page as text, never as markup.
 const _kitJs = r'''
-var ctx = { locale: undefined, timeZone: undefined };
+var ctx = { locale: undefined, timeZone: undefined, imperial: false };
 function el(tag, cls, text) {
   var e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -82,12 +83,15 @@ function num(n, digits) {
   try { return new Intl.NumberFormat(ctx.locale, { maximumFractionDigits: digits === undefined ? 1 : digits }).format(n); }
   catch (e) { return String(n); }
 }
-function kg(n) { return num(n) + ' kg'; }
-function km(n) { return num(n, 2) + ' km'; }
+function weight(kg, digits) { return num(ctx.imperial ? kg * 2.20462262 : kg, digits) + (ctx.imperial ? ' lb' : ' kg'); }
+function distance(km) { return num(ctx.imperial ? km * 0.621371192 : km, 2) + (ctx.imperial ? ' mi' : ' km'); }
 function pad(n) { return n < 10 ? '0' + n : String(n); }
 function clock(seconds) {
   var s = Math.round(seconds), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
   return h ? h + ':' + pad(m) + ':' + pad(s % 60) : m + ':' + pad(s % 60);
+}
+function pace(secondsPerKm) {
+  return clock(ctx.imperial ? secondsPerKm * 1.609344 : secondsPerKm) + (ctx.imperial ? ' /mi' : ' /km');
 }
 function span(seconds) {
   if (seconds < 60) return Math.round(seconds) + ' s';
@@ -103,10 +107,10 @@ function date(iso, options) {
 function shortDate(iso) { return date(iso, { day: 'numeric', month: 'short', year: 'numeric' }); }
 function setText(set) {
   var parts = [];
-  if (isNum(set.weightKg) && isNum(set.reps)) parts.push(kg(set.weightKg) + ' × ' + set.reps);
-  else if (isNum(set.weightKg)) parts.push(kg(set.weightKg));
+  if (isNum(set.weightKg) && isNum(set.reps)) parts.push(weight(set.weightKg) + ' × ' + set.reps);
+  else if (isNum(set.weightKg)) parts.push(weight(set.weightKg));
   else if (isNum(set.reps)) parts.push(set.reps + '×');
-  if (isNum(set.distanceKm)) parts.push(km(set.distanceKm));
+  if (isNum(set.distanceKm)) parts.push(distance(set.distanceKm));
   if (isNum(set.seconds)) parts.push(clock(set.seconds));
   return parts.join(' · ') || '—';
 }
@@ -143,6 +147,7 @@ const _bridgeJs = r'''
     last = result;
     root.replaceChildren();
     var data = result && result.structuredContent;
+    ctx.imperial = !!data && data.unitSystem === 'imperial';
     if (!data || result.isError) root.append(el('p', 'note', textOf(result)));
     else try { render(root, data); }
     catch (e) { root.replaceChildren(el('p', 'note', 'This result could not be drawn here; the text answer has all of it.')); }

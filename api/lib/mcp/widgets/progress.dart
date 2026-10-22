@@ -24,16 +24,15 @@ svg .dot { fill: var(--surface); stroke: var(--accent-ink); stroke-width: 2; }
 /// session lists them; one this page doesn't know shows under its own key.
 const _progressJs = r'''
 function count(n) { return num(n, 0); }
-function pace(n) { return clock(n) + ' /km'; }
 var metricNames = {
-  topSetWeight: ['Top set', kg],
-  estimatedOneRepMax: ['Estimated 1RM', kg],
-  totalVolume: ['Volume', function (n) { return kg(Math.round(n)); }],
-  averageWorkingWeight: ['Average working weight', kg],
-  assistanceWeight: ['Assistance', kg],
+  topSetWeight: ['Top set', weight],
+  estimatedOneRepMax: ['Estimated 1RM', weight],
+  totalVolume: ['Volume', function (n) { return weight(n, 0); }],
+  averageWorkingWeight: ['Average working weight', weight],
+  assistanceWeight: ['Assistance', weight],
   totalReps: ['Total reps', count],
   maxConsecutiveReps: ['Most reps in a set', count],
-  cardioDistance: ['Distance', km],
+  cardioDistance: ['Distance', distance],
   cardioDuration: ['Duration', clock],
   totalTimeUnderTension: ['Time under tension', clock],
   averagePace: ['Pace', pace]
