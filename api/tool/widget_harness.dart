@@ -5,7 +5,11 @@
 ///   dart run tool/widget_harness.dart [out-dir]   (default: ../build/widgets)
 ///
 /// Open `<out-dir>/<widget>.html`; `?theme=dark` or `?theme=light` sets the
-/// host's theme, and no parameter leaves it to the OS.
+/// host's theme, and no parameter leaves it to the OS. `?units=imperial`
+/// sends the result as an imperial user's, and `?width=760` frames the card
+/// as wide as a desktop host's column (420 by default). `?height=900`
+/// holds the frame at that height instead of the size the card reports,
+/// for a headless screenshot, which may not deliver the later reports.
 library;
 
 import 'dart:convert';
@@ -37,8 +41,13 @@ String _page(McpWidget widget, Map<String, dynamic> structured) {
 <iframe id="view" sandbox="allow-scripts" srcdoc="${const HtmlEscape(HtmlEscapeMode.attribute).convert(widget.html)}"></iframe>
 <script>
 var frame = document.getElementById('view');
-var theme = new URLSearchParams(location.search).get('theme');
+var params = new URLSearchParams(location.search);
+var theme = params.get('theme');
 var result = ${jsonEncode(result)};
+if (params.get('units')) result.structuredContent.unitSystem = params.get('units');
+if (params.get('width')) frame.style.width = params.get('width') + 'px';
+var fixedHeight = params.get('height');
+if (fixedHeight) frame.style.height = fixedHeight + 'px';
 function post(m) { frame.contentWindow.postMessage(m, '*'); }
 window.addEventListener('message', function (event) {
   if (event.source !== frame.contentWindow) return;
@@ -52,7 +61,7 @@ window.addEventListener('message', function (event) {
     post({ jsonrpc: '2.0', method: 'ui/notifications/tool-input', params: { arguments: {} } });
     post({ jsonrpc: '2.0', method: 'ui/notifications/tool-result', params: result });
   } else if (m.method === 'ui/notifications/size-changed') {
-    frame.style.height = m.params.height + 'px';
+    if (!fixedHeight) frame.style.height = m.params.height + 'px';
   }
 });
 </script></body></html>
@@ -77,6 +86,16 @@ const _samples = <String, Map<String, dynamic>>{
           {'weightKg': 225, 'reps': 5, 'rpe': 8},
           {'weightKg': 225, 'reps': 5, 'rpe': 9},
           {'type': 'failure', 'weightKg': 225, 'reps': 3},
+        ],
+      },
+      {
+        'id': '01900000-0000-7000-8000-000000000004',
+        'name': 'Chest Press (Machine)',
+        'category': 'Machine',
+        'sets': [
+          {'weightKg': 58.967, 'reps': 14},
+          {'weightKg': 58.967, 'reps': 14},
+          {'weightKg': 58.967, 'reps': 14},
         ],
       },
       {
