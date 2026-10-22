@@ -40,6 +40,8 @@ void main() {
     when(
       app.db.getPendingAnomalies(userId: anyNamed('userId'), from: anyNamed('from'), to: anyNamed('to')),
     ).thenAnswer((_) async => []);
+    // a result a card draws carries the user's units
+    when(app.db.getProfile(any)).thenAnswer((_) async => User(id: 'u1'));
   });
 
   tearDown(() => app.stop());
@@ -1265,7 +1267,34 @@ void main() {
       // the card leaves assisted work out of volume, so it needs the category
       final exercise = ((result['structuredContent'] as Map)['exercises'] as List).single as Map;
       expect(exercise['category'], 'Assisted Body Weight');
-      expect(jsonDecode(((result['content'] as List).single as Map)['text'] as String), result['structuredContent']);
+      final [data, shown] = (result['content'] as List).cast<Map>();
+      expect(jsonDecode(data['text'] as String), result['structuredContent']);
+      // a host that draws the card has the model answer, not restate it
+      expect(shown['text'], contains("don't restate it"));
+      expect((result['structuredContent'] as Map)['unitSystem'], 'metric');
+    });
+
+    test("a card's result names the units the user logs in, and a tool without a card doesn't", () async {
+      when(app.db.getProfile('u1')).thenAnswer(
+        (_) async => User(
+          id: 'u1',
+          settings: const Settings(unitSystem: MeasurementUnit.imperial),
+        ),
+      );
+      when(
+        app.db.getRecordSets(userId: 'u1', from: anyNamed('from'), to: anyNamed('to')),
+      ).thenAnswer((_) async => []);
+      when(
+        app.db.getWorkouts(userId: 'u1', targetUserId: 'u1', imageUrl: anyNamed('imageUrl'), cursor: null, limit: 20),
+      ).thenAnswer((_) async => const Page(items: [], hasMore: false));
+
+      final records = (await rpc('tools/call', params: {'name': 'get_personal_records'})).body['result'] as Map;
+      expect((records['structuredContent'] as Map)['unitSystem'], 'imperial');
+      expect(records['content'], hasLength(2));
+
+      final listed = (await rpc('tools/call', params: {'name': 'list_workouts'})).body['result'] as Map;
+      expect(listed['structuredContent'] as Map, isNot(contains('unitSystem')));
+      expect(listed['content'], hasLength(1));
     });
   });
 
@@ -1310,7 +1339,7 @@ void main() {
       return response.body['result'] as Map;
     }
 
-    String text(Map result) => ((result['content'] as List).single as Map)['text'] as String;
+    String text(Map result) => ((result['content'] as List).first as Map)['text'] as String;
 
     Future<String> instructions({String? token}) async {
       final response = await rpc('initialize', params: {'protocolVersion': '2025-06-18'}, token: token);
@@ -1446,6 +1475,7 @@ void main() {
       expect(shown['isError'], isFalse, reason: text(shown));
       expect(shown['structuredContent'], {
         'status': 'preview',
+        'unitSystem': 'metric',
         'template': {
           'folder': {'id': folderId, 'name': 'Upper/lower'},
           'name': 'Push',
