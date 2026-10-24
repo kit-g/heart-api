@@ -30,10 +30,10 @@ var statuses = {
   updated: 'Replaced in Heart'
 };
 var measures = [
-  ['reps', function (n) { return num(n, 0); }, ' reps'],
-  ['weightKg', function (n) { return num(n); }, ' kg'],
-  ['distanceKm', function (n) { return num(n, 2); }, ' km'],
-  ['seconds', function (n) { return clock(n); }, '']
+  ['reps', function (n) { return num(n, 0); }, function () { return ' reps'; }],
+  ['weightKg', function (n) { return num(ctx.imperial ? n * 2.20462262 : n); }, function () { return ctx.imperial ? ' lb' : ' kg'; }],
+  ['distanceKm', function (n) { return num(ctx.imperial ? n * 0.621371192 : n, 2); }, function () { return ctx.imperial ? ' mi' : ' km'; }],
+  ['seconds', function (n) { return clock(n); }, function () { return ''; }]
 ];
 function range(r, format, unit) {
   if (!r || !isNum(r.min)) return null;
@@ -44,7 +44,7 @@ function range(r, format, unit) {
 function aim(target) {
   if (!target || typeof target !== 'object') return '';
   var parts = [];
-  measures.forEach(function (m) { var text = range(target[m[0]], m[1], m[2]); if (text) parts.push(text); });
+  measures.forEach(function (m) { var text = range(target[m[0]], m[1], m[2]()); if (text) parts.push(text); });
   if (isNum(target.rir)) parts.push(num(target.rir) + ' in reserve');
   return parts.join(' · ');
 }

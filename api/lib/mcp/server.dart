@@ -5,6 +5,7 @@ import 'package:heart/globals/globals.dart';
 import 'package:heart/mcp/protocol.dart';
 import 'package:heart/mcp/tools.dart';
 import 'package:heart/mcp/widgets.dart';
+import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/tokens.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/oauth/protocol.dart';
@@ -327,6 +328,20 @@ Response? _scopeRefusal(
   );
 }
 
+/// Said beside every result a card can draw. The server can't tell whether
+/// this host draws cards, so it says what to do when one does: a host that
+/// shows the card and has the model restate it shows the workout twice.
+const _shownAsCard =
+    'A host that draws Heart cards shows this result to the user as a card. If it does, the user already sees '
+    "it: don't restate it, answer what they asked. Weights here are in kg and distances in km; give them in "
+    'unitSystem.';
+
+/// The units the user logs in, as `get_profile` names them.
+Future<String> _unitSystem(Request request) async {
+  final user = await request.profileService.getProfile(request.userId);
+  return user?.settings.unitSystem?.name ?? 'metric';
+}
+
 Future<Map<String, dynamic>> _callTool(Request request, Map<String, dynamic> params) async {
   final tool = switch (params['name']) {
     final String name => toolsByName[name],
@@ -340,10 +355,16 @@ Future<Map<String, dynamic>> _callTool(Request request, Map<String, dynamic> par
   };
 
   try {
-    final structured = await tool.run(request, arguments);
+    final result = await tool.run(request, arguments);
+    // a card draws in the user's units, and the model answers in them
+    final structured = switch (tool.widget) {
+      null => result,
+      _ => {...result, 'unitSystem': await _unitSystem(request)},
+    };
     return {
       'content': [
         {'type': 'text', 'text': jsonEncode(structured)},
+        if (tool.widget != null) const {'type': 'text', 'text': _shownAsCard},
       ],
       'structuredContent': structured,
       'isError': false,
