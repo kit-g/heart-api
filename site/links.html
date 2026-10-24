@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="description"
+          content="Every Heart of Yours link in one place: the app on the App Store and Google Play, the blog, r/heartofyours, Threads and Instagram."/>
+    <title>Links - Heart of Yours, a free workout log app</title>
+    <link rel="canonical" href="https://heart-of.me/links.html"/>
+    <!-- Safari on iPhone shows a native "Get" bar for the app. -->
+    <meta name="apple-itunes-app" content="app-id=6777837444"/>
+    <!-- Link previews: absolute URLs, because crawlers don't resolve relative ones. -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="Heart of Yours"/>
+    <meta property="og:title" content="Links - Heart of Yours, a free workout log app"/>
+    <meta property="og:description" content="The app, the blog, r/heartofyours, Threads and Instagram: every Heart of Yours link in one place."/>
+    <meta property="og:url" content="https://heart-of.me/links.html"/>
+    <meta property="og:image" content="https://heart-of.me/assets/og.png?v=3"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content="Heart of Yours: a workout log that gets out of your way. Free, no account needed, health data stays on your phone. Beside it, the app’s workouts-per-week chart and goals."/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,600&display=swap"
+          rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"/>
+    <link rel="stylesheet" href="assets/tokens.css">
+    <link rel="stylesheet" href="assets/site.css">
+    <link rel="stylesheet" href="assets/tailwind.css">
+    <script src="assets/site.js"></script>
+</head>
+<!-- The link in every social bio: one column, no navbar, opened mostly from
+     an app's in-app browser on a phone. A new profile goes in "Follow along"
+     once its account exists. -->
+<body class="bg-ground text-ink font-text min-h-screen flex flex-col overflow-x-hidden selection:bg-accent selection:text-on-accent">
+<main class="flex-grow w-full max-w-md mx-auto px-6 py-12 flex flex-col items-center gap-10">
+
+    <a href="index.html" class="flex flex-col items-center gap-4 text-center hover:opacity-80 transition-opacity">
+        <div class="size-20 flex items-center justify-center bg-surface rounded-xl overflow-hidden border">
+            <picture class="size-full">
+                <source srcset="assets/logo-dark.png" media="(prefers-color-scheme: dark)"/>
+                <img src="assets/logo-light.png" width="192" height="192" alt=""
+                     class="size-full object-contain"/>
+            </picture>
+        </div>
+        <div>
+            <h1 class="font-title text-3xl font-semibold tracking-tight">Heart of Yours</h1>
+            <p class="text-muted mt-2">A free workout log. No account needed, and your data stays yours.</p>
+        </div>
+    </a>
+
+    <!-- site.js hides the badge for the other platform on a phone; elsewhere both show. -->
+    <section class="flex flex-wrap justify-center gap-4" aria-label="Get the app">
+        <a href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener" data-store="ios"
+           class="inline-block hover:opacity-90 transition-opacity">
+            <img src="assets/appstore_button.svg" alt="Download on the App Store" class="h-12 w-auto"/>
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=me.heart.android&referrer=utm_source%3Dsite%26utm_campaign%3Dlinks"
+           target="_blank" rel="noopener" data-store="android"
+           class="inline-block hover:opacity-90 transition-opacity">
+            <img src="assets/google_play_button.svg" alt="Get it on Google Play" class="h-12 w-auto"/>
+        </a>
+    </section>
+
+    <section class="w-full flex flex-col gap-3">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Read</h2>
+        <a href="blog.html"
+           class="flex items-center gap-3 px-5 py-4 bg-surface border rounded-xl font-medium hover:border-accent-ink transition-colors">
+            <span class="material-symbols-outlined text-accent-ink">article</span>
+            <span class="flex-grow">Blog</span>
+        </a>
+        <a href="features.html"
+           class="flex items-center gap-3 px-5 py-4 bg-surface border rounded-xl font-medium hover:border-accent-ink transition-colors">
+            <span class="material-symbols-outlined text-accent-ink">checklist</span>
+            <span class="flex-grow">Features</span>
+        </a>
+        <a href="strong-alternative.html"
+           class="flex items-center gap-3 px-5 py-4 bg-surface border rounded-xl font-medium hover:border-accent-ink transition-colors">
+            <span class="material-symbols-outlined text-accent-ink">swap_horiz</span>
+            <span class="flex-grow">Coming from Strong or Hevy</span>
+        </a>
+        <a href="developers.html"
+           class="flex items-center gap-3 px-5 py-4 bg-surface border rounded-xl font-medium hover:border-accent-ink transition-colors">
+            <span class="material-symbols-outlined text-accent-ink">code</span>
+            <span class="flex-grow">Developer API and AI assistants</span>
+        </a>
+    </section>
+
+    <section class="w-full flex flex-col gap-3">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Follow along</h2>
+        <a href="https://www.reddit.com/r/heartofyours/" target="_blank" rel="noopener"
+           class="flex items-center gap-3 px-5 py-4 bg-surface border rounded-xl font-medium hover:border-accent-ink transition-colors">
+            <span class="material-symbols-outlined text-accent-ink">forum</span>
+            <span class="flex-grow">r/heartofyours</span>
+            <span class="text-sm text-muted">Reddit</span>
+        </a>
+        <a href="https://www.threads.com/@heartofyours.app" target="_blank" rel="noopener"
+           class="flex items-center gap-3 px-5 py-4 bg-surface border rounded-xl font-medium hover:border-accent-ink transition-colors">
+            <span class="material-symbols-outlined text-accent-ink">alternate_email</span>
+            <span class="flex-grow">@heartofyours.app</span>
+            <span class="text-sm text-muted">Threads</span>
+        </a>
+        <a href="https://www.instagram.com/heartofyours.app/" target="_blank" rel="noopener"
+           class="flex items-center gap-3 px-5 py-4 bg-surface border rounded-xl font-medium hover:border-accent-ink transition-colors">
+            <span class="material-symbols-outlined text-accent-ink">photo_camera</span>
+            <span class="flex-grow">@heartofyours.app</span>
+            <span class="text-sm text-muted">Instagram</span>
+        </a>
+    </section>
+
+    <section class="w-full flex flex-col gap-3">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Get in touch</h2>
+        <a href="support.html"
+           class="flex items-center gap-3 px-5 py-4 bg-surface border rounded-xl font-medium hover:border-accent-ink transition-colors">
+            <span class="material-symbols-outlined text-accent-ink">help</span>
+            <span class="flex-grow">Help and support</span>
+        </a>
+        <a href="mailto:info@heart-of.me"
+           class="flex items-center gap-3 px-5 py-4 bg-surface border rounded-xl font-medium hover:border-accent-ink transition-colors">
+            <span class="material-symbols-outlined text-accent-ink">mail</span>
+            <span class="flex-grow break-all">info@heart-of.me</span>
+        </a>
+    </section>
+</main>
+
+<footer class="w-full py-8 px-6 border-t bg-ground">
+    <div class="max-w-md mx-auto flex flex-wrap justify-center gap-x-6 gap-y-2">
+        <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="privacy.html">Privacy Policy</a>
+        <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="terms.html">Terms of Service</a>
+        <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="account.html">Account Control</a>
+    </div>
+</footer>
+</body>
+</html>
