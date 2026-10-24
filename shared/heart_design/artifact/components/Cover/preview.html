@@ -1,0 +1,42 @@
+<!-- @dsCard height=288 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400&family=Literata:opsz,wght@7..72,600&display=swap">
+<style>
+  html, body { margin: 0; background: var(--ground); }
+  .cover { position: relative; width: 960px; height: 288px; overflow: hidden; background: var(--ground); }
+  .cover svg { position: absolute; inset: 0; }
+  .block { fill: var(--accent); }
+  .tint { fill: var(--fill); }
+  .tile { rx: var(--radius-card); }
+  .rule { stroke: var(--border); stroke-width: 1; }
+  .name {
+    position: absolute; left: 48px; bottom: 68px; margin: 0; max-width: 440px;
+    font-family: var(--font-literata, 'Literata', Georgia, serif); font-weight: 600;
+    font-size: 120px; line-height: .92; color: var(--ink);
+  }
+  .tagline {
+    position: absolute; left: 50px; bottom: 36px; margin: 0; max-width: 440px;
+    font-family: var(--font-ibm-plex-sans, 'IBM Plex Sans', system-ui, sans-serif);
+    font-size: 14px; color: var(--muted);
+  }
+</style>
+<div class="cover">
+  <!--
+    blocks: accent of each preset in the theme it is shown in (ink-light slab 192x312, forge-dark 104x104,
+            utility-light 136x104, ember-dark 256x72) plus one fill tint 96x80
+    arrangement: one tall slab with satellites, the right-hand ones bleeding off the right and bottom edges
+    pattern: three hairlines in border, the editorial row: Ink is paper and ink, borders not shadows
+    scales: radius-card on every block; gaps of 16 between blocks
+  -->
+  <svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+    <line class="rule" x1="480" x2="960" y1="128.5" y2="128.5"/>
+    <line class="rule" x1="480" x2="960" y1="216.5" y2="216.5"/>
+    <line class="rule" x1="480" x2="960" y1="272.5" y2="272.5"/>
+    <g data-theme="ink-light"><rect class="block tile" x="528" y="-12" width="192" height="312"/></g>
+    <g data-theme="forge-dark"><rect class="block tile" x="736" y="24" width="104" height="104"/></g>
+    <g data-theme="utility-light"><rect class="block tile" x="856" y="24" width="136" height="104"/></g>
+    <g data-theme="ember-dark"><rect class="block tile" x="736" y="144" width="256" height="72"/></g>
+    <rect class="tint tile" x="736" y="232" width="96" height="80"/>
+  </svg>
+  <h1 class="name">Heart</h1>
+  <p class="tagline">A workout log that gets out of your way.</p>
+</div>

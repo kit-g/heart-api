@@ -5,11 +5,14 @@
 ///
 ///   dart run tool/emit_cards.dart        (or `make cards` from the repo root)
 ///
-/// `cards/<name>.dart` becomes `_<name>CardJs`, inlined by the page in
-/// `api/lib/mcp/widgets/<name>.dart`.
+/// `cards/<name>.dart` becomes `_<name>CardJs`, and its styles in
+/// `lib/cards/styles.dart` `_<name>CardCss`, inlined by the page in
+/// `api/lib/mcp/widgets/<name>.dart` with the shared `_cardCss`.
 library;
 
 import 'dart:io';
+
+import 'package:heart_pages/cards/styles.dart';
 
 final _api = File('../api/lib/mcp/widgets/cards.g.dart');
 
@@ -18,9 +21,17 @@ Future<void> main() async {
     ..sort((a, b) => a.path.compareTo(b.path));
   final out = Directory('build/cards')..createSync(recursive: true);
 
-  final constants = StringBuffer();
+  final constants = StringBuffer()
+    ..writeln()
+    ..writeln('/// `cardCss` from `pages/lib/cards/styles.dart`: what every card shares.')
+    ..writeln('const _cardCss = ${cardCss.toDartLiteral()};');
   for (final script in scripts) {
     final name = script.uri.pathSegments.last.replaceAll('.dart', '');
+    final css = cardStyles[name];
+    if (css == null) {
+      stderr.writeln('cards/$name.dart has no entry in lib/cards/styles.dart');
+      exit(1);
+    }
     final js = '${out.path}/$name.js';
     // -O4 is safe here: the cards read results through patterns, never casts,
     // so the checks it drops are ones the code doesn't rely on.
@@ -35,7 +46,10 @@ Future<void> main() async {
     constants
       ..writeln()
       ..writeln('/// `pages/cards/$name.dart`, compiled by dart2js -O4 (${source.length} bytes).')
-      ..writeln('const _${name.toCamelCase()}CardJs = ${source.toDartLiteral()};');
+      ..writeln('const _${name.toCamelCase()}CardJs = ${source.toDartLiteral()};')
+      ..writeln()
+      ..writeln('/// `cardStyles[\'$name\']` from `pages/lib/cards/styles.dart`.')
+      ..writeln('const _${name.toCamelCase()}CardCss = ${css.toDartLiteral()};');
     stdout.writeln('$name: ${source.length} bytes');
   }
 

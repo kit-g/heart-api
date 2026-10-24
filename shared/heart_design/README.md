@@ -10,6 +10,11 @@ palette of eleven colors, its faces and headline, plus the control and card radi
 | `lib/src/presets.g.dart`       | the app (`Preset`, `Palette`, `controlRadius`, `cardRadius`) and `tokensCss` for the MCP cards |
 | `../../site/assets/tokens.css` | the site and the blog                                                                  |
 
+The Heart Design System artifact, which replaces the Claude Design project, is built from the
+same file: `dart run tool/design_system.dart OUT_DIR [REF]` writes its `tokens.json` beside the
+pages kept in `artifact/` (its README, the logos' notes, the cover), ready to publish to it. The
+logos are uploads the artifact already holds.
+
 Change a token in `tokens.json`, run `make design` from the repo root, and commit the generated
 files with it. The tests fail when they are stale, and they check that every palette keeps its
 text legible on its ground (WCAG AA for muted and accentInk).

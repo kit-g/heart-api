@@ -194,17 +194,25 @@ class IntlFormat implements Format {
 
   @override
   String dateTime(String iso) {
-    final date = (globalContext['Date'] as JSFunction).callAsConstructor<JSObject>(iso.toJS);
-    final options = {
-      'timeZone': ?timeZone,
+    return _date(iso, {
       'weekday': 'long',
       'day': 'numeric',
       'month': 'short',
       'year': 'numeric',
       'hour': 'numeric',
       'minute': '2-digit',
-    };
-    return _format('DateTimeFormat', options, date) ?? iso;
+    });
+  }
+
+  @override
+  String date(String iso) => _date(iso, {'day': 'numeric', 'month': 'short', 'year': 'numeric'});
+
+  @override
+  String dayMonth(String iso) => _date(iso, {'day': 'numeric', 'month': 'short'});
+
+  String _date(String iso, Map<String, Object> options) {
+    final date = (globalContext['Date'] as JSFunction).callAsConstructor<JSObject>(iso.toJS);
+    return _format('DateTimeFormat', {'timeZone': ?timeZone, ...options}, date) ?? iso;
   }
 
   String? _format(String formatter, Map<String, Object> options, JSAny value) {
@@ -213,7 +221,9 @@ class IntlFormat implements Format {
       (null, {...options}..remove('timeZone')),
     ]) {
       try {
-        final format = _intl.callMethodVarArgs<JSObject>(formatter.toJS, [locale?.toJS, options_.jsify()]);
+        // no locale is an empty list, the browser's own: Intl throws on null
+        final locales = locale?.toJS ?? JSArray<JSString>();
+        final format = _intl.callMethodVarArgs<JSObject>(formatter.toJS, [locales, options_.jsify()]);
         return format.callMethod<JSString>('format'.toJS, value).toDart;
       } catch (_) {
         // A RangeError from an unknown locale or time zone: try the defaults.
