@@ -17,6 +17,8 @@ dependencies:
   # Path-only, like heart_aws: a version constraint on a path dependency can
   # only ever be redundant or break CI on the next heart_models bump — the
   # working tree is always the version consumed.
+  heart_design:
+    path: "../shared/heart_design"
   heart_models:
     path: "../shared/heart_models"
   jose: ^0.3.5

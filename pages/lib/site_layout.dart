@@ -8,7 +8,8 @@ import 'posts.dart';
 
 /// The site's chrome around a rendered page: the head every site page has,
 /// the header and footer of `site/strong-alternative.html`, and the post or
-/// index between them. Styling is the site's own `site.css` and Tailwind
+/// index between them. Styling is the design system's `tokens.css`, the
+/// site's own `site.css` and Tailwind
 /// build (whose `content` globs include this package), so light and dark
 /// follow the OS as on every other page.
 ///
@@ -72,6 +73,7 @@ class SiteLayout implements PageLayout {
           href:
               'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap',
         ),
+        const link(rel: 'stylesheet', href: '/assets/tokens.css'),
         const link(rel: 'stylesheet', href: '/assets/site.css'),
         const link(rel: 'stylesheet', href: '/assets/tailwind.css'),
         const script(src: '/assets/site.js'),

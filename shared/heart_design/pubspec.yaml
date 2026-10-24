@@ -1,0 +1,11 @@
+name: heart_design
+description: "Heart's design tokens: four presets, light and dark, generated from tokens.json"
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.13.0"
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6

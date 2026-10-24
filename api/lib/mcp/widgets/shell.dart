@@ -8,35 +8,16 @@ const _head =
     '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
     '<meta name="viewport" content="width=device-width, initial-scale=1">';
 
-/// The Ink preset of the Heart design system, as `site/assets/site.css` has
-/// it: eleven tokens per brightness, no shadows, the accent a fill and
-/// accent-ink for text and lines, 12px cards. The fonts are named but never
-/// fetched; a host without them falls back to the system face.
+/// The Heart design system's tokens, as `site/assets/tokens.css` has them
+/// (`package:heart_design`), and the page on top of them: no shadows, the
+/// accent a fill and accent-ink for text and lines, 12px cards. Ink unless a
+/// page sets `data-preset`. The fonts are named but never fetched; a host
+/// without them falls back to the system face.
 ///
 /// The host's `theme` wins over the OS setting when it sends one.
-const _baseCss = r'''
-:root {
-  --ground: #FFFFFF; --surface: #FFFFFF; --fill: #F4F1EA; --ink: #1A1815; --muted: #5D584E;
-  --faint: #948F85; --border: #E2DED4; --accent: #1F4EC8; --on-accent: #FFFFFF; --accent-ink: #1B43A8;
-  --destructive: #9E2B25;
-  --font-text: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-title: 'Literata', Georgia, serif;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --ground: #141311; --surface: #1E1C19; --fill: #2A2721; --ink: #F2F0EA; --muted: #A29D93;
-    --faint: #6F6B63; --border: #302D27; --accent: #93ADFF; --on-accent: #0F1526; --accent-ink: #93ADFF;
-    --destructive: #FF7A66;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --ground: #141311; --surface: #1E1C19; --fill: #2A2721; --ink: #F2F0EA; --muted: #A29D93;
-  --faint: #6F6B63; --border: #302D27; --accent: #93ADFF; --on-accent: #0F1526; --accent-ink: #93ADFF;
-  --destructive: #FF7A66;
-  color-scheme: dark;
-}
+const _baseCss =
+    '$tokensCss'
+    r'''
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 body {

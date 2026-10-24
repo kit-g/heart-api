@@ -54,7 +54,7 @@ jobs:
       # analysis_options is discarded, and its files reformat at the default width.
       - name: "Install dependencies"
         run: |
-          for pkg in api shared/heart_aws shared/heart_models pages; do
+          for pkg in api shared/heart_aws shared/heart_design shared/heart_models pages; do
             (cd "$pkg" && dart pub get)
           done
 
@@ -82,7 +82,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [ api, shared/heart_aws, shared/heart_models ]
+        package: [ api, shared/heart_aws, shared/heart_design, shared/heart_models ]
     steps:
       - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
@@ -100,10 +100,10 @@ jobs:
         if: matrix.package == 'api'
         run: make cards
 
-      # heart_aws has no build_runner; the other two generate their mocks
-      # (mocks are gitignored, not checked in)
+      # heart_aws and heart_design have no build_runner; the other two generate
+      # their mocks (mocks are gitignored, not checked in)
       - name: "Generate Mocks"
-        if: matrix.package != 'shared/heart_aws'
+        if: matrix.package != 'shared/heart_aws' && matrix.package != 'shared/heart_design'
         working-directory: ${{ matrix.package }}
         run: dart run build_runner build
 

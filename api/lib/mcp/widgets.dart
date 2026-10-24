@@ -7,6 +7,8 @@
 /// draws only the tool result the host hands it over the `ui/*` bridge.
 library;
 
+import 'package:heart_design/heart_design.dart';
+
 part 'widgets/shell.dart';
 part 'widgets/workout.dart';
 part 'widgets/progress.dart';

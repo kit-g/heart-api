@@ -1,12 +1,13 @@
 # Repo-wide entrypoints. `make test` runs the same matrix CI does.
 # Database targets need local Postgres + pgtap (see database/README.md).
 
-.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages cards lint format-check db-up db-down db-reset db-seed
+.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages cards design lint format-check db-up db-down db-reset db-seed
 
 bootstrap:
 	$(MAKE) cards
 	cd api && dart pub get && dart run build_runner build
 	cd shared/heart_aws && dart pub get
+	cd shared/heart_design && dart pub get
 	cd shared/heart_models && dart pub get && dart run build_runner build
 	cd pages && dart pub get && dart run build_runner build
 	$(MAKE) prepare-compat-tests
@@ -18,6 +19,7 @@ test: test-dart test-db test-api-db test-python test-tf test-pages
 test-dart:
 	cd api && dart test
 	cd shared/heart_aws && dart test
+	cd shared/heart_design && dart test
 	cd shared/heart_models && dart test
 
 # Containerized dev database (Postgres 17 + pgtap, see compose.yaml).
@@ -79,6 +81,10 @@ test-pages:
 cards:
 	cd pages && dart pub get && dart run tool/emit_cards.dart
 
+# Regenerates the design tokens' Dart and CSS from shared/heart_design/tokens.json.
+design:
+	cd shared/heart_design && dart pub get && dart run tool/generate.dart
+
 # fmt + init/validate of every Terraform root + the native .tftest.hcl suites.
 # Credential-free; first run downloads providers (cached in ~/.terraform.d).
 test-tf:
@@ -87,6 +93,7 @@ test-tf:
 lint:
 	cd api && dart analyze
 	cd shared/heart_aws && dart analyze
+	cd shared/heart_design && dart analyze
 	cd shared/heart_models && dart analyze
 	cd pages && dart analyze
 	uv run ruff check firebase assets scripts
