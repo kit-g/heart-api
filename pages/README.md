@@ -50,9 +50,9 @@ python3 -m http.server -d build/site              # http://localhost:8000/blog.h
 
 ## MCP Apps cards
 
-`lib/cards/` holds cards the API's MCP server shows in an assistant (heart-api#303):
-`WorkoutCard`, a component with no browser imports so a server can render it too, and
-`McpAppsBridge`, which draws a card from the tool result a host posts. `cards/<name>.dart` is
-one page's script. `make cards` compiles each with dart2js into
+`lib/cards/` holds the cards the API's MCP server shows in an assistant (heart-api#303):
+`WorkoutCard`, `ProgressCard`, `RecordsCard` and `TemplateCard`, components with no browser
+imports so a server can render them too, their styles in `styles.dart`, and `McpAppsBridge`,
+which draws a card from the tool result a host posts. `cards/<name>.dart` is one page's script. `make cards` compiles each with dart2js into
 `api/lib/mcp/widgets/cards.g.dart`, and `api/tool/widget_harness.dart` shows the result in
 a browser. `docs/2026-10-18.mcp-widgets.md` has the rest.
