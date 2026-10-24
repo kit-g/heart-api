@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <!-- Translated from ../strong-alternative.html (machine draft 2026-10-24, reviewed): neutral
+         international Spanish, tú-form, the app's own es terms for its menus. -->
+    <link rel="icon" type="image/png" sizes="256x256" href="../assets/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="description" content="¿Buscas una alternativa a Strong? Una comparación honesta de Heart, Strong y Hevy: precio, límites, funciones y lo que está en camino, y cómo traer tu historial de Strong o Hevy."/>
+    <title>¿Una alternativa a Strong? Heart, Strong y Hevy comparados - Heart of Yours</title>
+    <link rel="canonical" href="https://heart-of.me/es/strong-alternative.html"/>
+    <link rel="alternate" hreflang="en" href="https://heart-of.me/strong-alternative.html"/>
+    <link rel="alternate" hreflang="es" href="https://heart-of.me/es/strong-alternative.html"/>
+    <link rel="alternate" hreflang="x-default" href="https://heart-of.me/strong-alternative.html"/>
+    <!-- Safari on iPhone shows a native "Get" bar for the app. -->
+    <meta name="apple-itunes-app" content="app-id=6777837444"/>
+    <!-- Link previews: absolute URLs, because crawlers don't resolve relative ones. -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="Heart of Yours"/>
+    <meta property="og:locale" content="es_419"/>
+    <meta property="og:locale:alternate" content="en_US"/>
+    <meta property="og:title" content="¿Una alternativa a Strong? Heart, Strong y Hevy comparados - Heart of Yours"/>
+    <meta property="og:description" content="Una comparación honesta de Heart, Strong y Hevy, y cómo traer tu historial de Strong o Hevy."/>
+    <meta property="og:url" content="https://heart-of.me/es/strong-alternative.html"/>
+    <meta property="og:image" content="https://heart-of.me/assets/og.png?v=3"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content="Heart of Yours: un registro de entrenamientos que no te estorba. Gratis, sin cuenta, y tus datos de salud se quedan en tu teléfono. Al lado, el gráfico de entrenamientos por semana y las metas de la app."/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,600&display=swap"
+          rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"/>
+    <link rel="stylesheet" href="../assets/tokens.css">
+    <link rel="stylesheet" href="../assets/site.css">
+    <link rel="stylesheet" href="../assets/tailwind.css">
+    <script src="../assets/site.js"></script>
+</head>
+<body class="bg-ground text-ink font-text min-h-screen flex flex-col overflow-x-hidden selection:bg-accent selection:text-on-accent">
+<!-- Navbar: the rest of the site is in English, so its links say so. -->
+<header class="w-full flex flex-col items-center pt-6 pb-2 px-6 sm:px-10 z-10">
+    <div class="w-full max-w-[1200px] flex items-center justify-between">
+        <a href="../index.html" hreflang="en" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="size-9 flex items-center justify-center bg-surface rounded overflow-hidden border">
+                <picture class="size-full">
+                    <source srcset="../assets/logo-dark.png" media="(prefers-color-scheme: dark)"/>
+                    <img src="../assets/logo-light.png" width="192" height="192" alt=""
+                         class="size-full object-contain"/>
+                </picture>
+            </div>
+            <h2 class="text-lg font-title font-semibold tracking-tight">Heart of Yours</h2>
+        </a>
+        <nav class="hidden md:flex items-center gap-8">
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
+               href="../features.html" hreflang="en">Funciones <span class="text-xs">(en inglés)</span></a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors"
+               href="../strong-alternative.html" hreflang="en" lang="en">English</a>
+        </nav>
+        <button id="menu-button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Menú"
+                class="md:hidden flex items-center justify-center size-10 rounded bg-fill text-ink">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+    </div>
+    <nav id="mobile-nav" hidden
+         class="md:hidden w-full max-w-[1200px] mt-4 flex flex-col border rounded-xl bg-surface divide-y divide-border">
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="../features.html" hreflang="en">Funciones (en inglés)</a>
+        <a class="px-4 py-3 text-sm font-medium text-ink" href="../strong-alternative.html" hreflang="en" lang="en">English</a>
+    </nav>
+</header>
+
+<main class="flex-grow w-full max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
+
+    <!-- The same facts as the English page, checked on the same date; when that page is
+         rechecked, this one is updated with it. -->
+    <section class="max-w-3xl animate-fade-in opacity-0">
+        <h1 class="font-title text-4xl sm:text-5xl font-semibold tracking-tight text-ink mb-4">
+            ¿Buscas una alternativa a Strong?
+        </h1>
+        <p class="text-lg text-muted leading-relaxed mb-4">
+            Strong y Hevy son buenas apps, y mucha gente está contenta con cualquiera de las dos. Si estás pensando
+            en cambiar, aquí tienes una comparación honesta con Heart: lo que hace, lo que todavía no hace y cómo
+            traer tu historial si decides probarla.
+        </p>
+        <p class="text-muted leading-relaxed">
+            Heart es un registro de entrenamientos gratuito para iPhone, iPad, Apple Watch y Android. Puedes abrirla
+            y entrenar sin crear una cuenta.
+        </p>
+    </section>
+
+    <nav aria-label="En esta página"
+         class="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted animate-fade-in opacity-0 animate-delay-100">
+        <a class="hover:text-accent-ink transition-colors underline underline-offset-4" href="#compare">Cara a cara</a>
+        <a class="hover:text-accent-ink transition-colors underline underline-offset-4" href="#switches">Solo lo que actives</a>
+        <a class="hover:text-accent-ink transition-colors underline underline-offset-4" href="#import">Cómo traer tu historial de Strong o Hevy</a>
+        <a class="hover:text-accent-ink transition-colors underline underline-offset-4" href="#others">Otras opciones</a>
+        <a class="hover:text-accent-ink transition-colors underline underline-offset-4" href="#faq">Preguntas</a>
+    </nav>
+
+    <!-- Comparison -->
+    <section id="compare" class="mt-12 scroll-mt-8 animate-fade-in opacity-0 animate-delay-100">
+        <h2 class="font-title text-2xl sm:text-3xl font-semibold tracking-tight text-ink mb-3">Cara a cara</h2>
+        <p class="text-muted leading-relaxed mb-6 max-w-3xl">
+            <strong class="text-ink">Gratis</strong> significa incluido sin pagar.
+            <strong class="text-ink">De pago</strong> significa que necesita la suscripción de la app.
+            <strong class="text-ink">No figura</strong> significa que no lo encontramos en las páginas de la propia
+            app, así que puede existir. <strong class="text-ink">En camino</strong> significa que Heart lo está
+            desarrollando.
+        </p>
+
+        <div class="overflow-x-auto border rounded-xl bg-surface">
+            <table class="w-full min-w-[640px] text-sm text-left align-top">
+                <caption class="sr-only">Heart, Strong y Hevy comparados función por función</caption>
+                <thead class="bg-fill">
+                <tr>
+                    <th scope="col" class="p-3 sm:p-4 w-[22%] font-semibold text-ink"></th>
+                    <th scope="col" class="p-3 sm:p-4 w-[26%] font-title text-base font-semibold text-ink">Heart</th>
+                    <th scope="col" class="p-3 sm:p-4 w-[26%] font-title text-base font-semibold text-ink">Strong</th>
+                    <th scope="col" class="p-3 sm:p-4 w-[26%] font-title text-base font-semibold text-ink">Hevy</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-border text-muted leading-relaxed">
+
+                <tr><th colspan="4" scope="colgroup" class="px-3 sm:px-4 pt-6 pb-2 text-xs font-semibold text-accent-ink uppercase tracking-wider">Precio y límites</th></tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Precio</th>
+                    <td class="p-3 sm:p-4">Gratis; nada está detrás de un muro de pago</td>
+                    <td class="p-3 sm:p-4">Gratis, con Strong PRO a 4,99 US$ al mes, 29,99 US$ al año o 99,99 US$ en un solo pago</td>
+                    <td class="p-3 sm:p-4">Gratis, con Hevy Pro a 2,99 US$ al mes, 23,99 US$ al año o 74,99 US$ en un solo pago</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Plantillas en el plan gratuito</th>
+                    <td class="p-3 sm:p-4">40, en carpetas, y el límite seguirá subiendo</td>
+                    <td class="p-3 sm:p-4">3</td>
+                    <td class="p-3 sm:p-4">4</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Ejercicios personalizados en el plan gratuito</th>
+                    <td class="p-3 sm:p-4">Sin límite</td>
+                    <td class="p-3 sm:p-4">No indica un límite</td>
+                    <td class="p-3 sm:p-4">7</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Gráficos e historial</th>
+                    <td class="p-3 sm:p-4">Gratis, con todo tu historial</td>
+                    <td class="p-3 sm:p-4">Los gráficos de ejercicios son de pago</td>
+                    <td class="p-3 sm:p-4">Gratis para los últimos 3 meses; un año o todo el historial es de pago</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Exportar (CSV)</th>
+                    <td class="p-3 sm:p-4">Gratis, también en JSON, con o sin cuenta, y una API gratuita de solo lectura</td>
+                    <td class="p-3 sm:p-4">Gratis</td>
+                    <td class="p-3 sm:p-4">Gratis</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Importar tu historial</th>
+                    <td class="p-3 sm:p-4">Gratis, desde Strong o Hevy: entrenamientos, tipos de serie, RPE y notas, además de los temporizadores de descanso de Strong (necesita una cuenta)</td>
+                    <td class="p-3 sm:p-4">—</td>
+                    <td class="p-3 sm:p-4">Gratis, desde Strong: entrenamientos; las rutinas y las superseries no se traspasan</td>
+                </tr>
+
+                <tr><th colspan="4" scope="colgroup" class="px-3 sm:px-4 pt-6 pb-2 text-xs font-semibold text-accent-ink uppercase tracking-wider">Registro</th></tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Series de calentamiento, descendentes y al fallo</th>
+                    <td class="p-3 sm:p-4">Gratis</td>
+                    <td class="p-3 sm:p-4">Gratis</td>
+                    <td class="p-3 sm:p-4">Gratis</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">RPE</th>
+                    <td class="p-3 sm:p-4">Gratis, de 6 a 10, desactivado hasta que lo actives</td>
+                    <td class="p-3 sm:p-4">Gratis, de 6 a 10</td>
+                    <td class="p-3 sm:p-4">Gratis, de 6 a 10</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Temporizador de descanso por ejercicio</th>
+                    <td class="p-3 sm:p-4">Gratis</td>
+                    <td class="p-3 sm:p-4">Gratis, con un temporizador aparte para el calentamiento</td>
+                    <td class="p-3 sm:p-4">Gratis</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Una nota que vuelve cada vez</th>
+                    <td class="p-3 sm:p-4">Gratis: fija la nota de un ejercicio (con sesión iniciada)</td>
+                    <td class="p-3 sm:p-4">Gratis: notas fijadas</td>
+                    <td class="p-3 sm:p-4">Notas de rutina; la nota de un ejercicio solo aparece la vez siguiente</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Superseries</th>
+                    <td class="p-3 sm:p-4">Gratis, y circuitos</td>
+                    <td class="p-3 sm:p-4">Gratis</td>
+                    <td class="p-3 sm:p-4">Gratis</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Calculadora de discos</th>
+                    <td class="p-3 sm:p-4"><span class="roadmap">En camino</span><br>Gratis, con barras personalizadas</td>
+                    <td class="p-3 sm:p-4">De pago</td>
+                    <td class="p-3 sm:p-4">Gratis</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Pantalla de bloqueo</th>
+                    <td class="p-3 sm:p-4">Tiempo transcurrido, siguiente serie y descanso, con botones de descanso y de serie hecha, en iPhone y Android</td>
+                    <td class="p-3 sm:p-4">Temporizador de descanso en iPhone; actualizaciones en vivo en Android</td>
+                    <td class="p-3 sm:p-4">Siguiente serie y descanso, en iPhone y Android</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Reloj</th>
+                    <td class="p-3 sm:p-4">Apple Watch<br>Wear OS <span class="roadmap">En camino</span></td>
+                    <td class="p-3 sm:p-4">Apple Watch</td>
+                    <td class="p-3 sm:p-4">Apple Watch y Wear OS</td>
+                </tr>
+
+                <tr><th colspan="4" scope="colgroup" class="px-3 sm:px-4 pt-6 pb-2 text-xs font-semibold text-accent-ink uppercase tracking-wider">Progreso</th></tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Fotos en un entrenamiento</th>
+                    <td class="p-3 sm:p-4">Varias por entrenamiento, todas en una tira arriba del historial (necesita una cuenta)</td>
+                    <td class="p-3 sm:p-4">Imágenes en un entrenamiento</td>
+                    <td class="p-3 sm:p-4">Hasta 3 fotos, o 2 y un video</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Fotos de progreso corporal</th>
+                    <td class="p-3 sm:p-4"><span class="roadmap">En camino</span></td>
+                    <td class="p-3 sm:p-4">No figura</td>
+                    <td class="p-3 sm:p-4">Gratis, con comparación lado a lado</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Programas prediseñados</th>
+                    <td class="p-3 sm:p-4">Gratis: 19, cada uno con los estudios en que se basa, o uno hecho con tus propias plantillas; los pesos suben a medida que progresas</td>
+                    <td class="p-3 sm:p-4">Plantillas de ejemplo</td>
+                    <td class="p-3 sm:p-4">26 programas gratuitos; un programa generado es de pago</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Widgets de pantalla de inicio</th>
+                    <td class="p-3 sm:p-4">iPhone y Android</td>
+                    <td class="p-3 sm:p-4">iPhone</td>
+                    <td class="p-3 sm:p-4">iPhone y Android</td>
+                </tr>
+
+                <tr><th colspan="4" scope="colgroup" class="px-3 sm:px-4 pt-6 pb-2 text-xs font-semibold text-accent-ink uppercase tracking-wider">Todo lo demás</th></tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Apple Salud y Health Connect</th>
+                    <td class="p-3 sm:p-4">Guarda allí los entrenamientos; lee la frecuencia cardiaca en reposo, la variabilidad de la frecuencia cardiaca, el sueño, los pasos y el peso para mostrarlos junto a tu entrenamiento, y esos datos nunca salen de tu teléfono</td>
+                    <td class="p-3 sm:p-4">Guarda los entrenamientos; lee y guarda el peso corporal, la grasa corporal y las calorías</td>
+                    <td class="p-3 sm:p-4">Guarda los entrenamientos</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Funciones sociales</th>
+                    <td class="p-3 sm:p-4"><span class="roadmap">En camino</span><br>Desactivadas a menos que las actives</td>
+                    <td class="p-3 sm:p-4">No figura</td>
+                    <td class="p-3 sm:p-4">Gratis: seguir a otras personas, feed y clasificaciones</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Strava</th>
+                    <td class="p-3 sm:p-4"><span class="roadmap">En camino</span></td>
+                    <td class="p-3 sm:p-4">No figura</td>
+                    <td class="p-3 sm:p-4">Gratis</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Tabletas</th>
+                    <td class="p-3 sm:p-4">Diseño propio en iPad y tabletas Android</td>
+                    <td class="p-3 sm:p-4">Funciona en iPad</td>
+                    <td class="p-3 sm:p-4">App para iPad</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">En el navegador</th>
+                    <td class="p-3 sm:p-4">—</td>
+                    <td class="p-3 sm:p-4">No figura</td>
+                    <td class="p-3 sm:p-4">Sí</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-3 sm:p-4 font-medium text-ink">Idiomas</th>
+                    <td class="p-3 sm:p-4">4, español incluido</td>
+                    <td class="p-3 sm:p-4">11 en iPhone</td>
+                    <td class="p-3 sm:p-4">16 en iPhone</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-xs text-muted leading-relaxed mt-3">
+            Comprobado el 3 de octubre de 2026, en las fichas de las tiendas y las páginas de ayuda de cada app; los
+            precios son los de la App Store de EE. UU. Las apps cambian rápido. Si algo está desactualizado, escríbenos
+            a <a class="text-accent-ink underline underline-offset-2 hover:opacity-80" href="mailto:info@heart-of.me">info@heart-of.me</a>
+            y lo corregimos.
+        </p>
+    </section>
+
+    <!-- Opt-in -->
+    <section id="switches" class="mt-16 max-w-3xl scroll-mt-8">
+        <h2 class="font-title text-2xl sm:text-3xl font-semibold tracking-tight text-ink mb-4">Solo lo que actives</h2>
+        <p class="text-muted leading-relaxed mb-4">
+            Heart empieza simple: un entrenamiento, sus series y un temporizador. Casi todo lo demás es un interruptor.
+            El RPE, el mapa muscular y el entrenamiento en la pantalla de bloqueo están desactivados hasta que los
+            quieras, y las funciones sociales que están en camino funcionarán igual. Dos personas pueden usar Heart de
+            formas muy distintas, y las dos lo están usando bien.
+        </p>
+        <p class="text-muted leading-relaxed">
+            Con tus datos pasa lo mismo. No necesitas una cuenta para registrar, puedes exportarlo todo en cualquier
+            momento, y lo que Heart lee de tu app de salud se queda en tu teléfono. La lista completa de lo que hace
+            está en la
+            <a class="text-accent-ink underline underline-offset-2 hover:opacity-80" href="../features.html" hreflang="en">página de funciones</a>
+            (en inglés).
+        </p>
+    </section>
+
+    <!-- Import: Heart's own menu names are the app's es strings; Strong's and Hevy's are as their
+         English apps name them, because we couldn't confirm their Spanish labels. -->
+    <section id="import" class="mt-16 max-w-3xl scroll-mt-8">
+        <h2 class="font-title text-2xl sm:text-3xl font-semibold tracking-tight text-ink mb-4">Cómo traer tu historial de Strong o Hevy</h2>
+        <p class="text-muted leading-relaxed mb-6">
+            Tus entrenamientos anteriores pueden venir contigo, así tus gráficos y récords siguen donde los dejaste.
+        </p>
+        <ol class="space-y-5">
+            <li class="flex gap-4">
+                <span class="size-8 shrink-0 rounded bg-fill text-accent-ink font-semibold flex items-center justify-center">1</span>
+                <p class="text-muted leading-relaxed pt-1">
+                    En Strong, abre <strong class="text-ink" lang="en">Profile → Settings → Export Strong Data</strong>. En
+                    Hevy, abre <strong class="text-ink" lang="en">Profile → Settings → Export &amp; Import Data → Export Workouts</strong>,
+                    o exporta desde hevy.com. Si usas esas apps en español, los nombres del menú estarán traducidos. Cualquiera
+                    de las dos te envía un archivo CSV por correo. Guárdalo en algún lugar al que tu teléfono pueda acceder.
+                </p>
+            </li>
+            <li class="flex gap-4">
+                <span class="size-8 shrink-0 rounded bg-fill text-accent-ink font-semibold flex items-center justify-center">2</span>
+                <p class="text-muted leading-relaxed pt-1">
+                    En Heart, inicia sesión con Apple, Google o tu correo. La importación se guarda en tu cuenta, así que es
+                    el único paso que la necesita. Lo que ya hayas registrado en Heart viene contigo.
+                </p>
+            </li>
+            <li class="flex gap-4">
+                <span class="size-8 shrink-0 rounded bg-fill text-accent-ink font-semibold flex items-center justify-center">3</span>
+                <p class="text-muted leading-relaxed pt-1">
+                    Abre <strong class="text-ink">Ajustes → Tus datos → Importar historial de entrenamientos</strong>, indica
+                    de qué app es el archivo y elígelo. Heart te muestra cuántos entrenamientos y series están listos, y te
+                    enumera los ejercicios que no reconoce para que elijas cuáles traer como propios.
+                </p>
+            </li>
+        </ol>
+        <p class="text-muted leading-relaxed mt-6">
+            Las series de calentamiento, descendentes y al fallo, el RPE y las notas de ejercicios y entrenamientos
+            llegan junto con los números, y desde Strong también el temporizador de descanso de cada ejercicio. Una
+            exportación de Hevy funciona en cualquiera de sus idiomas. Las superseries no se traspasan desde ninguna de
+            las dos. Importar el mismo archivo otra vez es seguro: los entrenamientos que ya están en Heart se omiten,
+            nunca se duplican, así que puedes volver a importar más adelante si sigues usando las dos un tiempo.
+        </p>
+    </section>
+
+    <!-- Others -->
+    <section id="others" class="mt-16 max-w-3xl scroll-mt-8">
+        <h2 class="font-title text-2xl sm:text-3xl font-semibold tracking-tight text-ink mb-4">Otras opciones</h2>
+        <p class="text-muted leading-relaxed mb-6">
+            Heart no será la opción ideal para todo el mundo, y está bien. Algunas otras que la gente suele mencionar:
+        </p>
+        <div class="space-y-5">
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-1">
+                    <a class="hover:text-accent-ink" href="https://www.hevyapp.com/" rel="noopener">Hevy</a>
+                </h3>
+                <p class="text-muted leading-relaxed">
+                    Si hoy lo que más te importa es seguir a tus amigos, Wear OS o una app web, Hevy tiene las tres cosas, y
+                    una selección más amplia de programas prediseñados.
+                </p>
+            </article>
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-1">
+                    <a class="hover:text-accent-ink" href="http://www.fitnotesapp.com/" rel="noopener">FitNotes</a>
+                </h3>
+                <p class="text-muted leading-relaxed">
+                    Un registro sencillo, tipo libreta, para Android, gratis y sin anuncios, con copias de seguridad en
+                    Google Drive o Dropbox.
+                </p>
+            </article>
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-1">
+                    <a class="hover:text-accent-ink" href="https://www.liftosaur.com/" rel="noopener">Liftosaur</a>
+                </h3>
+                <p class="text-muted leading-relaxed">
+                    Para quienes siguen programas estructurados como 5/3/1 o GZCL: escribes las reglas de progresión en
+                    texto, y la app las aplica después de cada sesión. En iPhone, Android y la web.
+                </p>
+            </article>
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-1">
+                    <a class="hover:text-accent-ink" href="https://getbazu.com/" rel="noopener">Bazu</a>
+                </h3>
+                <p class="text-muted leading-relaxed">
+                    Una app más reciente para iPhone y Apple Watch, pensada en torno a objetivos para la próxima sesión y la
+                    sobrecarga progresiva.
+                </p>
+            </article>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="mt-16 max-w-3xl scroll-mt-8">
+        <h2 class="font-title text-2xl sm:text-3xl font-semibold tracking-tight text-ink mb-6">Preguntas</h2>
+        <div class="space-y-8">
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">¿Heart es gratis de verdad?</h3>
+                <p class="text-muted leading-relaxed">
+                    Sí. Todo lo que Heart hace hoy es gratis, sin anuncios y sin límite en tu historial. Las plantillas se
+                    detienen en 40 por ahora, un número que seguirá subiendo.
+                </p>
+            </article>
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">¿Necesito una cuenta?</h3>
+                <p class="text-muted leading-relaxed">
+                    No para entrenar. Heart funciona en tu teléfono desde que la abres por primera vez. La cuenta sirve para
+                    sincronizar entre dispositivos y para importar tu historial, y si inicias sesión más tarde, todo lo que
+                    hayas registrado viene contigo.
+                </p>
+            </article>
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">¿Y mis plantillas de Strong?</h3>
+                <p class="text-muted leading-relaxed">
+                    La exportación de Strong incluye tus entrenamientos, no tus plantillas, así que tendrás que crearlas de
+                    nuevo. Lo más rápido es abrir un entrenamiento importado y guardarlo como plantilla.
+                </p>
+            </article>
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">¿Puedo irme después?</h3>
+                <p class="text-muted leading-relaxed">
+                    Cuando quieras. En <strong class="text-ink">Ajustes</strong> puedes exportarlo todo en CSV o JSON, sin
+                    conexión, con o sin cuenta, y desde el mismo lugar puedes borrarlo todo.
+                </p>
+            </article>
+            <article>
+                <h3 class="font-title text-lg font-semibold text-ink mb-2">¿Echas algo en falta?</h3>
+                <p class="text-muted leading-relaxed">
+                    Escríbenos a
+                    <a class="text-accent-ink underline underline-offset-2 hover:opacity-80" href="mailto:info@heart-of.me">info@heart-of.me</a>.
+                    Una persona de verdad lee cada mensaje.
+                </p>
+            </article>
+        </div>
+    </section>
+
+    <!-- Download -->
+    <section class="mt-16 bg-fill rounded-xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+        <p class="font-title text-xl font-semibold text-ink">Pruébala. Tu historial de Strong puede venir contigo.</p>
+        <div class="flex flex-wrap gap-4">
+            <a href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener"
+               class="hover:opacity-80 transition-opacity">
+                <img src="../assets/appstore_button.svg" alt="Descargar en la App Store" class="h-10 w-auto"/>
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=me.heart.android&referrer=utm_source%3Dsite%26utm_campaign%3Dstrong-alternative-es"
+               target="_blank" rel="noopener" class="hover:opacity-80 transition-opacity">
+                <img src="../assets/google_play_button.svg" alt="Disponible en Google Play" class="h-10 w-auto"/>
+            </a>
+        </div>
+    </section>
+
+</main>
+
+
+<!-- Footer: the pages it links are in English. -->
+<footer class="w-full py-10 px-6 border-t bg-ground mt-auto">
+    <div class="max-w-[960px] mx-auto flex flex-col items-center gap-6">
+        <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors flex items-center gap-1"
+               href="../privacy.html" hreflang="en">
+                <span class="material-symbols-outlined text-[16px]">shield</span>
+                Política de privacidad
+            </a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="../terms.html" hreflang="en">Términos del servicio</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="../account.html" hreflang="en">Eliminar cuenta</a>
+            <a class="text-sm font-medium text-muted hover:text-accent-ink transition-colors" href="mailto:info@heart-of.me">info@heart-of.me</a>
+        </div>
+        <p class="text-xs text-muted">
+            © <span id="footer-year"></span> Heart of Yours. Todos los derechos reservados.
+        </p>
+    </div>
+</footer>
+</body>
+</html>

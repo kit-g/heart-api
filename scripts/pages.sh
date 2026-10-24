@@ -29,6 +29,16 @@ mkdir -p "$OUT"
 rsync -a --delete "$ROOT/site/" "$OUT/"
 rsync -a --exclude '.gitkeep' "$BUILT/blog.html" "$BUILT/blog.xml" "$BUILT/blog" "$OUT/"
 
+# A translated page waiting for its reviewer carries
+# <meta name="heart-review" content="pending"/>: dev ships it, where the
+# reviewer reads it, and prod leaves it out until the review drops the marker.
+if [ "$ENV" = prod ]; then
+  { grep -rl --include='*.html' 'name="heart-review" content="pending"' "$OUT" || true; } | while read -r page; do
+    echo "left out of prod, pending review: ${page#"$OUT"/}"
+    rm "$page"
+  done
+fi
+
 {
   grep -v '</urlset>' "$ROOT/site/sitemap.xml"
   (cd "$BUILT" && find blog.html blog -name '*.html' | sort | sed "s#^#    <url><loc>$ORIGIN/#; s#\$#</loc></url>#")
