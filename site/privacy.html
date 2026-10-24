@@ -57,7 +57,7 @@
 <main class="flex-grow w-full max-w-3xl mx-auto px-6 py-16 md:py-24">
     <article class="prose prose-h1:text-4xl prose-h1:tracking-tight max-w-none">
         <h1>Privacy Policy</h1>
-        <p><strong>Last updated: October 18, 2026</strong></p>
+        <p><strong>Last updated: October 24, 2026</strong></p>
         <p>Last reviewed against the app’s behaviour: October 2, 2026.</p>
 
         <p>Thanks for using Heart of Yours. This document explains what data we collect, how we use it, and what choices
@@ -67,7 +67,8 @@
             paywall.</p>
 
         <p>Your health data is a different matter: we don’t store it at all. Anything Heart reads from Apple Health
-            or Health Connect, or measures on your Apple Watch, stays on your devices. More on that below.</p>
+            or Health Connect, or measures on your Apple Watch or Wear OS watch, stays on your devices. More on that
+            below.</p>
 
         <p>If anything here feels off, you're welcome to stop using the app — but we hope you won’t have to.</p>
 
@@ -98,6 +99,18 @@
             health store (see <em>What Heart writes</em>). They are not sent to the Heart app on your phone, not uploaded
             to our servers, and not included in analytics or crash reports.</p>
 
+        <p><strong>On a Wear OS watch:</strong> if you open Heart on your watch during a workout, it reads your heart
+            rate and active energy live, for that workout only, and shows them on your wrist. It asks for the watch’s
+            sensors the first time; if you decline, nothing is measured and the rest of the watch app still works.
+            Whether those readings go any further is up to you. When you finish the first workout the watch measured,
+            Health Connect asks whether Heart may save heart rate and active energy. If you allow it, the watch hands
+            each workout’s readings to the Heart app on your phone over a direct connection (Bluetooth or the same Wi-Fi
+            network, never through the cloud), and the phone saves them in Health Connect with that workout. They wait
+            only until then, at most a week on the watch and a day on the phone, and are deleted from both once saved;
+            a workout you cancel drops them. If you decline, or later turn off <strong>Heart rate in Health
+            Connect</strong> under Wear OS in Heart’s settings, the readings never leave the watch. Either way, they are
+            not uploaded to our servers and not included in analytics or crash reports.</p>
+
         <p><strong>Where it goes:</strong> nowhere. Heart keeps a copy on your phone so charts work offline, and that
             copy never leaves the device. It is not uploaded to our servers, not included in analytics, and not shared
             with anyone. It is not used for advertising, profiling, or anything other than showing it back to you.
@@ -117,13 +130,17 @@
             writes anything you didn’t do. The one exception is a workout you tracked on Apple Watch: the watch saves it
             instead, from your start to your finish, with the heart rate and active energy the watch measured. The phone
             writes nothing of its own for that workout, so your health store holds one workout, not two. A workout you
-            cancel saves nothing. <strong>Settings → Health</strong> shows whether it’s on and takes you to your
+            tracked on a Wear OS watch is still saved by the phone, with the heart rate and active energy the watch
+            measured only if you allowed it (see <em>On a Wear OS watch</em>). A workout you cancel saves nothing. <strong>Settings → Health</strong> shows whether it’s on and takes you to your
             phone’s health permissions to change it.</p>
 
         <p><strong>Your controls:</strong></p>
         <ul>
             <li>Change or revoke what Heart may read in the Health app (iPhone: your profile → Apps) or in Health
                 Connect (Android).</li>
+            <li>Stop saving your Wear OS watch’s readings by turning off <strong>Heart rate in Health Connect</strong>
+                under Wear OS in Heart’s settings, or by revoking Heart’s heart rate and active energy permissions in
+                Health Connect.</li>
             <li>Delete Heart’s copy from your phone under <strong>Settings → Health → Delete health data</strong>. Your
                 phone’s health store is untouched; Heart will read it again the next time it syncs, if you still allow
                 it.</li>
