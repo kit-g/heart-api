@@ -21,7 +21,8 @@ Map<String, Object?> meOpenApi() {
       'token': {'type': 'http', 'scheme': 'bearer', 'description': 'A personal access token from the app.'},
     },
     everywhere: [
-      const .unauthorized('unauthorized', 'no token, or one revoked or expired'),
+      const .unauthorized('invalid_token', 'a token missing, unknown, revoked or expired'),
+      const .new(403, 'insufficient_scope', description: 'a token without the read scope'),
       const .tooManyRequests('rate_limited', 'too many requests for this token'),
     ],
   );

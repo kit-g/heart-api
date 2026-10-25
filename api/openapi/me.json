@@ -45,7 +45,7 @@
             }
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -57,7 +57,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -171,7 +194,7 @@
             }
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -183,7 +206,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -281,7 +327,7 @@
             }
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -293,7 +339,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -402,7 +471,7 @@
             }
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -414,7 +483,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -459,7 +551,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -471,7 +563,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -641,7 +756,7 @@
             }
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -653,7 +768,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -698,7 +836,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -710,7 +848,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -755,7 +916,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -767,7 +928,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -812,7 +996,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -824,7 +1008,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -869,7 +1076,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -881,7 +1088,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -926,7 +1156,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -938,7 +1168,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -983,7 +1236,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -995,7 +1248,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -1040,7 +1316,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1052,7 +1328,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -1107,7 +1406,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1119,7 +1418,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -1234,7 +1556,7 @@
             }
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1246,7 +1568,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -1291,7 +1636,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1303,7 +1648,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -1348,7 +1716,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1360,7 +1728,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -1469,7 +1860,7 @@
             }
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1481,7 +1872,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -1526,7 +1940,7 @@
             "description": "Not declared yet."
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1538,7 +1952,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -1646,7 +2083,7 @@
             }
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1658,7 +2095,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
@@ -1782,7 +2242,7 @@
             }
           },
           "401": {
-            "description": "`unauthorized`: no token, or one revoked or expired",
+            "description": "`invalid_token`: a token missing, unknown, revoked or expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1794,7 +2254,30 @@
                       "properties": {
                         "code": {
                           "enum": [
-                            "unauthorized"
+                            "invalid_token"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope`: a token without the read scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "insufficient_scope"
                           ]
                         }
                       }
