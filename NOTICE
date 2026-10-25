@@ -1,0 +1,38 @@
+Heart of Yours: heart-api
+Copyright 2025-2026 Kit Gerasimov and the Heart of Yours contributors
+
+This repository is under three licences, by directory:
+
+  shared/heart_models/, shared/heart_aws/, shared/heart_design/
+      Apache License 2.0 (each package's LICENSE file)
+  content/
+      Creative Commons Attribution 4.0 International (content/LICENSE)
+  everything else
+      GNU Affero General Public License v3.0 (LICENSE)
+
+The written copy and images of the website and blog (the text of site/*.html,
+pages/posts/, screenshots, og images) are all rights reserved. The code that
+renders them is under the AGPL like the rest of the repository.
+
+Trademarks
+
+"Heart of Yours", "Heart" as the app's name, and the Heart logo are
+trademarks of the project. None of the licences above grants permission to
+use them, except to say truthfully where a copy came from. A fork or a
+hosted copy must use its own name and logo.
+
+Not ours, and not covered by any licence above
+
+  - The App Store and Google Play badges (site/assets/) are trademarks of
+    Apple Inc. and Google LLC, used under their badge guidelines.
+  - The Reddit, Threads and Instagram logos on site/links.html are
+    trademarks of their owners. The SVG paths come from Simple Icons
+    (https://simpleicons.org), CC0 1.0.
+  - Exercise images and animations served from the CDN are not in this
+    repository and are not covered by any licence here.
+  - Fonts and icon fonts are loaded from Google Fonts and keep their own
+    licences.
+  - The studies and articles cited in content/program_sources.yml are the
+    work of their authors; the file only links to them.
+
+Dependencies installed by pub or uv keep their own licences.

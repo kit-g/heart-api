@@ -45,3 +45,7 @@ to `CHANGELOG.md` in the same PR, and keep changes additive.
 On the web, `tokens.css` sets Ink on `:root`. An element picks another preset with
 `data-preset="forge|ink|utility|ember"`, and `data-theme="light|dark"` on `:root` or on that
 element pins its brightness instead of following the OS.
+
+## License
+
+Apache License 2.0 (see `LICENSE`). Contributions go to this repository, under the same licence.
