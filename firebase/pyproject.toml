@@ -2,7 +2,7 @@
 name = "firebase"
 version = "0.1.0"
 description = "Firebase microservice — push notifications and Auth user lifecycle"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
     "firebase-admin>=7.4.0",
 ]
