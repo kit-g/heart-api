@@ -89,3 +89,19 @@ the sync parser, then sync exercises + translations to Postgres (guarded against
 - **No comments unless the WHY is non-obvious** — naming carries the WHAT.
 - **Single source of truth for shapes.** Anything the client sees lives in `heart_models`; server-only types stay in `api/lib/models`.
 - **Boto3-shaped AWS package** — generic, no domain knowledge in `heart_aws`.
+
+## Licence
+
+The server and everything else in this repository is under the
+[GNU AGPL v3.0](LICENSE). The shared packages (`shared/heart_models`, `shared/heart_aws`,
+`shared/heart_design`) are under the [Apache License 2.0](shared/heart_models/LICENSE), and the
+exercise library and other content in `content/` under [CC BY 4.0](content/LICENSE).
+The name and logo aren't covered by any of them. [NOTICE](NOTICE) has the full map, including
+what in the repository isn't ours. The reasons are in
+[docs/2026-10-24.licence.md](docs/2026-10-24.licence.md).
+
+## Contributing
+
+Contributions come in under the licence of the directory they change (inbound = outbound): AGPL
+for the server, Apache-2.0 for the shared packages, CC BY 4.0 for `content/`. Opening a pull
+request means you agree to that and that the work is yours to give. There is no CLA.

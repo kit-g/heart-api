@@ -37,3 +37,7 @@ const like = 'sample';
 TODO: Tell users more about the package: where to find more information, how to 
 contribute to the package, how to file issues, what response they can expect 
 from the package authors, and more.
+
+## License
+
+Apache License 2.0 (see `LICENSE`). Contributions go to this repository, under the same licence.

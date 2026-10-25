@@ -87,4 +87,4 @@ Shared domain models and service interfaces for the Heart project. This package 
 This package is part of the Heart monorepo and is not published to pub.dev (publish_to: none). Depend on it via path or workspace resolution within this repository.
 
 ### License and contributions
-This package is internal to the Heart project. Issues and contributions should be made in this repository.
+Apache License 2.0 (see `LICENSE`). Issues and contributions go to this repository, under the same licence.
