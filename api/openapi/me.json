@@ -5,6 +5,11 @@
     "version": "1",
     "description": "Read-only access to your own Heart log with a personal access token. Published and additive-only: fields and routes are added, never removed or re-meant."
   },
+  "servers": [
+    {
+      "url": "https://api.heart-of.me/v1"
+    }
+  ],
   "paths": {
     "/me": {
       "get": {

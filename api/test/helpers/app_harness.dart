@@ -66,7 +66,6 @@ class AppHarness {
     Set<String> allowedOrigins = const {},
     String surface = 'api',
     String? originSecret,
-    bool docs = false,
   }) async {
     final db = MockDatabase();
     final storage = MockStorage();
@@ -102,7 +101,6 @@ class AppHarness {
         eventPublisher: events,
         apple: apple,
         auth: verify,
-        docs: docs,
       ),
     };
     await _keepAlive;

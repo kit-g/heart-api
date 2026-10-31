@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:heart/core/docs_router.dart';
 import 'package:heart/core/openapi/endpoint.dart';
 import 'package:heart/core/openapi/shape.dart';
 import 'package:heart/globals/globals.dart';
@@ -17,7 +16,7 @@ import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
 
 import '../../tool/openapi/shapes.dart' as generator;
-import '../helpers/app_harness.dart';
+import '../../tool/openapi/spec.dart';
 import '../helpers/request.dart';
 import '../mocks.mocks.dart';
 
@@ -190,26 +189,5 @@ void main() {
     final shape = Shape.object<({String? name})>('Named', {'name': .optional(.string, (it) => it.name)});
     expect(shape.encode((name: null)), isEmpty);
     expect(shape.encode((name: 'x')), {'name': 'x'});
-  });
-
-  group('the docs router', () {
-    test('serves the spec and Swagger UI without a token where the environment publishes them', () async {
-      final app = await AppHarness.start(docs: true);
-      addTearDown(app.stop);
-
-      final spec = await app.send('GET', '/docs/me.json', token: null);
-      expect(spec.status, 200);
-      expect(jsonDecode(spec.body), meOpenApi());
-      final ui = await app.send('GET', '/docs', token: null);
-      expect(ui.status, 200);
-      expect(ui.body, contains('SwaggerUIBundle'));
-    });
-
-    test('is not there where it does not', () async {
-      final app = await AppHarness.start();
-      addTearDown(app.stop);
-
-      expect((await app.send('GET', '/docs/me.json', token: null)).status, 404);
-    });
   });
 }

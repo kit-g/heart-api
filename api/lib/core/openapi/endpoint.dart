@@ -306,6 +306,7 @@ Map<String, Object?> openApiDocument(
   required String title,
   required String version,
   String? description,
+  List<String> servers = const [],
   Map<String, Object?> securitySchemes = const {},
   List<Failure> everywhere = const [],
 }) {
@@ -333,6 +334,7 @@ Map<String, Object?> openApiDocument(
   return {
     'openapi': '3.1.0',
     'info': {'title': title, 'version': version, 'description': ?description},
+    if (servers.isNotEmpty) 'servers': [for (final url in servers) {'url': url}],
     'paths': paths,
     'components': {
       'schemas': components.schemas,
