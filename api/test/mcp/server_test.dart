@@ -138,6 +138,7 @@ void main() {
       expect((info['icons'] as List).single, containsPair('mimeType', 'image/png'));
       expect(result['instructions'], contains('no health data'));
       expect(result['instructions'], contains('as the user entered it'));
+      expect(result['instructions'], contains('Times are in UTC'));
       expect(response.headers.containsKey('mcp-session-id'), isFalse);
     });
 

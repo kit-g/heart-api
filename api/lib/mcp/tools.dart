@@ -95,7 +95,9 @@ String instructionsFor({required bool writes}) {
       'It has no health data: no heart rate, sleep, steps or body weight from the health store, because '
       'that never leaves the user\'s phone. Do not offer to look it up. Workout calories, where present, '
       'are an estimate, not a measurement. Weights are in kilograms and distances in kilometres; convert '
-      "to the user's unitSystem from get_profile when answering. Lists are paged: pass back `cursor` while "
+      "to the user's unitSystem from get_profile when answering. Times are in UTC, while cards draw them in the "
+      "user's local time, and a late workout can fall on the next day in UTC: state dates and times in the user's "
+      'time zone, or say they are in UTC if you do not know it. Lists are paged: pass back `cursor` while '
       'one is returned. ${writes ? _writes : 'Everything here is read-only. '}The log is as the user entered it, '
       'so expect timers left running, typos and weights in the wrong unit: nothing is corrected or dropped. Prefer '
       'medians for typical values, point out an outlier rather than quietly leave it out, and say you excluded '
