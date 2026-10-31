@@ -5,10 +5,10 @@ abstract interface class Media {
   /// local bytes
   Uint8List? get bytes;
 
-  /// remote URL
+  /// Where the image is served from.
   String? get link;
 
-  /// some sort of identifier
+  /// The image's id.
   String get id;
 
   /// possibly createdAt timestamp
