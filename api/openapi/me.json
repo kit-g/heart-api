@@ -2293,26 +2293,32 @@
   },
   "components": {
     "schemas": {
-      "AccountCounts": {
+      "MeProfileCounts": {
         "type": "object",
         "properties": {
           "workouts": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Rows the account owns in this collection."
           },
           "templates": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Rows the account owns in this collection."
           },
           "templateFolders": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Rows the account owns in this collection."
           },
           "goals": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Rows the account owns in this collection."
           },
           "customExercises": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Rows the account owns in this collection."
           },
           "programs": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Rows the account owns in this collection."
           }
         },
         "required": [
@@ -2327,7 +2333,7 @@
       },
       "MeProfile": {
         "type": "object",
-        "description": "Who a token acts as, and how much history there is to read.",
+        "description": "`GET /me`: who a token acts as, and how much history there is to read.",
         "properties": {
           "id": {
             "type": "string"
@@ -2343,7 +2349,7 @@
             ]
           },
           "counts": {
-            "$ref": "#/components/schemas/AccountCounts"
+            "$ref": "#/components/schemas/MeProfileCounts"
           }
         },
         "required": [
@@ -2427,7 +2433,8 @@
             ]
           },
           "share": {
-            "type": "number"
+            "type": "number",
+            "description": "The share of a set each of these muscles receives, when the library says it differs from the role's default (`primaryShare`, `secondaryShare`); null otherwise."
           }
         },
         "required": [
@@ -2461,19 +2468,40 @@
             }
           },
           "axialLoad": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "none",
+              "low",
+              "moderate",
+              "high"
+            ]
           },
           "stability": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "free",
+              "supported",
+              "machine"
+            ]
           },
           "unilateral": {
             "type": "boolean"
           },
           "impact": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "none",
+              "low",
+              "high"
+            ]
           },
           "skill": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "low",
+              "moderate",
+              "high"
+            ]
           }
         },
         "required": [
@@ -2486,11 +2514,34 @@
         ],
         "additionalProperties": false
       },
-      "ExerciseHealth": {
+      "Health": {
         "type": "object",
         "properties": {
           "activity": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "strength",
+              "cycling",
+              "cyclingIndoor",
+              "elliptical",
+              "hiking",
+              "rowing",
+              "running",
+              "runningTreadmill",
+              "skating",
+              "skiing",
+              "snowboarding",
+              "swimming",
+              "walking",
+              "climbing",
+              "coreTraining",
+              "flexibility",
+              "yoga",
+              "cardioDance",
+              "highIntensity",
+              "jumpRope",
+              "other"
+            ]
           }
         },
         "required": [],
@@ -2500,10 +2551,12 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "The identity: the server row's uuid, or the client-minted UUIDv7 for a custom exercise created offline (the server persists that id on sync)."
           },
           "key": {
-            "type": "string"
+            "type": "string",
+            "description": "The env-stable content slug (`bench-press-barbell`) for library exercises; null for user-created ones."
           },
           "category": {
             "type": "string",
@@ -2521,7 +2574,8 @@
             ]
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Localized display copy for the locale the library was fetched under — never an identifier."
           },
           "target": {
             "type": "string",
@@ -2552,7 +2606,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Other names lifters search this exercise by in the served locale (`ohp`, `skull crusher`)."
           },
           "asset": {
             "type": "string"
@@ -2560,7 +2615,7 @@
           "assetHeight": {
             "oneOf": [
               {
-                "type": "number"
+                "type": "integer"
               },
               {
                 "type": "null"
@@ -2570,7 +2625,7 @@
           "assetWidth": {
             "oneOf": [
               {
-                "type": "number"
+                "type": "integer"
               },
               {
                 "type": "null"
@@ -2583,7 +2638,7 @@
           "thumbnailHeight": {
             "oneOf": [
               {
-                "type": "number"
+                "type": "integer"
               },
               {
                 "type": "null"
@@ -2593,7 +2648,7 @@
           "thumbnailWidth": {
             "oneOf": [
               {
-                "type": "number"
+                "type": "integer"
               },
               {
                 "type": "null"
@@ -2621,7 +2676,7 @@
             "$ref": "#/components/schemas/Movement"
           },
           "health": {
-            "$ref": "#/components/schemas/ExerciseHealth"
+            "$ref": "#/components/schemas/Health"
           },
           "unitSystem": {
             "type": "string",
@@ -2631,7 +2686,8 @@
             ]
           },
           "restTimer": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The requesting user's preferred rest timer (seconds) for this exercise."
           }
         },
         "required": [
@@ -2678,16 +2734,20 @@
             "$ref": "#/components/schemas/TargetRange"
           },
           "share": {
-            "type": "number"
+            "type": "number",
+            "description": "The weight as a share of the exercise's base in a program, a training max (heart-api#86): 0.85 is 85%."
           },
           "of": {
-            "type": "string"
+            "type": "string",
+            "description": "Whose base `share` is a share of: another exercise's id (the front squat at 60% of the squat's training max)."
           },
           "ofSlot": {
-            "type": "integer"
+            "type": "string",
+            "description": "Which occurrence of `of` the share is of, when the lift has a base per slot: a template exercise id, the volume day at 90% of the intensity day's squat (heart-api#257)."
           },
           "rir": {
-            "type": "integer"
+            "type": "number",
+            "description": "Reps in reserve: stop with this many left in the tank."
           },
           "supplemental": {
             "type": "boolean"
@@ -2699,7 +2759,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "Client-minted v7 uuid."
           },
           "completed": {
             "type": "boolean"
@@ -2716,7 +2777,7 @@
             "type": "integer"
           },
           "duration": {
-            "type": "number"
+            "type": "integer"
           },
           "distance": {
             "type": "number"
@@ -2726,7 +2787,8 @@
             "description": "Kilograms."
           },
           "set_type": {
-            "type": "string"
+            "type": "string",
+            "description": "The `set_type` word a write carries: `setType`'s value, or, when the set arrived with a word this build doesn't know, that word untouched."
           },
           "rpe": {
             "oneOf": [
@@ -2736,7 +2798,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Rate of perceived exertion as the lifter rated it: 1–10 in whole or half points, null when not rated."
           },
           "target": {
             "oneOf": [
@@ -2764,9 +2827,6 @@
           "id": {
             "type": "string"
           },
-          "order": {
-            "type": "integer"
-          },
           "exercise": {
             "$ref": "#/components/schemas/Exercise"
           },
@@ -2775,10 +2835,12 @@
             "format": "date-time"
           },
           "met": {
-            "type": "number"
+            "type": "number",
+            "description": "Measured MET (kcal/kg/h) over this exercise's time window, computed on device from wearable data."
           },
           "note": {
-            "type": "string"
+            "type": "string",
+            "description": "A short, user-authored pin describing how this exercise is performed — e.g. \"do one hand at a time\"."
           },
           "rest": {
             "oneOf": [
@@ -2788,7 +2850,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Rest between sets, in seconds, as a template plans it: 2–3 minutes for a compound lift, 60–90 seconds for isolation work."
           },
           "superset": {
             "oneOf": [
@@ -2798,7 +2861,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The superset this exercise belongs to in its session: exercises with the same number are done back to back, a circuit when there are more than two."
           },
           "pattern": {
             "oneOf": [
@@ -2808,7 +2872,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "An open slot: any exercise of this movement pattern (a library key such as `vertical_pull`) will do, `exercise` being the one offered."
           },
           "totalReps": {
             "oneOf": [
@@ -2825,13 +2890,16 @@
             "items": {
               "$ref": "#/components/schemas/ExerciseSet"
             }
+          },
+          "order": {
+            "type": "integer"
           }
         },
         "required": [
           "id",
-          "order",
           "start",
-          "sets"
+          "sets",
+          "order"
         ],
         "additionalProperties": false
       },
@@ -2839,10 +2907,12 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "some sort of identifier."
           },
           "url": {
-            "type": "string"
+            "type": "string",
+            "description": "remote URL."
           }
         },
         "required": [
@@ -2852,6 +2922,7 @@
       },
       "MeWorkout": {
         "type": "object",
+        "description": "A workout as the `/me` surface publishes it: the app's wire shape, minus what only the app's own plumbing needs.",
         "properties": {
           "id": {
             "type": "string"
@@ -2883,7 +2954,7 @@
           },
           "calories": {
             "type": "number",
-            "description": "An estimate from catalog MET values and a weight the user typed, never a measurement."
+            "description": "Estimated energy for the session in kilocalories: MET × body weight × time, from the exercises' catalog MET values and a weight the user typed in."
           },
           "note": {
             "oneOf": [
@@ -2893,7 +2964,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "A free-text note on the whole session, trimmed; null when there is none."
           },
           "pauses": {
             "type": "array",
@@ -2902,10 +2974,12 @@
             }
           },
           "templateId": {
-            "type": "string"
+            "type": "string",
+            "description": "The template this workout was started from, if any: a program's session or a plain template."
           },
           "programId": {
-            "type": "string"
+            "type": "string",
+            "description": "The program this workout counts toward, if any."
           },
           "exercises": {
             "type": "array",
@@ -2932,7 +3006,7 @@
         ],
         "additionalProperties": false
       },
-      "MeDeletion": {
+      "MeWorkoutChangesDeleted": {
         "type": "object",
         "properties": {
           "id": {
@@ -2951,6 +3025,7 @@
       },
       "MeWorkoutChanges": {
         "type": "object",
+        "description": "`GET /me/workouts/changes`: one page of the change feed.",
         "properties": {
           "workouts": {
             "type": "array",
@@ -2961,7 +3036,7 @@
           "deleted": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MeDeletion"
+              "$ref": "#/components/schemas/MeWorkoutChangesDeleted"
             }
           },
           "cursor": {
@@ -2969,7 +3044,8 @@
             "description": "Where to resume: pass it back as `since`."
           },
           "hasMore": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when this page was cut short: ask again straight away."
           }
         },
         "required": [
@@ -2979,7 +3055,7 @@
         ],
         "additionalProperties": false
       },
-      "MeSessionSet": {
+      "MeExerciseSessionSet": {
         "type": "object",
         "properties": {
           "weight": {
@@ -2998,8 +3074,49 @@
         "required": [],
         "additionalProperties": false
       },
+      "SessionMetrics": {
+        "type": "object",
+        "properties": {
+          "maxConsecutiveReps": {
+            "type": "number"
+          },
+          "topSetWeight": {
+            "type": "number"
+          },
+          "estimatedOneRepMax": {
+            "type": "number"
+          },
+          "totalVolume": {
+            "type": "number"
+          },
+          "averageWorkingWeight": {
+            "type": "number"
+          },
+          "assistanceWeight": {
+            "type": "number"
+          },
+          "totalReps": {
+            "type": "number"
+          },
+          "cardioDistance": {
+            "type": "number"
+          },
+          "cardioDuration": {
+            "type": "number"
+          },
+          "averagePace": {
+            "type": "number"
+          },
+          "totalTimeUnderTension": {
+            "type": "number"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
       "MeExerciseSession": {
         "type": "object",
+        "description": "One session in an exercise's history: its workout, when, the working sets as they were done, and the values the progress chart plots for it (`toSessionMetrics`).",
         "properties": {
           "workoutId": {
             "type": "string"
@@ -3011,14 +3128,11 @@
           "sets": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MeSessionSet"
+              "$ref": "#/components/schemas/MeExerciseSessionSet"
             }
           },
           "metrics": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "number"
-            },
+            "$ref": "#/components/schemas/SessionMetrics",
             "description": "What the progress chart plots, by chart."
           }
         },
@@ -3035,13 +3149,14 @@
         "properties": {
           "reason": {
             "type": "string",
-            "description": "Why it looks wrong; a newer server may add reasons."
+            "description": "One of `AnomalyReason`, or a word a newer server added."
           },
           "workoutId": {
             "type": "string"
           },
           "setId": {
-            "type": "string"
+            "type": "string",
+            "description": "The set, for every reason but `durationLeftRunning`."
           },
           "exerciseId": {
             "type": "string"
@@ -3053,10 +3168,12 @@
             "type": "object",
             "additionalProperties": {
               "description": "Not declared yet: what was entered, by field"
-            }
+            },
+            "description": "What was entered when it was judged, in stored units: `weight` (kg) and `reps` for a set, `seconds` for a workout."
           },
           "typical": {
-            "type": "number"
+            "type": "number",
+            "description": "The exercise's median working weight, kg, the set was judged against."
           }
         },
         "required": [
@@ -3066,7 +3183,7 @@
         ],
         "additionalProperties": false
       },
-      "MeRecordExercise": {
+      "MeRecordsRecordExercise": {
         "type": "object",
         "properties": {
           "id": {
@@ -3098,11 +3215,11 @@
         ],
         "additionalProperties": false
       },
-      "MeRecord": {
+      "MeRecordsRecord": {
         "type": "object",
         "properties": {
           "exercise": {
-            "$ref": "#/components/schemas/MeRecordExercise"
+            "$ref": "#/components/schemas/MeRecordsRecordExercise"
           },
           "lastTrained": {
             "type": "string",
@@ -3115,11 +3232,12 @@
       },
       "MeRecords": {
         "type": "object",
+        "description": "`GET /me/records`: personal records per exercise, as `toPersonalRecords` computes them — the same records the app shows.",
         "properties": {
           "records": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MeRecord"
+              "$ref": "#/components/schemas/MeRecordsRecord"
             }
           },
           "warnings": {
@@ -3134,14 +3252,16 @@
         ],
         "additionalProperties": false
       },
-      "MeLibraryResult": {
+      "MeLibrarySearchExercise": {
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "The identity: the server row's uuid, or the client-minted UUIDv7 for a custom exercise created offline (the server persists that id on sync)."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Localized display copy for the locale the library was fetched under — never an identifier."
           },
           "category": {
             "type": "string",
@@ -3203,11 +3323,12 @@
       },
       "MeLibrarySearch": {
         "type": "object",
+        "description": "Library search results: the exercises `SearchMatch` ranks best first, then by name, archived ones left out.",
         "properties": {
           "exercises": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MeLibraryResult"
+              "$ref": "#/components/schemas/MeLibrarySearchExercise"
             }
           }
         },

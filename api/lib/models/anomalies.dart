@@ -1,4 +1,3 @@
-import 'package:heart/core/openapi/shape.dart';
 import 'package:heart_models/heart_models.dart';
 
 import 'changes.dart';
@@ -38,16 +37,3 @@ extension AnomalyWarnings on Iterable<Anomaly> {
     ];
   }
 }
-
-/// [AnomalyWarnings.toWarnings] as a shape: the `warnings` beside a count.
-final Shape<Iterable<Anomaly>> warningsShape = .list(
-  .object<Anomaly>('Warning', {
-    'reason': .required(.string, (anomaly) => anomaly.reason, 'Why it looks wrong; a newer server may add reasons.'),
-    'workoutId': .required(.string, (anomaly) => anomaly.workoutId),
-    'setId': .optional(.string, (anomaly) => anomaly.setId),
-    'exerciseId': .optional(.string, (anomaly) => anomaly.exerciseId),
-    'exerciseName': .optional(.string, (anomaly) => anomaly.exerciseName),
-    'observed': .required(.mapOf(.unknown('what was entered, by field')), (anomaly) => anomaly.observed),
-    'typical': .optional(.number, (anomaly) => anomaly.typical),
-  }),
-);

@@ -9,13 +9,14 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/me.dart';
-import 'package:heart/models/wire.dart';
+import 'package:heart/models/shapes.g.dart';
 import 'package:heart/routes/me_index.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
 import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
 
+import '../../tool/openapi/shapes.dart' as generator;
 import '../helpers/app_harness.dart';
 import '../helpers/request.dart';
 import '../mocks.mocks.dart';
@@ -36,6 +37,16 @@ void main() {
     if (Platform.environment['UPDATE_OPENAPI'] == '1') _golden.writeAsStringSync('$spec\n');
     expect('$spec\n', _golden.readAsStringSync(), reason: 'run with UPDATE_OPENAPI=1 to accept the change');
   });
+
+  test('the committed shapes are the ones the toMap()s write', () async {
+    final generated = await generator.generate(Directory.current.path);
+    expect(generated.errors, isEmpty);
+    expect(
+      generated.source,
+      File(generator.generatedPath).readAsStringSync(),
+      reason: 'run `dart run tool/openapi/shapes.dart`',
+    );
+  }, timeout: const Timeout(Duration(minutes: 2)));
 
   test('every route is in the spec, and says when it is not declared yet', () {
     final paths = meOpenApi()['paths'] as Map<String, Object?>;
@@ -69,21 +80,34 @@ void main() {
         path: {'workoutId': workout.id},
       ))!.toMap();
 
-      expect(MeWorkout.shape.check(body, 'body'), isEmpty);
+      expect(meWorkoutShape.check(body, 'body'), isEmpty);
       expect(body['images'], isEmpty);
     });
 
     test('a key the shape does not name fails the check, and so does a missing one', () {
-      final json = Workout.fromJson(_fixture()).toMap();
-      expect(workoutShape.check({...json, 'heartRate': 120}, 'body'), ['body.heartRate: not in Workout']);
-      expect(workoutShape.check({...json}..remove('pauses'), 'body'), ['body.pauses: required by Workout, missing']);
+      final json = MeWorkout(Workout.fromJson(_fixture())).toMap();
+      expect(meWorkoutShape.check({...json, 'heartRate': 120}, 'body'), ['body.heartRate: not in MeWorkout']);
+      expect(
+        meWorkoutShape.check({...json}..remove('pauses'), 'body'),
+        ['body.pauses: required by MeWorkout, missing'],
+      );
+    });
+
+    test('an optional key a toMap() writes as null passes where its shape says nullable', () {
+      final json = MeWorkout(Workout.fromJson(_fixture())).toMap();
+      final exercise = {...(json['exercises'] as List).first as Map, 'rest': null};
+      expect(workoutExerciseShape.check(exercise, 'exercise'), isEmpty);
+      expect(
+        workoutExerciseShape.check({...exercise, 'note': null}, 'exercise'),
+        ['exercise.note: optional in WorkoutExercise, so left out when null, but written as null'],
+      );
     });
   });
 
   test('a refusal the route does not declare fails while asserts are on', () {
     final endpoint = Endpoint.none<MeProfile>(
       (_) => throw const Forbidden(reason: 'no'),
-      reply: .json(MeProfile.shape),
+      reply: .json(meProfileShape),
     );
     expect(() => endpoint.call(bareRequest()), throwsA(isA<AssertionError>()));
   });
@@ -91,7 +115,7 @@ void main() {
   test('a declared refusal goes through as thrown', () {
     final endpoint = Endpoint.none<MeProfile>(
       (_) => throw const NotFound(type: 'profile', id: 'u1'),
-      reply: .json(MeProfile.shape),
+      reply: .json(meProfileShape),
       errors: [const .notFound()],
     );
     expect(() => endpoint.call(bareRequest()), throwsA(isA<NotFound>()));

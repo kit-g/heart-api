@@ -1,38 +1,35 @@
-import 'package:heart/core/openapi/shape.dart';
 import 'package:heart_models/heart_models.dart';
 
 import 'anomalies.dart';
 import 'changes.dart';
-import 'wire.dart';
 
 /// `GET /me`: who a token acts as, and how much history there is to read.
-class MeProfile implements Model {
+abstract interface class MeProfile implements Model {
+  factory({required User user, required AccountSummary summary}) = _MeProfile.new;
+}
+
+class _MeProfile implements MeProfile {
   final User user;
   final AccountSummary summary;
 
   new({required this.user, required this.summary});
 
-  static final Shape<MeProfile> shape = .object('MeProfile', {
-    'id': .required(.string, (me) => me.user.id),
-    'username': .optional(.string, (me) => me.user.displayName),
-    'unitSystem': .optional(
-      .enumOf<MeasurementUnit>(MeasurementUnit.values, (unit) => unit.name),
-      (me) => me.user.settings.unitSystem,
-    ),
-    'counts': .required(_counts, (me) => me.summary),
-  }, description: 'Who a token acts as, and how much history there is to read.');
-
-  static final Shape<AccountSummary> _counts = .object('AccountCounts', {
-    'workouts': .required(.integer, (summary) => summary[.workouts].count),
-    'templates': .required(.integer, (summary) => summary[.templates].count),
-    'templateFolders': .required(.integer, (summary) => summary[.templateFolders].count),
-    'goals': .required(.integer, (summary) => summary[.goals].count),
-    'customExercises': .required(.integer, (summary) => summary[.customExercises].count),
-    'programs': .required(.integer, (summary) => summary[.programs].count),
-  });
-
   @override
-  Map<String, dynamic> toMap() => shape.encode(this) as Map<String, dynamic>;
+  Map<String, dynamic> toMap() {
+    return {
+      'id': user.id,
+      'username': ?user.displayName,
+      'unitSystem': ?user.settings.unitSystem?.name,
+      'counts': {
+        'workouts': summary[.workouts].count,
+        'templates': summary[.templates].count,
+        'templateFolders': summary[.templateFolders].count,
+        'goals': summary[.goals].count,
+        'customExercises': summary[.customExercises].count,
+        'programs': summary[.programs].count,
+      },
+    };
+  }
 }
 
 /// A workout as the `/me` surface publishes it: the app's wire shape, minus
@@ -41,28 +38,30 @@ class MeProfile implements Model {
 ///
 /// Published shapes are additive only, so this is the one place that decides
 /// what `/me` shows of a workout.
-class MeWorkout implements Model {
+abstract interface class MeWorkout implements Model {
+  String get id;
+
+  factory(Workout workout) = _MeWorkout.new;
+}
+
+class _MeWorkout implements MeWorkout {
   final Workout workout;
 
   new(this.workout);
 
+  @override
   String get id => workout.id;
 
-  static final Shape<MeWorkout> shape = .object(
-    'MeWorkout',
-    {
-      'images': .required(.list(_image), (me) => me.workout.images?.values ?? const <WorkoutImage>[]),
-    },
-    base: (shape: workoutShape, read: (me) => me.workout),
-  );
-
-  static final Shape<WorkoutImage> _image = .object('MeWorkoutImage', {
-    'id': .required(.string, (image) => image.id),
-    'url': .optional(.string, (image) => image.link),
-  });
-
   @override
-  Map<String, dynamic> toMap() => shape.encode(this) as Map<String, dynamic>;
+  Map<String, dynamic> toMap() {
+    final map = workout.toMap();
+    return {
+      ...map,
+      'images': [
+        for (final image in workout.images?.values ?? const <WorkoutImage>[]) {'id': image.id, 'url': ?image.link},
+      ],
+    };
+  }
 }
 
 /// `GET /me/workouts/changes`: one page of the change feed.
@@ -71,20 +70,17 @@ class MeWorkoutChanges implements Model {
 
   const new(this.changes);
 
-  static final Shape<MeWorkoutChanges> shape = .object('MeWorkoutChanges', {
-    'workouts': .required(.list(MeWorkout.shape), (me) => me.changes.upserted.map(MeWorkout.new)),
-    'deleted': .required(.list(_deletion), (me) => me.changes.deleted),
-    'cursor': .optional(.string, (me) => me.changes.cursor?.toString(), 'Where to resume: pass it back as `since`.'),
-    'hasMore': .required(.boolean, (me) => me.changes.hasMore),
-  });
-
-  static final Shape<({String id, DateTime deletedAt})> _deletion = .object('MeDeletion', {
-    'id': .required(.string, (deleted) => deleted.id),
-    'deletedAt': .required(.dateTime, (deleted) => deleted.deletedAt.toUtc()),
-  });
-
   @override
-  Map<String, dynamic> toMap() => shape.encode(this) as Map<String, dynamic>;
+  Map<String, dynamic> toMap() {
+    return {
+      'workouts': [for (final workout in changes.upserted) MeWorkout(workout).toMap()],
+      'deleted': [
+        for (final (:id, :deletedAt) in changes.deleted) {'id': id, 'deletedAt': deletedAt.toUtc().toIso8601String()},
+      ],
+      'cursor': ?changes.cursor?.toString(),
+      'hasMore': changes.hasMore,
+    };
+  }
 }
 
 /// `GET /me/records`: personal records per exercise, as `toPersonalRecords`
@@ -114,34 +110,20 @@ class MeRecords implements Model {
     );
   }
 
-  static final Shape<MeRecords> shape = .object('MeRecords', {
-    'records': .required(.list(_entry), (me) => me.entries),
-    'warnings': .optional(warningsShape, (me) => me.warnings.isEmpty ? null : me.warnings),
-  });
-
-  static final Shape<({ExerciseRecordSets exercise, Map<String, Object> records})> _entry = .object(
-    'MeRecord',
-    {
-      'exercise': .required(_exercise, (entry) => entry.exercise),
-      'lastTrained': .optional(.isoString, (entry) => entry.exercise.sets.lastOrNull?.at),
-    },
-    base: (
-      shape: .unknown('each record kind toPersonalRecords computes (heaviest, oneRepMax, …), beside the exercise'),
-      read: (entry) => entry.records,
-    ),
-  );
-
-  static final Shape<ExerciseRecordSets> _exercise = .object('MeRecordExercise', {
-    'id': .required(.string, (exercise) => exercise.exerciseId),
-    'name': .required(.string, (exercise) => exercise.name),
-    'category': .required(
-      .enumOf<Category>(Category.values, (category) => category.value),
-      (exercise) => exercise.category,
-    ),
-  });
-
   @override
-  Map<String, dynamic> toMap() => shape.encode(this) as Map<String, dynamic>;
+  Map<String, dynamic> toMap() {
+    return {
+      'records': [
+        for (final (:exercise, :records) in entries)
+          {
+            'exercise': {'id': exercise.exerciseId, 'name': exercise.name, 'category': exercise.category.value},
+            ...records,
+            'lastTrained': ?exercise.sets.lastOrNull?.at,
+          },
+      ],
+      if (warnings.isNotEmpty) 'warnings': warnings.toWarnings(),
+    };
+  }
 }
 
 /// One session in an exercise's history: its workout, when, the working sets
@@ -155,26 +137,18 @@ class MeExerciseSession implements Model {
 
   String get workoutId => session.workoutId;
 
-  static final Shape<MeExerciseSession> shape = .object('MeExerciseSession', {
-    'workoutId': .required(.string, (me) => me.session.workoutId),
-    'at': .required(.isoString, (me) => me.session.at),
-    'sets': .required(.list(_set), (me) => me.session.sets),
-    'metrics': .required(
-      .mapOf(.number),
-      (me) => me.session.sets.toSessionMetrics(me.category),
-      'What the progress chart plots, by chart.',
-    ),
-  });
-
-  static final Shape<RecordSet> _set = .object('MeSessionSet', {
-    'weight': .optional(.number, (set) => set.weight),
-    'reps': .optional(.integer, (set) => set.reps),
-    'duration': .optional(.number, (set) => set.duration),
-    'distance': .optional(.number, (set) => set.distance),
-  });
-
   @override
-  Map<String, dynamic> toMap() => shape.encode(this) as Map<String, dynamic>;
+  Map<String, dynamic> toMap() {
+    return {
+      'workoutId': session.workoutId,
+      'at': session.at,
+      'sets': [
+        for (final set in session.sets)
+          {'weight': ?set.weight, 'reps': ?set.reps, 'duration': ?set.duration, 'distance': ?set.distance},
+      ],
+      'metrics': session.sets.toSessionMetrics(category),
+    };
+  }
 }
 
 /// Library search results: the exercises [SearchMatch] ranks best first,
@@ -217,25 +191,23 @@ class MeLibrarySearch implements Model {
     );
   }
 
-  static final Shape<MeLibrarySearch> shape = .object('MeLibrarySearch', {
-    'exercises': .required(.list(_result), (me) => me.results),
-  });
-
-  static final Shape<({Exercise exercise, SearchMatch match})> _result = .object('MeLibraryResult', {
-    'id': .required(.string, (result) => result.exercise.id),
-    'name': .required(.string, (result) => result.exercise.name),
-    'category': .required(
-      .enumOf<Category>(Category.values, (category) => category.value),
-      (result) => result.exercise.category,
-    ),
-    'target': .required(.enumOf<Target>(Target.values, (target) => target.value), (result) => result.exercise.target),
-    'aliases': .optional(.list(.string), (result) => result.exercise.aliases.isEmpty ? null : result.exercise.aliases),
-    'own': .optional(.boolean, (result) => result.exercise.isMine ? true : null),
-    'match': .required(.enumOf<SearchMatch>(SearchMatch.values, (match) => match.name), (result) => result.match),
-  });
-
   @override
-  Map<String, dynamic> toMap() => shape.encode(this) as Map<String, dynamic>;
+  Map<String, dynamic> toMap() {
+    return {
+      'exercises': [
+        for (final (:exercise, :match) in results)
+          {
+            'id': exercise.id,
+            'name': exercise.name,
+            'category': exercise.category.value,
+            'target': exercise.target.value,
+            if (exercise.aliases.isNotEmpty) 'aliases': [...exercise.aliases],
+            if (exercise.isMine) 'own': true,
+            'match': match.name,
+          },
+      ],
+    };
+  }
 }
 
 /// A program as `/me` shows it: the program, where the user stands in it
