@@ -1,0 +1,386 @@
+/* Swagger UI in the Ink preset of the Heart design system. Its own stylesheet
+   loads first; this one only repaints it with the tokens from tokens.css, so
+   it follows the OS brightness like the rest of the site. Accent is a fill and
+   accent-ink is for text and lines; no shadows, no pills. */
+
+.swagger-ui,
+.swagger-ui .opblock-tag,
+.swagger-ui .opblock .opblock-summary-description,
+.swagger-ui .opblock .opblock-section-header h4,
+.swagger-ui .opblock .opblock-summary-path,
+.swagger-ui .opblock-description-wrapper p,
+.swagger-ui .opblock-external-docs-wrapper p,
+.swagger-ui .opblock-title_normal p,
+.swagger-ui .responses-inner h4,
+.swagger-ui .responses-inner h5,
+.swagger-ui .response-col_status,
+.swagger-ui .response-col_description,
+.swagger-ui .response-col_links,
+.swagger-ui .responses-table td,
+.swagger-ui .tab li,
+.swagger-ui .tab li button.tablinks,
+.swagger-ui table thead tr th,
+.swagger-ui table thead tr td,
+.swagger-ui .parameter__name,
+.swagger-ui .parameter__type,
+.swagger-ui .parameter__in,
+.swagger-ui .parameter__extension,
+.swagger-ui .parameter__deprecated,
+.swagger-ui .prop-format,
+.swagger-ui .renderedMarkdown p,
+.swagger-ui .markdown p,
+.swagger-ui .markdown li,
+.swagger-ui label,
+.swagger-ui .servers-title,
+.swagger-ui .servers > label,
+.swagger-ui .scheme-container .schemes > label,
+.swagger-ui section.models h4,
+.swagger-ui section.models h5,
+.swagger-ui .model,
+.swagger-ui .model-title,
+.swagger-ui .model .property,
+.swagger-ui .model .property.primitive,
+.swagger-ui .prop-type,
+.swagger-ui .dialog-ux .modal-ux,
+.swagger-ui .dialog-ux .modal-ux-header h3,
+.swagger-ui .dialog-ux .modal-ux-content h4,
+.swagger-ui .dialog-ux .modal-ux-content p,
+.swagger-ui .auth-container h4,
+.swagger-ui .auth-container h6 {
+    color: var(--ink);
+    font-family: var(--font-text);
+}
+
+/* The spec's title and blurb: the page around it already says them. */
+.swagger-ui .information-container,
+.swagger-ui .opblock-tag-section > h3 {
+    display: none;
+}
+
+.swagger-ui .wrapper {
+    padding: 0;
+    max-width: none;
+}
+
+.swagger-ui .scheme-container {
+    background: transparent;
+    box-shadow: none;
+    margin: 0;
+    padding: 0 0 16px;
+}
+
+.swagger-ui .scheme-container .schemes {
+    align-items: flex-end;
+}
+
+/* One route */
+.swagger-ui .opblock,
+.swagger-ui .opblock.opblock-get,
+.swagger-ui .opblock.opblock-deprecated {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: none;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.swagger-ui .opblock .opblock-summary,
+.swagger-ui .opblock.opblock-get .opblock-summary,
+.swagger-ui .opblock.is-open .opblock-summary {
+    border: 0;
+    padding: 10px 12px;
+}
+
+.swagger-ui .opblock.is-open .opblock-summary {
+    border-bottom: 1px solid var(--border);
+}
+
+.swagger-ui .opblock .opblock-summary-method,
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+    background: var(--fill);
+    border-radius: var(--radius-control);
+    color: var(--accent-ink);
+    font-family: var(--font-text);
+    font-weight: 600;
+    min-width: 56px;
+    text-shadow: none;
+}
+
+.swagger-ui .opblock .opblock-summary-path,
+.swagger-ui .opblock .opblock-summary-path a,
+.swagger-ui .opblock .opblock-summary-path__deprecated {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.swagger-ui .opblock .opblock-summary-description {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.swagger-ui .opblock .opblock-section-header,
+.swagger-ui .opblock.opblock-get .tab-header .tab-item.active h4 span::after {
+    background: var(--fill);
+    box-shadow: none;
+}
+
+.swagger-ui .opblock .tab-header .tab-item.active h4 span::after {
+    background: var(--accent-ink);
+}
+
+.swagger-ui .opblock-body pre.microlight,
+.swagger-ui .highlight-code > .microlight,
+.swagger-ui .highlight-code > .microlight code,
+.swagger-ui .opblock-body pre.microlight code,
+.swagger-ui .responses-inner code,
+.swagger-ui pre {
+    background: var(--fill) !important;
+    border-radius: var(--radius-control);
+    color: var(--ink) !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.swagger-ui .opblock-body pre.microlight span,
+.swagger-ui .highlight-code .microlight span {
+    color: var(--ink) !important;
+}
+
+.swagger-ui code,
+.swagger-ui .markdown code,
+.swagger-ui .renderedMarkdown code {
+    background: var(--fill);
+    border-radius: 4px;
+    color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.swagger-ui .parameter__name.required::after,
+.swagger-ui .parameter__name.required span,
+.swagger-ui .prop .star {
+    color: var(--destructive);
+}
+
+.swagger-ui .parameter__in,
+.swagger-ui .parameter__type,
+.swagger-ui .prop-format,
+.swagger-ui .response-control-media-type__accept-message {
+    color: var(--muted);
+}
+
+.swagger-ui table thead tr th,
+.swagger-ui table thead tr td,
+.swagger-ui .responses-table .response,
+.swagger-ui .responses-inner .response {
+    border-color: var(--border);
+}
+
+.swagger-ui a,
+.swagger-ui a.nostyle,
+.swagger-ui .info a {
+    color: var(--accent-ink);
+}
+
+.swagger-ui .opblock-summary-control,
+.swagger-ui a.nostyle,
+.swagger-ui .opblock .opblock-summary-path a {
+    color: inherit;
+}
+
+/* Controls */
+.swagger-ui .btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    box-shadow: none;
+    color: var(--ink);
+    font-family: var(--font-text);
+    font-weight: 500;
+}
+
+.swagger-ui .btn.authorize,
+.swagger-ui .btn.authorize.unlocked,
+.swagger-ui .btn.try-out__btn,
+.swagger-ui .btn.modal-btn.auth {
+    border-color: var(--accent-ink);
+    color: var(--accent-ink);
+}
+
+.swagger-ui .btn.execute,
+.swagger-ui .auth-btn-wrapper .btn.modal-btn.auth.authorize {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+}
+
+.swagger-ui .btn.cancel {
+    border-color: var(--destructive);
+    color: var(--destructive);
+}
+
+.swagger-ui svg,
+.swagger-ui .authorization__btn svg,
+.swagger-ui .opblock-summary-control svg,
+.swagger-ui .expand-operation svg,
+.swagger-ui .model-toggle::after {
+    fill: var(--muted);
+}
+
+.swagger-ui .btn.authorize svg {
+    fill: var(--accent-ink);
+}
+
+.swagger-ui input[type="text"],
+.swagger-ui input[type="password"],
+.swagger-ui input[type="search"],
+.swagger-ui input[type="email"],
+.swagger-ui select,
+.swagger-ui textarea {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    box-shadow: none;
+    color: var(--ink);
+    font-family: var(--font-text);
+}
+
+.swagger-ui .response-control-media-type--accept-controller select,
+.swagger-ui .response-control-media-type__accept-message {
+    border-color: var(--border);
+    color: var(--muted);
+}
+
+/* The schemas */
+.swagger-ui section.models,
+.swagger-ui section.models.is-open {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    margin-top: 24px;
+}
+
+.swagger-ui section.models h4,
+.swagger-ui section.models.is-open h4 {
+    border-color: var(--border);
+    padding: 10px 12px;
+}
+
+.swagger-ui section.models .model-container {
+    margin: 0 12px 8px;
+}
+
+.swagger-ui .model-box .model-title,
+.swagger-ui .model-box .model-title__text,
+.swagger-ui section.models .model-container .model-box > button {
+    color: var(--ink);
+    opacity: 1;
+}
+
+.swagger-ui section.models .model-container,
+.swagger-ui .model-box,
+.swagger-ui .model-box-control:focus {
+    background: var(--fill);
+    border-radius: var(--radius-control);
+    box-shadow: none;
+    outline: none;
+}
+
+.swagger-ui .model .property.primitive,
+.swagger-ui .model .deprecated,
+.swagger-ui .model-toggle,
+.swagger-ui .prop-type {
+    color: var(--accent-ink);
+}
+
+.swagger-ui .model-hint {
+    background: var(--ink);
+    border-radius: var(--radius-control);
+    color: var(--ground);
+}
+
+/* OpenAPI 3.1 schemas draw through their own components. */
+.swagger-ui .json-schema-2020-12,
+.swagger-ui .json-schema-2020-12__title,
+.swagger-ui .json-schema-2020-12-accordion,
+.swagger-ui .json-schema-2020-12-keyword__name,
+.swagger-ui .json-schema-2020-12-keyword__name--primary,
+.swagger-ui .json-schema-2020-12-keyword__name--secondary,
+.swagger-ui .json-schema-2020-12-keyword__value {
+    color: var(--ink);
+    font-family: var(--font-text);
+}
+
+.swagger-ui .json-schema-2020-12__title {
+    font-weight: 600;
+}
+
+.swagger-ui .json-schema-2020-12-property .json-schema-2020-12__title,
+.swagger-ui .json-schema-2020-12-property > .json-schema-2020-12 > .json-schema-2020-12-head .json-schema-2020-12__title {
+    color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+}
+
+.swagger-ui .json-schema-2020-12-accordion,
+.swagger-ui .json-schema-2020-12-expand-deep-button {
+    background: transparent;
+}
+
+.swagger-ui .json-schema-2020-12-expand-deep-button,
+.swagger-ui .json-schema-2020-12-keyword__value--secondary,
+.swagger-ui .json-schema-2020-12-keyword--description,
+.swagger-ui .json-schema-2020-12-keyword--description p,
+.swagger-ui .json-schema-2020-12__attribute--muted {
+    color: var(--muted);
+}
+
+.swagger-ui .json-schema-2020-12__attribute,
+.swagger-ui .json-schema-2020-12__attribute--primary,
+.swagger-ui .json-schema-2020-12-keyword__value--const {
+    color: var(--accent-ink);
+    border-color: var(--accent-ink);
+}
+
+.swagger-ui .json-schema-2020-12__attribute--warning,
+.swagger-ui .json-schema-2020-12-property--required > .json-schema-2020-12 > .json-schema-2020-12-head .json-schema-2020-12__title::after {
+    color: var(--destructive);
+    border-color: var(--destructive);
+}
+
+.swagger-ui .json-schema-2020-12-body {
+    border-color: var(--border);
+}
+
+.swagger-ui .json-schema-2020-12-accordion__icon svg {
+    fill: var(--muted);
+}
+
+/* The Authorize dialog */
+.swagger-ui .dialog-ux .backdrop-ux {
+    background: var(--ground);
+    opacity: .8;
+}
+
+.swagger-ui .dialog-ux .modal-ux {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: none;
+}
+
+.swagger-ui .dialog-ux .modal-ux-header {
+    border-color: var(--border);
+}
+
+.swagger-ui .dialog-ux .modal-ux-header .close-modal svg {
+    fill: var(--ink);
+}
+
+.swagger-ui .auth-container {
+    border-color: var(--border);
+}
+
+.swagger-ui .auth-container code {
+    background: var(--fill);
+    color: var(--ink);
+}

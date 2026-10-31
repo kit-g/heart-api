@@ -30,6 +30,8 @@
     <link rel="stylesheet" href="assets/tokens.css">
     <link rel="stylesheet" href="assets/site.css">
     <link rel="stylesheet" href="assets/tailwind.css">
+    <link rel="stylesheet" href="assets/swagger-ui/swagger-ui.css">
+    <link rel="stylesheet" href="assets/swagger-ink.css">
     <script src="assets/site.js"></script>
 </head>
 <body class="bg-ground text-ink font-text min-h-screen flex flex-col selection:bg-accent selection:text-on-accent">
@@ -70,6 +72,8 @@
         <pre><code>curl https://api.heart-of.me/v1/me/workouts?limit=5 \
   -H "Authorization: Bearer hrt_…" \
   -H "User-Agent: my-sheet-sync/1.0"</code></pre>
+
+        <p>Every route, parameter and response is in the <a href="#reference">reference</a> below.</p>
 
         <h2 id="tokens">Tokens</h2>
         <p>Create a token in the app under <strong>Settings</strong>. (The screen for it comes with an upcoming
@@ -172,6 +176,13 @@
         <p>Building something, or missing something? Write to <a href="mailto:info@heart-of.me">info@heart-of.me</a>.
             We’d love to hear what you make.</p>
     </article>
+
+    <section id="reference" class="mt-16 scroll-mt-6">
+        <h2 class="text-2xl font-title font-semibold tracking-tight mb-2">Reference</h2>
+        <p class="text-muted mb-6">Generated from the code. Open a route for its parameters and what it answers;
+            Authorize with a token to try it.</p>
+        <div id="swagger"></div>
+    </section>
 </main>
 
 <footer class="w-full py-10 px-6 border-t">
@@ -181,5 +192,7 @@
         </p>
     </div>
 </footer>
+<script src="assets/swagger-ui/swagger-ui-bundle.js"></script>
+<script>SwaggerUIBundle({url: 'openapi/me.json', dom_id: '#swagger', syntaxHighlight: {activated: false}});</script>
 </body>
 </html>
