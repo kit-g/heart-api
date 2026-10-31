@@ -143,7 +143,8 @@
         <p>You don’t need the API for this: the app exports too, under <strong>Settings → Export my data</strong>.</p>
 
         <h2 id="mcp">AI assistants (MCP)</h2>
-        <p>Heart’s MCP server is <code>https://mcp.heart-of.me</code>, read-only. In Claude, add it as a custom
+        <p>Heart’s MCP server is <code>https://mcp.heart-of.me</code>. Personal tokens are read-only; signing in can
+            also grant template writes. In Claude, add it as a custom
             connector with that address and sign in with your Heart account; no token needed. With a token, in Claude
             Code:</p>
         <pre><code>claude mcp add --transport http heart https://mcp.heart-of.me \
