@@ -1,0 +1,54 @@
+name: "Contract diff"
+
+# The /me spec is generated, not checked in, so a PR's change to the contract
+# doesn't show up as a file diff. This generates it at the PR and at its base,
+# and says what changed in the job summary and in one comment on the PR. It
+# informs the review and never fails: a breaking change can be a planned phase.
+on:
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'shared/heart_models/**'
+      - 'scripts/spec_diff.*'
+      - 'Makefile'
+      - '.github/workflows/contract-diff.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: contract-diff-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+      - uses: actions/cache@v6
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-
+
+      - name: "Compile cards"
+        run: make cards
+
+      - name: "Compare with the base"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          scripts/spec_diff.sh "$BASE_SHA" > report.md
+          if [ -s report.md ]; then
+            cat report.md >> "$GITHUB_STEP_SUMMARY"
+            gh pr comment "$PR" --body-file report.md --edit-last --create-if-none
+          else
+            echo "No change to the \`/me\` contract." >> "$GITHUB_STEP_SUMMARY"
+            gh pr comment "$PR" --body "No change to the \`/me\` contract any more." --edit-last || true
+          fi
