@@ -83,6 +83,22 @@ data "aws_cloudfront_origin_request_policy" "all_but_host" {
   name = "Managed-AllViewerExceptHostHeader"
 }
 
+data "aws_cloudfront_cache_policy" "optimized" {
+  name = "Managed-CachingOptimized"
+}
+
+locals {
+  # Files the MCP host answers with the site's copy rather than the function:
+  # the icon, for hosts that look up the server domain's favicon instead of
+  # serverInfo.icons, and the token ChatGPT's app submission fetches to verify
+  # the domain (site/.well-known/<env>/openai-apps-challenge). The token can be
+  # reissued, so only the icon is cached.
+  mcp_site_files = var.site_origin == null ? {} : {
+    "/favicon.ico"                       = data.aws_cloudfront_cache_policy.optimized.id
+    "/.well-known/openai-apps-challenge" = data.aws_cloudfront_cache_policy.disabled.id
+  }
+}
+
 resource "aws_cloudfront_distribution" "mcp" {
   enabled         = true
   comment         = "Heart MCP host"
@@ -104,6 +120,33 @@ resource "aws_cloudfront_distribution" "mcp" {
       https_port             = 443
       origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  dynamic "origin" {
+    for_each = var.site_origin == null ? [] : [trimprefix(var.site_origin, "https://")]
+    content {
+      domain_name = origin.value
+      origin_id   = "site"
+
+      custom_origin_config {
+        http_port              = 80
+        https_port             = 443
+        origin_protocol_policy = "https-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
+    }
+  }
+
+  dynamic "ordered_cache_behavior" {
+    for_each = local.mcp_site_files
+    content {
+      path_pattern           = ordered_cache_behavior.key
+      target_origin_id       = "site"
+      viewer_protocol_policy = "https-only"
+      allowed_methods        = ["GET", "HEAD"]
+      cached_methods         = ["GET", "HEAD"]
+      cache_policy_id        = ordered_cache_behavior.value
     }
   }
 

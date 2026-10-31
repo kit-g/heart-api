@@ -38,6 +38,13 @@ aws s3 cp "site/.well-known/$ENV/assetlinks.json" \
 aws s3 cp "site/.well-known/$ENV/oauth-authorization-server" \
   "s3://$BUCKET/site/.well-known/oauth-authorization-server" \
   --content-type application/json --profile "$PROFILE"
+# Issued by ChatGPT's app submission to verify the domain, so it exists only
+# once one is under way. The MCP host serves this same file (api/mcp.tf).
+if [ -f "site/.well-known/$ENV/openai-apps-challenge" ]; then
+  aws s3 cp "site/.well-known/$ENV/openai-apps-challenge" \
+    "s3://$BUCKET/site/.well-known/openai-apps-challenge" \
+    --content-type text/plain --profile "$PROFILE"
+fi
 aws s3 cp "site/connect/$ENV.js" "s3://$BUCKET/site/assets/connect-config.js" \
   --content-type text/javascript --profile "$PROFILE"
 aws s3 cp "site/robots/$ENV.txt" "s3://$BUCKET/site/robots.txt" \
