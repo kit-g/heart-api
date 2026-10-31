@@ -258,7 +258,7 @@ extension on double {
 /// the exercise's patterns is on that side; the rows are the window's.
 final class MeBalance implements Model {
   final LensWindow window;
-  final List<Map<String, dynamic>> pairs;
+  final List<MeBalancePair> pairs;
   final List<Anomaly> warnings;
 
   const new _(this.window, this.pairs, this.warnings);
@@ -283,17 +283,17 @@ final class MeBalance implements Model {
       };
     }
 
-    ({Map<String, dynamic> side, Iterable<LensRow> rows})? side(Object? json) {
+    ({MeBalanceSide side, Iterable<LensRow> rows})? side(Object? json) {
       if (json case {'key': final String key, 'patterns': final List patterns} when patterns.isNotEmpty) {
         final on = patterns.whereType<String>().toSet();
         final trained = rows.where((row) => row.patterns.any(on.contains)).toList();
         return (
-          side: {
-            'key': key,
-            'name': ?named(json['name']),
-            'patterns': on.toList(),
-            'sets': trained.fold(0, (sum, row) => sum + row.sets),
-          },
+          side: MeBalanceSide(
+            key: key,
+            name: named(json['name']),
+            patterns: on.toList(),
+            sets: trained.fold(0, (sum, row) => sum + row.sets),
+          ),
           rows: trained,
         );
       }
@@ -304,12 +304,12 @@ final class MeBalance implements Model {
       for (final pair in (content?['pairs'] as List? ?? const []).whereType<Map>())
         if (pair case {'key': final String key, 'left': final left, 'right': final right})
           if ((side(left), side(right)) case (final left?, final right?))
-            {
-              'key': key,
-              'left': left.side,
-              'right': right.side,
-              'weeksTrained': {for (final row in left.rows.followedBy(right.rows)) window.weekOf(row.start)}.length,
-            },
+            MeBalancePair(
+              key: key,
+              left: left.side,
+              right: right.side,
+              weeksTrained: {for (final row in left.rows.followedBy(right.rows)) window.weekOf(row.start)}.length,
+            ),
     ], warnings);
   }
 
@@ -318,7 +318,75 @@ final class MeBalance implements Model {
     return {
       ...window.toMap(),
       'weeks': window.weeks.length,
-      'pairs': pairs,
+      'pairs': [for (final pair in pairs) pair.toMap()],
+      if (warnings.isNotEmpty) 'warnings': warnings.toWarnings(),
+    };
+  }
+}
+
+/// One side of a balance pair: its working sets over the window.
+final class MeBalanceSide implements Model {
+  final String key;
+  final String? name;
+  final List<String> patterns;
+  final int sets;
+
+  const new({required this.key, required this.name, required this.patterns, required this.sets});
+
+  @override
+  Map<String, dynamic> toMap() => {'key': key, 'name': ?name, 'patterns': patterns, 'sets': sets};
+}
+
+/// Two opposing movements set against each other.
+final class MeBalancePair implements Model {
+  final String key;
+  final MeBalanceSide left;
+  final MeBalanceSide right;
+
+  /// The weeks of the window either side was trained in.
+  final int weeksTrained;
+
+  const new({required this.key, required this.left, required this.right, required this.weeksTrained});
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {'key': key, 'left': left.toMap(), 'right': right.toMap(), 'weeksTrained': weeksTrained};
+  }
+}
+
+/// One goal with where it stands: its definition, the period it reads and the
+/// reading.
+final class MeGoalReading implements Model {
+  final Goal goal;
+  final String? exerciseName;
+  final (DateTime, DateTime)? period;
+
+  /// The reading, in the goal's own unit; absent with nothing to read.
+  final num? current;
+
+  /// How far along the current stage: 0 to 1.
+  final num progress;
+
+  /// The pending anomalies on what it read, in its period.
+  final List<Anomaly> warnings;
+
+  const new(
+    this.goal, {
+    required this.exerciseName,
+    required this.period,
+    required this.current,
+    required this.progress,
+    required this.warnings,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      ...goal.toMap(),
+      'exerciseName': ?exerciseName,
+      if (period case (final from, final to)) 'period': {'from': from.toIso8601String(), 'to': to.toIso8601String()},
+      'current': ?current,
+      'progress': progress,
       if (warnings.isNotEmpty) 'warnings': warnings.toWarnings(),
     };
   }
@@ -345,7 +413,7 @@ final class MeBalance implements Model {
 /// finished ladder.
 final class MeGoalProgress implements Model {
   final int weekStart;
-  final List<Map<String, dynamic>> goals;
+  final List<MeGoalReading> goals;
 
   const new _(this.weekStart, this.goals);
 
@@ -442,7 +510,7 @@ final class MeGoalProgress implements Model {
       });
     }
 
-    Map<String, dynamic> measured(Goal goal) {
+    MeGoalReading measured(Goal goal) {
       final period = periodOf(goal.cadence);
       final current = switch (goal.metric) {
         .workouts => spans.where((span) => within(span.start, period)).length,
@@ -464,21 +532,26 @@ final class MeGoalProgress implements Model {
             })
               anomaly,
       ];
-      return {
-        ...goal.toMap(),
-        'exerciseName': ?names[goal.exerciseId],
-        if (period case (final from, final to)) 'period': {'from': from.toIso8601String(), 'to': to.toIso8601String()},
-        'current': ?current,
-        'progress': goal.progressAt(current).toTwoPlaces(),
-        if (warnings.isNotEmpty) 'warnings': warnings.toWarnings(),
-      };
+      return MeGoalReading(
+        goal,
+        exerciseName: names[goal.exerciseId],
+        period: period,
+        current: current,
+        progress: goal.progressAt(current).toTwoPlaces(),
+        warnings: warnings,
+      );
     }
 
     return MeGoalProgress._(weekStart, [for (final goal in goals) measured(goal)]);
   }
 
   @override
-  Map<String, dynamic> toMap() => {'weekStart': weekStart, 'goals': goals};
+  Map<String, dynamic> toMap() {
+    return {
+      'weekStart': weekStart,
+      'goals': [for (final goal in goals) goal.toMap()],
+    };
+  }
 }
 
 extension on Goal {

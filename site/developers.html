@@ -96,35 +96,8 @@
         <p>Everything is <code>GET</code>, and everything is about the account the token belongs to. Lists that
             page carry a <code>cursor</code> while there’s more: pass it back as <code>?cursor=</code>. No
             <code>cursor</code> means the last page. <code>limit</code> is 1–100 (30 by default).</p>
-        <!-- a route stays on one line; where that makes the table wider than the
-             page, the table scrolls rather than the page -->
-        <div class="overflow-x-auto">
-        <table class="[&_td:first-child]:whitespace-nowrap">
-            <thead><tr><th>Route</th><th>Returns</th></tr></thead>
-            <tbody>
-            <tr><td><code>/me</code></td><td>Your username, unit system, and how many workouts, templates, folders, goals, custom exercises and programs you have.</td></tr>
-            <tr><td><code>/me/workouts</code></td><td>Your workouts, newest first, each with its exercises, sets, notes and image links.</td></tr>
-            <tr><td><code>/me/workouts/:id</code></td><td>One workout.</td></tr>
-            <tr><td><code>/me/workouts/changes</code></td><td>What changed since a cursor: see <a href="#polling">Keeping a copy in sync</a>.</td></tr>
-            <tr><td><code>/me/records</code></td><td>Personal records per exercise, the same ones the app shows, and when each exercise was last done (<code>lastTrained</code>); <code>?exerciseId=</code> for one.</td></tr>
-            <tr><td><code>/me/volume</code></td><td>Week by week: the finished workouts, their time in seconds, the weight moved (<code>totalVolume</code>, kg), and working sets and sessions per muscle group and per movement pattern, as the app’s weekly card counts them: a set counts fully for the muscles an exercise works first and partly (usually half) for the ones it works second, so sets per muscle can be fractional; <code>primarySets</code> is the direct part. <code>untrained</code> lists the muscle groups nothing reached. <code>?from=&amp;to=</code> for a span of up to a year; without <code>from</code>, the 4 weeks ending this one.</td></tr>
-            <tr><td><code>/me/balance</code></td><td>Opposing movements set against each other, as the app’s balance view shows them (push against pull, hinge against squat, and so on): each side’s working sets and how many of the weeks either was trained. Counts only. Same span as <code>/me/volume</code>.</td></tr>
-            <tr><td><code>/me/exercises/:id/history</code></td><td>Every session of one exercise, newest first, with its working sets and the values the app’s progress chart plots.</td></tr>
-            <tr><td><code>/me/library?q=</code></td><td>The exercise library and your own exercises, searched the way the app searches: word order free, abbreviations such as <code>db</code> or <code>rdl</code>, muscle words such as <code>lats</code>, one typo a word.</td></tr>
-            <tr><td><code>/me/library/programs</code></td><td>Heart’s ready-made programs, with what helps choose one: who it’s for (<code>audience</code>), the <code>equipment</code> it needs, days a week, minutes a session and weeks long. In your language where translated, otherwise English.</td></tr>
-            <tr><td><code>/me/library/programs/:key</code></td><td>One ready-made program in full: what a week looks like, how it grows, its sessions and growth rules, its safety notes, and the research behind it. Each claim has its sources (title, authors, year, a link and the finding in plain words) and the part of the program it explains (<code>about</code>).</td></tr>
-            <tr><td><code>/me/exercises</code></td><td>Your custom exercises.</td></tr>
-            <tr><td><code>/me/templates</code></td><td>Your templates, in your order; <code>?folder=</code> for one folder.</td></tr>
-            <tr><td><code>/me/template-folders</code></td><td>Your template folders.</td></tr>
-            <tr><td><code>/me/goals</code></td><td>Your goals. Goals backed by health data carry their definition only; their progress lives on your phone.</td></tr>
-            <tr><td><code>/me/anomalies</code></td><td>Entries in your log that look suspicious (a workout left running, a weight far from the exercise’s usual, weight and reps swapped) and what you made of each: <code>pending</code>, <code>valid</code> or <code>invalid</code>. Nothing is corrected; invalid entries stay in your log and are left out of the counts. <code>?status=</code> for one kind. Volume, balance, records and goal progress name the pending ones they counted in <code>warnings</code>.</td></tr>
-            <tr><td><code>/me/goals/progress</code></td><td>Each live goal with where it stands now, as the app’s goal card measures it: <code>current</code>, and <code>progress</code> through the current stage from 0 to 1. A weekly or monthly goal names its <code>period</code>.</td></tr>
-            <tr><td><code>/me/programs</code></td><td>Your programs, each with where you stand: the program week, the sessions done in the open cycle and the next one, whether it’s paused, and workouts this week. Worked out from what you logged, the way the app works it out; weeks here are ISO weeks in UTC.</td></tr>
-            <tr><td><code>/me/programs/:id</code></td><td>One program: its sessions and when each joined (<code>joined</code>), each exercise’s growth rule, its lighter weeks (<code>deload</code>), <code>phases</code> and test sessions (<code>tests</code>). Under <code>bases</code>, each exercise’s current base: the training max, working weight, duration or distance its rule raises. A lift used in two sessions can keep a base for each; that one is keyed by its <code>slot</code> and names its <code>exerciseId</code>. Under <code>nextSession</code>, the session up next as the app shows it: this week’s targets, and weights worked out from the bases (a share of a base, rounded down to the rule’s step, and lighter in a lighter week). It reads what’s stored and isn’t a forecast. A program you started from the library also has <code>research</code>: the claims behind it and their sources, each placed on the part of your copy it explains.</td></tr>
-            <tr><td><code>/me/programs/:id/history</code></td><td>How the program got there, oldest first. Each base value has its <code>cause</code>: <code>workout</code> (a session raised it, or lowered it after misses), <code>test</code> (a test session set it), <code>action</code> (replaying a week set it) or <code>user</code>, and the value before it (<code>previous</code>). Also your <code>actions</code> (pauses, lighter weeks, repeats, replays, a variation moving up a step) and the sessions you skipped (<code>skips</code>), with the reason you gave.</td></tr>
-            </tbody>
-        </table>
-        </div>
+        <p>The <a href="#reference">reference</a> below has every route: what it answers, what it takes and how it can
+            refuse.</p>
         <p>Weights are in kilograms and distances in kilometres, whatever unit the app shows you. Durations are in
             seconds, and times are ISO 8601 in UTC. Counts by week use UTC weeks starting on the day you chose in
             the app (<code>weekStart</code>, 1 for Monday), or Monday until the app has told us.</p>
