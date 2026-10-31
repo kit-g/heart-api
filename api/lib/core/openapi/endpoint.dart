@@ -334,7 +334,10 @@ Map<String, Object?> openApiDocument(
   return {
     'openapi': '3.1.0',
     'info': {'title': title, 'version': version, 'description': ?description},
-    if (servers.isNotEmpty) 'servers': [for (final url in servers) {'url': url}],
+    if (servers.isNotEmpty)
+      'servers': [
+        for (final url in servers) {'url': url},
+      ],
     'paths': paths,
     'components': {
       'schemas': components.schemas,
