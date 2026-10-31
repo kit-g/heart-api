@@ -45,6 +45,12 @@ if [ -f "site/.well-known/$ENV/openai-apps-challenge" ]; then
     "s3://$BUCKET/site/.well-known/openai-apps-challenge" \
     --content-type text/plain --profile "$PROFILE"
 fi
+# Proves heart-of.me to the MCP Registry (plugins/mcp-registry); prod only.
+if [ -f "site/.well-known/$ENV/mcp-registry-auth" ]; then
+  aws s3 cp "site/.well-known/$ENV/mcp-registry-auth" \
+    "s3://$BUCKET/site/.well-known/mcp-registry-auth" \
+    --content-type text/plain --profile "$PROFILE"
+fi
 aws s3 cp "site/connect/$ENV.js" "s3://$BUCKET/site/assets/connect-config.js" \
   --content-type text/javascript --profile "$PROFILE"
 aws s3 cp "site/robots/$ENV.txt" "s3://$BUCKET/site/robots.txt" \

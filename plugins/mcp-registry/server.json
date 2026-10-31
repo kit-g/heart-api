@@ -1,0 +1,25 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "me.heart-of/heart",
+  "title": "Heart",
+  "description": "Your Heart workout log: workouts, records, templates, programs. Holds no health data.",
+  "version": "1.0.0",
+  "websiteUrl": "https://heart-of.me/developers.html#mcp",
+  "repository": {
+    "url": "https://github.com/kit-g/heart-api",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://heart-of.me/assets/favicon.png",
+      "mimeType": "image/png",
+      "sizes": ["256x256"]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.heart-of.me"
+    }
+  ]
+}
