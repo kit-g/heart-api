@@ -163,10 +163,15 @@ class Obj {
   String? description;
   String? name;
 
+  /// What a key the literal computes holds (`for (…) key: value`).
+  S? values;
+
   new(this.hint, {this.model});
 
-  String get key =>
-      [for (final MapEntry(:key, :value) in fields.entries) '$key:${value.required}:${_key(value.shape)}'].join(',');
+  String get key => [
+    for (final MapEntry(:key, :value) in fields.entries) '$key:${value.required}:${_key(value.shape)}',
+    if (values case final values?) '*:${_key(values)}',
+  ].join(',');
 }
 
 String _key(S s) => switch (s) {
@@ -320,15 +325,23 @@ class _Generator {
 
   /// The model each declared route answers, by its handler's return type: a
   /// `Paginated<T>` answers `T`s. A route whose reply is no model's (a file,
-  /// a value nobody declares yet) is not the generator's.
+  /// a value nobody declares yet, one written by hand in the overrides) is not
+  /// the generator's.
   Future<List<Obj>> roots() async {
     final table = _topLevel(await unit(routesPath), 'meRoutes');
+    final handWritten = (await unit(overridesPath)).declarations
+        .whereType<TopLevelVariableDeclaration>()
+        .expand((declaration) => declaration.variables.variables)
+        .map((variable) => variable.name.lexeme)
+        .where((name) => name.endsWith('Shape'))
+        .toList();
     final roots = <Obj>[];
     for (final entry in table.elements.cast<MapLiteralEntry>()) {
       final arguments = _firstArguments(entry.value);
       if (arguments.isEmpty) continue;
       final reply = arguments.whereType<NamedArgument>().where((argument) => argument.name.lexeme == 'reply');
       if (reply.any((argument) => RegExp(r'\.(unknown|download)\(').hasMatch(argument.toSource()))) continue;
+      if (reply.any((argument) => handWritten.any(argument.toSource().contains))) continue;
       final handler = switch (arguments.first.argumentExpression) {
         final Identifier identifier => identifier.element,
         _ => null,
@@ -411,6 +424,22 @@ class _Generator {
     switch (e) {
       case ParenthesizedExpression(:final expression):
         return expr(expression, hint, into: into);
+      // `action.toMap()..remove('programId')`: the model less those keys
+      case CascadeExpression(:final target, :final cascadeSections):
+        final removed = <String>[];
+        for (final section in cascadeSections) {
+          if (section case MethodInvocation(methodName: SimpleIdentifier(name: 'remove'), :final argumentList)) {
+            if (argumentList.arguments.single case StringLiteral(:final stringValue?)) {
+              removed.add(stringValue);
+              continue;
+            }
+          }
+          return Hole('a cascade other than removing a named key', where(section));
+        }
+        return switch (await expr(target, hint)) {
+          Ref(:final obj) when obj.model != null => Ref(_without(obj, removed, hint)),
+          final other => holeIn(other) ?? Hole('a cascade on something other than a model', where(e)),
+        };
       case SetOrMapLiteral() when e.isMap:
         return Ref(await mapLiteral(e, hint, into: into));
       case ListLiteral(:final elements):
@@ -706,6 +735,13 @@ class _Generator {
         }
       case ForElement(:final forLoopParts, :final body):
         if (await _enumKeys(obj, forLoopParts, body)) return;
+        if (body is MapLiteralEntry) {
+          final hint = '${obj.hint}${_singular(obj.hint) == obj.hint ? 'Value' : ''}';
+          var values = await expr(body.value, _singular(hint));
+          if (body.valueQuestion != null) values = nonNull(values);
+          obj.values = values;
+          return;
+        }
         _spreadHole(obj, 'keys computed in a for loop', element);
       default:
         _spreadHole(obj, 'a ${element.runtimeType}', element);
@@ -738,11 +774,20 @@ class _Generator {
     return true;
   }
 
+  /// [model]'s shape less [removed], written beside it under [hint].
+  Obj _without(Obj model, List<String> removed, String hint) {
+    final obj = Obj(hint)..description = model.description;
+    _copy(model, into: obj, optional: false);
+    removed.forEach(obj.fields.remove);
+    return obj;
+  }
+
   void _copy(Obj spread, {required Obj into, required bool optional}) {
     for (final MapEntry(:key, :value) in spread.fields.entries) {
       into.fields[key] = F(value.shape, required: value.required && !optional, description: value.description);
     }
     into.open ??= spread.open;
+    into.values ??= spread.values;
   }
 
   void _field(Obj obj, String name, S s, {required bool required, String? description}) {
@@ -866,6 +911,11 @@ class _Generator {
           visit(child, obj);
         }
       }
+      if (obj.values case final values?) {
+        for (final child in _objectsIn(values)) {
+          visit(child, obj);
+        }
+      }
     }
 
     roots.forEach(visit);
@@ -884,6 +934,9 @@ class _Generator {
         if (holeIn(field.shape) case final hole?) {
           errors.add('${name == '*' ? '${obj.hint}.*' : '${obj.hint}.$name'}: ${hole.reason} (${hole.where})');
         }
+      }
+      if (obj.values case final values?) {
+        if (holeIn(values) case final hole?) errors.add('${obj.hint}.*: ${hole.reason} (${hole.where})');
       }
     }
     for (final key in overrides.keys) {
@@ -954,6 +1007,7 @@ class _Generator {
     final named = [
       if (obj.description case final description?) 'description: ${_string(description)}',
       if (obj.open != null) 'open: true',
+      if (obj.values case final values?) 'values: ${_dart(values)}',
     ];
     final why = obj.open == null ? '' : '/// Open: ${obj.open}\n';
     final tail = named.isEmpty ? '' : ', ${named.join(', ')},';

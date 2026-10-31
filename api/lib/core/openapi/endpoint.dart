@@ -37,9 +37,10 @@ abstract interface class Endpoint {
     required Input<Q> input,
     required Reply<R> reply,
     String? summary,
+    String? description,
     List<Failure> errors = const [],
   }) {
-    return _Endpoint(handle, input: input, reply: reply, summary: summary, errors: errors);
+    return _Endpoint(handle, input: input, reply: reply, summary: summary, description: description, errors: errors);
   }
 
   /// A route with nothing to read.
@@ -47,6 +48,7 @@ abstract interface class Endpoint {
     Future<R> Function(Request request) handle, {
     required Reply<R> reply,
     String? summary,
+    String? description,
     List<Failure> errors = const [],
   }) {
     return _Endpoint<Null, R>(
@@ -54,6 +56,7 @@ abstract interface class Endpoint {
       input: null,
       reply: reply,
       summary: summary,
+      description: description,
       errors: errors,
     );
   }
@@ -151,9 +154,10 @@ class _Endpoint<Q, R> implements Endpoint {
   final Input<Q>? input;
   final Reply<R> reply;
   final String? summary;
+  final String? description;
   final List<Failure> errors;
 
-  new(this.handle, {required this.input, required this.reply, this.summary, this.errors = const []});
+  new(this.handle, {required this.input, required this.reply, this.summary, this.description, this.errors = const []});
 
   @override
   ModelHandler get handler => call;
@@ -184,6 +188,7 @@ class _Endpoint<Q, R> implements Endpoint {
     return {
       'operationId': id,
       'summary': ?summary,
+      'description': ?description,
       if (parameters.isNotEmpty) 'parameters': [for (final parameter in parameters) parameter.toMap()],
       'responses': {
         ...reply.describe(components),

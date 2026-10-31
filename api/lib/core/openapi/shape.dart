@@ -42,14 +42,16 @@ sealed class Shape<T> {
 
   /// A named model, written by its own `toMap()`, which [fields]
   /// describe. [open] for a shape that carries keys a newer build wrote
-  /// (`tolerant.dart`), which the check then lets through.
+  /// (`tolerant.dart`), which the check then lets through. [values] for the
+  /// keys a `toMap()` computes, such as rules by the name they're used under.
   static Shape<T> model<T extends Model>(
     String name,
     Map<String, Field> fields, {
     String? description,
     bool open = false,
+    Shape<Object?>? values,
   }) {
-    return _Model(name, fields, description: description, open: open);
+    return _Model(name, fields, description: description, open: open, values: values);
   }
 
   /// A named object a `toMap()` writes inline (a map literal, not a model of
@@ -60,8 +62,9 @@ sealed class Shape<T> {
     Map<String, Field> fields, {
     String? description,
     bool open = false,
+    Shape<Object?>? values,
   }) {
-    return _Described(name, fields, description: description, open: open);
+    return _Described(name, fields, description: description, open: open, values: values);
   }
 
   /// `Paginated`'s body: [itemsKey] holding [items], the next page's
@@ -257,7 +260,10 @@ abstract class _Named<T> extends Shape<T> {
   final String name;
   final String? description;
 
-  const new(this.name, {this.description});
+  /// What the keys [properties] doesn't name hold, when they're data.
+  final Shape<Object?>? values;
+
+  const new(this.name, {this.description, this.values});
 
   Map<String, Field> get properties;
 
@@ -278,7 +284,10 @@ abstract class _Named<T> extends Shape<T> {
           for (final MapEntry(:key, value: field) in properties.entries)
             if (field.required) key,
         ],
-        if (!open) 'additionalProperties': false,
+        if (values case final values?)
+          'additionalProperties': values.describe(components)
+        else if (!open)
+          'additionalProperties': false,
       };
     });
   }
@@ -305,8 +314,13 @@ abstract class _Named<T> extends Shape<T> {
       yield* field.shape.check(value, '$at.$key');
     }
     if (open) return;
-    for (final key in json.keys) {
-      if (!properties.containsKey(key)) yield '$at.$key: not in $name';
+    for (final MapEntry(:key, :value) in json.entries) {
+      if (properties.containsKey(key)) continue;
+      if (values case final values?) {
+        yield* values.check(value, '$at.$key');
+      } else {
+        yield '$at.$key: not in $name';
+      }
     }
   }
 }
@@ -316,7 +330,7 @@ class _Model<T extends Model> extends _Named<T> {
   @override
   final bool open;
 
-  const new(super.name, this.fields, {super.description, this.open = false});
+  const new(super.name, this.fields, {super.description, this.open = false, super.values});
 
   @override
   Map<String, Field> get properties => fields;
@@ -338,7 +352,7 @@ class _Described extends _Named<Object?> {
   @override
   final bool open;
 
-  const new(super.name, this.fields, {super.description, this.open = false});
+  const new(super.name, this.fields, {super.description, this.open = false, super.values});
 
   @override
   Map<String, Field> get properties => fields;

@@ -71,6 +71,15 @@ void main() {
       expect(open.check({'id': 'x', 'newer': 1}, 'body'), isEmpty);
     });
 
+    test('and holds keys it can\'t name to [values]', () {
+      final Shape<Object?> byName = .described('ByName', {'id': const .required(.string)}, values: Shape.integer);
+      expect(byName.check({'id': 'x', 'squat': 1, 'bench': 2}, 'body'), isEmpty);
+      expect(byName.check({'id': 'x', 'squat': 'heavy'}, 'body'), ['body.squat: expected integer, got a string']);
+      final components = Components();
+      byName.describe(components);
+      expect(components.schemas['ByName']!['additionalProperties'], {'type': 'integer'});
+    });
+
     test('and encoding fails on a mismatch while asserts are on', () {
       expect(() => _thing.encode(const _Thing({'kind': 'a'})), throwsA(isA<ShapeMismatch>()));
       expect(_thing.encode(const _Thing(_valid)), _valid);
