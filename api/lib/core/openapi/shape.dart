@@ -70,6 +70,18 @@ sealed class Shape<T> {
     return _Model(name, fields, description: description, open: open);
   }
 
+  /// A named object a `toMap()` writes inline (a map literal, not a model of
+  /// its own): described, and checked as part of the model that writes it,
+  /// never encoded on its own. What the generator writes for `{'k': v}`.
+  static Shape<Object?> described(
+    String name,
+    Map<String, Field<Object?, Object?>> fields, {
+    String? description,
+    bool open = false,
+  }) {
+    return _Described(name, fields, description: description, open: open);
+  }
+
   /// `Paginated`'s body: [itemsKey] holding [items], the next page's
   /// `cursor` while there is one, and [extra] beside them.
   static Shape<Paginated<V>> page<V extends Model>(
@@ -111,6 +123,28 @@ class Components {
     }
     return {r'$ref': '#/components/schemas/$name'};
   }
+}
+
+/// What `tool/openapi/shapes.dart` cannot read from a `toMap()`, or reads
+/// short of what the spec should say, written by hand: the entries of
+/// `shapeOverrides`, keyed `Object.key` (`Object.*` for its spread or computed
+/// keys) as the generator names them.
+final class ShapeOverride {
+  final Shape<Object?>? shape;
+  final String? description;
+
+  /// Why the object carries keys nobody declares, for [ShapeOverride.open].
+  final String? open;
+
+  /// [shape] in place of the one inferred, or of a hole.
+  const new shape(Shape<Object?> this.shape, {this.description}) : open = null;
+
+  /// The inferred shape, with [description].
+  const new describe(String this.description) : shape = null, open = null;
+
+  /// An object whose spread or computed keys no declaration names: open, for
+  /// the reason [open].
+  const new open(String this.open) : shape = null, description = null;
 }
 
 /// Thrown by an encode, while asserts are on, when a `toMap()` writes what its
@@ -319,8 +353,9 @@ abstract class _Named<T> extends Shape<T> {
         continue;
       }
       final value = json[key];
-      // an optional key is left out rather than written as null
-      if (value == null && !field.required) {
+      // an optional key is left out rather than written as null, unless its
+      // shape says null is a value (`if (spoken) 'rest': rest`)
+      if (value == null && !field.required && field.shape is! _Nullable) {
         yield '$at.$key: optional in $name, so left out when null, but written as null';
         continue;
       }
@@ -390,6 +425,20 @@ class _Model<T extends Model> extends _Named<T> {
     }());
     return map;
   }
+}
+
+class _Described extends _Named<Object?> {
+  final Map<String, Field<Object?, Object?>> fields;
+  @override
+  final bool open;
+
+  const new(super.name, this.fields, {super.description, this.open = false});
+
+  @override
+  Map<String, Field<Object?, Object?>> get properties => fields;
+
+  @override
+  Object? encode(Object? value) => value;
 }
 
 class _Page<V extends Model> extends Shape<Paginated<V>> {
