@@ -3,8 +3,12 @@
 // lib/models/shape_overrides.dart, and run `dart run tool/openapi/shapes.dart`.
 
 import 'package:heart/core/openapi/shape.dart';
+import 'package:heart/models/goals.dart';
+import 'package:heart/models/lens.dart';
 import 'package:heart/models/me.dart';
+import 'package:heart/models/programs.dart';
 import 'package:heart/models/shape_overrides.dart';
+import 'package:heart/models/template_folders.dart';
 import 'package:heart_models/heart_models.dart';
 
 final Shape<MeProfile> meProfileShape = .model(
@@ -278,6 +282,305 @@ final Shape<Object?> sessionMetricsShape = .described('SessionMetrics', {
   'totalTimeUnderTension': const .optional(.number),
 });
 
+final Shape<Template> templateShape = .model('Template', {
+  'id': const .required(.string),
+  'name': .required(.nullable(.string)),
+  'order': const .required(.integer),
+  'folder': .optional(templateFolderShape),
+  'sourceTemplateId': const .optional(
+    .string,
+    null,
+    'The coach\'s master template this one was copied from, when it arrived by assignment.',
+  ),
+  'assignedBy': .optional(profileShape),
+  'syncEnabled': const .optional(.boolean, null, 'Whether later edits to the master should flow down.'),
+  'programId': const .optional(
+    .string,
+    null,
+    'The program this template is a session of, or null for a plain template.',
+  ),
+  'joined': const .optional(.isoString),
+  'note': const .optional(
+    .string,
+    null,
+    'A line about the template: what a session is for, in the user\'s words or the library\'s ("big lifts for the quads, chest and lats").',
+  ),
+  'exercises': .required(.list(workoutExercise2Shape)),
+});
+
+final Shape<TemplateFolder> templateFolderShape = .model('TemplateFolder', {
+  'id': const .optional(.string, null, 'Null only before the server has minted one.'),
+  'name': const .required(.string),
+  'order': const .required(.integer, null, 'Owner-arranged position in the folder list.'),
+  'templateCount': const .optional(.integer, null, 'How many of the owner\'s templates are filed here.'),
+  'createdAt': const .optional(.isoString),
+});
+
+final Shape<Profile> profileShape = .model('Profile', {
+  'id': const .required(.string),
+  'name': .required(.nullable(.string)),
+  'avatar': .required(.nullable(.string)),
+});
+
+final Shape<WorkoutExercise> workoutExercise2Shape = .model('WorkoutExercise2', {
+  'id': const .required(.string),
+  'exercise': .optional(exerciseShape),
+  'start': const .required(.isoString),
+  'met': const .optional(
+    .number,
+    null,
+    'Measured MET (kcal/kg/h) over this exercise\'s time window, computed on device from wearable data.',
+  ),
+  'note': const .optional(
+    .string,
+    null,
+    'A short, user-authored pin describing how this exercise is performed — e.g. "do one hand at a time".',
+  ),
+  'rest': .optional(
+    .nullable(.integer),
+    null,
+    'Rest between sets, in seconds, as a template plans it: 2–3 minutes for a compound lift, 60–90 seconds for isolation work.',
+  ),
+  'superset': .optional(
+    .nullable(.integer),
+    null,
+    'The superset this exercise belongs to in its session: exercises with the same number are done back to back, a circuit when there are more than two.',
+  ),
+  'pattern': .optional(
+    .nullable(.string),
+    null,
+    'An open slot: any exercise of this movement pattern (a library key such as `vertical_pull`) will do, `exercise` being the one offered.',
+  ),
+  'totalReps': .optional(_override('WorkoutExercise.totalReps')),
+  'sets': .required(.list(exerciseSetShape)),
+});
+
+final Shape<TemplateFoldersResponse> templateFoldersResponseShape = .model('TemplateFoldersResponse', {
+  'folders': .required(.list(templateFolderShape)),
+});
+
+final Shape<GoalsResponse> goalsResponseShape = .model('GoalsResponse', {
+  'goals': .required(.list(goalShape)),
+});
+
+final Shape<Goal> goalShape = .model('Goal', {
+  'id': const .optional(.string),
+  'metric': .required(.enumOf<GoalMetric>(GoalMetric.values, (value) => value.value)),
+  'exerciseId': const .optional(.string),
+  'pattern': const .optional(
+    .string,
+    null,
+    'A movement pattern key from the exercise library (`horizontal_press`), for a `countsSubject` goal about a pattern.',
+  ),
+  'muscle': const .optional(
+    .string,
+    null,
+    'A muscle id prefix (`triceps_brachii`) or a muscle group (`chest`), for a `countsSubject` goal about a muscle, matched as `shareOf` matches it.',
+  ),
+  'cadence': .optional(.enumOf<GoalCadence>(GoalCadence.values, (value) => value.value)),
+  'stages': .required(.list(goalStageShape)),
+  'archived': const .required(.boolean),
+  'createdAt': const .optional(.isoString),
+});
+
+final Shape<GoalStage> goalStageShape = .model('GoalStage', {
+  'id': const .optional(.string),
+  'target': const .required(.number),
+  'dueOn': const .optional(.string),
+  'achievedAt': const .optional(.isoString),
+  'achievedBy': const .optional(.string),
+});
+
+final Shape<MeGoalProgress> meGoalProgressShape = .model(
+  'MeGoalProgress',
+  {
+    'weekStart': const .required(.integer),
+    'goals': .required(_override('MeGoalProgress.goals')),
+  },
+  description: '`GET /me/goals/progress`: each live goal with where it stands, measured as the app measures it (`currentGoalValue` in heart-of-yours), so the two agree.',
+);
+
+final Shape<Anomaly> anomalyShape = .model('Anomaly', {
+  'id': const .required(.string),
+  'workoutId': const .required(.string),
+  'workoutStart': const .optional(.isoString),
+  'setId': const .optional(.string, null, 'The set, for every reason but `durationLeftRunning`.'),
+  'exerciseId': const .optional(.string),
+  'exerciseName': const .optional(.string),
+  'reason': const .required(.string, null, 'One of `AnomalyReason`, or a word a newer server added.'),
+  'observed': .required(
+    _override('Anomaly.observed'),
+    null,
+    'What was entered when it was judged, in stored units: `weight` (kg) and `reps` for a set, `seconds` for a workout.',
+  ),
+  'typical': const .optional(.number, null, 'The exercise\'s median working weight, kg, the set was judged against.'),
+  'status': .required(.enumOf<AnomalyStatus>(AnomalyStatus.values, (value) => value.value)),
+  'detectedAt': const .required(.isoString),
+  'resolvedAt': const .optional(.isoString),
+});
+
+final Shape<MePrograms> meProgramsShape = .model(
+  'MePrograms',
+  {
+    'programs': .required(.list(meProgramShape)),
+  },
+  description: '`GET /me/programs`.',
+);
+
+final Shape<MeProgram> meProgramShape = .model(
+  'MeProgram',
+  {
+    'id': const .optional(.string),
+    'name': const .required(.string),
+    'note': const .optional(.string),
+    'source': const .optional(.string, null, 'The library program this one was copied from, when it was.'),
+    'perWeek': const .optional(.integer, null, 'The weekly target, in sessions.'),
+    'days': .optional(.list(.integer)),
+    'weeks': const .optional(.integer, null, 'The length in program weeks; null runs on.'),
+    'rules': .required(programRulesShape),
+    'constraint': const .optional(
+      .string,
+      null,
+      'A content key, such as `avoid_high_axial_load`, that filters suggestions inside the program.',
+    ),
+    'deload': .optional(deloadShape),
+    'phases': .optional(.list(programPhaseShape)),
+    'tests': .optional(programTestsShape),
+    'archived': const .required(.boolean),
+    'sessions': .required(.list(.string), null, 'The ids of the program\'s session templates, in order.'),
+    'joined': .optional(programJoinedShape),
+    'createdAt': const .optional(.isoString),
+    'position': .required(programPositionShape),
+    'bases': .optional(meProgramBasesShape),
+    'stages': .optional(_override('MeProgram.stages')),
+    'nextSession': .optional(plannedSessionShape),
+    'research': .optional(_override('MeProgram.research')),
+  },
+  description: 'A program as `/me` shows it: the program, where the user stands in it (computed, never stored), and, for one program, each exercise\'s current base, the next session planned from them, and the research behind a copy of a library program.',
+);
+
+/// Open: a rule by the name its sessions use.
+final Shape<Object?> programRulesShape = .described(
+  'ProgramRules',
+  {},
+  open: true,
+);
+
+final Shape<Deload> deloadShape = .model('Deload', {
+  'every': const .required(.integer),
+  'load': const .required(.number),
+  'volume': const .required(.number),
+});
+
+final Shape<ProgramPhase> programPhaseShape = .model('ProgramPhase', {
+  'name': const .optional(.string),
+  'sessions': .required(.list(.string)),
+  'cycles': const .optional(.integer),
+});
+
+/// Open: a test session by its name.
+final Shape<Object?> programTestsShape = .described(
+  'ProgramTests',
+  {},
+  open: true,
+);
+
+/// Open: when each slot joined, by the slot.
+final Shape<Object?> programJoinedShape = .described(
+  'ProgramJoined',
+  {},
+  open: true,
+);
+
+final Shape<ProgramPosition> programPositionShape = .model('ProgramPosition', {
+  'week': const .required(.integer, null, 'The program week, from 1.'),
+  'done': .required(.list(.string)),
+  'remaining': .required(.list(.string), null, 'The open cycle\'s sessions still to do, in program order.'),
+  'next': const .optional(.string, null, 'The session to suggest: the first one remaining.'),
+  'paused': const .required(.boolean),
+  'phase': const .optional(
+    .integer,
+    null,
+    'The phase the open cycle is in, an index into `phases`; null without phases.',
+  ),
+  'lighter': const .required(
+    .boolean,
+    null,
+    'Whether the open cycle is a lighter one: one the program schedules (`deload`) or one the user asked for.',
+  ),
+  'finished': const .required(.boolean, null, 'A program with a length is finished once its week passes it.'),
+  'thisWeek': const .required(.integer, null, 'Program workouts in the calendar week that holds `now`.'),
+  'target': const .optional(
+    .integer,
+    null,
+    'What `thisWeek` counts toward: `perWeek`, or null while the program is paused or finished.',
+  ),
+});
+
+/// Open: a base by the slot or exercise it belongs to.
+final Shape<Object?> meProgramBasesShape = .described(
+  'MeProgramBases',
+  {},
+  open: true,
+);
+
+final Shape<PlannedSession> plannedSessionShape = .model('PlannedSession', {
+  'templateId': const .required(.string, null, 'The session\'s template id.'),
+  'week': const .required(.integer, null, 'The program week it falls in.'),
+  'lighter': const .required(.boolean, null, 'A lighter cycle: weights at `load`, working sets at `volume`.'),
+  'test': const .optional(
+    .number,
+    null,
+    'The share of a best estimated max a test session sets the base at; null for a session that isn\'t a test.',
+  ),
+  'exercises': .required(.list(plannedExerciseShape)),
+});
+
+final Shape<PlannedExercise> plannedExerciseShape = .model('PlannedExercise', {
+  'slot': const .required(.string, null, 'The template exercise id: the slot a base may be kept for.'),
+  'exerciseId': const .required(.string),
+  'base': const .optional(.number, null, 'The base its sets were worked out from, when it has one.'),
+  'stage': const .optional(.integer, null, 'The stage a stages rule is on, from 0; null under any other rule.'),
+  'sets': .required(.list(plannedSetShape)),
+});
+
+final Shape<PlannedSet> plannedSetShape = .model('PlannedSet', {
+  'setType': .optional(
+    .enumOf<SetType>(SetType.values, (value) => value.value),
+    null,
+    'The wire word, `set_type` on a set.',
+  ),
+  'target': .optional(setTargetShape),
+  'weight': const .optional(.number),
+  'reps': const .optional(
+    .number,
+    null,
+    'The reps the template stores, where the target names none; with a reps target, the target is the plan.',
+  ),
+  'duration': const .optional(.number),
+  'distance': const .optional(.number),
+});
+
+final Shape<ProgramHistory> programHistoryShape = .model(
+  'ProgramHistory',
+  {
+    'bases': .required(.list(programHistoryBaseShape)),
+    'actions': .required(_override('ProgramHistory.actions')),
+    'skips': .required(_override('ProgramHistory.skips')),
+  },
+  description: 'A program\'s history read back (heart-api#260): every base with its cause and the value it replaced, the actions, and the skips, each oldest first.',
+);
+
+/// Open: a base, with its `cause` and `previous`.
+final Shape<Object?> programHistoryBaseShape = .described(
+  'ProgramHistoryBase',
+  {
+    'cause': .required(.enumOf<BaseCause>(BaseCause.values, (value) => value.value), null, 'The `cause` on the wire.'),
+    'previous': const .optional(.number),
+  },
+  open: true,
+);
+
 final Shape<MeRecords> meRecordsShape = .model(
   'MeRecords',
   {
@@ -316,6 +619,49 @@ final Shape<Object?> warningShape = .described('Warning', {
   ),
   'typical': const .optional(.number, null, 'The exercise\'s median working weight, kg, the set was judged against.'),
 });
+
+final Shape<MeVolume> meVolumeShape = .model(
+  'MeVolume',
+  {
+    'weekStart': const .required(.integer),
+    'from': const .required(.isoString),
+    'to': const .required(.isoString),
+    'weeks': .required(.list(meVolumeWeekShape)),
+    'untrained': .required(.list(.string), null, 'The muscle groups no set reached in the whole window.'),
+    'warnings': .optional(.list(warningShape)),
+  },
+  description: '`GET /me/volume`: working sets and sessions per muscle group and per movement pattern, week by week, with the week\'s finished workouts, their time and the weight they moved.',
+);
+
+final Shape<Object?> meVolumeWeekShape = .described('MeVolumeWeek', {
+  'week': const .required(.string),
+  'workouts': const .required(.integer),
+  'duration': const .required(.integer),
+  'totalVolume': const .required(.number),
+  'muscles': .required(countMapShape),
+  'patterns': .required(countMapShape),
+  'unplacedSets': const .optional(.integer),
+});
+
+/// Open: `sets`, `primarySets` and `sessions` by the name being counted.
+final Shape<Object?> countMapShape = .described(
+  'CountMap',
+  {},
+  open: true,
+);
+
+final Shape<MeBalance> meBalanceShape = .model(
+  'MeBalance',
+  {
+    'weekStart': const .required(.integer),
+    'from': const .required(.isoString),
+    'to': const .required(.isoString),
+    'weeks': const .required(.integer),
+    'pairs': .required(_override('MeBalance.pairs')),
+    'warnings': .optional(.list(warningShape)),
+  },
+  description: '`GET /me/balance`: each pair\'s two sides set against each other over the window, counts only.',
+);
 
 final Shape<MeLibrarySearch> meLibrarySearchShape = .model(
   'MeLibrarySearch',

@@ -69,16 +69,16 @@ Future<MeWorkout> getMyWorkout(Request req, String workoutId) async {
 /// and templates, so there is nothing else to look up.
 Future<ExerciseResponse> getMyExercises(Request req) => exercises.getExercises(req, owned: true);
 
-Future<Paginated<Template>> getMyTemplates(Request req) => templates.getMyTemplates(req);
+Future<Paginated<Template>> getMyTemplates(Request req, TemplateListQuery query) => templates.listTemplates(req, query);
 
 Future<TemplateFoldersResponse> getMyFolders(Request req) => folders.getMyFolders(req);
 
 /// Goal definitions. Health-backed goals carry no progress here because the
 /// server never has any: it's computed on the device.
-Future<GoalsResponse> getMyGoals(Request req) => goals.getTargetUserGoalsById(
+Future<GoalsResponse> getMyGoals(Request req, GoalsQuery query) => goals.getTargetUserGoalsById(
   req,
   req.userId,
-  archived: GoalsQuery.fromRequest(req).archived,
+  archived: query.archived,
 );
 
 /// Each live goal with where it stands now, measured as the app measures it.
@@ -115,7 +115,7 @@ Future<MeGoalProgress> goalProgress(Request req) async {
 
 /// The user's suspicious entries, newest found first; `?status=` for one kind.
 /// Read-only here: deciding is the app's.
-Future<Paginated<Anomaly>> getMyAnomalies(Request req) => anomalies.getAnomalies(req);
+Future<Paginated<Anomaly>> getMyAnomalies(Request req, AnomaliesQuery query) => anomalies.listAnomalies(req, query);
 
 /// The user's programs, each with where they stand in it.
 Future<MePrograms> getMyPrograms(Request req) async {
@@ -128,12 +128,10 @@ Future<MePrograms> getMyPrograms(Request req) async {
   );
 }
 
-Future<MeProgram> getMyProgram(Request req) => getMyProgramById(req, req.rawPathParameters[#programId]!);
-
 /// One program with where the user stands in it, each exercise's current
 /// base, the next session planned from them, and, for a copy of a library
 /// program, the research behind it.
-Future<MeProgram> getMyProgramById(Request req, String programId) async {
+Future<MeProgram> getMyProgram(Request req, String programId) async {
   final program = await _myProgram(req, programId);
   final state = await programs.programState(req, program, withBases: true);
   final (:position, :bases, :stages) = state;
@@ -167,8 +165,8 @@ Future<LibraryResponse> getMyLibraryProgram(Request req, String key) async {
   };
 }
 
-Future<ProgramHistory> getMyProgramHistory(Request req) async {
-  final program = await _myProgram(req, req.rawPathParameters[#programId]!);
+Future<ProgramHistory> getMyProgramHistory(Request req, String programId) async {
+  final program = await _myProgram(req, programId);
   return programs.programHistory(req, program);
 }
 
@@ -300,14 +298,12 @@ Future<MeRecords> getMyRecords(Request req, RecordsQuery query) async {
 
 /// Working sets and sessions per muscle group and per movement pattern, week
 /// by week, and the groups nothing reached; within `?from=&to=`.
-Future<MeVolume> getMyVolume(Request req) {
-  final query = LensQuery.read(.of(req));
+Future<MeVolume> getMyVolume(Request req, LensQuery query) {
   return volume(req, from: query.from, to: query.to);
 }
 
 /// Each balance pair's two sides set against each other, within `?from=&to=`.
-Future<MeBalance> getMyBalance(Request req) {
-  final query = LensQuery.read(.of(req));
+Future<MeBalance> getMyBalance(Request req, LensQuery query) {
   return balance(req, from: query.from, to: query.to);
 }
 

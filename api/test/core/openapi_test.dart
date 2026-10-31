@@ -55,6 +55,71 @@ void main() {
     expect(operations.where((operation) => operation['x-undeclared'] == true), hasLength(lessThan(meRoutes.length)));
   });
 
+  group('the shared models conform to the shapes read from their toMap()s', () {
+    test('a template, with its folder and exercises', () {
+      final template = Template.fromJson({
+        'id': 't-1',
+        'order': 3,
+        'name': 'Push',
+        'note': 'heavy',
+        'programId': 'p-1',
+        'joined': '2026-10-01T10:00:00.000Z',
+        'folder': {'id': 'f-1', 'name': 'Strength', 'order': 1, 'templateCount': 2},
+        'exercises': _fixture()['exercises'],
+      });
+      expect(templateShape.check(template.toMap(), 'body'), isEmpty);
+    });
+
+    test('a folder', () {
+      final folder = TemplateFolder.fromJson({'id': 'f-1', 'name': 'Strength', 'order': 1, 'templateCount': 2});
+      expect(templateFolderShape.check(folder.toMap(), 'body'), isEmpty);
+    });
+
+    test('a goal, plain and laddered', () {
+      for (final json in <Map<String, dynamic>>[
+        {'id': 'g-1', 'metric': 'workouts', 'cadence': 'week', 'stages': const []},
+        {
+          'id': 'g-2',
+          'metric': 'sets',
+          'muscle': 'chest',
+          'cadence': 'week',
+          'archived': true,
+          'createdAt': '2026-10-01T10:00:00.000Z',
+          'stages': [
+            {'target': 10},
+          ],
+        },
+      ]) {
+        expect(goalShape.check(Goal.fromJson(json).toMap(), 'body'), isEmpty, reason: '$json');
+      }
+    });
+
+    test('an anomaly, open and resolved', () {
+      for (final extra in <Map<String, dynamic>>[
+        const {},
+        {
+          'setId': 's-1',
+          'exerciseId': 'e-1',
+          'exerciseName': 'Bench',
+          'typical': 60,
+          'workoutStart': '2026-10-01T10:00:00.000Z',
+          'resolvedAt': '2026-10-02T10:00:00.000Z',
+        },
+      ]) {
+        final anomaly = Anomaly.fromJson({
+          'id': 'a-1',
+          'workoutId': 'w-1',
+          'reason': 'weight',
+          'observed': {'weight': 600},
+          'status': 'pending',
+          'detectedAt': '2026-10-01T11:00:00.000Z',
+          ...extra,
+        });
+        expect(anomalyShape.check(anomaly.toMap(), 'body'), isEmpty, reason: '$extra');
+      }
+    });
+  });
+
   group('a workout as /me writes it', () {
     late MockApiWorkoutService workouts;
 

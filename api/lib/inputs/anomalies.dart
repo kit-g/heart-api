@@ -9,17 +9,15 @@ class AnomaliesQuery {
 
   const new _({required this.status, required this.cursor, required this.limit});
 
-  static AnomaliesQuery fromRequest(Request req) {
-    final page = PageQuery.fromRequest(req, defaultLimit: 30, maxLimit: 100);
+  static AnomaliesQuery fromRequest(Request req) => read(Query.of(req));
+
+  static AnomaliesQuery read(Query q) {
+    final page = PageQuery.read(q, defaultLimit: 30, maxLimit: 100);
     if (page.cursor case final cursor? when !isUuidV7(cursor)) {
       throw const BadRequest(reason: 'cursor must be the one the previous page returned');
     }
-    final q = req.url.queryParameters;
     return AnomaliesQuery._(
-      status: switch (q.stringOrNull('status')) {
-        null => null,
-        _ => q.parsed('status', AnomalyStatus.fromString),
-      },
+      status: q.choiceOrNull('status', AnomalyStatus.values, (status) => status.value),
       cursor: page.cursor,
       limit: page.limit,
     );

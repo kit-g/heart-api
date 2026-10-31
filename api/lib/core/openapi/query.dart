@@ -115,6 +115,26 @@ class Query {
     throw BadRequest(reason: '$field has an invalid value: $raw');
   }
 
+  /// An optional one of [values], by its [wire] name. Empty is absent.
+  E? choiceOrNull<E>(String field, Iterable<E> values, String Function(E) wire, {String? description}) {
+    if (_isRecording) {
+      return _note(
+        .new(
+          field,
+          schema: {'type': 'string', 'enum': values.map(wire).toList()},
+          description: description,
+        ),
+        null,
+      );
+    }
+    final raw = stringOrNull(field);
+    if (raw == null) return null;
+    for (final value in values) {
+      if (wire(value) == raw) return value;
+    }
+    throw BadRequest(reason: '$field has an invalid value: $raw');
+  }
+
   /// Optional boolean query param; absent or empty means [orElse].
   bool boolean(String field, {bool orElse = false, String? description}) {
     if (_isRecording) {

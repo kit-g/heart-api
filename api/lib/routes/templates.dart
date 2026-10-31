@@ -38,7 +38,10 @@ Future<Template> getMyTemplate(Request request) async {
 }
 
 Future<Paginated<Template>> getMyTemplates(Request request) async {
-  final query = TemplateListQuery.fromRequest(request);
+  return listTemplates(request, TemplateListQuery.fromRequest(request));
+}
+
+Future<Paginated<Template>> listTemplates(Request request, TemplateListQuery query) async {
   final page = await request.templatesService.getTemplates(
     userId: request.userId,
     limit: query.limit,

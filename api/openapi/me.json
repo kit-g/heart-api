@@ -545,10 +545,17 @@
     "/me/exercises": {
       "get": {
         "operationId": "getMeExercises",
-        "x-undeclared": true,
+        "summary": "The user's own exercises",
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Not declared yet: `exercises`: the user's own, as the database writes them"
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -830,10 +837,88 @@
     "/me/templates": {
       "get": {
         "operationId": "getMeTemplates",
-        "x-undeclared": true,
+        "summary": "Templates, in the user's order",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The `cursor` of the last page."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            },
+            "description": "Out of range is clamped."
+          },
+          {
+            "name": "folder",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "One folder's templates, or `none` for those in none."
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "templates": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Template"
+                      }
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "description": "The next page, while there is one: pass it back as `cursor`."
+                    }
+                  },
+                  "required": [
+                    "templates"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`bad_request`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "bad_request"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -910,10 +995,17 @@
     "/me/template-folders": {
       "get": {
         "operationId": "getMeTemplateFolders",
-        "x-undeclared": true,
+        "summary": "Template folders",
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateFoldersResponse"
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -990,10 +1082,51 @@
     "/me/goals": {
       "get": {
         "operationId": "getMeGoals",
-        "x-undeclared": true,
+        "summary": "Goal definitions",
+        "parameters": [
+          {
+            "name": "archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`bad_request`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "bad_request"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -1070,10 +1203,17 @@
     "/me/goals/progress": {
       "get": {
         "operationId": "getMeGoalsProgress",
-        "x-undeclared": true,
+        "summary": "Each live goal with where it stands now",
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeGoalProgress"
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -1150,10 +1290,92 @@
     "/me/anomalies": {
       "get": {
         "operationId": "getMeAnomalies",
-        "x-undeclared": true,
+        "summary": "Suspicious entries, newest found first",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The `cursor` of the last page."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            },
+            "description": "Out of range is clamped."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "valid",
+                "invalid"
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "anomalies": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Anomaly"
+                      }
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "description": "The next page, while there is one: pass it back as `cursor`."
+                    }
+                  },
+                  "required": [
+                    "anomalies"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`bad_request`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "bad_request"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -1230,10 +1452,17 @@
     "/me/programs": {
       "get": {
         "operationId": "getMePrograms",
-        "x-undeclared": true,
+        "summary": "The user's programs, each with where they stand in it",
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MePrograms"
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -1310,10 +1539,74 @@
     "/me/programs/{programId}": {
       "get": {
         "operationId": "getMeProgramsProgramId",
-        "x-undeclared": true,
+        "summary": "One program, with the next session planned",
+        "parameters": [
+          {
+            "name": "programId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeProgram"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`bad_request`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "bad_request"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`program_not_found`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "program_not_found"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -1384,26 +1677,80 @@
               }
             }
           }
-        },
-        "parameters": [
-          {
-            "name": "programId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ]
+        }
       }
     },
     "/me/programs/{programId}/history": {
       "get": {
         "operationId": "getMeProgramsProgramIdHistory",
-        "x-undeclared": true,
+        "summary": "One program's sessions so far",
+        "parameters": [
+          {
+            "name": "programId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgramHistory"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`bad_request`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "bad_request"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`program_not_found`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "program_not_found"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -1474,17 +1821,7 @@
               }
             }
           }
-        },
-        "parameters": [
-          {
-            "name": "programId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ]
+        }
       }
     },
     "/me/records": {
@@ -1630,10 +1967,60 @@
     "/me/volume": {
       "get": {
         "operationId": "getMeVolume",
-        "x-undeclared": true,
+        "summary": "Training volume by muscle and week",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Workouts started at or after: a date (2026-01-01, UTC) or an ISO moment."
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Workouts started before: a date (2026-01-01, UTC) or an ISO moment."
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeVolume"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`bad_request`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "bad_request"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -1710,10 +2097,60 @@
     "/me/balance": {
       "get": {
         "operationId": "getMeBalance",
-        "x-undeclared": true,
+        "summary": "Each balance pair's two sides set against each other",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Workouts started at or after: a date (2026-01-01, UTC) or an ISO moment."
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Workouts started before: a date (2026-01-01, UTC) or an ISO moment."
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeBalance"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`bad_request`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "bad_request"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -1934,10 +2371,17 @@
     "/me/library/programs": {
       "get": {
         "operationId": "getMeLibraryPrograms",
-        "x-undeclared": true,
+        "summary": "The library's programs",
         "responses": {
           "200": {
-            "description": "Not declared yet."
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Not declared yet: the library's programs as the content publishes them"
+                }
+              }
+            }
           },
           "401": {
             "description": "`invalid_token`: a token missing, unknown, revoked or expired",
@@ -3183,6 +3627,792 @@
         ],
         "additionalProperties": false
       },
+      "TemplateFolder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Null only before the server has minted one."
+          },
+          "name": {
+            "type": "string"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Owner-arranged position in the folder list."
+          },
+          "templateCount": {
+            "type": "integer",
+            "description": "How many of the owner's templates are filed here."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "name",
+          "order"
+        ],
+        "additionalProperties": false
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "avatar": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "avatar"
+        ],
+        "additionalProperties": false
+      },
+      "WorkoutExercise2": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "exercise": {
+            "$ref": "#/components/schemas/Exercise"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "met": {
+            "type": "number",
+            "description": "Measured MET (kcal/kg/h) over this exercise's time window, computed on device from wearable data."
+          },
+          "note": {
+            "type": "string",
+            "description": "A short, user-authored pin describing how this exercise is performed — e.g. \"do one hand at a time\"."
+          },
+          "rest": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Rest between sets, in seconds, as a template plans it: 2–3 minutes for a compound lift, 60–90 seconds for isolation work."
+          },
+          "superset": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The superset this exercise belongs to in its session: exercises with the same number are done back to back, a circuit when there are more than two."
+          },
+          "pattern": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An open slot: any exercise of this movement pattern (a library key such as `vertical_pull`) will do, `exercise` being the one offered."
+          },
+          "totalReps": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TargetRange"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExerciseSet"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "start",
+          "sets"
+        ],
+        "additionalProperties": false
+      },
+      "Template": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "order": {
+            "type": "integer"
+          },
+          "folder": {
+            "$ref": "#/components/schemas/TemplateFolder"
+          },
+          "sourceTemplateId": {
+            "type": "string",
+            "description": "The coach's master template this one was copied from, when it arrived by assignment."
+          },
+          "assignedBy": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "syncEnabled": {
+            "type": "boolean",
+            "description": "Whether later edits to the master should flow down."
+          },
+          "programId": {
+            "type": "string",
+            "description": "The program this template is a session of, or null for a plain template."
+          },
+          "joined": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "A line about the template: what a session is for, in the user's words or the library's (\"big lifts for the quads, chest and lats\")."
+          },
+          "exercises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutExercise2"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "order",
+          "exercises"
+        ],
+        "additionalProperties": false
+      },
+      "TemplateFoldersResponse": {
+        "type": "object",
+        "properties": {
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateFolder"
+            }
+          }
+        },
+        "required": [
+          "folders"
+        ],
+        "additionalProperties": false
+      },
+      "GoalStage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "target": {
+            "type": "number"
+          },
+          "dueOn": {
+            "type": "string"
+          },
+          "achievedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "achievedBy": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "Goal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "workouts",
+              "topSetWeight",
+              "estimatedOneRepMax",
+              "totalVolume",
+              "totalReps",
+              "maxConsecutiveReps",
+              "averageWorkingWeight",
+              "assistanceWeight",
+              "cardioDistance",
+              "cardioDuration",
+              "averagePace",
+              "totalTimeUnderTension",
+              "sessions",
+              "sets"
+            ]
+          },
+          "exerciseId": {
+            "type": "string"
+          },
+          "pattern": {
+            "type": "string",
+            "description": "A movement pattern key from the exercise library (`horizontal_press`), for a `countsSubject` goal about a pattern."
+          },
+          "muscle": {
+            "type": "string",
+            "description": "A muscle id prefix (`triceps_brachii`) or a muscle group (`chest`), for a `countsSubject` goal about a muscle, matched as `shareOf` matches it."
+          },
+          "cadence": {
+            "type": "string",
+            "enum": [
+              "week",
+              "month"
+            ]
+          },
+          "stages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GoalStage"
+            }
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "metric",
+          "stages",
+          "archived"
+        ],
+        "additionalProperties": false
+      },
+      "GoalsResponse": {
+        "type": "object",
+        "properties": {
+          "goals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Goal"
+            }
+          }
+        },
+        "required": [
+          "goals"
+        ],
+        "additionalProperties": false
+      },
+      "MeGoalProgress": {
+        "type": "object",
+        "description": "`GET /me/goals/progress`: each live goal with where it stands, measured as the app measures it (`currentGoalValue` in heart-of-yours), so the two agree.",
+        "properties": {
+          "weekStart": {
+            "type": "integer"
+          },
+          "goals": {
+            "type": "array",
+            "items": {
+              "description": "Not declared yet: a goal, with its `exerciseName`, `period`, `current`, `progress` and `warnings`"
+            }
+          }
+        },
+        "required": [
+          "weekStart",
+          "goals"
+        ],
+        "additionalProperties": false
+      },
+      "Anomaly": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "workoutId": {
+            "type": "string"
+          },
+          "workoutStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "setId": {
+            "type": "string",
+            "description": "The set, for every reason but `durationLeftRunning`."
+          },
+          "exerciseId": {
+            "type": "string"
+          },
+          "exerciseName": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "description": "One of `AnomalyReason`, or a word a newer server added."
+          },
+          "observed": {
+            "type": "object",
+            "additionalProperties": {
+              "description": "Not declared yet: what was entered, by field"
+            },
+            "description": "What was entered when it was judged, in stored units: `weight` (kg) and `reps` for a set, `seconds` for a workout."
+          },
+          "typical": {
+            "type": "number",
+            "description": "The exercise's median working weight, kg, the set was judged against."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "valid",
+              "invalid"
+            ]
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "workoutId",
+          "reason",
+          "observed",
+          "status",
+          "detectedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ProgramRules": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "Deload": {
+        "type": "object",
+        "properties": {
+          "every": {
+            "type": "integer"
+          },
+          "load": {
+            "type": "number"
+          },
+          "volume": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "every",
+          "load",
+          "volume"
+        ],
+        "additionalProperties": false
+      },
+      "ProgramPhase": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cycles": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sessions"
+        ],
+        "additionalProperties": false
+      },
+      "ProgramTests": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "ProgramJoined": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "ProgramPosition": {
+        "type": "object",
+        "properties": {
+          "week": {
+            "type": "integer",
+            "description": "The program week, from 1."
+          },
+          "done": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "remaining": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The open cycle's sessions still to do, in program order."
+          },
+          "next": {
+            "type": "string",
+            "description": "The session to suggest: the first one remaining."
+          },
+          "paused": {
+            "type": "boolean"
+          },
+          "phase": {
+            "type": "integer",
+            "description": "The phase the open cycle is in, an index into `phases`; null without phases."
+          },
+          "lighter": {
+            "type": "boolean",
+            "description": "Whether the open cycle is a lighter one: one the program schedules (`deload`) or one the user asked for."
+          },
+          "finished": {
+            "type": "boolean",
+            "description": "A program with a length is finished once its week passes it."
+          },
+          "thisWeek": {
+            "type": "integer",
+            "description": "Program workouts in the calendar week that holds `now`."
+          },
+          "target": {
+            "type": "integer",
+            "description": "What `thisWeek` counts toward: `perWeek`, or null while the program is paused or finished."
+          }
+        },
+        "required": [
+          "week",
+          "done",
+          "remaining",
+          "paused",
+          "lighter",
+          "finished",
+          "thisWeek"
+        ],
+        "additionalProperties": false
+      },
+      "MeProgramBases": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "PlannedSet": {
+        "type": "object",
+        "properties": {
+          "setType": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "warmup",
+              "drop",
+              "failure"
+            ],
+            "description": "The wire word, `set_type` on a set."
+          },
+          "target": {
+            "$ref": "#/components/schemas/SetTarget"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "reps": {
+            "type": "number",
+            "description": "The reps the template stores, where the target names none; with a reps target, the target is the plan."
+          },
+          "duration": {
+            "type": "number"
+          },
+          "distance": {
+            "type": "number"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "PlannedExercise": {
+        "type": "object",
+        "properties": {
+          "slot": {
+            "type": "string",
+            "description": "The template exercise id: the slot a base may be kept for."
+          },
+          "exerciseId": {
+            "type": "string"
+          },
+          "base": {
+            "type": "number",
+            "description": "The base its sets were worked out from, when it has one."
+          },
+          "stage": {
+            "type": "integer",
+            "description": "The stage a stages rule is on, from 0; null under any other rule."
+          },
+          "sets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlannedSet"
+            }
+          }
+        },
+        "required": [
+          "slot",
+          "exerciseId",
+          "sets"
+        ],
+        "additionalProperties": false
+      },
+      "PlannedSession": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "description": "The session's template id."
+          },
+          "week": {
+            "type": "integer",
+            "description": "The program week it falls in."
+          },
+          "lighter": {
+            "type": "boolean",
+            "description": "A lighter cycle: weights at `load`, working sets at `volume`."
+          },
+          "test": {
+            "type": "number",
+            "description": "The share of a best estimated max a test session sets the base at; null for a session that isn't a test."
+          },
+          "exercises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlannedExercise"
+            }
+          }
+        },
+        "required": [
+          "templateId",
+          "week",
+          "lighter",
+          "exercises"
+        ],
+        "additionalProperties": false
+      },
+      "MeProgram": {
+        "type": "object",
+        "description": "A program as `/me` shows it: the program, where the user stands in it (computed, never stored), and, for one program, each exercise's current base, the next session planned from them, and the research behind a copy of a library program.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "description": "The library program this one was copied from, when it was."
+          },
+          "perWeek": {
+            "type": "integer",
+            "description": "The weekly target, in sessions."
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "weeks": {
+            "type": "integer",
+            "description": "The length in program weeks; null runs on."
+          },
+          "rules": {
+            "$ref": "#/components/schemas/ProgramRules"
+          },
+          "constraint": {
+            "type": "string",
+            "description": "A content key, such as `avoid_high_axial_load`, that filters suggestions inside the program."
+          },
+          "deload": {
+            "$ref": "#/components/schemas/Deload"
+          },
+          "phases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProgramPhase"
+            }
+          },
+          "tests": {
+            "$ref": "#/components/schemas/ProgramTests"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The ids of the program's session templates, in order."
+          },
+          "joined": {
+            "$ref": "#/components/schemas/ProgramJoined"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "position": {
+            "$ref": "#/components/schemas/ProgramPosition"
+          },
+          "bases": {
+            "$ref": "#/components/schemas/MeProgramBases"
+          },
+          "stages": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "nextSession": {
+            "$ref": "#/components/schemas/PlannedSession"
+          },
+          "research": {
+            "description": "Not declared yet: the research behind a library program"
+          }
+        },
+        "required": [
+          "name",
+          "rules",
+          "archived",
+          "sessions",
+          "position"
+        ],
+        "additionalProperties": false
+      },
+      "MePrograms": {
+        "type": "object",
+        "description": "`GET /me/programs`.",
+        "properties": {
+          "programs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MeProgram"
+            }
+          }
+        },
+        "required": [
+          "programs"
+        ],
+        "additionalProperties": false
+      },
+      "ProgramHistoryBase": {
+        "type": "object",
+        "properties": {
+          "cause": {
+            "type": "string",
+            "enum": [
+              "workout",
+              "test",
+              "action",
+              "user"
+            ],
+            "description": "The `cause` on the wire."
+          },
+          "previous": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "cause"
+        ]
+      },
+      "ProgramHistory": {
+        "type": "object",
+        "description": "A program's history read back (heart-api#260): every base with its cause and the value it replaced, the actions, and the skips, each oldest first.",
+        "properties": {
+          "bases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProgramHistoryBase"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "description": "Not declared yet: an action of the program"
+            }
+          },
+          "skips": {
+            "type": "array",
+            "items": {
+              "description": "Not declared yet: a skipped session of the program"
+            }
+          }
+        },
+        "required": [
+          "bases",
+          "actions",
+          "skips"
+        ],
+        "additionalProperties": false
+      },
       "MeRecordsRecordExercise": {
         "type": "object",
         "properties": {
@@ -3249,6 +4479,130 @@
         },
         "required": [
           "records"
+        ],
+        "additionalProperties": false
+      },
+      "CountMap": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "MeVolumeWeek": {
+        "type": "object",
+        "properties": {
+          "week": {
+            "type": "string"
+          },
+          "workouts": {
+            "type": "integer"
+          },
+          "duration": {
+            "type": "integer"
+          },
+          "totalVolume": {
+            "type": "number"
+          },
+          "muscles": {
+            "$ref": "#/components/schemas/CountMap"
+          },
+          "patterns": {
+            "$ref": "#/components/schemas/CountMap"
+          },
+          "unplacedSets": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "week",
+          "workouts",
+          "duration",
+          "totalVolume",
+          "muscles",
+          "patterns"
+        ],
+        "additionalProperties": false
+      },
+      "MeVolume": {
+        "type": "object",
+        "description": "`GET /me/volume`: working sets and sessions per muscle group and per movement pattern, week by week, with the week's finished workouts, their time and the weight they moved.",
+        "properties": {
+          "weekStart": {
+            "type": "integer"
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "weeks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MeVolumeWeek"
+            }
+          },
+          "untrained": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The muscle groups no set reached in the whole window."
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          }
+        },
+        "required": [
+          "weekStart",
+          "from",
+          "to",
+          "weeks",
+          "untrained"
+        ],
+        "additionalProperties": false
+      },
+      "MeBalance": {
+        "type": "object",
+        "description": "`GET /me/balance`: each pair's two sides set against each other over the window, counts only.",
+        "properties": {
+          "weekStart": {
+            "type": "integer"
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "weeks": {
+            "type": "integer"
+          },
+          "pairs": {
+            "type": "array",
+            "items": {
+              "description": "Not declared yet: a pair: its `key`, `left`, `right` and `weeksTrained`"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          }
+        },
+        "required": [
+          "weekStart",
+          "from",
+          "to",
+          "weeks",
+          "pairs"
         ],
         "additionalProperties": false
       },

@@ -84,7 +84,7 @@ void main() {
   test('getMyGoals reads the caller\'s own goals', () async {
     when(goals.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1')).thenAnswer((_) async => []);
 
-    await getMyGoals(build('/me/goals'));
+    await serve('/goals', build('/me/goals'));
 
     verify(goals.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1')).called(1);
   });
@@ -327,7 +327,7 @@ void main() {
         (_) async => [(workoutId: 'w', start: DateTime.utc(2026, 10, 12, 18), duration: const Duration(hours: 1))],
       );
 
-      final volume = (await getMyVolume(build('/me/volume', query: {'to': '2026-10-14'}))).toMap();
+      final volume = (await serve('/volume', build('/me/volume', query: {'to': '2026-10-14'}))).toMap();
 
       expect(volume['weekStart'], DateTime.sunday);
       expect((volume['weeks'] as List).map((week) => (week as Map)['week']), [
@@ -343,7 +343,7 @@ void main() {
 
     test('a span over a year is a 400', () {
       expect(
-        () => getMyVolume(build('/me/volume', query: {'from': '2025-01-01', 'to': '2026-06-01'})),
+        () => serve('/volume', build('/me/volume', query: {'from': '2025-01-01', 'to': '2026-06-01'})),
         throwsA(isA<BadRequest>()),
       );
     });
@@ -357,7 +357,7 @@ void main() {
       ).thenAnswer((_) async => []);
       when(exercises.getExercises('u1')).thenAnswer((_) async => {'exercises': const []});
 
-      final balance = (await getMyBalance(build('/me/balance')..balancePairs = pairs)).toMap();
+      final balance = (await serve('/balance', build('/me/balance')..balancePairs = pairs)).toMap();
 
       expect(balance['weekStart'], DateTime.monday);
       expect(balance['weeks'], LensWindow.defaultWeeks);
