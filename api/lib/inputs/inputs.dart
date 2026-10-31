@@ -2,6 +2,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:heart/core/openapi/query.dart';
 import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';

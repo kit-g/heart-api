@@ -30,6 +30,8 @@ Not ours, and not covered by any licence above
     (https://simpleicons.org), CC0 1.0.
   - Exercise images and animations served from the CDN are not in this
     repository and are not covered by any licence here.
+  - Swagger UI 5.17.14 (site/assets/swagger-ui/) is SmartBear's, Apache
+    License 2.0; its LICENSE and NOTICE are beside it.
   - Fonts and icon fonts are loaded from Google Fonts and keep their own
     licences.
   - The studies and articles cited in content/program_sources.yml are the

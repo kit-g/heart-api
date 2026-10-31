@@ -12,9 +12,12 @@ class PageQuery {
   const new _({required this.cursor, required this.limit});
 
   static PageQuery fromRequest(Request req, {int defaultLimit = 30, int maxLimit = 100}) {
-    final q = req.url.queryParameters;
+    return read(Query.of(req), defaultLimit: defaultLimit, maxLimit: maxLimit);
+  }
+
+  static PageQuery read(Query q, {int defaultLimit = 30, int maxLimit = 100}) {
     return PageQuery._(
-      cursor: q.stringOrNull('cursor'),
+      cursor: q.stringOrNull('cursor', description: 'The `cursor` of the last page.'),
       limit: q.integer('limit', defaultValue: defaultLimit, min: 1, max: maxLimit),
     );
   }

@@ -1,11 +1,12 @@
 # Repo-wide entrypoints. `make test` runs the same matrix CI does.
 # Database targets need local Postgres + pgtap (see database/README.md).
 
-.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages cards design lint format-check db-up db-down db-reset db-seed
+.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages cards openapi design lint format-check db-up db-down db-reset db-seed
 
 bootstrap:
 	$(MAKE) cards
-	cd api && dart pub get && dart run build_runner build
+	$(MAKE) openapi
+	cd api && dart run build_runner build
 	cd shared/heart_aws && dart pub get
 	cd shared/heart_design && dart pub get
 	cd shared/heart_models && dart pub get && dart run build_runner build
@@ -16,7 +17,7 @@ bootstrap:
 
 test: test-dart test-db test-api-db test-python test-tf test-pages
 
-test-dart:
+test-dart: openapi
 	cd api && dart test
 	cd shared/heart_aws && dart test
 	cd shared/heart_design && dart test
@@ -81,6 +82,14 @@ test-pages:
 cards:
 	cd pages && dart pub get && dart run tool/emit_cards.dart
 
+# The /me routes' response shapes, read from the models' toMap()s and written
+# into api/lib/models/shapes.g.dart, and the OpenAPI document built from them,
+# api/openapi/me.json, which the site publishes. Neither is checked in. The api
+# doesn't compile without the shapes, so everything that builds or analyzes it
+# runs this first, after `cards`.
+openapi:
+	cd api && dart pub get && dart run tool/openapi/shapes.dart && dart run tool/openapi/spec.dart
+
 # Regenerates the design tokens' Dart and CSS from shared/heart_design/tokens.json.
 design:
 	cd shared/heart_design && dart pub get && dart run tool/generate.dart
@@ -90,7 +99,7 @@ design:
 test-tf:
 	./scripts/tf_checks.sh
 
-lint:
+lint: openapi
 	cd api && dart analyze
 	cd shared/heart_aws && dart analyze
 	cd shared/heart_design && dart analyze
