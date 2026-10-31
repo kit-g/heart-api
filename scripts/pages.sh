@@ -22,12 +22,18 @@ OUT=$2
 BUILT="$ROOT/pages/build/jaspr"
 # Matches `origin` in pages/lib/posts.dart.
 if [ "$ENV" = prod ]; then ORIGIN=https://heart-of.me; else ORIGIN=https://dev.heart-of.me; fi
+if [ "$ENV" = prod ]; then API=https://api.heart-of.me; else API=https://api.dev.heart-of.me; fi
 
 (cd "$ROOT/pages" && dart pub get >/dev/null && dart run jaspr_cli:jaspr build --dart-define=HEART_ENV="$ENV")
 
 mkdir -p "$OUT"
 rsync -a --delete "$ROOT/site/" "$OUT/"
 rsync -a --exclude '.gitkeep' "$BUILT/blog.html" "$BUILT/blog.xml" "$BUILT/blog" "$OUT/"
+
+# The Developer API's spec, which site/api-reference.html renders. It's
+# generated from the routes (api/tool/openapi/) and names prod's API.
+mkdir -p "$OUT/openapi"
+sed "s#https://api.heart-of.me#$API#" "$ROOT/api/openapi/me.json" > "$OUT/openapi/me.json"
 
 # A translated page waiting for its reviewer carries
 # <meta name="heart-review" content="pending"/>: dev ships it, where the
