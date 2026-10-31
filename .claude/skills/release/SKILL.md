@@ -95,10 +95,10 @@ their purpose, MCP tool names, limits and the codes they return, auth changes. L
 `https://heart-of.me/developers.html` and the design docs on `main` for detail. No internal
 names (no Dart symbols, no table names). Empty when nothing changed for them: say so in one line.
 
-`developers.html` is a stand-in, not the reference: a hand-written page until the API has a
-generated one (OpenAPI/Swagger, someday). Until then this section is the closest thing to a
-reference developers get, so it names every changed route and tool exactly. When the generated
-reference exists, link it instead.
+`developers.html` carries the generated reference for `/me` (`make openapi`), so link it rather
+than repeat what a route's schema says. MCP tools and OAuth have none, so this section still names
+every changed tool exactly. The site ships by hand (`scripts/site.sh`): a release that changes
+`/me` also needs a site deploy before the reference is true.
 
 ### Before tagging
 

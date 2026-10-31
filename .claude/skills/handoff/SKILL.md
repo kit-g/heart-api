@@ -114,10 +114,8 @@ without its anchor.
 This file is the anchor for the procedure — edit it in the same PR as whatever changes it. Known
 future upgrades:
 
-- **OpenAPI generation** (`api/tool/generate_openapi.dart` PoC): blocked on responses being runtime
-  `toMap()` shapes with no static declaration — see the "On generating an OpenAPI spec" section of
-  `docs/2026-08-02.connections.md` for the convention fix (a declared route → input/output
-  registry). When a committed `openapi.json` exists on `main`, step 4's Contract section shrinks to
-  a link plus the behavioral-semantics prose, which no spec will ever carry.
+- **The `/me` contract** has a generated reference now (`make openapi`, published on
+  `developers.html`). The app's own routes aren't declared; when they are, step 4's Contract
+  section shrinks to a link plus the behavioral-semantics prose, which no spec will ever carry.
 - **Frontend label conventions** — currently defaults-only over there; revise step 4 when real
   conventions emerge.
