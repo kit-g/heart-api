@@ -1,0 +1,109 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "heart",
+  "version": "1.0.2",
+  "description": "Your Heart workout log in ChatGPT: workouts, sets, records, templates, programs and goals.",
+  "author": {
+    "name": "Kit Gerasimov",
+    "email": "info@heart-of.me",
+    "url": "https://heart-of.me"
+  },
+  "homepage": "https://heart-of.me/developers.html",
+  "repository": "https://github.com/kit-g/heart-api",
+  "keywords": [
+    "workout",
+    "training log",
+    "strength training",
+    "gym"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Heart",
+        "shortDescription": "Your workout log, in chat",
+        "longDescription": "Heart is a free workout log. Connect it and ask about your own training: what you did last week, how a lift has progressed, your personal records, weekly volume per muscle group, your programs and goals. Heart can also build workout templates for you, and saves one only after you've seen it and agreed.\n\nHeart holds your training log only. Health data such as heart rate, sleep, steps or body weight stays on your phone and never reaches Heart's servers, so it is never shared here. Workout calories are an estimate, not a measurement.\n\nSign in with your Heart account. Heart is free, with nothing to buy inside the app.",
+        "developerName": "Kit Gerasimov",
+        "category": "Productivity",
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
+        "websiteURL": "https://heart-of.me/developers.html#mcp",
+        "privacyPolicyURL": "https://heart-of.me/privacy.html",
+        "termsOfServiceURL": "https://heart-of.me/terms.html",
+        "supportURL": "https://heart-of.me/support.html",
+        "defaultPrompt": [
+          "How has my bench press progressed over the last three months?",
+          "Summarize my training last week: sessions, volume and any new records.",
+          "Build me a 45-minute upper-body template from the exercises I use most."
+        ],
+        "brandColor": "#1F4EC8",
+        "brandColorDark": "#93ADFF",
+        "composerIcon": "./assets/logo.png",
+        "logo": "./assets/logo.png"
+      },
+      "review": {
+        "prompts": [
+          "How has my bench press progressed over the last three months?",
+          "Summarize my training last week: sessions, volume and any new records.",
+          "Build me a 45-minute upper-body template from the exercises I use most."
+        ],
+        "test_cases": {
+          "positive": [
+            {
+              "description": "A named workout in full. Setup: the demo account (Sofia) has an Upper/Lower program logged March-September 2026; its last Lower A session is 2026-09-15 with five exercises and 18 sets.",
+              "prompt": "Show me my last Lower A workout in Heart, with every exercise and set.",
+              "tools_triggered": "get_profile, list_workouts, get_workout",
+              "expected_behavior": "Read the user's unitSystem with get_profile. Find the most recent workout named Lower A with list_workouts (following cursors as needed), then call get_workout with its workoutId. Show the workout card: date, duration, and every exercise with its sets. Convert returned kilogram weights to the user's preferred units. Label any calories as an estimate. Make no writes."
+            },
+            {
+              "description": "Exercise progress across a date window. Setup: demo account with at least two completed bench press sessions between 2026-07-01 and 2026-10-01, with distinct weights or repetitions. Follow every returned history cursor needed to cover the window.",
+              "prompt": "How did my bench press progress from July through September 2026? Show the sessions and compare my top sets.",
+              "tools_triggered": "get_profile, get_personal_records, get_exercise_history",
+              "expected_behavior": "Use get_profile for units and get_personal_records with exercise bench to discover the matching exercise ID; clarify if multiple variants are ambiguous. Pass that exerciseId and from 2026-07-01T00:00:00Z / to 2026-10-01T00:00:00Z to get_exercise_history. Follow returned cursor values for additional pages. Compare only returned sessions and top-set metrics; identify estimated 1RM as an estimate if used and disclose returned warnings without silently excluding entries. Make no writes."
+            },
+            {
+              "description": "Weekly volume and muscle coverage. Setup: demo account with completed resistance workouts between 2026-07-01 and 2026-10-01. The seeded workouts must exercise multiple muscle groups.",
+              "prompt": "Summarize my weekly training volume from July through September 2026. Which muscle groups did I skip?",
+              "tools_triggered": "get_profile, get_training_volume",
+              "expected_behavior": "Read units with get_profile. Call get_training_volume with from 2026-07-01T00:00:00Z and to 2026-10-01T00:00:00Z. Report returned weekly workout counts and totalVolume with units; use returned muscle working sets and untrained groups. Explain fractional indirect sets if relevant and disclose returned warnings. Do not infer heart rate, health energy, or medical outcomes. Make no writes."
+            },
+            {
+              "description": "Catalog search with an abbreviation and typo. Setup: authenticated demo account with access to the published English exercise catalog.",
+              "prompt": "Find db bench pres exercises in Heart.",
+              "tools_triggered": "search_exercises",
+              "expected_behavior": "Call search_exercises with query db bench pres and locale en (or omit locale to use English default). Show relevant returned dumbbell bench press results, grounded in their returned IDs, names and match information. Do not invent a matching exercise or create a custom one. If no match is returned, report that and suggest a simpler search without claiming success. Make no writes."
+            },
+            {
+              "description": "Preview then explicitly save a template. Setup: dedicated demo account with read and write:templates consent and room for one new template; catalog includes dumbbell bench press and a one-arm dumbbell row. Start with no template named Review Upper Body. After inspecting the preview, the reviewer sends a second message: Save that template. Use only the demo account for this write.",
+              "prompt": "Make a Heart template called Review Upper Body with dumbbell bench press and one-arm dumbbell row, three sets of eight reps each. Show it to me before saving.",
+              "tools_triggered": "search_exercises, create_template, list_templates",
+              "expected_behavior": "Resolve both exercise IDs with search_exercises. Call create_template with name Review Upper Body, the two exercises in the requested order, three sets with reps 8 each, and preview true. Display the returned preview and wait; do not call create_template without preview, create_template_folder or update_template before approval. Only after the separate Save that template message, repeat the approved template arguments without preview to save once. Report status created and the returned template ID. Verify the saved response contains the approved exercise IDs, order, and three sets of eight reps per exercise. Confirm the same ID, name, exercise names, and set counts with list_templates, following cursors if needed; that tool returns summaries, not individual set repetitions. Never claim it saved after an error. Do not log a workout."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Device-only health boundary. Heart stores no health data. Say Heart does not have these readings and call no Heart tools. Do not claim a measurement from Heart or accept a health-data upload. Pointing to another source the host offers is fine, as long as it is clear the data would not come from Heart.",
+              "prompt": "Can Heart show me my resting heart rate and sleep from last week?"
+            },
+            {
+              "description": "Unsupported deletion. Heart exposes no workout deletion tool. Explain that deleting workouts must be done in the Heart app. Do not invoke any Heart tools or claim a deletion; do not repurpose update_template.",
+              "prompt": "Delete my latest workout from Heart."
+            },
+            {
+              "description": "Unsupported workout logging. Template writes do not create completed workout sessions. Explain that completed sets must be logged in the Heart app. Do not invoke any Heart tools or create a template as a substitute, and do not claim the workout was logged.",
+              "prompt": "Log a completed bench press workout in Heart for today: three sets of eight reps at 60 kg."
+            }
+          ]
+        },
+        "commerce": false,
+        "commerce_description": "The Heart plugin does not sell products, offer purchases or process payments.",
+        "demo_recording_url": "https://drive.google.com/file/d/10bIqvkCmDE_UbTIhR25HdX1zYh80NivJ/view"
+      },
+      "publication": {
+        "countries": [],
+        "release_notes": "Initial public Heart plugin release: read your workout history, exercise progress, personal records, training volume, templates, programs and goals; preview and save workout templates after approval. Health-store data remains on your device."
+      }
+    }
+  }
+}
