@@ -23,10 +23,11 @@ class TemplateListQuery {
     required this.unfiledOnly,
   });
 
-  static TemplateListQuery fromRequest(Request req) {
-    final query = req.url.queryParameters;
-    final page = PageQuery.fromRequest(req);
-    final folder = query.stringOrNull('folder');
+  static TemplateListQuery fromRequest(Request req) => read(Query.of(req));
+
+  static TemplateListQuery read(Query q) {
+    final page = PageQuery.read(q);
+    final folder = q.stringOrNull('folder', description: 'One folder\'s templates, or `$unfiled` for those in none.');
 
     return TemplateListQuery._(
       limit: page.limit,

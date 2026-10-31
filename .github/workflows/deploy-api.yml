@@ -61,9 +61,15 @@ jobs:
       - name: "Compile cards"
         run: make cards
 
+      - name: "Generate shapes and spec"
+        run: make openapi
+
       - name: "Generate Mocks"
         working-directory: api
         run: dart run build_runner build
+
+      - name: "Validate the spec"
+        run: pipx run openapi-spec-validator==0.9.0 api/openapi/me.json
 
       - name: "Format check"
         run: make format-check
@@ -99,6 +105,10 @@ jobs:
       - name: "Compile cards"
         if: matrix.package == 'api'
         run: make cards
+
+      - name: "Generate shapes and spec"
+        if: matrix.package == 'api'
+        run: make openapi
 
       # heart_aws and heart_design have no build_runner; the other two generate
       # their mocks (mocks are gitignored, not checked in)
@@ -199,6 +209,9 @@ jobs:
 
       - name: "Compile cards"
         run: make cards
+
+      - name: "Generate shapes and spec"
+        run: make openapi
 
       - name: "Generate mocks"
         working-directory: api

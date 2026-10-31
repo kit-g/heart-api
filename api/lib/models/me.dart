@@ -83,8 +83,10 @@ class MeWorkoutChanges implements Model {
   }
 }
 
-/// `GET /me/records`: personal records per exercise, as `toPersonalRecords`
-/// computes them — the same records the app shows.
+/// `GET /me/records`: personal records per exercise, the same records the app
+/// shows.
+///
+/// [PersonalRecords.toPersonalRecords] computes them.
 class MeRecords implements Model {
   final List<({ExerciseRecordSets exercise, Map<String, Object> records})> entries;
   final List<Anomaly> warnings;
@@ -127,8 +129,9 @@ class MeRecords implements Model {
 }
 
 /// One session in an exercise's history: its workout, when, the working sets
-/// as they were done, and the values the progress chart plots for it
-/// ([SessionMetrics.toSessionMetrics]).
+/// as they were done, and the values the progress chart plots for it.
+///
+/// [SessionMetrics.toSessionMetrics] computes those.
 class MeExerciseSession implements Model {
   final ExerciseSession session;
   final Category category;
@@ -151,8 +154,10 @@ class MeExerciseSession implements Model {
   }
 }
 
-/// Library search results: the exercises [SearchMatch] ranks best first,
-/// then by name, archived ones left out.
+/// Library search results: the best matches first, then by name, archived
+/// ones left out.
+///
+/// [SearchMatch] does the ranking.
 class MeLibrarySearch implements Model {
   final List<({Exercise exercise, SearchMatch match})> results;
 

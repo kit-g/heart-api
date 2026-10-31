@@ -4,5 +4,8 @@
 *.mocks.dart
 # Compiled card scripts, written by `make cards` (pages/tool/emit_cards.dart)
 lib/mcp/widgets/cards.g.dart
+# The shapes and the spec, written by `make openapi` (tool/openapi/)
+/lib/models/shapes.g.dart
+/openapi/
 # Test coverage output
 coverage/

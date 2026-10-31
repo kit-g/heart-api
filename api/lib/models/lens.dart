@@ -325,8 +325,9 @@ final class MeBalance implements Model {
 }
 
 /// `GET /me/goals/progress`: each live goal with where it stands, measured as
-/// the app measures it (`currentGoalValue` in heart-of-yours), so the two
-/// agree.
+/// the app measures it, so the two agree.
+///
+/// The app's side is `currentGoalValue` in heart-of-yours.
 ///
 /// - A goal with a cadence reads the week or calendar month [now] falls in
 ///   (`period`): weeks start on [weekStart], both in UTC. One without reads

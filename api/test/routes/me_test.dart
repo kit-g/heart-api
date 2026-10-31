@@ -8,7 +8,9 @@ import 'package:heart/middleware/s3.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/lens.dart';
+import 'package:heart/inputs/inputs.dart';
 import 'package:heart/routes/me.dart';
+import 'package:heart/routes/me_index.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
 import 'package:relic_core/relic_core.dart';
@@ -39,6 +41,12 @@ void main() {
     when(config.defaultLocale).thenReturn('en');
   });
 
+  /// [route] of `/me` as the router runs it: input read, result encoded and
+  /// held to its shape.
+  Future<Model> serve(String route, Request request, {Map<String, String> path = const {}}) async {
+    return (await meRoutes[(route, Method.get)]!.call(request, path: path))!;
+  }
+
   Request build(String path, {Map<String, String> query = const {}}) {
     return bareRequest(method: Method.get, path: path, query: query)
       ..user = User(id: 'u1')
@@ -56,7 +64,10 @@ void main() {
   });
 
   test('getMyWorkoutById rejects a malformed id without a query', () {
-    expect(() => getMyWorkoutById(build('/me/workouts/x'), 'x'), throwsA(isA<NotFound>()));
+    expect(
+      () => serve('/workouts/:workoutId', build('/me/workouts/x'), path: {'workoutId': 'x'}),
+      throwsA(isA<NotFound>()),
+    );
     verifyNever(
       workouts.getWorkout(userId: anyNamed('userId'), workoutId: anyNamed('workoutId'), imageUrl: anyNamed('imageUrl')),
     );
@@ -73,7 +84,7 @@ void main() {
   test('getMyGoals reads the caller\'s own goals', () async {
     when(goals.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1')).thenAnswer((_) async => []);
 
-    await getMyGoals(build('/me/goals'));
+    await serve('/goals', build('/me/goals'));
 
     verify(goals.getTargetUserGoals(requesterId: 'u1', targetUserId: 'u1')).called(1);
   });
@@ -106,7 +117,7 @@ void main() {
     test('a small export is the body, as a Strong CSV download', () async {
       when(tokens.claimExport('u1')).thenAnswer((_) async => null);
 
-      final result = await exportMe(exportRequest());
+      final result = await serve('/export', exportRequest());
 
       expect(result, isA<Download>());
       final download = result as Download;
@@ -122,7 +133,11 @@ void main() {
         storage.stash(key: anyNamed('key'), bytes: anyNamed('bytes'), mimeType: 'text/csv'),
       ).thenAnswer((_) async => link);
 
-      final result = await exportMe(exportRequest(), inlineLimit: 10);
+      final result = await exportMe(
+        exportRequest(),
+        ExportQuery.read(.values(const {'format': 'strong'})),
+        inlineLimit: 10,
+      );
 
       expect((result as SeeOther).location, link);
       final key =
@@ -139,7 +154,7 @@ void main() {
       );
 
       expect(
-        () => exportMe(exportRequest()),
+        () => serve('/export', exportRequest()),
         throwsA(
           isA<TooManyRequests>()
               .having((e) => e.code, 'code', 'export_limit')
@@ -149,8 +164,8 @@ void main() {
     });
 
     test('the format is required and must be known, before the allowance is spent', () {
-      expect(() => exportMe(exportRequest(const {})), throwsA(isA<BadRequest>()));
-      expect(() => exportMe(exportRequest(const {'format': 'hevy'})), throwsA(isA<BadRequest>()));
+      expect(() => serve('/export', exportRequest(const {})), throwsA(isA<BadRequest>()));
+      expect(() => serve('/export', exportRequest(const {'format': 'hevy'})), throwsA(isA<BadRequest>()));
       verifyNever(tokens.claimExport(any));
     });
   });
@@ -158,19 +173,19 @@ void main() {
   group('changes and records', () {
     test('a since that is not a cursor from the feed is a 400', () {
       expect(
-        () => getMyWorkoutChanges(build('/me/workouts/changes', query: {'since': 'garbage'})),
+        () => serve('/workouts/changes', build('/me/workouts/changes', query: {'since': 'garbage'})),
         throwsA(isA<BadRequest>()),
       );
     });
 
     test('a malformed exerciseId is a 400', () {
-      expect(() => getMyRecords(build('/me/records', query: {'exerciseId': 'x'})), throwsA(isA<BadRequest>()));
+      expect(() => serve('/records', build('/me/records', query: {'exerciseId': 'x'})), throwsA(isA<BadRequest>()));
     });
 
     test('a window that is not dates, or runs backwards, is a 400', () {
-      expect(() => getMyRecords(build('/me/records', query: {'from': 'last year'})), throwsA(isA<BadRequest>()));
+      expect(() => serve('/records', build('/me/records', query: {'from': 'last year'})), throwsA(isA<BadRequest>()));
       expect(
-        () => getMyRecords(build('/me/records', query: {'from': '2026-02-01', 'to': '2026-01-01'})),
+        () => serve('/records', build('/me/records', query: {'from': '2026-02-01', 'to': '2026-01-01'})),
         throwsA(isA<BadRequest>()),
       );
     });
@@ -185,7 +200,8 @@ void main() {
         ),
       ).thenAnswer((_) async => []);
 
-      final records = await getMyRecords(
+      final records = await serve(
+        '/records',
         build('/me/records', query: {'from': '2026-01-01', 'to': '2026-06-01T12:00:00Z'}),
       );
 
@@ -209,13 +225,13 @@ void main() {
         ],
       );
 
-      final records = (await getMyRecords(build('/me/records'))).toMap()['records'] as List;
+      final records = (await serve('/records', build('/me/records'))).toMap()['records'] as List;
 
       expect(records.map((r) => ((r as Map)['exercise'] as Map)['name']), ['Bench', 'squat']);
       expect(((records.first as Map)['heaviest'] as Map)['weight'], 100);
       expect((records.first as Map)['lastTrained'], '2026-01-01T00:00:00.000Z');
       expect(
-        (await getMyRecords(build('/me/records'))).toMap().containsKey('warnings'),
+        (await serve('/records', build('/me/records'))).toMap().containsKey('warnings'),
         isFalse,
         reason: 'nothing pending',
       );
@@ -254,7 +270,7 @@ void main() {
     );
     when(anomalies.getPendingAnomalies(userId: 'u1')).thenAnswer((_) async => [pending('a'), pending('gone')]);
 
-    final records = (await getMyRecords(build('/me/records'))).toMap();
+    final records = (await serve('/records', build('/me/records'))).toMap();
 
     expect((records['warnings'] as List).single, containsPair('exerciseId', 'a'));
   });
@@ -311,7 +327,7 @@ void main() {
         (_) async => [(workoutId: 'w', start: DateTime.utc(2026, 10, 12, 18), duration: const Duration(hours: 1))],
       );
 
-      final volume = (await getMyVolume(build('/me/volume', query: {'to': '2026-10-14'}))).toMap();
+      final volume = (await serve('/volume', build('/me/volume', query: {'to': '2026-10-14'}))).toMap();
 
       expect(volume['weekStart'], DateTime.sunday);
       expect((volume['weeks'] as List).map((week) => (week as Map)['week']), [
@@ -327,7 +343,7 @@ void main() {
 
     test('a span over a year is a 400', () {
       expect(
-        () => getMyVolume(build('/me/volume', query: {'from': '2025-01-01', 'to': '2026-06-01'})),
+        () => serve('/volume', build('/me/volume', query: {'from': '2025-01-01', 'to': '2026-06-01'})),
         throwsA(isA<BadRequest>()),
       );
     });
@@ -341,7 +357,7 @@ void main() {
       ).thenAnswer((_) async => []);
       when(exercises.getExercises('u1')).thenAnswer((_) async => {'exercises': const []});
 
-      final balance = (await getMyBalance(build('/me/balance')..balancePairs = pairs)).toMap();
+      final balance = (await serve('/balance', build('/me/balance')..balancePairs = pairs)).toMap();
 
       expect(balance['weekStart'], DateTime.monday);
       expect(balance['weeks'], LensWindow.defaultWeeks);
@@ -367,11 +383,15 @@ void main() {
 
     test('a malformed exercise id is a 404, a malformed cursor a 400', () {
       expect(
-        () => getMyExerciseHistoryById(build('/me/exercises/x/history'), 'x'),
+        () => serve('/exercises/:exerciseId/history', build('/me/exercises/x/history'), path: {'exerciseId': 'x'}),
         throwsA(isA<NotFound>()),
       );
       expect(
-        () => getMyExerciseHistoryById(build('/me/exercises/$exercise/history', query: {'cursor': 'x'}), exercise),
+        () => serve(
+          '/exercises/:exerciseId/history',
+          build('/me/exercises/$exercise/history', query: {'cursor': 'x'}),
+          path: {'exerciseId': exercise},
+        ),
         throwsA(isA<BadRequest>()),
       );
     });
@@ -382,7 +402,11 @@ void main() {
       ).thenAnswer((_) async => null);
 
       expect(
-        () => getMyExerciseHistoryById(build('/me/exercises/$exercise/history'), exercise),
+        () => serve(
+          '/exercises/:exerciseId/history',
+          build('/me/exercises/$exercise/history'),
+          path: {'exerciseId': exercise},
+        ),
         throwsA(isA<NotFound>()),
       );
     });
@@ -402,9 +426,10 @@ void main() {
         ),
       );
 
-      final page = (await getMyExerciseHistoryById(
+      final page = (await serve(
+        '/exercises/:exerciseId/history',
         build('/me/exercises/$exercise/history', query: {'cursor': newer, 'limit': '2'}),
-        exercise,
+        path: {'exerciseId': exercise},
       )).toMap();
 
       final session = (page['sessions'] as List).single as Map;
@@ -453,7 +478,11 @@ void main() {
         ],
       );
 
-      final page = (await getMyExerciseHistoryById(build('/me/exercises/$exercise/history'), exercise)).toMap();
+      final page = (await serve(
+        '/exercises/:exerciseId/history',
+        build('/me/exercises/$exercise/history'),
+        path: {'exerciseId': exercise},
+      )).toMap();
 
       expect((page['warnings'] as List).single, containsPair('workoutId', older));
       expect((page['warnings'] as List).single, containsPair('exerciseId', exercise));
@@ -487,10 +516,10 @@ void main() {
     }
 
     test('q is required, and a locale must be one served', () {
-      expect(() => searchMyLibrary(build('/me/library')), throwsA(isA<BadRequest>()));
-      expect(() => searchMyLibrary(build('/me/library', query: {'q': '  '})), throwsA(isA<BadRequest>()));
+      expect(() => serve('/library', build('/me/library')), throwsA(isA<BadRequest>()));
+      expect(() => serve('/library', build('/me/library', query: {'q': '  '})), throwsA(isA<BadRequest>()));
       expect(
-        () => searchMyLibrary(build('/me/library', query: {'q': 'squat', 'locale': 'de'})),
+        () => serve('/library', build('/me/library', query: {'q': 'squat', 'locale': 'de'})),
         throwsA(isA<BadRequest>()),
       );
     });
@@ -506,15 +535,16 @@ void main() {
         {...exercise('6', 'Squat Curl'), 'target': 'Biceps'},
       ]);
 
-      final squats = (await searchMyLibrary(build('/me/library', query: {'q': 'squat'}))).toMap()['exercises'] as List;
+      final squats =
+          (await serve('/library', build('/me/library', query: {'q': 'squat'}))).toMap()['exercises'] as List;
       expect(squats.map((e) => (e as Map)['name']), ['Squat', 'Barbell Squat']);
       expect(squats.map((e) => (e as Map)['match']), ['prefix', 'words']);
 
-      final rdl = (await searchMyLibrary(build('/me/library', query: {'q': 'rdl'}))).toMap()['exercises'] as List;
+      final rdl = (await serve('/library', build('/me/library', query: {'q': 'rdl'}))).toMap()['exercises'] as List;
       expect(rdl.single, containsPair('aliases', ['rdl']));
       expect(rdl.single, containsPair('match', 'vocabulary'));
 
-      final glossary = (await searchMyLibrary(build('/me/library', query: {'q': 'bb squat'}))).toMap()['exercises'];
+      final glossary = (await serve('/library', build('/me/library', query: {'q': 'bb squat'}))).toMap()['exercises'];
       expect((glossary as List).map((e) => (e as Map)['name']), ['Barbell Squat']);
     });
 
@@ -522,7 +552,7 @@ void main() {
       when(config.supportedLocales).thenReturn(['en', 'es']);
       library([exercise('3', 'Sentadilla')], locale: 'es');
 
-      final found = (await searchMyLibrary(build('/me/library', query: {'q': 'sentadila', 'locale': 'es'}))).toMap();
+      final found = (await serve('/library', build('/me/library', query: {'q': 'sentadila', 'locale': 'es'}))).toMap();
       expect(((found['exercises'] as List).single as Map)['match'], 'typo');
     });
   });

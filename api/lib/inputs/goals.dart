@@ -217,7 +217,7 @@ class GoalsQuery {
 
   const new _({required this.archived});
 
-  static GoalsQuery fromRequest(Request req) {
-    return GoalsQuery._(archived: req.url.queryParameters.boolean('archived'));
-  }
+  static GoalsQuery fromRequest(Request req) => read(Query.of(req));
+
+  static GoalsQuery read(Query q) => GoalsQuery._(archived: q.boolean('archived'));
 }
