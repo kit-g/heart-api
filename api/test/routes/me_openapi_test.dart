@@ -4,7 +4,11 @@ import 'dart:io';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/models/exercises.dart';
+import 'package:heart/models/lens.dart';
+import 'package:heart/models/library.dart';
 import 'package:heart/models/me.dart';
+import 'package:heart/models/shape_overrides.dart';
 import 'package:heart/models/shapes.g.dart';
 import 'package:heart/routes/me_index.dart';
 import 'package:heart_models/heart_models.dart';
@@ -111,6 +115,108 @@ void main() {
         });
         expect(anomalyShape.check(anomaly.toMap(), 'body'), isEmpty, reason: '$extra');
       }
+    });
+  });
+
+  group('what the API assembles conforms to its shape', () {
+    test('a balance, its pairs and their sides', () {
+      final balance = MeBalance.fold(
+        LensWindow.resolve(weekStart: DateTime.monday, to: DateTime.utc(2026, 10, 15)),
+        const [],
+        content: {
+          'pairs': [
+            {
+              'key': 'push_pull',
+              'left': {
+                'key': 'push',
+                'name': {'en': 'Push'},
+                'patterns': ['horizontal_press'],
+              },
+              'right': {
+                'key': 'pull',
+                'patterns': ['horizontal_row'],
+              },
+            },
+          ],
+        },
+        locale: 'en',
+      );
+      expect((balance.toMap()['pairs'] as List), hasLength(1));
+      expect(meBalanceShape.check(balance.toMap(), 'body'), isEmpty);
+    });
+
+    test('goal progress, with a period and without', () {
+      final progress = MeGoalProgress.measure(
+        [
+          Goal.fromJson({'id': 'g-1', 'metric': 'workouts', 'cadence': 'week', 'stages': const []}),
+          Goal.fromJson({
+            'id': 'g-2',
+            'metric': 'workouts',
+            'stages': [
+              {'target': 10},
+            ],
+          }),
+        ],
+        now: DateTime.utc(2026, 10, 15),
+        weekStart: DateTime.monday,
+      );
+      expect((progress.toMap()['goals'] as List), hasLength(2));
+      expect(meGoalProgressShape.check(progress.toMap(), 'body'), isEmpty);
+    });
+
+    test('the custom exercises, as the query writes them', () {
+      final response = ExerciseResponse(
+        exerciseLibrary: {
+          'exercises': [
+            {
+              'id': 'e-1',
+              'key': null,
+              'own': true,
+              'name': 'Pushdown',
+              'asset': null,
+              'health': null,
+              'target': 'Other',
+              'aliases': const <String>[],
+              'muscles': null,
+              'archived': false,
+              'category': 'Machine',
+              'movement': null,
+              'thumbnail': null,
+              'validated': null,
+              'rest_timer': 90,
+              'unit_system': null,
+              'instructions': null,
+            },
+          ],
+          'glossary': {
+            'db': {
+              'words': ['dumbbell'],
+            },
+          },
+        },
+      );
+      expect(customExercisesShape.check(response.toMap(), 'body'), isEmpty);
+      expect(customExercisesShape.check({'exercises': const [], 'heartRate': 1}, 'body'), [
+        'body.glossary: required by CustomExercises, missing',
+        'body.heartRate: not in CustomExercises',
+      ]);
+    });
+
+    test('a library program\'s summary stays open for what a later library adds', () {
+      const body = LibraryResponse({
+        'programs': [
+          {'key': 'walk', 'name': 'Walk', 'perWeek': 3, 'later': true},
+        ],
+      });
+      expect(libraryProgramsShape.check(body.toMap(), 'body'), isEmpty);
+      expect(
+        libraryProgramsShape.check({
+          'programs': [
+            {'key': 'walk'},
+          ],
+        }, 'body'),
+        ['body.programs[0].name: required by LibraryProgramSummary, missing'],
+      );
     });
   });
 
