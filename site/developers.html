@@ -30,6 +30,9 @@
     <link rel="stylesheet" href="assets/tokens.css">
     <link rel="stylesheet" href="assets/site.css">
     <link rel="stylesheet" href="assets/tailwind.css">
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css"
+          integrity="sha384-wxLW6kwyHktdDGr6Pv1zgm/VGJh99lfUbzSn6HNHBENZlCN7W602k9VkGdxuFvPn" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/swagger-ink.css">
     <script src="assets/site.js"></script>
 </head>
 <body class="bg-ground text-ink font-text min-h-screen flex flex-col selection:bg-accent selection:text-on-accent">
@@ -71,7 +74,7 @@
   -H "Authorization: Bearer hrt_…" \
   -H "User-Agent: my-sheet-sync/1.0"</code></pre>
 
-        <p>Every route, parameter and response is in the <a href="api-reference.html">API reference</a>.</p>
+        <p>Every route, parameter and response is in the <a href="#reference">reference</a> below.</p>
 
         <h2 id="tokens">Tokens</h2>
         <p>Create a token in the app under <strong>Settings</strong>. (The screen for it comes with an upcoming
@@ -174,6 +177,13 @@
         <p>Building something, or missing something? Write to <a href="mailto:info@heart-of.me">info@heart-of.me</a>.
             We’d love to hear what you make.</p>
     </article>
+
+    <section id="reference" class="mt-16 scroll-mt-6">
+        <h2 class="text-2xl font-title font-semibold tracking-tight mb-2">Reference</h2>
+        <p class="text-muted mb-6">Generated from the code. Open a route for its parameters and what it answers;
+            Authorize with a token to try it.</p>
+        <div id="swagger"></div>
+    </section>
 </main>
 
 <footer class="w-full py-10 px-6 border-t">
@@ -183,5 +193,8 @@
         </p>
     </div>
 </footer>
+<script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"
+        integrity="sha384-wmyclcVGX/WhUkdkATwhaK1X1JtiNrr2EoYJ+diV3vj4v6OC5yCeSu+yW13SYJep" crossorigin="anonymous"></script>
+<script>SwaggerUIBundle({url: 'openapi/me.json', dom_id: '#swagger', syntaxHighlight: {activated: false}});</script>
 </body>
 </html>

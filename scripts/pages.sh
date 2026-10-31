@@ -30,7 +30,7 @@ mkdir -p "$OUT"
 rsync -a --delete "$ROOT/site/" "$OUT/"
 rsync -a --exclude '.gitkeep' "$BUILT/blog.html" "$BUILT/blog.xml" "$BUILT/blog" "$OUT/"
 
-# The Developer API's spec, which site/api-reference.html renders. It's
+# The Developer API's spec, which site/developers.html renders. It's
 # generated from the routes (api/tool/openapi/) and names prod's API.
 mkdir -p "$OUT/openapi"
 sed "s#https://api.heart-of.me#$API#" "$ROOT/api/openapi/me.json" > "$OUT/openapi/me.json"
