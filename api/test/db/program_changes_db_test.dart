@@ -120,7 +120,7 @@ void main() {
 
     test('a change records who, what and how it stood, and the revision moves', () async {
       final c = await sent();
-      final first = c.sessions.first;
+      final first = await sessionNamed(c.student, c.sessions, 'Day 0');
 
       await h.db.writeSession(
         ownerId: c.student,
