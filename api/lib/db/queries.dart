@@ -647,6 +647,26 @@ _response AS (
   SET response = 'accepted', at = now()
   RETURNING 1
 ),
+-- Someone can accept on the web, with an account made a moment ago and away from
+-- any device, so this makes their profile if need be, and records the answer the
+-- app would have, in the shape it syncs.
+_person AS (
+  INSERT INTO profiles (id, email, username, settings)
+  SELECT
+    @userId,
+    @email,
+    @name,
+    jsonb_build_object('features', jsonb_build_object('yourCoach', jsonb_build_object('on', true, 'at', to_jsonb(now()))))
+  FROM _go
+  ON CONFLICT (id) DO UPDATE
+  SET settings = jsonb_set(
+    profiles.settings,
+    '{features}',
+    coalesce(profiles.settings -> 'features', '{}'::jsonb)
+      || (EXCLUDED.settings -> 'features')
+  )
+  RETURNING id
+),
 _row AS (
   SELECT id, initiator_id AS other_id, target_role AS role, domain, status, created_at, accepted_at, shares
   FROM _connection
@@ -685,6 +705,13 @@ _invitation AS (
   WHERE i.token_hash = @tokenHash
     AND i.inviter_id <> @userId
 ),
+_person AS (
+  INSERT INTO profiles (id, email, username)
+  SELECT @userId, @email, @name
+  FROM _invitation
+  ON CONFLICT (id) DO NOTHING
+  RETURNING id
+),
 _response AS (
   INSERT INTO invitation_responses (invitation_id, user_id, response)
   SELECT id, @userId, 'declined'
@@ -704,6 +731,13 @@ _invitation AS (
   FROM invitations i
   WHERE i.token_hash = @tokenHash
     AND i.inviter_id <> @userId
+),
+_person AS (
+  INSERT INTO profiles (id, email, username)
+  SELECT @userId, @email, @name
+  FROM _invitation
+  ON CONFLICT (id) DO NOTHING
+  RETURNING id
 ),
 _block AS (
   INSERT INTO blocks (blocker_id, blocked_id)

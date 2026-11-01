@@ -27,18 +27,21 @@ abstract interface class InvitationService {
   Future<InvitationPreview?> previewInvitation({required String token});
 
   /// Starts the relationship, opening [shares] to the inviter. Accepting twice
-  /// is a no-op. Throws when the link is no longer good.
+  /// is a no-op. Throws when the link is no longer good. Someone who only just
+  /// made an account on the web gets a profile from [email] and [name].
   Future<Connection> acceptInvitation({
     required String userId,
     required String token,
     Set<ConnectionShare> shares = const {},
+    String? email,
+    String? name,
   });
 
   /// Says no. A person can still change their mind while the link is good.
-  Future<void> declineInvitation({required String userId, required String token});
+  Future<void> declineInvitation({required String userId, required String token, String? email, String? name});
 
   /// Says no and blocks the person who made the link.
-  Future<void> blockInviter({required String userId, required String token});
+  Future<void> blockInviter({required String userId, required String token, String? email, String? name});
 
   /// Who [userId] has blocked.
   Future<Page<BlockedPerson>> getBlocks({required String userId, String? cursor, int limit = 30});

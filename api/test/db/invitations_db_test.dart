@@ -271,6 +271,67 @@ void main() {
     });
   });
 
+  group('on the web', () {
+    Future<String> newAccount() async {
+      final id = h.uid('web');
+      addTearDown(() => h.exec('DELETE FROM profiles WHERE id = @id', {'id': id}));
+      return id;
+    }
+
+    test('someone with an account made a moment ago can accept, and "Your coach" is on', () async {
+      final c = await coach();
+      final person = await newAccount();
+
+      final connection = await h.db.acceptInvitation(
+        userId: person,
+        token: (await invite(c)).token!,
+        email: 'new@test.local',
+        name: 'New Person',
+      );
+      expect(connection.status, ConnectionStatus.active);
+
+      final profile = await h.db.getProfile(person);
+      expect(profile?.email, 'new@test.local');
+      expect(profile?.displayName, 'New Person');
+      final feature = (profile?.settings.extra['features'] as Map)['yourCoach'] as Map;
+      expect(feature['on'], isTrue);
+      expect(DateTime.tryParse(feature['at'] as String), isNotNull);
+    });
+
+    test('accepting keeps an existing profile, and the other features in it', () async {
+      final c = await coach();
+      final person = await h.seedProfile();
+      await h.exec(
+        '''UPDATE profiles SET settings = '{"unitSystem": "metric", "features": {"muscleMap": {"on": true}}}' WHERE id = @id''',
+        {'id': person},
+      );
+
+      await h.db.acceptInvitation(userId: person, token: (await invite(c)).token!, email: 'x@y', name: 'Other');
+
+      final profile = await h.db.getProfile(person);
+      expect(profile?.displayName, 'u_$person', reason: 'nothing else about them moved');
+      final features = profile?.settings.extra['features'] as Map;
+      expect(features.keys, unorderedEquals(['muscleMap', 'yourCoach']));
+    });
+
+    test('someone new can decline or block too', () async {
+      final c = await coach();
+      final (one, two) = (await newAccount(), await newAccount());
+      await h.db.declineInvitation(userId: one, token: (await invite(c)).token!, email: 'a@b', name: 'A');
+      await h.db.blockInviter(userId: two, token: (await invite(c)).token!, email: 'c@d', name: 'C');
+      expect((await h.db.getBlocks(userId: two)).items.single.id, c);
+    });
+
+    test('a link that is gone makes no profile', () async {
+      final person = await newAccount();
+      await expectLater(
+        h.db.acceptInvitation(userId: person, token: TokenSecret.random(), email: 'a@b', name: 'A'),
+        throwsA(isA<NotFound>()),
+      );
+      expect(await h.db.getProfile(person), isNull);
+    });
+  });
+
   group('blocking from a link', () {
     test('someone with no connection blocks the inviter, whose later links stop working for them', () async {
       final c = await coach();

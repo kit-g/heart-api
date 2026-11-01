@@ -60,6 +60,8 @@ Future<Connection> acceptInvitation(Request req) async {
     userId: req.userId,
     token: req.rawPathParameters[#token]!,
     shares: input.shares,
+    email: req.user.email,
+    name: req.user.displayName,
   );
   await req.events.publish(
     queueUrl: req.config.eventsQueueUrl,
@@ -76,12 +78,22 @@ Future<Connection> acceptInvitation(Request req) async {
 }
 
 Future<Model> declineInvitation(Request req) async {
-  await req.invitationService.declineInvitation(userId: req.userId, token: req.rawPathParameters[#token]!);
+  await req.invitationService.declineInvitation(
+    userId: req.userId,
+    token: req.rawPathParameters[#token]!,
+    email: req.user.email,
+    name: req.user.displayName,
+  );
   throw const NoContent();
 }
 
 Future<Model> blockInviter(Request req) async {
-  await req.invitationService.blockInviter(userId: req.userId, token: req.rawPathParameters[#token]!);
+  await req.invitationService.blockInviter(
+    userId: req.userId,
+    token: req.rawPathParameters[#token]!,
+    email: req.user.email,
+    name: req.user.displayName,
+  );
   throw const NoContent();
 }
 

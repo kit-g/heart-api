@@ -97,6 +97,8 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
     required String userId,
     required String token,
     Set<ConnectionShare> shares = const {},
+    String? email,
+    String? name,
   }) async {
     final tokenHash = TokenSecret.hash(token);
     final row = await _pool.runTx((tx) async {
@@ -107,6 +109,8 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
           'userId': userId,
           'tokenHash': tokenHash,
           'shares': [for (final share in shares) share.name],
+          'email': email,
+          'name': name,
         },
       );
       return rows.firstOrNull?.toColumnMap();
@@ -120,19 +124,19 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
   }
 
   @override
-  Future<void> declineInvitation({required String userId, required String token}) async {
+  Future<void> declineInvitation({required String userId, required String token, String? email, String? name}) async {
     final rows = await _pool.execute(
       _declineInvitation.toSql(),
-      parameters: {'userId': userId, 'tokenHash': TokenSecret.hash(token)},
+      parameters: {'userId': userId, 'tokenHash': TokenSecret.hash(token), 'email': email, 'name': name},
     );
     if (rows.isEmpty) throw const NotFound(type: 'Invitation', id: 'that link');
   }
 
   @override
-  Future<void> blockInviter({required String userId, required String token}) async {
+  Future<void> blockInviter({required String userId, required String token, String? email, String? name}) async {
     final rows = await _pool.execute(
       _blockInviter.toSql(),
-      parameters: {'userId': userId, 'tokenHash': TokenSecret.hash(token)},
+      parameters: {'userId': userId, 'tokenHash': TokenSecret.hash(token), 'email': email, 'name': name},
     );
     if (rows.isEmpty) throw const NotFound(type: 'Invitation', id: 'that link');
   }

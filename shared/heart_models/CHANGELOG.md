@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.45.0
+
+Answering an invitation from the web (heart-api#375).
+
+- `InvitationService.acceptInvitation`, `declineInvitation` and `blockInviter`
+  take an optional `email` and `name`.
+
 ## 2.44.0
 
 Messages, notes and reports (heart-api#362).
