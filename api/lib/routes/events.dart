@@ -4,6 +4,7 @@ import 'package:heart/events/account_deletion.dart';
 import 'package:heart/events/comment_notification.dart';
 import 'package:heart/events/database_jobs.dart';
 import 'package:heart/events/exercise_asset.dart';
+import 'package:heart/events/pushes.dart';
 import 'package:heart/events/uploads.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/middleware/aws.dart';
@@ -112,6 +113,12 @@ Future<NoContent> handler(Request request) async {
               // use case: a new comment was created — render & enqueue push
               case {'type': 'comment.created'}:
                 await runRecord(() => commentNotification(request, event));
+              // use case: a route asked for a push
+              case {'type': 'push.requested'}:
+                await runRecord(() => pushRequested(request, event));
+              // use case: the hourly schedule, for the day's digests
+              case {'type': 'push.digest'}:
+                await runRecord(() => deliverDigests(request));
               // use case: the assets pipeline finished processing an exercise
               // upload — persist its link + dimensions onto the exercise row
               case {'type': 'exercise.asset.processed'}:

@@ -19,6 +19,7 @@ final _exercisePrefsProperty = ContextProperty<ApiExercisePreferenceService>('Ap
 final _goalsProperty = ContextProperty<IdempotentGoalService>('IdempotentGoalService');
 final _programsProperty = ContextProperty<ProgramService>('ProgramService');
 final _invitationsProperty = ContextProperty<InvitationService>('InvitationService');
+final _pushProperty = ContextProperty<PushService>('PushService');
 final _skipsProperty = ContextProperty<SkipService>('SkipService');
 final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
@@ -69,6 +70,15 @@ Middleware goalsDb({required IdempotentGoalService db}) {
   return (Handler next) {
     return (request) {
       _goalsProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
+Middleware pushDb({required PushService db}) {
+  return (Handler next) {
+    return (request) {
+      _pushProperty[request] = db;
       return next(request);
     };
   };
@@ -210,6 +220,10 @@ extension DatabaseContext on Request {
   SkipService get skipService => _skipsProperty.get(this);
 
   set skipService(SkipService v) => _skipsProperty[this] = v;
+
+  PushService get pushService => _pushProperty.get(this);
+
+  set pushService(PushService v) => _pushProperty[this] = v;
 
   InvitationService get invitationService => _invitationsProperty.get(this);
 

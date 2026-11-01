@@ -22,6 +22,8 @@ const _cronJobs = [
   "SELECT cron.schedule_in_database('anomaly-sweep', '37 3 * * *', 'SELECT _sweep_anomalies()', @database)",
   // 04:17 UTC daily: OAuth rows no flow can use any more
   "SELECT cron.schedule_in_database('oauth-cleanup', '17 4 * * *', 'SELECT _clean_up_oauth()', @database)",
+  // 04:32 UTC daily: push tokens that have gone quiet
+  "SELECT cron.schedule_in_database('device-token-cleanup', '32 4 * * *', 'SELECT _clean_up_device_tokens()', @database)",
   // 04:47 UTC daily: pg_cron's own run log, which otherwise grows forever
   r"""SELECT cron.schedule(
     'cron-history-cleanup',

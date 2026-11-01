@@ -11,13 +11,13 @@ import '../mocks.mocks.dart';
 Request _request() => RequestInternal.create(Method.post, Uri.parse('http://localhost/events'), Object());
 
 void main() {
-  late MockDeviceService devices;
+  late MockPushService push;
   late MockEventPublisher publisher;
   late MockAppConfig config;
   late Request request;
 
   setUp(() {
-    devices = MockDeviceService();
+    push = MockPushService();
     publisher = MockEventPublisher();
     config = MockAppConfig();
 
@@ -28,12 +28,23 @@ void main() {
     ).thenAnswer((_) async {});
 
     request = _request()
-      ..deviceService = devices
+      ..pushService = push
       ..events = publisher
       ..config = config;
   });
 
-  Map<String, dynamic> event({String body = 'looks great'}) => {
+  void audience(List<({String token, String locale})> devices, {bool blocked = false, String? forTopic}) {
+    when(
+      push.getPushAudience(
+        userId: 'owner-id',
+        topic: 'comment.created',
+        connectionId: anyNamed('connectionId'),
+        actorId: anyNamed('actorId'),
+      ),
+    ).thenAnswer((_) async => (blocked: blocked, forPerson: null, forTopic: forTopic, devices: devices));
+  }
+
+  Map<String, dynamic> event() => {
     'type': 'comment.created',
     'commentId': 'c-1',
     'authorId': 'sarah-id',
@@ -41,11 +52,10 @@ void main() {
     'ownerId': 'owner-id',
     'targetType': 'workout',
     'targetId': 'w-1',
-    'body': body,
   };
 
   test('no devices: skips the firebase enqueue', () async {
-    when(devices.tokensWithLocale('owner-id')).thenAnswer((_) async => []);
+    audience([]);
 
     await commentNotification(request, event());
 
@@ -53,9 +63,7 @@ void main() {
   });
 
   test('single-locale recipient: one push.notification event with localized title', () async {
-    when(devices.tokensWithLocale('owner-id')).thenAnswer(
-      (_) async => [(token: 't-en-1', locale: 'en'), (token: 't-en-2', locale: 'en')],
-    );
+    audience([(token: 't-en-1', locale: 'en'), (token: 't-en-2', locale: 'en')]);
 
     await commentNotification(request, event());
 
@@ -70,8 +78,9 @@ void main() {
     expect(captured['type'], 'push.notification');
     expect(captured['tokens'], ['t-en-1', 't-en-2']);
     expect(captured['title'], 'Sarah: new comment on your workout');
-    expect(captured['body'], 'looks great');
+    expect(captured.containsKey('body'), isFalse, reason: 'the text never reaches Apple or Google');
     expect(captured['data'], {
+      'topic': 'comment.created',
       'commentId': 'c-1',
       'targetType': 'workout',
       'targetId': 'w-1',
@@ -79,13 +88,11 @@ void main() {
   });
 
   test('multi-locale recipient: one event per locale, each with its own title', () async {
-    when(devices.tokensWithLocale('owner-id')).thenAnswer(
-      (_) async => [
-        (token: 't-en', locale: 'en'),
-        (token: 't-ru-1', locale: 'ru'),
-        (token: 't-ru-2', locale: 'ru'),
-      ],
-    );
+    audience([
+      (token: 't-en', locale: 'en'),
+      (token: 't-ru-1', locale: 'ru'),
+      (token: 't-ru-2', locale: 'ru'),
+    ]);
 
     await commentNotification(request, event());
 
@@ -102,5 +109,15 @@ void main() {
     };
     expect(byTitle['Sarah: new comment on your workout'], ['t-en']);
     expect(byTitle['Sarah: новый комментарий к вашей тренировке'], ['t-ru-1', 't-ru-2']);
+  });
+
+  test('off means no push, and so does a block', () async {
+    audience([(token: 't', locale: 'en')], forTopic: 'off');
+    await commentNotification(request, event());
+
+    audience([(token: 't', locale: 'en')], blocked: true);
+    await commentNotification(request, event());
+
+    verifyNever(publisher.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
   });
 }

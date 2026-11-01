@@ -28,6 +28,7 @@ abstract interface class DeviceService {
     required String token,
     required String locale,
     required Map<String, dynamic> settings,
+    int? utcOffsetMinutes,
   });
 
   /// All FCM tokens registered for [profileId], each paired with the locale

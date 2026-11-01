@@ -5,7 +5,6 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/events.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/pagination.dart';
-import 'package:heart/notifications/renderer.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -32,7 +31,6 @@ Future<Comment> createComment(Request req) async {
         'ownerId': ownerId,
         'targetType': input.targetType.value,
         'targetId': input.targetId,
-        'body': snippetize(input.body),
       },
     );
   }

@@ -1,10 +1,13 @@
 import 'package:heart/core/handler.dart';
+import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/middleware/events.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/pagination.dart';
 import 'package:heart/models/tokens.dart';
+import 'package:heart/notifications/topics.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -53,11 +56,23 @@ Future<InvitationPreview> previewInvitation(Request req) async {
 
 Future<Connection> acceptInvitation(Request req) async {
   final input = await InvitationAcceptIn.fromRequest(req);
-  return req.invitationService.acceptInvitation(
+  final connection = await req.invitationService.acceptInvitation(
     userId: req.userId,
     token: req.rawPathParameters[#token]!,
     shares: input.shares,
   );
+  await req.events.publish(
+    queueUrl: req.config.eventsQueueUrl,
+    message: {
+      'type': 'push.requested',
+      'userId': connection.targetId,
+      'topic': PushTopic.invitationAccepted.key,
+      'name': req.user.displayName ?? '',
+      'actorId': req.userId,
+      'connectionId': connection.connectionId,
+    },
+  );
+  return connection;
 }
 
 Future<Model> declineInvitation(Request req) async {
