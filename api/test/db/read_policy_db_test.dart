@@ -170,7 +170,8 @@ void main() {
       await h.exec("UPDATE connections SET status = 'paused' WHERE initiator_id = @c AND domain = 'running'", {
         'c': coach,
       });
-      final during = await workoutOf(student, DateTime.now().toUtc());
+      // ahead of the pause whatever the two clocks say
+      final during = await workoutOf(student, DateTime.now().toUtc().add(const Duration(minutes: 5)));
 
       final seen = await workoutsSeenBy(coach, student);
       expect(seen, contains(earlier));

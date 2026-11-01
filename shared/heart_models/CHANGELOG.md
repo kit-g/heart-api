@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.44.0
+
+Messages, notes and reports (heart-api#362).
+
+- New: `Thread`, `ThreadList`, `ThreadItem` and `CoachNote`.
+- New: `ThreadService`, `CoachNoteService`, `ReportService`.
+
 ## 2.43.0
 
 Device keys and key delivery (heart-api#361).
