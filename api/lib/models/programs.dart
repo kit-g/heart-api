@@ -1,5 +1,16 @@
 import 'package:heart_models/heart_models.dart';
 
+/// What makes a program a coach's copy for a student. [waits] when the student is
+/// on something else, so it holds until they say when it starts.
+typedef ProgramCopy = ({
+  String coachId,
+  String connectionId,
+  String libraryProgramId,
+  int libraryVersion,
+  Map<String, String> libraryIds,
+  bool waits,
+});
+
 /// The user's programs (heart-api#86, `docs/2026-10-13.programs.md`).
 ///
 /// API-side rather than in `heart_models`: the app keeps programs in its own
@@ -15,10 +26,13 @@ abstract interface class ProgramService {
   /// transaction: starting a library program is this call, with the copy made
   /// on the device. Idempotent on the program's id, as the other creates are
   /// (heart-api#66); a hit returns the stored program and writes no sessions.
+  ///
+  /// [copy] makes it a coach's copy, in the same transaction.
   Future<(Program, bool created)> createProgramOrExisting({
     required String userId,
     required Program program,
     required List<TemplateRequest> sessions,
+    ProgramCopy? copy,
   });
 
   /// A full replace of the program's own fields. Sessions change through their

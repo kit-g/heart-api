@@ -1,3 +1,5 @@
+import 'coach_program.dart';
+import 'connections.dart';
 import 'misc.dart';
 
 /// A link one person makes to start a relationship, as its inviter sees it.
@@ -101,6 +103,21 @@ class _Invitation implements Invitation {
       'createdAt': createdAt.toIso8601String(),
       'token': ?token,
     };
+  }
+}
+
+/// The answer to accepting: the relationship, and how the program it named went.
+class AcceptedInvitation implements Model {
+  final Connection connection;
+
+  /// Null when the invitation named no program.
+  final ProgramDelivery? delivery;
+
+  const new(this.connection, {this.delivery});
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {...connection.toMap(), 'programDelivered': ?delivery?.delivered, 'programId': ?delivery?.programId};
   }
 }
 

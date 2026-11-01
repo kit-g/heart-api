@@ -570,7 +570,7 @@ final List<McpTool> tools = [
           for (final program in all)
             {
               'id': program.id,
-              'name': program.name,
+              ...program.quotedIfSent({'name': program.name}),
               'archived': program.archived,
               'sessions': program.sessions.length,
               if (program.weeks case final int weeks) 'weeks': weeks,
@@ -640,8 +640,7 @@ final List<McpTool> tools = [
       final next = await programs.nextSession(request, program, state, templates: templates.nonNulls);
       return {
         'id': program.id,
-        'name': program.name,
-        'note': ?program.note,
+        ...program.quotedIfSent({'name': program.name, 'note': ?program.note}),
         'perWeek': ?program.perWeek,
         'weeks': ?program.weeks,
         'archived': program.archived,
@@ -654,10 +653,12 @@ final List<McpTool> tools = [
           for (final template in templates.nonNulls)
             {
               'id': template.id,
-              'name': template.name ?? 'Untitled',
-              'note': ?template.note,
               'done': position.done.contains(template.id),
-              'exercises': [for (final exercise in template) exercise.exercise.name],
+              ...template.quotedIfAssigned({
+                'name': template.name ?? 'Untitled',
+                'note': ?template.note,
+                'exercises': [for (final exercise in template) exercise.exercise.name],
+              }),
             },
         ],
         'exercises': [
@@ -928,6 +929,19 @@ extension on Template {
       null => text,
       final Profile by => {
         'quoted': {'by': by.quotedName, ...text},
+      },
+    };
+  }
+}
+
+extension on Program {
+  /// [text] as the tools return it, as [Template.quotedIfAssigned] does: under
+  /// `quoted` when a coach wrote it.
+  Map<String, dynamic> quotedIfSent(Map<String, dynamic> text) {
+    return switch (coachId) {
+      null => text,
+      _ => {
+        'quoted': {'by': coachName ?? 'another account', ...text},
       },
     };
   }

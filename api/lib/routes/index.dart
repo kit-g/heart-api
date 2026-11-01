@@ -3,6 +3,7 @@ import 'package:heart/core/oauth_router.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/routes/account.dart' as account;
 import 'package:heart/routes/charts.dart' as charts;
+import 'package:heart/routes/coach_library.dart' as coach_library;
 import 'package:heart/routes/comments.dart' as comments;
 import 'package:heart/routes/connections.dart' as connections;
 import 'package:heart/routes/invitations.dart' as invitations;
@@ -86,6 +87,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/programs/:programId', .get): programs.getMyProgram,
   ('/programs/:programId', .put): programs.updateProgram,
   ('/programs/:programId', .delete): programs.deleteProgram,
+  ('/programs/:programId/start', .post): coach_library.startProgram,
   ('/programs/:programId/actions', .get): programs.getProgramActions,
   ('/programs/:programId/actions', .post): programs.createProgramAction,
   ('/programs/:programId/actions/:actionId', .delete): programs.deleteProgramAction,
@@ -104,6 +106,12 @@ final routes = <(String, Method), ModelHandler>{
   ('/keys/queue', .get): keys.getQueue,
   ('/keys/queue', .post): keys.enqueue,
   ('/keys/queue/confirmations', .post): keys.confirmQueued,
+  ('/library-programs', .get): coach_library.getCoachPrograms,
+  ('/library-programs/:programId', .get): coach_library.getCoachProgram,
+  ('/library-programs/:programId', .put): coach_library.saveCoachProgram,
+  ('/library-programs/:programId', .delete): coach_library.deleteCoachProgram,
+  ('/library-programs/:programId/holders', .get): coach_library.getCoachProgramHolders,
+  ('/library-programs/:programId/send', .post): coach_library.sendCoachProgram,
   ('/notes', .get): threads.getNotes,
   ('/notes/:noteId', .put): threads.saveNote,
   ('/notes/:noteId', .delete): threads.deleteNote,

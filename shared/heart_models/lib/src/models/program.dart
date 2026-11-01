@@ -722,6 +722,14 @@ abstract interface class Program implements Model {
 
   DateTime? get createdAt;
 
+  /// The coach who sent this copy, if one did. Their text is theirs, not the user's.
+  String? get coachId;
+
+  String? get coachName;
+
+  /// Sent while the user was on something else, and waiting for them to start it.
+  DateTime? get waitingSince;
+
   /// Rules this build could not read, by exercise id, as they arrived.
   /// [toMap] writes them back, so a save by this build never drops them.
   Map<String, Map> get unreadRules;
@@ -743,6 +751,9 @@ abstract interface class Program implements Model {
     List<String> sessions,
     Map<String, DateTime> joined,
     DateTime? createdAt,
+    String? coachId,
+    String? coachName,
+    DateTime? waitingSince,
     Map<String, Map> unreadRules,
   }) = _Program;
 
@@ -757,6 +768,9 @@ abstract interface class Program implements Model {
         'perWeek': row['per_week'],
         'constraint': row['constraint_key'],
         'createdAt': row['created_at'],
+        'coachId': row['coach_id'],
+        'coachName': row['coach_name'],
+        'waitingSince': row['waiting_since'],
       },
       created: row['created_at'],
     );
@@ -816,6 +830,12 @@ class _Program implements Program {
   final DateTime? createdAt;
   @override
   final Map<String, Map> unreadRules;
+  @override
+  final String? coachId;
+  @override
+  final String? coachName;
+  @override
+  final DateTime? waitingSince;
 
   new({
     this.id,
@@ -835,6 +855,9 @@ class _Program implements Program {
     this.joined = const {},
     this.createdAt,
     this.unreadRules = const {},
+    this.coachId,
+    this.coachName,
+    this.waitingSince,
   });
 
   factory _read(Map json, {required Object? created}) {
@@ -890,6 +913,13 @@ class _Program implements Program {
         if (_decoded(json['joined']) case final Map joined)
           for (final MapEntry(:key, :value) in joined.entries)
             if (_moment(value) case final DateTime at) '$key': at,
+      },
+      coachId: json['coachId'] as String?,
+      coachName: json['coachName'] as String?,
+      waitingSince: switch (json['waitingSince']) {
+        final DateTime at => at,
+        final String at => DateTime.tryParse(at),
+        _ => null,
       },
       createdAt: switch (created) {
         final DateTime c => c,
@@ -959,6 +989,9 @@ class _Program implements Program {
       joined: joined,
       createdAt: createdAt,
       unreadRules: unreadRules,
+      coachId: coachId,
+      coachName: coachName,
+      waitingSince: waitingSince,
     );
   }
 
@@ -1009,6 +1042,9 @@ class _Program implements Program {
       if (joined.isNotEmpty)
         'joined': {for (final MapEntry(:key, :value) in joined.entries) key: value.toUtc().toIso8601String()},
       'createdAt': ?createdAt?.toUtc().toIso8601String(),
+      'coachId': ?coachId,
+      'coachName': ?coachName,
+      'waitingSince': ?waitingSince?.toUtc().toIso8601String(),
     };
   }
 

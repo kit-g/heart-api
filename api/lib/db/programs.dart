@@ -17,6 +17,7 @@ mixin _Programs on _DatabaseBase implements ProgramService {
     required String userId,
     required Program program,
     required List<TemplateRequest> sessions,
+    ProgramCopy? copy,
   }) async {
     try {
       return await _retryOnCreateRace(
@@ -75,6 +76,20 @@ mixin _Programs on _DatabaseBase implements ProgramService {
                 },
               );
               if (saved.isEmpty) throw NotFound(type: 'TemplateFolder', id: session.folderId ?? '');
+            }
+            if (copy != null) {
+              await tx.execute(
+                _markProgramCopy.toSql(),
+                parameters: {
+                  'id': id,
+                  'coachId': copy.coachId,
+                  'connectionId': copy.connectionId,
+                  'libraryProgramId': copy.libraryProgramId,
+                  'libraryVersion': copy.libraryVersion,
+                  'libraryIds': jsonEncode(copy.libraryIds),
+                  'waits': copy.waits,
+                },
+              );
             }
           }
           return (await _readProgram(tx, userId: userId, programId: id), created);

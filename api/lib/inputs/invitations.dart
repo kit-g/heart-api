@@ -6,7 +6,10 @@ class InvitationCreateIn {
   final String name;
   final ConnectionDomain domain;
 
-  const new _({required this.name, required this.domain});
+  /// A library program to start with, sent on acceptance.
+  final String? programId;
+
+  const new _({required this.name, required this.domain, this.programId});
 
   static Future<InvitationCreateIn> fromRequest(Request req) async {
     final json = await req.json();
@@ -19,6 +22,11 @@ class InvitationCreateIn {
       domain: switch (json['domain']) {
         null => ConnectionDomain.fitness,
         _ => json.parsed('domain', ConnectionDomain.fromString),
+      },
+      programId: switch (json['programId']) {
+        null => null,
+        final String id when isUuidV7(id) => id,
+        _ => throw const BadRequest(reason: 'programId must be a program\'s id'),
       },
     );
   }

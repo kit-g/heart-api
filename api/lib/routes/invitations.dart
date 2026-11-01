@@ -8,6 +8,7 @@ import 'package:heart/models/errors.dart';
 import 'package:heart/models/pagination.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/notifications/topics.dart';
+import 'package:heart/routes/coach_library.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -19,6 +20,13 @@ Future<Model> createInvitation(Request req) async {
     domain: input.domain,
     token: TokenSecret.random(),
   );
+  if (input.programId case final String programId) {
+    await req.coachLibraryService.attachInvitationProgram(
+      coachId: req.userId,
+      invitationId: invitation.id,
+      programId: programId,
+    );
+  }
   return Created(invitation);
 }
 
@@ -54,11 +62,13 @@ Future<InvitationPreview> previewInvitation(Request req) async {
   return preview ?? (throw const NotFound(type: 'Invitation', id: 'that link'));
 }
 
-Future<Connection> acceptInvitation(Request req) async {
+Future<AcceptedInvitation> acceptInvitation(Request req) async {
   final input = await InvitationAcceptIn.fromRequest(req);
+  final token = req.rawPathParameters[#token]!;
+  final program = await req.coachLibraryService.invitationProgram(token: token);
   final connection = await req.invitationService.acceptInvitation(
     userId: req.userId,
-    token: req.rawPathParameters[#token]!,
+    token: token,
     shares: input.shares,
     email: req.user.email,
     name: req.user.displayName,
@@ -74,7 +84,18 @@ Future<Connection> acceptInvitation(Request req) async {
       'connectionId': connection.connectionId,
     },
   );
-  return connection;
+  // a separate step: their limit shouldn't stop them connecting, and the coach
+  // sees it didn't arrive and can send it again
+  final delivery = switch (program) {
+    final String id => await deliverCoachProgram(
+      req,
+      coachId: connection.targetId,
+      id: id,
+      connectionId: connection.connectionId!,
+    ),
+    null => null,
+  };
+  return AcceptedInvitation(connection, delivery: delivery);
 }
 
 Future<Model> declineInvitation(Request req) async {
