@@ -4,6 +4,7 @@ import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/programs.dart';
+import 'package:heart/routes/program_changes.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -32,6 +33,7 @@ Future<Program> updateProgram(Request req) {
 
 Future<Program> updateProgramById(Request req, String programId) async {
   final input = await ProgramUpdateIn.fromRequest(req);
+  if (await writeCopyFieldsIfAny(req, programId, input) case final Program program) return program;
   return req.programService.updateProgram(userId: req.userId, programId: programId, program: input.program);
 }
 

@@ -730,6 +730,12 @@ abstract interface class Program implements Model {
   /// Sent while the user was on something else, and waiting for them to start it.
   DateTime? get waitingSince;
 
+  /// On a coach's copy, how many times its own fields have changed, and each session
+  /// by id: the `baseRevision` a write starts from.
+  int get revision;
+
+  Map<String, int> get sessionRevisions;
+
   /// Rules this build could not read, by exercise id, as they arrived.
   /// [toMap] writes them back, so a save by this build never drops them.
   Map<String, Map> get unreadRules;
@@ -754,6 +760,8 @@ abstract interface class Program implements Model {
     String? coachId,
     String? coachName,
     DateTime? waitingSince,
+    int revision,
+    Map<String, int> sessionRevisions,
     Map<String, Map> unreadRules,
   }) = _Program;
 
@@ -771,6 +779,7 @@ abstract interface class Program implements Model {
         'coachId': row['coach_id'],
         'coachName': row['coach_name'],
         'waitingSince': row['waiting_since'],
+        'sessionRevisions': row['session_revisions'],
       },
       created: row['created_at'],
     );
@@ -836,6 +845,10 @@ class _Program implements Program {
   final String? coachName;
   @override
   final DateTime? waitingSince;
+  @override
+  final int revision;
+  @override
+  final Map<String, int> sessionRevisions;
 
   new({
     this.id,
@@ -858,6 +871,8 @@ class _Program implements Program {
     this.coachId,
     this.coachName,
     this.waitingSince,
+    this.revision = 0,
+    this.sessionRevisions = const {},
   });
 
   factory _read(Map json, {required Object? created}) {
@@ -920,6 +935,14 @@ class _Program implements Program {
         final DateTime at => at,
         final String at => DateTime.tryParse(at),
         _ => null,
+      },
+      revision: (json['revision'] as num?)?.toInt() ?? 0,
+      sessionRevisions: switch (json['sessionRevisions']) {
+        final Map revisions => {
+          for (final MapEntry(:key, :value) in revisions.entries)
+            if (value case final num revision) '$key': revision.toInt(),
+        },
+        _ => const {},
       },
       createdAt: switch (created) {
         final DateTime c => c,
@@ -992,6 +1015,8 @@ class _Program implements Program {
       coachId: coachId,
       coachName: coachName,
       waitingSince: waitingSince,
+      revision: revision,
+      sessionRevisions: sessionRevisions,
     );
   }
 
@@ -1045,6 +1070,9 @@ class _Program implements Program {
       'coachId': ?coachId,
       'coachName': ?coachName,
       'waitingSince': ?waitingSince?.toUtc().toIso8601String(),
+      if (coachId != null) 'revision': revision,
+      if (coachId != null)
+        'sessionRevisions': {for (final MapEntry(:key, :value) in sessionRevisions.entries) key: value},
     };
   }
 

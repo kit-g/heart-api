@@ -61,11 +61,19 @@ class ProgramCreateIn {
 class ProgramUpdateIn {
   final Program program;
 
-  const new _(this.program);
+  /// On a coach's copy: the revision this edit started from, and an id so a retried
+  /// save is one change. A build that predates them sends neither.
+  final int? baseRevision;
+  final String? changeId;
 
-  static Future<ProgramUpdateIn> fromRequest(Request req) async {
-    final json = await req.json();
+  const new _(this.program, {this.baseRevision, this.changeId});
+
+  static Future<ProgramUpdateIn> fromRequest(Request req) async => fromJson(await req.json());
+
+  static ProgramUpdateIn fromJson(Map<String, dynamic> json) {
     return ProgramUpdateIn._(
+      baseRevision: json.baseRevision(),
+      changeId: json.changeId(),
       Program(
         name: json.programName(),
         note: json.templateNote(),
@@ -371,5 +379,38 @@ class ProgramBaseIn {
         at: json.timestamp('at'),
       ),
     );
+  }
+}
+
+extension _ChangeFields on Map<String, dynamic> {
+  /// What a write to a coach's copy started from.
+  int? baseRevision() {
+    return switch (this['baseRevision']) {
+      null => null,
+      final int revision when revision >= 0 => revision,
+      _ => throw const BadRequest(reason: 'baseRevision must be a revision'),
+    };
+  }
+
+  String? changeId() {
+    return switch (this['changeId']) {
+      null => null,
+      final String id when isUuidV7(id) => id,
+      _ => throw const BadRequest(reason: 'changeId must be a UUIDv7'),
+    };
+  }
+}
+
+/// `PUT /workouts/:workoutId/plan` — `{plan}`, what the device planned, as it stood.
+class WorkoutPlanIn {
+  final Map<String, dynamic> plan;
+
+  const new _(this.plan);
+
+  static Future<WorkoutPlanIn> fromRequest(Request req) async {
+    return switch ((await req.json())['plan']) {
+      final Map plan when plan.isNotEmpty => WorkoutPlanIn._(plan.cast<String, dynamic>()),
+      _ => throw const BadRequest(reason: 'plan must be an object'),
+    };
   }
 }

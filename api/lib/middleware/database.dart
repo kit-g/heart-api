@@ -9,6 +9,7 @@ import 'package:heart/models/skips.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart/models/coach_library.dart';
+import 'package:heart/models/program_changes.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -26,6 +27,7 @@ final _threadsProperty = ContextProperty<ThreadService>('ThreadService');
 final _notesProperty = ContextProperty<CoachNoteService>('CoachNoteService');
 final _reportsProperty = ContextProperty<ReportService>('ReportService');
 final _coachLibraryProperty = ContextProperty<CoachLibraryService>('CoachLibraryService');
+final _programChangesProperty = ContextProperty<ProgramChangeService>('ProgramChangeService');
 final _skipsProperty = ContextProperty<SkipService>('SkipService');
 final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
@@ -85,6 +87,15 @@ Middleware coachLibraryDb({required CoachLibraryService db}) {
   return (Handler next) {
     return (request) {
       _coachLibraryProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
+Middleware programChangesDb({required ProgramChangeService db}) {
+  return (Handler next) {
+    return (request) {
+      _programChangesProperty[request] = db;
       return next(request);
     };
   };
@@ -275,6 +286,10 @@ extension DatabaseContext on Request {
   CoachLibraryService get coachLibraryService => _coachLibraryProperty.get(this);
 
   set coachLibraryService(CoachLibraryService v) => _coachLibraryProperty[this] = v;
+
+  ProgramChangeService get programChangeService => _programChangesProperty.get(this);
+
+  set programChangeService(ProgramChangeService v) => _programChangesProperty[this] = v;
 
   ThreadService get threadService => _threadsProperty.get(this);
 

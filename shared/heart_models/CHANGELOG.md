@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.47.0
+
+Two people on one copy of a program (heart-api#364).
+
+- New: `ProgramChange`, `ProgramChanges`, `CoachProgramView` and `WorkoutPlan`.
+- New: `Program.revision` and `sessionRevisions`, on a coach's copy.
+
 ## 2.46.0
 
 A coach's library (heart-api#363).
