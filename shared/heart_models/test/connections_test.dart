@@ -140,6 +140,7 @@ void main() {
           'domain': 'SWIMMING',
           'status': 'pending',
           'createdAt': now.toIso8601String(),
+          'shares': <String>[],
         }),
       );
     });
@@ -169,6 +170,7 @@ void main() {
               'domain': 'GENERAL',
               'status': 'active',
               'createdAt': now.toIso8601String(),
+              'shares': <String>[],
             },
           ],
         }),

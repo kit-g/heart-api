@@ -45,6 +45,7 @@ void main() {
               'id': 'user123',
               'createdAt': '2025-01-01T12:00:00.000Z',
               'settings': <String, dynamic>{},
+              'entitlements': <String>[],
             },
           );
         },
