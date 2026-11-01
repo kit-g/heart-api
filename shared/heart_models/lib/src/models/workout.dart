@@ -215,6 +215,12 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
   /// [templateId] so the workout still counts after its session is deleted.
   String? get programId;
 
+  /// The coach who entered this for its owner, if one did, and their name. It's
+  /// still the owner's workout, and they can delete it.
+  String? get loggedBy;
+
+  String? get loggedByName;
+
   Iterable<WorkoutExercise> get sets;
 
   Map<String, WorkoutImage>? get images;
@@ -285,6 +291,8 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
       pauses: _pauses(row['pauses']),
       templateId: row['template_id']?.toString(),
       programId: row['program_id']?.toString(),
+      loggedBy: row['logged_by'] as String?,
+      loggedByName: row['logged_by_name'] as String?,
       // a workout read from the server's own store is, by definition, synced
       synced: true,
     );
@@ -654,6 +662,12 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
   final String? programId;
 
   @override
+  final String? loggedBy;
+
+  @override
+  final String? loggedByName;
+
+  @override
   final bool synced;
 
   new _({
@@ -668,6 +682,8 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
     List<WorkoutPause>? pauses,
     this.templateId,
     this.programId,
+    this.loggedBy,
+    this.loggedByName,
     Map<String, WorkoutImage>? images,
     this.synced = false,
   }) : _sets = exercises ?? <WorkoutExercise>[],
@@ -687,6 +703,8 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       pauses: _pauses(json['pauses']),
       templateId: json['templateId'] as String?,
       programId: json['programId'] as String?,
+      loggedBy: json['loggedBy'] as String?,
+      loggedByName: json['loggedByName'] as String?,
       exercises: exercises.items,
       unread: exercises.unread,
       images: switch (json) {
@@ -746,6 +764,8 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       // program; deleting the template or the program does that
       'templateId': ?templateId,
       'programId': ?programId,
+      'loggedBy': ?loggedBy,
+      'loggedByName': ?loggedByName,
       'exercises': [
         for (final (order, each) in exercises.indexed) {...each, 'order': order},
       ],

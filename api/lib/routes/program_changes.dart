@@ -1,3 +1,4 @@
+import 'package:heart/core/handler.dart';
 import 'package:heart/core/request.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
@@ -7,6 +8,7 @@ import 'package:heart/middleware/events.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/program_copy.dart';
 import 'package:heart/models/programs.dart';
+import 'package:heart/models/workouts.dart';
 import 'package:heart/notifications/topics.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
@@ -319,6 +321,64 @@ Future<ProgramDelivery> updateCopyFor(Request req, {required String id, required
   await changes.setCopyVersion(ownerId: student, programId: programId, version: context.version, ids: ids);
   await tellOtherSide(req, programId);
   return ProgramDelivery(connectionId: connectionId, delivered: true, programId: programId);
+}
+
+Future<void> _assertCanLog(Request req, String student) async {
+  if (!await req.programChangeService.canLogFor(coachId: req.userId, studentId: student)) {
+    throw const Forbidden(reason: 'You can only log for a client you are coaching.');
+  }
+}
+
+/// A workout entered in person. It's the student's, and says who entered it. A
+/// coach's custom exercise reaches the student as sending a program does, so nothing
+/// is dropped. Moving a base is the device's job, as with any workout: it posts that
+/// to the route below.
+Future<Model> logWorkoutFor(Request req) => logWorkoutForStudent(req, req.rawPathParameters[#targetUserId]!);
+
+Future<Model> logWorkoutForStudent(Request req, String student) async {
+  await _assertCanLog(req, student);
+  final json = await req.json();
+  final exercises = await req.coachLibraryService.matchExercisesForStudent(
+    ids: idsIn(json['exercises']).toList(),
+    studentId: student,
+  );
+  final body = (remapIds(json, exercises)! as Map).cast<String, dynamic>();
+
+  final (workout, created) = await req.workoutsService.createWorkout(
+    userId: student,
+    body: WorkoutRequest(userId: student, body: body),
+    imageUrl: req.config.cdnAssetUrl,
+  );
+  if (!created) return workout;
+  await req.programChangeService.markLoggedBy(coachId: req.userId, studentId: student, workoutId: workout.id);
+  return Created(
+    await req.workoutsService.getWorkout(userId: student, workoutId: workout.id, imageUrl: req.config.cdnAssetUrl),
+  );
+}
+
+Future<Model> moveBaseFor(Request req) async {
+  final student = req.rawPathParameters[#targetUserId]!;
+  final programId = req.rawPathParameters[#programId]!;
+  await _assertCanWrite(req, student, programId);
+  final input = await ProgramBaseIn.fromRequest(req);
+  final (base, created) = await req.programService.createProgramBase(
+    userId: student,
+    programId: programId,
+    base: input.base,
+  );
+  return created ? Created(base) : base;
+}
+
+Future<Model> savePlanFor(Request req) async {
+  final student = req.rawPathParameters[#targetUserId]!;
+  await _assertCanLog(req, student);
+  final input = await WorkoutPlanIn.fromRequest(req);
+  await req.programChangeService.savePlan(
+    userId: student,
+    workoutId: req.rawPathParameters[#workoutId]!,
+    plan: input.plan,
+  );
+  throw const NoContent();
 }
 
 Future<Model> saveWorkoutPlan(Request req) async {

@@ -915,6 +915,8 @@ _rel AS (
 _workouts AS (
   SELECT
     id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at,
+    logged_by,
+    (SELECT username FROM profiles coach WHERE coach.id = workouts.logged_by) AS logged_by_name,
     _workout_exercises(id) AS exercises,
     CASE
       WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
@@ -931,9 +933,9 @@ _workouts AS (
   ORDER BY id DESC
   LIMIT @limit
 )
-SELECT id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, exercises, images, false AS forbidden FROM _workouts
+SELECT id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, logged_by, logged_by_name, exercises, images, false AS forbidden FROM _workouts
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _rel WHERE (r).scope IS NULL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _rel WHERE (r).scope IS NULL
 ''';
 
 const _hideWorkout = '''
@@ -976,6 +978,8 @@ SELECT
   w.template_id,
   w.program_id,
   w.created_at,
+  w.logged_by,
+  (SELECT username FROM profiles coach WHERE coach.id = w.logged_by) AS logged_by_name,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -4002,6 +4006,20 @@ JOIN profiles p ON p.id = i.student_id
 WHERE @afterAt::timestamptz IS NULL OR (i.at, i.id) < (@afterAt::timestamptz, @afterId::text)
 ORDER BY i.at DESC, i.id DESC
 LIMIT @limit
+''';
+
+/// Their workout, entered by someone else, and it says so.
+const _markWorkoutLoggedBy = '''
+UPDATE workouts
+SET logged_by = @coachId
+WHERE id = @workoutId::uuid
+  AND user_id = @studentId
+RETURNING id
+''';
+
+const _coachCanLog = '''
+SELECT (r).scope IS NOT DISTINCT FROM 'coach' AND (r).active AS allowed
+FROM (SELECT _relation(@coachId, @studentId) AS r) rel
 ''';
 
 const _listDeviceTokensWithLocale = '''

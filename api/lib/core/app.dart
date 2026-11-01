@@ -106,6 +106,7 @@ RelicApp buildApp({
     ..use('/templates', programChangesDb(db: database))
     ..use('/workouts', programChangesDb(db: database))
     ..use('/accounts', programChangesDb(db: database))
+    ..use('/accounts', coachLibraryDb(db: database))
     ..use('/accounts', programsDb(db: database))
     ..use('/library-programs', programsDb(db: database))
     ..use('/invitations', coachLibraryDb(db: database))

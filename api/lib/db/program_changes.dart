@@ -356,6 +356,20 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
   }
 
   @override
+  Future<bool> canLogFor({required String coachId, required String studentId}) async {
+    final rows = await _pool.execute(_coachCanLog.toSql(), parameters: {'coachId': coachId, 'studentId': studentId});
+    return rows.first[0]! as bool;
+  }
+
+  @override
+  Future<void> markLoggedBy({required String coachId, required String studentId, required String workoutId}) async {
+    await _pool.execute(
+      _markWorkoutLoggedBy.toSql(),
+      parameters: {'coachId': coachId, 'studentId': studentId, 'workoutId': workoutId},
+    );
+  }
+
+  @override
   Future<void> savePlan({
     required String userId,
     required String workoutId,

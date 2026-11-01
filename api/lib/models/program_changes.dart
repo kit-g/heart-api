@@ -90,6 +90,11 @@ abstract interface class ProgramChangeService {
   /// Who to tell a copy changed: the other person from [actorId], if the copy is one.
   Future<String?> otherSideOf({required String actorId, required String programId});
 
+  /// Whether [coachId] can log for and write to [studentId] right now.
+  Future<bool> canLogFor({required String coachId, required String studentId});
+
+  Future<void> markLoggedBy({required String coachId, required String studentId, required String workoutId});
+
   /// What [userId]'s device planned for a workout, as it stood. Doing it again keeps
   /// the first, since it's what was asked at the time.
   Future<void> savePlan({required String userId, required String workoutId, required Map<String, dynamic> plan});
