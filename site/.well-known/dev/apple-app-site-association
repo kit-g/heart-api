@@ -5,6 +5,7 @@
       {
         "appID": "DFX2JYT8BM.me.heart-of.ios.dev",
         "paths": [
+          "/invite.html",
           "/workout",
           "/workout/*",
           "/activeWorkout",
