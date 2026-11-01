@@ -28,6 +28,8 @@ const _cronJobs = [
   "SELECT cron.schedule_in_database('device-queue-cleanup', '40 4 * * *', 'SELECT _clean_up_device_queue()', @database)",
   // 04:43 UTC daily: reports past their deadline
   "SELECT cron.schedule_in_database('report-cleanup', '43 4 * * *', 'SELECT _clean_up_reports()', @database)",
+  // 00:05 UTC daily: a calendar week can move a program along with nothing changing
+  "SELECT cron.schedule_in_database('client-summaries-mark', '5 0 * * *', 'SELECT _mark_all_client_summaries()', @database)",
   // 04:47 UTC daily: pg_cron's own run log, which otherwise grows forever
   r"""SELECT cron.schedule(
     'cron-history-cleanup',

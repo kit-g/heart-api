@@ -52,13 +52,14 @@ void main() {
       await h.exec(statement, {});
     }
     try {
-      expect(await declare(), 6);
+      expect(await declare(), 7);
       final calls = [
         for (final row in await h.exec('SELECT jobname, schedule, command, db FROM cron.calls ORDER BY jobname', {}))
           row.toColumnMap(),
       ];
       expect(calls.map((c) => c['jobname']), [
         'anomaly-sweep',
+        'client-summaries-mark',
         'cron-history-cleanup',
         'device-queue-cleanup',
         'device-token-cleanup',
@@ -77,7 +78,10 @@ void main() {
         'command': 'SELECT _clean_up_oauth()',
         'db': database,
       });
-      expect(calls[1]['command'], contains('cron.job_run_details'));
+      expect(
+        calls.firstWhere((call) => call['jobname'] == 'cron-history-cleanup')['command'],
+        contains('cron.job_run_details'),
+      );
     } finally {
       await h.exec('DROP SCHEMA cron CASCADE', {});
     }

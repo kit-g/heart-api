@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.48.0
+
+A coach's roster and feed (heart-api#365).
+
+- New: `ClientSummary` and `CoachFeedItem`.
+
 ## 2.47.0
 
 Two people on one copy of a program (heart-api#364).

@@ -21,6 +21,7 @@ import 'package:heart/routes/misc.dart' as version;
 import 'package:heart/routes/oauth.dart' as oauth;
 import 'package:heart/routes/program_changes.dart' as changes;
 import 'package:heart/routes/programs.dart' as programs;
+import 'package:heart/routes/roster.dart' as roster;
 import 'package:heart/routes/skips.dart' as skips;
 import 'package:heart/routes/anomalies.dart' as anomalies;
 import 'package:heart/routes/template_folders.dart' as folders;
@@ -59,6 +60,9 @@ final routes = <(String, Method), ModelHandler>{
   ('/charts', .get): charts.getChartPreferences,
   ('/charts', .post): charts.saveChartPreference,
   ('/charts/:preferenceId', .delete): charts.deleteChartPreference,
+  ('/coach/clients', .get): roster.getRoster,
+  ('/coach/clients/:connectionId/reviewed', .put): roster.markClientReviewed,
+  ('/coach/feed', .get): roster.getCoachFeed,
   ('/comments', .get): comments.listComments,
   ('/comments', .post): comments.createComment,
   ('/comments/:commentId', .put): comments.editComment,

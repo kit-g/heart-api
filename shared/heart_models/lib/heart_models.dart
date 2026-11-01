@@ -24,6 +24,7 @@ export 'src/models/misc.dart';
 export 'src/models/pagination.dart';
 export 'src/models/program.dart';
 export 'src/models/program_change.dart';
+export 'src/models/roster.dart';
 export 'src/models/push.dart';
 export 'src/models/program_position.dart';
 export 'src/models/progression.dart';
