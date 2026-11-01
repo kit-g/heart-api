@@ -8,8 +8,8 @@ environment:
   sdk: ">=3.13.0"
 
 dependencies:
-  asn1lib: ^1.6.5
-  crypto: ^3.0.6
+  asn1lib: ^1.6.8
+  crypto: ^3.0.8
   csv: ^8.0.0
   heart_aws:
     path: "../shared/heart_aws"
