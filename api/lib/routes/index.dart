@@ -6,6 +6,7 @@ import 'package:heart/routes/charts.dart' as charts;
 import 'package:heart/routes/comments.dart' as comments;
 import 'package:heart/routes/connections.dart' as connections;
 import 'package:heart/routes/invitations.dart' as invitations;
+import 'package:heart/routes/keys.dart' as keys;
 import 'package:heart/routes/push.dart' as push;
 import 'package:heart/routes/devices.dart' as devices;
 import 'package:heart/routes/events.dart' as events;
@@ -91,6 +92,16 @@ final routes = <(String, Method), ModelHandler>{
   ('/programs/:programId/bases/:baseId', .delete): programs.deleteProgramBase,
   ('/anomalies', .get): anomalies.getAnomalies,
   ('/anomalies/:anomalyId', .put): anomalies.resolveAnomaly,
+  ('/keys/devices', .get): keys.getDevices,
+  ('/keys/devices', .post): keys.publishDevice,
+  ('/keys/devices/:deviceId', .delete): keys.removeDevice,
+  ('/keys/devices/:deviceId/fallback', .put): keys.replaceFallbackKey,
+  ('/keys/devices/:deviceId/one-time-keys', .get): keys.countOneTimeKeys,
+  ('/keys/devices/:deviceId/one-time-keys', .post): keys.addOneTimeKeys,
+  ('/keys/claims/:ownerId', .post): keys.claimKeys,
+  ('/keys/queue', .get): keys.getQueue,
+  ('/keys/queue', .post): keys.enqueue,
+  ('/keys/queue/confirmations', .post): keys.confirmQueued,
   ('/push/settings', .get): push.getPushSettings,
   ('/push/settings/:topic', .put): push.setPushPreference,
   ('/push/settings/:topic', .delete): push.clearPushPreference,

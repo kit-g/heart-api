@@ -90,6 +90,8 @@ RelicApp buildApp({
     ..use('/exercise-preferences', exercisePreferencesDb(db: database))
     ..use('/connections', connectionsDb(db: database))
     ..use('/push', pushDb(db: database))
+    ..use('/keys', keysDb(db: database))
+    ..use('/events', keysDb(db: database))
     ..use('/invitations', invitationsDb(db: database))
     ..use('/events', pushDb(db: database))
     ..use('/invitation-links', invitationsDb(db: database))

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:heart/events/account_deletion.dart';
 import 'package:heart/events/comment_notification.dart';
 import 'package:heart/events/database_jobs.dart';
+import 'package:heart/events/devices_changed.dart';
 import 'package:heart/events/exercise_asset.dart';
 import 'package:heart/events/pushes.dart';
 import 'package:heart/events/uploads.dart';
@@ -113,6 +114,9 @@ Future<NoContent> handler(Request request) async {
               // use case: a new comment was created — render & enqueue push
               case {'type': 'comment.created'}:
                 await runRecord(() => commentNotification(request, event));
+              // use case: someone's devices changed, so whoever talks to them should look
+              case {'type': 'devices.changed'}:
+                await runRecord(() => devicesChanged(request, event));
               // use case: a route asked for a push
               case {'type': 'push.requested'}:
                 await runRecord(() => pushRequested(request, event));

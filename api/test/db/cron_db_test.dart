@@ -52,7 +52,7 @@ void main() {
       await h.exec(statement, {});
     }
     try {
-      expect(await declare(), 4);
+      expect(await declare(), 5);
       final calls = [
         for (final row in await h.exec('SELECT jobname, schedule, command, db FROM cron.calls ORDER BY jobname', {}))
           row.toColumnMap(),
@@ -60,6 +60,7 @@ void main() {
       expect(calls.map((c) => c['jobname']), [
         'anomaly-sweep',
         'cron-history-cleanup',
+        'device-queue-cleanup',
         'device-token-cleanup',
         'oauth-cleanup',
       ]);
