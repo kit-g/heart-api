@@ -31,3 +31,21 @@ resource "aws_sns_topic_subscription" "monitoring_email" {
   protocol  = "email"
   endpoint  = var.monitoring_email
 }
+
+# The hourly job behind daily pushes. A person's evening depends on where they
+# are, so every hour is someone's. It reaches Firebase, which pg_cron can't.
+resource "aws_scheduler_schedule" "push_digest" {
+  name = "${var.name_prefix}-push-digest"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  schedule_expression = "rate(1 hour)"
+
+  target {
+    arn      = aws_sqs_queue.events.arn
+    role_arn = aws_iam_role.scheduler.arn
+    input    = jsonencode({ type = "push.digest" })
+  }
+}

@@ -6,24 +6,33 @@ push-copy rendering happen upstream in the API event consumer; this service
 doesn't know what a comment is.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Self
 
 
 @dataclass(frozen=True)
 class PushNotification:
     tokens: list[str]
-    title: str
-    body: str
-    data: dict[str, str]
+    title: str | None = None
+    body: str | None = None
+    data: dict[str, str] = field(default_factory=dict)
+    silent: bool = False
+    channel: str | None = None
+    collapse_key: str | None = None
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Self:
+        def text(key: str) -> str | None:
+            return str(d[key]) if d.get(key) is not None else None
+
         return cls(
             tokens=[str(t) for t in d["tokens"]],
-            title=str(d["title"]),
-            body=str(d["body"]),
+            title=text("title"),
+            body=text("body"),
             data={k: str(v) for k, v in d.get("data", {}).items()},
+            silent=bool(d.get("silent", False)),
+            channel=text("channel"),
+            collapse_key=text("collapseKey"),
         )
 
 

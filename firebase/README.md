@@ -12,7 +12,7 @@ The API enqueues events to the `heart-firebase-events` SQS queue; this Lambda co
 
 | Type              | Payload                                                           | Handler                                    |
 |-------------------|-------------------------------------------------------------------|--------------------------------------------|
-| `comment.created` | `{tokens: [...], title, body, data: {commentId, workoutId, ...}}` | `notify.send_comment_push` — FCM multicast |
+| `push.notification` | `{tokens: [...], title?, body?, silent?, channel?, collapseKey?, data: {...}}` | `notify.send_comment_push` — FCM multicast |
 | `account.delete`  | `{uid: "<firebase-uid>"}`                                         | `auth.delete_user` — Admin SDK             |
 
 Add a new event:
