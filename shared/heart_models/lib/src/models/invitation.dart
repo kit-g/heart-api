@@ -60,7 +60,6 @@ abstract interface class Invitation implements Model {
   }
 }
 
-
 class _Invitation implements Invitation {
   @override
   final String id;
