@@ -55,14 +55,14 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     required ConnectionDomain domain,
   }) async {
     final result = await _pool.execute(
-      _deleteConnection.toSql(),
+      _endConnection.toSql(),
       parameters: {'actorId': actorId, 'targetId': targetId, 'domain': domain.value},
     );
 
     final row = result.first.toColumnMap();
     // Nothing there is a no-op, as it always has been. Something there that did
-    // not go is the block guard refusing.
-    if (row['existed'] == true && row['deleted'] != true) {
+    // not end is the block guard refusing.
+    if (row['existed'] == true && row['ended'] != true) {
       throw const Forbidden(reason: 'You cannot remove a connection that blocks you.');
     }
   }
@@ -102,22 +102,47 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     );
 
     if (updated.isEmpty) {
-      throw Forbidden(reason: _refusal(existing.status, newStatus));
+      throw Forbidden(reason: _refusal(existing, newStatus));
     }
 
-    return Connection(
-      targetId: existing.targetId,
-      role: existing.role,
-      domain: existing.domain,
-      status: newStatus,
-      createdAt: existing.createdAt,
+    return Connection.fromRow(updated.first.toColumnMap());
+  }
+
+  @override
+  Future<Connection> changeConnectionShares({
+    required String actorId,
+    required String targetId,
+    required ConnectionRole role,
+    required ConnectionDomain domain,
+    required Set<ConnectionShare> shares,
+  }) async {
+    final updated = await _pool.execute(
+      _updateConnectionShares.toSql(),
+      parameters: {
+        'actorId': actorId,
+        'targetId': targetId,
+        'domain': domain.value,
+        'shares': [for (final share in shares) share.name],
+      },
     );
+    if (updated.isEmpty) {
+      throw const Forbidden(reason: 'Only the student of a coaching connection chooses what it shares.');
+    }
+    return Connection.fromRow(updated.first.toColumnMap());
   }
 
   /// The UPDATE matched nothing. The legality and existence checks already
   /// passed, so it is one of the actor rules — or, rarely, someone else moved
   /// the status between the read and the write.
-  static String _refusal(ConnectionStatus from, ConnectionStatus to) {
+  static String _refusal(Connection existing, ConnectionStatus to) {
+    final from = existing.status;
+    final coaching = existing.role != .peer;
+    if (coaching && (to == .pending || (from == .pending && to == .active))) {
+      return 'A coaching connection starts with an invitation.';
+    }
+    if (coaching && from == .paused && to == .active) {
+      return 'Only the student can resume a paused coaching connection.';
+    }
     if (from == .pending && to.isTheTargetsAlone) {
       return 'Only the person you sent this request to can ${to == ConnectionStatus.active ? 'accept' : 'decline'} it.';
     }

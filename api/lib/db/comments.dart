@@ -91,4 +91,24 @@ mixin _Comments on _DatabaseBase implements CommentService {
     if (result.isEmpty) return null;
     return result.first[0] as String;
   }
+
+  @override
+  Future<({String ownerId, bool related, bool readable})?> accessOfTarget({
+    required String readerId,
+    required CommentTarget targetType,
+    required String targetId,
+  }) async {
+    final result = await _pool.execute(
+      _commentTargetAccess.toSql(),
+      parameters: {'readerId': readerId, 'targetType': targetType.value, 'targetId': targetId},
+    );
+    return switch (result.firstOrNull?.toColumnMap()) {
+      {'owner_id': final String ownerId, 'related': final bool related, 'readable': final bool readable} => (
+        ownerId: ownerId,
+        related: related,
+        readable: readable,
+      ),
+      _ => null,
+    };
+  }
 }

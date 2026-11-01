@@ -15,6 +15,7 @@ export 'src/models/exercise.dart';
 export 'src/models/exercise_preference.dart';
 export 'src/models/exercise_set.dart';
 export 'src/models/goal.dart';
+export 'src/models/hidden_workout.dart';
 export 'src/models/media.dart';
 export 'src/models/misc.dart';
 export 'src/models/pagination.dart';

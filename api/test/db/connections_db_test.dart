@@ -214,7 +214,7 @@ void main() {
   });
 
   group('deleteConnection', () {
-    test('removes the connection so neither side can read it', () async {
+    test('ends the connection and keeps the row, for both sides', () async {
       final (a, b) = await pair();
       await h.db.createConnection(
         initiatorId: a,
@@ -230,17 +230,15 @@ void main() {
         domain: ConnectionDomain.fitness,
       );
 
-      expect(
-        await h.db.getConnection(
-          actorId: a,
-          targetId: b,
-          role: ConnectionRole.peer,
-          domain: ConnectionDomain.fitness,
-        ),
-        isNull,
+      final seenByA = await h.db.getConnection(
+        actorId: a,
+        targetId: b,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
       );
-      expect(await h.db.getConnections(a), isEmpty);
-      expect(await h.db.getConnections(b), isEmpty);
+      expect(seenByA?.status, ConnectionStatus.severed);
+      expect((await h.db.getConnections(b)).single.status, ConnectionStatus.severed);
+      expect(await h.db.areConnected(userA: a, userB: b), isFalse);
     });
 
     test('deletes regardless of which side is named as initiator', () async {
@@ -252,14 +250,14 @@ void main() {
         domain: ConnectionDomain.fitness,
       );
 
-      // Delete addressed from the target's perspective still clears the pair.
+      // Addressed from the target's perspective, it still ends the pair's row.
       await h.db.deleteConnection(
         actorId: b,
         targetId: a,
         role: ConnectionRole.peer,
         domain: ConnectionDomain.fitness,
       );
-      expect(await h.db.getConnections(a), isEmpty);
+      expect((await h.db.getConnections(a)).single.status, ConnectionStatus.severed);
     });
 
     test('is a no-op when there is no connection', () async {
@@ -298,7 +296,7 @@ void main() {
       expect(await h.db.getConnections(blocker), hasLength(1));
     });
 
-    test('the blocker can still delete their own block', () async {
+    test('the blocker can end their own block, which lifts it', () async {
       final (blocker, blocked) = await pair();
       await h.seedConnection(initiator: blocked, target: blocker);
       await h.db.changeConnectionStatus(
@@ -315,7 +313,12 @@ void main() {
         role: ConnectionRole.peer,
         domain: ConnectionDomain.fitness,
       );
-      expect(await h.db.getConnections(blocker), isEmpty);
+      expect((await h.db.getConnections(blocker)).single.status, ConnectionStatus.severed);
+      final live = await h.exec(
+        'SELECT 1 FROM blocks WHERE blocker_id = @b AND lifted_at IS NULL',
+        {'b': blocker},
+      );
+      expect(live, isEmpty);
     });
   });
 

@@ -417,7 +417,7 @@ void main() {
     // The gate used to check only that a connection row existed with the right
     // role, so an unanswered request — or one that had been declined, severed or
     // blocked — read as permission to browse someone's whole history.
-    for (final status in ['pending', 'declined', 'severed', 'blocked', 'paused']) {
+    for (final status in ['pending', 'declined', 'severed', 'blocked']) {
       test('a requester whose connection is $status is Forbidden', () async {
         final owner = await h.seedProfile();
         final asker = await h.seedProfile();

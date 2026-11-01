@@ -9,6 +9,17 @@ import 'imports.dart';
 import 'sets.dart';
 
 abstract interface class ApiWorkoutService {
+  /// Hides [workoutId] from every connection of its owner, or does nothing if
+  /// it's hidden already or isn't theirs. [at] is when the device says it
+  /// happened, capped at now.
+  Future<void> hideWorkout({required String userId, required String workoutId, DateTime? at});
+
+  /// Undoes [hideWorkout].
+  Future<void> unhideWorkout({required String userId, required String workoutId});
+
+  /// [userId]'s hidden workouts, newest first.
+  Future<Page<HiddenWorkout>> getHiddenWorkouts({required String userId, String? cursor, int limit = 30});
+
   /// Workouts that changed or were deleted since [since], ordered by the
   /// transaction that made each change, at most [limit] changes. Only finished
   /// transactions are reported: a change still being written waits for a

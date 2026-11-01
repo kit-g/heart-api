@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.40.0
+
+Groundwork for coaching (heart-api#358).
+
+- New: `Connection.connectionId`, `acceptedAt` and `shares`, with
+  `ConnectionShare` (`history`, `goals`).
+- New: `ConnectionsService.changeConnectionShares`.
+- New: `CommentService.accessOfTarget`.
+- New: `User.entitlements`, such as `coach`.
+- New: `HiddenWorkout`.
+
 ## 2.39.0
 
 Clearing a set's measurement, weeks on the user's first day, and a retired

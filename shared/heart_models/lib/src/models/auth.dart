@@ -40,6 +40,9 @@ abstract interface class User implements Model, Profile {
 
   Settings get settings;
 
+  /// What the account has been granted beyond the free app, such as `coach`.
+  List<String> get entitlements;
+
   String? remoteAvatar;
 
   Uint8List? localAvatar;
@@ -52,6 +55,7 @@ abstract interface class User implements Model, Profile {
     DateTime? createdAt,
     DateTime? scheduledForDeletionAt,
     Settings? settings,
+    List<String> entitlements = const [],
   }) {
     return _User(
       displayName: displayName,
@@ -61,6 +65,7 @@ abstract interface class User implements Model, Profile {
       createdAt: createdAt,
       scheduledForDeletionAt: scheduledForDeletionAt,
       settings: settings ?? const Settings(),
+      entitlements: entitlements,
     );
   }
 
@@ -83,6 +88,10 @@ abstract interface class User implements Model, Profile {
         _ => null,
       },
       settings: Settings.fromJson(json['settings'] as Map?),
+      entitlements: switch (json['entitlements']) {
+        final List names => [for (final name in names) '$name'],
+        _ => const [],
+      },
     );
   }
 
@@ -100,6 +109,10 @@ abstract interface class User implements Model, Profile {
           _ => null,
         },
       ),
+      entitlements: switch (row['entitlements']) {
+        final List names => [for (final name in names) '$name'],
+        _ => const [],
+      },
     );
   }
 }
@@ -120,6 +133,8 @@ class _User implements User {
   @override
   final Settings settings;
   @override
+  final List<String> entitlements;
+  @override
   Uint8List? localAvatar;
 
   new({
@@ -130,6 +145,7 @@ class _User implements User {
     required this.createdAt,
     this.scheduledForDeletionAt,
     this.settings = const Settings(),
+    this.entitlements = const [],
   });
 
   @override
@@ -147,6 +163,7 @@ class _User implements User {
       'createdAt': ?createdAt?.toIso8601String(),
       'scheduledForDeletionAt': ?scheduledForDeletionAt?.toIso8601String(),
       'settings': settings.toMap(),
+      'entitlements': entitlements,
     };
   }
 
@@ -160,6 +177,7 @@ class _User implements User {
       createdAt: createdAt,
       scheduledForDeletionAt: scheduledForDeletionAt,
       settings: settings ?? this.settings,
+      entitlements: entitlements,
     );
   }
 
