@@ -12,7 +12,10 @@ _spec.loader.exec_module(open_report)
 
 def test_it_opens_what_the_api_sealed():
     # a throwaway pair, used for nothing else
-    sealed = "eK4he6cpv4uyXS4bLubBPopcc6EMno+aYt8OnQw4ii1IDNPFg1Ge6Fnj1oTmY7g9wO1xkohiAR+vu5vVaZX8nHtZh2ZUnnQHrSb4HM9rbw=="
+    sealed = (
+        "eK4he6cpv4uyXS4bLubBPopcc6EMno+aYt8OnQw4ii1IDNPFg1Ge6Fnj1oTm"
+        "Y7g9wO1xkohiAR+vu5vVaZX8nHtZh2ZUnnQHrSb4HM9rbw=="
+    )
     private = "AFqMMM/gnt6MAqUESQEsuTP9VSYqzRsRCEl4ISIseWY="
     assert open_report.open_sealed(sealed, private) == '[{"words":"words"}]'
 
