@@ -215,4 +215,25 @@ void main() {
     expect(User.fromJson(user.toMap()).entitlements, ['coach']);
     expect(User.fromRow({'id': 'u'}).entitlements, isEmpty);
   });
+
+  group('invitations', () {
+    test('an invitation round-trips, and a status this build does not know is kept', () {
+      final invitation = Invitation.fromJson({
+        'id': 'i',
+        'name': 'Alex',
+        'status': 'a_later_status',
+        'role': 'COACH',
+        'domain': 'fitness',
+        'expiresAt': '2026-01-08T00:00:00.000Z',
+        'createdAt': '2026-01-01T00:00:00.000Z',
+      });
+      expect(invitation.status, 'a_later_status');
+      expect(invitation.toMap().containsKey('token'), isFalse);
+    });
+
+    test('a preview says who is asking and whether the link is good', () {
+      expect(InvitationPreview(good: false).toMap(), {'good': false});
+      expect(InvitationPreview.fromJson({'inviterName': 'Alex', 'good': true}).inviterName, 'Alex');
+    });
+  });
 }

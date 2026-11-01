@@ -30,6 +30,7 @@ part 'exercise_preferences.dart';
 part 'exercises.dart';
 part 'goals.dart';
 part 'images.dart';
+part 'invitations.dart';
 part 'oauth.dart';
 part 'profiles.dart';
 part 'programs.dart';
@@ -204,6 +205,7 @@ class Database extends _DatabaseBase
         _Charts,
         _Comments,
         _Connections,
+        _Invitations,
         _Devices,
         _ExercisePreferences,
         _Exercises,
@@ -223,6 +225,7 @@ class Database extends _DatabaseBase
         ApiExercisePreferenceService,
         CommentService,
         ConnectionsService,
+        InvitationService,
         DeviceService,
         ExerciseService,
         IdempotentGoalService,

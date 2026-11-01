@@ -22,6 +22,7 @@ part 'account.dart';
 part 'anomalies.dart';
 part 'charts.dart';
 part 'comments.dart';
+part 'invitations.dart';
 part 'connections.dart';
 part 'devices.dart';
 part 'exercise_preferences.dart';
