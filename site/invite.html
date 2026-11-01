@@ -26,31 +26,118 @@
                 <span id="inviter-name">Someone</span> invited you to train with them in Heart
             </h1>
             <p class="text-muted leading-relaxed mb-4">
-                You answer in the app, and nothing is shared until you say yes.
+                Nothing is shared until you say yes. If you accept, a coach sees the workouts you log from then on,
+                with their notes, your program and how it's going, and the name you use in Heart. You can hide any
+                workout, pause, or leave at any time.
             </p>
-            <p class="text-muted leading-relaxed mb-8">
-                If you accept, a coach sees the workouts you log from then on, with their notes, your program and
-                how it's going, and the name you use in Heart. You can hide any workout, pause, or leave at any time.
+            <p class="text-muted leading-relaxed mb-6">
                 A coach never sees your health data, your photos, why you skipped a session, or your email address.
             </p>
-            <div class="flex flex-col gap-3">
-                <a id="open-app" class="inline-flex items-center justify-center h-11 px-6 rounded bg-accent text-on-accent font-medium">
+
+            <div id="ask-signed-out" class="flex flex-col gap-3 mb-6"></div>
+
+            <div id="ask-signed-in" hidden>
+                <div class="flex flex-col gap-2 text-left mb-6">
+                    <label class="flex items-center gap-3 text-muted">
+                        <input id="share-history" type="checkbox"/>
+                        Also share my earlier workouts
+                    </label>
+                    <label class="flex items-center gap-3 text-muted">
+                        <input id="share-goals" type="checkbox"/>
+                        Also share my goals
+                    </label>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <button id="accept" type="button"
+                            class="inline-flex items-center justify-center h-11 px-6 rounded bg-accent text-on-accent font-medium">
+                        Accept
+                    </button>
+                    <button id="decline" type="button"
+                            class="inline-flex items-center justify-center h-11 px-6 rounded border text-ink font-medium">
+                        No, thanks
+                    </button>
+                    <button id="block" type="button" class="text-sm text-muted underline mt-2">Block this person</button>
+                </div>
+                <p class="text-sm text-muted mt-6">
+                    Signed in as <span id="signed-in-as"></span>.
+                    <button id="sign-out" type="button" class="underline">Not you?</button>
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-3 mt-8 pt-6 border-t">
+                <a id="open-app" class="inline-flex items-center justify-center h-11 px-6 rounded border text-ink font-medium">
                     Open in Heart
                 </a>
-                <a class="inline-flex items-center justify-center h-11 px-6 rounded border text-ink font-medium"
-                   href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener">Get it for iPhone</a>
-                <a class="inline-flex items-center justify-center h-11 px-6 rounded border text-ink font-medium"
-                   href="https://play.google.com/store/apps/details?id=me.heart.android" target="_blank" rel="noopener">Get it for Android</a>
+                <p class="text-sm text-muted">
+                    Don't have it?
+                    <a class="underline" href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener">iPhone</a>
+                    or
+                    <a class="underline" href="https://play.google.com/store/apps/details?id=me.heart.android"
+                       target="_blank" rel="noopener">Android</a>.
+                </p>
             </div>
-            <p class="text-muted text-sm leading-relaxed mt-8">
-                Already installed? Come back to this link once you have Heart, and it will open there.
-            </p>
         </section>
 
-        <section id="state-gone" hidden>
-            <h1 class="font-title text-2xl font-semibold tracking-tight text-ink mb-4">This invitation has ended</h1>
-            <p class="text-muted leading-relaxed">It has expired, been withdrawn or been answered. Ask the person who sent it for a new one.</p>
+        <section id="state-make" hidden>
+            <h1 class="font-title text-2xl font-semibold tracking-tight text-ink mb-4">Invite someone to train with you</h1>
+            <p class="text-muted leading-relaxed mb-6">
+                The link works for one person, for seven days. They see your name and photo, and decide. You see that
+                they said yes or no.
+            </p>
+            <div id="make-signed-out" class="flex flex-col gap-3"></div>
+            <form id="make-form" hidden class="flex flex-col gap-3 text-left">
+                <input id="invitee-name" required maxlength="100" placeholder="Their name, just for you"
+                       class="h-11 px-4 rounded border bg-ground text-ink w-full"/>
+                <button type="submit"
+                        class="inline-flex items-center justify-center h-11 px-6 rounded bg-accent text-on-accent font-medium">
+                    Make the link
+                </button>
+                <p class="text-sm text-muted text-center">
+                    A link made here can't carry your key for checking messages. Make it in the app if you can.
+                </p>
+            </form>
         </section>
+
+        <section id="state-link" hidden>
+            <h1 class="font-title text-2xl font-semibold tracking-tight text-ink mb-4">Here's the link</h1>
+            <p class="text-muted leading-relaxed mb-6">Send it to them however you like. It's only shown this once.</p>
+            <input id="made-link" readonly class="h-11 px-4 rounded border bg-ground text-ink w-full"/>
+        </section>
+
+        <section id="state-done" hidden>
+            <h1 id="done-title" class="font-title text-2xl font-semibold tracking-tight text-ink mb-4"></h1>
+            <p id="done-body" class="text-muted leading-relaxed mb-6"></p>
+            <a id="done-open-app" class="inline-flex items-center justify-center h-11 px-6 rounded bg-accent text-on-accent font-medium">
+                Open in Heart
+            </a>
+        </section>
+
+        <section id="state-message" hidden>
+            <h1 id="message-title" class="font-title text-2xl font-semibold tracking-tight text-ink mb-4"></h1>
+            <p id="message-body" class="text-muted leading-relaxed"></p>
+        </section>
+
+        <template id="sign-in">
+            <button data-sign-in="google" type="button"
+                    class="inline-flex items-center justify-center h-11 px-6 rounded bg-accent text-on-accent font-medium">
+                Continue with Google
+            </button>
+            <button data-sign-in="apple" type="button"
+                    class="inline-flex items-center justify-center h-11 px-6 rounded border text-ink font-medium">
+                Continue with Apple
+            </button>
+            <form data-sign-in="email" class="flex flex-col gap-3 text-left mt-2">
+                <input name="email" type="email" autocomplete="username" required placeholder="Email"
+                       class="h-11 px-4 rounded border bg-ground text-ink w-full"/>
+                <input name="password" type="password" autocomplete="current-password" required minlength="6"
+                       placeholder="Password" class="h-11 px-4 rounded border bg-ground text-ink w-full"/>
+                <button type="submit" class="inline-flex items-center justify-center h-11 px-6 rounded border text-ink font-medium">
+                    Sign in with email
+                </button>
+                <button data-create type="button" class="text-sm text-muted underline">Make an account with this email</button>
+            </form>
+            <p data-error class="text-sm text-destructive" hidden></p>
+        </template>
     </div>
 </main>
 </body>
