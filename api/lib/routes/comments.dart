@@ -78,18 +78,18 @@ Future<String> _assertCanAccessTarget(
   required CommentTarget targetType,
   required String targetId,
 }) async {
-  final ownerId = await req.commentService.ownerOfTarget(
+  final access = await req.commentService.accessOfTarget(
+    readerId: req.userId,
     targetType: targetType,
     targetId: targetId,
   );
-  if (ownerId == null) throw NotFound(type: targetType.value, id: targetId);
-  if (ownerId == req.userId) return ownerId;
-  final connected = await req.connectionsService.areConnected(
-    userA: req.userId,
-    userB: ownerId,
-  );
-  if (!connected) {
-    throw const Forbidden(reason: 'not connected to the owner of this content');
-  }
-  return ownerId;
+  return switch (access) {
+    null => throw NotFound(type: targetType.value, id: targetId),
+    (ownerId: _, related: false, readable: _) => throw const Forbidden(
+      reason: 'not connected to the owner of this content',
+    ),
+    // past what this reader can see, it doesn't exist for them
+    (ownerId: _, related: true, readable: false) => throw NotFound(type: targetType.value, id: targetId),
+    (:final ownerId, related: true, readable: true) => ownerId,
+  };
 }

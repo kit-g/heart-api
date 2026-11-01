@@ -34,6 +34,34 @@ Future<Paginated<Workout>> getTargetUserWorkoutsFor(Request request, String targ
   return Paginated<Workout>.from(page, itemsKey: 'workouts', cursorOf: (w) => w.id);
 }
 
+Future<Paginated<HiddenWorkout>> getHiddenWorkouts(Request request) async {
+  final query = PageQuery.fromRequest(request);
+  final page = await request.workoutsService.getHiddenWorkouts(
+    userId: request.userId,
+    cursor: query.cursor,
+    limit: query.limit,
+  );
+  return Paginated<HiddenWorkout>.from(page, itemsKey: 'workouts', cursorOf: (hidden) => hidden.id);
+}
+
+Future<Model> hideWorkout(Request request) async {
+  final input = await WorkoutHideIn.fromRequest(request);
+  await request.workoutsService.hideWorkout(
+    userId: request.userId,
+    workoutId: request.rawPathParameters[#workoutId]!,
+    at: input.at,
+  );
+  throw const NoContent();
+}
+
+Future<Model> unhideWorkout(Request request) async {
+  await request.workoutsService.unhideWorkout(
+    userId: request.userId,
+    workoutId: request.rawPathParameters[#workoutId]!,
+  );
+  throw const NoContent();
+}
+
 Future<Workout> getWorkout(Request request) async {
   final workoutId = request.pathParameters.raw[#workoutId]!;
   return request.workoutsService.getWorkout(

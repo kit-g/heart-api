@@ -13,6 +13,17 @@ Future<Paginated<TrainingSkip>> getMySkips(Request req) async {
   return Paginated<TrainingSkip>.from(page, itemsKey: 'skips', cursorOf: (skip) => skip.id!);
 }
 
+Future<Paginated<TrainingSkip>> getTargetUserSkips(Request req) async {
+  final query = PageQuery.fromRequest(req);
+  final page = await req.skipService.getTargetSkips(
+    requesterId: req.userId,
+    targetUserId: req.rawPathParameters[#targetUserId]!,
+    cursor: query.cursor,
+    limit: query.limit,
+  );
+  return Paginated<TrainingSkip>.from(page, itemsKey: 'skips', cursorOf: (skip) => skip.id!);
+}
+
 Future<Model> createSkip(Request req) async {
   final input = await SkipIn.fromRequest(req);
   final (skip, isNew) = await req.skipService.createSkip(userId: req.userId, skip: input.skip);

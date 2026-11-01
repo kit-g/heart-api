@@ -42,6 +42,22 @@ Future<Model?> deleteConnectionById(Request request, String connectionId) async 
   throw const NoContent();
 }
 
+Future<Connection> changeConnectionShares(Request request) {
+  return changeConnectionSharesById(request, request.rawPathParameters[#connectionId]!);
+}
+
+Future<Connection> changeConnectionSharesById(Request request, String connectionId) async {
+  final ref = ConnectionRef.parse(connectionId);
+  final input = await ConnectionSharesIn.fromRequest(request);
+  return request.connectionsService.changeConnectionShares(
+    actorId: request.userId,
+    targetId: ref.targetId,
+    role: ref.role,
+    domain: ref.domain,
+    shares: input.shares,
+  );
+}
+
 Future<Connection?> reactToConnection(Request request) {
   return reactToConnectionById(request, request.rawPathParameters[#connectionId]!);
 }

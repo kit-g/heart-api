@@ -12,13 +12,18 @@ void main() {
     Future<ConnectionCreateIn> parse(Map<String, dynamic> body) =>
         ConnectionCreateIn.fromRequest(jsonRequest(body: body)..user = User(id: 'u1'));
 
-    const valid = {'targetId': 't1', 'role': 'COACH', 'domain': 'fitness'};
+    const valid = {'targetId': 't1', 'role': 'PEER', 'domain': 'fitness'};
 
     test('parses targetId / role / domain', () async {
       final input = await parse(valid);
       expect(input.targetId, 't1');
-      expect(input.role, ConnectionRole.coach);
+      expect(input.role, ConnectionRole.peer);
       expect(input.domain, ConnectionDomain.fitness);
+    });
+
+    test('rejects a coach or student role', () async {
+      await expectLater(parse({...valid, 'role': 'COACH'}), throwsA(isA<BadRequest>()));
+      await expectLater(parse({...valid, 'role': 'STUDENT'}), throwsA(isA<BadRequest>()));
     });
 
     test('rejects connecting to yourself', () async {
