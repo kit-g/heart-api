@@ -1,3 +1,4 @@
+import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -50,6 +51,44 @@ void main() {
       final res = await app.send('POST', '/keys/queue', body: body('x' * 1025));
       expect(res.status, 400);
     });
+  });
+
+  test('publishing and removing a device tell the people who share keys, through the real app', () async {
+    when(
+      app.db.publishDevice(
+        userId: anyNamed('userId'),
+        id: anyNamed('id'),
+        identityKey: anyNamed('identityKey'),
+        signingKey: anyNamed('signingKey'),
+        fallbackKey: anyNamed('fallbackKey'),
+        signature: anyNamed('signature'),
+        vouchedBy: anyNamed('vouchedBy'),
+      ),
+    ).thenAnswer(
+      (_) async => CryptoDevice(
+        id: device,
+        userId: 'u',
+        identityKey: 'i',
+        signingKey: 's',
+        fallbackKey: 'f',
+        createdAt: DateTime.utc(2026),
+      ),
+    );
+    when(app.db.removeDevice(userId: anyNamed('userId'), deviceId: anyNamed('deviceId'))).thenAnswer((_) async {});
+    when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+    when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
+
+    final published = await app.send(
+      'POST',
+      '/keys/devices',
+      body: {'id': device, 'identityKey': 'i', 'signingKey': 's', 'fallbackKey': 'f'},
+    );
+    expect(published.status, 201);
+
+    final removed = await app.send('DELETE', '/keys/devices/$device');
+    expect(removed.status, 204);
+
+    verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).called(2);
   });
 
   test('one-time keys must map a name to a key', () async {

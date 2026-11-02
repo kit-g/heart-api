@@ -91,6 +91,7 @@ RelicApp buildApp({
     ..use('/connections', connectionsDb(db: database))
     ..use('/push', pushDb(db: database))
     ..use('/keys', keysDb(db: database))
+    ..use('/keys', events(publisher: eventPublisher))
     ..use('/events', keysDb(db: database))
     ..use('/invitations', invitationsDb(db: database))
     ..use('/events', pushDb(db: database))
