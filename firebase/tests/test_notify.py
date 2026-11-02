@@ -38,6 +38,29 @@ def fcm(mocker):
     return mocker.patch("notify.messaging")
 
 
+class TestSilent:
+    def test_shows_nothing_and_travels_in_the_background(self, mocker, fcm):
+        fcm.send_each_for_multicast.return_value = _batch(mocker, [True])
+
+        notify.send_push(PushNotification(tokens=["t1"], silent=True, collapse_key="k"))
+
+        fcm.Notification.assert_not_called()
+        kwargs = fcm.MulticastMessage.call_args.kwargs
+        assert "notification" not in kwargs
+        fcm.AndroidConfig.assert_called_once_with(priority="normal", collapse_key="k")
+        fcm.Aps.assert_called_once_with(content_available=True)
+
+
+class TestChannel:
+    def test_a_visible_push_names_its_channel(self, mocker, fcm):
+        fcm.send_each_for_multicast.return_value = _batch(mocker, [True])
+
+        notify.send_push(PushNotification(tokens=["t1"], title="t", channel="messages", collapse_key="k"))
+
+        fcm.AndroidNotification.assert_called_once_with(channel_id="messages")
+        fcm.Notification.assert_called_once_with(title="t", body=None)
+
+
 class TestEmptyTokens:
     def test_returns_without_sending(self, fcm):
         notify.send_push(_event([]))
@@ -55,6 +78,7 @@ class TestSuccessfulSend:
             tokens=["t1", "t2"],
             notification=fcm.Notification.return_value,
             data={"commentId": "c-1"},
+            android=fcm.AndroidConfig.return_value,
         )
         fcm.Notification.assert_called_once_with(title="t", body="b")
         fcm.send_each_for_multicast.assert_called_once_with(

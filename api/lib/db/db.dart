@@ -34,6 +34,7 @@ part 'invitations.dart';
 part 'oauth.dart';
 part 'profiles.dart';
 part 'programs.dart';
+part 'push.dart';
 part 'queries.dart';
 part 'skips.dart';
 part 'template_folders.dart';
@@ -206,6 +207,7 @@ class Database extends _DatabaseBase
         _Comments,
         _Connections,
         _Invitations,
+        _Push,
         _Devices,
         _ExercisePreferences,
         _Exercises,
@@ -226,6 +228,7 @@ class Database extends _DatabaseBase
         CommentService,
         ConnectionsService,
         InvitationService,
+        PushService,
         DeviceService,
         ExerciseService,
         IdempotentGoalService,

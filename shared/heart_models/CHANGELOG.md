@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.42.0
+
+Push settings (heart-api#360).
+
+- New: `PushSetting`, `PushSettings` and `PushPreference`.
+- New: `PushService` and `PushAudience`.
+- New: `DeviceService.registerDevice` takes an optional `utcOffsetMinutes`.
+
 ## 2.41.0
 
 Invitations (heart-api#359).

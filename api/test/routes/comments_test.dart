@@ -105,7 +105,7 @@ void main() {
       verifyNever(publisher.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
     });
 
-    test('connected user comments: enqueues comment.created with snippet + authorName', () async {
+    test('connected user comments: enqueues comment.created with authorName and no text', () async {
       stubAccess((ownerId: _ownerId, related: true, readable: true));
 
       final req = wire(jsonRequest(path: '/comments', body: validBody));
@@ -133,7 +133,6 @@ void main() {
       expect(captured['authorId'], _meId);
       expect(captured['authorName'], 'Sarah');
       expect(captured['targetType'], 'workout');
-      expect(captured['body'], 'nice');
     });
 
     test('rejects a non-connected, non-owner user', () async {

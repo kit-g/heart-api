@@ -8,6 +8,7 @@ mixin _Devices on _DatabaseBase implements DeviceService {
     required String token,
     required String locale,
     required Map<String, dynamic> settings,
+    int? utcOffsetMinutes,
   }) async {
     await _pool.execute(
       _upsertDevice.toSql(),
@@ -17,6 +18,7 @@ mixin _Devices on _DatabaseBase implements DeviceService {
         'token': token,
         'locale': locale,
         'settings': jsonEncode(settings),
+        'utcOffsetMinutes': utcOffsetMinutes,
       },
     );
   }

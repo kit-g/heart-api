@@ -13,6 +13,7 @@ Future<Model> registerDevice(Request req) async {
     token: input.token,
     locale: input.locale,
     settings: input.settings,
+    utcOffsetMinutes: input.utcOffsetMinutes,
   );
   throw const NoContent();
 }

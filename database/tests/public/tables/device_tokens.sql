@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(20);
+SELECT plan(21);
 
 SELECT has_table('public'::name, 'device_tokens'::name);
 
@@ -15,7 +15,8 @@ SELECT columns_are(
                    'locale',
                    'settings',
                    'created_at',
-                   'last_seen_at'
+                   'last_seen_at',
+                   'utc_offset_minutes'
                    ]
        );
 
@@ -41,6 +42,8 @@ SELECT col_default_is('public', 'device_tokens', 'locale', 'en', 'locale default
 SELECT col_default_is('public', 'device_tokens', 'settings', '{}'::jsonb, 'settings default is empty jsonb');
 
 SELECT fk_ok('public', 'device_tokens', 'profile_id', 'public', 'profiles', 'id');
+
+SELECT col_type_is('public'::name, 'device_tokens'::name, 'utc_offset_minutes'::name, 'smallint'::name);
 
 SELECT * FROM finish();
 

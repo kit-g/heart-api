@@ -1,13 +1,5 @@
 import 'templates.dart';
 
-/// Truncates [s] to [maxLength] characters and appends a horizontal-ellipsis
-/// (`…`, U+2026) if it had to cut. The ellipsis itself is locale-neutral so
-/// safe to apply before knowing the recipient's language.
-String snippetize(String s, {int maxLength = 200}) {
-  if (s.length <= maxLength) return s;
-  return '${s.substring(0, maxLength)}…';
-}
-
 /// Renders the title for a push notification. A regional locale without
 /// templates of its own falls back to its base language before the default
 /// locale (`es_ES -> es -> en`), mirroring the exercise-library chain; falls

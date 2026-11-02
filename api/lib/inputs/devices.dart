@@ -6,11 +6,15 @@ class DeviceRegisterIn {
   final String locale;
   final Map<String, dynamic> settings;
 
+  /// When a daily push reaches them: the server has no other idea of their time.
+  final int? utcOffsetMinutes;
+
   const new _({
     required this.platform,
     required this.token,
     required this.locale,
     required this.settings,
+    this.utcOffsetMinutes,
   });
 
   static Future<DeviceRegisterIn> fromRequest(Request req) async {
@@ -23,6 +27,11 @@ class DeviceRegisterIn {
         req.config.defaultLocale,
       ),
       settings: json.mapping('settings'),
+      utcOffsetMinutes: switch (json['utcOffsetMinutes']) {
+        null => null,
+        final int minutes when minutes >= -720 && minutes <= 840 => minutes,
+        _ => throw const BadRequest(reason: 'utcOffsetMinutes must be between -720 and 840'),
+      },
     );
   }
 }
