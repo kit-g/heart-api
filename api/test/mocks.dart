@@ -37,6 +37,7 @@ import 'package:mockito/annotations.dart';
   SkipService,
   CommentService,
   ConnectionsService,
+  InvitationService,
   DeviceService,
   EventPublisher,
   AppleIdentityService,

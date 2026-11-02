@@ -5,6 +5,7 @@ import 'package:heart/routes/account.dart' as account;
 import 'package:heart/routes/charts.dart' as charts;
 import 'package:heart/routes/comments.dart' as comments;
 import 'package:heart/routes/connections.dart' as connections;
+import 'package:heart/routes/invitations.dart' as invitations;
 import 'package:heart/routes/devices.dart' as devices;
 import 'package:heart/routes/events.dart' as events;
 import 'package:heart/routes/exercise_preferences.dart' as exercise_preferences;
@@ -49,12 +50,22 @@ final routes = <(String, Method), ModelHandler>{
   ('/comments', .post): comments.createComment,
   ('/comments/:commentId', .put): comments.editComment,
   ('/comments/:commentId', .delete): comments.deleteComment,
+  ('/blocks', .get): invitations.getBlocks,
+  ('/blocks/:blockedId', .delete): invitations.liftBlock,
   ('/connections', .get): connections.getConnections,
   ('/connections', .post): connections.createConnection,
   ('/connections/:connectionId', .delete): connections.deleteConnection,
   ('/connections/:connectionId', .put): connections.reactToConnection,
   ('/connections/:connectionId/shares', .put): connections.changeConnectionShares,
   ('/devices', .post): devices.registerDevice,
+  ('/invitations', .get): invitations.getInvitations,
+  ('/invitations', .post): invitations.createInvitation,
+  ('/invitations/:invitationId', .delete): invitations.cancelInvitation,
+  ('/invitations/:invitationId/resend', .post): invitations.resendInvitation,
+  ('/invitation-links/:token', .get): invitations.previewInvitation,
+  ('/invitation-links/:token/accept', .post): invitations.acceptInvitation,
+  ('/invitation-links/:token/decline', .post): invitations.declineInvitation,
+  ('/invitation-links/:token/block', .post): invitations.blockInviter,
   ('/exercises', .get): exercises.getExercises,
   ('/exercises', .post): exercises.createExercise,
   ('/exercises/:exerciseId', .put): exercises.updateExercise,
@@ -110,6 +121,13 @@ final routes = <(String, Method), ModelHandler>{
 
 const _publicRoutes = {'/version', '/events'};
 
+/// Reading a link is signed out, so someone without the app or an account can
+/// see who is asking. Answering it isn't.
+bool _isInvitationPreview(Request request) {
+  final segments = request.url.pathSegments;
+  return request.method == .get && segments.length == 2 && segments.first == 'invitation-links';
+}
+
 /// Whether [request] is for one of the app's own routes: those authenticate
 /// with a Firebase ID token and carry the app version. Public routes need
 /// neither, the `/me` and MCP surfaces authenticate with tokens, and the
@@ -118,6 +136,7 @@ const _publicRoutes = {'/version', '/events'};
 bool isAppRoute(Request request) {
   final path = request.url.path;
   if (_publicRoutes.contains(path)) return false;
+  if (_isInvitationPreview(request)) return false;
   bool under(String prefix) => path == prefix || path.startsWith('$prefix/');
   return !under(tokenPrefix) && !under(mcpPrefix) && !under(oauthPrefix);
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.41.0
+
+Invitations (heart-api#359).
+
+- New: `Invitation`, `InvitationPreview` and `BlockedPerson`.
+- New: `InvitationService`.
+
 ## 2.40.0
 
 Groundwork for coaching (heart-api#358).

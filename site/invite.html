@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="robots" content="noindex"/>
+    <title>An invitation - Heart of Yours</title>
+    <link rel="stylesheet" href="assets/tokens.css">
+    <link rel="stylesheet" href="assets/site.css">
+    <link rel="stylesheet" href="assets/tailwind.css">
+    <script src="assets/site.js"></script>
+    <script src="assets/connect-config.js"></script>
+    <script type="module" src="assets/invite.js"></script>
+</head>
+<body class="bg-ground text-ink font-text min-h-screen flex flex-col overflow-x-hidden">
+<main class="flex-grow flex flex-col items-center justify-center w-full px-6 py-12 md:py-20">
+    <div class="w-full max-w-xl bg-surface rounded-xl p-8 sm:p-12 border text-center">
+        <section id="state-loading">
+            <p class="text-muted">Loading…</p>
+        </section>
+
+        <section id="state-ask" hidden>
+            <img id="inviter-photo" hidden alt="" class="size-20 rounded-full object-cover mx-auto mb-6"/>
+            <h1 class="font-title text-2xl font-semibold tracking-tight text-ink mb-4">
+                <span id="inviter-name">Someone</span> invited you to train with them in Heart
+            </h1>
+            <p class="text-muted leading-relaxed mb-4">
+                You answer in the app, and nothing is shared until you say yes.
+            </p>
+            <p class="text-muted leading-relaxed mb-8">
+                If you accept, a coach sees the workouts you log from then on, with their notes, your program and
+                how it's going, and the name you use in Heart. You can hide any workout, pause, or leave at any time.
+                A coach never sees your health data, your photos, why you skipped a session, or your email address.
+            </p>
+            <div class="flex flex-col gap-3">
+                <a id="open-app" class="inline-flex items-center justify-center h-11 px-6 rounded bg-accent text-on-accent font-medium">
+                    Open in Heart
+                </a>
+                <a class="inline-flex items-center justify-center h-11 px-6 rounded border text-ink font-medium"
+                   href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener">Get it for iPhone</a>
+                <a class="inline-flex items-center justify-center h-11 px-6 rounded border text-ink font-medium"
+                   href="https://play.google.com/store/apps/details?id=me.heart.android" target="_blank" rel="noopener">Get it for Android</a>
+            </div>
+            <p class="text-muted text-sm leading-relaxed mt-8">
+                Already installed? Come back to this link once you have Heart, and it will open there.
+            </p>
+        </section>
+
+        <section id="state-gone" hidden>
+            <h1 class="font-title text-2xl font-semibold tracking-tight text-ink mb-4">This invitation has ended</h1>
+            <p class="text-muted leading-relaxed">It has expired, been withdrawn or been answered. Ask the person who sent it for a new one.</p>
+        </section>
+    </div>
+</main>
+</body>
+</html>
