@@ -5,7 +5,7 @@ SELECT plan(21);
 SELECT has_table('public'::name, 'invitations'::name);
 SELECT columns_are(
                'public', 'invitations',
-               ARRAY ['id', 'inviter_id', 'role', 'domain', 'token_hash', 'name', 'max_uses', 'expires_at', 'canceled_at', 'created_at']
+               ARRAY ['id', 'inviter_id', 'role', 'domain', 'token_hash', 'name', 'max_uses', 'expires_at', 'canceled_at', 'renewed_at', 'created_at']
        );
 SELECT col_is_pk('public'::name, 'invitations'::name, 'id'::name);
 SELECT col_type_is('public'::name, 'invitations'::name, 'token_hash'::name, 'bytea'::name);

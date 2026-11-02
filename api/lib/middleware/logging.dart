@@ -36,5 +36,11 @@ String _message(Request request, Duration elapsed, String outcome) {
   final query = url.query.isEmpty ? '' : '?${url.query}';
   final ms = (elapsed.inMicroseconds / 1000).toStringAsFixed(1);
 
-  return '${ms}ms ${request.method.value} [$outcome] ${url.path}$query';
+  return '${ms}ms ${request.method.value} [$outcome] ${redactedPath(url.path)}$query';
 }
+
+final _invitationLink = RegExp(r'^(/?invitation-links/)[^/]+');
+
+/// [path] as a log can hold it. An invitation's token is a bearer secret in the
+/// address, and the database keeps only its hash, so a log must not keep it either.
+String redactedPath(String path) => path.replaceFirstMapped(_invitationLink, (match) => '${match[1]}<token>');

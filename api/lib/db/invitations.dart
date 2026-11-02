@@ -98,15 +98,19 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
     required String token,
     Set<ConnectionShare> shares = const {},
   }) async {
-    final rows = await _pool.execute(
-      _acceptInvitation.toSql(),
-      parameters: {
-        'userId': userId,
-        'tokenHash': TokenSecret.hash(token),
-        'shares': [for (final share in shares) share.name],
-      },
-    );
-    final row = rows.firstOrNull?.toColumnMap();
+    final tokenHash = TokenSecret.hash(token);
+    final row = await _pool.runTx((tx) async {
+      await tx.execute(_lockInvitation.toSql(), parameters: {'tokenHash': tokenHash});
+      final rows = await tx.execute(
+        _acceptInvitation.toSql(),
+        parameters: {
+          'userId': userId,
+          'tokenHash': tokenHash,
+          'shares': [for (final share in shares) share.name],
+        },
+      );
+      return rows.firstOrNull?.toColumnMap();
+    });
     return switch (row) {
       null => throw const NotFound(type: 'Invitation', id: 'that link'),
       {'own': true} => throw const BadRequest(code: 'own_invitation', reason: 'this is your own invitation'),

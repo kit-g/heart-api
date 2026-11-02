@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS invitations
     max_uses    SMALLINT    NOT NULL DEFAULT 1,
     expires_at  TIMESTAMPTZ NOT NULL,
     canceled_at TIMESTAMPTZ,
+    renewed_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT invitations_role_check CHECK (role IN ('COACH', 'PEER')),
     CONSTRAINT invitations_name_check CHECK (length(trim(name)) BETWEEN 1 AND 100),
@@ -33,6 +34,7 @@ COMMENT ON COLUMN invitations.name IS 'The name the inviter wrote for the person
 COMMENT ON COLUMN invitations.max_uses IS 'How many people can answer the link';
 COMMENT ON COLUMN invitations.expires_at IS 'When the link stops working';
 COMMENT ON COLUMN invitations.canceled_at IS 'When the inviter withdrew it; NULL while it stands';
+COMMENT ON COLUMN invitations.renewed_at IS 'When it last got a new secret; only answers since then count against it, and older ones stay as history';
 COMMENT ON CONSTRAINT invitations_role_check ON invitations IS 'An inviter coaches or is a peer; a student is who accepts';
 COMMENT ON CONSTRAINT invitations_name_check ON invitations IS 'Between 1 and 100 characters';
 COMMENT ON CONSTRAINT invitations_max_uses_check ON invitations IS 'At least one person';

@@ -4,6 +4,7 @@ library;
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart_models/heart_models.dart';
+import 'package:postgres/postgres.dart' show Sql;
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -140,6 +141,34 @@ void main() {
       expect(second.shares, isEmpty);
     });
 
+    // The statements have to overlap: both wait on a lock this test holds, so each
+    // starts before the other has answered. One statement that took the lock itself
+    // would still count answers from before it waited, and let both in.
+    test('of two people waiting at once, one gets it', () async {
+      final c = await coach();
+      final people = [await h.seedProfile(), await h.seedProfile()];
+      final invitation = await invite(c);
+
+      late Future<List<String>> answers;
+      await h.pool.runTx((tx) async {
+        await tx.execute(
+          Sql.named('SELECT id FROM invitations WHERE id = @id::uuid FOR UPDATE'),
+          parameters: {'id': invitation.id},
+        );
+        answers = Future.wait([
+          for (final person in people)
+            h.db
+                .acceptInvitation(userId: person, token: invitation.token!)
+                .then<String>((_) => 'accepted', onError: (Object e) => (e as BadRequest).code),
+        ]);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      });
+
+      final outcomes = await answers;
+      expect(outcomes.where((outcome) => outcome == 'accepted'), hasLength(1));
+      expect(outcomes.where((outcome) => outcome == 'invitation_gone'), hasLength(1));
+    });
+
     test('of two people racing, one gets it', () async {
       final c = await coach();
       final people = [await h.seedProfile(), await h.seedProfile(), await h.seedProfile()];
@@ -256,6 +285,19 @@ void main() {
       await expectLater(h.db.acceptInvitation(userId: student, token: next.token!), refusedWith('invitation_gone'));
     });
 
+    test('a block from a link ends a live relationship, and lifting it gives nothing back', () async {
+      final c = await coach();
+      final student = await h.seedProfile();
+      await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!);
+
+      await h.db.blockInviter(userId: student, token: (await invite(c)).token!);
+      expect((await h.db.getConnections(student)).single.status, ConnectionStatus.severed);
+
+      await h.db.liftBlock(userId: student, blockedId: c);
+      expect((await h.db.getConnections(student)).single.status, ConnectionStatus.severed);
+      expect(await h.db.areConnected(userA: c, userB: student), isFalse);
+    });
+
     test('only the blocker lifts it, and a blocked row ends', () async {
       final c = await coach();
       final student = await h.seedProfile();
@@ -275,6 +317,28 @@ void main() {
       expect((await h.db.getBlocks(userId: student)).items, isEmpty);
       expect((await h.db.getConnections(student)).single.status, ConnectionStatus.severed);
     });
+  });
+
+  test('renewing a declined link opens it to the next person, and the decline still counts', () async {
+    final c = await coach();
+    final (declined, other) = (await h.seedProfile(), await h.seedProfile());
+    final invitation = await invite(c);
+    await h.db.declineInvitation(userId: declined, token: invitation.token!);
+    expect((await h.db.getInvitations(inviterId: c)).items.single.status, 'declined');
+
+    final renewed = await h.db.renewInvitation(
+      inviterId: c,
+      invitationId: invitation.id,
+      token: TokenSecret.random(),
+    );
+    expect((await h.db.getInvitations(inviterId: c)).items.single.status, 'pending');
+    expect((await h.db.acceptInvitation(userId: other, token: renewed.token!)).status, ConnectionStatus.active);
+
+    final kept = await h.exec(
+      "SELECT count(*) FROM invitation_responses WHERE invitation_id = @id::uuid AND response = 'declined'",
+      {'id': invitation.id},
+    );
+    expect(kept.first[0], 1);
   });
 
   test('renewing gives a new token, and the old one stops working', () async {

@@ -466,7 +466,7 @@ WHERE domain = @domain
 const _invitationStatus = '''
   CASE
     WHEN EXISTS (SELECT 1 FROM invitation_responses r WHERE r.invitation_id = i.id AND r.response = 'accepted') THEN 'accepted'
-    WHEN EXISTS (SELECT 1 FROM invitation_responses r WHERE r.invitation_id = i.id) THEN 'declined'
+    WHEN EXISTS (SELECT 1 FROM invitation_responses r WHERE r.invitation_id = i.id AND r.at >= i.renewed_at) THEN 'declined'
     WHEN i.canceled_at IS NOT NULL THEN 'canceled'
     WHEN i.expires_at <= now() THEN 'expired'
     ELSE 'pending'
@@ -487,7 +487,7 @@ _load AS (
       WHERE i.inviter_id = @inviterId
         AND i.canceled_at IS NULL
         AND i.expires_at > now()
-        AND NOT EXISTS (SELECT 1 FROM invitation_responses r WHERE r.invitation_id = i.id)
+        AND NOT EXISTS (SELECT 1 FROM invitation_responses r WHERE r.invitation_id = i.id AND r.at >= i.renewed_at)
     ) AS pending,
     (
       SELECT count(*)
@@ -534,7 +534,7 @@ RETURNING id
 
 const _renewInvitation = '''
 UPDATE invitations i
-SET token_hash = @tokenHash, expires_at = @expiresAt, canceled_at = NULL
+SET token_hash = @tokenHash, expires_at = @expiresAt, canceled_at = NULL, renewed_at = now()
 WHERE i.id = @invitationId::uuid
   AND i.inviter_id = @inviterId
   AND NOT EXISTS (SELECT 1 FROM invitation_responses r WHERE r.invitation_id = i.id AND r.response = 'accepted')
@@ -560,14 +560,20 @@ JOIN profiles p ON p.id = i.inviter_id
 WHERE i.token_hash = @tokenHash
 ''';
 
-/// One statement, holding the invitation's row, so of two people racing the
-/// second finds it answered. A row the pair already holds in this domain is
-/// rewritten: the new relationship reads from now, and shares only what was said
-/// just now. One the same coach already holds live is left alone.
+/// Holds the invitation for [_acceptInvitation], which runs next in the same
+/// transaction. They can't be one statement: one that waited for this lock would still
+/// count answers as they stood before it waited, so two people racing would both get in.
+const _lockInvitation = '''
+SELECT id FROM invitations WHERE token_hash = @tokenHash FOR UPDATE
+''';
+
+/// A row the pair already holds in this domain is rewritten: the new relationship reads
+/// from now, and shares only what was said just now. One the same coach already holds
+/// live is left alone.
 const _acceptInvitation = '''
 WITH
 _invitation AS (
-  SELECT * FROM invitations WHERE token_hash = @tokenHash FOR UPDATE
+  SELECT * FROM invitations WHERE token_hash = @tokenHash
 ),
 _standing AS (
   SELECT
@@ -583,7 +589,9 @@ _standing AS (
       AND NOT _blocked_between(i.inviter_id, @userId)
       AND (
         SELECT count(*) FROM invitation_responses r
-        WHERE r.invitation_id = i.id AND r.user_id IS DISTINCT FROM @userId
+        WHERE r.invitation_id = i.id
+          AND r.user_id IS DISTINCT FROM @userId
+          AND r.at >= i.renewed_at
       ) < i.max_uses
     ) AS good
   FROM _invitation i
@@ -725,7 +733,8 @@ ORDER BY b.blocked_id DESC
 LIMIT @limit
 ''';
 
-/// A block set on a row ends that row. One set from a link had no row to end.
+/// A block ended what was live when it was set, so lifting one restores nothing. A row
+/// left at `blocked` moves to `severed`, as lifting it there would.
 const _liftBlock = '''
 WITH
 _lifted AS (
