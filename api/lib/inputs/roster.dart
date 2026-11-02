@@ -20,25 +20,19 @@ class PageTokenQuery {
   }
 }
 
-/// `GET /coach/clients?sort=&reason=&former=&cursor=&limit=`.
+/// `GET /coach/clients?reason=&former=&cursor=&limit=`.
 class RosterQuery {
-  final bool byNeed;
   final String? reason;
   final bool former;
   final String? cursor;
   final int limit;
 
-  const new _({required this.byNeed, this.reason, required this.former, this.cursor, required this.limit});
+  const new _({this.reason, required this.former, this.cursor, required this.limit});
 
   static RosterQuery fromRequest(Request req) {
     final query = req.url.queryParameters;
     final page = PageTokenQuery.fromRequest(req);
     return RosterQuery._(
-      byNeed: switch (query['sort']) {
-        null || 'need' => true,
-        'name' => false,
-        _ => throw const BadRequest(reason: 'sort is need or name'),
-      },
       reason: query['reason'],
       former: query['former'] == 'true',
       cursor: page.cursor,

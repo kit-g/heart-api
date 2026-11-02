@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS client_summaries
     coach_id        TEXT        NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
     student_id      TEXT        NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
     dirty           BOOLEAN     NOT NULL DEFAULT true,
+    generation      BIGINT      NOT NULL DEFAULT 0,
     program_id      UUID,
     program_name    TEXT,
     program_week    INTEGER,
@@ -32,6 +33,8 @@ COMMENT ON COLUMN client_summaries.connection_id IS 'The relationship';
 COMMENT ON COLUMN client_summaries.coach_id IS 'The coach';
 COMMENT ON COLUMN client_summaries.student_id IS 'The client';
 COMMENT ON COLUMN client_summaries.dirty IS 'Something changed since this was worked out';
+COMMENT ON COLUMN client_summaries.generation IS
+    'Moves with each change, so working this out over a change still being written leaves it dirty';
 COMMENT ON COLUMN client_summaries.program_id IS 'The program of this coach''s they are on; a link, not a reference';
 COMMENT ON COLUMN client_summaries.program_name IS 'Its name';
 COMMENT ON COLUMN client_summaries.program_week IS 'The week the coach can see them in';
@@ -69,6 +72,7 @@ BEGIN
         )
         ON CONFLICT (connection_id) DO UPDATE
             SET dirty = true,
+                generation = client_summaries.generation + 1,
                 coach_id = EXCLUDED.coach_id,
                 student_id = EXCLUDED.student_id;
     ELSE
@@ -95,9 +99,9 @@ AS
 $$
 BEGIN
     UPDATE client_summaries
-    SET dirty = true
-    WHERE student_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END
-      AND NOT dirty;
+    SET dirty = true,
+        generation = generation + 1
+    WHERE student_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
     RETURN NULL;
 END
 $$;
@@ -143,11 +147,11 @@ AS
 $$
 BEGIN
     UPDATE client_summaries s
-    SET dirty = true
+    SET dirty = true,
+        generation = s.generation + 1
     FROM workouts w
     WHERE w.id = NEW.workout_id
-      AND s.student_id = w.user_id
-      AND NOT s.dirty;
+      AND s.student_id = w.user_id;
     RETURN NULL;
 END
 $$;
@@ -194,7 +198,8 @@ COMMENT ON TRIGGER workouts_owe_digest ON workouts IS 'A finished workout that i
 
 -- Whether a workout fell short of what was planned. A plan names its sets as
 -- {"exercises": [{"sets": [{"weight": 80, "setId": "..."}]}]}: a planned set with no
--- set, one not completed, or one lighter than planned.
+-- set of this workout, one not completed, or one lighter than planned. The plan is the
+-- device's, so anything else in it, however it got there, compares as nothing.
 CREATE OR REPLACE FUNCTION _workout_fell_short(_workout_id UUID) RETURNS BOOLEAN
     LANGUAGE sql
     STABLE
@@ -202,15 +207,32 @@ AS
 $$
 SELECT EXISTS (
     SELECT 1
-    FROM workout_plans p,
-         jsonb_array_elements(p.plan -> 'exercises') exercise,
-         jsonb_array_elements(exercise -> 'sets') planned
-    LEFT JOIN exercise_sets done ON done.id::text = planned ->> 'setId'
+    FROM workout_plans p
+    CROSS JOIN LATERAL jsonb_array_elements(
+        CASE WHEN jsonb_typeof(p.plan -> 'exercises') = 'array' THEN p.plan -> 'exercises' ELSE '[]'::jsonb END
+    ) exercise
+    CROSS JOIN LATERAL jsonb_array_elements(
+        CASE WHEN jsonb_typeof(exercise -> 'sets') = 'array' THEN exercise -> 'sets' ELSE '[]'::jsonb END
+    ) planned
+    LEFT JOIN exercise_sets done
+        ON done.id = CASE
+            WHEN planned ->> 'setId' ~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+            THEN (planned ->> 'setId')::uuid
+        END
+        AND EXISTS (
+            SELECT 1
+            FROM workout_exercises we
+            WHERE we.id = done.workout_exercise_id
+              AND we.workout_id = p.workout_id
+        )
     WHERE p.workout_id = _workout_id
+      AND jsonb_typeof(planned) = 'object'
       AND (
         done.id IS NULL
         OR NOT coalesce(done.completed, false)
-        OR done.weight < (planned ->> 'weight')::real
+        OR done.weight < CASE
+            WHEN jsonb_typeof(planned -> 'weight') = 'number' THEN (planned ->> 'weight')::real
+        END
       )
 )
 $$;
@@ -222,9 +244,9 @@ CREATE OR REPLACE FUNCTION _mark_all_client_summaries() RETURNS VOID
 AS
 $$
 UPDATE client_summaries
-SET dirty = true
+SET dirty = true,
+    generation = generation + 1
 WHERE program_id IS NOT NULL
-  AND NOT dirty
 $$;
 
 COMMENT ON FUNCTION _mark_all_client_summaries() IS 'Marks summaries on a program, since a calendar week can move one along with nothing changing';

@@ -43,7 +43,7 @@ void main() {
       ..programChangeService = h.db
       ..programService = h.db;
     await refreshRoster(req);
-    return h.db.getRoster(coachId: coach, reason: reason, former: former, cursor: cursor, limit: limit, byNeed: byNeed);
+    return h.db.getRoster(coachId: coach, reason: reason, former: former, cursor: cursor, limit: limit);
   }
 
   Future<String> trained(String student, {DateTime? at, String? note}) {
@@ -129,6 +129,43 @@ void main() {
       await h.exec('UPDATE workouts SET note = NULL WHERE id = @w::uuid', {'w': workout});
       expect((await roster(coach)).items.single.reasons, ['lighter']);
     });
+  });
+
+  test('a plan of the wrong shape, however it got there, takes nothing down', () async {
+    final (coach, student, _) = await client();
+    final workout = await trained(student);
+    await h.exec(
+      '''INSERT INTO workout_plans (workout_id, plan) VALUES (@w::uuid, '{"exercises": {"x": 1}}')''',
+      {'w': workout},
+    );
+    final summary = (await roster(coach)).items.single;
+    expect(summary.reasons, isEmpty);
+    expect(summary.recent, hasLength(1));
+  });
+
+  test('working one out over a change still being written leaves it dirty', () async {
+    final (coach, student, _) = await client();
+    final read = (await h.db.getDirtySummaries(coachId: coach)).single;
+
+    await trained(student);
+    await h.db.refreshSummary(
+      connectionId: read.connectionId,
+      coachId: read.coachId,
+      studentId: read.studentId,
+      generation: read.generation,
+      ending: false,
+    );
+    expect(await h.db.getDirtySummaries(coachId: coach), hasLength(1), reason: 'it read from before the workout');
+
+    final again = (await h.db.getDirtySummaries(coachId: coach)).single;
+    await h.db.refreshSummary(
+      connectionId: again.connectionId,
+      coachId: again.coachId,
+      studentId: again.studentId,
+      generation: again.generation,
+      ending: false,
+    );
+    expect(await h.db.getDirtySummaries(coachId: coach), isEmpty);
   });
 
   group('what it can\'t see', () {

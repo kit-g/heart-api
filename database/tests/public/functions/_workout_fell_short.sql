@@ -31,6 +31,16 @@ BEGIN
     UPDATE workout_plans SET plan = jsonb_build_object('exercises', jsonb_build_array(jsonb_build_object(
         'sets', jsonb_build_array(jsonb_build_object('weight', 80))))) WHERE workout_id = _workout;
     RETURN NEXT ok(_workout_fell_short(_workout), 'a planned set that was never done');
+
+    UPDATE workout_plans SET plan = '{"exercises": {"x": 1}}' WHERE workout_id = _workout;
+    RETURN NEXT ok(NOT _workout_fell_short(_workout), 'a plan of the wrong shape compares as nothing');
+
+    UPDATE workout_plans SET plan = '{"exercises": [1, {"sets": 2}, {"sets": [3]}]}' WHERE workout_id = _workout;
+    RETURN NEXT ok(NOT _workout_fell_short(_workout), 'at any depth');
+
+    UPDATE workout_plans SET plan = jsonb_build_object('exercises', jsonb_build_array(jsonb_build_object(
+        'sets', jsonb_build_array(jsonb_build_object('weight', 'heavy', 'setId', _set))))) WHERE workout_id = _workout;
+    RETURN NEXT ok(NOT _workout_fell_short(_workout), 'a weight that is no number compares as nothing');
 END
 $$ LANGUAGE plpgsql;
 

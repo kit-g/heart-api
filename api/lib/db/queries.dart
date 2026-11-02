@@ -3839,7 +3839,7 @@ WHERE w.id = @workoutId::uuid
 /// With each its program: the newest of this coach's copies the student has started.
 const _dirtySummaries =
     '''
-SELECT s.connection_id, s.student_id, program.*
+SELECT s.connection_id, s.student_id, s.generation, program.*
 FROM client_summaries s
 JOIN connections c ON c.id = s.connection_id
 LEFT JOIN LATERAL (
@@ -3875,7 +3875,7 @@ _seen AS (
 )
 UPDATE client_summaries
 SET
-  dirty = false,
+  dirty = generation IS DISTINCT FROM @generation::bigint,
   program_id = @programId::uuid,
   program_name = @programName,
   program_week = @programWeek,
@@ -3936,7 +3936,7 @@ _clients AS (
 _ranked AS (
   SELECT
     *,
-    CASE WHEN @byNeed::boolean AND NOT @former::boolean AND cardinality(reasons) = 0 THEN 1 ELSE 0 END AS rank
+    CASE WHEN NOT @former::boolean AND cardinality(reasons) = 0 THEN 1 ELSE 0 END AS rank
   FROM _clients
   WHERE @reason::text IS NULL OR @reason = ANY (reasons)
 )

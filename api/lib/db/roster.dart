@@ -10,6 +10,7 @@ mixin _Roster on _DatabaseBase implements RosterService {
           connectionId: row['connection_id'].toString(),
           coachId: coachId,
           studentId: row['student_id'] as String,
+          generation: row['generation'] as int,
           program: row['id'] == null ? null : Program.fromRow(row),
         ),
     ];
@@ -20,6 +21,7 @@ mixin _Roster on _DatabaseBase implements RosterService {
     required String connectionId,
     required String coachId,
     required String studentId,
+    required int generation,
     String? programId,
     String? programName,
     int? programWeek,
@@ -32,6 +34,7 @@ mixin _Roster on _DatabaseBase implements RosterService {
         'connectionId': connectionId,
         'coachId': coachId,
         'studentId': studentId,
+        'generation': generation,
         'programId': programId,
         'programName': programName,
         'programWeek': programWeek,
@@ -44,7 +47,6 @@ mixin _Roster on _DatabaseBase implements RosterService {
   @override
   Future<Page<ClientSummary>> getRoster({
     required String coachId,
-    bool byNeed = true,
     String? reason,
     bool former = false,
     String? cursor,
@@ -59,7 +61,6 @@ mixin _Roster on _DatabaseBase implements RosterService {
       _roster.toSql(),
       parameters: {
         'coachId': coachId,
-        'byNeed': byNeed,
         'reason': reason,
         'former': former,
         'afterRank': after?.rank,
