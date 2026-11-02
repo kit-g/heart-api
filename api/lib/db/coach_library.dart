@@ -73,10 +73,14 @@ mixin _CoachLibrary on _DatabaseBase implements CoachLibraryService {
   }
 
   @override
-  Future<Map<String, String>> matchExercisesForStudent({required List<String> ids, required String studentId}) async {
+  Future<Map<String, String>> matchExercisesForStudent({
+    required List<String> ids,
+    required String coachId,
+    required String studentId,
+  }) async {
     final rows = await _pool.execute(
       _matchExercisesForStudent.toSql(),
-      parameters: {'ids': ids, 'studentId': studentId},
+      parameters: {'ids': ids, 'coachId': coachId, 'studentId': studentId},
     );
     return {for (final row in rows) row[0].toString(): row[1].toString()};
   }

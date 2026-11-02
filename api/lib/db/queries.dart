@@ -3512,13 +3512,15 @@ WHERE l.id = @id::uuid
 
 /// Any exercise the body names, as the one the student has: their own by that name
 /// first, then the library's, and otherwise a copy made for them. An id that isn't
-/// an exercise, such as a session's, finds no row and stays out of the answer.
+/// an exercise, such as a session's, finds no row and stays out of the answer. So does
+/// someone else's private exercise: a coach can pass on only what they can see.
 const _matchExercisesForStudent = '''
 WITH
 _sources AS (
   SELECT e.*
   FROM exercises e
   WHERE e.id = ANY (@ids::uuid[])
+    AND (e.user_id IS NULL OR e.user_id = @coachId)
 ),
 _matched AS (
   SELECT

@@ -55,8 +55,9 @@ Future<ProgramDeliveries> sendCoachProgram(Request req) async {
 }
 
 /// Makes the student's own copy, on the server since they may be offline. What
-/// they already hold answers that copy. A limit of theirs comes back as not
-/// delivered, because it shouldn't stop what's going on around it.
+/// they already hold answers that copy. Someone they aren't coaching, or a limit of
+/// theirs, comes back as not delivered: a send covers several clients, and one that
+/// can't get it shouldn't stop the rest or hide who already did.
 Future<ProgramDelivery> deliverCoachProgram(
   Request req, {
   required String coachId,
@@ -71,7 +72,7 @@ Future<ProgramDelivery> deliverCoachProgram(
   if (context == null) throw NotFound(type: 'Library program', id: id);
   final studentId = context.studentId;
   if (studentId == null) {
-    throw const Forbidden(reason: 'You can only send a program to a client you are coaching.');
+    return ProgramDelivery(connectionId: connectionId, delivered: false, reason: 'not_coaching');
   }
   if (context.existingProgramId case final String existing) {
     return ProgramDelivery(connectionId: connectionId, delivered: true, programId: existing);
@@ -80,7 +81,11 @@ Future<ProgramDelivery> deliverCoachProgram(
   final body = context.body;
   final ids = copyIds(
     body,
-    exercises: await req.coachLibraryService.matchExercisesForStudent(ids: idsIn(body).toList(), studentId: studentId),
+    exercises: await req.coachLibraryService.matchExercisesForStudent(
+      ids: idsIn(body).toList(),
+      coachId: coachId,
+      studentId: studentId,
+    ),
   );
   final input = ProgramCreateIn.fromJson(studentId, (remapIds(body, ids)! as Map).cast<String, dynamic>());
   try {

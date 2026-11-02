@@ -52,6 +52,7 @@ void main() {
         createdAt: DateTime.utc(2026),
       ),
     );
+    when(app.db.invitationProgram(token: anyNamed('token'))).thenAnswer((_) async => null);
     when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
     when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
 

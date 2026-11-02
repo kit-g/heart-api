@@ -40,9 +40,13 @@ abstract interface class CoachLibraryService {
     required String connectionId,
   });
 
-  /// For each of [ids] that is an exercise, the one [studentId] has: their own by
-  /// that name, the library's, or a copy made for them.
-  Future<Map<String, String>> matchExercisesForStudent({required List<String> ids, required String studentId});
+  /// For each of [ids] that is an exercise [coachId] can see, the one [studentId]
+  /// has: their own by that name, the library's, or a copy made for them.
+  Future<Map<String, String>> matchExercisesForStudent({
+    required List<String> ids,
+    required String coachId,
+    required String studentId,
+  });
 
   /// The program an invitation names, if any.
   Future<String?> invitationProgram({required String token});

@@ -630,7 +630,7 @@ final List<McpTool> tools = [
       // the session each template exercise is in, for a base kept per slot
       final sessionOf = {
         for (final template in templates.nonNulls)
-          for (final exercise in template) exercise.id: template.name ?? 'Untitled',
+          for (final exercise in template) exercise.id: template.quotedName,
       };
       // and the exercise each slot is, for a rule kept per slot
       final exerciseOf = {
@@ -696,7 +696,7 @@ final List<McpTool> tools = [
         if (next != null)
           'nextSession': _namedPlan(
             next,
-            session: templates.nonNulls.firstWhere((template) => template.id == next.templateId).name ?? 'Untitled',
+            session: templates.nonNulls.firstWhere((template) => template.id == next.templateId).quotedName,
             names: names,
             sessions: sessionOf,
           ),
@@ -735,10 +735,10 @@ final List<McpTool> tools = [
         request.exerciseService.getExercises(request.userId).then((library) => library.toExerciseNames()),
         programs.programSessions(request, program),
       ).wait;
-      final sessionNames = {for (final template in templates.nonNulls) template.id: template.name ?? 'Untitled'};
+      final sessionNames = {for (final template in templates.nonNulls) template.id: template.quotedName};
       final slotSessions = {
         for (final template in templates.nonNulls)
-          for (final exercise in template) exercise.id: template.name ?? 'Untitled',
+          for (final exercise in template) exercise.id: template.quotedName,
       };
       String name(String exerciseId) => names[exerciseId] ?? exerciseId;
       return {
@@ -851,9 +851,9 @@ final List<McpTool> tools = [
 /// naming that lift, and the session of the occurrence it is of.
 Map<String, dynamic> _namedPlan(
   PlannedSession plan, {
-  required String session,
+  required Object session,
   required Map<String, String> names,
-  required Map<String, String> sessions,
+  required Map<String, Object> sessions,
 }) {
   final map = plan.toMap();
   return {
@@ -903,11 +903,11 @@ Map<String, dynamic> _namedResearch(
                 {'on': 'rule', 'exercise': final String id} => {'on': 'rule', 'exercise': names[id] ?? id},
                 {'on': 'session', 'session': final String id} => {
                   'on': 'session',
-                  'session': sessions[id]?.name ?? 'Untitled',
+                  'session': sessions[id]?.quotedName ?? 'Untitled',
                 },
                 {'on': 'exercise', 'session': final String id, 'exercise': final String slot} => {
                   'on': 'exercise',
-                  'session': sessions[id]?.name ?? 'Untitled',
+                  'session': sessions[id]?.quotedName ?? 'Untitled',
                   'exercise': ?sessions[id]?.where((exercise) => exercise.id == slot).firstOrNull?.exercise.name,
                 },
                 _ => about,
@@ -919,6 +919,18 @@ Map<String, dynamic> _namedResearch(
 }
 
 extension on Template {
+  /// The template's name as the tools return it on its own: as is for the user's own,
+  /// and under `quoted` for one another account assigned them.
+  Object get quotedName {
+    final name = this.name ?? 'Untitled';
+    return switch (assignedBy) {
+      null => name,
+      final Profile by => {
+        'quoted': {'by': by.quotedName, 'name': name},
+      },
+    };
+  }
+
   /// [text] as the tools return it: as is for the user's own template, and
   /// under `quoted` for one another account assigned them, with `by` naming
   /// that account. Every string an assigned template carries (its name, its

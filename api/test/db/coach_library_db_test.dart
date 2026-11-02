@@ -132,6 +132,7 @@ void main() {
 
       final matched = await h.db.matchExercisesForStudent(
         ids: [global, coachesShared, onlyCoach, uuidV7()],
+        coachId: coach,
         studentId: student,
       );
 
@@ -142,6 +143,22 @@ void main() {
       final owner = await h.exec('SELECT user_id FROM exercises WHERE id = @id::uuid', {'id': matched[onlyCoach]});
       expect(owner.first[0], student);
     });
+  });
+
+  test('someone else\'s private exercise doesn\'t get copied to anyone', () async {
+    final (coach, student, _) = await coaching();
+    final stranger = await h.seedProfile();
+    final name = 'Private ${h.uid('x')}';
+    final private = await h.insertId(
+      "INSERT INTO exercises (name, category, target, user_id) VALUES (@n, 'Barbell', 'Chest', @u) RETURNING id",
+      {'n': name, 'u': stranger},
+    );
+
+    final matched = await h.db.matchExercisesForStudent(ids: [private], coachId: coach, studentId: student);
+
+    expect(matched, isEmpty);
+    final copied = await h.exec('SELECT 1 FROM exercises WHERE name = @n AND user_id = @s', {'n': name, 's': student});
+    expect(copied, isEmpty);
   });
 
   test('a copy keeps the program a coach\'s, its sessions theirs, and waits if the student is busy', () async {
@@ -294,11 +311,13 @@ void main() {
       expect(delivery.reason, 'program_limit');
     });
 
-    test('a coach of someone else gets nothing through', () async {
+    test('a client this coach doesn\'t coach comes back as not delivered', () async {
       final (coach, _, _) = await coaching();
       final (_, _, theirs) = await coaching();
       final (id, _) = await library(coach);
-      await expectLater(send(coach, id, theirs), throwsA(anything));
+      final delivery = await send(coach, id, theirs);
+      expect(delivery.delivered, isFalse);
+      expect(delivery.reason, 'not_coaching');
     });
   });
 
