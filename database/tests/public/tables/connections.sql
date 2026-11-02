@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(32);
+SELECT plan(44);
 
 SELECT has_table('public'::name, 'connections'::name);
 
@@ -15,7 +15,10 @@ SELECT columns_are(
                    'domain',
                    'status',
                    'created_at',
-                   'status_by'
+                   'status_by',
+                   'id',
+                   'accepted_at',
+                   'shares'
                    ]
        );
 
@@ -27,6 +30,16 @@ SELECT col_type_is('public'::name, 'connections'::name, 'domain'::name, 'text'::
 SELECT col_type_is('public'::name, 'connections'::name, 'status'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'connections'::name, 'created_at'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'connections'::name, 'status_by'::name, 'text'::name);
+
+SELECT col_type_is('public'::name, 'connections'::name, 'id'::name, 'uuid'::name);
+SELECT col_not_null('public'::name, 'connections'::name, 'id'::name);
+SELECT col_default_is('public', 'connections', 'id', 'uuidv7()', 'id defaults to a v7');
+SELECT col_type_is('public'::name, 'connections'::name, 'accepted_at'::name, 'timestamp with time zone'::name);
+SELECT col_type_is('public'::name, 'connections'::name, 'shares'::name, 'text[]'::name);
+SELECT col_not_null('public'::name, 'connections'::name, 'shares'::name);
+SELECT col_default_is('public', 'connections', 'shares', '{}', 'nothing is shared by default');
+SELECT has_index('public'::name, 'connections'::name, 'connections_pair_domain_key'::name);
+SELECT index_is_unique('public'::name, 'connections'::name, 'connections_pair_domain_key'::name);
 
 SELECT has_pk('public'::name, 'connections'::name, 'connections has a primary key');
 SELECT col_is_pk('public'::name, 'connections'::name, ARRAY ['initiator_id', 'target_id', 'domain'], '(initiator_id, target_id, domain) is the composite primary key');
@@ -107,6 +120,32 @@ SELECT throws_ok(
                '23514',
                NULL,
                'an unknown status is rejected'
+       );
+
+SELECT throws_ok(
+               $$
+               INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain)
+               VALUES ('conn-b', 'conn-a', 'PEER', 'PEER', 'fitness')
+               $$,
+               '23505',
+               NULL,
+               'one row per pair and domain, whichever of them started it'
+       );
+
+SELECT lives_ok(
+               $$
+               INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain)
+               VALUES ('conn-b', 'conn-a', 'COACH', 'STUDENT', 'swimming')
+               $$,
+               'the same two people, the other way round, in another domain'
+       );
+
+SELECT is(
+               (SELECT accepted_at IS NOT NULL
+                FROM connections
+                WHERE initiator_id = 'conn-b' AND domain = 'swimming'),
+               FALSE,
+               'a pending connection has not been accepted'
        );
 
 SELECT * FROM finish();

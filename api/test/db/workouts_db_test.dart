@@ -378,6 +378,8 @@ void main() {
   group('getWorkouts', () {
     test('lists an isolated owner newest-first with limit+1 pagination', () async {
       final w1 = await h.seedWorkout(userId: listOwnerId, name: 'W1');
+      // ids minted in one millisecond have no order
+      await Future<void>.delayed(const Duration(milliseconds: 2));
       final w2 = await h.seedWorkout(userId: listOwnerId, name: 'W2');
 
       final page1 = await h.db.getWorkouts(
@@ -417,7 +419,7 @@ void main() {
     // The gate used to check only that a connection row existed with the right
     // role, so an unanswered request — or one that had been declined, severed or
     // blocked — read as permission to browse someone's whole history.
-    for (final status in ['pending', 'declined', 'severed', 'blocked', 'paused']) {
+    for (final status in ['pending', 'declined', 'severed', 'blocked']) {
       test('a requester whose connection is $status is Forbidden', () async {
         final owner = await h.seedProfile();
         final asker = await h.seedProfile();

@@ -50,6 +50,16 @@ void main() {
     ).thenAnswer((_) async {});
   });
 
+  void stubAccess(({String ownerId, bool related, bool readable})? access) {
+    when(
+      commentService.accessOfTarget(
+        readerId: anyNamed('readerId'),
+        targetType: anyNamed('targetType'),
+        targetId: anyNamed('targetId'),
+      ),
+    ).thenAnswer((_) async => access);
+  }
+
   Request wire(Request req) {
     return req
       ..user = User(id: _meId, displayName: 'Sarah')
@@ -67,12 +77,7 @@ void main() {
     };
 
     setUp(() {
-      when(
-        commentService.ownerOfTarget(
-          targetType: anyNamed('targetType'),
-          targetId: anyNamed('targetId'),
-        ),
-      ).thenAnswer((_) async => _ownerId);
+      stubAccess((ownerId: _ownerId, related: true, readable: true));
       when(
         commentService.createComment(
           authorId: anyNamed('authorId'),
@@ -84,17 +89,11 @@ void main() {
     });
 
     test('owner comments on own content: no connection check, no notification enqueue', () async {
-      when(
-        commentService.ownerOfTarget(
-          targetType: anyNamed('targetType'),
-          targetId: anyNamed('targetId'),
-        ),
-      ).thenAnswer((_) async => _meId);
+      stubAccess((ownerId: _meId, related: true, readable: true));
 
       final req = wire(jsonRequest(path: '/comments', body: validBody));
       await createComment(req);
 
-      verifyNever(connections.areConnected(userA: anyNamed('userA'), userB: anyNamed('userB')));
       verify(
         commentService.createComment(
           authorId: _meId,
@@ -107,14 +106,11 @@ void main() {
     });
 
     test('connected user comments: enqueues comment.created with snippet + authorName', () async {
-      when(
-        connections.areConnected(userA: _meId, userB: _ownerId),
-      ).thenAnswer((_) async => true);
+      stubAccess((ownerId: _ownerId, related: true, readable: true));
 
       final req = wire(jsonRequest(path: '/comments', body: validBody));
       await createComment(req);
 
-      verify(connections.areConnected(userA: _meId, userB: _ownerId)).called(1);
       verify(
         commentService.createComment(
           authorId: _meId,
@@ -141,9 +137,7 @@ void main() {
     });
 
     test('rejects a non-connected, non-owner user', () async {
-      when(
-        connections.areConnected(userA: _meId, userB: _ownerId),
-      ).thenAnswer((_) async => false);
+      stubAccess((ownerId: _ownerId, related: false, readable: false));
 
       final req = wire(jsonRequest(path: '/comments', body: validBody));
       await expectLater(createComment(req), throwsA(isA<Forbidden>()));
@@ -158,13 +152,15 @@ void main() {
       );
     });
 
+    test('a target past what the reader can see reads as missing', () async {
+      stubAccess((ownerId: _ownerId, related: true, readable: false));
+
+      final req = wire(jsonRequest(path: '/comments', body: validBody));
+      await expectLater(createComment(req), throwsA(isA<NotFound>()));
+    });
+
     test('404 when target does not exist', () async {
-      when(
-        commentService.ownerOfTarget(
-          targetType: anyNamed('targetType'),
-          targetId: anyNamed('targetId'),
-        ),
-      ).thenAnswer((_) async => null);
+      stubAccess(null);
 
       final req = wire(jsonRequest(path: '/comments', body: validBody));
       await expectLater(createComment(req), throwsA(isA<NotFound>()));
@@ -194,12 +190,7 @@ void main() {
 
   group('listComments', () {
     setUp(() {
-      when(
-        commentService.ownerOfTarget(
-          targetType: anyNamed('targetType'),
-          targetId: anyNamed('targetId'),
-        ),
-      ).thenAnswer((_) async => _meId);
+      stubAccess((ownerId: _meId, related: true, readable: true));
       when(
         commentService.listComments(
           targetType: anyNamed('targetType'),
@@ -272,15 +263,8 @@ void main() {
     });
 
     test('Forbidden when neither owner nor connected', () async {
-      when(
-        commentService.ownerOfTarget(
-          targetType: anyNamed('targetType'),
-          targetId: anyNamed('targetId'),
-        ),
-      ).thenAnswer((_) async => _ownerId);
-      when(
-        connections.areConnected(userA: _meId, userB: _ownerId),
-      ).thenAnswer((_) async => false);
+      stubAccess((ownerId: _ownerId, related: true, readable: true));
+      stubAccess((ownerId: _ownerId, related: false, readable: false));
 
       final req = wire(
         jsonRequest(

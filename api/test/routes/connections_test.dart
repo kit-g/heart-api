@@ -57,7 +57,7 @@ void main() {
         '/connections',
         body: {
           'targetId': 't1',
-          'role': 'COACH',
+          'role': 'PEER',
           'domain': 'fitness',
         },
       );
@@ -66,11 +66,19 @@ void main() {
         app.db.createConnection(
           initiatorId: 'u1',
           targetId: 't1',
-          role: ConnectionRole.coach,
+          role: ConnectionRole.peer,
           domain: ConnectionDomain.fitness,
         ),
       ).called(1);
     });
+
+    for (final role in ['COACH', 'STUDENT']) {
+      test('a $role connection needs an invitation', () async {
+        final res = await app.send('POST', '/connections', body: {'targetId': 't1', 'role': role, 'domain': 'fitness'});
+        expect(res.status, 400);
+        expect(res.body, contains('invitation_required'));
+      });
+    }
 
     test('rejects connecting to yourself with 400', () async {
       final res = await app.send(

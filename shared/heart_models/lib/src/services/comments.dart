@@ -33,4 +33,13 @@ abstract interface class CommentService {
     required CommentTarget targetType,
     required String targetId,
   });
+
+  /// Who owns the target and how [readerId] stands towards it: [related] when
+  /// any relationship lets them read that owner, [readable] when it reaches this
+  /// target too. `null` if the target doesn't exist.
+  Future<({String ownerId, bool related, bool readable})?> accessOfTarget({
+    required String readerId,
+    required CommentTarget targetType,
+    required String targetId,
+  });
 }

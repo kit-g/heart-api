@@ -24,9 +24,17 @@ class ConnectionCreateIn {
       throw const BadRequest(reason: 'you cannot connect to yourself');
     }
 
+    final role = json.parsed('role', ConnectionRole.fromString);
+
+    // A coach's narrower view rests on what the student said when accepting, so
+    // that relationship only starts from an invitation.
+    if (role != .peer) {
+      throw const BadRequest(code: 'invitation_required', reason: 'a coaching connection starts with an invitation');
+    }
+
     return ConnectionCreateIn._(
       targetId: targetId,
-      role: json.parsed('role', ConnectionRole.fromString),
+      role: role,
       domain: json.parsed('domain', ConnectionDomain.fromString),
     );
   }
@@ -41,6 +49,29 @@ class ConnectionStatusIn {
   static Future<ConnectionStatusIn> fromRequest(Request req) async {
     final json = await req.json();
     return ConnectionStatusIn._(json.parsed('status', ConnectionStatus.fromString));
+  }
+}
+
+/// `PUT /connections/:connectionId/shares` — `{shares: [...]}`, the whole list.
+class ConnectionSharesIn {
+  final Set<ConnectionShare> shares;
+
+  const new _(this.shares);
+
+  static Future<ConnectionSharesIn> fromRequest(Request req) async {
+    final json = await req.json();
+    return switch (json['shares']) {
+      final List shares => ConnectionSharesIn._(_parse(shares)),
+      _ => throw const BadRequest(reason: 'shares must be a list'),
+    };
+  }
+
+  static Set<ConnectionShare> _parse(List shares) {
+    try {
+      return {for (final share in shares) ConnectionShare.fromString('$share')};
+    } on ArgumentError catch (e) {
+      throw BadRequest(reason: '${e.message}: ${e.invalidValue}');
+    }
   }
 }
 

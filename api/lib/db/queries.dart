@@ -49,7 +49,9 @@ email = EXCLUDED.email,
 avatar_url = EXCLUDED.avatar_url,
 settings = profiles.settings || EXCLUDED.settings,
 updated_at = now()
-RETURNING id, email, username, avatar_url, scheduled_for_deletion_at, settings
+RETURNING
+  id, email, username, avatar_url, scheduled_for_deletion_at, settings,
+  (SELECT array_agg(entitlement ORDER BY entitlement) FROM entitlements WHERE user_id = profiles.id) AS entitlements
 ''';
 
 const _scheduleAccountDeletion = '''
@@ -408,47 +410,74 @@ FROM _move_exercise_history(@userId, @sourceId::uuid, @targetId::uuid, @dryRun)
 ''';
 
 const _createConnection = '''
+-- A block reads as no such person, so a request can't test for one.
 WITH target_exists AS (
-  SELECT 1 FROM profiles WHERE id = @targetId
+  SELECT 1 FROM profiles WHERE id = @targetId AND NOT _blocked_between(@initiatorId, @targetId)
+),
+-- An ended peer relationship can be asked for again, and the one asking is
+-- then the one who can't answer. A coach's only restarts from an invitation.
+reopened AS (
+  UPDATE connections
+  SET status = 'pending', status_by = @initiatorId
+  WHERE domain = @domain
+    AND status = 'severed'
+    AND initiator_role = 'PEER'
+    AND @initiatorRole = 'PEER'
+    AND exists(SELECT 1 FROM target_exists)
+    AND (initiator_id, target_id) IN ((@initiatorId, @targetId), (@targetId, @initiatorId))
+  RETURNING
+    id AS connection_id,
+    CASE WHEN initiator_id = @initiatorId THEN target_id ELSE initiator_id END AS target_id,
+    initiator_role AS "role", domain, status, created_at, accepted_at, shares
 ),
 inserted AS (
   INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status_by)
   SELECT @initiatorId, @targetId, @initiatorRole, @targetRole, @domain, @initiatorId
   WHERE exists(SELECT 1 FROM target_exists)
-  ON CONFLICT (initiator_id, target_id, domain) DO NOTHING
-  RETURNING target_id, initiator_role AS "role", domain, status, created_at
+    AND NOT exists(SELECT 1 FROM reopened)
+  ON CONFLICT DO NOTHING
+  RETURNING id AS connection_id, target_id, initiator_role AS "role", domain, status, created_at, accepted_at, shares
 )
-SELECT target_id, "role", domain, status, created_at FROM inserted
+SELECT connection_id, target_id, "role", domain, status, created_at, accepted_at, shares FROM reopened
+UNION ALL
+SELECT connection_id, target_id, "role", domain, status, created_at, accepted_at, shares FROM inserted
 UNION ALL
 SELECT
+  id AS connection_id,
   CASE WHEN initiator_id = @initiatorId THEN target_id ELSE initiator_id END AS target_id,
   CASE WHEN initiator_id = @initiatorId THEN initiator_role ELSE target_role END AS role,
-  domain, 
-  status, 
-  created_at
+  domain,
+  status,
+  created_at,
+  accepted_at,
+  shares
 FROM connections
 WHERE domain = @domain
   AND exists(SELECT 1 FROM target_exists)
   AND NOT exists(SELECT 1 FROM inserted)
+  AND NOT exists(SELECT 1 FROM reopened)
   AND (
     (initiator_id = @initiatorId AND target_id = @targetId)
-    OR 
+    OR
     (initiator_id = @targetId AND target_id = @initiatorId)
   )
 ''';
 
 const _listConnections = '''
 SELECT
+  id AS connection_id,
   target_id,
   initiator_role AS role,
   domain,
   status,
-  created_at
+  created_at,
+  accepted_at,
+  shares
 FROM connections
 WHERE initiator_id = @userId
   AND (@role::text IS NULL OR initiator_role = @role)
 UNION ALL
-SELECT initiator_id AS target_id, target_role AS role, domain, status, created_at
+SELECT id AS connection_id, initiator_id AS target_id, target_role AS role, domain, status, created_at, accepted_at, shares
 FROM connections
 WHERE target_id = @userId
   AND (@role::text IS NULL OR target_role = @role)
@@ -457,9 +486,10 @@ ORDER BY created_at DESC
 
 const _getConnection = '''
 SELECT
+  id AS connection_id,
   CASE WHEN initiator_id = @userId THEN target_id ELSE initiator_id END AS target_id,
   CASE WHEN initiator_id = @userId THEN initiator_role ELSE target_role END AS role,
-  domain, status, created_at
+  domain, status, created_at, accepted_at, shares
 FROM connections
 WHERE domain = @domain
   AND (
@@ -468,13 +498,12 @@ WHERE domain = @domain
   )
 ''';
 
-/// Severing is either party's call — except while a block stands, when only the
-/// blocker may remove the row. Without that, blocking someone is undone by the
-/// person you blocked, since a hard delete makes them re-requestable.
+/// Ending is either party's call — except while a block stands, when only the
+/// blocker may. The row stays, because "this person was a client" outlives it.
 ///
-/// Returns one row either way: `existed` separates "already gone" (a no-op, as
-/// it has always been) from `deleted` false, which is a refusal.
-const _deleteConnection = '''
+/// Returns one row either way: `existed` separates "nothing there" (a no-op, as
+/// it has always been) from `ended` false, which is a refusal.
+const _endConnection = '''
 WITH
 _pair AS (
   SELECT status, status_by FROM connections
@@ -483,8 +512,9 @@ _pair AS (
     (@targetId, @actorId, @domain)
   )
 ),
-_deleted AS (
-  DELETE FROM connections
+_ended AS (
+  UPDATE connections
+  SET status = 'severed', status_by = @actorId
   WHERE (initiator_id, target_id, domain) IN (
     (@actorId, @targetId, @domain),
     (@targetId, @actorId, @domain)
@@ -493,68 +523,121 @@ _deleted AS (
   RETURNING 1
 )
 SELECT
-  EXISTS (SELECT 1 FROM _deleted) AS deleted,
+  EXISTS (SELECT 1 FROM _ended) AS ended,
   EXISTS (SELECT 1 FROM _pair) AS existed
 ''';
 
-/// The two rules that turn on *which* side is asking, enforced here rather than
-/// in Dart so they cannot be raced past:
+/// The rules that turn on *which* side is asking, enforced here rather than in
+/// Dart so they cannot be raced past:
 ///
-/// - accepting or declining a request belongs to the person who received it; the
-///   author of a pending request must not be able to approve their own.
+/// - whoever put a request in front of the other person can't answer it, which
+///   `status_by` says even after a row went back to pending. The author of a
+///   request must not be able to approve their own, and neither may the other
+///   side of a severed row by reopening it.
+/// - a coach's row becomes pending or active from a request only by invitation.
+/// - only the student resumes a paused coach's row.
 /// - only whoever set a block may lift it.
 ///
 /// `@expectedStatus` makes the write optimistic-locked against the status the
 /// caller read, so a concurrent change loses rather than silently overwriting.
 const _updateConnectionStatus = '''
-UPDATE connections SET status = @newStatus, status_by = @actorId
+UPDATE connections
+SET status = @newStatus, status_by = @actorId
 WHERE (initiator_id, target_id, domain) IN (
   (@actorId, @targetId, @domain),
   (@targetId, @actorId, @domain)
 )
 AND status = @expectedStatus
-AND (@newStatus NOT IN ('active', 'declined') OR status <> 'pending' OR initiator_id <> @actorId)
+AND (@newStatus NOT IN ('active', 'declined') OR status <> 'pending' OR status_by IS DISTINCT FROM @actorId)
+AND (
+  initiator_role = 'PEER'
+  OR NOT (@newStatus = 'pending' OR (status = 'pending' AND @newStatus = 'active'))
+)
+AND (
+  initiator_role = 'PEER'
+  OR status <> 'paused'
+  OR @newStatus <> 'active'
+  OR (initiator_id = @actorId AND initiator_role = 'STUDENT')
+  OR (target_id = @actorId AND target_role = 'STUDENT')
+)
 AND (status <> 'blocked' OR status_by = @actorId)
-RETURNING status
+RETURNING
+  id AS connection_id,
+  CASE WHEN initiator_id = @actorId THEN target_id ELSE initiator_id END AS target_id,
+  CASE WHEN initiator_id = @actorId THEN initiator_role ELSE target_role END AS role,
+  domain, status, created_at, accepted_at, shares
+''';
+
+const _updateConnectionShares = '''
+UPDATE connections
+SET shares = @shares::text[]
+WHERE (
+  (initiator_id = @actorId AND target_id = @targetId AND initiator_role = 'STUDENT')
+  OR (initiator_id = @targetId AND target_id = @actorId AND target_role = 'STUDENT')
+)
+AND domain = @domain
+RETURNING
+  id AS connection_id,
+  CASE WHEN initiator_id = @actorId THEN target_id ELSE initiator_id END AS target_id,
+  CASE WHEN initiator_id = @actorId THEN initiator_role ELSE target_role END AS role,
+  domain, status, created_at, accepted_at, shares
 ''';
 
 const _listWorkouts = '''
 WITH
-_auth AS (
-  SELECT (
-    @requesterId::text = @targetUserId::text
-    OR EXISTS (
-      -- status matters: a pending request the other person has never seen, or a
-      -- declined/severed/blocked one, is not permission to read their history.
-      SELECT 1 FROM connections
-      WHERE status = 'active'
-        AND (
-          (initiator_id = @requesterId AND target_id = @targetUserId AND initiator_role IN ('COACH', 'PEER'))
-          OR
-          (initiator_id = @targetUserId AND target_id = @requesterId AND target_role IN ('COACH', 'PEER'))
-        )
-    )
-  ) AS allowed
+_rel AS (
+  SELECT _relation(@requesterId, @targetUserId) AS r
 ),
 _workouts AS (
   SELECT
     id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at,
     _workout_exercises(id) AS exercises,
-    COALESCE(
-      (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
-       FROM workout_images wi WHERE wi.workout_id = workouts.id),
-      '[]'::jsonb
-    ) AS images
+    CASE
+      WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
+      ELSE COALESCE(
+        (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
+         FROM workout_images wi WHERE wi.workout_id = workouts.id),
+        '[]'::jsonb
+      )
+    END AS images
   FROM workouts
-  WHERE (SELECT allowed FROM _auth)
-    AND user_id = @targetUserId::text
+  WHERE user_id = @targetUserId::text
+    AND _readable_at((SELECT r FROM _rel), started_at, hidden_at)
     AND (@cursor::uuid IS NULL OR id < @cursor::uuid)
   ORDER BY id DESC
   LIMIT @limit
 )
 SELECT id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, exercises, images, false AS forbidden FROM _workouts
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _rel WHERE (r).scope IS NULL
+''';
+
+const _hideWorkout = '''
+UPDATE workouts
+SET hidden_at = least(coalesce(@at::timestamptz, now()), now())
+WHERE id = @workoutId::uuid
+  AND user_id = @userId
+  AND hidden_at IS NULL
+RETURNING id
+''';
+
+const _unhideWorkout = '''
+UPDATE workouts
+SET hidden_at = NULL
+WHERE id = @workoutId::uuid
+  AND user_id = @userId
+  AND hidden_at IS NOT NULL
+RETURNING id
+''';
+
+const _listHiddenWorkouts = '''
+SELECT id, hidden_at
+FROM workouts
+WHERE user_id = @userId
+  AND hidden_at IS NOT NULL
+  AND (@cursor::uuid IS NULL OR id < @cursor::uuid)
+ORDER BY id DESC
+LIMIT @limit
 ''';
 
 const _getWorkout = '''
@@ -581,35 +664,27 @@ WHERE w.id = @workoutId::uuid AND w.user_id = @userId
 
 const _getTargetWorkout = '''
 WITH
-_auth AS (
-  SELECT (
-    @requesterId::text = @targetUserId::text
-    OR EXISTS (
-      -- status matters: a pending request the other person has never seen, or a
-      -- declined/severed/blocked one, is not permission to read their history.
-      SELECT 1 FROM connections
-      WHERE status = 'active'
-        AND (
-          (initiator_id = @requesterId AND target_id = @targetUserId AND initiator_role IN ('COACH', 'PEER'))
-          OR
-          (initiator_id = @targetUserId AND target_id = @requesterId AND target_role IN ('COACH', 'PEER'))
-        )
-    )
-  ) AS allowed
+_rel AS (
+  SELECT _relation(@requesterId, @targetUserId) AS r
 )
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
   _workout_exercises(w.id) AS exercises,
-  COALESCE(
-    (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
-     FROM workout_images wi WHERE wi.workout_id = w.id),
-    '[]'::jsonb
-  ) AS images,
+  CASE
+    WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
+    ELSE COALESCE(
+      (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
+       FROM workout_images wi WHERE wi.workout_id = w.id),
+      '[]'::jsonb
+    )
+  END AS images,
   false AS forbidden
 FROM workouts w
-WHERE w.id = @workoutId::uuid AND w.user_id = @targetUserId::text AND (SELECT allowed FROM _auth)
+WHERE w.id = @workoutId::uuid
+  AND w.user_id = @targetUserId::text
+  AND _readable_at((SELECT r FROM _rel), w.started_at, w.hidden_at)
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _rel WHERE (r).scope IS NULL
 ''';
 
 /// Idempotent create for a workout, the replay's fifth resource
@@ -2017,14 +2092,10 @@ _existing AS (
 -- severed or blocked relationship is not a licence to push templates into
 -- someone's library — matching `_areConnected`, which has always required this.
 _allowed AS (
-  SELECT 1 FROM connections
-  WHERE status = 'active'
-    AND (
-      (initiator_id = @coachId AND target_id = @studentId AND initiator_role IN ('COACH', 'PEER'))
-      OR
-      (initiator_id = @studentId AND target_id = @coachId AND target_role IN ('COACH', 'PEER'))
-    )
-  LIMIT 1
+  SELECT 1
+  FROM (SELECT _relation(@coachId, @studentId) AS r) rel
+  WHERE (r).scope IN ('coach', 'peer')
+    AND (r).active
 ),
 -- Decided per master rather than per call: assigning a folder where three of
 -- five templates already went must still send the other two.
@@ -2267,6 +2338,7 @@ SELECT
 const _areConnected = '''
 SELECT 1 FROM connections
 WHERE status = 'active'
+  AND NOT _blocked_between(@userA, @userB)
   AND (
     (initiator_id = @userA AND target_id = @userB)
     OR
@@ -2287,6 +2359,41 @@ WHERE id = (CASE @targetType
   )
   WHEN 'workout_image' THEN (SELECT workout_id FROM workout_images WHERE id = @targetId::uuid)
 END)
+''';
+
+/// The reader's standing towards a comment's target, from the workout it belongs
+/// to. A coach comments only on what they can read, never on a photo, and not
+/// while paused.
+const _commentTargetAccess = '''
+WITH
+_workout AS (
+  SELECT id, user_id, started_at, hidden_at
+  FROM workouts
+  WHERE id = (CASE @targetType
+    WHEN 'workout' THEN @targetId::uuid
+    WHEN 'workout_exercise' THEN (SELECT workout_id FROM workout_exercises WHERE id = @targetId::uuid)
+    WHEN 'exercise_set' THEN (
+      SELECT we.workout_id FROM workout_exercises we
+      JOIN exercise_sets es ON es.workout_exercise_id = we.id
+      WHERE es.id = @targetId::uuid
+    )
+    WHEN 'workout_image' THEN (SELECT workout_id FROM workout_images WHERE id = @targetId::uuid)
+  END)
+),
+_rel AS (
+  SELECT w.*, _relation(@readerId, w.user_id) AS r
+  FROM _workout w
+)
+SELECT
+  user_id AS owner_id,
+  (r).scope IS NOT NULL AS related,
+  (
+    (r).scope IS NOT NULL
+    AND (r).active
+    AND _readable_at(r, started_at, hidden_at)
+    AND NOT ((r).scope = 'coach' AND @targetType = 'workout_image')
+  ) AS readable
+FROM _rel
 ''';
 
 const _insertComment = '''
@@ -2479,37 +2586,29 @@ WHERE exercise_id = @id::uuid
   ;
 ''';
 
-// Goals are visible to their owner and to active connections, exactly like
-// workouts (see _listWorkouts) — the auth CTE is identical. Writing stays
-// owner-only; this is the only cross-user read. A forbidden requester gets a
-// single sentinel row, which the db layer turns into a 403.
+// Goals are visible to their owner, to a peer, and to a coach the student shared
+// them with. Writing stays owner-only. A forbidden requester gets a single
+// sentinel row, which the db layer turns into a 403.
 const _listTargetGoals = '''
 WITH
-_auth AS (
-  SELECT (
-    @requesterId::text = @targetUserId::text
-    OR EXISTS (
-      SELECT 1 FROM connections
-      WHERE status = 'active'
-        AND (
-          (initiator_id = @requesterId AND target_id = @targetUserId AND initiator_role IN ('COACH', 'PEER'))
-          OR
-          (initiator_id = @targetUserId AND target_id = @requesterId AND target_role IN ('COACH', 'PEER'))
-        )
-    )
-  ) AS allowed
+_rel AS (
+  SELECT _relation(@requesterId, @targetUserId) AS r
+),
+_allowed AS (
+  SELECT (r).scope IN ('self', 'peer') OR ((r).scope = 'coach' AND 'goals' = ANY ((r).shares)) AS allowed
+  FROM _rel
 ),
 _goals AS (
   SELECT id, metric, exercise_id, pattern, muscle, cadence, stages, archived, created_at
   FROM goals
-  WHERE (SELECT allowed FROM _auth)
+  WHERE (SELECT allowed FROM _allowed)
     AND user_id = @targetUserId::text
     AND archived = @archived::boolean
   ORDER BY created_at
 )
 SELECT id, metric, exercise_id, pattern, muscle, cadence, stages, archived, created_at, false AS forbidden FROM _goals
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _auth WHERE NOT allowed
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _allowed WHERE allowed IS NOT TRUE
 ''';
 
 /// A user keeps a bounded number of live goals — enough for every sensible plan,
@@ -2950,6 +3049,27 @@ WHERE id = @id::uuid
 ''';
 
 /// The caller's skips, newest first, a page at a time.
+/// A coach's view of a student's skips: that a session was set aside and when.
+/// The reason and the weather are the student's own.
+const _listTargetSkips = '''
+WITH
+_rel AS (
+  SELECT _relation(@requesterId, @targetUserId) AS r
+)
+SELECT id, at, NULL AS reason, NULL AS weather, template_id, program_id, false AS forbidden
+FROM skips
+WHERE user_id = @targetUserId
+  AND (SELECT (r).scope FROM _rel) = 'coach'
+  AND _readable_at((SELECT r FROM _rel), at, NULL)
+  AND (@cursor::uuid IS NULL OR id < @cursor::uuid)
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, true
+FROM _rel
+WHERE (r).scope IS DISTINCT FROM 'coach'
+ORDER BY id DESC
+LIMIT @limit
+''';
+
 const _listSkips = '''
 SELECT id, at, reason, weather, template_id, program_id
 FROM skips
@@ -3121,7 +3241,9 @@ LEFT JOIN oauth_grants g ON g.id = t.grant_id
 ''';
 
 const _getProfile = '''
-SELECT id, username, email, avatar_url, scheduled_for_deletion_at, settings
+SELECT
+  id, username, email, avatar_url, scheduled_for_deletion_at, settings,
+  (SELECT array_agg(entitlement ORDER BY entitlement) FROM entitlements WHERE user_id = profiles.id) AS entitlements
 FROM profiles
 WHERE id = @userId
 ''';

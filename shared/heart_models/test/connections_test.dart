@@ -140,6 +140,7 @@ void main() {
           'domain': 'SWIMMING',
           'status': 'pending',
           'createdAt': now.toIso8601String(),
+          'shares': <String>[],
         }),
       );
     });
@@ -169,10 +170,49 @@ void main() {
               'domain': 'GENERAL',
               'status': 'active',
               'createdAt': now.toIso8601String(),
+              'shares': <String>[],
             },
           ],
         }),
       );
     });
+  });
+
+  group('coaching fields', () {
+    test('read from a row, and written back', () {
+      final connection = Connection.fromRow({
+        'connection_id': '01900000-0000-7000-8000-000000000001',
+        'target_id': 'u',
+        'role': 'COACH',
+        'domain': 'fitness',
+        'status': 'active',
+        'created_at': DateTime.utc(2026),
+        'accepted_at': DateTime.utc(2026, 2),
+        'shares': ['goals', 'a_later_share'],
+      });
+      expect(connection.toMap(), containsPair('connectionId', '01900000-0000-7000-8000-000000000001'));
+      expect(connection.toMap(), containsPair('acceptedAt', '2026-02-01T00:00:00.000Z'));
+      expect(connection.shares, ['goals', 'a_later_share'], reason: 'a share this build does not know is kept');
+    });
+
+    test('ConnectionShare refuses an unknown value', () {
+      expect(ConnectionShare.fromString('goals'), ConnectionShare.goals);
+      expect(() => ConnectionShare.fromString('photos'), throwsArgumentError);
+    });
+  });
+
+  test('HiddenWorkout round-trips', () {
+    final hidden = HiddenWorkout(id: 'w', at: DateTime.utc(2026));
+    expect(HiddenWorkout.fromJson(hidden.toMap()).at, DateTime.utc(2026));
+  });
+
+  test('User carries entitlements', () {
+    final user = User.fromRow({
+      'id': 'u',
+      'entitlements': ['coach'],
+    });
+    expect(user.toMap()['entitlements'], ['coach']);
+    expect(User.fromJson(user.toMap()).entitlements, ['coach']);
+    expect(User.fromRow({'id': 'u'}).entitlements, isEmpty);
   });
 }

@@ -81,8 +81,39 @@ enum ConnectionStatus {
   }
 }
 
+/// What a student can open to their coach beyond the default, sent in a
+/// connection's `shares`.
+enum ConnectionShare {
+  /// Workouts from before the connection was accepted.
+  history,
+
+  /// The student's goals.
+  goals;
+
+  /// Throws [ArgumentError] on an unknown value. The server's own check: a
+  /// connection read from the wire carries `shares` as plain strings, so a value
+  /// a newer server added passes through a build that doesn't know it.
+  factory fromString(String val) {
+    return values.firstWhere(
+      (e) => e.name == val,
+      orElse: () => throw ArgumentError.value(val, 'shares', 'unknown share'),
+    );
+  }
+}
+
 abstract interface class Connection implements Model {
+  /// Viewer-relative: the same relationship has a different one from each side.
+  /// It addresses a row and identifies nothing. [connectionId] does.
   String get id;
+
+  /// The relationship's identity, the same from both sides.
+  String? get connectionId;
+
+  /// When the relationship last became active from a request.
+  DateTime? get acceptedAt;
+
+  /// What the student opened to their coach, by [ConnectionShare] name.
+  List<String> get shares;
 
   String get targetId;
 
@@ -100,6 +131,9 @@ abstract interface class Connection implements Model {
     required ConnectionDomain domain,
     required ConnectionStatus status,
     required DateTime createdAt,
+    String? connectionId,
+    DateTime? acceptedAt,
+    List<String> shares,
   }) = _Connection.new;
 
   factory fromRow(Map<String, dynamic> row) {
@@ -112,6 +146,12 @@ abstract interface class Connection implements Model {
         DateTime dt => dt,
         String s => DateTime.parse(s),
         _ => DateTime.now(),
+      },
+      connectionId: row['connection_id']?.toString(),
+      acceptedAt: row['accepted_at'] as DateTime?,
+      shares: switch (row['shares']) {
+        final List shares => [for (final share in shares) '$share'],
+        _ => const [],
       },
     );
   }
@@ -141,6 +181,12 @@ class _Connection implements Connection {
   final ConnectionStatus status;
   @override
   final DateTime createdAt;
+  @override
+  final String? connectionId;
+  @override
+  final DateTime? acceptedAt;
+  @override
+  final List<String> shares;
 
   const new({
     required this.targetId,
@@ -148,6 +194,9 @@ class _Connection implements Connection {
     required this.domain,
     required this.status,
     required this.createdAt,
+    this.connectionId,
+    this.acceptedAt,
+    this.shares = const [],
   });
 
   @override
@@ -162,6 +211,9 @@ class _Connection implements Connection {
       'domain': domain.value.toUpperCase(),
       'status': status.name,
       'createdAt': createdAt.toIso8601String(),
+      'connectionId': ?connectionId,
+      'acceptedAt': ?acceptedAt?.toIso8601String(),
+      'shares': shares,
     };
   }
 
@@ -203,9 +255,9 @@ abstract interface class ConnectionsService {
     required ConnectionDomain domain,
   });
 
-  /// Hard-deletes the row from either side. Throws if [actorId] is the party a
-  /// standing block is against — otherwise blocking someone would be undone by
-  /// the person blocked.
+  /// Ends the relationship from either side, keeping the row as `severed`. Throws
+  /// if [actorId] is the party a standing block is against — otherwise blocking
+  /// someone would be undone by the person blocked.
   Future<void> deleteConnection({
     required String actorId,
     required String targetId,
@@ -233,7 +285,17 @@ abstract interface class ConnectionsService {
     required ConnectionDomain domain,
   });
 
+  /// What the student of a coach connection has opened to their coach. Throws if
+  /// [actorId] isn't that student.
+  Future<Connection> changeConnectionShares({
+    required String actorId,
+    required String targetId,
+    required ConnectionRole role,
+    required ConnectionDomain domain,
+    required Set<ConnectionShare> shares,
+  });
+
   /// True if there is any active connection between the two users in any
-  /// direction or domain. Used for permission checks (e.g. commenting).
+  /// direction or domain, and no block stands between them.
   Future<bool> areConnected({required String userA, required String userB});
 }

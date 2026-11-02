@@ -14,6 +14,25 @@ mixin _Skips on _DatabaseBase implements SkipService {
   }
 
   @override
+  Future<Page<TrainingSkip>> getTargetSkips({
+    required String requesterId,
+    required String targetUserId,
+    String? cursor,
+    int limit = 30,
+  }) async {
+    final rows = await _pool.execute(
+      _listTargetSkips.toSql(),
+      parameters: {'requesterId': requesterId, 'targetUserId': targetUserId, 'cursor': cursor, 'limit': limit + 1},
+    );
+    if (rows.firstOrNull?.toColumnMap()['forbidden'] == true) {
+      throw const Forbidden(reason: 'You do not have permission to view these skips.');
+    }
+    final skips = rows.map((row) => TrainingSkip.fromRow(row.toColumnMap())).toList();
+    final hasMore = skips.length > limit;
+    return Page(items: hasMore ? skips.sublist(0, limit) : skips, hasMore: hasMore);
+  }
+
+  @override
   Future<(TrainingSkip, bool created)> createSkip({required String userId, required TrainingSkip skip}) async {
     try {
       final rows = await _retryOnCreateRace(

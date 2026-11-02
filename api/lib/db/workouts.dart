@@ -2,6 +2,30 @@ part of 'db.dart';
 
 mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   @override
+  Future<void> hideWorkout({required String userId, required String workoutId, DateTime? at}) async {
+    await _pool.execute(
+      _hideWorkout.toSql(),
+      parameters: {'userId': userId, 'workoutId': workoutId, 'at': at?.toUtc()},
+    );
+  }
+
+  @override
+  Future<void> unhideWorkout({required String userId, required String workoutId}) async {
+    await _pool.execute(_unhideWorkout.toSql(), parameters: {'userId': userId, 'workoutId': workoutId});
+  }
+
+  @override
+  Future<Page<HiddenWorkout>> getHiddenWorkouts({required String userId, String? cursor, int limit = 30}) async {
+    final rows = await _pool.execute(
+      _listHiddenWorkouts.toSql(),
+      parameters: {'userId': userId, 'cursor': cursor, 'limit': limit + 1},
+    );
+    final hidden = rows.map((row) => HiddenWorkout.fromRow(row.toColumnMap())).toList();
+    final hasMore = hidden.length > limit;
+    return Page(items: hasMore ? hidden.sublist(0, limit) : hidden, hasMore: hasMore);
+  }
+
+  @override
   Future<Page<Workout>> getWorkouts({
     required String userId,
     required String targetUserId,
