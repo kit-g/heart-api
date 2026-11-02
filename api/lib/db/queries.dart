@@ -3148,7 +3148,7 @@ WHERE t.id = @threadId::uuid
 /// Writes only to a thread that can still take it, the same conditions the sender
 /// was told about a moment ago, since a block could have landed in between.
 const _threadItemColumns = '''
-  id, thread_id, sender_id, kind, subject_type, subject_id, content, commitment, tag, tag_key, at, created_at, xid::text AS xid
+  id, thread_id, sender_id, kind, subject_type, subject_id, content, commitment, tag, tag_key, at, created_at, xid::text AS xid_text
 ''';
 
 const _addThreadItem =
@@ -3170,7 +3170,7 @@ _inserted AS (
     @id::uuid, o.id, @senderId, @kind, @subjectType, @subjectId, @content, @commitment, @tag, @tagKey, @at, @createdAt
   FROM _open o
   ON CONFLICT (id) DO NOTHING
-  RETURNING $_threadItemColumns
+  RETURNING *
 )
 SELECT $_threadItemColumns, true AS created FROM _inserted
 UNION ALL
@@ -3236,38 +3236,45 @@ _readable AS (
 const _listThreadItemsForward =
     '''
 WITH $_threadReadable
-SELECT $_threadItemColumns, false AS forbidden
-FROM thread_items
-WHERE thread_id = @threadId::uuid
-  AND (SELECT readable FROM _readable)
-  AND xid < pg_snapshot_xmin(pg_current_snapshot())
-  AND (xid, id) > (@xid::text::xid8, @itemId::uuid)
-  AND (@subjectType::text IS NULL OR subject_type = @subjectType)
-  AND (@subjectId::text IS NULL OR subject_id = @subjectId)
+(
+  SELECT $_threadItemColumns, false AS forbidden
+  FROM thread_items
+  WHERE thread_id = @threadId::uuid
+    AND (SELECT readable FROM _readable)
+    AND xid < pg_snapshot_xmin(pg_current_snapshot())
+    AND (xid, id) > (@xid::text::xid8, @itemId::uuid)
+    AND (@subjectType::text IS NULL OR subject_type = @subjectType)
+    AND (@subjectId::text IS NULL OR subject_id = @subjectId)
+  ORDER BY xid, id
+  LIMIT @limit
+)
 UNION ALL
 SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true
 FROM _readable
 WHERE NOT readable
-ORDER BY xid, id
-LIMIT @limit
 ''';
 
+/// The same horizon as going forward: a cursor taken from here is where a forward read
+/// starts, and one past a transaction still writing would skip what it writes.
 const _listThreadItemsBackward =
     '''
 WITH $_threadReadable
-SELECT $_threadItemColumns, false AS forbidden
-FROM thread_items
-WHERE thread_id = @threadId::uuid
-  AND (SELECT readable FROM _readable)
-  AND (@xid::text IS NULL OR (xid, id) < (@xid::text::xid8, @itemId::uuid))
-  AND (@subjectType::text IS NULL OR subject_type = @subjectType)
-  AND (@subjectId::text IS NULL OR subject_id = @subjectId)
+(
+  SELECT $_threadItemColumns, false AS forbidden
+  FROM thread_items
+  WHERE thread_id = @threadId::uuid
+    AND (SELECT readable FROM _readable)
+    AND xid < pg_snapshot_xmin(pg_current_snapshot())
+    AND (@xid::text IS NULL OR (xid, id) < (@xid::text::xid8, @itemId::uuid))
+    AND (@subjectType::text IS NULL OR subject_type = @subjectType)
+    AND (@subjectId::text IS NULL OR subject_id = @subjectId)
+  ORDER BY xid DESC, id DESC
+  LIMIT @limit
+)
 UNION ALL
 SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true
 FROM _readable
 WHERE NOT readable
-ORDER BY xid DESC, id DESC
-LIMIT @limit
 ''';
 
 const _markThreadRead = '''

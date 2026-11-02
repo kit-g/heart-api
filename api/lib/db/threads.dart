@@ -66,7 +66,7 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
     return (
       ThreadItem.fromRow(
         row,
-        cursor: ChangeCursor(xid: row['xid'] as String, id: row['id'].toString()).toString(),
+        cursor: ChangeCursor(xid: row['xid_text'] as String, id: row['id'].toString()).toString(),
       ),
       row['created'] as bool,
     );
@@ -110,7 +110,7 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
       for (final row in maps)
         ThreadItem.fromRow(
           row,
-          cursor: ChangeCursor(xid: row['xid'] as String, id: row['id'].toString()).toString(),
+          cursor: ChangeCursor(xid: row['xid_text'] as String, id: row['id'].toString()).toString(),
         ),
     ];
     final hasMore = items.length > limit;

@@ -1,6 +1,7 @@
 @Tags(['db'])
 library;
 
+import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
@@ -58,6 +59,10 @@ void main() {
     }
   }
 
+  Future<List<ThreadItem>> newest(String reader, String thread, {int count = 1}) async {
+    return (await settled(reader, thread, null, count)).items;
+  }
+
   group('opening', () {
     test('one thread per connection, from either side', () async {
       final (a, b, thread) = await open();
@@ -85,7 +90,7 @@ void main() {
       await say(a, thread, id: id);
       await say(a, thread, id: id, content: 'again');
 
-      final items = (await h.db.getThreadItems(userId: b, threadId: thread)).items;
+      final items = await newest(b, thread);
       expect(items.single.content, 'sealed');
     });
 
@@ -98,7 +103,7 @@ void main() {
       expect(await h.db.getThreadParties(senderId: a, threadId: thread), isNull);
       await expectLater(say(a, thread), throwsA(isA<Forbidden>()));
       expect(
-        (await h.db.getThreadItems(userId: b, threadId: thread)).items,
+        await h.db.getThreadItems(userId: b, threadId: thread).then((page) => page.items),
         isEmpty,
         reason: 'an ended thread stays readable',
       );
@@ -124,9 +129,30 @@ void main() {
       expect(since.items.single.at, DateTime.utc(2020), reason: 'the app shows the device time');
     });
 
+    // Text sorts '1000000' before '999999', so a sort on a cast of the transaction id
+    // would page past items for good.
+    test('order goes by the transaction id as a number, across a digit boundary', () async {
+      final (a, b, thread) = await open();
+      final (one, two) = (await say(a, thread, content: 'older'), await say(a, thread, content: 'newer'));
+      await h.exec("UPDATE thread_items SET xid = '999'::xid8 WHERE id = @id::uuid", {'id': one.id});
+      await h.exec("UPDATE thread_items SET xid = '1000'::xid8 WHERE id = @id::uuid", {'id': two.id});
+
+      final items = (await h.db.getThreadItems(userId: b, threadId: thread)).items;
+      expect(items.map((item) => item.content), ['newer', 'older']);
+
+      final older = await h.exec('SELECT xid::text, id FROM thread_items WHERE id = @id::uuid', {'id': one.id});
+      final forward = await h.db.getThreadItems(
+        userId: b,
+        threadId: thread,
+        since: ChangeCursor(xid: older.first[0]! as String, id: one.id).toString(),
+      );
+      expect(forward.items.single.content, 'newer');
+    });
+
     test('newest first by default, and back from a point', () async {
       final (a, b, thread) = await open();
       final said = [for (var i = 0; i < 5; i++) await say(a, thread, content: 'm$i')];
+      await newest(b, thread, count: 5);
 
       final first = await h.db.getThreadItems(userId: b, threadId: thread, limit: 2);
       expect(first.items.map((item) => item.content), ['m4', 'm3']);
@@ -144,6 +170,7 @@ void main() {
       await say(a, thread, content: 'general');
       await say(a, thread, content: 'about the set', subjectType: 'exercise_set', subjectId: 's1');
       await say(a, thread, content: 'about another', subjectType: 'exercise_set', subjectId: 's2');
+      await newest(b, thread, count: 3);
 
       final about = await h.db.getThreadItems(
         userId: b,
@@ -157,6 +184,7 @@ void main() {
     test('a stranger cannot, and someone blocked by the other cannot, while the blocker can', () async {
       final (a, b, thread) = await open();
       await say(a, thread);
+      await newest(b, thread);
       final stranger = await h.seedProfile();
       await expectLater(h.db.getThreadItems(userId: stranger, threadId: thread), throwsA(isA<Forbidden>()));
 
@@ -212,14 +240,14 @@ void main() {
       expect(seen.unread, 0);
 
       await say(a, thread, content: 'still live');
-      expect((await h.db.getThreadItems(userId: b, threadId: thread)).items.single.content, 'still live');
+      expect((await newest(b, thread)).single.content, 'still live');
     });
 
     test('a stranger cannot, and either can after the connection ended', () async {
       final (a, b, thread) = await open();
       await say(a, thread);
       expect(await h.db.clearThread(userId: await h.seedProfile(), threadId: thread), isNull);
-      expect((await h.db.getThreadItems(userId: a, threadId: thread)).items, hasLength(1));
+      expect(await newest(a, thread), hasLength(1));
 
       await h.db.deleteConnection(actorId: a, targetId: b, role: .peer, domain: .fitness);
       expect(await h.db.clearThread(userId: b, threadId: thread), a);
@@ -232,7 +260,7 @@ void main() {
 
       await h.exec('DELETE FROM profiles WHERE id = @a', {'a': a});
 
-      final items = (await h.db.getThreadItems(userId: b, threadId: thread)).items;
+      final items = await newest(b, thread, count: 2);
       expect(items, hasLength(2));
       expect(items.firstWhere((each) => each.id == item.id).senderId, isNull);
       final seen = (await h.db.getThreads(userId: b)).single;

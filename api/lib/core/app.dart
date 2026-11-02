@@ -94,6 +94,7 @@ RelicApp buildApp({
     ..use('/keys', events(publisher: eventPublisher))
     ..use('/connections', threadsDb(db: database))
     ..use('/threads', threadsDb(db: database))
+    ..use('/threads', events(publisher: eventPublisher))
     ..use('/notes', notesDb(db: database))
     ..use('/reports', reportsDb(db: database))
     ..use('/events', keysDb(db: database))

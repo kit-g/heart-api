@@ -149,18 +149,23 @@ Future<Model> fileReport(Request req) async {
   final reviewKey = req.config.reportReviewKey ?? (throw UnimplementedError('reports are not configured'));
   final tags = _tags(req);
 
-  final verified = input.messages.every(
-    (message) => tags.confirms(
-      words: message.words,
-      reporterKey: message.key,
-      commitment: message.commitment,
-      tag: message.tag,
-      tagKey: message.tagKey,
-      senderId: message.senderId,
-      recipientId: message.recipientId,
-      at: message.createdAt,
-    ),
-  );
+  final people = {req.userId, input.reportedId};
+  final verified =
+      input.messages.any((message) => message.senderId == input.reportedId) &&
+      input.messages.every(
+        (message) =>
+            {message.senderId, message.recipientId}.containsAll(people) &&
+            tags.confirms(
+              words: message.words,
+              reporterKey: message.key,
+              commitment: message.commitment,
+              tag: message.tag,
+              tagKey: message.tagKey,
+              senderId: message.senderId,
+              recipientId: message.recipientId,
+              at: message.createdAt,
+            ),
+      );
 
   await req.reportService.fileReport(
     reporterId: req.userId,
