@@ -33,6 +33,35 @@ void main() {
     });
   }
 
+  test('accepting through the real app tells the inviter', () async {
+    when(
+      app.db.acceptInvitation(
+        userId: anyNamed('userId'),
+        token: anyNamed('token'),
+        shares: anyNamed('shares'),
+      ),
+    ).thenAnswer(
+      (_) async => Connection(
+        targetId: 'coach-1',
+        connectionId: 'c1',
+        role: .student,
+        domain: .fitness,
+        status: .active,
+        createdAt: DateTime.utc(2026),
+      ),
+    );
+    when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+    when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
+
+    final res = await app.send('POST', '/invitation-links/abc/accept', body: {});
+    expect(res.status, 200);
+    final message =
+        verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: captureAnyNamed('message'))).captured.single
+            as Map;
+    expect(message['userId'], 'coach-1');
+    expect(message['topic'], 'coaching.invitation_accepted');
+  });
+
   test('making an invitation mints the token server-side', () async {
     when(
       app.db.createInvitation(

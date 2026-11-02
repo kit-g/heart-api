@@ -93,6 +93,7 @@ RelicApp buildApp({
     ..use('/invitations', invitationsDb(db: database))
     ..use('/events', pushDb(db: database))
     ..use('/invitation-links', invitationsDb(db: database))
+    ..use('/invitation-links', events(publisher: eventPublisher))
     ..use('/blocks', invitationsDb(db: database))
     ..use('/comments', commentsDb(db: database))
     ..use('/comments', connectionsDb(db: database))
