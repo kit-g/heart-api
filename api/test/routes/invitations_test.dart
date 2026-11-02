@@ -39,6 +39,8 @@ void main() {
         userId: anyNamed('userId'),
         token: anyNamed('token'),
         shares: anyNamed('shares'),
+        email: anyNamed('email'),
+        name: anyNamed('name'),
       ),
     ).thenAnswer(
       (_) async => Connection(
