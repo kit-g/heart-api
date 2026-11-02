@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.43.0
+
+Device keys and key delivery (heart-api#361).
+
+- New: `CryptoDevice`, `QueuedItem`, `CryptoDevices`, `QueuedItems` and `OneTimeKeyCount`.
+- New: `KeyService`.
+
 ## 2.42.0
 
 Push settings (heart-api#360).

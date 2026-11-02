@@ -236,4 +236,32 @@ void main() {
       expect(InvitationPreview.fromJson({'inviterName': 'Alex', 'good': true}).inviterName, 'Alex');
     });
   });
+
+  group('keys', () {
+    test('a device round-trips, with a single-use key when it answers a claim', () {
+      final device = CryptoDevice.fromJson({
+        'id': 'd',
+        'userId': 'u',
+        'identityKey': 'i',
+        'signingKey': 's',
+        'fallbackKey': 'f',
+        'createdAt': '2026-01-01T00:00:00.000Z',
+        'oneTimeKeyId': 'k',
+        'oneTimeKey': 'v',
+      });
+      expect(device.toMap()['oneTimeKey'], 'v');
+      expect(device.toMap().containsKey('signature'), isFalse);
+    });
+
+    test('a queued item round-trips', () {
+      final item = QueuedItem(
+        id: 'q',
+        recipientDeviceId: 'd',
+        kind: 'key',
+        content: 'sealed',
+        createdAt: DateTime.utc(2026),
+      );
+      expect(QueuedItem.fromJson(item.toMap()).content, 'sealed');
+    });
+  });
 }

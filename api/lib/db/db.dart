@@ -31,6 +31,7 @@ part 'exercises.dart';
 part 'goals.dart';
 part 'images.dart';
 part 'invitations.dart';
+part 'keys.dart';
 part 'oauth.dart';
 part 'profiles.dart';
 part 'programs.dart';
@@ -208,6 +209,7 @@ class Database extends _DatabaseBase
         _Connections,
         _Invitations,
         _Push,
+        _Keys,
         _Devices,
         _ExercisePreferences,
         _Exercises,
@@ -229,6 +231,7 @@ class Database extends _DatabaseBase
         ConnectionsService,
         InvitationService,
         PushService,
+        KeyService,
         DeviceService,
         ExerciseService,
         IdempotentGoalService,
