@@ -91,6 +91,32 @@ WHERE status = 'blocked'
   AND status_by IS NOT NULL
 ON CONFLICT DO NOTHING;
 
+CREATE OR REPLACE FUNCTION _end_connections_on_block() RETURNS trigger
+    LANGUAGE plpgsql
+AS
+$$
+BEGIN
+    UPDATE connections
+    SET status = 'severed',
+        status_by = NEW.blocker_id
+    WHERE (initiator_id, target_id) IN ((NEW.blocker_id, NEW.blocked_id), (NEW.blocked_id, NEW.blocker_id))
+      AND status IN ('active', 'paused', 'pending');
+    RETURN NULL;
+END
+$$;
+
+COMMENT ON FUNCTION _end_connections_on_block() IS
+    'A block ends everything live between the two people, in every domain, so lifting it restores nothing without a new yes';
+
+DROP TRIGGER IF EXISTS blocks_end_connections ON blocks;
+CREATE TRIGGER blocks_end_connections
+    AFTER INSERT
+    ON blocks
+    FOR EACH ROW
+EXECUTE FUNCTION _end_connections_on_block();
+
+COMMENT ON TRIGGER blocks_end_connections ON blocks IS 'Whichever way a block was set';
+
 CREATE OR REPLACE FUNCTION _stamp_connection_accepted() RETURNS trigger
     LANGUAGE plpgsql
 AS

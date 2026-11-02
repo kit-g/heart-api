@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(14);
+SELECT plan(15);
 
 SELECT has_table('public'::name, 'blocks'::name);
 SELECT columns_are('public', 'blocks', ARRAY ['id', 'blocker_id', 'blocked_id', 'created_at', 'lifted_at']);
@@ -13,6 +13,7 @@ SELECT fk_ok('public', 'blocks', 'blocked_id', 'public', 'profiles', 'id');
 SELECT has_index('public'::name, 'blocks'::name, 'blocks_live_key'::name);
 SELECT index_is_unique('public'::name, 'blocks'::name, 'blocks_live_key'::name);
 SELECT has_index('public'::name, 'blocks'::name, 'blocks_blocked_idx'::name);
+SELECT has_trigger('public'::name, 'blocks'::name, 'blocks_end_connections'::name);
 
 DO
 $$

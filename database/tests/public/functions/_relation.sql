@@ -43,6 +43,11 @@ BEGIN
     RETURN NEXT ok(_r.pauses @> clock_timestamp(), 'and the window is open');
 
     UPDATE connections SET status = 'blocked', status_by = _student WHERE domain = 'general' AND initiator_id = _coach;
+    RETURN NEXT is(
+        (SELECT status FROM connections WHERE domain = 'fitness' AND initiator_id = _coach),
+        'severed',
+        'a block in one domain ends the others'
+    );
     RETURN NEXT is((_relation(_coach, _student)).scope, NULL, 'a block in one domain answers nothing for the pair');
     RETURN NEXT is((_relation(_student, _coach)).scope, NULL, 'in either direction');
     RETURN NEXT is(_blocked_between(_student, _coach), TRUE, 'whichever way it is asked');
@@ -54,6 +59,31 @@ BEGIN
         1::bigint,
         'and the block stays as history'
     );
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__a_block_ends_what_is_live() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _a TEXT := create_test_profile();
+    _b TEXT := create_test_profile();
+BEGIN
+    INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status)
+    VALUES (_a, _b, 'COACH', 'STUDENT', 'fitness', 'active'),
+           (_a, _b, 'PEER', 'PEER', 'general', 'paused'),
+           (_b, _a, 'PEER', 'PEER', 'running', 'pending'),
+           (_a, _b, 'PEER', 'PEER', 'swimming', 'declined');
+
+    INSERT INTO blocks (blocker_id, blocked_id) VALUES (_b, _a);
+
+    RETURN NEXT is(
+        (SELECT array_agg(status ORDER BY domain) FROM connections WHERE initiator_id IN (_a, _b)),
+        ARRAY ['severed', 'severed', 'severed', 'declined'],
+        'everything live ends, in every domain'
+    );
+
+    UPDATE blocks SET lifted_at = now() WHERE blocker_id = _b;
+    RETURN NEXT is((_relation(_a, _b)).scope, NULL, 'and lifting it gives nothing back');
 END
 $$ LANGUAGE plpgsql;
 
