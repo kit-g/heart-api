@@ -378,6 +378,8 @@ void main() {
   group('getWorkouts', () {
     test('lists an isolated owner newest-first with limit+1 pagination', () async {
       final w1 = await h.seedWorkout(userId: listOwnerId, name: 'W1');
+      // ids minted in one millisecond have no order
+      await Future<void>.delayed(const Duration(milliseconds: 2));
       final w2 = await h.seedWorkout(userId: listOwnerId, name: 'W2');
 
       final page1 = await h.db.getWorkouts(
