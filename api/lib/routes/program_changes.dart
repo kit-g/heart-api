@@ -70,12 +70,19 @@ Future<Model> revertById(
         kind: 'revert',
       );
     case (final String sessionId, null):
-      await service.removeSession(ownerId: ownerId, actorId: req.userId, sessionId: sessionId, kind: 'revert');
+      await service.removeSession(
+        ownerId: ownerId,
+        actorId: req.userId,
+        sessionId: sessionId,
+        programId: programId,
+        kind: 'revert',
+      );
     case (final String sessionId, final Map<String, dynamic> before):
       final written = await service.writeSession(
         ownerId: ownerId,
         actorId: req.userId,
         sessionId: sessionId,
+        programId: programId,
         body: TemplateUpdateIn.fromJson(before, userId: ownerId).request,
         baseRevision: change.revision,
         kind: 'revert',
@@ -190,6 +197,7 @@ Future<Template> updateCopySession(Request req) async {
         ownerId: student,
         actorId: req.userId,
         sessionId: sessionId,
+        programId: programId,
         body: input.request,
         baseRevision: input.baseRevision,
         changeId: input.changeId,
@@ -208,11 +216,14 @@ Future<Model> deleteCopySession(Request req) async {
   final student = req.rawPathParameters[#targetUserId]!;
   final programId = req.rawPathParameters[#programId]!;
   await _assertCanWrite(req, student, programId);
-  await req.programChangeService.removeSession(
+  final sessionId = req.rawPathParameters[#sessionId]!;
+  final removed = await req.programChangeService.removeSession(
     ownerId: student,
     actorId: req.userId,
-    sessionId: req.rawPathParameters[#sessionId]!,
+    sessionId: sessionId,
+    programId: programId,
   );
+  if (!removed) throw NotFound(type: 'Session', id: sessionId);
   await tellOtherSide(req, programId);
   throw const NoContent();
 }
@@ -240,7 +251,9 @@ Future<ProgramDelivery> updateCopyFor(Request req, {required String id, required
   final context = await library.getCoachSendContext(coachId: req.userId, id: id, connectionId: connectionId);
   if (context == null) throw NotFound(type: 'Library program', id: id);
   final student = context.studentId;
-  if (student == null) throw const Forbidden(reason: 'You can only update a client you are coaching.');
+  if (student == null) {
+    return ProgramDelivery(connectionId: connectionId, delivered: false, reason: 'not_coaching');
+  }
   final programId = context.existingProgramId;
   if (programId == null) {
     return ProgramDelivery(connectionId: connectionId, delivered: false, reason: 'not_sent');
@@ -251,7 +264,11 @@ Future<ProgramDelivery> updateCopyFor(Request req, {required String id, required
   final known = await changes.getCopyIds(ownerId: student, programId: programId);
   final ids = copyIds(
     body,
-    exercises: await library.matchExercisesForStudent(ids: idsIn(body).toList(), studentId: student),
+    exercises: await library.matchExercisesForStudent(
+      ids: idsIn(body).toList(),
+      coachId: req.userId,
+      studentId: student,
+    ),
     known: known,
   );
   final next = (remapIds(body, ids)! as Map).cast<String, dynamic>();
@@ -275,6 +292,7 @@ Future<ProgramDelivery> updateCopyFor(Request req, {required String id, required
       ownerId: student,
       actorId: req.userId,
       sessionId: json['id'] as String,
+      programId: programId,
       body: TemplateUpdateIn.fromJson(json, userId: student).request,
       baseRevision: 1 << 30,
       kind: 'library_update',
@@ -290,7 +308,13 @@ Future<ProgramDelivery> updateCopyFor(Request req, {required String id, required
     }
   }
   for (final session in current.sessions.where((session) => !wanted.contains(session))) {
-    await changes.removeSession(ownerId: student, actorId: req.userId, sessionId: session, kind: 'library_update');
+    await changes.removeSession(
+      ownerId: student,
+      actorId: req.userId,
+      sessionId: session,
+      programId: programId,
+      kind: 'library_update',
+    );
   }
   await changes.setCopyVersion(ownerId: student, programId: programId, version: context.version, ids: ids);
   await tellOtherSide(req, programId);

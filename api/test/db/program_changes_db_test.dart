@@ -13,6 +13,7 @@ import 'package:heart/globals/globals.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
 import 'package:relic/relic.dart';
+import 'package:postgres/postgres.dart' show Sql;
 import 'package:test/test.dart';
 
 import '../helpers/request.dart';
@@ -164,6 +165,171 @@ void main() {
       expect((await h.db.getTemplate(userId: c.student, templateId: first)).name, 'Coach');
     });
 
+    // The statements have to overlap: both queue behind a lock this test holds, so each
+    // starts before the other has written. A check in the statement that takes the lock
+    // would see neither, and the second would overwrite the first.
+    test('of two saves waiting at once from one base, the second is told', () async {
+      final c = await sent();
+      final first = c.sessions.first;
+
+      late Future<List<String>> saves;
+      await h.pool.runTx((tx) async {
+        await tx.execute(
+          Sql.named('SELECT id FROM templates WHERE id = @id::uuid FOR UPDATE'),
+          parameters: {'id': first},
+        );
+        saves = Future.wait([
+          for (final (actor, name) in [(c.coach, 'Coach'), (c.student, 'Student')])
+            h.db
+                .writeSession(
+                  ownerId: c.student,
+                  actorId: actor,
+                  sessionId: first,
+                  body: edit(c.student, name),
+                  baseRevision: 0,
+                )
+                .then<String>((_) => 'saved', onError: (Object e) => (e as Conflict).code),
+        ]);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      });
+
+      final outcomes = await saves;
+      expect(outcomes.where((outcome) => outcome == 'saved'), hasLength(1));
+      expect(outcomes.where((outcome) => outcome == 'program_changed'), hasLength(1));
+    });
+
+    test('the same for a program\'s own fields', () async {
+      final c = await sent();
+
+      late Future<List<String>> saves;
+      await h.pool.runTx((tx) async {
+        await tx.execute(
+          Sql.named('SELECT id FROM programs WHERE id = @id::uuid FOR UPDATE'),
+          parameters: {'id': c.program},
+        );
+        saves = Future.wait([
+          for (final (actor, name) in [(c.coach, 'Coach'), (c.student, 'Student')])
+            h.db
+                .writeProgramFields(
+                  ownerId: c.student,
+                  actorId: actor,
+                  programId: c.program,
+                  program: Program(name: name),
+                  baseRevision: 0,
+                )
+                .then<String>((_) => 'saved', onError: (Object e) => (e as Conflict).code),
+        ]);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      });
+
+      final outcomes = await saves;
+      expect(outcomes.where((outcome) => outcome == 'saved'), hasLength(1));
+      expect(outcomes.where((outcome) => outcome == 'program_changed'), hasLength(1));
+    });
+
+    test('order goes by the transaction id as a number, across a digit boundary', () async {
+      final c = await sent();
+      await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.student,
+        sessionId: c.sessions.first,
+        body: edit(c.student, 'Older'),
+        baseRevision: 0,
+      );
+      await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.student,
+        sessionId: c.sessions.first,
+        body: edit(c.student, 'Newer'),
+        baseRevision: 1,
+      );
+      final saved = await history(c.student, c.program, count: 2);
+      await h.exec("UPDATE program_changes SET xid = '999'::xid8 WHERE id = @id::uuid", {'id': saved.first.id});
+      await h.exec("UPDATE program_changes SET xid = '1000'::xid8 WHERE id = @id::uuid", {'id': saved.last.id});
+
+      final changes = await h.db.getProgramChanges(ownerId: c.student, programId: c.program);
+      expect(changes.map((change) => change.after?['name']), ['Older', 'Newer']);
+    });
+
+    test('a coach cannot reach a session through a program it isn\'t in', () async {
+      final c = await sent();
+      // the student's own template, which a workout's templateId could give away
+      final own = await h.insertId(
+        'INSERT INTO templates (user_id, name, order_index) VALUES (@u, @n, 0) RETURNING id',
+        {'u': c.student, 'n': 'Private'},
+      );
+      final other = await sent();
+
+      expect(
+        await h.db.writeSession(
+          ownerId: c.student,
+          actorId: c.coach,
+          sessionId: other.sessions.first,
+          programId: c.program,
+          body: edit(c.student, 'Taken'),
+        ),
+        isNull,
+      );
+      expect(
+        await h.db.removeSession(
+          ownerId: c.student,
+          actorId: c.coach,
+          sessionId: c.sessions.first,
+          programId: other.program,
+        ),
+        isFalse,
+      );
+      await expectLater(
+        h.db.restoreSession(
+          ownerId: c.student,
+          actorId: c.coach,
+          programId: c.program,
+          body: TemplateCreateIn.fromJson({...session('Taken'), 'id': own}, userId: c.student).request,
+        ),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+      );
+      final row = await h.exec('SELECT name, assigned_by, program_id FROM templates WHERE id = @t::uuid', {'t': own});
+      expect(row.first.toColumnMap(), {'name': 'Private', 'assigned_by': null, 'program_id': null});
+    });
+
+    test('a session put back carries on from its history, so nobody is locked out', () async {
+      final c = await sent();
+      final first = c.sessions.first;
+      await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.coach,
+        sessionId: first,
+        body: edit(c.student, 'One'),
+        baseRevision: 0,
+      );
+      await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.coach,
+        sessionId: first,
+        body: edit(c.student, 'Two'),
+        baseRevision: 1,
+      );
+      await h.db.removeSession(ownerId: c.student, actorId: c.coach, sessionId: first);
+      await h.db.restoreSession(
+        ownerId: c.student,
+        actorId: c.coach,
+        programId: c.program,
+        body: TemplateCreateIn.fromJson({...session('Back'), 'id': first}, userId: c.student).request,
+        kind: 'revert',
+      );
+
+      final revision = (await copy(c.student, c.program)).sessionRevisions[first]!;
+      expect(revision, 4);
+      final saved = await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.student,
+        sessionId: first,
+        body: edit(c.student, 'Mine'),
+        baseRevision: revision,
+      );
+      expect(saved?.name, 'Mine', reason: 'a save from what they just read goes through');
+    });
+
     test('a coach changing Monday does not stop the student changing Thursday', () async {
       final c = await sent();
       await h.db.writeSession(
@@ -286,7 +452,7 @@ void main() {
 
     test('an edit goes back to how it stood, as a change like any other', () async {
       final c = await sent();
-      final first = c.sessions.first;
+      final first = await sessionNamed(c.student, c.sessions, 'Day 0');
       await h.db.writeSession(
         ownerId: c.student,
         actorId: c.student,

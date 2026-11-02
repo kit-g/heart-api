@@ -50,6 +50,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     required String actorId,
     required String sessionId,
     required TemplateRequest body,
+    String? programId,
     int? baseRevision,
     String? changeId,
     String kind = 'edit',
@@ -57,16 +58,17 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     return _pool.runTx<Template?>((tx) async {
       final locked = await tx.execute(
         _lockCopySession.toSql(),
-        parameters: {
-          'ownerId': ownerId,
-          'sessionId': sessionId,
-          'actorId': actorId,
-          'baseRevision': baseRevision,
-          'changeId': changeId,
-        },
+        parameters: {'ownerId': ownerId, 'sessionId': sessionId, 'programId': programId},
       );
-      final row = locked.firstOrNull?.toColumnMap();
-      if (row == null) return null;
+      final lock = locked.firstOrNull?.toColumnMap();
+      if (lock == null) return null;
+      final row = {
+        ...lock,
+        ...(await tx.execute(
+          _copySessionStanding.toSql(),
+          parameters: {'sessionId': sessionId, 'actorId': actorId, 'baseRevision': baseRevision, 'changeId': changeId},
+        )).first.toColumnMap(),
+      };
       if (row['replayed'] == true) return _readSession(tx, userId: ownerId, sessionId: sessionId);
       if (row['conflict'] == true) _changed(row['revision'] as int);
 
@@ -112,6 +114,12 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     String kind = 'create',
   }) async {
     return _pool.runTx((tx) async {
+      // it would answer the row there, and this would take over a template it never
+      // was: of the student's own, of another program, or someone else's
+      if (body.id case final String id) {
+        final taken = await tx.execute(_templateIdTaken.toSql(), parameters: {'id': id});
+        if (taken.isNotEmpty) throw const Forbidden(code: 'id_taken', reason: 'this id belongs to something else');
+      }
       final saved = await tx.execute(
         _saveTemplate.toSql(),
         parameters: {
@@ -124,7 +132,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
       );
       if (saved.isEmpty) throw NotFound(type: 'Program', id: programId);
       final sessionId = saved.first.toColumnMap()['id'].toString();
-      await tx.execute(
+      final restored = await tx.execute(
         _restoreSessionLinks.toSql(),
         parameters: {
           'sessionId': sessionId,
@@ -142,7 +150,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
         sessionId: sessionId,
         actorId: actorId,
         kind: kind,
-        revision: 1,
+        revision: restored.first[0]! as int,
         before: null,
         after: after.toMap(),
       );
@@ -155,21 +163,23 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     required String ownerId,
     required String actorId,
     required String sessionId,
+    String? programId,
     String kind = 'delete',
   }) async {
     return _pool.runTx((tx) async {
       final locked = await tx.execute(
         _lockCopySession.toSql(),
-        parameters: {
-          'ownerId': ownerId,
-          'sessionId': sessionId,
-          'actorId': actorId,
-          'baseRevision': null,
-          'changeId': null,
-        },
+        parameters: {'ownerId': ownerId, 'sessionId': sessionId, 'programId': programId},
       );
-      final row = locked.firstOrNull?.toColumnMap();
-      if (row == null) return false;
+      final lock = locked.firstOrNull?.toColumnMap();
+      if (lock == null) return false;
+      final row = {
+        ...lock,
+        ...(await tx.execute(
+          _copySessionStanding.toSql(),
+          parameters: {'sessionId': sessionId, 'actorId': actorId, 'baseRevision': null, 'changeId': null},
+        )).first.toColumnMap(),
+      };
       final before = await _readSession(tx, userId: ownerId, sessionId: sessionId);
       final linked = await tx.execute(_sessionLinks.toSql(), parameters: {'sessionId': sessionId, 'ownerId': ownerId});
       await tx.execute(_deleteSession.toSql(), parameters: {'sessionId': sessionId, 'ownerId': ownerId});
@@ -202,16 +212,14 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     return _pool.runTx<Program?>((tx) async {
       final locked = await tx.execute(
         _lockCopy.toSql(),
-        parameters: {
-          'ownerId': ownerId,
-          'programId': programId,
-          'actorId': actorId,
-          'baseRevision': baseRevision,
-          'changeId': changeId,
-        },
+        parameters: {'ownerId': ownerId, 'programId': programId},
       );
-      final row = locked.firstOrNull?.toColumnMap();
-      if (row == null) return null;
+      if (locked.isEmpty) return null;
+      final standing = await tx.execute(
+        _copyStanding.toSql(),
+        parameters: {'programId': programId, 'actorId': actorId, 'baseRevision': baseRevision, 'changeId': changeId},
+      );
+      final row = standing.first.toColumnMap();
       if (row['replayed'] == true) return _readProgram(tx, userId: ownerId, programId: programId);
       if (row['conflict'] == true) _changed(row['revision'] as int);
 
@@ -258,7 +266,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
       for (final row in rows.map((row) => row.toColumnMap()))
         ProgramChange.fromRow(
           row,
-          cursor: ChangeCursor(xid: row['xid'] as String, id: row['id'].toString()).toString(),
+          cursor: ChangeCursor(xid: row['xid_text'] as String, id: row['id'].toString()).toString(),
         ),
     ];
   }

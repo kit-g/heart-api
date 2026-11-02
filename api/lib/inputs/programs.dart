@@ -402,15 +402,50 @@ extension _ChangeFields on Map<String, dynamic> {
 }
 
 /// `PUT /workouts/:workoutId/plan` — `{plan}`, what the device planned, as it stood.
+/// The plan is the device's, and the rest of it is kept as sent, but the part the server
+/// reads has a shape: `{exercises: [{sets: [{weight?, setId?}]}]}`.
 class WorkoutPlanIn {
   final Map<String, dynamic> plan;
 
   const new _(this.plan);
 
+  static const _maxExercises = 100;
+  static const _maxSets = 100;
+
   static Future<WorkoutPlanIn> fromRequest(Request req) async {
     return switch ((await req.json())['plan']) {
-      final Map plan when plan.isNotEmpty => WorkoutPlanIn._(plan.cast<String, dynamic>()),
-      _ => throw const BadRequest(reason: 'plan must be an object'),
+      final Map plan when plan.isNotEmpty && _valid(plan) => WorkoutPlanIn._(plan.cast<String, dynamic>()),
+      _ => throw const BadRequest(
+        code: 'invalid_plan',
+        reason: 'plan must be {exercises: [{sets: [{weight, setId}]}]}',
+      ),
+    };
+  }
+
+  static bool _valid(Map plan) {
+    return switch (plan['exercises']) {
+      null => true,
+      final List exercises when exercises.length <= _maxExercises => exercises.every(_validExercise),
+      _ => false,
+    };
+  }
+
+  static bool _validExercise(Object? exercise) {
+    return switch (exercise) {
+      {'sets': final List sets} when sets.length <= _maxSets => sets.every(_validSet),
+      final Map map => !map.containsKey('sets'),
+      _ => false,
+    };
+  }
+
+  static bool _validSet(Object? set) {
+    return switch (set) {
+      final Map map => switch ((map['weight'], map['setId'])) {
+        (null || num(), null) => true,
+        (null || num(), final String id) => isUuidV7(id),
+        _ => false,
+      },
+      _ => false,
     };
   }
 }

@@ -7,8 +7,8 @@ typedef CopyAccess = ({bool readable, bool writable});
 /// Two people on one copy of a program. Only a copy a coach sent pays for any of
 /// this: on a person's own program each of these says so, and the plain route runs.
 abstract interface class ProgramChangeService {
-  /// Writes a session of a copy, recording it. Null if [sessionId] isn't one, so the
-  /// plain path applies. Throws `409 program_changed` when someone else changed this
+  /// Writes a session of a copy, recording it. Null if [sessionId] isn't one, or isn't
+  /// one of [programId] when that's given, so the plain path applies. Throws `409 program_changed` when someone else changed this
   /// session since [baseRevision]. A [changeId] already seen does nothing. Without a
   /// [baseRevision] it's an old build: accepted, and recorded as stale.
   Future<Template?> writeSession({
@@ -16,13 +16,15 @@ abstract interface class ProgramChangeService {
     required String actorId,
     required String sessionId,
     required TemplateRequest body,
+    String? programId,
     int? baseRevision,
     String? changeId,
     String kind = 'edit',
   });
 
   /// Adds a session to a copy, or puts a deleted one back under its own ids, with
-  /// the workouts and skips [links] names linked to it again.
+  /// the workouts and skips [links] names linked to it again. Refuses an id already in
+  /// use, so it can't take over a template that isn't this copy's.
   Future<Template> restoreSession({
     required String ownerId,
     required String actorId,
@@ -32,11 +34,13 @@ abstract interface class ProgramChangeService {
     String kind = 'create',
   });
 
-  /// Deletes a session of a copy, recording who named it. False if it isn't one.
+  /// Deletes a session of a copy, recording who named it. False if it isn't one, or
+  /// isn't one of [programId] when that's given.
   Future<bool> removeSession({
     required String ownerId,
     required String actorId,
     required String sessionId,
+    String? programId,
     String kind = 'delete',
   });
 
