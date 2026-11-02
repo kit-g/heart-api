@@ -301,7 +301,7 @@ BEGIN
            (
                SELECT range_agg(tstzrange(at, next_at))
                FROM (
-                   SELECT e.status, e.at, lead(e.at) OVER (PARTITION BY e.connection_id ORDER BY e.id) AS next_at
+                   SELECT e.status, e.at, lead(e.at) OVER (PARTITION BY e.connection_id ORDER BY e.at, e.id) AS next_at
                    FROM connection_events e
                    JOIN connections c ON c.id = e.connection_id
                    WHERE (c.initiator_id = _reader AND c.target_id = _owner AND c.initiator_role = 'COACH')

@@ -110,6 +110,29 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+-- Two moves in one millisecond have ids in no particular order, so the windows go by time.
+CREATE OR REPLACE FUNCTION test__pause_windows_go_by_time() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _coach   TEXT := create_test_profile();
+    _student TEXT := create_test_profile();
+    _id      UUID;
+    _r       relation;
+BEGIN
+    INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status)
+    VALUES (_coach, _student, 'COACH', 'STUDENT', 'fitness', 'active')
+    RETURNING id INTO _id;
+    DELETE FROM connection_events WHERE connection_id = _id;
+    INSERT INTO connection_events (id, connection_id, status, at)
+    VALUES ('01900000-0000-7000-8000-00000000000f', _id, 'paused', '2026-07-01Z'),
+           ('01900000-0000-7000-8000-000000000001', _id, 'active', '2026-08-01Z');
+
+    _r := _relation(_coach, _student);
+    RETURN NEXT ok(_r.pauses @> '2026-07-15Z'::timestamptz, 'the pause lasted until it was lifted');
+    RETURN NEXT ok(NOT _r.pauses @> '2026-09-01Z'::timestamptz, 'and no further');
+END
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION test__connection_triggers() RETURNS SETOF TEXT AS
 $$
 DECLARE
@@ -128,7 +151,7 @@ BEGIN
     RETURN NEXT is((SELECT count(*) FROM connection_events WHERE connection_id = _id), 2::bigint, 'each move');
     RETURN NEXT ok((SELECT accepted_at IS NOT NULL FROM connections WHERE id = _id), 'dated on becoming active');
     RETURN NEXT is(
-        (SELECT actor_id FROM connection_events WHERE connection_id = _id ORDER BY id DESC LIMIT 1),
+        (SELECT actor_id FROM connection_events WHERE connection_id = _id ORDER BY at DESC, id DESC LIMIT 1),
         _b,
         'with who moved it'
     );
