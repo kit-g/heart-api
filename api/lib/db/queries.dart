@@ -997,6 +997,8 @@ _rel AS (
 )
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
+  w.logged_by,
+  (SELECT username FROM profiles coach WHERE coach.id = w.logged_by) AS logged_by_name,
   _workout_exercises(w.id) AS exercises,
   CASE
     WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
@@ -1012,7 +1014,7 @@ WHERE w.id = @workoutId::uuid
   AND w.user_id = @targetUserId::text
   AND _readable_at((SELECT r FROM _rel), w.started_at, w.hidden_at)
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _rel WHERE (r).scope IS NULL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _rel WHERE (r).scope IS NULL
 ''';
 
 /// Idempotent create for a workout, the replay's fifth resource
@@ -1065,7 +1067,7 @@ _exercise_lookup AS (
   WHERE e.user_id IS NULL OR e.user_id = @userId
 ),
 _workout AS (
-  INSERT INTO workouts (id, user_id, name, started_at, completed_at, calories, note, pauses, template_id, program_id)
+  INSERT INTO workouts (id, user_id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, logged_by)
   SELECT
     coalesce(@id::uuid, uuidv7()),
     @userId,
@@ -1076,9 +1078,10 @@ _workout AS (
     @note,
     @pauses::jsonb,
     (SELECT id FROM _template),
-    (SELECT id FROM _program)
+    (SELECT id FROM _program),
+    @loggedBy::text
   WHERE NOT EXISTS (SELECT 1 FROM _existing_workout)
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, logged_by
 ),
 _inserted_exercises AS (
   INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note, superset)
@@ -1179,6 +1182,7 @@ SELECT
   w.template_id,
   w.program_id,
   w.created_at,
+  w.logged_by,
   coalesce(ej.exercises_json, '[]'::jsonb) AS exercises,
   '[]'::jsonb AS images,
   true AS created
@@ -1197,6 +1201,7 @@ SELECT
   w.template_id,
   w.program_id,
   w.created_at,
+  w.logged_by,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -3819,7 +3824,11 @@ WHERE id = @programId::uuid
 const _saveWorkoutPlan = '''
 WITH
 _workout AS (
-  SELECT id FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId
+  SELECT id
+  FROM workouts
+  WHERE id = @workoutId::uuid
+    AND user_id = @userId
+    AND (@loggedBy::text IS NULL OR logged_by = @loggedBy)
 ),
 _saved AS (
   INSERT INTO workout_plans (workout_id, plan)
@@ -4006,15 +4015,6 @@ JOIN profiles p ON p.id = i.student_id
 WHERE @afterAt::timestamptz IS NULL OR (i.at, i.id) < (@afterAt::timestamptz, @afterId::text)
 ORDER BY i.at DESC, i.id DESC
 LIMIT @limit
-''';
-
-/// Their workout, entered by someone else, and it says so.
-const _markWorkoutLoggedBy = '''
-UPDATE workouts
-SET logged_by = @coachId
-WHERE id = @workoutId::uuid
-  AND user_id = @studentId
-RETURNING id
 ''';
 
 const _coachCanLog = '''
@@ -4847,6 +4847,8 @@ SELECT
   c.stale,
   p.id, p.xid::text AS xid, p.at, p.deleted,
   w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
+  w.logged_by,
+  (SELECT username FROM profiles coach WHERE coach.id = w.logged_by) AS logged_by_name,
   CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id) END AS exercises,
   CASE WHEN p.deleted THEN NULL ELSE COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)

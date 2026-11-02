@@ -362,22 +362,15 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
   }
 
   @override
-  Future<void> markLoggedBy({required String coachId, required String studentId, required String workoutId}) async {
-    await _pool.execute(
-      _markWorkoutLoggedBy.toSql(),
-      parameters: {'coachId': coachId, 'studentId': studentId, 'workoutId': workoutId},
-    );
-  }
-
-  @override
   Future<void> savePlan({
     required String userId,
     required String workoutId,
     required Map<String, dynamic> plan,
+    String? loggedBy,
   }) async {
     final rows = await _pool.execute(
       _saveWorkoutPlan.toSql(),
-      parameters: {'userId': userId, 'workoutId': workoutId, 'plan': jsonEncode(plan)},
+      parameters: {'userId': userId, 'workoutId': workoutId, 'plan': jsonEncode(plan), 'loggedBy': loggedBy},
     );
     if (rows.first[0] != true) throw NotFound(type: 'Workout', id: workoutId);
   }

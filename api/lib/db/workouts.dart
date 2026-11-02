@@ -257,12 +257,13 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required String userId,
     required WorkoutRequest body,
     required String Function(String) imageUrl,
+    String? loggedBy,
   }) async {
     try {
       final rows = await _retryOnCreateRace(
         () => _pool.execute(
           _saveWorkout.toSql(),
-          parameters: {'id': body.id, ...body.toParams()},
+          parameters: {'id': body.id, 'loggedBy': loggedBy, ...body.toParams()},
         ),
       );
       final row = rows.first.toColumnMap();

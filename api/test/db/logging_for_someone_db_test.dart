@@ -100,6 +100,85 @@ void main() {
     await h.exec('DELETE FROM workouts WHERE user_id = @s', {'s': student});
   });
 
+  group('an id already there', () {
+    test('a retry answers the same workout, once', () async {
+      final (coach, student) = await coaching();
+      final exercise = await h.seedGlobalExercise();
+      final json = body(exercise);
+
+      await logWorkoutForStudent(logging(coach, student, json), student);
+      final again = await logWorkoutForStudent(logging(coach, student, json), student);
+
+      expect((again as Workout).id, json['id']);
+      expect(again.loggedBy, coach);
+      final page = await h.db.getWorkouts(userId: student, targetUserId: student, limit: 5, imageUrl: imageUrl);
+      expect(page.items, hasLength(1));
+    });
+
+    test('the student\'s own workout comes back as nothing, hidden or not', () async {
+      final (coach, student) = await coaching();
+      final exercise = await h.seedGlobalExercise();
+      final own = await h.seedWorkout(userId: student, start: DateTime.utc(2026), end: DateTime.utc(2026));
+      await h.db.hideWorkout(userId: student, workoutId: own);
+
+      await expectLater(
+        logWorkoutForStudent(logging(coach, student, {...body(exercise), 'id': own}), student),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+      );
+    });
+
+    test('one they logged and the student hid isn\'t read back either', () async {
+      final (coach, student) = await coaching();
+      final exercise = await h.seedGlobalExercise();
+      final json = body(exercise);
+      await logWorkoutForStudent(logging(coach, student, json), student);
+      await h.db.hideWorkout(userId: student, workoutId: json['id'] as String);
+
+      await expectLater(logWorkoutForStudent(logging(coach, student, json), student), throwsA(isA<NotFound>()));
+    });
+  });
+
+  test('every read of the workout says who entered it', () async {
+    final (coach, student) = await coaching();
+    final exercise = await h.seedGlobalExercise();
+    final json = body(exercise);
+    await logWorkoutForStudent(logging(coach, student, json), student);
+    final id = json['id'] as String;
+
+    final mine = await h.db.getWorkout(userId: student, workoutId: id, imageUrl: imageUrl);
+    expect(mine.loggedByName, 'u_$coach');
+    final theirs = await h.db.getTargetWorkout(
+      requesterId: coach,
+      targetUserId: student,
+      workoutId: id,
+      imageUrl: imageUrl,
+    );
+    expect(theirs.loggedBy, coach);
+
+    for (var i = 0; ; i++) {
+      final changes = await h.db.getWorkoutChanges(userId: student, imageUrl: imageUrl);
+      if (changes.upserted.isNotEmpty || i == 50) {
+        expect(changes.upserted.single.loggedByName, 'u_$coach');
+        break;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+  });
+
+  test('a coach\'s plan goes only on a workout they logged', () async {
+    final (coach, student) = await coaching();
+    final exercise = await h.seedGlobalExercise();
+    final json = body(exercise);
+    await logWorkoutForStudent(logging(coach, student, json), student);
+    final own = await h.seedWorkout(userId: student);
+
+    await h.db.savePlan(userId: student, workoutId: json['id'] as String, plan: {'week': 1}, loggedBy: coach);
+    await expectLater(
+      h.db.savePlan(userId: student, workoutId: own, plan: {'week': 1}, loggedBy: coach),
+      throwsA(isA<NotFound>()),
+    );
+  });
+
   for (final (name, status) in [('paused', 'paused'), ('ended', 'severed')]) {
     test('not across a connection that is $name', () async {
       final (coach, student) = await coaching(status: status);

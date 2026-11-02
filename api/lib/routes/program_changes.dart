@@ -340,6 +340,7 @@ Future<Model> logWorkoutForStudent(Request req, String student) async {
   final json = await req.json();
   final exercises = await req.coachLibraryService.matchExercisesForStudent(
     ids: idsIn(json['exercises']).toList(),
+    coachId: req.userId,
     studentId: student,
   );
   final body = (remapIds(json, exercises)! as Map).cast<String, dynamic>();
@@ -348,11 +349,20 @@ Future<Model> logWorkoutForStudent(Request req, String student) async {
     userId: student,
     body: WorkoutRequest(userId: student, body: body),
     imageUrl: req.config.cdnAssetUrl,
+    loggedBy: req.userId,
   );
-  if (!created) return workout;
-  await req.programChangeService.markLoggedBy(coachId: req.userId, studentId: student, workoutId: workout.id);
-  return Created(
-    await req.workoutsService.getWorkout(userId: student, workoutId: workout.id, imageUrl: req.config.cdnAssetUrl),
+  if (created) return Created(workout);
+
+  // An id already there is a retry only if this coach logged it, and what comes back is
+  // what they can read. Anything else would turn this into a way to read any workout.
+  if (workout.loggedBy != req.userId) {
+    throw const Forbidden(code: 'id_taken', reason: 'this id belongs to something else');
+  }
+  return req.workoutsService.getTargetWorkout(
+    requesterId: req.userId,
+    targetUserId: student,
+    workoutId: workout.id,
+    imageUrl: req.config.cdnAssetUrl,
   );
 }
 
@@ -377,6 +387,7 @@ Future<Model> savePlanFor(Request req) async {
     userId: student,
     workoutId: req.rawPathParameters[#workoutId]!,
     plan: input.plan,
+    loggedBy: req.userId,
   );
   throw const NoContent();
 }

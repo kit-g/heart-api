@@ -93,11 +93,15 @@ abstract interface class ProgramChangeService {
   /// Whether [coachId] can log for and write to [studentId] right now.
   Future<bool> canLogFor({required String coachId, required String studentId});
 
-  Future<void> markLoggedBy({required String coachId, required String studentId, required String workoutId});
-
-  /// What [userId]'s device planned for a workout, as it stood. Doing it again keeps
-  /// the first, since it's what was asked at the time.
-  Future<void> savePlan({required String userId, required String workoutId, required Map<String, dynamic> plan});
+  /// What a device planned for [userId]'s workout, as it stood. Doing it again keeps
+  /// the first, since it's what was asked at the time. With [loggedBy], only on a
+  /// workout that coach logged, so a coach can't plant one on the student's own.
+  Future<void> savePlan({
+    required String userId,
+    required String workoutId,
+    required Map<String, dynamic> plan,
+    String? loggedBy,
+  });
 
   /// Through the read policy; null if there's none or it's past what they can read.
   Future<Map<String, dynamic>?> getPlan({
