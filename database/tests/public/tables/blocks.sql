@@ -28,6 +28,7 @@ SELECT fk_ok('public', 'blocks', 'blocked_id', 'public', 'profiles', 'id');
 SELECT has_index('public'::name, 'blocks'::name, 'blocks_live_key'::name);
 SELECT index_is_unique('public'::name, 'blocks'::name, 'blocks_live_key'::name);
 SELECT has_index('public'::name, 'blocks'::name, 'blocks_blocked_idx'::name);
+SELECT has_trigger('public'::name, 'blocks'::name, 'blocks_end_connections'::name);
 
 SELECT has_trigger('public'::name, 'blocks'::name, 'blocks_end_connections'::name);
 
