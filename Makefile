@@ -1,16 +1,12 @@
 # Repo-wide entrypoints. `make test` runs the same matrix CI does.
 # Database targets need local Postgres + pgtap (see database/README.md).
 
-.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages cards openapi design lint format-check db-up db-down db-reset db-seed
+.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages generate cards openapi design lint format-check db-up db-down db-reset db-seed
 
 bootstrap:
-	$(MAKE) cards
-	$(MAKE) openapi
-	cd api && dart run build_runner build
+	$(MAKE) generate
 	cd shared/heart_aws && dart pub get
 	cd shared/heart_design && dart pub get
-	cd shared/heart_models && dart pub get && dart run build_runner build
-	cd pages && dart pub get && dart run build_runner build
 	$(MAKE) prepare-compat-tests
 	uv sync --all-packages
 	uv run pre-commit install --hook-type pre-push
@@ -90,6 +86,16 @@ cards:
 openapi:
 	cd api && dart pub get && dart run tool/openapi/shapes.dart && dart run tool/openapi/spec.dart
 
+# Everything generated and gitignored that analysis needs: the cards, the
+# shapes and spec, the mocks, and the blog's server options. They belong to the
+# checkout they were built in, so after a branch switch or in a new worktree
+# they describe other code until rebuilt. `lint`, and with it the pre-push hook,
+# runs this first; on an unchanged tree each step is a cache hit.
+generate: cards openapi
+	cd api && dart run build_runner build --delete-conflicting-outputs
+	cd shared/heart_models && dart pub get && dart run build_runner build --delete-conflicting-outputs
+	cd pages && dart run build_runner build --delete-conflicting-outputs
+
 # Regenerates the design tokens' Dart and CSS from shared/heart_design/tokens.json.
 design:
 	cd shared/heart_design && dart pub get && dart run tool/generate.dart
@@ -99,7 +105,7 @@ design:
 test-tf:
 	./scripts/tf_checks.sh
 
-lint: openapi
+lint: generate
 	cd api && dart analyze
 	cd shared/heart_aws && dart analyze
 	cd shared/heart_design && dart analyze
