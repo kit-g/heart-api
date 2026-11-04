@@ -23,7 +23,13 @@ SELECT columns_are(
                    'updated_at',
                    'deload',
                    'phases',
-                   'tests'
+                   'tests',
+                   'coach_id',
+                   'connection_id',
+                   'library_program_id',
+                   'library_version',
+                   'library_ids',
+                   'waiting_since'
                    ]
        );
 

@@ -330,6 +330,23 @@ resource "aws_cloudfront_distribution" "web" {
     }
   }
 
+  # Accepting an invitation opens a person's workouts to someone. Framed inside
+  # another site, its button could be clickjacked, as Allow could.
+  ordered_cache_behavior {
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    path_pattern               = "/invite.html"
+    target_origin_id           = local.static_origin
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = local.caching_disabled
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.consent.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.www_redirect.arn
+    }
+  }
+
   # Sign in with Apple returns to the handler by form POST (response_mode
   # form_post), so this path takes every method; GET alone turned Apple's
   # answer into a 403, which the error mapping below served as the index.

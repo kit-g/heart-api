@@ -16,6 +16,7 @@ import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart/storage/s3.dart';
 import 'package:heart_models/heart_models.dart' hide ExerciseService, WorkoutService, TemplateService;
+import 'package:heart/models/coach_library.dart';
 import 'package:mockito/annotations.dart';
 
 @GenerateMocks([
@@ -41,6 +42,7 @@ import 'package:mockito/annotations.dart';
   PushService,
   KeyService,
   ThreadService,
+  CoachLibraryService,
   CoachNoteService,
   ReportService,
   DeviceService,

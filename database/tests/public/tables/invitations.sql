@@ -18,7 +18,8 @@ SELECT columns_are(
                    'expires_at',
                    'canceled_at',
                    'renewed_at',
-                   'created_at'
+                   'created_at',
+                   'library_program_id'
                    ]
        );
 

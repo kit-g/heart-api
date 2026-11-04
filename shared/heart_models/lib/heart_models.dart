@@ -6,6 +6,7 @@ export 'src/models/api_token.dart';
 export 'src/models/act.dart';
 export 'src/models/auth.dart';
 export 'src/models/charts.dart';
+export 'src/models/coach_program.dart';
 export 'src/models/comment.dart';
 export 'src/models/connected_app.dart';
 export 'src/models/connections.dart';

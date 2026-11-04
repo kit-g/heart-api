@@ -18,7 +18,11 @@ class ProgramCreateIn {
   const new _({required this.program, required this.sessions});
 
   static Future<ProgramCreateIn> fromRequest(Request req) async {
-    final json = await req.json();
+    return fromJson(req.userId, await req.json());
+  }
+
+  /// For [userId], who needn't be the caller: a coach's program becomes a student's.
+  static ProgramCreateIn fromJson(String userId, Map<String, dynamic> json) {
     final sessions = switch (json['sessions']) {
       null => const <Object?>[],
       final List l when l.length <= maxSessions => l,
@@ -43,7 +47,7 @@ class ProgramCreateIn {
       sessions: [
         for (final (index, session) in sessions.indexed)
           switch (session) {
-            final Map m => _session(req.userId, m.cast<String, dynamic>()),
+            final Map m => _session(userId, m.cast<String, dynamic>()),
             _ => throw BadRequest(reason: 'sessions[$index] must be an object'),
           },
       ],

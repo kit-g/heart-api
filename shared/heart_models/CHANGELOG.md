@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.46.0
+
+A coach's library (heart-api#363).
+
+- New: `CoachProgram`, `CoachProgramHolder`, `CoachProgramHolders`, `ProgramDelivery`, `ProgramDeliveries`.
+- New: `Program.coachId`, `coachName` and `waitingSince`. A program without them is the user's own.
+
+## 2.45.0
+
+Answering an invitation from the web (heart-api#375).
+
+- `InvitationService.acceptInvitation`, `declineInvitation` and `blockInviter`
+  take an optional `email` and `name`.
+
 ## 2.44.0
 
 Messages, notes and reports (heart-api#362).

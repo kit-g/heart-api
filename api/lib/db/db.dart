@@ -14,6 +14,7 @@ import 'package:heart/models/images.dart';
 import 'package:heart/models/imports.dart';
 import 'package:heart/models/oauth.dart';
 import 'package:heart/models/profile.dart';
+import 'package:heart/models/coach_library.dart';
 import 'package:heart/models/programs.dart';
 import 'package:heart/models/skips.dart';
 import 'package:heart/models/tokens.dart';
@@ -23,6 +24,7 @@ import 'package:postgres/postgres.dart' hide Connection;
 
 part 'anomalies.dart';
 part 'charts.dart';
+part 'coach_library.dart';
 part 'comments.dart';
 part 'connections.dart';
 part 'devices.dart';
@@ -212,6 +214,7 @@ class Database extends _DatabaseBase
         _Push,
         _Keys,
         _Threads,
+        _CoachLibrary,
         _Devices,
         _ExercisePreferences,
         _Exercises,
@@ -235,6 +238,7 @@ class Database extends _DatabaseBase
         PushService,
         KeyService,
         ThreadService,
+        CoachLibraryService,
         CoachNoteService,
         ReportService,
         DeviceService,

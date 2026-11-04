@@ -39,6 +39,8 @@ void main() {
         userId: anyNamed('userId'),
         token: anyNamed('token'),
         shares: anyNamed('shares'),
+        email: anyNamed('email'),
+        name: anyNamed('name'),
       ),
     ).thenAnswer(
       (_) async => Connection(
@@ -50,6 +52,7 @@ void main() {
         createdAt: DateTime.utc(2026),
       ),
     );
+    when(app.db.invitationProgram(token: anyNamed('token'))).thenAnswer((_) async => null);
     when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
     when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
 
