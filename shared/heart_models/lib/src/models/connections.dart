@@ -1,5 +1,7 @@
 import 'package:heart_models/heart_models.dart';
 
+import 'tolerant.dart' show readIndexed;
+
 enum ConnectionRole {
   coach,
   student,
@@ -156,6 +158,28 @@ abstract interface class Connection implements Model {
     );
   }
 
+  /// [role], [domain] and [status] are typed, so one this build doesn't know
+  /// throws [ArgumentError]: read a list of them with [readEach]. [shares] are
+  /// plain strings and carry any word.
+  factory fromJson(Map json) {
+    return Connection(
+      targetId: json['targetId'] as String,
+      role: ConnectionRole.fromString(json['role'] as String),
+      domain: ConnectionDomain.fromString(json['domain'] as String),
+      status: ConnectionStatus.fromString(json['status'] as String),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      connectionId: json['connectionId'] as String?,
+      acceptedAt: switch (json['acceptedAt']) {
+        final String at => DateTime.parse(at),
+        _ => null,
+      },
+      shares: switch (json['shares']) {
+        final List shares => [for (final share in shares) '$share'],
+        _ => const [],
+      },
+    );
+  }
+
   static (String, ConnectionRole, ConnectionDomain) fromId(String id) {
     return switch (id.split('|')) {
       [String id, String role, String domain] => (
@@ -228,6 +252,12 @@ class ConnectionListResponse with Iterable<Connection> implements Model {
   final List<Connection> connections;
 
   const new(this.connections);
+
+  /// A connection this build can't read, such as one in a status it doesn't
+  /// know, is left out.
+  factory fromJson(Map json) {
+    return ConnectionListResponse(readIndexed(json['connections'], Connection.fromJson).items);
+  }
 
   @override
   Iterator<Connection> get iterator => connections.iterator;

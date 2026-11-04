@@ -64,6 +64,30 @@ abstract interface class ClientSummary implements Model {
       reasons: [for (final reason in (row['reasons'] as List?) ?? const []) '$reason'],
     );
   }
+
+  factory fromJson(Map json) {
+    return ClientSummary(
+      connectionId: json['connectionId'] as String,
+      studentId: json['studentId'] as String,
+      name: json['name'] as String?,
+      avatar: json['avatar'] as String?,
+      status: json['status'] as String,
+      acceptedAt: switch (json['acceptedAt']) {
+        final String at => DateTime.parse(at),
+        _ => null,
+      },
+      programId: json['programId'] as String?,
+      programName: json['programName'] as String?,
+      programWeek: (json['programWeek'] as num?)?.toInt(),
+      programWeeks: (json['programWeeks'] as num?)?.toInt(),
+      recent: [for (final at in (json['recent'] as List?) ?? const []) DateTime.parse(at as String)],
+      lastTrainedAt: switch (json['lastTrainedAt']) {
+        final String at => DateTime.parse(at),
+        _ => null,
+      },
+      reasons: [for (final reason in (json['reasons'] as List?) ?? const []) '$reason'],
+    );
+  }
 }
 
 class _ClientSummary implements ClientSummary {
@@ -171,6 +195,20 @@ abstract interface class CoachFeedItem implements Model {
       at: row['at'] as DateTime,
       title: row['title'] as String?,
       cursor: cursor,
+    );
+  }
+
+  /// The wire carries no cursor per item: the page's own `cursor` is the one to
+  /// pass back.
+  factory fromJson(Map json) {
+    return CoachFeedItem(
+      kind: json['kind'] as String,
+      id: json['id'] as String,
+      studentId: json['studentId'] as String,
+      name: json['name'] as String?,
+      avatar: json['avatar'] as String?,
+      at: DateTime.parse(json['at'] as String),
+      title: json['title'] as String?,
     );
   }
 }

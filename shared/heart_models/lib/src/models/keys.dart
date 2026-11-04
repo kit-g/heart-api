@@ -1,4 +1,5 @@
 import 'misc.dart';
+import 'tolerant.dart';
 
 /// A device's public keys, which is all the server ever holds of its encryption.
 abstract interface class CryptoDevice implements Model {
@@ -211,6 +212,8 @@ class OneTimeKeyCount implements Model {
 
   const new(this.count);
 
+  factory fromJson(Map json) => OneTimeKeyCount((json['count'] as num).toInt());
+
   @override
   Map<String, dynamic> toMap() => {'count': count};
 }
@@ -220,6 +223,9 @@ class CryptoDevices implements Model {
   final List<CryptoDevice> devices;
 
   const new(this.devices);
+
+  /// A device this build can't read is left out.
+  factory fromJson(Map json) => CryptoDevices(readIndexed(json['devices'], CryptoDevice.fromJson).items);
 
   @override
   Map<String, dynamic> toMap() => {
@@ -232,6 +238,9 @@ class QueuedItems implements Model {
   final List<QueuedItem> items;
 
   const new(this.items);
+
+  /// An item this build can't read is left out.
+  factory fromJson(Map json) => QueuedItems(readIndexed(json['items'], QueuedItem.fromJson).items);
 
   @override
   Map<String, dynamic> toMap() => {

@@ -115,6 +115,23 @@ class AcceptedInvitation implements Model {
 
   const new(this.connection, {this.delivery});
 
+  /// The wire carries whether the program arrived and where, not why it didn't:
+  /// a [delivery] read here has no [ProgramDelivery.reason].
+  factory fromJson(Map json) {
+    final connection = Connection.fromJson(json);
+    return AcceptedInvitation(
+      connection,
+      delivery: switch (json['programDelivered']) {
+        final bool delivered => ProgramDelivery(
+          connectionId: connection.connectionId ?? '',
+          delivered: delivered,
+          programId: json['programId'] as String?,
+        ),
+        _ => null,
+      },
+    );
+  }
+
   @override
   Map<String, dynamic> toMap() {
     return {...connection.toMap(), 'programDelivered': ?delivery?.delivered, 'programId': ?delivery?.programId};
@@ -175,6 +192,15 @@ abstract interface class BlockedPerson implements Model {
       name: row['username'] as String?,
       avatar: row['avatar_url'] as String?,
       since: row['created_at'] as DateTime,
+    );
+  }
+
+  factory fromJson(Map json) {
+    return BlockedPerson(
+      id: json['id'] as String,
+      name: json['name'] as String?,
+      avatar: json['avatar'] as String?,
+      since: DateTime.parse(json['since'] as String),
     );
   }
 }

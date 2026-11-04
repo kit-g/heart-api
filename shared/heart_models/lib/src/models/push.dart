@@ -1,4 +1,5 @@
 import 'misc.dart';
+import 'tolerant.dart';
 
 /// One push topic as a settings screen draws it: the server sends the words, so
 /// a build that has never heard of a topic can still show and change it.
@@ -84,6 +85,21 @@ class PushSettings implements Model {
   final List<PushPreference> forPeople;
 
   const new({required this.topics, this.forPeople = const []});
+
+  /// A topic or a preference this build can't read is left out; the rest still show.
+  factory fromJson(Map json) {
+    return PushSettings(
+      topics: readIndexed(json['topics'], PushSetting.fromJson).items,
+      forPeople: readIndexed(
+        json['forPeople'],
+        (each) => (
+          topic: each['topic'] as String,
+          connectionId: each['connectionId'] as String?,
+          delivery: each['delivery'] as String,
+        ),
+      ).items,
+    );
+  }
 
   @override
   Map<String, dynamic> toMap() {

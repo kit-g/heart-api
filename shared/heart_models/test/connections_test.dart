@@ -1,6 +1,8 @@
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
+import 'wire.dart';
+
 void main() {
   group('ConnectionRole', () {
     test('fromString parses correctly', () {
@@ -262,6 +264,51 @@ void main() {
         createdAt: DateTime.utc(2026),
       );
       expect(QueuedItem.fromJson(item.toMap()).content, 'sealed');
+    });
+  });
+  group('Connection on the wire', () {
+    const connection = '01900000-0000-7000-8000-000000000001';
+    final at = DateTime.utc(2026, 11, 1, 9, 30);
+    final later = DateTime.utc(2026, 11, 2, 18);
+
+    final accepted = Connection.fromRow({
+      'target_id': 'coach',
+      'role': 'COACH',
+      'domain': 'fitness',
+      'status': 'active',
+      'created_at': at,
+      'connection_id': connection,
+      'accepted_at': later,
+      'shares': ['history'],
+    });
+
+    test('Connection round-trips, as a list too', () {
+      expectRoundTrip(accepted, Connection.fromJson);
+      expectRoundTrip(ConnectionListResponse([accepted]), ConnectionListResponse.fromJson);
+    });
+
+    test('Connection reads the API body, a share it does not know too', () {
+      final read = Connection.fromJson({
+        ...wire(accepted),
+        'shares': ['history', 'something_new'],
+      });
+      expect(read.id, 'coach|COACH|FITNESS');
+      expect(
+        (read.role, read.domain, read.status),
+        (ConnectionRole.coach, ConnectionDomain.fitness, ConnectionStatus.active),
+      );
+      expect(read.acceptedAt, later);
+      expect(read.shares, ['history', 'something_new']);
+    });
+
+    test('a connection in a status this build does not know leaves the rest of the list', () {
+      final read = ConnectionListResponse.fromJson({
+        'connections': [
+          {...wire(accepted), 'status': 'something_new'},
+          wire(accepted),
+        ],
+      });
+      expect(read.connections, hasLength(1));
     });
   });
 }
