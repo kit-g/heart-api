@@ -1364,6 +1364,21 @@ void main() {
       });
     },
   );
+
+  group('Workout.copy keeps who logged it', () {
+    final workout = Workout.fromJson({...Workout().toMap(), 'loggedBy': 'coach', 'loggedByName': 'Coach'});
+
+    test('the same session keeps who logged it', () {
+      final same = workout.copy(sameId: true);
+      expect((same.loggedBy, same.loggedByName), ('coach', 'Coach'));
+      expect(same.toMap(), allOf(containsPair('loggedBy', 'coach'), containsPair('loggedByName', 'Coach')));
+    });
+
+    test('a repeat is the owner\'s own', () {
+      final repeat = workout.copy();
+      expect((repeat.loggedBy, repeat.loggedByName), (null, null));
+    });
+  });
 }
 
 extension on int {
