@@ -51,7 +51,7 @@ Renaming a migration file is the same hazard in reverse: the new name is unrecor
 
 ## pgtap test
 
-pgtap covers **schema, signatures, and the behavior of database-side functions and triggers**. It does **not** cover the SQL the API runs — that lives in `api/lib/db/queries.dart` and is covered by `db`-tagged Dart integration tests (see the `add-endpoint` skill).
+pgtap covers **schema, signatures, and the behavior of database-side functions and triggers**. It does **not** cover the SQL the API runs — that lives in `api/lib/db/queries/` and is covered by `db`-tagged Dart integration tests (see the `add-endpoint` skill).
 
 There are **two forms**, chosen by what you are testing. They are not interchangeable — the table form is a flat script with an explicit plan; the function form is pgtap's xUnit runner with no plan at all. Pick by directory:
 

@@ -8,7 +8,7 @@ import 'set_target.dart';
 /// One coach-owned master template, handed to one student.
 ///
 /// Assignment copies rather than references (see `_shareTemplates` in
-/// `api/lib/db/queries.dart`), so a share is the ledger entry tying the coach's
+/// `api/lib/db/queries/templates.dart`), so a share is the ledger entry tying the coach's
 /// [masterTemplateId] to the student's [studentTemplateId] copy. Deleting the
 /// share deletes the student's copy.
 abstract interface class TemplateShare implements Model {

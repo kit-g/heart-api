@@ -41,7 +41,6 @@ part 'profiles.dart';
 part 'program_changes.dart';
 part 'programs.dart';
 part 'push.dart';
-part 'queries.dart';
 part 'roster.dart';
 part 'skips.dart';
 part 'template_folders.dart';
@@ -49,6 +48,34 @@ part 'templates.dart';
 part 'threads.dart';
 part 'tokens.dart';
 part 'workouts.dart';
+part 'queries/anomalies.dart';
+part 'queries/charts.dart';
+part 'queries/coach_library.dart';
+part 'queries/comments.dart';
+part 'queries/connections.dart';
+part 'queries/devices.dart';
+part 'queries/exercise_preferences.dart';
+part 'queries/exercises.dart';
+part 'queries/goals.dart';
+part 'queries/images.dart';
+part 'queries/invitations.dart';
+part 'queries/keys.dart';
+part 'queries/oauth.dart';
+part 'queries/profiles.dart';
+part 'queries/program_changes.dart';
+part 'queries/programs.dart';
+part 'queries/push.dart';
+part 'queries/roster.dart';
+part 'queries/skips.dart';
+part 'queries/template_folders.dart';
+part 'queries/templates.dart';
+part 'queries/threads.dart';
+part 'queries/tokens.dart';
+part 'queries/workouts.dart';
+
+extension on String {
+  Sql toSql() => Sql.named(this);
+}
 
 abstract class _DatabaseBase {
   Pool get _pool;

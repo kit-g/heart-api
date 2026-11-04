@@ -30,7 +30,7 @@ Forward-only. Naming: `YYYY-MM-DD.<title>.sql`. Applied in lexical order — the
 ### Schema patterns
 
 - **Single-roundtrip CTEs** for any operation that touches more than one table. Most write queries are `WITH _x AS (…), _y AS (…) SELECT …` — keeps logic in the planner.
-- **`forbidden` sentinel** for read endpoints with auth checks: empty result = 404, single row with `forbidden = true` = 403, otherwise the data. See `_listWorkouts` / `_getTargetWorkout` in `api/lib/db/queries.dart` for the canonical shape.
+- **`forbidden` sentinel** for read endpoints with auth checks: empty result = 404, single row with `forbidden = true` = 403, otherwise the data. See `_listWorkouts` / `_getTargetWorkout` in `api/lib/db/queries/workouts.dart` for the canonical shape.
 - **`COALESCE` for partial updates**: `SET col = coalesce(@col, col)` — pass null for fields you want unchanged.
 - **`BEFORE DELETE` triggers for snapshots**: cascade-deleted rows are still visible at trigger time. `_archive_workout` uses this to copy workout JSON into `archive.deleted_workouts` before the cascade fires.
 - **Timestamps, where present, are `NOT NULL DEFAULT now()`** — defaults shouldn't be defeated by an explicit-null insert. Owner-level tables carry `created_at`; child rows that live and die with their parent (`workout_exercises`, `exercise_sets`, `template_exercises`, `template_exercise_sets`, `exercise_translations`) carry no timestamps of their own. Only `profiles` has `updated_at`, and nothing maintains it yet — don't read it as a change marker.
