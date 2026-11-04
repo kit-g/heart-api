@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.50.0
+
+Reading coaching's answers back.
+
+- New: `fromJson` on `PushSettings`, `CryptoDevices`, `QueuedItems`, `OneTimeKeyCount`, `Thread`,
+  `ThreadList`, `CoachNote`, `CoachProgram`, `CoachProgramHolder`, `CoachProgramHolders`,
+  `ProgramDelivery`, `ProgramDeliveries`, `ProgramChange`, `ProgramChanges`, `WorkoutPlan`,
+  `CoachProgramView`, `ClientSummary`, `CoachFeedItem`, `BlockedPerson`, `Connection`,
+  `ConnectionListResponse` and `AcceptedInvitation`. A list wrapper leaves out an item this build
+  can't read and keeps the rest; words such as a feed item's `kind` are carried as they arrived.
+  A paged list (`notes`, `blocks`, `clients`, `items`, `programs`) reads with `readEach`.
+- New: `AcceptedInvitation`, what accepting an invitation answers: the connection, and how the
+  program it named arrived. It came in 2.46.0 without an entry. A delivery read from the wire has
+  no `reason`, which the answer doesn't carry.
+- Fixed: `Workout.copy(sameId: true)` dropped `loggedBy` and `loggedByName`. A fresh-id copy
+  still leaves them behind.
+
 ## 2.49.1
 
 `getMonday` across a clock change (heart-api#383).

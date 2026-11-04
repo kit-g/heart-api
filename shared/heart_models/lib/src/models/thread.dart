@@ -1,4 +1,5 @@
 import 'misc.dart';
+import 'tolerant.dart';
 
 /// A conversation in someone's inbox.
 abstract interface class Thread implements Model {
@@ -47,6 +48,26 @@ abstract interface class Thread implements Model {
       lastAt: row['last_at'] as DateTime?,
       clearedAt: row['cleared_at'] as DateTime?,
       clearedBy: row['cleared_by'] as String?,
+    );
+  }
+
+  factory fromJson(Map json) {
+    return Thread(
+      id: json['id'] as String,
+      connectionId: json['connectionId'] as String?,
+      otherId: json['otherId'] as String?,
+      otherName: json['otherName'] as String?,
+      otherAvatar: json['otherAvatar'] as String?,
+      unread: (json['unread'] as num?)?.toInt() ?? 0,
+      lastAt: switch (json['lastAt']) {
+        final String at => DateTime.parse(at),
+        _ => null,
+      },
+      clearedAt: switch (json['clearedAt']) {
+        final String at => DateTime.parse(at),
+        _ => null,
+      },
+      clearedBy: json['clearedBy'] as String?,
     );
   }
 }
@@ -254,6 +275,10 @@ class ThreadList implements Model {
 
   const new(this.threads);
 
+  /// A thread this build can't read is left out. The total unread is worked out
+  /// again from the threads, as [toMap] does.
+  factory fromJson(Map json) => ThreadList(readIndexed(json['threads'], Thread.fromJson).items);
+
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -282,6 +307,15 @@ abstract interface class CoachNote implements Model {
       connectionId: row['connection_id']?.toString(),
       content: row['content'] as String,
       updatedAt: row['updated_at'] as DateTime,
+    );
+  }
+
+  factory fromJson(Map json) {
+    return CoachNote(
+      id: json['id'] as String,
+      connectionId: json['connectionId'] as String?,
+      content: json['content'] as String,
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
 }

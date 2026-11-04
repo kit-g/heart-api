@@ -877,6 +877,9 @@ class _Workout with Iterable<WorkoutExercise>, HasUuid implements Workout {
       // a repeat of a program session is a workout of its own, not the session
       templateId: sameId ? templateId : null,
       programId: sameId ? programId : null,
+      // who entered it is about that session; a repeat is the owner's own
+      loggedBy: sameId ? loggedBy : null,
+      loggedByName: sameId ? loggedByName : null,
       unread: sameId ? [..._unread] : null,
       images: images,
     );

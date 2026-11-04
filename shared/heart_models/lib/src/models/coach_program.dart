@@ -1,4 +1,5 @@
 import 'misc.dart';
+import 'tolerant.dart';
 
 /// A program in a coach's library, which reaches no client until it is sent.
 abstract interface class CoachProgram implements Model {
@@ -30,6 +31,16 @@ abstract interface class CoachProgram implements Model {
       version: row['version'] as int,
       body: (row['body'] as Map?)?.cast<String, dynamic>(),
       updatedAt: row['updated_at'] as DateTime,
+    );
+  }
+
+  factory fromJson(Map json) {
+    return CoachProgram(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      version: (json['version'] as num).toInt(),
+      body: (json['body'] as Map?)?.cast<String, dynamic>(),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
 }
@@ -87,6 +98,17 @@ abstract interface class CoachProgramHolder implements Model {
       version: row['library_version'] as int,
     );
   }
+
+  factory fromJson(Map json) {
+    return CoachProgramHolder(
+      connectionId: json['connectionId'] as String,
+      studentId: json['studentId'] as String,
+      studentName: json['studentName'] as String?,
+      studentAvatar: json['studentAvatar'] as String?,
+      programId: json['programId'] as String,
+      version: (json['version'] as num).toInt(),
+    );
+  }
 }
 
 class _CoachProgramHolder implements CoachProgramHolder {
@@ -130,6 +152,11 @@ class CoachProgramHolders implements Model {
 
   const new(this.holders);
 
+  /// A holder this build can't read is left out.
+  factory fromJson(Map json) {
+    return CoachProgramHolders(readIndexed(json['holders'], CoachProgramHolder.fromJson).items);
+  }
+
   @override
   Map<String, dynamic> toMap() => {
     'holders': [for (final holder in holders) holder.toMap()],
@@ -146,6 +173,15 @@ class ProgramDelivery implements Model {
 
   const new({required this.connectionId, required this.delivered, this.programId, this.reason});
 
+  factory fromJson(Map json) {
+    return ProgramDelivery(
+      connectionId: json['connectionId'] as String,
+      delivered: json['delivered'] as bool,
+      programId: json['programId'] as String?,
+      reason: json['reason'] as String?,
+    );
+  }
+
   @override
   Map<String, dynamic> toMap() {
     return {'connectionId': connectionId, 'delivered': delivered, 'programId': ?programId, 'reason': ?reason};
@@ -156,6 +192,11 @@ class ProgramDeliveries implements Model {
   final List<ProgramDelivery> deliveries;
 
   const new(this.deliveries);
+
+  /// A delivery this build can't read is left out.
+  factory fromJson(Map json) {
+    return ProgramDeliveries(readIndexed(json['deliveries'], ProgramDelivery.fromJson).items);
+  }
 
   @override
   Map<String, dynamic> toMap() => {

@@ -1,6 +1,7 @@
 import 'misc.dart';
 import 'program.dart';
 import 'template.dart';
+import 'tolerant.dart';
 
 /// One change to a coach's copy of a program: who, what and when, with how it stood.
 abstract interface class ProgramChange implements Model {
@@ -60,6 +61,22 @@ abstract interface class ProgramChange implements Model {
       stale: row['stale'] as bool? ?? false,
       at: row['at'] as DateTime,
       cursor: cursor,
+    );
+  }
+
+  factory fromJson(Map json) {
+    return ProgramChange(
+      id: json['id'] as String,
+      programId: json['programId'] as String,
+      sessionId: json['sessionId'] as String?,
+      actorId: json['actorId'] as String?,
+      kind: json['kind'] as String,
+      revision: (json['revision'] as num).toInt(),
+      before: (json['before'] as Map?)?.cast<String, dynamic>(),
+      after: (json['after'] as Map?)?.cast<String, dynamic>(),
+      stale: json['stale'] as bool? ?? false,
+      at: DateTime.parse(json['at'] as String),
+      cursor: json['cursor'] as String?,
     );
   }
 }
@@ -126,6 +143,9 @@ class ProgramChanges implements Model {
 
   const new(this.changes);
 
+  /// A change this build can't read is left out.
+  factory fromJson(Map json) => ProgramChanges(readIndexed(json['changes'], ProgramChange.fromJson).items);
+
   @override
   Map<String, dynamic> toMap() => {
     'changes': [for (final change in changes) change.toMap()],
@@ -137,6 +157,8 @@ class WorkoutPlan implements Model {
   final Map<String, dynamic> plan;
 
   const new(this.plan);
+
+  factory fromJson(Map json) => WorkoutPlan((json['plan'] as Map).cast<String, dynamic>());
 
   @override
   Map<String, dynamic> toMap() => {'plan': plan};
@@ -151,6 +173,15 @@ class CoachProgramView implements Model {
   final Map<String, dynamic> position;
 
   const new({required this.program, required this.sessions, required this.position});
+
+  /// A session this build can't read is left out.
+  factory fromJson(Map json) {
+    return CoachProgramView(
+      program: Program.fromJson(json['program'] as Map),
+      sessions: readIndexed(json['sessions'], Template.fromJson).items,
+      position: (json['position'] as Map).cast<String, dynamic>(),
+    );
+  }
 
   @override
   Map<String, dynamic> toMap() {
