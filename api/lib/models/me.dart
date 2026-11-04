@@ -52,9 +52,13 @@ class _MeWorkout implements MeWorkout {
   @override
   String get id => workout.id;
 
+  /// Who entered a workout for its owner isn't part of `/me`, which coaching stays
+  /// out of.
   @override
   Map<String, dynamic> toMap() {
-    final map = workout.toMap();
+    final map = workout.toMap()
+      ..remove('loggedBy')
+      ..remove('loggedByName');
     return {
       ...map,
       'images': [

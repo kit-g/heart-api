@@ -266,6 +266,13 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
           parameters: {'id': body.id, 'loggedBy': loggedBy, ...body.toParams()},
         ),
       );
+      // only a coach's log is ever refused
+      if (rows.isEmpty) {
+        throw const Forbidden(
+          code: 'not_loggable',
+          reason: 'A coach logs only what they could see: since coaching began, outside a pause, and not deleted.',
+        );
+      }
       final row = rows.first.toColumnMap();
       return (Workout.fromRow(row, imageUrl: imageUrl), row['created'] as bool);
     } on ServerException catch (e) {

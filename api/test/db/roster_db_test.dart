@@ -35,15 +35,21 @@ void main() {
     bool former = false,
     String? cursor,
     int limit = 50,
-    bool byNeed = true,
   }) async {
-    final req = bareRequest()
+    // the route's first page works out what changed
+    final req = bareRequest(method: .get)
       ..user = User(id: coach)
       ..rosterService = h.db
       ..programChangeService = h.db
       ..programService = h.db;
-    await refreshRoster(req);
-    return h.db.getRoster(coachId: coach, reason: reason, former: former, cursor: cursor, limit: limit);
+    await getRoster(req);
+    return h.db.getRoster(
+      coachId: coach,
+      reason: reason,
+      former: former,
+      cursor: OrderedCursor.tryParse(cursor),
+      limit: limit,
+    );
   }
 
   Future<String> trained(String student, {DateTime? at, String? note}) {
@@ -79,6 +85,56 @@ void main() {
 
       await trained(student, at: DateTime.now().toUtc().add(const Duration(minutes: 5)), note: 'and again');
       expect((await roster(coach)).items.single.reasons, ['note']);
+    });
+
+    test('a note on a workout that arrives after the coach looked, however early it started', () async {
+      final (coach, student, connection) = await client();
+      await roster(coach);
+      await h.db.markReviewed(coachId: coach, connectionId: connection);
+
+      await trained(student, at: DateTime.now().toUtc().subtract(const Duration(days: 3)), note: 'synced late');
+      expect((await roster(coach)).items.single.reasons, ['note']);
+    });
+
+    test('not a note the coach wrote on a workout they logged', () async {
+      final (coach, student, _) = await client();
+      await h.exec(
+        '''
+        INSERT INTO workouts (user_id, name, started_at, completed_at, note, logged_by)
+        VALUES (@s, 'In person', now() - INTERVAL '1 hour', now(), 'good session', @c)
+        ''',
+        {'s': student, 'c': coach},
+      );
+      final summary = (await roster(coach)).items.single;
+      expect(summary.reasons, isEmpty);
+      expect(summary.recent, hasLength(1), reason: 'it is still the client\'s training');
+    });
+
+    test('a late look doesn\'t bring back what a later one cleared', () async {
+      final (coach, student, connection) = await client();
+      await trained(student, note: 'knees felt fine');
+      await h.db.markReviewed(coachId: coach, connectionId: connection);
+      await h.db.markReviewed(
+        coachId: coach,
+        connectionId: connection,
+        at: DateTime.now().toUtc().subtract(const Duration(days: 1)),
+      );
+      expect((await roster(coach)).items.single.reasons, isEmpty);
+    });
+
+    test('nobody is a gap for a week after resuming', () async {
+      final (coach, student, connection) = await client();
+      await trained(student, at: DateTime.now().toUtc().subtract(const Duration(days: 10)));
+      expect((await roster(coach)).items.single.reasons, ['gap']);
+
+      for (final status in ['paused', 'active']) {
+        await h.exec('UPDATE connections SET status = @status, status_by = @s WHERE id = @c::uuid', {
+          'status': status,
+          's': student,
+          'c': connection,
+        });
+      }
+      expect((await roster(coach)).items.single.reasons, isEmpty);
     });
 
     test('a gap, which clears when they train', () async {
@@ -168,6 +224,94 @@ void main() {
     expect(await h.db.getDirtySummaries(coachId: coach), isEmpty);
   });
 
+  test('recent times age out, whether or not anything marked the summary', () async {
+    final (coach, student, connection) = await client();
+    await trained(student);
+    await roster(coach);
+    await h.exec(
+      '''
+      UPDATE client_summaries
+      SET recent = ARRAY[now() - INTERVAL '20 days', now() - INTERVAL '1 day'], dirty = false
+      WHERE connection_id = @c::uuid
+      ''',
+      {'c': connection},
+    );
+    expect((await roster(coach)).items.single.recent, hasLength(1));
+  });
+
+  test('every client changed since the coach looked is worked out, however many', () async {
+    final coach = await h.seedProfile();
+    final prefix = h.uid('many');
+    await h.exec(
+      '''
+      WITH _students AS (
+        INSERT INTO profiles (id, username, email)
+        SELECT @p || n, 'u_' || @p || n, @p || n || '@test.local'
+        FROM generate_series(1, 201) n
+        RETURNING id
+      )
+      INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status, accepted_at)
+      SELECT @c, id, 'COACH', 'STUDENT', 'fitness', 'active', '2020-01-01Z'
+      FROM _students
+      ''',
+      {'p': prefix, 'c': coach},
+    );
+    try {
+      expect(await h.db.getDirtySummaries(coachId: coach), hasLength(201));
+    } finally {
+      await h.exec("DELETE FROM profiles WHERE id LIKE @p || '%'", {'p': prefix});
+    }
+  });
+
+  group('on a program', () {
+    Future<String> program(String coach, String student, String connection) async {
+      final id = await h.insertId(
+        '''
+        INSERT INTO programs (user_id, name, weeks, coach_id, connection_id)
+        VALUES (@s, 'Block', 1, @c, @connection::uuid)
+        RETURNING id
+        ''',
+        {'s': student, 'c': coach, 'connection': connection},
+      );
+      await h.exec(
+        '''
+        INSERT INTO templates (user_id, name, program_id, joined_program_at)
+        VALUES (@s, 'Day', @p::uuid, '2020-01-01Z')
+        ''',
+        {'s': student, 'p': id},
+      );
+      return id;
+    }
+
+    test('it is ending in its last week, from a date that stays put, and not once finished', () async {
+      final (coach, student, connection) = await client();
+      final id = await program(coach, student, connection);
+
+      final summary = (await roster(coach)).items.single;
+      expect((summary.programId, summary.programWeek, summary.programWeeks), (id, 1, 1));
+      expect(summary.reasons, contains('ending'));
+      final ending = (await h.db.getCoachFeed(coachId: coach)).items.single;
+      expect((ending.kind, ending.id), ('ending', id));
+
+      await h.exec('UPDATE client_summaries SET dirty = true WHERE connection_id = @c::uuid', {'c': connection});
+      await roster(coach);
+      expect((await h.db.getCoachFeed(coachId: coach)).items.single.at, ending.at, reason: 'working it out again');
+
+      final session = (await h.exec('SELECT id::text FROM templates WHERE program_id = @p::uuid', {'p': id})).single[0];
+      await h.exec(
+        '''
+        INSERT INTO workouts (user_id, name, started_at, completed_at, template_id, program_id)
+        VALUES (@s, 'Day', now() - INTERVAL '1 hour', now(), @t::uuid, @p::uuid)
+        ''',
+        {'s': student, 't': session, 'p': id},
+      );
+      final finished = (await roster(coach)).items.single;
+      expect(finished.programWeek, 2);
+      expect(finished.reasons, isNot(contains('ending')));
+      expect((await h.db.getCoachFeed(coachId: coach)).items.map((each) => each.kind), ['workout']);
+    });
+  });
+
   group('what it can\'t see', () {
     test('a hidden workout moves nothing, and hiding one puts it back', () async {
       final (coach, student, _) = await client();
@@ -226,7 +370,7 @@ void main() {
       expect((await roster(other)).items, isEmpty);
       expect((await roster(student)).items, isEmpty);
 
-      await h.db.markReviewed(coachId: other, connectionId: connection);
+      expect(await h.db.markReviewed(coachId: other, connectionId: connection), isFalse);
       final reviewed = await h.exec('SELECT reviewed_at FROM client_summaries WHERE connection_id = @c::uuid', {
         'c': connection,
       });
@@ -247,6 +391,24 @@ void main() {
       expect(former.lastTrainedAt, isNull);
       expect(former.recent, isEmpty);
       expect(former.reasons, isEmpty);
+      expect(
+        (await roster(coach, former: true, reason: 'gap')).items,
+        hasLength(1),
+        reason: 'a reason filters nothing',
+      );
+    });
+
+    test('someone who blocked the coach is no former client', () async {
+      final (coach, student, connection) = await client();
+      await roster(coach);
+      await h.exec("UPDATE connections SET status = 'blocked', status_by = @s WHERE id = @c::uuid", {
+        's': student,
+        'c': connection,
+      });
+      expect((await roster(coach, former: true)).items, isEmpty);
+
+      await h.exec('UPDATE blocks SET lifted_at = now() WHERE blocker_id = @s', {'s': student});
+      expect((await roster(coach, former: true)).items.single.status, 'severed');
     });
   });
 
@@ -275,8 +437,22 @@ void main() {
       final first = await h.db.getCoachFeed(coachId: coach, limit: 2);
       expect(first.items, hasLength(2));
       expect(first.hasMore, isTrue);
-      final next = await h.db.getCoachFeed(coachId: coach, limit: 2, cursor: first.items.last.cursor);
+      final last = first.items.last;
+      final next = await h.db.getCoachFeed(coachId: coach, limit: 2, cursor: (at: last.at, id: last.id));
       expect(next.items, hasLength(1));
+    });
+
+    test('a client coached in two domains is there once', () async {
+      final (coach, student, _) = await client();
+      await h.exec(
+        '''
+        INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status, accepted_at)
+        VALUES (@c, @s, 'COACH', 'STUDENT', 'running', 'active', '2020-01-01Z')
+        ''',
+        {'c': coach, 's': student},
+      );
+      await trained(student);
+      expect((await h.db.getCoachFeed(coachId: coach)).items, hasLength(1));
     });
 
     test('a former client\'s drop out, and so does someone else\'s', () async {
