@@ -96,6 +96,10 @@ mixin _Programs on _DatabaseBase implements ProgramService {
         }),
       );
     } on ServerException catch (e) {
+      // two sends of one library program to one student, both before either committed
+      if (e.code == '23505' && e.constraintName == 'programs_library_copy_key') {
+        throw const Conflict(code: 'already_sent', reason: 'they already hold a copy of this program');
+      }
       _rethrowClientIdCollision(e);
     }
   }

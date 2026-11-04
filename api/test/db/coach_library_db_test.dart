@@ -2,6 +2,7 @@
 library;
 
 import 'package:heart/middleware/database.dart';
+import 'package:heart/models/errors.dart';
 import 'package:heart/models/program_copy.dart';
 import 'package:heart/routes/coach_library.dart';
 import 'package:heart_models/heart_models.dart';
@@ -68,13 +69,25 @@ void main() {
       final id = uuidV7();
       await h.db.saveCoachProgram(coachId: coach, id: id, name: 'One', body: body('One'));
 
-      await expectLater(h.db.getCoachProgram(coachId: other, id: id), throwsA(anything));
+      await expectLater(h.db.getCoachProgram(coachId: other, id: id), throwsA(isA<NotFound>()));
       await expectLater(
         h.db.saveCoachProgram(coachId: other, id: id, name: 'Mine', body: body('Mine')),
-        throwsA(anything),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+        reason: 'their id, not a full library',
       );
       await h.db.deleteCoachProgram(coachId: other, id: id);
       expect((await h.db.getCoachProgram(coachId: coach, id: id)).name, 'One');
+    });
+
+    test('saving what is already the current version, as a retry does, makes no new one', () async {
+      final coach = await h.seedProfile();
+      final id = uuidV7();
+      final document = body('One');
+      await h.db.saveCoachProgram(coachId: coach, id: id, name: 'One', body: document);
+      final again = await h.db.saveCoachProgram(coachId: coach, id: id, name: 'One', body: document);
+      expect(again.version, 1);
+      expect(again.body?['name'], 'One');
+      expect((await h.db.saveCoachProgram(coachId: coach, id: id, name: 'Two', body: document)).version, 2);
     });
   });
 
@@ -98,6 +111,17 @@ void main() {
       Future<String?> reached(String who) async {
         return (await h.db.getCoachSendContext(coachId: coach, id: id, connectionId: who))?.studentId;
       }
+
+      final peer = await h.seedProfile();
+      await h.exec(
+        '''
+        INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status)
+        VALUES (@c, @p, 'PEER', 'PEER', 'general', 'active')
+        ''',
+        {'c': coach, 'p': peer},
+      );
+      final peers = (await h.db.getConnections(peer)).single.connectionId!;
+      expect(await reached(peers), isNull);
 
       await h.exec("UPDATE connections SET status = 'paused' WHERE id = @c::uuid", {'c': connection});
       expect(await reached(connection), isNull);
@@ -184,7 +208,7 @@ void main() {
     expect(read.coachName, 'u_$coach');
     expect(read.waitingSince, isNotNull);
 
-    await h.db.startProgram(userId: coach, programId: program.id!);
+    await expectLater(h.db.startProgram(userId: coach, programId: program.id!), throwsA(isA<NotFound>()));
     expect((await h.db.getProgram(userId: student, programId: program.id!)).waitingSince, isNotNull);
     await h.db.startProgram(userId: student, programId: program.id!);
     expect((await h.db.getProgram(userId: student, programId: program.id!)).waitingSince, isNull);
@@ -259,15 +283,10 @@ void main() {
       final session = ((document['sessions'] as List).single as Map)['id'];
       expect(read.sessions, isNot(contains(session)));
       expect(read.coachId, coach);
-      expect(
-        read.rules.keys.single,
-        isNot(idsIn(document['rules'])),
-        reason: 'the rule follows the student\'s exercise',
-      );
 
       final exercises = await h.exec(
         '''
-        SELECT e.user_id
+        SELECT e.user_id, e.id
         FROM template_exercises te
         JOIN exercises e ON e.id = te.exercise_id
         WHERE te.template_id = ANY(@sessions::uuid[])
@@ -275,6 +294,11 @@ void main() {
         {'sessions': read.sessions},
       );
       expect(exercises.single[0], one);
+      expect(
+        read.rules.keys.single,
+        exercises.single[1].toString(),
+        reason: 'the rule follows the student\'s exercise',
+      );
 
       final assigned = await h.exec('SELECT assigned_by FROM templates WHERE id = ANY(@s::uuid[])', {
         's': read.sessions,
@@ -318,6 +342,116 @@ void main() {
       final delivery = await send(coach, id, theirs);
       expect(delivery.delivered, isFalse);
       expect(delivery.reason, 'not_coaching');
+    });
+
+    test('a session the coach filed arrives unfiled, not as a missing folder', () async {
+      final (coach, student, connection) = await coaching();
+      final folder = await h.insertId(
+        "INSERT INTO template_folders (user_id, name) VALUES (@c, 'Mine') RETURNING id",
+        {'c': coach},
+      );
+      final id = uuidV7();
+      await h.db.saveCoachProgram(
+        coachId: coach,
+        id: id,
+        name: 'Filed',
+        body: withRowIds({
+          'name': 'Filed',
+          'sessions': [
+            {'name': 'Monday', 'folderId': folder, 'exercises': <Object?>[]},
+          ],
+        }),
+      );
+      final delivery = await send(coach, id, connection);
+      expect(delivery.delivered, isTrue, reason: '${delivery.reason}');
+      final read = await h.db.getProgram(userId: student, programId: delivery.programId!);
+      expect((await h.db.getTemplate(userId: student, templateId: read.sessions.single)).folder, isNull);
+    });
+
+    test('sessions with no order keep the order they are written in', () async {
+      final (coach, student, connection) = await coaching();
+      final id = uuidV7();
+      final days = [for (var i = 0; i < 12; i++) 'Day $i'];
+      await h.db.saveCoachProgram(
+        coachId: coach,
+        id: id,
+        name: 'Many',
+        body: withRowIds({
+          'name': 'Many',
+          'sessions': [
+            for (final day in days) {'name': day, 'exercises': <Object?>[]},
+          ],
+        }),
+      );
+      final delivery = await send(coach, id, connection);
+      final read = await h.db.getProgram(userId: student, programId: delivery.programId!);
+      final names = [
+        for (final session in read.sessions) (await h.db.getTemplate(userId: student, templateId: session)).name,
+      ];
+      expect(names, days);
+    });
+
+    test('an exercise the coach no longer has comes back as not delivered, not dropped', () async {
+      final (coach, student, connection) = await coaching();
+      final (id, document) = await library(coach);
+      final exercise = idsIn(document['rules']).single;
+      await h.exec('DELETE FROM exercises WHERE id = @e::uuid', {'e': exercise});
+      final delivery = await send(coach, id, connection);
+      expect(delivery.delivered, isFalse);
+      expect(delivery.reason, 'unknown_exercise');
+      expect(await h.db.getPrograms(student), isEmpty);
+    });
+
+    test('a student whose library is full is told as not delivered, not an error', () async {
+      final (coach, student, connection) = await coaching();
+      final (id, _) = await library(coach);
+      await h.exec(
+        '''
+        INSERT INTO exercises (name, category, target, user_id)
+        SELECT 'Mine ' || g, 'Barbell', 'Chest', @s FROM generate_series(1, 2000) g
+        ''',
+        {'s': student},
+      );
+      final delivery = await send(coach, id, connection);
+      expect(delivery.delivered, isFalse);
+      expect(delivery.reason, 'bad_request');
+    });
+
+    test('a second copy racing the first answers as already sent', () async {
+      final (coach, student, connection) = await coaching();
+      final library = uuidV7();
+      await h.db.saveCoachProgram(coachId: coach, id: library, name: 'One', body: body('One'));
+      Future<void> copy() => h.db.createProgramOrExisting(
+        userId: student,
+        program: Program(name: 'One'),
+        sessions: const [],
+        copy: (
+          coachId: coach,
+          connectionId: connection,
+          libraryProgramId: library,
+          libraryVersion: 1,
+          libraryIds: const {},
+          waits: false,
+        ),
+      );
+      await copy();
+      await expectLater(copy(), throwsA(isA<Conflict>()));
+    });
+  });
+
+  group('who holds a program', () {
+    test('only those the coach still coaches', () async {
+      final (coach, student, connection) = await coaching();
+      final library = uuidV7();
+      await h.db.saveCoachProgram(coachId: coach, id: library, name: 'One', body: body('One'));
+      final req = bareRequest()
+        ..coachLibraryService = h.db
+        ..programService = h.db;
+      await deliverCoachProgram(req, coachId: coach, id: library, connectionId: connection);
+      expect(await h.db.getCoachProgramHolders(coachId: coach, id: library), hasLength(1));
+
+      await h.exec('INSERT INTO blocks (blocker_id, blocked_id) VALUES (@s, @c)', {'s': student, 'c': coach});
+      expect(await h.db.getCoachProgramHolders(coachId: coach, id: library), isEmpty);
     });
   });
 
