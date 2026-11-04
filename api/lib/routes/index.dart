@@ -23,6 +23,7 @@ import 'package:heart/routes/skips.dart' as skips;
 import 'package:heart/routes/anomalies.dart' as anomalies;
 import 'package:heart/routes/template_folders.dart' as folders;
 import 'package:heart/routes/templates.dart' as templates;
+import 'package:heart/routes/threads.dart' as threads;
 import 'package:heart/routes/tokens.dart' as tokens;
 import 'package:heart/routes/workouts.dart' as workouts;
 import 'package:relic/relic.dart';
@@ -59,6 +60,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/connections/:connectionId', .delete): connections.deleteConnection,
   ('/connections/:connectionId', .put): connections.reactToConnection,
   ('/connections/:connectionId/shares', .put): connections.changeConnectionShares,
+  ('/connections/:connectionId/thread', .post): threads.openThread,
   ('/devices', .post): devices.registerDevice,
   ('/invitations', .get): invitations.getInvitations,
   ('/invitations', .post): invitations.createInvitation,
@@ -102,6 +104,15 @@ final routes = <(String, Method), ModelHandler>{
   ('/keys/queue', .get): keys.getQueue,
   ('/keys/queue', .post): keys.enqueue,
   ('/keys/queue/confirmations', .post): keys.confirmQueued,
+  ('/notes', .get): threads.getNotes,
+  ('/notes/:noteId', .put): threads.saveNote,
+  ('/notes/:noteId', .delete): threads.deleteNote,
+  ('/reports', .post): threads.fileReport,
+  ('/threads', .get): threads.getThreads,
+  ('/threads/:threadId/items', .get): threads.getThreadItems,
+  ('/threads/:threadId/items', .post): threads.addThreadItem,
+  ('/threads/:threadId/items', .delete): threads.clearThread,
+  ('/threads/:threadId/read', .put): threads.markThreadRead,
   ('/push/settings', .get): push.getPushSettings,
   ('/push/settings/:topic', .put): push.setPushPreference,
   ('/push/settings/:topic', .delete): push.clearPushPreference,

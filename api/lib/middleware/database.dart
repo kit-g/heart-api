@@ -21,6 +21,9 @@ final _programsProperty = ContextProperty<ProgramService>('ProgramService');
 final _invitationsProperty = ContextProperty<InvitationService>('InvitationService');
 final _pushProperty = ContextProperty<PushService>('PushService');
 final _keysProperty = ContextProperty<KeyService>('KeyService');
+final _threadsProperty = ContextProperty<ThreadService>('ThreadService');
+final _notesProperty = ContextProperty<CoachNoteService>('CoachNoteService');
+final _reportsProperty = ContextProperty<ReportService>('ReportService');
 final _skipsProperty = ContextProperty<SkipService>('SkipService');
 final _commentsProperty = ContextProperty<CommentService>('CommentService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
@@ -71,6 +74,33 @@ Middleware goalsDb({required IdempotentGoalService db}) {
   return (Handler next) {
     return (request) {
       _goalsProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
+Middleware threadsDb({required ThreadService db}) {
+  return (Handler next) {
+    return (request) {
+      _threadsProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
+Middleware notesDb({required CoachNoteService db}) {
+  return (Handler next) {
+    return (request) {
+      _notesProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
+Middleware reportsDb({required ReportService db}) {
+  return (Handler next) {
+    return (request) {
+      _reportsProperty[request] = db;
       return next(request);
     };
   };
@@ -230,6 +260,18 @@ extension DatabaseContext on Request {
   SkipService get skipService => _skipsProperty.get(this);
 
   set skipService(SkipService v) => _skipsProperty[this] = v;
+
+  ThreadService get threadService => _threadsProperty.get(this);
+
+  set threadService(ThreadService v) => _threadsProperty[this] = v;
+
+  CoachNoteService get noteService => _notesProperty.get(this);
+
+  set noteService(CoachNoteService v) => _notesProperty[this] = v;
+
+  ReportService get reportService => _reportsProperty.get(this);
+
+  set reportService(ReportService v) => _reportsProperty[this] = v;
 
   KeyService get keyService => _keysProperty.get(this);
 

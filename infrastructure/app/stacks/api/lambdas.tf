@@ -26,6 +26,7 @@ locals {
     # API's own /mcp
     MCP_RESOURCE         = var.mcp_domain == null ? "" : "https://${var.mcp_domain.name}"
     MEDIA_DISTRIBUTION   = var.media_distribution
+    MESSAGE_TAG_KEYS     = var.message_tag_keys
     MIN_APP_VERSION      = var.minimal_app_version
     MONITORING_TOPIC_ARN = aws_sns_topic.monitoring.arn
     PG_DATABASE          = var.database.database
@@ -33,6 +34,7 @@ locals {
     PG_PASSWORD          = var.database.password
     PG_PORT              = var.database.port
     PG_USER              = var.database.user
+    REPORT_REVIEW_KEY    = var.report_review_key
     REGION               = var.region
     SCHEDULE_GROUP       = aws_scheduler_schedule_group.accounts.name
     SCHEDULER_ROLE_ARN   = aws_iam_role.scheduler.arn

@@ -252,3 +252,16 @@ variable "enforce_app_version" {
   type        = bool
   default     = false
 }
+
+variable "message_tag_keys" {
+  description = "The keys that tag messages, as id:base64 pairs, newest first; empty where messaging is off"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "report_review_key" {
+  description = "The public key reports are sealed to, base64; the private half stays off every server"
+  type        = string
+  default     = ""
+}

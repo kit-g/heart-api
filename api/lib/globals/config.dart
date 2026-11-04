@@ -1,3 +1,5 @@
+import 'package:heart/notifications/sealing.dart';
+
 import 'dart:io' show File, Platform, SecurityContext;
 
 import 'package:heart/models/tokens.dart';
@@ -305,6 +307,13 @@ abstract interface class AppConfig {
   /// Null where OAuth isn't configured; see [OAuthConfig].
   OAuthConfig? get oauth;
 
+  /// The keys that make a message's tag. Null where messaging isn't configured.
+  MessageTags? get messageTags;
+
+  /// The public key reports are sealed to, whose private half is on no server.
+  /// Null where reports aren't configured.
+  String? get reportReviewKey;
+
   factory fromEnv() {
     final env = Platform.environment;
     switch (env) {
@@ -353,6 +362,11 @@ abstract interface class AppConfig {
           allowNonHttpEvents: bool.tryParse(env['ALLOW_NON_HTTP_EVENTS'] ?? '', caseSensitive: false) ?? false,
           db: PostgresConfig.fromEnv(),
           oauth: OAuthConfig.fromEnv(env),
+          messageTags: MessageTags.parse(env['MESSAGE_TAG_KEYS']),
+          reportReviewKey: switch (env['REPORT_REVIEW_KEY']) {
+            null || '' => null,
+            final String key => key,
+          },
           freeApiLimits: ApiLimits(
             perMinute: int.tryParse(env['API_FREE_PER_MINUTE'] ?? '') ?? ApiLimits.free.perMinute,
             perDay: int.tryParse(env['API_FREE_PER_DAY'] ?? '') ?? ApiLimits.free.perDay,
@@ -425,6 +439,10 @@ class _EnvConfig implements AppConfig {
   final ApiLimits freeApiLimits;
   @override
   final OAuthConfig? oauth;
+  @override
+  final MessageTags? messageTags;
+  @override
+  final String? reportReviewKey;
 
   const new({
     required this.env,
@@ -454,6 +472,8 @@ class _EnvConfig implements AppConfig {
     required this.firebaseEventsQueueUrl,
     required this.freeApiLimits,
     required this.oauth,
+    this.messageTags,
+    this.reportReviewKey,
   });
 
   @override

@@ -33,6 +33,9 @@ enum PushTopic {
   /// Wakes the app to fetch what changed. It says nothing, so nothing to choose.
   programChanged(key: 'coaching.program_changed', group: 'coaching', silent: true),
 
+  /// Wakes the app to drop a conversation someone deleted for both sides.
+  threadCleared(key: 'coaching.thread_cleared', group: 'coaching', silent: true),
+
   /// Wakes the app to look at the other person's devices.
   devicesChanged(key: 'security.devices_changed', group: 'security', silent: true),
   ;

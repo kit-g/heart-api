@@ -40,6 +40,7 @@ part 'queries.dart';
 part 'skips.dart';
 part 'template_folders.dart';
 part 'templates.dart';
+part 'threads.dart';
 part 'tokens.dart';
 part 'workouts.dart';
 
@@ -210,6 +211,7 @@ class Database extends _DatabaseBase
         _Invitations,
         _Push,
         _Keys,
+        _Threads,
         _Devices,
         _ExercisePreferences,
         _Exercises,
@@ -232,6 +234,9 @@ class Database extends _DatabaseBase
         InvitationService,
         PushService,
         KeyService,
+        ThreadService,
+        CoachNoteService,
+        ReportService,
         DeviceService,
         ExerciseService,
         IdempotentGoalService,
