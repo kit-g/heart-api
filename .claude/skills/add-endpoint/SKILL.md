@@ -26,7 +26,7 @@ The API wires a route across ~8 files. Miss one and it fails late (compile error
 
 2. **Service interface** — `shared/heart_models/lib/src/services/<domain>.dart`, exported from `heart_models.dart`. Methods return domain models or `Page<T>`. This is a `heart_models` change, so in the same diff bump its pubspec `version:` (minor — new public API) and prepend a `CHANGELOG.md` entry; the app pulls `main` directly.
 
-3. **SQL** — add query strings to `api/lib/db/queries.dart` (use the `.toSql()` extension).
+3. **SQL** — add query strings to `api/lib/db/queries/<domain>.dart`, the file named like the mixin that runs them (use the `.toSql()` extension). A new file is a `part of '../db.dart'` and gets its own `part 'queries/<domain>.dart';` line in `db.dart`.
 
 4. **DB mixin** — `api/lib/db/<domain>.dart` as `mixin _<Domain> on _DatabaseBase implements <Domain>Service`. Pagination methods fetch `limit + 1` and return `Page(items: …, hasMore: …)`.
 

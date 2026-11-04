@@ -41,7 +41,7 @@ api/
 │   ├── middleware/              # Request context: config, awsConfig, db services, auth
 │   ├── db/
 │   │   ├── db.dart              # Database class. Mixes in service mixins + Pool.
-│   │   ├── queries.dart         # SQL strings, named.
+│   │   ├── queries/             # SQL strings, named; one file per mixin below
 │   │   └── {profiles,workouts,exercises,…}.dart  # part of 'db.dart'
 │   ├── models/                  # API-specific models (responses, error types)
 │   │                            #   shared models live in shared/heart_models
@@ -165,7 +165,7 @@ checked by `checkToken`. It is off where `SITE_ORIGIN`/`API_PUBLIC_URL` aren't s
 
 ## Database layer
 
-No ORM. SQL strings in `db/queries.dart`, executed against a `Pool` from the `postgres` package. Each resource (`profiles`, `workouts`, …) gets a mixin in its own file, all `part of 'db.dart'`. The `Database` class assembles them.
+No ORM. SQL strings in `db/queries/<resource>.dart`, executed against a `Pool` from the `postgres` package. Each resource (`profiles`, `workouts`, …) gets a mixin in its own file, all `part of 'db.dart'`. The `Database` class assembles them.
 
 ```dart
 mixin _Profiles on _DatabaseBase implements ApiProfileService {
@@ -198,7 +198,7 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
   `/template-folders`, `/goals` all accept an optional client `id` (a v7 uuid, same
   `isUuidV7` check everywhere) — absent, `coalesce(@id::uuid, uuidv7())` mints one. The shape
   (see `_createExercise`/`_createTemplateFolder`/`_createGoal`/`_saveTemplate`/`_saveWorkout` in
-  `queries.dart`) is: pre-check the id (and, for exercises/folders, the name — their one natural
+  `db/queries/`) is: pre-check the id (and, for exercises/folders, the name — their one natural
   key) against rows the caller already owns; if either matches, skip the INSERT and return that
   row with `false AS created`; otherwise insert and return `true AS created`. An id that belongs
   to a *different* owner matches neither pre-check, so the INSERT is attempted and trips the real
@@ -225,7 +225,7 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
 
 1. Create `lib/db/<name>.dart` with `mixin _<Name> on _DatabaseBase implements <NameService>`.
 2. Add `part '<name>.dart'` to `lib/db/db.dart` and add the mixin to `Database`'s `with` list.
-3. Add SQL strings to `lib/db/queries.dart`.
+3. Add SQL strings to `lib/db/queries/<name>.dart`, with its own `part 'queries/<name>.dart'` in `db.dart`.
 4. Define `<NameService>` interface in either `api/lib/models/` (api-specific) or `shared/heart_models/lib/src/services/` (shared with client).
 5. Wire middleware in `lib/middleware/database.dart` and apply it in `bin/main.dart` for the relevant path prefix.
 
