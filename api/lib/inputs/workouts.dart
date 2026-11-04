@@ -131,6 +131,25 @@ class WorkoutHideIn {
   }
 }
 
+/// `POST /accounts/:targetUserId/workouts` — a workout a coach enters for a client, in
+/// the shape `POST /workouts` takes. Every read of a workout needs its name and start,
+/// and the owner can't be asked to fix one somebody else wrote, so both are required
+/// here. The whole body is checked before anything is written for it.
+class WorkoutLogIn {
+  final Map<String, dynamic> body;
+
+  const new _(this.body);
+
+  static Future<WorkoutLogIn> fromRequest(Request req) async {
+    final json = await req.json();
+    json
+      ..string('name')
+      ..timestamp('start');
+    WorkoutRequest(userId: '', body: json).toParams();
+    return WorkoutLogIn._(json);
+  }
+}
+
 /// Body for `PATCH /workouts/:workoutId` — a partial update of a workout's own
 /// fields (name, start, end, calories, note, pauses), leaving its exercises
 /// untouched.

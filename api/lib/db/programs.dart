@@ -206,8 +206,14 @@ mixin _Programs on _DatabaseBase implements ProgramService {
     required String userId,
     required String programId,
     required ProgramBase base,
+    String? loggedBy,
   }) async {
-    final references = {'userId': userId, 'exerciseId': base.exerciseId, 'workoutId': base.workoutId};
+    final references = {
+      'userId': userId,
+      'exerciseId': base.exerciseId,
+      'workoutId': base.workoutId,
+      'loggedBy': loggedBy,
+    };
     try {
       final rows = await _retryOnCreateRace(
         () => _pool.execute(

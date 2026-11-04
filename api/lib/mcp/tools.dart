@@ -953,7 +953,7 @@ extension on Program {
     return switch (coachId) {
       null => text,
       _ => {
-        'quoted': {'by': coachName ?? 'another account', ...text},
+        'quoted': {'by': coachName ?? _anotherAccount, ...text},
       },
     };
   }
@@ -961,8 +961,11 @@ extension on Program {
 
 extension on Profile {
   /// Who quoted text came from, as the tools name them.
-  String get quotedName => name ?? 'another account';
+  String get quotedName => name ?? _anotherAccount;
 }
+
+/// Quoted text's author, when the tools don't know their name.
+const _anotherAccount = 'another account';
 
 final Map<String, McpTool> toolsByName = {for (final tool in tools) tool.name: tool};
 
@@ -1060,7 +1063,7 @@ extension on Workout {
             'id': exercise.exercise.id,
             'name': exercise.exercise.name,
             'category': exercise.exercise.category.value,
-            'note': ?exercise.note,
+            ...quotedIfLogged({'note': ?exercise.note}),
             'sets': [
               for (final set in exercise) {...set.toMcp(), 'target': ?set.target?.toMcp(names: names)},
             ],
@@ -1069,18 +1072,23 @@ extension on Workout {
     };
   }
 
-  /// A coach who logged this wrote its name and note, so a model reading them is
-  /// told they're quoted, not instructions.
   Map<String, dynamic> _toMcpHeader({bool withNote = false}) {
-    final text = {'name': ?name, if (withNote) 'note': ?note};
     return {
       'id': id,
       'start': start.toUtc().toIso8601String(),
-      ...switch (loggedBy) {
-        null => text,
-        _ => {
-          'quoted': {'by': loggedByName ?? 'another account', ...text},
-        },
+      ...quotedIfLogged({'name': ?name, if (withNote) 'note': ?note}),
+    };
+  }
+
+  /// [text] as the tools return it, as [Template.quotedIfAssigned] does: under
+  /// `quoted` when a coach logged the workout, since they wrote its name and its
+  /// notes, the exercises' included.
+  Map<String, dynamic> quotedIfLogged(Map<String, dynamic> text) {
+    return switch (loggedBy) {
+      null => text,
+      _ when text.isEmpty => text,
+      _ => {
+        'quoted': {'by': loggedByName ?? _anotherAccount, ...text},
       },
     };
   }

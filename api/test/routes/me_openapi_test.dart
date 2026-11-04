@@ -249,6 +249,12 @@ void main() {
       expect(body['images'], isEmpty);
     });
 
+    test('who entered a workout for its owner stays out of /me', () {
+      final json = MeWorkout(Workout.fromJson({..._fixture(), 'loggedBy': 'coach-1', 'loggedByName': 'coach'})).toMap();
+      expect(json.keys, isNot(anyOf(contains('loggedBy'), contains('loggedByName'))));
+      expect(meWorkoutShape.check(json, 'body'), isEmpty);
+    });
+
     test('a key the shape does not name fails the check, and so does a missing one', () {
       final json = MeWorkout(Workout.fromJson(_fixture())).toMap();
       expect(meWorkoutShape.check({...json, 'heartRate': 120}, 'body'), ['body.heartRate: not in MeWorkout']);
