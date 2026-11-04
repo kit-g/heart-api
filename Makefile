@@ -1,12 +1,10 @@
 # Repo-wide entrypoints. `make test` runs the same matrix CI does.
 # Database targets need local Postgres + pgtap (see database/README.md).
 
-.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages generate cards openapi design lint format-check db-up db-down db-reset db-seed
+.PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages deps generate cards openapi design lint format-check db-up db-down db-reset db-seed
 
 bootstrap:
 	$(MAKE) generate
-	cd shared/heart_aws && dart pub get
-	cd shared/heart_design && dart pub get
 	$(MAKE) prepare-compat-tests
 	uv sync --all-packages
 	uv run pre-commit install --hook-type pre-push
@@ -86,14 +84,22 @@ cards:
 openapi:
 	cd api && dart pub get && dart run tool/openapi/shapes.dart && dart run tool/openapi/spec.dart
 
+# Every Dart package's dependencies. `dart format` and `dart analyze` both
+# resolve packages, so a fresh worktree fails them until this runs; when the
+# lockfiles are current it's a few seconds.
+deps:
+	for d in api shared/heart_aws shared/heart_design shared/heart_models pages; do \
+		(cd $$d && dart pub get) || exit 1; \
+	done
+
 # Everything generated and gitignored that analysis needs: the cards, the
 # shapes and spec, the mocks, and the blog's server options. They belong to the
 # checkout they were built in, so after a branch switch or in a new worktree
 # they describe other code until rebuilt. `lint`, and with it the pre-push hook,
 # runs this first; on an unchanged tree each step is a cache hit.
-generate: cards openapi
+generate: deps cards openapi
 	cd api && dart run build_runner build --delete-conflicting-outputs
-	cd shared/heart_models && dart pub get && dart run build_runner build --delete-conflicting-outputs
+	cd shared/heart_models && dart run build_runner build --delete-conflicting-outputs
 	cd pages && dart run build_runner build --delete-conflicting-outputs
 
 # Regenerates the design tokens' Dart and CSS from shared/heart_design/tokens.json.
@@ -115,7 +121,7 @@ lint: generate
 
 # The invariant is "the whole repo is formatted", so this checks everything
 # (minus generated files), not a changed-files subset.
-format-check:
+format-check: deps
 	find api shared pages -name '*.dart' \
 		-not -path '*/.dart_tool/*' \
 		-not -name '*.mocks.dart' \
