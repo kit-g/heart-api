@@ -543,9 +543,9 @@ _existing AS (
     AND student_id = @studentId
     AND master_template_id IN (SELECT id FROM _master)
 ),
--- The connection has to be live. A pending request, a declined one, or a
--- severed or blocked relationship is not a licence to push templates into
--- someone's library — matching `_areConnected`, which has always required this.
+-- The connection has to be live. A pending request, a declined one, a severed,
+-- blocked or paused relationship is not a licence to push templates into
+-- someone's library.
 _allowed AS (
   SELECT 1
   FROM (SELECT _relation(@coachId, @studentId) AS r) rel

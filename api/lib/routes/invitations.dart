@@ -31,7 +31,7 @@ Future<Model> createInvitation(Request req) async {
 }
 
 Future<Paginated<Invitation>> getInvitations(Request req) async {
-  final query = PageQuery.fromRequest(req);
+  final query = InvitationsQuery.fromRequest(req);
   final page = await req.invitationService.getInvitations(
     inviterId: req.userId,
     cursor: query.cursor,
@@ -41,19 +41,21 @@ Future<Paginated<Invitation>> getInvitations(Request req) async {
 }
 
 Future<Model> cancelInvitation(Request req) async {
-  await req.invitationService.cancelInvitation(
-    inviterId: req.userId,
-    invitationId: req.rawPathParameters[#invitationId]!,
-  );
+  await req.invitationService.cancelInvitation(inviterId: req.userId, invitationId: _invitationId(req));
   throw const NoContent();
 }
 
 Future<Invitation> resendInvitation(Request req) {
   return req.invitationService.renewInvitation(
     inviterId: req.userId,
-    invitationId: req.rawPathParameters[#invitationId]!,
+    invitationId: _invitationId(req),
     token: TokenSecret.random(),
   );
+}
+
+String _invitationId(Request req) {
+  final id = req.rawPathParameters[#invitationId]!;
+  return isUuidV7(id) ? id : throw NotFound(type: 'Invitation', id: id);
 }
 
 /// Signed out: all a link says is who is asking and whether it's good.

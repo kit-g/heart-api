@@ -94,7 +94,9 @@ void main() {
       expect(preview?.toMap().keys, unorderedEquals(['inviterName', 'good']), reason: 'nothing else');
 
       await h.db.cancelInvitation(inviterId: c, invitationId: invitation.id);
-      expect((await h.db.previewInvitation(token: invitation.token!))?.good, isFalse);
+      final withdrawn = await h.db.previewInvitation(token: invitation.token!);
+      expect(withdrawn?.good, isFalse);
+      expect(withdrawn?.toMap().keys, ['good'], reason: 'a withdrawn link no longer says who made it');
     });
 
     test('is null for a link that does not exist', () async {
@@ -314,6 +316,22 @@ void main() {
       expect(features.keys, unorderedEquals(['muscleMap', 'yourCoach']));
     });
 
+    test('accepting turns "Your coach" on and keeps the rest of what it holds', () async {
+      final c = await coach();
+      final person = await h.seedProfile();
+      await h.exec(
+        '''UPDATE profiles SET settings = '{"features": {"yourCoach": {"on": false, "without": ["x"], "later": 1}}}' WHERE id = @id''',
+        {'id': person},
+      );
+
+      await h.db.acceptInvitation(userId: person, token: (await invite(c)).token!);
+
+      final feature = ((await h.db.getProfile(person))?.settings.extra['features'] as Map)['yourCoach'] as Map;
+      expect(feature['on'], isTrue);
+      expect(feature['without'], ['x']);
+      expect(feature['later'], 1);
+    });
+
     test('someone new can decline or block too', () async {
       final c = await coach();
       final (one, two) = (await newAccount(), await newAccount());
@@ -421,6 +439,237 @@ void main() {
       throwsA(isA<NotFound>()),
       reason: 'an accepted link is done',
     );
+  });
+
+  group('sending a link again', () {
+    Future<Invitation> renew(String inviter, String invitationId) {
+      return h.db.renewInvitation(inviterId: inviter, invitationId: invitationId, token: TokenSecret.random());
+    }
+
+    test('needs the entitlement, as making one does', () async {
+      final c = await coach();
+      final invitation = await invite(c);
+      await h.exec('DELETE FROM entitlements WHERE user_id = @c', {'c': c});
+      await expectLater(
+        renew(c, invitation.id),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'coaching_beta')),
+      );
+    });
+
+    test('stops at too many recent declines, as making one does', () async {
+      final c = await coach();
+      final declined = <Invitation>[];
+      for (var i = 0; i < 20; i++) {
+        final invitation = await invite(c);
+        await h.db.declineInvitation(userId: await h.seedProfile(), token: invitation.token!);
+        declined.add(invitation);
+      }
+      await expectLater(renew(c, declined.first.id), refusedWith('invitation_limit'));
+    });
+
+    test('a link already open does not count against itself', () async {
+      final c = await coach();
+      final invitation = await invite(c);
+      await h.exec(
+        '''
+        INSERT INTO invitations (inviter_id, token_hash, name, expires_at)
+        SELECT @c, decode(md5(@c || g::text), 'hex'), 'x', now() + INTERVAL '1 day'
+        FROM generate_series(1, 49) g
+        ''',
+        {'c': c},
+      );
+      expect((await renew(c, invitation.id)).status, 'pending');
+    });
+
+    test('an accepted link stays used up, even when sent again as it was accepted', () async {
+      final c = await coach();
+      final (first, second) = (await h.seedProfile(), await h.seedProfile());
+      final invitation = await invite(c);
+      await h.db.acceptInvitation(userId: first, token: invitation.token!);
+
+      // what a send that read the link just before the acceptance committed leaves behind
+      final token = TokenSecret.random();
+      await h.exec(
+        "UPDATE invitations SET token_hash = @hash, renewed_at = now() + INTERVAL '1 second' WHERE id = @id::uuid",
+        {'hash': TokenSecret.hash(token), 'id': invitation.id},
+      );
+      await expectLater(h.db.acceptInvitation(userId: second, token: token), refusedWith('invitation_gone'));
+    });
+  });
+
+  group('answering', () {
+    test('a link its person declined is not anyone else\'s to decline', () async {
+      final c = await coach();
+      final (person, other) = (await h.seedProfile(), await h.seedProfile());
+      final invitation = await invite(c);
+      await h.db.declineInvitation(userId: person, token: invitation.token!);
+      await h.db.declineInvitation(userId: other, token: invitation.token!);
+
+      final answered = await h.exec(
+        'SELECT user_id FROM invitation_responses WHERE invitation_id = @id::uuid',
+        {'id': invitation.id},
+      );
+      expect(answered.map((row) => row[0]), [person]);
+    });
+
+    test('a link that ended takes no answer, and makes no profile', () async {
+      final c = await coach();
+      final canceled = await invite(c);
+      await h.db.cancelInvitation(inviterId: c, invitationId: canceled.id);
+      final expired = await invite(c);
+      await h.exec("UPDATE invitations SET expires_at = now() - INTERVAL '1 second' WHERE id = @id::uuid", {
+        'id': expired.id,
+      });
+
+      final person = h.uid('web');
+      addTearDown(() => h.exec('DELETE FROM profiles WHERE id = @id', {'id': person}));
+      await h.db.declineInvitation(userId: person, token: canceled.token!, email: 'a@b', name: 'A');
+      await h.db.declineInvitation(userId: person, token: expired.token!, email: 'a@b', name: 'A');
+
+      final statuses = (await h.db.getInvitations(inviterId: c)).items.map((i) => i.status);
+      expect(statuses, unorderedEquals(['canceled', 'expired']));
+      expect(await h.db.getProfile(person), isNull);
+    });
+
+    test('a block from a link sent again reads as declined', () async {
+      final c = await coach();
+      final student = await h.seedProfile();
+      final invitation = await invite(c);
+      await h.db.declineInvitation(userId: student, token: invitation.token!);
+      final renewed = await h.db.renewInvitation(
+        inviterId: c,
+        invitationId: invitation.id,
+        token: TokenSecret.random(),
+      );
+
+      await h.db.blockInviter(userId: student, token: renewed.token!);
+      expect((await h.db.getInvitations(inviterId: c)).items.single.status, 'declined');
+    });
+
+    test('declining or blocking your own link says so', () async {
+      final c = await coach();
+      final invitation = await invite(c);
+      await expectLater(h.db.declineInvitation(userId: c, token: invitation.token!), refusedWith('own_invitation'));
+      await expectLater(h.db.blockInviter(userId: c, token: invitation.token!), refusedWith('own_invitation'));
+    });
+
+    test('accepting again after the relationship ended is no longer good', () async {
+      final c = await coach();
+      final student = await h.seedProfile();
+      final invitation = await invite(c);
+      await h.db.acceptInvitation(userId: student, token: invitation.token!);
+      await h.db.deleteConnection(actorId: student, targetId: c, role: .student, domain: .fitness);
+
+      await expectLater(
+        h.db.acceptInvitation(userId: student, token: invitation.token!),
+        refusedWith('invitation_gone'),
+      );
+    });
+
+    test('a link accepted while the two are already live is answered, and nobody else can use it', () async {
+      final c = await coach();
+      final (student, other) = (await h.seedProfile(), await h.seedProfile());
+      await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!);
+      final second = await invite(c);
+      await h.db.acceptInvitation(userId: student, token: second.token!);
+
+      expect((await h.db.getInvitations(inviterId: c)).items.map((i) => i.status), ['accepted', 'accepted']);
+      await expectLater(h.db.acceptInvitation(userId: other, token: second.token!), refusedWith('invitation_gone'));
+    });
+
+    test('a relationship started over a live row is in its history', () async {
+      final c = await coach();
+      final student = await h.seedProfile();
+      await h.seedConnection(initiator: student, target: c);
+      Future<int> events() async {
+        final rows = await h.exec(
+          '''
+          SELECT count(*)::int FROM connection_events e JOIN connections x ON x.id = e.connection_id
+          WHERE x.domain = 'fitness' AND @s IN (x.initiator_id, x.target_id)
+          ''',
+          {'s': student},
+        );
+        return rows.first[0]! as int;
+      }
+
+      final before = await events();
+      await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!);
+      expect(await events(), before + 1);
+    });
+
+    test('a coach with as many clients as one can hold gets no more', () async {
+      final c = await coach();
+      addTearDown(() => h.exec("DELETE FROM profiles WHERE id LIKE @c || '-client-%'", {'c': c}));
+      await h.exec(
+        '''
+        WITH _people AS (
+          INSERT INTO profiles (id, username, email)
+          SELECT @c || '-client-' || g, 'client', @c || g || '@test.local'
+          FROM generate_series(1, 1000) g
+          RETURNING id
+        )
+        INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status)
+        SELECT @c, id, 'COACH', 'STUDENT', 'fitness', 'active' FROM _people
+        ''',
+        {'c': c},
+      );
+      await expectLater(
+        h.db.acceptInvitation(userId: await h.seedProfile(), token: (await invite(c)).token!),
+        refusedWith('invitation_gone'),
+      );
+    });
+
+    // The block is set while the acceptance is under way: whichever of the two
+    // commits second has to see the other.
+    test('a block set while someone accepts leaves nothing live', () async {
+      final c = await coach();
+      final student = await h.seedProfile();
+      final invitation = await invite(c);
+
+      final outcomes = await h.runBlocked<String>(
+        hold: (tx) => tx.execute(
+          Sql.named('INSERT INTO blocks (blocker_id, blocked_id) VALUES (@c, @s)'),
+          parameters: {'c': c, 's': student},
+        ),
+        calls: [
+          () => h.db
+              .acceptInvitation(userId: student, token: invitation.token!)
+              .then<String>((_) => 'accepted', onError: (Object e) => (e as BadRequest).code),
+        ],
+      );
+      expect(outcomes, ['invitation_gone']);
+      expect(await h.db.getConnections(student), isEmpty);
+    });
+  });
+
+  group('pages', () {
+    test('invitations come a page at a time, newest first', () async {
+      final c = await coach();
+      final made = [for (var i = 0; i < 3; i++) await invite(c)];
+
+      final first = await h.db.getInvitations(inviterId: c, limit: 2);
+      expect(first.items.map((i) => i.id), [made[2].id, made[1].id]);
+      expect(first.hasMore, isTrue);
+
+      final rest = await h.db.getInvitations(inviterId: c, cursor: first.items.last.id, limit: 2);
+      expect(rest.items.map((i) => i.id), [made[0].id]);
+      expect(rest.hasMore, isFalse);
+    });
+
+    test('blocks come a page at a time', () async {
+      final blocker = await h.seedProfile();
+      final blocked = [for (var i = 0; i < 3; i++) await h.seedProfile()];
+      for (final person in blocked) {
+        await h.exec('INSERT INTO blocks (blocker_id, blocked_id) VALUES (@b, @p)', {'b': blocker, 'p': person});
+      }
+
+      final first = await h.db.getBlocks(userId: blocker, limit: 2);
+      expect(first.items, hasLength(2));
+      expect(first.hasMore, isTrue);
+      final rest = await h.db.getBlocks(userId: blocker, cursor: first.items.last.id, limit: 2);
+      expect(rest.hasMore, isFalse);
+      expect([...first.items, ...rest.items].map((b) => b.id), unorderedEquals(blocked));
+    });
   });
 }
 

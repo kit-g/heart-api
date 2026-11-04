@@ -37,4 +37,14 @@ void main() {
       expect(isAnonymousAccount(claims), isFalse);
     });
   });
+
+  group('toUser', () {
+    test('carries the name the token has, which a profile made on the web starts with', () {
+      final user = OpenIdClaims.fromJson({'sub': 'u1', 'email': 'a@b.c', 'name': 'Alex'}).toUser();
+
+      expect(user.id, 'u1');
+      expect(user.email, 'a@b.c');
+      expect(user.displayName, 'Alex');
+    });
+  });
 }

@@ -95,4 +95,11 @@ void main() {
     final res = await app.send('POST', '/invitations', body: {'name': ' '});
     expect(res.status, 400);
   });
+
+  test('an id that is no invitation\'s is a 404, and a cursor that is no page\'s a 400', () async {
+    expect((await app.send('DELETE', '/invitations/abc')).status, 404);
+    expect((await app.send('POST', '/invitations/abc/resend', body: {})).status, 404);
+    expect((await app.send('GET', '/invitations?cursor=abc')).status, 400);
+    verifyZeroInteractions(app.db);
+  });
 }
