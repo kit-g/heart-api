@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(10);
+SELECT plan(13);
 
 SELECT has_table('public'::name, 'client_summaries'::name);
 
@@ -16,7 +16,11 @@ SELECT col_default_is('public', 'client_summaries', 'generation', '0', 'from not
 SELECT has_index('public'::name, 'client_summaries'::name, 'client_summaries_coach_idx'::name);
 SELECT has_index('public'::name, 'client_summaries'::name, 'client_summaries_student_idx'::name);
 
-SELECT has_trigger('public'::name, 'workouts'::name, 'workouts_mark_summaries'::name);
+SELECT col_type_is('public'::name, 'client_summaries'::name, 'ending_since'::name, 'timestamp with time zone'::name);
+
+SELECT has_trigger('public'::name, 'workouts'::name, 'workouts_mark_summaries_insert'::name);
+SELECT has_trigger('public'::name, 'workouts'::name, 'workouts_mark_summaries_update'::name);
+SELECT has_trigger('public'::name, 'workouts'::name, 'workouts_mark_summaries_delete'::name);
 
 SELECT * FROM finish();
 
