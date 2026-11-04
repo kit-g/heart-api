@@ -34,6 +34,8 @@ module "api" {
   content_bucket               = module.content.content_bucket
   database                     = module.content.database
   apple_sign_in                = local.apple_sign_in
+  message_tag_keys             = local.message_tag_keys
+  report_review_key            = local.report_review_key
   account_deletion_offset_days = 30
   # 1.13 is the first store release (CLAUDE.md, Compatibility floor). Enforcement
   # waits until 1.13 is in both stores: 1.9.0 builds were still in the field on
@@ -141,4 +143,35 @@ locals {
     private_key = data.aws_s3_object.apple_sign_in_key.body
     client_ids  = ["me.heart-of.ios"]
   }
+}
+
+# Coaching's keys (docs/2026-11-01.coaching.md, Encryption). Each is optional:
+# until its object is uploaded the variable stays empty and that feature stays
+# off, so a plan never fails on a key nobody has generated yet. Both objects are
+# stored as text/plain, or `body` reads back empty (see the Apple key above).
+#
+# message-tag-keys.txt: the HMAC keys that tag messages, `id:base64` pairs,
+# comma-separated, newest first; rotating adds a pair at the front.
+# report-review-key.txt: the public half from `scripts/open_report.py
+# --generate`. The private half never goes in this bucket.
+data "aws_s3_objects" "coaching_keys" {
+  bucket = module.content.static_bucket.bucket
+  prefix = "secrets/coaching/"
+}
+
+data "aws_s3_object" "message_tag_keys" {
+  count  = contains(data.aws_s3_objects.coaching_keys.keys, "secrets/coaching/message-tag-keys.txt") ? 1 : 0
+  bucket = module.content.static_bucket.bucket
+  key    = "secrets/coaching/message-tag-keys.txt"
+}
+
+data "aws_s3_object" "report_review_key" {
+  count  = contains(data.aws_s3_objects.coaching_keys.keys, "secrets/coaching/report-review-key.txt") ? 1 : 0
+  bucket = module.content.static_bucket.bucket
+  key    = "secrets/coaching/report-review-key.txt"
+}
+
+locals {
+  message_tag_keys  = trimspace(try(data.aws_s3_object.message_tag_keys[0].body, ""))
+  report_review_key = trimspace(try(data.aws_s3_object.report_review_key[0].body, ""))
 }
