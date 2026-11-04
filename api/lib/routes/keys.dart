@@ -15,6 +15,15 @@ Future<void> _tellPeers(Request req) {
   );
 }
 
+/// A device in the path is one of the caller's, by an id it chose, so anything
+/// that can't be such an id is no device.
+String _deviceId(Request req) {
+  return switch (req.rawPathParameters[#deviceId]) {
+    final String id when isUuidV7(id) => id,
+    final id => throw NotFound(type: 'Device', id: '$id'),
+  };
+}
+
 Future<Model> publishDevice(Request req) async {
   final input = await DevicePublishIn.fromRequest(req);
   final device = await req.keyService.publishDevice(
@@ -36,7 +45,7 @@ Future<CryptoDevices> getDevices(Request req) async {
 }
 
 Future<Model> removeDevice(Request req) async {
-  await req.keyService.removeDevice(userId: req.userId, deviceId: req.rawPathParameters[#deviceId]!);
+  await req.keyService.removeDevice(userId: req.userId, deviceId: _deviceId(req));
   await _tellPeers(req);
   throw const NoContent();
 }
@@ -45,7 +54,7 @@ Future<Model> replaceFallbackKey(Request req) async {
   final input = await FallbackKeyIn.fromRequest(req);
   await req.keyService.replaceFallbackKey(
     userId: req.userId,
-    deviceId: req.rawPathParameters[#deviceId]!,
+    deviceId: _deviceId(req),
     key: input.key,
   );
   throw const NoContent();
@@ -55,7 +64,7 @@ Future<OneTimeKeyCount> addOneTimeKeys(Request req) async {
   final input = await OneTimeKeysIn.fromRequest(req);
   final count = await req.keyService.addOneTimeKeys(
     userId: req.userId,
-    deviceId: req.rawPathParameters[#deviceId]!,
+    deviceId: _deviceId(req),
     keys: input.keys,
   );
   return OneTimeKeyCount(count);
@@ -64,7 +73,7 @@ Future<OneTimeKeyCount> addOneTimeKeys(Request req) async {
 Future<OneTimeKeyCount> countOneTimeKeys(Request req) async {
   final count = await req.keyService.countOneTimeKeys(
     userId: req.userId,
-    deviceId: req.rawPathParameters[#deviceId]!,
+    deviceId: _deviceId(req),
   );
   return OneTimeKeyCount(count);
 }
@@ -88,9 +97,8 @@ Future<Model> enqueue(Request req) async {
 }
 
 Future<QueuedItems> getQueue(Request req) async {
-  final deviceId = req.url.queryParameters['deviceId'];
-  if (deviceId == null) throw const BadRequest(reason: 'deviceId is required');
-  return QueuedItems(await req.keyService.getQueue(userId: req.userId, deviceId: deviceId));
+  final query = QueueQuery.fromRequest(req);
+  return QueuedItems(await req.keyService.getQueue(userId: req.userId, deviceId: query.deviceId));
 }
 
 Future<Model> confirmQueued(Request req) async {

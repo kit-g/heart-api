@@ -12,9 +12,11 @@ from typing import Any, Self
 
 @dataclass(frozen=True)
 class PushNotification:
+    """A push says who, never what: a title and ids, and no body, so no text of
+    anyone's reaches Apple or Google."""
+
     tokens: list[str]
     title: str | None = None
-    body: str | None = None
     data: dict[str, str] = field(default_factory=dict)
     silent: bool = False
     channel: str | None = None
@@ -25,12 +27,15 @@ class PushNotification:
         def text(key: str) -> str | None:
             return str(d[key]) if d.get(key) is not None else None
 
+        silent = bool(d.get("silent", False))
+        title = text("title")
+        if not silent and not title:
+            raise ValueError("a visible push needs a title")
         return cls(
             tokens=[str(t) for t in d["tokens"]],
-            title=text("title"),
-            body=text("body"),
+            title=title,
             data={k: str(v) for k, v in d.get("data", {}).items()},
-            silent=bool(d.get("silent", False)),
+            silent=silent,
             channel=text("channel"),
             collapse_key=text("collapseKey"),
         )

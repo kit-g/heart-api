@@ -59,15 +59,11 @@ Future<Model> setPushPreference(Request req) async {
 }
 
 Future<Model> clearPushPreference(Request req) async {
-  final connectionId = switch (req.url.queryParameters['connectionId']) {
-    null => null,
-    final String id when isUuidV7(id) => id,
-    _ => throw const BadRequest(reason: 'connectionId must be a connection\'s id'),
-  };
+  final query = PushPreferenceClearQuery.fromRequest(req, topicKey: req.rawPathParameters[#topic]!);
   await req.pushService.clearPushPreference(
     userId: req.userId,
-    topic: req.rawPathParameters[#topic]!,
-    connectionId: connectionId,
+    topic: query.topic.key,
+    connectionId: query.connectionId,
   );
   throw const NoContent();
 }

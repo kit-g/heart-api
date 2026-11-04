@@ -72,76 +72,116 @@ void main() {
     expect(audience.blocked, isFalse, reason: 'with nobody it is about');
   });
 
-  group('digests', () {
-    int localHourFor(int offsetMinutes) => DateTime.now().toUtc().add(Duration(minutes: offsetMinutes)).hour;
+  test('a push about a person reads what was said about them, with no relationship named', () async {
+    final (me, other) = (await h.seedProfile(), await h.seedProfile());
+    await h.seedConnection(initiator: me, target: other);
+    final connection = (await h.db.getConnections(me)).single.connectionId!;
+    await h.db.setPushPreference(userId: me, topic: 'comment.created', delivery: 'off', connectionId: connection);
 
-    test('one is owed however much happens, and goes out at their hour, once', () async {
-      final me = await h.seedProfile();
-      await h.db.registerDevice(
+    final audience = await h.db.getPushAudience(userId: me, topic: 'comment.created', actorId: other);
+    expect(audience.forPerson, 'off');
+
+    final nobody = await h.db.getPushAudience(userId: me, topic: 'comment.created');
+    expect(nobody.forPerson, isNull, reason: 'with nobody it is about');
+  });
+
+  group('digests', () {
+    const digest = 'coaching.workout_digest';
+
+    /// The offset that makes it [hour] o'clock for someone now, so these tests
+    /// read the same at any time of day.
+    int offsetFor(int hour) {
+      final minutes = ((hour - DateTime.now().toUtc().hour) % 24) * 60;
+      return minutes > 840 ? minutes - 1440 : minutes;
+    }
+
+    Future<void> register(String me, String token, int? offset) {
+      return h.db.registerDevice(
         profileId: me,
         platform: .ios,
-        token: 'd-$me',
+        token: '$token-$me',
         locale: 'en',
         settings: const {},
-        utcOffsetMinutes: 120,
+        utcOffsetMinutes: offset,
       );
-      await h.db.queueDigest(userId: me, topic: 'coaching.workout_digest');
-      await h.db.queueDigest(userId: me, topic: 'coaching.workout_digest');
+    }
 
-      final notYet = await h.db.claimDueDigests(localHour: (localHourFor(120) + 6) % 24);
-      expect(notYet.where((due) => due.userId == me), isEmpty);
+    Future<void> queuedAgo(String me, Duration ago) async {
+      await h.db.queueDigest(userId: me, topic: digest);
+      await h.exec('UPDATE push_digests SET created_at = now() - @ago::interval WHERE user_id = @me', {
+        'me': me,
+        'ago': '${ago.inMinutes} minutes',
+      });
+    }
 
-      final due = await h.db.claimDueDigests(localHour: localHourFor(120));
-      expect(due.where((due) => due.userId == me), hasLength(1));
+    Future<bool> claimed(String me, {required int from}) async {
+      final due = await h.db.claimDueDigests(localHour: from);
+      return due.any((due) => due.userId == me);
+    }
 
-      final again = await h.db.claimDueDigests(localHour: localHourFor(120));
-      expect(again.where((due) => due.userId == me), isEmpty);
+    test('one is owed however much happens, and goes out once their evening starts, once', () async {
+      final me = await h.seedProfile();
+      await register(me, 'd', offsetFor(12));
+      await h.db.queueDigest(userId: me, topic: digest);
+      await queuedAgo(me, const Duration(hours: 1));
+
+      expect(await claimed(me, from: 13), isFalse, reason: 'it is not their evening yet');
+      expect(await claimed(me, from: 12), isTrue);
+      expect(await claimed(me, from: 12), isFalse);
+    });
+
+    test('an hour the schedule missed is caught up later that evening', () async {
+      final me = await h.seedProfile();
+      await register(me, 'd', offsetFor(12));
+      await queuedAgo(me, const Duration(hours: 3));
+
+      expect(await claimed(me, from: 11), isTrue);
+    });
+
+    test('what was queued once the evening began waits for the next one', () async {
+      final me = await h.seedProfile();
+      await register(me, 'd', offsetFor(12));
+      await queuedAgo(me, Duration.zero);
+      expect(await claimed(me, from: 11), isFalse);
+
+      await queuedAgo(me, const Duration(days: 1));
+      expect(await claimed(me, from: 11), isTrue, reason: 'the next evening');
     });
 
     test('the device they last used decides, so two devices mean one push', () async {
       final me = await h.seedProfile();
-      await h.db.registerDevice(
-        profileId: me,
-        platform: .ios,
-        token: 'old-$me',
-        locale: 'en',
-        settings: const {},
-        utcOffsetMinutes: 300,
-      );
+      await register(me, 'old', offsetFor(6));
       await h.exec("UPDATE device_tokens SET last_seen_at = now() - INTERVAL '1 day' WHERE token = @t", {
         't': 'old-$me',
       });
-      await h.db.registerDevice(
-        profileId: me,
-        platform: .android,
-        token: 'new-$me',
-        locale: 'en',
-        settings: const {},
-        utcOffsetMinutes: -300,
-      );
-      await h.db.queueDigest(userId: me, topic: 'coaching.workout_digest');
+      await register(me, 'new', offsetFor(12));
+      await queuedAgo(me, const Duration(hours: 2));
 
-      final atOld = await h.db.claimDueDigests(localHour: localHourFor(300));
-      expect(atOld.where((due) => due.userId == me), isEmpty);
-      final atNew = await h.db.claimDueDigests(localHour: localHourFor(-300));
-      expect(atNew.where((due) => due.userId == me), hasLength(1));
+      expect(await claimed(me, from: 11), isTrue);
+    });
+
+    test('a device that never said its offset says nothing of their zone', () async {
+      final me = await h.seedProfile();
+      // UTC is what a device with no offset would stand for, so their evening has
+      // to start at an hour UTC hasn't reached, or has long passed
+      final hour = switch (DateTime.now().toUtc().hour) {
+        11 || 12 => 18,
+        _ => 12,
+      };
+      await register(me, 'said', offsetFor(hour));
+      await h.exec("UPDATE device_tokens SET last_seen_at = now() - INTERVAL '1 day' WHERE token = @t", {
+        't': 'said-$me',
+      });
+      await register(me, 'silent', null);
+      await queuedAgo(me, const Duration(hours: 2));
+
+      expect(await claimed(me, from: hour - 1), isTrue);
     });
 
     test('a device that does not say its offset keeps the last one it said', () async {
       final me = await h.seedProfile();
-      Future<void> register(int? offset) {
-        return h.db.registerDevice(
-          profileId: me,
-          platform: .ios,
-          token: 'k-$me',
-          locale: 'en',
-          settings: const {},
-          utcOffsetMinutes: offset,
-        );
-      }
-
-      await register(60);
-      await register(null);
+      await register(me, 'k', 60);
+      await register(me, 'k', null);
       final rows = await h.exec('SELECT utc_offset_minutes FROM device_tokens WHERE token = @t', {'t': 'k-$me'});
       expect(rows.first[0], 60);
     });

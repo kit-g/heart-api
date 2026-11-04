@@ -71,4 +71,43 @@ void main() {
       }
     });
   });
+
+  group('DELETE /push/settings/:topic', () {
+    test('goes back to what the topic does, for one relationship or the whole topic', () async {
+      when(
+        app.db.clearPushPreference(
+          userId: anyNamed('userId'),
+          topic: anyNamed('topic'),
+          connectionId: anyNamed('connectionId'),
+        ),
+      ).thenAnswer((_) async {});
+      const connection = '01900000-0000-7000-8000-000000000001';
+
+      expect((await app.send('DELETE', '/push/settings/coaching.message?connectionId=$connection')).status, 204);
+      expect((await app.send('DELETE', '/push/settings/coaching.message')).status, 204);
+      verify(
+        app.db.clearPushPreference(userId: anyNamed('userId'), topic: 'coaching.message', connectionId: connection),
+      );
+      verify(app.db.clearPushPreference(userId: anyNamed('userId'), topic: 'coaching.message', connectionId: null));
+    });
+
+    test('a topic that does not exist, or says nothing, is not there, as for PUT', () async {
+      for (final topic in ['nonsense', 'coaching.program_changed']) {
+        final res = await app.send('DELETE', '/push/settings/$topic');
+        expect(res.status, 404, reason: topic);
+      }
+      verifyNever(
+        app.db.clearPushPreference(
+          userId: anyNamed('userId'),
+          topic: anyNamed('topic'),
+          connectionId: anyNamed('connectionId'),
+        ),
+      );
+    });
+
+    test('a connectionId has to be one', () async {
+      final res = await app.send('DELETE', '/push/settings/coaching.message?connectionId=nope');
+      expect(res.status, 400);
+    });
+  });
 }

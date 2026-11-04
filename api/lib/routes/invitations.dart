@@ -79,7 +79,7 @@ Future<AcceptedInvitation> acceptInvitation(Request req) async {
       'type': 'push.requested',
       'userId': connection.targetId,
       'topic': PushTopic.invitationAccepted.key,
-      'name': req.user.displayName ?? '',
+      'name': ?req.user.displayName,
       'actorId': req.userId,
       'connectionId': connection.connectionId,
     },

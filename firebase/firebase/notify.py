@@ -1,5 +1,5 @@
 """FCM send wrapper. Pure dumb pipe — the upstream API decides who gets
-notified, in what language, with what title and body. This module just calls
+notified, in what language, with what title. This module just calls
 FCM with the pre-baked payload."""
 
 import logging
@@ -24,7 +24,7 @@ def _delivery(event: PushNotification) -> dict[str, Any]:
             ),
         }
     return {
-        "notification": messaging.Notification(title=event.title, body=event.body),
+        "notification": messaging.Notification(title=event.title),
         "android": messaging.AndroidConfig(
             collapse_key=event.collapse_key,
             notification=messaging.AndroidNotification(channel_id=event.channel),

@@ -7,12 +7,14 @@
 ///
 /// A topic's `title` is what the push says, and `name` and `description` are what
 /// a settings screen says about it. `comment.created` has a title per target.
-/// The only argument any of them takes is `{name}`.
+/// The only argument any of them takes is `{name}`, and `person.unnamed` stands
+/// in for someone who has none.
 ///
 /// Templates are gender-neutral by design — keep them in present tense /
 /// nominal forms so we don't need per-gender branching across languages.
 const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
   'en': {
+    'person': {'unnamed': 'Someone'},
     'comment.created': {
       'name': 'New comments',
       'description': 'When someone comments on your workout',
@@ -38,6 +40,7 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
     },
   },
   'en_CA': {
+    'person': {'unnamed': 'Someone'},
     'comment.created': {
       'name': 'New comments',
       'description': 'When someone comments on your workout',
@@ -63,6 +66,7 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
     },
   },
   'ru': {
+    'person': {'unnamed': 'Кто-то'},
     'comment.created': {
       'name': 'Новые комментарии',
       'description': 'Когда кто-то комментирует вашу тренировку',
@@ -90,6 +94,7 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
   // neutral international Spanish; es_ES reaches these via the renderer's
   // base-language fallback, same chain as the exercise library
   'es': {
+    'person': {'unnamed': 'Alguien'},
     'comment.created': {
       'name': 'Comentarios nuevos',
       'description': 'Cuando alguien comenta tu entrenamiento',
@@ -116,6 +121,7 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
   },
   // neutral international French; fr_CA reaches these via the same fallback
   'fr': {
+    'person': {'unnamed': 'Quelqu\'un'},
     'comment.created': {
       'name': 'Nouveaux commentaires',
       'description': 'Quand quelqu\'un commente votre entraînement',

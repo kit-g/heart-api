@@ -2,7 +2,8 @@ part of '../db.dart';
 
 /// A device id is chosen by the device, so publishing twice answers what is
 /// there, and someone else's id answers nothing. A signature only counts if it
-/// names a device of the same owner.
+/// names a device of the same owner. A device its owner removed stays removed,
+/// and says so.
 const _publishDevice = '''
 WITH
 _inserted AS (
@@ -21,9 +22,10 @@ _inserted AS (
   ON CONFLICT (id) DO NOTHING
   RETURNING *
 )
-SELECT id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at FROM _inserted
+SELECT id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at, false AS removed
+FROM _inserted
 UNION ALL
-SELECT id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at
+SELECT id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at, removed_at IS NOT NULL
 FROM crypto_devices
 WHERE id = @id::uuid
   AND user_id = @userId
@@ -31,13 +33,13 @@ WHERE id = @id::uuid
 ''';
 
 const _listDevices = '''
-WITH _allowed AS (
-  SELECT _shares_keys_with(@readerId, @ownerId) AS allowed
+WITH _status AS (
+  SELECT NOT _shares_keys_with(@readerId, @ownerId) AS forbidden
 )
-SELECT a.allowed, d.id, d.user_id, d.identity_key, d.signing_key, d.fallback_key, d.signature, d.vouched_by, d.created_at
-FROM _allowed a
+SELECT s.forbidden, d.id, d.user_id, d.identity_key, d.signing_key, d.fallback_key, d.signature, d.vouched_by, d.created_at
+FROM _status s
 LEFT JOIN crypto_devices d
-  ON a.allowed AND d.user_id = @ownerId AND d.removed_at IS NULL
+  ON NOT s.forbidden AND d.user_id = @ownerId AND d.removed_at IS NULL
 ORDER BY d.id
 ''';
 
@@ -74,6 +76,18 @@ WHERE id = @deviceId::uuid
 RETURNING id
 ''';
 
+/// Taken before counting, in a statement of its own: a statement counts from
+/// the snapshot it started with, so a lock inside it would wait for another
+/// upload and then count as if that one never happened.
+const _lockDevice = '''
+SELECT id
+FROM crypto_devices
+WHERE id = @deviceId::uuid
+  AND user_id = @userId
+  AND removed_at IS NULL
+FOR UPDATE
+''';
+
 const _addOneTimeKeys =
     '''
 WITH
@@ -83,7 +97,6 @@ _device AS (
   WHERE id = @deviceId::uuid
     AND user_id = @userId
     AND removed_at IS NULL
-  FOR UPDATE
 ),
 _incoming AS (
   SELECT value ->> 'id' AS key_id, value ->> 'key' AS key
@@ -132,13 +145,13 @@ const _claimKeys =
     '''
 WITH
 _status AS (
-  SELECT _shares_keys_with(@claimerId, @ownerId) AS allowed
+  SELECT NOT _shares_keys_with(@claimerId, @ownerId) AS forbidden
 ),
 _count AS (
   INSERT INTO key_claims (claimer_id, owner_id)
   SELECT @claimerId, @ownerId
   FROM _status
-  WHERE allowed
+  WHERE NOT forbidden
   ON CONFLICT (claimer_id, owner_id) DO UPDATE
   SET
     claims = CASE WHEN key_claims.window_start < now() - INTERVAL '1 hour' THEN 1 ELSE key_claims.claims + 1 END,
@@ -173,7 +186,7 @@ _taken AS (
   RETURNING k.device_id, k.key_id, k.key
 )
 SELECT
-  s.allowed,
+  s.forbidden,
   (SELECT claims FROM _count) AS claims,
   d.id, d.user_id, d.identity_key, d.signing_key, d.fallback_key, d.signature, d.vouched_by, d.created_at,
   t.key_id,
@@ -184,11 +197,16 @@ LEFT JOIN _taken t ON t.device_id = d.id
 ORDER BY d.id
 ''';
 
+/// An id names one item from one device to another, whether it still waits or
+/// was confirmed, so sending it again delivers nothing new, and an id another
+/// pair holds is taken. Who may send is settled before either.
 const _enqueue =
     '''
 WITH
 _seen AS (
-  SELECT 1 FROM device_queue WHERE id = @id::uuid
+  SELECT recipient_device_id, sender_device_id FROM device_queue WHERE id = @id::uuid
+  UNION ALL
+  SELECT recipient_device_id, sender_device_id FROM device_queue_receipts WHERE id = @id::uuid
 ),
 _sender AS (
   SELECT id
@@ -220,36 +238,61 @@ _inserted AS (
   RETURNING 1
 )
 SELECT
-  EXISTS (SELECT 1 FROM _seen) AS seen,
   EXISTS (SELECT 1 FROM _sender) AS sender_owned,
-  EXISTS (SELECT 1 FROM _recipient) AS allowed,
-  (SELECT is_full FROM _load) AS is_full
+  NOT EXISTS (SELECT 1 FROM _recipient) AS forbidden,
+  EXISTS (
+    SELECT 1
+    FROM _seen
+    WHERE (recipient_device_id, sender_device_id) IS DISTINCT FROM (@recipientDeviceId::uuid, @senderDeviceId::uuid)
+  ) AS taken,
+  EXISTS (SELECT 1 FROM _seen) AS seen,
+  (SELECT is_full FROM _load) AS is_full,
+  EXISTS (SELECT 1 FROM _inserted) AS inserted
 ''';
 
+/// A block stops what was sent before it, too.
 const _listQueue = '''
 SELECT q.id, q.recipient_device_id, q.sender_device_id, q.kind, q.content, q.created_at
 FROM device_queue q
 JOIN crypto_devices d ON d.id = q.recipient_device_id
+LEFT JOIN crypto_devices s ON s.id = q.sender_device_id
 WHERE q.recipient_device_id = @deviceId::uuid
   AND d.user_id = @userId
+  AND NOT coalesce(_blocked_between(d.user_id, s.user_id), false)
 ORDER BY q.seq
 LIMIT @limit
 ''';
 
+/// The item goes, and its id stays behind for a sender's retry to find.
 const _confirmQueued = '''
-DELETE FROM device_queue q
-USING crypto_devices d
-WHERE d.id = q.recipient_device_id
-  AND d.user_id = @userId
-  AND q.recipient_device_id = @deviceId::uuid
-  AND q.id = ANY (@ids::uuid[])
-RETURNING q.seq
+WITH
+_confirmed AS (
+  DELETE FROM device_queue q
+  USING crypto_devices d
+  WHERE d.id = q.recipient_device_id
+    AND d.user_id = @userId
+    AND q.recipient_device_id = @deviceId::uuid
+    AND q.id = ANY (@ids::uuid[])
+  RETURNING q.seq, q.id, q.recipient_device_id, q.sender_device_id
+),
+_receipts AS (
+  INSERT INTO device_queue_receipts (id, recipient_device_id, sender_device_id)
+  SELECT id, recipient_device_id, sender_device_id
+  FROM _confirmed
+  ON CONFLICT (id) DO NOTHING
+  RETURNING id
+)
+SELECT seq FROM _confirmed
 ''';
 
+/// Whoever `_shares_keys_with` says shares keys, so the people told to look are
+/// the people allowed to.
 const _listKeyPeers = '''
-SELECT DISTINCT CASE WHEN initiator_id = @userId THEN target_id ELSE initiator_id END AS peer
-FROM connections
-WHERE @userId IN (initiator_id, target_id)
-  AND accepted_at IS NOT NULL
-  AND status IN ('active', 'paused', 'severed')
+SELECT DISTINCT p.peer
+FROM connections c
+CROSS JOIN LATERAL (
+  SELECT CASE WHEN c.initiator_id = @userId THEN c.target_id ELSE c.initiator_id END AS peer
+) p
+WHERE @userId IN (c.initiator_id, c.target_id)
+  AND _shares_keys_with(@userId, p.peer)
 ''';

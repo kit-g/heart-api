@@ -21,27 +21,37 @@ mixin _Keys on _DatabaseBase implements KeyService {
     String? signature,
     String? vouchedBy,
   }) async {
-    final rows = await _pool.execute(
-      _publishDevice.toSql(),
-      parameters: {
-        'userId': userId,
-        'id': id,
-        'identityKey': identityKey,
-        'signingKey': signingKey,
-        'fallbackKey': fallbackKey,
-        'signature': signature,
-        'vouchedBy': vouchedBy,
-      },
-    );
-    if (rows.isEmpty) throw const Forbidden(code: 'id_taken', reason: 'this id belongs to another account');
-    return CryptoDevice.fromRow(rows.first.toColumnMap());
+    Future<Map<String, dynamic>?> publish() async {
+      final rows = await _pool.execute(
+        _publishDevice.toSql(),
+        parameters: {
+          'userId': userId,
+          'id': id,
+          'identityKey': identityKey,
+          'signingKey': signingKey,
+          'fallbackKey': fallbackKey,
+          'signature': signature,
+          'vouchedBy': vouchedBy,
+        },
+      );
+      return rows.firstOrNull?.toColumnMap();
+    }
+
+    // A publish racing another of the same id waits for it, then reads from a
+    // snapshot taken before it committed and finds nothing. Asking again sees it.
+    final row = await publish() ?? await publish();
+    return switch (row) {
+      null => throw _idTaken,
+      {'removed': true} => throw const Forbidden(code: 'device_removed', reason: 'this device was removed'),
+      _ => CryptoDevice.fromRow(row),
+    };
   }
 
   @override
   Future<List<CryptoDevice>> getDevices({required String readerId, required String ownerId}) async {
     final rows = await _pool.execute(_listDevices.toSql(), parameters: {'readerId': readerId, 'ownerId': ownerId});
     final maps = rows.map((row) => row.toColumnMap()).toList();
-    if (maps.first['allowed'] != true) {
+    if (maps.first['forbidden'] == true) {
       throw const Forbidden(reason: 'You do not have permission to see these devices.');
     }
     return [
@@ -52,7 +62,8 @@ mixin _Keys on _DatabaseBase implements KeyService {
 
   @override
   Future<void> removeDevice({required String userId, required String deviceId}) async {
-    await _pool.execute(_removeDevice.toSql(), parameters: {'userId': userId, 'deviceId': deviceId});
+    final rows = await _pool.execute(_removeDevice.toSql(), parameters: {'userId': userId, 'deviceId': deviceId});
+    if (rows.isEmpty) throw NotFound(type: 'Device', id: deviceId);
   }
 
   @override
@@ -70,17 +81,20 @@ mixin _Keys on _DatabaseBase implements KeyService {
     required String deviceId,
     required Map<String, String> keys,
   }) async {
-    final rows = await _pool.execute(
-      _addOneTimeKeys.toSql(),
-      parameters: {
-        'userId': userId,
-        'deviceId': deviceId,
-        'keys': jsonEncode([
-          for (final MapEntry(:key, :value) in keys.entries) {'id': key, 'key': value},
-        ]),
-      },
-    );
-    final row = rows.first.toColumnMap();
+    final row = await _pool.runTx((tx) async {
+      await tx.execute(_lockDevice.toSql(), parameters: {'userId': userId, 'deviceId': deviceId});
+      final rows = await tx.execute(
+        _addOneTimeKeys.toSql(),
+        parameters: {
+          'userId': userId,
+          'deviceId': deviceId,
+          'keys': jsonEncode([
+            for (final MapEntry(:key, :value) in keys.entries) {'id': key, 'key': value},
+          ]),
+        },
+      );
+      return rows.first.toColumnMap();
+    });
     return switch (row) {
       {'owned': false} => throw NotFound(type: 'Device', id: deviceId),
       {'fits': false} => throw const BadRequest(
@@ -104,7 +118,7 @@ mixin _Keys on _DatabaseBase implements KeyService {
     final rows = await _pool.execute(_claimKeys.toSql(), parameters: {'claimerId': claimerId, 'ownerId': ownerId});
     final maps = rows.map((row) => row.toColumnMap()).toList();
     final first = maps.first;
-    if (first['allowed'] != true) {
+    if (first['forbidden'] == true) {
       throw const Forbidden(reason: 'You do not have permission to take these keys.');
     }
     if ((first['claims'] as num).toInt() > _maxKeyClaims) {
@@ -138,11 +152,12 @@ mixin _Keys on _DatabaseBase implements KeyService {
     );
     final row = rows.first.toColumnMap();
     return switch (row) {
-      {'seen': true} => false,
       {'sender_owned': false} => throw NotFound(type: 'Device', id: senderDeviceId),
-      {'allowed': false} => throw const Forbidden(reason: 'You do not have permission to reach this device.'),
+      {'forbidden': true} => throw const Forbidden(reason: 'You do not have permission to reach this device.'),
+      {'taken': true} => throw _idTaken,
+      {'seen': true} => false,
       {'is_full': true} => throw const BadRequest(code: 'queue_full', reason: 'this device has too much waiting'),
-      _ => true,
+      _ => row['inserted'] == true,
     };
   }
 
