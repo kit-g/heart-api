@@ -915,6 +915,8 @@ _rel AS (
 _workouts AS (
   SELECT
     id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at,
+    logged_by,
+    (SELECT username FROM profiles coach WHERE coach.id = workouts.logged_by) AS logged_by_name,
     _workout_exercises(id) AS exercises,
     CASE
       WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
@@ -931,9 +933,9 @@ _workouts AS (
   ORDER BY id DESC
   LIMIT @limit
 )
-SELECT id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, exercises, images, false AS forbidden FROM _workouts
+SELECT id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, logged_by, logged_by_name, exercises, images, false AS forbidden FROM _workouts
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _rel WHERE (r).scope IS NULL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _rel WHERE (r).scope IS NULL
 ''';
 
 const _hideWorkout = '''
@@ -976,6 +978,8 @@ SELECT
   w.template_id,
   w.program_id,
   w.created_at,
+  w.logged_by,
+  (SELECT username FROM profiles coach WHERE coach.id = w.logged_by) AS logged_by_name,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -993,6 +997,8 @@ _rel AS (
 )
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
+  w.logged_by,
+  (SELECT username FROM profiles coach WHERE coach.id = w.logged_by) AS logged_by_name,
   _workout_exercises(w.id) AS exercises,
   CASE
     WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
@@ -1008,7 +1014,7 @@ WHERE w.id = @workoutId::uuid
   AND w.user_id = @targetUserId::text
   AND _readable_at((SELECT r FROM _rel), w.started_at, w.hidden_at)
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _rel WHERE (r).scope IS NULL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _rel WHERE (r).scope IS NULL
 ''';
 
 /// Idempotent create for a workout, the replay's fifth resource
@@ -1061,7 +1067,7 @@ _exercise_lookup AS (
   WHERE e.user_id IS NULL OR e.user_id = @userId
 ),
 _workout AS (
-  INSERT INTO workouts (id, user_id, name, started_at, completed_at, calories, note, pauses, template_id, program_id)
+  INSERT INTO workouts (id, user_id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, logged_by)
   SELECT
     coalesce(@id::uuid, uuidv7()),
     @userId,
@@ -1072,9 +1078,10 @@ _workout AS (
     @note,
     @pauses::jsonb,
     (SELECT id FROM _template),
-    (SELECT id FROM _program)
+    (SELECT id FROM _program),
+    @loggedBy::text
   WHERE NOT EXISTS (SELECT 1 FROM _existing_workout)
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, logged_by
 ),
 _inserted_exercises AS (
   INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note, superset)
@@ -1175,6 +1182,7 @@ SELECT
   w.template_id,
   w.program_id,
   w.created_at,
+  w.logged_by,
   coalesce(ej.exercises_json, '[]'::jsonb) AS exercises,
   '[]'::jsonb AS images,
   true AS created
@@ -1193,6 +1201,7 @@ SELECT
   w.template_id,
   w.program_id,
   w.created_at,
+  w.logged_by,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -3572,6 +3581,447 @@ WHERE id = @programId::uuid
 RETURNING id
 ''';
 
+const _recordProgramChange = '''
+INSERT INTO program_changes (id, program_id, session_id, actor_id, kind, revision, before, after, links, stale)
+VALUES (
+  @id::uuid, @programId::uuid, @sessionId::uuid, @actorId, @kind, @revision, @before::jsonb, @after::jsonb, @links::jsonb, @stale
+)
+RETURNING id
+''';
+
+/// Holds a copy's session while it changes. No row means it isn't a session of a copy,
+/// or of the program a coach named. What the writer is up against is the next statement:
+/// one that waited for this lock would still see the world from before it waited, and
+/// miss the very write it queued behind.
+const _lockCopySession = '''
+SELECT t.program_id
+FROM templates t
+JOIN programs p ON p.id = t.program_id
+WHERE t.id = @sessionId::uuid
+  AND t.user_id = @ownerId
+  AND p.coach_id IS NOT NULL
+  AND (@programId::uuid IS NULL OR t.program_id = @programId::uuid)
+FOR UPDATE OF t
+''';
+
+/// Someone else having changed it since the writer's base is a conflict, and the writer's
+/// own changes aren't, so two queued edits both land.
+const _copySessionStanding = '''
+SELECT
+  t.revision,
+  @changeId::uuid IS NOT NULL
+    AND EXISTS (SELECT 1 FROM program_changes c WHERE c.id = @changeId::uuid) AS replayed,
+  @baseRevision::int IS NOT NULL
+    AND EXISTS (
+      SELECT 1
+      FROM program_changes c
+      WHERE c.program_id = t.program_id
+        AND c.session_id = t.id
+        AND c.revision > @baseRevision::int
+        AND c.actor_id IS DISTINCT FROM @actorId
+    ) AS conflict
+FROM templates t
+WHERE t.id = @sessionId::uuid
+''';
+
+/// As for a session: the lock, then in a statement of its own what it's up against.
+const _lockCopy = '''
+SELECT p.id
+FROM programs p
+WHERE p.id = @programId::uuid
+  AND p.user_id = @ownerId
+  AND p.coach_id IS NOT NULL
+FOR UPDATE OF p
+''';
+
+const _copyStanding = '''
+SELECT
+  p.revision,
+  @changeId::uuid IS NOT NULL
+    AND EXISTS (SELECT 1 FROM program_changes c WHERE c.id = @changeId::uuid) AS replayed,
+  @baseRevision::int IS NOT NULL
+    AND EXISTS (
+      SELECT 1
+      FROM program_changes c
+      WHERE c.program_id = p.id
+        AND c.session_id IS NULL
+        AND c.revision > @baseRevision::int
+        AND c.actor_id IS DISTINCT FROM @actorId
+    ) AS conflict
+FROM programs p
+WHERE p.id = @programId::uuid
+''';
+
+const _templateIdTaken = '''
+SELECT 1 FROM templates WHERE id = @id::uuid
+''';
+
+const _bumpSessionRevision = '''
+UPDATE templates
+SET revision = revision + 1
+WHERE id = @sessionId::uuid
+RETURNING revision
+''';
+
+const _bumpProgramRevision = '''
+UPDATE programs
+SET revision = revision + 1
+WHERE id = @programId::uuid
+RETURNING revision
+''';
+
+/// A deletion clears these, so a snapshot has to say what they were.
+const _sessionLinks = '''
+SELECT jsonb_build_object(
+  'workouts', coalesce((SELECT jsonb_agg(id) FROM workouts WHERE template_id = @sessionId::uuid AND user_id = @ownerId), '[]'::jsonb),
+  'skips', coalesce((SELECT jsonb_agg(id) FROM skips WHERE template_id = @sessionId::uuid AND user_id = @ownerId), '[]'::jsonb)
+)
+''';
+
+const _deleteSession = '''
+DELETE FROM templates
+WHERE id = @sessionId::uuid
+  AND user_id = @ownerId
+RETURNING id
+''';
+
+/// Links a session put back to what named it, and to the copy it left. Its revision
+/// carries on from its history, which a write's base is compared against.
+const _restoreSessionLinks = '''
+WITH
+_workouts AS (
+  UPDATE workouts
+  SET template_id = @sessionId::uuid
+  WHERE id = ANY (@workouts::uuid[])
+    AND user_id = @ownerId
+  RETURNING 1
+),
+_skips AS (
+  UPDATE skips
+  SET template_id = @sessionId::uuid
+  WHERE id = ANY (@skips::uuid[])
+    AND user_id = @ownerId
+  RETURNING 1
+)
+UPDATE templates t
+SET
+  assigned_by = p.coach_id,
+  revision = 1 + coalesce(
+    (
+      SELECT max(c.revision)
+      FROM program_changes c
+      WHERE c.program_id = p.id
+        AND c.session_id = t.id
+    ),
+    0
+  )
+FROM programs p
+WHERE t.id = @sessionId::uuid
+  AND p.id = @programId::uuid
+RETURNING t.revision
+''';
+
+const _programChangeColumns = '''
+  id, program_id, session_id, actor_id, kind, revision, before, after, stale, at, xid::text AS xid_text
+''';
+
+/// Stops short of the oldest transaction still running, as the workout feed does.
+const _listProgramChanges =
+    '''
+SELECT $_programChangeColumns
+FROM program_changes
+WHERE program_id = @programId::uuid
+  AND EXISTS (SELECT 1 FROM programs p WHERE p.id = @programId::uuid AND p.user_id = @ownerId)
+  AND xid < pg_snapshot_xmin(pg_current_snapshot())
+  AND (@xid::text IS NULL OR (xid, id) > (@xid::text::xid8, @changeId::uuid))
+ORDER BY xid, id
+LIMIT 500
+''';
+
+const _getProgramChange =
+    '''
+SELECT $_programChangeColumns, links
+FROM program_changes
+WHERE id = @changeId::uuid
+  AND program_id = @programId::uuid
+  AND EXISTS (SELECT 1 FROM programs p WHERE p.id = @programId::uuid AND p.user_id = @ownerId)
+''';
+
+/// A coach reads what they sent while they hold a coach's view, paused included,
+/// and writes only across the live connection it came through.
+const _copyAccess = '''
+WITH
+_copy AS (
+  SELECT connection_id
+  FROM programs
+  WHERE id = @programId::uuid
+    AND user_id = @studentId
+    AND coach_id = @coachId
+)
+SELECT
+  EXISTS (SELECT 1 FROM _copy)
+    AND (_relation(@coachId, @studentId)).scope IS NOT DISTINCT FROM 'coach' AS readable,
+  EXISTS (
+    SELECT 1
+    FROM _copy p
+    JOIN connections c ON c.id = p.connection_id
+    WHERE c.status = 'active'
+      AND NOT _blocked_between(@coachId, @studentId)
+  ) AS writable
+''';
+
+const _listCopies =
+    '''
+SELECT $_programColumns
+FROM programs p
+WHERE p.user_id = @studentId
+  AND p.coach_id = @coachId
+  AND (_relation(@coachId, @studentId)).scope = 'coach'
+ORDER BY p.id
+''';
+
+const _listVisibleMarks = '''
+WITH _rel AS (
+  SELECT _relation(@readerId, @ownerId) AS r
+)
+SELECT template_id, started_at AS at, true AS is_workout
+FROM workouts
+WHERE program_id = @programId::uuid
+  AND user_id = @ownerId
+  AND started_at IS NOT NULL
+  AND _readable_at((SELECT r FROM _rel), started_at, hidden_at)
+UNION ALL
+SELECT template_id, at, false AS is_workout
+FROM skips
+WHERE program_id = @programId::uuid
+  AND user_id = @ownerId
+  AND _readable_at((SELECT r FROM _rel), at, NULL)
+''';
+
+const _getCopyIds = '''
+SELECT library_ids
+FROM programs
+WHERE id = @programId::uuid
+  AND user_id = @ownerId
+''';
+
+const _setCopyVersion = '''
+UPDATE programs
+SET library_version = @version, library_ids = @ids::jsonb
+WHERE id = @programId::uuid
+  AND user_id = @ownerId
+RETURNING id
+''';
+
+const _otherSideOf = '''
+SELECT CASE WHEN user_id = @actorId THEN coach_id ELSE user_id END
+FROM programs
+WHERE id = @programId::uuid
+  AND coach_id IS NOT NULL
+''';
+
+/// One row either way, saying whether the workout is theirs.
+const _saveWorkoutPlan = '''
+WITH
+_workout AS (
+  SELECT id
+  FROM workouts
+  WHERE id = @workoutId::uuid
+    AND user_id = @userId
+    AND (@loggedBy::text IS NULL OR logged_by = @loggedBy)
+),
+_saved AS (
+  INSERT INTO workout_plans (workout_id, plan)
+  SELECT id, @plan::jsonb
+  FROM _workout
+  ON CONFLICT (workout_id) DO NOTHING
+  RETURNING 1
+)
+SELECT EXISTS (SELECT 1 FROM _workout)
+''';
+
+const _getWorkoutPlan = '''
+SELECT p.plan
+FROM workout_plans p
+JOIN workouts w ON w.id = p.workout_id
+WHERE w.id = @workoutId::uuid
+  AND w.user_id = @ownerId
+  AND _readable_at(_relation(@readerId, @ownerId), w.started_at, w.hidden_at)
+''';
+
+/// With each its program: the newest of this coach's copies the student has started.
+const _dirtySummaries =
+    '''
+SELECT s.connection_id, s.student_id, s.generation, program.*
+FROM client_summaries s
+JOIN connections c ON c.id = s.connection_id
+LEFT JOIN LATERAL (
+  SELECT $_programColumns
+  FROM programs p
+  WHERE p.user_id = s.student_id
+    AND p.coach_id = s.coach_id
+    AND NOT p.archived
+    AND p.waiting_since IS NULL
+  ORDER BY p.id DESC
+  LIMIT 1
+) program ON true
+WHERE s.coach_id = @coachId
+  AND s.dirty
+  AND c.status IN ('active', 'paused')
+LIMIT @limit
+''';
+
+/// From what the coach can read, and nothing else: a hidden or paused-over workout
+/// moves none of these.
+const _refreshSummary = '''
+WITH
+_rel AS (
+  SELECT _relation(@coachId, @studentId) AS r
+),
+_seen AS (
+  SELECT w.id, w.started_at, w.note
+  FROM workouts w
+  WHERE w.user_id = @studentId
+    AND w.completed_at IS NOT NULL
+    AND (SELECT (r).scope FROM _rel) = 'coach'
+    AND _readable_at((SELECT r FROM _rel), w.started_at, w.hidden_at)
+)
+UPDATE client_summaries
+SET
+  dirty = generation IS DISTINCT FROM @generation::bigint,
+  program_id = @programId::uuid,
+  program_name = @programName,
+  program_week = @programWeek,
+  program_weeks = @programWeeks,
+  ending = @ending,
+  recent = coalesce(
+    (SELECT array_agg(started_at ORDER BY started_at DESC) FROM _seen WHERE started_at > now() - INTERVAL '14 days'),
+    '{}'
+  ),
+  last_trained_at = (SELECT max(started_at) FROM _seen),
+  note_at = (SELECT max(started_at) FROM _seen WHERE length(trim(coalesce(note, ''))) > 0),
+  lighter_at = (SELECT max(started_at) FROM _seen WHERE _workout_fell_short(id)),
+  updated_at = now()
+WHERE connection_id = @connectionId::uuid
+RETURNING connection_id
+''';
+
+/// Reasons count only what came after the coach last looked. A gap and an ending
+/// clear when they stop being true. Former clients are who and when, and no more.
+const _roster = '''
+WITH
+_clients AS (
+  SELECT
+    s.connection_id,
+    s.student_id,
+    c.status,
+    c.accepted_at,
+    profile.username,
+    profile.avatar_url,
+    s.program_id,
+    s.program_name,
+    s.program_week,
+    s.program_weeks,
+    s.recent,
+    s.last_trained_at,
+    array_remove(
+      ARRAY[
+        CASE WHEN s.lighter_at > coalesce(s.reviewed_at, '-infinity') THEN 'lighter' END,
+        CASE WHEN s.note_at > coalesce(s.reviewed_at, '-infinity') THEN 'note' END,
+        CASE
+          WHEN c.status = 'active'
+            AND coalesce(s.last_trained_at, c.accepted_at) < now() - INTERVAL '7 days'
+          THEN 'gap'
+        END,
+        CASE WHEN s.ending THEN 'ending' END
+      ],
+      NULL
+    ) AS reasons
+  FROM client_summaries s
+  JOIN connections c ON c.id = s.connection_id
+  JOIN profiles profile ON profile.id = s.student_id
+  WHERE s.coach_id = @coachId
+    AND (
+      (@former::boolean AND c.status IN ('severed', 'blocked'))
+      OR (NOT @former::boolean AND c.status IN ('active', 'paused'))
+    )
+),
+_ranked AS (
+  SELECT
+    *,
+    CASE WHEN NOT @former::boolean AND cardinality(reasons) = 0 THEN 1 ELSE 0 END AS rank
+  FROM _clients
+  WHERE @reason::text IS NULL OR @reason = ANY (reasons)
+)
+SELECT
+  connection_id,
+  student_id,
+  status,
+  accepted_at,
+  username,
+  avatar_url,
+  CASE WHEN @former::boolean THEN NULL ELSE program_id END AS program_id,
+  CASE WHEN @former::boolean THEN NULL ELSE program_name END AS program_name,
+  CASE WHEN @former::boolean THEN NULL ELSE program_week END AS program_week,
+  CASE WHEN @former::boolean THEN NULL ELSE program_weeks END AS program_weeks,
+  CASE WHEN @former::boolean THEN '{}'::timestamptz[] ELSE recent END AS recent,
+  CASE WHEN @former::boolean THEN NULL ELSE last_trained_at END AS last_trained_at,
+  CASE WHEN @former::boolean THEN '{}'::text[] ELSE reasons END AS reasons
+FROM _ranked
+WHERE @afterRank::int IS NULL OR (rank, connection_id) > (@afterRank::int, @afterId::uuid)
+ORDER BY rank, connection_id
+LIMIT @limit
+''';
+
+const _markReviewed = '''
+UPDATE client_summaries
+SET reviewed_at = least(coalesce(@at::timestamptz, now()), now())
+WHERE connection_id = @connectionId::uuid
+  AND coach_id = @coachId
+RETURNING connection_id
+''';
+
+const _coachFeed = '''
+WITH
+_clients AS (
+  SELECT s.student_id, s.program_id, s.program_name, s.ending, s.updated_at, _relation(@coachId, s.student_id) AS r
+  FROM client_summaries s
+  JOIN connections c ON c.id = s.connection_id
+  WHERE s.coach_id = @coachId
+    AND c.status IN ('active', 'paused')
+),
+_items AS (
+  SELECT 'workout' AS kind, w.id::text AS id, w.user_id AS student_id, w.completed_at AS at, w.name AS title
+  FROM _clients c
+  JOIN workouts w ON w.user_id = c.student_id
+  WHERE w.completed_at IS NOT NULL
+    AND (c.r).scope = 'coach'
+    AND _readable_at(c.r, w.started_at, w.hidden_at)
+  UNION ALL
+  SELECT 'skip', k.id::text, k.user_id, k.at, NULL
+  FROM _clients c
+  JOIN skips k ON k.user_id = c.student_id
+  WHERE (c.r).scope = 'coach'
+    AND _readable_at(c.r, k.at, NULL)
+  UNION ALL
+  SELECT 'ending', c.program_id::text, c.student_id, c.updated_at, c.program_name
+  FROM _clients c
+  WHERE c.ending
+    AND c.program_id IS NOT NULL
+)
+SELECT i.kind, i.id, i.student_id, i.at, i.title, p.username, p.avatar_url
+FROM _items i
+JOIN profiles p ON p.id = i.student_id
+WHERE @afterAt::timestamptz IS NULL OR (i.at, i.id) < (@afterAt::timestamptz, @afterId::text)
+ORDER BY i.at DESC, i.id DESC
+LIMIT @limit
+''';
+
+const _coachCanLog = '''
+SELECT (r).scope IS NOT DISTINCT FROM 'coach' AND (r).active AS allowed
+FROM (SELECT _relation(@coachId, @studentId) AS r) rel
+''';
+
 const _listDeviceTokensWithLocale = '''
 SELECT token, locale FROM device_tokens WHERE profile_id = @profileId
 ''';
@@ -3840,7 +4290,14 @@ const _programColumns = '''
   ) AS joined,
   p.coach_id,
   (SELECT username FROM profiles coach WHERE coach.id = p.coach_id) AS coach_name,
-  p.waiting_since
+  p.waiting_since,
+  p.revision,
+  (
+    SELECT jsonb_object_agg(t.id, t.revision)
+    FROM templates t
+    WHERE t.program_id = p.id
+      AND p.coach_id IS NOT NULL
+  ) AS session_revisions
 ''';
 
 /// Archived ones included: the cap counts them, so the list stays small, and
@@ -4390,6 +4847,8 @@ SELECT
   c.stale,
   p.id, p.xid::text AS xid, p.at, p.deleted,
   w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
+  w.logged_by,
+  (SELECT username FROM profiles coach WHERE coach.id = w.logged_by) AS logged_by_name,
   CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id) END AS exercises,
   CASE WHEN p.deleted THEN NULL ELSE COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)

@@ -19,7 +19,9 @@ import 'package:heart/routes/me_index.dart';
 import 'package:heart/routes/images.dart' as images;
 import 'package:heart/routes/misc.dart' as version;
 import 'package:heart/routes/oauth.dart' as oauth;
+import 'package:heart/routes/program_changes.dart' as changes;
 import 'package:heart/routes/programs.dart' as programs;
+import 'package:heart/routes/roster.dart' as roster;
 import 'package:heart/routes/skips.dart' as skips;
 import 'package:heart/routes/anomalies.dart' as anomalies;
 import 'package:heart/routes/template_folders.dart' as folders;
@@ -41,6 +43,17 @@ final routes = <(String, Method), ModelHandler>{
   ('/accounts/tokens/:tokenId', .delete): tokens.revokeApiToken,
   ('/feedback', .post): feedback.submitFeedback,
   ('/accounts/:targetUserId/workouts', .get): workouts.getTargetUserWorkouts,
+  ('/accounts/:targetUserId/programs', .get): changes.getCopies,
+  ('/accounts/:targetUserId/programs/:programId', .get): changes.getCopy,
+  ('/accounts/:targetUserId/programs/:programId', .put): changes.updateCopy,
+  ('/accounts/:targetUserId/programs/:programId/changes', .get): changes.getCopyChanges,
+  ('/accounts/:targetUserId/programs/:programId/changes/:changeId/revert', .post): changes.revertCopyChange,
+  ('/accounts/:targetUserId/programs/:programId/sessions/:sessionId', .put): changes.updateCopySession,
+  ('/accounts/:targetUserId/programs/:programId/sessions/:sessionId', .delete): changes.deleteCopySession,
+  ('/accounts/:targetUserId/workouts', .post): changes.logWorkoutFor,
+  ('/accounts/:targetUserId/programs/:programId/bases', .post): changes.moveBaseFor,
+  ('/accounts/:targetUserId/workouts/:workoutId/plan', .get): changes.getTargetWorkoutPlan,
+  ('/accounts/:targetUserId/workouts/:workoutId/plan', .put): changes.savePlanFor,
   ('/accounts/:targetUserId/goals', .get): goals.getTargetUserGoals,
   ('/accounts/:targetUserId/skips', .get): skips.getTargetUserSkips,
   ('/accounts/:targetUserId/workouts/:workoutId', .get): workouts.getTargetUserWorkout,
@@ -50,6 +63,9 @@ final routes = <(String, Method), ModelHandler>{
   ('/charts', .get): charts.getChartPreferences,
   ('/charts', .post): charts.saveChartPreference,
   ('/charts/:preferenceId', .delete): charts.deleteChartPreference,
+  ('/coach/clients', .get): roster.getRoster,
+  ('/coach/clients/:connectionId/reviewed', .put): roster.markClientReviewed,
+  ('/coach/feed', .get): roster.getCoachFeed,
   ('/comments', .get): comments.listComments,
   ('/comments', .post): comments.createComment,
   ('/comments/:commentId', .put): comments.editComment,
@@ -88,6 +104,8 @@ final routes = <(String, Method), ModelHandler>{
   ('/programs/:programId', .put): programs.updateProgram,
   ('/programs/:programId', .delete): programs.deleteProgram,
   ('/programs/:programId/start', .post): coach_library.startProgram,
+  ('/programs/:programId/changes', .get): changes.getProgramChanges,
+  ('/programs/:programId/changes/:changeId/revert', .post): changes.revertProgramChange,
   ('/programs/:programId/actions', .get): programs.getProgramActions,
   ('/programs/:programId/actions', .post): programs.createProgramAction,
   ('/programs/:programId/actions/:actionId', .delete): programs.deleteProgramAction,
@@ -112,6 +130,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/library-programs/:programId', .delete): coach_library.deleteCoachProgram,
   ('/library-programs/:programId/holders', .get): coach_library.getCoachProgramHolders,
   ('/library-programs/:programId/send', .post): coach_library.sendCoachProgram,
+  ('/library-programs/:programId/update', .post): changes.updateCopies,
   ('/notes', .get): threads.getNotes,
   ('/notes/:noteId', .put): threads.saveNote,
   ('/notes/:noteId', .delete): threads.deleteNote,
@@ -147,6 +166,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/workouts/:workoutId', .put): workouts.updateWorkout,
   ('/workouts/:workoutId', .patch): workouts.patchWorkout,
   ('/workouts/:workoutId', .delete): workouts.deleteWorkout,
+  ('/workouts/:workoutId/plan', .put): changes.saveWorkoutPlan,
   ('/workouts/:workoutId/hidden', .put): workouts.hideWorkout,
   ('/workouts/:workoutId/hidden', .delete): workouts.unhideWorkout,
   ('/workouts/:workoutId/images', .put): images.presignWorkoutImage,

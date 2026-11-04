@@ -101,6 +101,8 @@ void main() {
     test('a transaction still writing holds back everything newer, whatever its length', () async {
       final user = await h.seedProfile();
       await h.seedWorkout(userId: user, name: 'settled');
+      // other suites share this database, and their transactions hold this back too
+      await eventually(() => changes(user), (c) => c.upserted.isNotEmpty);
 
       await h.pool.runTx((tx) async {
         // a long save in flight: it has written (so it has a transaction

@@ -15,7 +15,9 @@ import 'package:heart/models/imports.dart';
 import 'package:heart/models/oauth.dart';
 import 'package:heart/models/profile.dart';
 import 'package:heart/models/coach_library.dart';
+import 'package:heart/models/program_changes.dart';
 import 'package:heart/models/programs.dart';
+import 'package:heart/models/roster.dart';
 import 'package:heart/models/skips.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
@@ -36,9 +38,11 @@ part 'invitations.dart';
 part 'keys.dart';
 part 'oauth.dart';
 part 'profiles.dart';
+part 'program_changes.dart';
 part 'programs.dart';
 part 'push.dart';
 part 'queries.dart';
+part 'roster.dart';
 part 'skips.dart';
 part 'template_folders.dart';
 part 'templates.dart';
@@ -214,6 +218,7 @@ class Database extends _DatabaseBase
         _Push,
         _Keys,
         _Threads,
+        _Roster,
         _CoachLibrary,
         _Devices,
         _ExercisePreferences,
@@ -222,6 +227,7 @@ class Database extends _DatabaseBase
         _Images,
         _Profiles,
         _Programs,
+        _ProgramChanges,
         _Skips,
         _Workouts,
         _Templates,
@@ -238,7 +244,9 @@ class Database extends _DatabaseBase
         PushService,
         KeyService,
         ThreadService,
+        RosterService,
         CoachLibraryService,
+        ProgramChangeService,
         CoachNoteService,
         ReportService,
         DeviceService,

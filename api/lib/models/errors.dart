@@ -82,6 +82,23 @@ class BadRequest implements ApiException {
   }
 }
 
+class Conflict implements ApiException {
+  final String reason;
+  @override
+  final String code;
+
+  /// What the caller needs to try again, such as the current revision.
+  final Map<String, dynamic> payload;
+
+  const new({required this.reason, this.code = 'conflict', this.payload = const {}});
+
+  @override
+  int get statusCode => 409;
+
+  @override
+  Map<String, dynamic> toMap() => {'error': 'conflict', 'code': code, 'reason': reason, ...payload};
+}
+
 class Forbidden implements ApiException {
   final String reason;
   @override

@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.49.0
+
+A workout a coach logged for someone (heart-api#366).
+
+- New: `Workout.loggedBy` and `loggedByName`.
+
+## 2.48.0
+
+A coach's roster and feed (heart-api#365).
+
+- New: `ClientSummary` and `CoachFeedItem`.
+
+## 2.47.0
+
+Two people on one copy of a program (heart-api#364).
+
+- New: `ProgramChange`, `ProgramChanges`, `CoachProgramView` and `WorkoutPlan`.
+- New: `Program.revision` and `sessionRevisions`, on a coach's copy.
+
 ## 2.46.0
 
 A coach's library (heart-api#363).

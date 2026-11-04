@@ -16,15 +16,28 @@ const _programId = '019def00-0000-7000-8000-000000000020';
 
 void main() {
   late MockProgramService service;
+  late MockProgramChangeService changes;
 
   setUp(() {
     service = MockProgramService();
+    changes = MockProgramChangeService();
+    when(
+      changes.writeProgramFields(
+        ownerId: anyNamed('ownerId'),
+        actorId: anyNamed('actorId'),
+        programId: anyNamed('programId'),
+        program: anyNamed('program'),
+        baseRevision: anyNamed('baseRevision'),
+        changeId: anyNamed('changeId'),
+      ),
+    ).thenAnswer((_) async => null);
   });
 
   Request wire(Request req) {
     return req
       ..user = User(id: _meId)
-      ..programService = service;
+      ..programService = service
+      ..programChangeService = changes;
   }
 
   group('createProgram', () {
@@ -206,5 +219,29 @@ void main() {
 
       expect(result, isA<Created<ProgramBase>>());
     });
+  });
+
+  test('a replace on a coach\'s copy goes through the history instead', () async {
+    final copy = Program(id: _programId, name: 'Recorded');
+    when(
+      changes.writeProgramFields(
+        ownerId: anyNamed('ownerId'),
+        actorId: anyNamed('actorId'),
+        programId: anyNamed('programId'),
+        program: anyNamed('program'),
+        baseRevision: 3,
+        changeId: anyNamed('changeId'),
+      ),
+    ).thenAnswer((_) async => copy);
+    when(changes.otherSideOf(actorId: anyNamed('actorId'), programId: anyNamed('programId')))
+        .thenAnswer((_) async => null);
+
+    final req = wire(
+      jsonRequest(method: Method.put, path: '/programs/$_programId', body: {'name': 'X', 'baseRevision': 3}),
+    );
+    expect((await updateProgramById(req, _programId)).name, 'Recorded');
+    verifyNever(
+      service.updateProgram(userId: anyNamed('userId'), programId: anyNamed('programId'), program: anyNamed('program')),
+    );
   });
 }

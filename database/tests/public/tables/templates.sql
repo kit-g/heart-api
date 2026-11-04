@@ -19,7 +19,8 @@ SELECT columns_are(
                    'folder_id',
                    'program_id',
                    'note',
-                   'joined_program_at'
+                   'joined_program_at',
+                   'revision'
                    ]
        );
 

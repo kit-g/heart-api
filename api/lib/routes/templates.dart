@@ -4,6 +4,7 @@ import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/pagination.dart';
+import 'package:heart/routes/program_changes.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -23,6 +24,7 @@ Future<Template> updateTemplate(Request request) {
 
 Future<Template> updateTemplateById(Request request, String templateId) async {
   final input = await TemplateUpdateIn.fromRequest(request);
+  if (await writeCopySessionIfAny(request, templateId, input) case final Template session) return session;
   return request.templatesService.updateTemplate(
     userId: request.userId,
     templateId: templateId,
@@ -84,9 +86,11 @@ Future<TemplateShare> assignTemplateToUser(Request request) async {
 }
 
 Future<NoContent> deleteMyTemplate(Request request) async {
+  final templateId = request.pathParameters.raw[#templateId]!;
+  if (await removeCopySessionIfAny(request, templateId)) throw const NoContent();
   await request.templatesService.deleteTemplate(
     coachId: request.userId,
-    templateId: request.pathParameters.raw[#templateId]!,
+    templateId: templateId,
   );
   throw const NoContent();
 }

@@ -80,7 +80,12 @@ class TemplateCreateIn {
 class TemplateUpdateIn {
   final TemplateRequest request;
 
-  const new _(this.request);
+  /// On a session of a coach's copy: the revision this edit started from, and an id
+  /// so a retried save is one change. A build that predates them sends neither.
+  final int? baseRevision;
+  final String? changeId;
+
+  const new _(this.request, {this.baseRevision, this.changeId});
 
   static Future<TemplateUpdateIn> fromRequest(Request req) async {
     return fromJson(await req.json(), userId: req.userId);
@@ -89,6 +94,8 @@ class TemplateUpdateIn {
   /// [fromRequest] over a body already read, as for [TemplateCreateIn.fromJson].
   static TemplateUpdateIn fromJson(Map<String, dynamic> json, {required String userId}) {
     return TemplateUpdateIn._(
+      baseRevision: json.baseRevision(),
+      changeId: json.changeId(),
       TemplateRequest(
         userId: userId,
         name: json.templateName(),

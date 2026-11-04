@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(52);
+SELECT plan(55);
 
 SELECT has_table('public'::name, 'workouts'::name);
 
@@ -22,7 +22,8 @@ SELECT columns_are(
                    'changed_xid',
                    'template_id',
                    'program_id',
-                   'hidden_at'
+                   'hidden_at',
+                   'logged_by'
                    ]
        );
 
@@ -40,6 +41,9 @@ SELECT col_type_is('public'::name, 'workouts'::name, 'template_id'::name, 'uuid'
 SELECT col_type_is('public'::name, 'workouts'::name, 'program_id'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'workouts'::name, 'hidden_at'::name, 'timestamp with time zone'::name);
 SELECT has_index('public'::name, 'workouts'::name, 'workouts_hidden_idx'::name);
+SELECT col_type_is('public'::name, 'workouts'::name, 'logged_by'::name, 'text'::name);
+SELECT fk_ok('public', 'workouts', 'logged_by', 'public', 'profiles', 'id');
+SELECT has_index('public'::name, 'workouts'::name, 'workouts_logged_by_idx'::name);
 
 SELECT has_pk('public'::name, 'workouts'::name, 'workouts has a primary key');
 SELECT col_is_pk('public'::name, 'workouts'::name, 'id'::name, 'id is the primary key');

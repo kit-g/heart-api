@@ -1051,9 +1051,8 @@ extension on Workout {
   /// [names].
   Map<String, dynamic> toMcpDetail({required Map<String, String> names}) {
     return {
-      ..._toMcpHeader(),
+      ..._toMcpHeader(withNote: true),
       'end': ?end?.toUtc().toIso8601String(),
-      'note': ?note,
       'caloriesEstimate': ?calories?.round(),
       'exercises': [
         for (final exercise in this)
@@ -1070,8 +1069,20 @@ extension on Workout {
     };
   }
 
-  Map<String, dynamic> _toMcpHeader() {
-    return {'id': id, 'name': ?name, 'start': start.toUtc().toIso8601String()};
+  /// A coach who logged this wrote its name and note, so a model reading them is
+  /// told they're quoted, not instructions.
+  Map<String, dynamic> _toMcpHeader({bool withNote = false}) {
+    final text = {'name': ?name, if (withNote) 'note': ?note};
+    return {
+      'id': id,
+      'start': start.toUtc().toIso8601String(),
+      ...switch (loggedBy) {
+        null => text,
+        _ => {
+          'quoted': {'by': loggedByName ?? 'another account', ...text},
+        },
+      },
+    };
   }
 }
 

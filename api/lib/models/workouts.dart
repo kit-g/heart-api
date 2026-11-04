@@ -87,6 +87,9 @@ abstract interface class ApiWorkoutService {
     required String userId,
     required WorkoutRequest body,
     required String Function(String) imageUrl,
+
+    /// The coach who entered it for [userId], in the same write, so a retry can't lose it.
+    String? loggedBy,
   });
 
   Future<Workout> updateWorkout({

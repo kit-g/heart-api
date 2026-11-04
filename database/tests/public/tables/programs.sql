@@ -29,7 +29,8 @@ SELECT columns_are(
                    'library_program_id',
                    'library_version',
                    'library_ids',
-                   'waiting_since'
+                   'waiting_since',
+                   'revision'
                    ]
        );
 
