@@ -23,6 +23,13 @@ void main() {
         programId: anyNamed('programId'),
       ),
     ).thenAnswer((_) async => (readable: true, writable: true));
+    when(
+      app.db.matchExercisesForStudent(
+        ids: anyNamed('ids'),
+        coachId: anyNamed('coachId'),
+        studentId: anyNamed('studentId'),
+      ),
+    ).thenAnswer((_) async => const {});
   });
   tearDown(() => app.stop());
 
@@ -70,13 +77,13 @@ void main() {
         sessionId: anyNamed('sessionId'),
         programId: anyNamed('programId'),
       ),
-    ).thenAnswer((_) async => true);
+    ).thenAnswer((_) async => program);
     final res = await app.send('DELETE', '/accounts/s/programs/$program/sessions/$session');
     expect(res.status, 204);
     told();
   });
 
-  test('a session that isn\'t in the program is a 404, and tells nobody', () async {
+  test('a session already gone answers as deleted, so a retry isn\'t a failure, and tells nobody', () async {
     when(
       app.db.removeSession(
         ownerId: anyNamed('ownerId'),
@@ -84,8 +91,110 @@ void main() {
         sessionId: anyNamed('sessionId'),
         programId: anyNamed('programId'),
       ),
-    ).thenAnswer((_) async => false);
+    ).thenAnswer((_) async => null);
     final res = await app.send('DELETE', '/accounts/s/programs/$program/sessions/$session');
+    expect(res.status, 204);
+    verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
+  });
+
+  test('a push that can\'t go out doesn\'t turn a saved edit into an error', () async {
+    stubWriteSession(template());
+    when(
+      app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')),
+    ).thenThrow(Exception('the queue is down'));
+    final res = await app.send('PUT', '/accounts/s/programs/$program/sessions/$session', body: body);
+    expect(res.status, 200);
+  });
+
+  test('a coach\'s custom exercise in a session edit goes through the student\'s own', () async {
+    const coaches = '01900000-0000-7000-8000-00000000c0ac';
+    const students = '01900000-0000-7000-8000-00000000057d';
+    when(
+      app.db.matchExercisesForStudent(
+        ids: anyNamed('ids'),
+        coachId: anyNamed('coachId'),
+        studentId: anyNamed('studentId'),
+      ),
+    ).thenAnswer((_) async => const {coaches: students});
+    stubWriteSession(template());
+    final res = await app.send(
+      'PUT',
+      '/accounts/s/programs/$program/sessions/$session',
+      body: {
+        'name': 'Day',
+        'exercises': [
+          {
+            'exercise': {'id': coaches},
+            'sets': [
+              {'reps': 5},
+            ],
+          },
+        ],
+      },
+    );
+    expect(res.status, 200);
+    final written =
+        verify(
+              app.db.writeSession(
+                ownerId: anyNamed('ownerId'),
+                actorId: anyNamed('actorId'),
+                sessionId: anyNamed('sessionId'),
+                body: captureAnyNamed('body'),
+                programId: anyNamed('programId'),
+                baseRevision: anyNamed('baseRevision'),
+                changeId: anyNamed('changeId'),
+              ),
+            ).captured.single
+            as TemplateRequest;
+    expect(written.exercises.single.exerciseId, students);
+  });
+
+  test('a coach\'s edit of a copy\'s fields keeps whether the student archived it', () async {
+    when(
+      app.db.getProgram(userId: anyNamed('userId'), programId: anyNamed('programId')),
+    ).thenAnswer((_) async => Program(id: program, name: 'Plan', archived: true));
+    when(
+      app.db.writeProgramFields(
+        ownerId: anyNamed('ownerId'),
+        actorId: anyNamed('actorId'),
+        programId: anyNamed('programId'),
+        program: anyNamed('program'),
+        baseRevision: anyNamed('baseRevision'),
+        changeId: anyNamed('changeId'),
+      ),
+    ).thenAnswer((_) async => Program(id: program, name: 'Plan', archived: true));
+    final res = await app.send('PUT', '/accounts/s/programs/$program', body: {'name': 'Plan'});
+    expect(res.status, 200);
+    final written =
+        verify(
+              app.db.writeProgramFields(
+                ownerId: anyNamed('ownerId'),
+                actorId: anyNamed('actorId'),
+                programId: anyNamed('programId'),
+                program: captureAnyNamed('program'),
+                baseRevision: anyNamed('baseRevision'),
+                changeId: anyNamed('changeId'),
+              ),
+            ).captured.single
+            as Program;
+    expect(written.archived, isTrue);
+  });
+
+  test('a coach\'s edit of a copy that isn\'t one is a 404, and tells nobody', () async {
+    when(
+      app.db.getProgram(userId: anyNamed('userId'), programId: anyNamed('programId')),
+    ).thenAnswer((_) async => Program(id: program, name: 'Plan'));
+    when(
+      app.db.writeProgramFields(
+        ownerId: anyNamed('ownerId'),
+        actorId: anyNamed('actorId'),
+        programId: anyNamed('programId'),
+        program: anyNamed('program'),
+        baseRevision: anyNamed('baseRevision'),
+        changeId: anyNamed('changeId'),
+      ),
+    ).thenAnswer((_) async => null);
+    final res = await app.send('PUT', '/accounts/s/programs/$program', body: {'name': 'Plan'});
     expect(res.status, 404);
     verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
   });
@@ -98,7 +207,6 @@ void main() {
   });
 
   test('a student deleting a session of a copy tells the coach', () async {
-    when(app.db.getTemplate(userId: anyNamed('userId'), templateId: session)).thenAnswer((_) async => template());
     when(
       app.db.removeSession(
         ownerId: anyNamed('ownerId'),
@@ -106,7 +214,7 @@ void main() {
         sessionId: anyNamed('sessionId'),
         programId: anyNamed('programId'),
       ),
-    ).thenAnswer((_) async => true);
+    ).thenAnswer((_) async => program);
     final res = await app.send('DELETE', '/templates/$session');
     expect(res.status, 204);
     told();
@@ -126,5 +234,14 @@ void main() {
     final res = await app.send('PUT', '/programs/$program', body: {'name': 'Plan', 'archived': false});
     expect(res.status, 200);
     told();
+  });
+
+  test('a base past what a revision can be is a 400, not a 500', () async {
+    final res = await app.send(
+      'PUT',
+      '/accounts/s/programs/$program/sessions/$session',
+      body: {...body, 'baseRevision': 3000000000},
+    );
+    expect(res.status, 400);
   });
 }

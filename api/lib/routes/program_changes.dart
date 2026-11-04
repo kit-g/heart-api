@@ -5,28 +5,39 @@ import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/events.dart';
+import 'package:heart/models/coach_library.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/program_copy.dart';
 import 'package:heart/models/programs.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart/notifications/topics.dart';
+import 'package:heart/routes/coach_library.dart';
 import 'package:heart_models/heart_models.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:relic/relic.dart';
 
-/// A silent push: the other side's app fetches what changed.
-Future<void> tellOtherSide(Request req, String programId) async {
-  final other = await req.programChangeService.otherSideOf(actorId: req.userId, programId: programId);
-  if (other == null) return;
-  await req.events.publish(
-    queueUrl: req.config.eventsQueueUrl,
-    message: {
-      'type': 'push.requested',
-      'userId': other,
-      'topic': PushTopic.programChanged.key,
-      'actorId': req.userId,
-      'data': {'programId': programId},
-    },
-  );
+final _logger = logging.Logger('ProgramChanges');
+
+/// A silent push: the other side's app fetches what changed. The write has committed
+/// by now, and the other side reads it on their next fetch anyway, so a push that
+/// can't go out doesn't turn a saved change into an error a client would retry.
+Future<void> _tellOtherSide(Request req, String programId) async {
+  try {
+    final other = await req.programChangeService.otherSideOf(actorId: req.userId, programId: programId);
+    if (other == null) return;
+    await req.events.publish(
+      queueUrl: req.config.eventsQueueUrl,
+      message: {
+        'type': 'push.requested',
+        'userId': other,
+        'topic': PushTopic.programChanged.key,
+        'actorId': req.userId,
+        'data': {'programId': programId},
+      },
+    );
+  } catch (error, stack) {
+    _logger.warning('could not tell the other side of $programId', error, stack);
+  }
 }
 
 Future<ProgramChanges> getProgramChanges(Request req) async {
@@ -72,20 +83,23 @@ Future<Model> revertById(
         kind: 'revert',
       );
     case (final String sessionId, null):
-      await service.removeSession(
+      final removed = await service.removeSession(
         ownerId: ownerId,
         actorId: req.userId,
         sessionId: sessionId,
         programId: programId,
+        baseRevision: change.revision,
         kind: 'revert',
       );
+      if (removed == null) throw NotFound(type: 'Session', id: sessionId);
     case (final String sessionId, final Map<String, dynamic> before):
       final written = await service.writeSession(
         ownerId: ownerId,
         actorId: req.userId,
         sessionId: sessionId,
         programId: programId,
-        body: TemplateUpdateIn.fromJson(before, userId: ownerId).request,
+        // a snapshot leaves out what was empty, which a partial update would keep
+        body: TemplateUpdateIn.fromJson(wholly(before), userId: ownerId).request,
         baseRevision: change.revision,
         kind: 'revert',
       );
@@ -102,7 +116,7 @@ Future<Model> revertById(
     default:
       throw const BadRequest(reason: 'there is nothing to put back');
   }
-  await tellOtherSide(req, programId);
+  await _tellOtherSide(req, programId);
   throw const NoContent();
 }
 
@@ -172,7 +186,10 @@ Future<Program> updateCopy(Request req) async {
   final student = req.rawPathParameters[#targetUserId]!;
   final programId = req.rawPathParameters[#programId]!;
   await _assertCanWrite(req, student, programId);
-  final input = await ProgramUpdateIn.fromRequest(req);
+  final json = await req.json();
+  // archiving is the student's own business: a coach's body keeps what's stored
+  final current = await req.programService.getProgram(userId: student, programId: programId);
+  final input = ProgramUpdateIn.fromJson({...json, 'archived': current.archived});
   final program = await req.programChangeService.writeProgramFields(
     ownerId: student,
     actorId: req.userId,
@@ -181,8 +198,9 @@ Future<Program> updateCopy(Request req) async {
     baseRevision: input.baseRevision,
     changeId: input.changeId,
   );
-  await tellOtherSide(req, programId);
-  return program ?? (throw NotFound(type: 'Program', id: programId, code: 'program_not_found'));
+  if (program == null) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
+  await _tellOtherSide(req, programId);
+  return program;
 }
 
 Future<Template> updateCopySession(Request req) async {
@@ -190,7 +208,15 @@ Future<Template> updateCopySession(Request req) async {
   final programId = req.rawPathParameters[#programId]!;
   final sessionId = req.rawPathParameters[#sessionId]!;
   await _assertCanWrite(req, student, programId);
-  final json = await req.json();
+  final sent = await req.json();
+  // a coach's custom exercise reaches the student as sending a program does, or the
+  // student's side couldn't resolve it and the slot would go without a word
+  final exercises = await req.coachLibraryService.matchExercisesForStudent(
+    ids: idsIn(sent['exercises']).toList(),
+    coachId: req.userId,
+    studentId: student,
+  );
+  final json = (remapIds(sent, exercises)! as Map).cast<String, dynamic>();
   final service = req.programChangeService;
   final input = TemplateUpdateIn.fromJson(json, userId: student);
 
@@ -209,24 +235,26 @@ Future<Template> updateCopySession(Request req) async {
         actorId: req.userId,
         programId: programId,
         body: TemplateCreateIn.fromJson({...json, 'id': sessionId}, userId: student).request,
+        baseRevision: input.baseRevision,
+        changeId: input.changeId,
       );
-  await tellOtherSide(req, programId);
+  await _tellOtherSide(req, programId);
   return session;
 }
 
+/// A session already gone answers as deleted, so a retry whose first answer was lost
+/// isn't told it failed.
 Future<Model> deleteCopySession(Request req) async {
   final student = req.rawPathParameters[#targetUserId]!;
   final programId = req.rawPathParameters[#programId]!;
   await _assertCanWrite(req, student, programId);
-  final sessionId = req.rawPathParameters[#sessionId]!;
   final removed = await req.programChangeService.removeSession(
     ownerId: student,
     actorId: req.userId,
-    sessionId: sessionId,
+    sessionId: req.rawPathParameters[#sessionId]!,
     programId: programId,
   );
-  if (!removed) throw NotFound(type: 'Session', id: sessionId);
-  await tellOtherSide(req, programId);
+  if (removed != null) await _tellOtherSide(req, programId);
   throw const NoContent();
 }
 
@@ -241,13 +269,15 @@ Future<Model> revertCopyChange(Request req) async {
 /// id map, so a session the student already trained keeps its id, and with it their
 /// week and bases. A recorded change, so it can be put back.
 Future<ProgramDeliveries> updateCopies(Request req) async {
+  final id = libraryIdOf(req);
   final input = await CoachProgramSendIn.fromRequest(req);
-  final id = req.rawPathParameters[#programId]!;
   return ProgramDeliveries([
     for (final connectionId in input.connectionIds) await updateCopyFor(req, id: id, connectionId: connectionId),
   ]);
 }
 
+/// As a send does, one client that can't take the update comes back as not
+/// delivered, and stops nothing else.
 Future<ProgramDelivery> updateCopyFor(Request req, {required String id, required String connectionId}) async {
   final library = req.coachLibraryService;
   final context = await library.getCoachSendContext(coachId: req.userId, id: id, connectionId: connectionId);
@@ -260,16 +290,44 @@ Future<ProgramDelivery> updateCopyFor(Request req, {required String id, required
   if (programId == null) {
     return ProgramDelivery(connectionId: connectionId, delivered: false, reason: 'not_sent');
   }
+  // the copy came through a connection of its own, and writes end with that one
+  final access = await req.programChangeService.getCopyAccess(
+    coachId: req.userId,
+    studentId: student,
+    programId: programId,
+  );
+  if (!access.writable) {
+    return ProgramDelivery(connectionId: connectionId, delivered: false, reason: 'not_coaching');
+  }
+  // up to date already: a repeat would only overwrite what the student changed since
+  if (context.existingVersion == context.version) {
+    return ProgramDelivery(connectionId: connectionId, delivered: true, programId: programId);
+  }
 
+  try {
+    await _updateCopy(req, context: context, student: student, programId: programId);
+    return ProgramDelivery(connectionId: connectionId, delivered: true, programId: programId);
+  } on ApiException catch (error) {
+    return ProgramDelivery(connectionId: connectionId, delivered: false, reason: error.code);
+  }
+}
+
+Future<void> _updateCopy(
+  Request req, {
+  required CoachSendContext context,
+  required String student,
+  required String programId,
+}) async {
   final changes = req.programChangeService;
-  final body = context.body;
+  final body = forCopy(context.body);
   final known = await changes.getCopyIds(ownerId: student, programId: programId);
   final ids = copyIds(
     body,
-    exercises: await library.matchExercisesForStudent(
+    exercises: await req.coachLibraryService.matchExercisesForStudent(
       ids: idsIn(body).toList(),
       coachId: req.userId,
       studentId: student,
+      known: known,
     ),
     known: known,
   );
@@ -279,12 +337,12 @@ Future<ProgramDelivery> updateCopyFor(Request req, {required String id, required
   final current = await req.programService.getProgram(userId: student, programId: programId);
   final wanted = {for (final session in input.sessions) ?session.id};
 
+  // a library update is nobody's edit: never stale, and no base to be up against
   await changes.writeProgramFields(
     ownerId: student,
     actorId: req.userId,
     programId: programId,
     program: ProgramUpdateIn.fromJson({...next, 'archived': current.archived}).program,
-    baseRevision: 1 << 30,
     kind: 'library_update',
   );
   final sessions = (next['sessions'] as List?) ?? const [];
@@ -295,8 +353,8 @@ Future<ProgramDelivery> updateCopyFor(Request req, {required String id, required
       actorId: req.userId,
       sessionId: json['id'] as String,
       programId: programId,
-      body: TemplateUpdateIn.fromJson(json, userId: student).request,
-      baseRevision: 1 << 30,
+      // the version is the whole session: what it leaves out goes
+      body: TemplateUpdateIn.fromJson(wholly(json), userId: student).request,
       kind: 'library_update',
     );
     if (written == null) {
@@ -318,9 +376,14 @@ Future<ProgramDelivery> updateCopyFor(Request req, {required String id, required
       kind: 'library_update',
     );
   }
-  await changes.setCopyVersion(ownerId: student, programId: programId, version: context.version, ids: ids);
-  await tellOtherSide(req, programId);
-  return ProgramDelivery(connectionId: connectionId, delivered: true, programId: programId);
+  // a row this version leaves out keeps its id for a later one that brings it back
+  await changes.setCopyVersion(
+    ownerId: student,
+    programId: programId,
+    version: context.version,
+    ids: {...known, ...ids},
+  );
+  await _tellOtherSide(req, programId);
 }
 
 Future<void> _assertCanLog(Request req, String student) async {
@@ -422,24 +485,19 @@ Future<Template?> writeCopySessionIfAny(Request req, String sessionId, TemplateU
     baseRevision: input.baseRevision,
     changeId: input.changeId,
   );
-  if (session?.programId case final String programId) await tellOtherSide(req, programId);
+  if (session?.programId case final String programId) await _tellOtherSide(req, programId);
   return session;
 }
 
 Future<bool> removeCopySessionIfAny(Request req, String sessionId) async {
-  final session = await req.templatesService
-      .getTemplate(userId: req.userId, templateId: sessionId)
-      .then<Template?>(
-        (found) => found,
-        onError: (Object _) => null,
-      );
-  final removed = await req.programChangeService.removeSession(
+  final programId = await req.programChangeService.removeSession(
     ownerId: req.userId,
     actorId: req.userId,
     sessionId: sessionId,
   );
-  if (removed && session?.programId != null) await tellOtherSide(req, session!.programId!);
-  return removed;
+  if (programId == null) return false;
+  await _tellOtherSide(req, programId);
+  return true;
 }
 
 Future<Program?> writeCopyFieldsIfAny(Request req, String programId, ProgramUpdateIn input) async {
@@ -451,6 +509,6 @@ Future<Program?> writeCopyFieldsIfAny(Request req, String programId, ProgramUpda
     baseRevision: input.baseRevision,
     changeId: input.changeId,
   );
-  if (program != null) await tellOtherSide(req, programId);
+  if (program != null) await _tellOtherSide(req, programId);
   return program;
 }

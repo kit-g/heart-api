@@ -9,6 +9,17 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     );
   }
 
+  /// A snapshot outlives the account of whoever it names, so it keeps their words and
+  /// not who they were: the change's actor says that, and goes when they do.
+  static const _identities = {'assignedBy', 'coachId', 'coachName'};
+
+  String? _snapshot(Map<String, dynamic>? state) {
+    return switch (state) {
+      null => null,
+      final state => jsonEncode({...state}..removeWhere((key, _) => _identities.contains(key))),
+    };
+  }
+
   Future<void> _record(
     Session tx, {
     required String? changeId,
@@ -31,9 +42,12 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
         'actorId': actorId,
         'kind': kind,
         'revision': revision,
-        'before': before == null ? null : jsonEncode(before),
-        'after': after == null ? null : jsonEncode(after),
-        'links': links == null ? null : jsonEncode(links),
+        'before': _snapshot(before),
+        'after': _snapshot(after),
+        'links': switch (links) {
+          null => null,
+          final links => jsonEncode(links),
+        },
         'stale': stale,
       },
     );
@@ -42,6 +56,16 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
   Future<Template> _readSession(Session tx, {required String userId, required String sessionId}) async {
     final rows = await tx.execute(_getTemplate.toSql(), parameters: {'userId': userId, 'templateId': sessionId});
     return Template.fromRow(rows.first.toColumnMap());
+  }
+
+  /// What a session, or the program's own fields, say: the same before and after a
+  /// write means it changed nothing.
+  Future<String?> _content(Session tx, {String? sessionId, String? programId}) async {
+    final rows = await switch (sessionId) {
+      final String id => tx.execute(_sessionContent.toSql(), parameters: {'sessionId': id}),
+      null => tx.execute(_programContent.toSql(), parameters: {'programId': programId}),
+    };
+    return rows.firstOrNull?[0] as String?;
   }
 
   @override
@@ -55,7 +79,153 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     String? changeId,
     String kind = 'edit',
   }) async {
-    return _pool.runTx<Template?>((tx) async {
+    try {
+      return await _pool.runTx<Template?>((tx) async {
+        final locked = await tx.execute(
+          _lockCopySession.toSql(),
+          parameters: {'ownerId': ownerId, 'sessionId': sessionId, 'programId': programId},
+        );
+        final lock = locked.firstOrNull?.toColumnMap();
+        if (lock == null) return null;
+        final row = {
+          ...lock,
+          ...(await tx.execute(
+            _copySessionStanding.toSql(),
+            parameters: {
+              'sessionId': sessionId,
+              'actorId': actorId,
+              'baseRevision': baseRevision,
+              'changeId': changeId,
+            },
+          )).first.toColumnMap(),
+        };
+        if (row['replayed'] == true) return _readSession(tx, userId: ownerId, sessionId: sessionId);
+        if (row['conflict'] == true) _changed(row['revision'] as int);
+
+        final before = await _readSession(tx, userId: ownerId, sessionId: sessionId);
+        final content = await _content(tx, sessionId: sessionId);
+        final replaced = await tx.execute(
+          _replaceTemplate.toSql(),
+          parameters: {
+            'templateId': sessionId,
+            'movesFolder': body.movesFolder,
+            'movesProgram': false,
+            'changesNote': body.changesNote,
+            ...body.toParams(),
+            'programId': row['program_id'].toString(),
+            'joined': body.joined,
+            'note': body.note,
+          },
+        );
+        // the session is held and there, so only the folder can have refused it
+        if (replaced.isEmpty) throw NotFound(type: 'TemplateFolder', id: body.folderId ?? '');
+        // nothing changed, so there's nothing for the other person to be up against
+        if (await _content(tx, sessionId: sessionId) == content) return before;
+        final bumped = await tx.execute(
+          _bumpSessionRevision.toSql(),
+          parameters: {'sessionId': sessionId, 'actorId': actorId},
+        );
+        final after = await _readSession(tx, userId: ownerId, sessionId: sessionId);
+        await _record(
+          tx,
+          changeId: changeId,
+          programId: row['program_id'].toString(),
+          sessionId: sessionId,
+          actorId: actorId,
+          kind: kind,
+          revision: bumped.first[0]! as int,
+          before: before.toMap(),
+          after: after.toMap(),
+          stale: baseRevision == null && kind == 'edit',
+        );
+        return after;
+      });
+    } on ServerException catch (e) {
+      _rethrowClientIdCollision(e);
+    }
+  }
+
+  @override
+  Future<Template> restoreSession({
+    required String ownerId,
+    required String actorId,
+    required String programId,
+    required TemplateRequest body,
+    Map<String, dynamic>? links,
+    int? baseRevision,
+    String? changeId,
+    String kind = 'create',
+  }) async {
+    try {
+      return await _pool.runTx((tx) async {
+        if (body.id case final String id) {
+          // it would answer the row there, and this would take over a template it never
+          // was: of the student's own, of another program, or someone else's
+          final taken = await tx.execute(_templateIdTaken.toSql(), parameters: {'id': id});
+          if (taken.isNotEmpty) throw const Forbidden(code: 'id_taken', reason: 'this id belongs to something else');
+          // a deletion since the base is someone else changing it, and leaves no
+          // session for the usual check to read
+          if (baseRevision != null) {
+            final gone = await tx.execute(
+              _goneSessionConflict.toSql(),
+              parameters: {'programId': programId, 'sessionId': id, 'baseRevision': baseRevision, 'actorId': actorId},
+            );
+            if (gone.first[0] case final int revision) _changed(revision);
+          }
+        }
+        final saved = await tx.execute(
+          _saveTemplate.toSql(),
+          parameters: {
+            'id': body.id,
+            ...body.toParams(),
+            'programId': programId,
+            'joined': body.joined,
+            'note': body.note,
+          },
+        );
+        // a program not the owner's trips its foreign key, so only the folder refuses
+        if (saved.isEmpty) throw NotFound(type: 'TemplateFolder', id: body.folderId ?? '');
+        final sessionId = saved.first.toColumnMap()['id'].toString();
+        final restored = await tx.execute(
+          _restoreSessionLinks.toSql(),
+          parameters: {
+            'sessionId': sessionId,
+            'ownerId': ownerId,
+            'programId': programId,
+            'workouts': [for (final id in (links?['workouts'] as List?) ?? const []) '$id'],
+            'skips': [for (final id in (links?['skips'] as List?) ?? const []) '$id'],
+          },
+        );
+        final after = await _readSession(tx, userId: ownerId, sessionId: sessionId);
+        await _record(
+          tx,
+          changeId: changeId,
+          programId: programId,
+          sessionId: sessionId,
+          actorId: actorId,
+          kind: kind,
+          revision: restored.first[0]! as int,
+          before: null,
+          after: after.toMap(),
+        );
+        return after;
+      });
+    } on ServerException catch (e) {
+      // two put-backs of one session, both past the check before either committed
+      _rethrowClientIdCollision(e);
+    }
+  }
+
+  @override
+  Future<String?> removeSession({
+    required String ownerId,
+    required String actorId,
+    required String sessionId,
+    String? programId,
+    int? baseRevision,
+    String kind = 'delete',
+  }) async {
+    return _pool.runTx((tx) async {
       final locked = await tx.execute(
         _lockCopySession.toSql(),
         parameters: {'ownerId': ownerId, 'sessionId': sessionId, 'programId': programId},
@@ -66,127 +236,18 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
         ...lock,
         ...(await tx.execute(
           _copySessionStanding.toSql(),
-          parameters: {'sessionId': sessionId, 'actorId': actorId, 'baseRevision': baseRevision, 'changeId': changeId},
+          parameters: {'sessionId': sessionId, 'actorId': actorId, 'baseRevision': baseRevision, 'changeId': null},
         )).first.toColumnMap(),
       };
-      if (row['replayed'] == true) return _readSession(tx, userId: ownerId, sessionId: sessionId);
       if (row['conflict'] == true) _changed(row['revision'] as int);
-
-      final before = await _readSession(tx, userId: ownerId, sessionId: sessionId);
-      await tx.execute(
-        _replaceTemplate.toSql(),
-        parameters: {
-          'templateId': sessionId,
-          'movesFolder': body.movesFolder,
-          'movesProgram': false,
-          'changesNote': body.changesNote,
-          ...body.toParams(),
-          'programId': row['program_id'].toString(),
-          'joined': body.joined,
-          'note': body.note,
-        },
-      );
-      final bumped = await tx.execute(_bumpSessionRevision.toSql(), parameters: {'sessionId': sessionId});
-      final after = await _readSession(tx, userId: ownerId, sessionId: sessionId);
-      await _record(
-        tx,
-        changeId: changeId,
-        programId: row['program_id'].toString(),
-        sessionId: sessionId,
-        actorId: actorId,
-        kind: kind,
-        revision: bumped.first[0]! as int,
-        before: before.toMap(),
-        after: after.toMap(),
-        stale: baseRevision == null && kind == 'edit',
-      );
-      return after;
-    });
-  }
-
-  @override
-  Future<Template> restoreSession({
-    required String ownerId,
-    required String actorId,
-    required String programId,
-    required TemplateRequest body,
-    Map<String, dynamic>? links,
-    String kind = 'create',
-  }) async {
-    return _pool.runTx((tx) async {
-      // it would answer the row there, and this would take over a template it never
-      // was: of the student's own, of another program, or someone else's
-      if (body.id case final String id) {
-        final taken = await tx.execute(_templateIdTaken.toSql(), parameters: {'id': id});
-        if (taken.isNotEmpty) throw const Forbidden(code: 'id_taken', reason: 'this id belongs to something else');
-      }
-      final saved = await tx.execute(
-        _saveTemplate.toSql(),
-        parameters: {
-          'id': body.id,
-          ...body.toParams(),
-          'programId': programId,
-          'joined': body.joined,
-          'note': body.note,
-        },
-      );
-      if (saved.isEmpty) throw NotFound(type: 'Program', id: programId);
-      final sessionId = saved.first.toColumnMap()['id'].toString();
-      final restored = await tx.execute(
-        _restoreSessionLinks.toSql(),
-        parameters: {
-          'sessionId': sessionId,
-          'ownerId': ownerId,
-          'programId': programId,
-          'workouts': [for (final id in (links?['workouts'] as List?) ?? const []) '$id'],
-          'skips': [for (final id in (links?['skips'] as List?) ?? const []) '$id'],
-        },
-      );
-      final after = await _readSession(tx, userId: ownerId, sessionId: sessionId);
-      await _record(
-        tx,
-        changeId: null,
-        programId: programId,
-        sessionId: sessionId,
-        actorId: actorId,
-        kind: kind,
-        revision: restored.first[0]! as int,
-        before: null,
-        after: after.toMap(),
-      );
-      return after;
-    });
-  }
-
-  @override
-  Future<bool> removeSession({
-    required String ownerId,
-    required String actorId,
-    required String sessionId,
-    String? programId,
-    String kind = 'delete',
-  }) async {
-    return _pool.runTx((tx) async {
-      final locked = await tx.execute(
-        _lockCopySession.toSql(),
-        parameters: {'ownerId': ownerId, 'sessionId': sessionId, 'programId': programId},
-      );
-      final lock = locked.firstOrNull?.toColumnMap();
-      if (lock == null) return false;
-      final row = {
-        ...lock,
-        ...(await tx.execute(
-          _copySessionStanding.toSql(),
-          parameters: {'sessionId': sessionId, 'actorId': actorId, 'baseRevision': null, 'changeId': null},
-        )).first.toColumnMap(),
-      };
       final before = await _readSession(tx, userId: ownerId, sessionId: sessionId);
       final linked = await tx.execute(_sessionLinks.toSql(), parameters: {'sessionId': sessionId, 'ownerId': ownerId});
       await tx.execute(_deleteSession.toSql(), parameters: {'sessionId': sessionId, 'ownerId': ownerId});
+      final program = row['program_id'].toString();
       await _record(
         tx,
         changeId: null,
-        programId: row['program_id'].toString(),
+        programId: program,
         sessionId: sessionId,
         actorId: actorId,
         kind: kind,
@@ -195,7 +256,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
         after: null,
         links: (linked.first[0]! as Map).cast<String, dynamic>(),
       );
-      return true;
+      return program;
     });
   }
 
@@ -224,6 +285,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
       if (row['conflict'] == true) _changed(row['revision'] as int);
 
       final before = await _readProgram(tx, userId: ownerId, programId: programId);
+      final content = await _content(tx, programId: programId);
       await tx.execute(
         _replaceProgram.toSql(),
         parameters: {
@@ -233,6 +295,8 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
           'archived': program.archived,
         },
       );
+      // nothing changed, so there's nothing for the other person to be up against
+      if (await _content(tx, programId: programId) == content) return before;
       final bumped = await tx.execute(_bumpProgramRevision.toSql(), parameters: {'programId': programId});
       final after = await _readProgram(tx, userId: ownerId, programId: programId);
       await _record(
@@ -257,17 +321,29 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     required String programId,
     String? since,
   }) async {
-    final after = since == null ? null : ChangeCursor.parse(since);
+    final after = switch (since) {
+      null => null,
+      final since => ChangeCursor.parse(since),
+    };
     final rows = await _pool.execute(
       _listProgramChanges.toSql(),
       parameters: {'ownerId': ownerId, 'programId': programId, 'xid': after?.xid, 'changeId': after?.id},
     );
+    final columns = [for (final row in rows) row.toColumnMap()];
+    if (columns.first['stale_cursor'] == true) {
+      throw const BadRequest(
+        code: 'stale_cursor',
+        reason: 'this cursor is from before the database moved; start again without since',
+      );
+    }
     return [
-      for (final row in rows.map((row) => row.toColumnMap()))
-        ProgramChange.fromRow(
-          row,
-          cursor: ChangeCursor(xid: row['xid_text'] as String, id: row['id'].toString()).toString(),
-        ),
+      // the check's row stands alone when there's nothing to report
+      for (final row in columns)
+        if (row['id'] != null)
+          ProgramChange.fromRow(
+            row,
+            cursor: ChangeCursor(xid: row['xid_text'] as String, id: row['id'].toString()).toString(),
+          ),
     ];
   }
 

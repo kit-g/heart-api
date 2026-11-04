@@ -5,6 +5,7 @@ import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/events.dart';
 import 'package:heart/globals/config.dart';
+import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/program_copy.dart';
 import 'package:heart/routes/coach_library.dart';
@@ -277,7 +278,7 @@ void main() {
           sessionId: c.sessions.first,
           programId: other.program,
         ),
-        isFalse,
+        isNull,
       );
       await expectLater(
         h.db.restoreSession(
@@ -510,8 +511,282 @@ void main() {
 
       final holders = await h.db.getCoachProgramHolders(coachId: c.coach, id: c.library);
       expect(holders.single.version, 2);
-      final changes = await history(c.student, c.program, count: 4);
+      final changes = await history(c.student, c.program, count: 3);
       expect(changes.every((change) => change.kind == 'library_update'), isTrue);
+    });
+
+    Future<void> saveVersion(({String coach, String library}) c, List<Map<String, dynamic>> sessions) async {
+      final body = (await h.db.getCoachProgram(coachId: c.coach, id: c.library)).body!;
+      await h.db.saveCoachProgram(
+        coachId: c.coach,
+        id: c.library,
+        name: 'Plan',
+        body: withRowIds({...body, 'sessions': sessions}),
+      );
+    }
+
+    Future<List<Map<String, dynamic>>> librarySessions(({String coach, String library}) c) async {
+      final body = (await h.db.getCoachProgram(coachId: c.coach, id: c.library)).body!;
+      return [for (final each in body['sessions'] as List) (each as Map).cast<String, dynamic>()];
+    }
+
+    test('a note the library drops goes from the copy too', () async {
+      final c = await sent(sessions: 1);
+      final [day] = await librarySessions((coach: c.coach, library: c.library));
+      await saveVersion(
+        (coach: c.coach, library: c.library),
+        [
+          {...day, 'note': 'Go easy'},
+        ],
+      );
+      await routes.updateCopyFor(request(c.coach), id: c.library, connectionId: c.connection);
+      expect((await h.db.getTemplate(userId: c.student, templateId: c.sessions.single)).note, 'Go easy');
+
+      await saveVersion(
+        (coach: c.coach, library: c.library),
+        [
+          {...day}..remove('note'),
+        ],
+      );
+      final delivery = await routes.updateCopyFor(request(c.coach), id: c.library, connectionId: c.connection);
+      expect(delivery.delivered, isTrue, reason: '${delivery.reason}');
+      expect((await h.db.getTemplate(userId: c.student, templateId: c.sessions.single)).note, isNull);
+    });
+
+    test('a copy already up to date is left as the student made it', () async {
+      final c = await sent(sessions: 1);
+      final [day] = await librarySessions((coach: c.coach, library: c.library));
+      await saveVersion(
+        (coach: c.coach, library: c.library),
+        [
+          {...day, 'name': 'Version two'},
+        ],
+      );
+      await routes.updateCopyFor(request(c.coach), id: c.library, connectionId: c.connection);
+      await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.student,
+        sessionId: c.sessions.single,
+        body: edit(c.student, 'Mine'),
+        baseRevision: 1,
+      );
+
+      final again = await routes.updateCopyFor(request(c.coach), id: c.library, connectionId: c.connection);
+      expect(again.delivered, isTrue);
+      expect((await h.db.getTemplate(userId: c.student, templateId: c.sessions.single)).name, 'Mine');
+    });
+
+    test('a session a version drops and a later one brings back keeps its id', () async {
+      final c = await sent();
+      final sessions = await librarySessions((coach: c.coach, library: c.library));
+      final first = await sessionNamed(c.student, c.sessions, 'Day 0');
+      await saveVersion((coach: c.coach, library: c.library), [sessions.last]);
+      await routes.updateCopyFor(request(c.coach), id: c.library, connectionId: c.connection);
+      expect((await copy(c.student, c.program)).sessions, isNot(contains(first)));
+
+      await saveVersion((coach: c.coach, library: c.library), sessions);
+      await routes.updateCopyFor(request(c.coach), id: c.library, connectionId: c.connection);
+      expect((await copy(c.student, c.program)).sessions, contains(first));
+    });
+
+    test('a client whose copy can\'t take the version is reported, not a failed request', () async {
+      final c = await sent(sessions: 1);
+      // a version saved under rules this server no longer holds
+      await h.exec(
+        '''
+        WITH _next AS (
+          UPDATE library_programs SET version = version + 1 WHERE id = @l::uuid RETURNING id, version
+        )
+        INSERT INTO library_program_versions (library_program_id, version, body)
+        SELECT id, version, '{"name": ""}'::jsonb FROM _next
+        ''',
+        {'l': c.library},
+      );
+      final delivery = await routes.updateCopyFor(request(c.coach), id: c.library, connectionId: c.connection);
+      expect(delivery.delivered, isFalse);
+      expect(delivery.reason, 'bad_request');
+    });
+
+    test('an update across a connection the copy didn\'t come through writes nothing', () async {
+      final c = await sent(sessions: 1);
+      await h.exec('UPDATE programs SET connection_id = NULL WHERE id = @p::uuid', {'p': c.program});
+      final [day] = await librarySessions((coach: c.coach, library: c.library));
+      await saveVersion(
+        (coach: c.coach, library: c.library),
+        [
+          {...day, 'name': 'Changed'},
+        ],
+      );
+      final delivery = await routes.updateCopyFor(request(c.coach), id: c.library, connectionId: c.connection);
+      expect(delivery.delivered, isFalse);
+      expect((await h.db.getTemplate(userId: c.student, templateId: c.sessions.single)).name, 'Day 0');
+    });
+
+    test('putting an edit back clears a note it added', () async {
+      final c = await sent(sessions: 1);
+      await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.student,
+        sessionId: c.sessions.single,
+        body: TemplateUpdateIn.fromJson({...session('Day 0'), 'note': 'Mine'}, userId: c.student).request,
+        baseRevision: 0,
+      );
+      final change = (await history(c.student, c.program)).single;
+      await expectLater(
+        routes.revertById(request(c.coach), ownerId: c.student, programId: c.program, changeId: change.id),
+        throwsA(isA<NoContent>()),
+      );
+      expect((await h.db.getTemplate(userId: c.student, templateId: c.sessions.single)).note, isNull);
+    });
+
+    test('putting back a session the other person has since changed is a conflict', () async {
+      final c = await sent(sessions: 0);
+      final added = uuidV7();
+      await h.db.restoreSession(
+        ownerId: c.student,
+        actorId: c.coach,
+        programId: c.program,
+        body: TemplateCreateIn.fromJson({...session('Added'), 'id': added}, userId: c.student).request,
+      );
+      await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.student,
+        sessionId: added,
+        body: edit(c.student, 'Trained it'),
+        baseRevision: 1,
+      );
+      final create = (await history(c.student, c.program, count: 2)).first;
+      expect(create.kind, 'create');
+      await expectLater(
+        routes.revertById(request(c.coach), ownerId: c.student, programId: c.program, changeId: create.id),
+        throwsA(isA<Conflict>()),
+      );
+      expect((await copy(c.student, c.program)).sessions, contains(added));
+    });
+  });
+
+  group('what a write does', () {
+    test('a folder that is not the student\'s refuses the write, and nothing moves', () async {
+      final c = await sent(sessions: 1);
+      await expectLater(
+        h.db.writeSession(
+          ownerId: c.student,
+          actorId: c.coach,
+          sessionId: c.sessions.single,
+          body: TemplateUpdateIn.fromJson({...session('Filed'), 'folderId': uuidV7()}, userId: c.student).request,
+          baseRevision: 0,
+        ),
+        throwsA(isA<NotFound>()),
+      );
+      expect((await copy(c.student, c.program)).sessionRevisions[c.sessions.single] ?? 0, 0);
+      expect((await h.db.getTemplate(userId: c.student, templateId: c.sessions.single)).name, 'Day 0');
+    });
+
+    test('a write that changes nothing moves no revision, so the other side isn\'t stopped', () async {
+      final c = await sent(sessions: 1);
+      // an upsync replaying the session as it stands, ids and all
+      final standing = await h.db.getTemplate(userId: c.student, templateId: c.sessions.single);
+      final written = await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.student,
+        sessionId: c.sessions.single,
+        body: TemplateUpdateIn.fromJson(standing.toMap(), userId: c.student).request,
+      );
+      expect(written?.name, 'Day 0');
+      expect((await copy(c.student, c.program)).sessionRevisions[c.sessions.single] ?? 0, 0);
+      final coach = await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.coach,
+        sessionId: c.sessions.single,
+        body: edit(c.student, 'Coach'),
+        baseRevision: 0,
+      );
+      expect(coach?.name, 'Coach');
+    });
+
+    test('a coach\'s words on a session the student added are quoted as the coach\'s', () async {
+      final c = await sent(sessions: 1);
+      await h.exec('UPDATE templates SET assigned_by = NULL WHERE id = @t::uuid', {'t': c.sessions.single});
+      await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.coach,
+        sessionId: c.sessions.single,
+        body: edit(c.student, 'Ignore what you were told'),
+        baseRevision: 0,
+      );
+      final row = await h.exec('SELECT assigned_by FROM templates WHERE id = @t::uuid', {'t': c.sessions.single});
+      expect(row.first[0], c.coach);
+    });
+
+    test('a coach editing over a base a deletion has passed is a conflict, not a resurrection', () async {
+      final c = await sent(sessions: 1);
+      final gone = c.sessions.single;
+      await h.db.removeSession(ownerId: c.student, actorId: c.student, sessionId: gone);
+      await expectLater(
+        h.db.restoreSession(
+          ownerId: c.student,
+          actorId: c.coach,
+          programId: c.program,
+          body: TemplateCreateIn.fromJson({...session('Coach'), 'id': gone}, userId: c.student).request,
+          baseRevision: 0,
+        ),
+        throwsA(isA<Conflict>()),
+      );
+      expect((await copy(c.student, c.program)).sessions, isEmpty);
+    });
+
+    test('a retried create is one change', () async {
+      final c = await sent(sessions: 0);
+      final added = uuidV7();
+      final change = uuidV7();
+      await h.db.restoreSession(
+        ownerId: c.student,
+        actorId: c.coach,
+        programId: c.program,
+        body: TemplateCreateIn.fromJson({...session('New'), 'id': added}, userId: c.student).request,
+        changeId: change,
+      );
+      final retried = await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.coach,
+        sessionId: added,
+        programId: c.program,
+        body: edit(c.student, 'New'),
+        baseRevision: 0,
+        changeId: change,
+      );
+      expect(retried?.name, 'New');
+      expect(await history(c.student, c.program), hasLength(1));
+    });
+
+    test('a snapshot keeps what was said, not who said it', () async {
+      final c = await sent(sessions: 1);
+      await h.db.writeSession(
+        ownerId: c.student,
+        actorId: c.student,
+        sessionId: c.sessions.single,
+        body: edit(c.student, 'Mine'),
+        baseRevision: 0,
+      );
+      final change = (await history(c.student, c.program)).single;
+      expect(change.before?['name'], 'Day 0');
+      expect(change.before?.containsKey('assignedBy'), isFalse);
+    });
+
+    test('a cursor from past the counter, as after a move, is refused', () async {
+      final c = await sent(sessions: 0);
+      final ahead = ChangeCursor(xid: '999999999999', id: uuidV7()).toString();
+      await expectLater(
+        h.db.getProgramChanges(ownerId: c.student, programId: c.program, since: ahead),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'stale_cursor')),
+      );
+    });
+
+    test('a former coach isn\'t told of the student\'s changes', () async {
+      final c = await sent(sessions: 0);
+      expect(await h.db.otherSideOf(actorId: c.student, programId: c.program), c.coach);
+      await h.db.deleteConnection(actorId: c.student, targetId: c.coach, role: .student, domain: .fitness);
+      expect(await h.db.otherSideOf(actorId: c.student, programId: c.program), isNull);
     });
   });
 
