@@ -85,5 +85,28 @@ void main() {
       final result = getMonday(date);
       expect(result.isAtSameMomentAs(expected), isTrue);
     });
+
+    // Under a zone with daylight saving (`make test-dart` and CI run this file
+    // as America/New_York): 2026-11-01 is the 25-hour day US clocks went back.
+    test('the week after the clocks go back starts on its Monday', () {
+      expect(getMonday(DateTime(2026, 11, 1, 23, 59)), DateTime(2026, 10, 26));
+      expect(getMonday(DateTime(2026, 11, 8, 23, 59)), DateTime(2026, 11, 2));
+      expect(getMonday(DateTime(2026, 3, 15, 0, 30)), DateTime(2026, 3, 9));
+    });
+
+    test('every day of two years lands on its own Monday at midnight', () {
+      for (var day = DateTime(2025); day.isBefore(DateTime(2027)); day = DateTime(day.year, day.month, day.day + 1)) {
+        for (final hour in [0, 12, 23]) {
+          final date = DateTime(day.year, day.month, day.day, hour, 59);
+          final monday = getMonday(date);
+          expect(monday.weekday, DateTime.monday, reason: '$date');
+          expect((monday.hour, monday.minute), (0, 0), reason: '$date');
+          final back = DateTime.utc(date.year, date.month, date.day).difference(
+            DateTime.utc(monday.year, monday.month, monday.day),
+          );
+          expect(back.inDays, date.weekday - DateTime.monday, reason: '$date');
+        }
+      }
+    });
   });
 }

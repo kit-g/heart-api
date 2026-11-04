@@ -16,6 +16,9 @@ test-dart: openapi
 	cd shared/heart_aws && dart test
 	cd shared/heart_design && dart test
 	cd shared/heart_models && dart test
+# Week and day boundaries again in a zone with daylight saving: CI's runners
+# are UTC, where a clock change never happens.
+	cd shared/heart_models && TZ=America/New_York dart test test/utils_test.dart
 
 # Containerized dev database (Postgres 17 + pgtap, see compose.yaml).
 # Alternative to a native install; set HEART_DB_PORT if 5432 is taken.

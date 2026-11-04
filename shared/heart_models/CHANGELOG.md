@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.49.1
+
+`getMonday` across a clock change (heart-api#383).
+
+- Fixed: `getMonday` gave the Tuesday for a date in the week after daylight saving ended (a 25-hour
+  day in the week). It now counts calendar days, so it's the Monday whatever the clocks did.
+
 ## 2.49.0
 
 A workout a coach logged for someone (heart-api#366).

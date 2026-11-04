@@ -134,6 +134,15 @@ jobs:
             --reporter=github \
             --file-reporter="json:$GITHUB_WORKSPACE/test-reports/${REPORT_NAME}.json"
 
+      # Week and day boundaries again in a zone with daylight saving: the
+      # runner is UTC, where clocks never change (heart-api#383).
+      - name: "Run date tests across a clock change"
+        if: matrix.package == 'shared/heart_models'
+        working-directory: ${{ matrix.package }}
+        env:
+          TZ: America/New_York
+        run: dart test test/utils_test.dart --reporter=github
+
       - name: "Upload test report"
         if: always()
         uses: actions/upload-artifact@v7
