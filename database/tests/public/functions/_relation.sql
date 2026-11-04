@@ -158,6 +158,43 @@ BEGIN
 
     UPDATE connections SET shares = '{goals}' WHERE id = _id;
     RETURN NEXT is((SELECT count(*) FROM connection_events WHERE connection_id = _id), 2::bigint, 'only status moves count');
+
+    UPDATE connections SET accepted_at = clock_timestamp(), status_by = _a WHERE id = _id;
+    RETURN NEXT is(
+        (SELECT count(*) FROM connection_events WHERE connection_id = _id),
+        3::bigint,
+        'and a relationship started again over the row, though it stays active'
+    );
+END
+$$ LANGUAGE plpgsql;
+
+-- One block can stand behind two of a pair's rows, and lifting one of them leaves it.
+CREATE OR REPLACE FUNCTION test__a_block_lasts_while_a_row_stands_on_it() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _a TEXT := create_test_profile();
+    _b TEXT := create_test_profile();
+BEGIN
+    INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status)
+    VALUES (_a, _b, 'PEER', 'PEER', 'general', 'active'),
+           (_a, _b, 'PEER', 'PEER', 'fitness', 'active');
+
+    UPDATE connections SET status = 'blocked', status_by = _a WHERE initiator_id = _a AND domain = 'general';
+    UPDATE connections SET status = 'blocked', status_by = _a WHERE initiator_id = _a AND domain = 'fitness';
+
+    UPDATE connections SET status = 'severed', status_by = _a WHERE initiator_id = _a AND domain = 'general';
+    RETURN NEXT ok(_blocked_between(_a, _b), 'a row still blocked keeps the block');
+
+    UPDATE connections SET status = 'severed', status_by = _a WHERE initiator_id = _a AND domain = 'fitness';
+    RETURN NEXT ok(NOT _blocked_between(_a, _b), 'the last one out lifts it');
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__lock_pair_signature() RETURNS SETOF TEXT AS
+$$
+BEGIN
+    RETURN NEXT has_function('public'::name, '_lock_pair'::name, ARRAY ['text', 'text']);
+    RETURN NEXT function_returns('public'::name, '_lock_pair'::name, ARRAY ['text', 'text'], 'void');
 END
 $$ LANGUAGE plpgsql;
 
