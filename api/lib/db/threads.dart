@@ -44,33 +44,51 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
     String? subjectType,
     String? subjectId,
   }) async {
-    final rows = await _pool.execute(
-      _addThreadItem.toSql(),
-      parameters: {
-        'senderId': senderId,
-        'threadId': threadId,
-        'id': id,
-        'kind': kind,
-        'content': content,
-        'commitment': commitment,
-        'tag': tag,
-        'tagKey': tagKey,
-        'at': at.toUtc(),
-        'createdAt': createdAt.toUtc(),
-        'subjectType': subjectType,
-        'subjectId': subjectId,
-      },
-    );
-    if (rows.isEmpty) throw const Forbidden(code: 'id_taken', reason: 'this id belongs to something else');
-    final row = rows.first.toColumnMap();
-    return (
-      ThreadItem.fromRow(
-        row,
-        cursor: ChangeCursor(xid: row['xid_text'] as String, id: row['id'].toString()).toString(),
+    Future<List<Map<String, dynamic>>> attempt() async {
+      final rows = await _pool.execute(
+        _addThreadItem.toSql(),
+        parameters: {
+          'senderId': senderId,
+          'threadId': threadId,
+          'id': id,
+          'kind': kind,
+          'content': content,
+          'commitment': commitment,
+          'tag': tag,
+          'tagKey': tagKey,
+          'at': at.toUtc(),
+          'createdAt': createdAt.toUtc(),
+          'subjectType': subjectType,
+          'subjectId': subjectId,
+          'perMinute': _maxMessagesPerMinute,
+        },
+      );
+      return [for (final row in rows) row.toColumnMap()];
+    }
+
+    // A retry racing the request it repeats waits for that one's insert, and then
+    // can't see the row, which committed after its snapshot: once more sees it.
+    var rows = await attempt();
+    if (rows.single['created'] == null) rows = await attempt();
+
+    // No cursor: this item's place may be past a transaction still writing, and a
+    // read position or a page taken from it would skip what that one writes.
+    return switch (rows.single) {
+      {'created': final bool created} && final row => (ThreadItem.fromRow(row), created),
+      {'open': false} => throw const Forbidden(
+        code: 'thread_closed',
+        reason: 'This thread takes no new messages from you.',
       ),
-      row['created'] as bool,
-    );
+      {'sent': final int sent} when sent >= _maxMessagesPerMinute => throw const TooManyRequests(
+        reason: 'at most $_maxMessagesPerMinute messages a minute',
+        retryAfter: 60,
+      ),
+      _ => throw _idTaken,
+    };
   }
+
+  /// A guard for the beta, not a promise: nobody is expected to reach it.
+  static const _maxMessagesPerMinute = 60;
 
   @override
   Future<List<Thread>> getThreads({required String userId}) async {
@@ -103,8 +121,11 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
       },
     );
     final maps = rows.map((row) => row.toColumnMap()).toList();
-    if (maps.firstOrNull?['forbidden'] == true) {
-      throw const Forbidden(reason: 'You do not have permission to read this thread.');
+    switch (maps.firstOrNull) {
+      case {'forbidden': true}:
+        throw const Forbidden(reason: 'You do not have permission to read this thread.');
+      case {'stale': true}:
+        throw _staleCursor;
     }
     final items = [
       for (final row in maps)
@@ -120,11 +141,19 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
   @override
   Future<void> markThreadRead({required String userId, required String threadId, required String cursor}) async {
     final position = ChangeCursor.parse(cursor);
-    await _pool.execute(
+    final rows = await _pool.execute(
       _markThreadRead.toSql(),
       parameters: {'userId': userId, 'threadId': threadId, 'xid': position.xid, 'itemId': position.id},
     );
+    if (rows.single.toColumnMap()['stale'] == true) throw _staleCursor;
   }
+
+  /// A cursor from before the database moved, or one no read handed out: a read
+  /// position there would hide everything until the counter caught up.
+  BadRequest get _staleCursor => const BadRequest(
+    code: 'stale_cursor',
+    reason: 'this cursor is not one a read of this thread returned; read again without it',
+  );
 
   @override
   Future<String?> clearThread({required String userId, required String threadId}) async {
@@ -143,8 +172,11 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
       _saveNote.toSql(),
       parameters: {'coachId': coachId, 'id': id, 'connectionId': connectionId, 'content': content},
     );
-    if (rows.isEmpty) throw NotFound(type: 'Connection', id: connectionId);
-    return CoachNote.fromRow(rows.first.toColumnMap());
+    return switch (rows.firstOrNull?.toColumnMap()) {
+      null => throw NotFound(type: 'Connection', id: connectionId),
+      {'taken': true} => throw _idTaken,
+      final row => CoachNote.fromRow(row),
+    };
   }
 
   @override

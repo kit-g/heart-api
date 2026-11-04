@@ -12,16 +12,22 @@ class MessageTags {
 
   const new(this.keys);
 
-  /// `MESSAGE_TAG_KEYS`: `id:base64,id:base64`, newest first.
+  /// `MESSAGE_TAG_KEYS`: `id:base64,id:base64`, newest first. A value that isn't
+  /// that reads as unset, as any optional setting does: messages and reports
+  /// answer 501, and every other route keeps working.
   static MessageTags? parse(String? raw) {
     if (raw == null || raw.isEmpty) return null;
     final keys = <String, List<int>>{};
     for (final entry in raw.split(',')) {
       switch (entry.split(':')) {
-        case [final id, final key]:
-          keys[id] = base64.decode(key);
+        case [final id, final key] when id.isNotEmpty && key.isNotEmpty:
+          try {
+            keys[id] = base64.decode(key);
+          } on FormatException {
+            return null;
+          }
         default:
-          throw ArgumentError('MESSAGE_TAG_KEYS must be id:base64 pairs');
+          return null;
       }
     }
     return MessageTags(keys);
@@ -46,6 +52,11 @@ class MessageTags {
 
   /// That [senderId] sent [words] to [recipientId]: the tag holds them to the
   /// commitment, and the reporter's key ties the commitment to these words.
+  ///
+  /// Anything that isn't base64 is a message that doesn't check out, never a
+  /// refused report: the reporter's key travels inside the sender's ciphertext,
+  /// so a sender could otherwise make their own messages unreportable. Bytes are
+  /// compared, in constant time, so either base64 alphabet checks the same.
   bool confirms({
     required String words,
     required String reporterKey,
@@ -57,17 +68,67 @@ class MessageTags {
     required DateTime at,
   }) {
     if (!keys.containsKey(tagKey)) return false;
-    final expected = this.tag(
-      commitment: commitment,
-      senderId: senderId,
-      recipientId: recipientId,
-      at: at,
-      keyId: tagKey,
-    );
-    if (expected != tag) return false;
-    return base64.encode(Hmac(sha256, base64.decode(reporterKey)).convert(utf8.encode(words)).bytes) == commitment;
+    try {
+      final expected = this.tag(
+        commitment: commitment,
+        senderId: senderId,
+        recipientId: recipientId,
+        at: at,
+        keyId: tagKey,
+      );
+      if (!_same(base64.decode(expected), base64.decode(tag))) return false;
+      final committed = Hmac(sha256, base64.decode(reporterKey)).convert(utf8.encode(words)).bytes;
+      return _same(committed, base64.decode(commitment));
+    } on FormatException {
+      return false;
+    }
+  }
+
+  /// That [messages] are between [reporterId] and [reportedId], include at least
+  /// one that [reportedId] sent, and every one checks out. Someone reporting
+  /// themselves verifies nothing.
+  bool verifies({required String reporterId, required String reportedId, required List<ReportedMessage> messages}) {
+    if (reporterId == reportedId) return false;
+    final people = {reporterId, reportedId};
+    return messages.any((message) => message.senderId == reportedId) &&
+        messages.every(
+          (message) =>
+              {message.senderId, message.recipientId}.containsAll(people) &&
+              confirms(
+                words: message.words,
+                reporterKey: message.key,
+                commitment: message.commitment,
+                tag: message.tag,
+                tagKey: message.tagKey,
+                senderId: message.senderId,
+                recipientId: message.recipientId,
+                at: message.createdAt,
+              ),
+        );
   }
 }
+
+/// Whether two digests are equal, looking at every byte whatever the first difference.
+bool _same(List<int> a, List<int> b) {
+  if (a.length != b.length) return false;
+  var difference = 0;
+  for (var i = 0; i < a.length; i++) {
+    difference |= a[i] ^ b[i];
+  }
+  return difference == 0;
+}
+
+/// One message a report carries: what the device opened, and what proves it.
+typedef ReportedMessage = ({
+  String words,
+  String key,
+  String commitment,
+  String tag,
+  String tagKey,
+  String senderId,
+  String recipientId,
+  DateTime createdAt,
+});
 
 /// Seals [plaintext] to a public key whose private half isn't on the server: X25519
 /// with a throwaway key, HKDF-SHA256 and ChaCha20-Poly1305. `scripts/open_report.py`

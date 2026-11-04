@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:heart/core/handler.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
 
@@ -66,6 +69,18 @@ void main() {
 
   test('a FormatException becomes 400', () async {
     expect(await status((_) async => throw const FormatException('nope')), 400);
+  });
+
+  test('a FormatException logs its message, never the input it quotes', () async {
+    final logged = <String>[];
+    final listening = logging.Logger.root.onRecord.listen(
+      (record) => logged.add('${record.message} ${record.error}'),
+    );
+    addTearDown(listening.cancel);
+
+    await status((_) async => jsonDecode('{"words": "what they said about me'));
+    expect(logged, isNotEmpty);
+    expect(logged.join(), isNot(contains('what they said')));
   });
 
   test('UnsupportedMediaType becomes 415', () async {

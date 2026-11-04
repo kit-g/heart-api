@@ -1,8 +1,7 @@
-import 'package:heart/notifications/sealing.dart';
-
 import 'dart:io' show File, Platform, SecurityContext;
 
 import 'package:heart/models/tokens.dart';
+import 'package:heart/notifications/sealing.dart';
 import 'package:postgres/postgres.dart' hide Connection;
 import 'package:relic/relic.dart';
 

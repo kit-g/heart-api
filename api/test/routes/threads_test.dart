@@ -59,52 +59,132 @@ void main() {
     });
   });
 
-  test('posting through the real app tells the other person', () async {
-    when(app.config.messageTags).thenReturn(MessageTags({'k': List.filled(32, 1)}));
+  group('posting through the real app', () {
+    void stubSend({bool created = true}) {
+      when(app.config.messageTags).thenReturn(MessageTags({'k': List.filled(32, 1)}));
+      when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+      when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
+      when(
+        app.db.getThreadParties(senderId: anyNamed('senderId'), threadId: anyNamed('threadId')),
+      ).thenAnswer((_) async => (threadId: thread, senderId: 'me', recipientId: 'them'));
+      when(
+        app.db.addThreadItem(
+          senderId: anyNamed('senderId'),
+          threadId: anyNamed('threadId'),
+          id: anyNamed('id'),
+          kind: anyNamed('kind'),
+          content: anyNamed('content'),
+          commitment: anyNamed('commitment'),
+          tag: anyNamed('tag'),
+          tagKey: anyNamed('tagKey'),
+          at: anyNamed('at'),
+          createdAt: anyNamed('createdAt'),
+          subjectType: anyNamed('subjectType'),
+          subjectId: anyNamed('subjectId'),
+        ),
+      ).thenAnswer(
+        (_) async => (
+          ThreadItem(
+            id: item,
+            threadId: thread,
+            kind: 'message',
+            content: 'sealed',
+            commitment: commitment,
+            tag: 't',
+            tagKey: 'k',
+            at: DateTime.utc(2026),
+            createdAt: DateTime.utc(2026),
+          ),
+          created,
+        ),
+      );
+    }
+
+    Map published() {
+      return verify(
+            app.events.publish(queueUrl: anyNamed('queueUrl'), message: captureAnyNamed('message')),
+          ).captured.single
+          as Map;
+    }
+
+    test('tells the other person', () async {
+      stubSend();
+      final res = await app.send('POST', '/threads/$thread/items', body: body());
+      expect(res.status, 201);
+      final message = published();
+      expect(message['userId'], 'them');
+      expect(message.toString(), isNot(contains('sealed')));
+    });
+
+    test('a retry tells them again, in case the push is what failed the first time', () async {
+      stubSend(created: false);
+      final res = await app.send('POST', '/threads/$thread/items', body: body());
+      expect(res.status, 200);
+      expect(published()['userId'], 'them');
+    });
+
+    test('tags a time a device keeping milliseconds can write back exactly', () async {
+      stubSend();
+      await app.send('POST', '/threads/$thread/items', body: body());
+      final captured = verify(
+        app.db.addThreadItem(
+          senderId: anyNamed('senderId'),
+          threadId: anyNamed('threadId'),
+          id: anyNamed('id'),
+          kind: anyNamed('kind'),
+          content: anyNamed('content'),
+          commitment: anyNamed('commitment'),
+          tag: captureAnyNamed('tag'),
+          tagKey: anyNamed('tagKey'),
+          at: anyNamed('at'),
+          createdAt: captureAnyNamed('createdAt'),
+          subjectType: anyNamed('subjectType'),
+          subjectId: anyNamed('subjectId'),
+        ),
+      ).captured;
+      final tag = captured.whereType<String>().single;
+      final stored = captured.whereType<DateTime>().single;
+      final kept = DateTime.fromMillisecondsSinceEpoch(stored.millisecondsSinceEpoch, isUtc: true);
+      expect(
+        MessageTags({'k': List.filled(32, 1)})
+            .tag(commitment: commitment, senderId: 'u1', recipientId: 'them', at: kept),
+        tag,
+      );
+    });
+  });
+
+  test('a cleared thread wakes the other person, unless they blocked whoever cleared it', () async {
     when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
     when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
-    when(
-      app.db.getThreadParties(senderId: anyNamed('senderId'), threadId: anyNamed('threadId')),
-    ).thenAnswer((_) async => (threadId: thread, senderId: 'me', recipientId: 'them'));
-    when(
-      app.db.addThreadItem(
-        senderId: anyNamed('senderId'),
-        threadId: anyNamed('threadId'),
-        id: anyNamed('id'),
-        kind: anyNamed('kind'),
-        content: anyNamed('content'),
-        commitment: anyNamed('commitment'),
-        tag: anyNamed('tag'),
-        tagKey: anyNamed('tagKey'),
-        at: anyNamed('at'),
-        createdAt: anyNamed('createdAt'),
-        subjectType: anyNamed('subjectType'),
-        subjectId: anyNamed('subjectId'),
-      ),
-    ).thenAnswer(
-      (_) async => (
-        ThreadItem(
-          id: item,
-          threadId: thread,
-          kind: 'message',
-          content: 'sealed',
-          commitment: commitment,
-          tag: 't',
-          tagKey: 'k',
-          at: DateTime.utc(2026),
-          createdAt: DateTime.utc(2026),
-        ),
-        true,
-      ),
-    );
+    when(app.db.clearThread(userId: anyNamed('userId'), threadId: anyNamed('threadId')))
+        .thenAnswer((_) async => 'them');
 
-    final res = await app.send('POST', '/threads/$thread/items', body: body());
-    expect(res.status, 201);
+    final res = await app.send('DELETE', '/threads/$thread/items');
+    expect(res.status, 204);
     final message =
         verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: captureAnyNamed('message'))).captured.single
             as Map;
     expect(message['userId'], 'them');
-    expect(message.toString(), isNot(contains('sealed')));
+    expect(message['actorId'], 'u1', reason: 'the send path checks blocks between the two');
+  });
+
+  group('an id that can\'t be one answers before the database sees it', () {
+    test('in a path', () async {
+      expect((await app.send('POST', '/connections/them:PEER:fitness/thread')).status, 404);
+      expect((await app.send('GET', '/threads/x/items')).status, 404);
+      expect((await app.send('PUT', '/threads/x/read', body: {'cursor': 'c'})).status, 404);
+      expect((await app.send('DELETE', '/notes/x')).status, 404);
+    });
+
+    test('in a query', () async {
+      expect((await app.send('GET', '/notes?connectionId=x')).status, 400);
+      expect((await app.send('GET', '/notes?cursor=x')).status, 400);
+    });
+  });
+
+  test('a NUL, which the database can\'t store, is refused up front', () async {
+    final res = await app.send('POST', '/threads/$thread/items', body: body(content: 'sealed\u0000'));
+    expect(res.status, 400);
   });
 
   group('a report', () {
@@ -126,7 +206,7 @@ void main() {
       'createdAt': at.toIso8601String(),
     };
 
-    Future<bool> verified(List<Map<String, dynamic>> messages) async {
+    Future<bool> verified(List<Map<String, dynamic>> messages, {String reportedId = 'them'}) async {
       when(app.config.reportReviewKey).thenReturn(base64.encode(List.filled(32, 1)));
       when(app.config.messageTags).thenReturn(tags);
       when(
@@ -139,7 +219,7 @@ void main() {
           verified: anyNamed('verified'),
         ),
       ).thenAnswer((_) async {});
-      await app.send('POST', '/reports', body: {'reportedId': 'them', 'reason': 'abuse', 'messages': messages});
+      await app.send('POST', '/reports', body: {'reportedId': reportedId, 'reason': 'abuse', 'messages': messages});
       return verify(
             app.db.fileReport(
               reporterId: anyNamed('reporterId'),
@@ -167,6 +247,33 @@ void main() {
 
     test('of only the reporter\'s own words does not', () async {
       expect(await verified([message(from: 'u1', to: 'them')]), isFalse);
+    });
+
+    test('about oneself does not', () async {
+      expect(await verified([message(from: 'u1', to: 'them')], reportedId: 'u1'), isFalse);
+    });
+
+    test('with a key the sender made unreadable is filed, unverified', () async {
+      expect(await verified([message(from: 'them', to: 'u1')..['key'] = 'not base64!']), isFalse);
+    });
+
+    test('has room for a message\'s words, and no more', () async {
+      when(app.config.reportReviewKey).thenReturn(base64.encode(List.filled(32, 1)));
+      when(app.config.messageTags).thenReturn(tags);
+      final long = message(from: 'them', to: 'u1')..['words'] = 'x' * 16385;
+      final res = await app.send(
+        'POST',
+        '/reports',
+        body: {
+          'reportedId': 'them',
+          'reason': 'abuse',
+          'messages': [long],
+        },
+      );
+      expect(res.status, 400);
+
+      final named = await app.send('POST', '/reports', body: {'reportedId': 'x' * 129, 'reason': 'abuse'});
+      expect(named.status, 400);
     });
   });
 
