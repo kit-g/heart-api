@@ -446,6 +446,20 @@ void main() {
       expect(await h.db.getProfile('no-such-${h.token}'), isNull);
     });
   });
+
+  test('every write answers the account as a read does, entitlements included', () async {
+    final id = await h.seedProfile();
+    await h.exec("INSERT INTO entitlements (user_id, entitlement) VALUES (@id, 'coach')", {'id': id});
+
+    final answers = [
+      await h.db.scheduleAccountDeletion(userId: id, scheduleArn: 'arn:x', scheduledAt: DateTime.utc(2026, 8, 3)),
+      await h.db.undoAccountDeletion(userId: id),
+      await h.db.updateAvatarUrl(userId: id, avatarUrl: null),
+    ];
+    for (final user in answers) {
+      expect(user.entitlements, ['coach']);
+    }
+  });
 }
 
 class _Harness extends DatabaseTestBase;

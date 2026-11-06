@@ -1,8 +1,8 @@
 part of '../db.dart';
 
-const _resolveCommentTargetOwner = '''
-SELECT user_id FROM workouts
-WHERE id = (CASE @targetType
+/// The workout a comment's target belongs to.
+const _commentTargetWorkout = '''
+CASE @targetType
   WHEN 'workout' THEN @targetId::uuid
   WHEN 'workout_exercise' THEN (SELECT workout_id FROM workout_exercises WHERE id = @targetId::uuid)
   WHEN 'exercise_set' THEN (
@@ -11,27 +11,25 @@ WHERE id = (CASE @targetType
     WHERE es.id = @targetId::uuid
   )
   WHEN 'workout_image' THEN (SELECT workout_id FROM workout_images WHERE id = @targetId::uuid)
-END)
+END
+''';
+
+const _resolveCommentTargetOwner =
+    '''
+SELECT user_id FROM workouts
+WHERE id = ($_commentTargetWorkout)
 ''';
 
 /// The reader's standing towards a comment's target, from the workout it belongs
 /// to. A coach comments only on what they can read, never on a photo, and not
 /// while paused.
-const _commentTargetAccess = '''
+const _commentTargetAccess =
+    '''
 WITH
 _workout AS (
   SELECT id, user_id, started_at, hidden_at
   FROM workouts
-  WHERE id = (CASE @targetType
-    WHEN 'workout' THEN @targetId::uuid
-    WHEN 'workout_exercise' THEN (SELECT workout_id FROM workout_exercises WHERE id = @targetId::uuid)
-    WHEN 'exercise_set' THEN (
-      SELECT we.workout_id FROM workout_exercises we
-      JOIN exercise_sets es ON es.workout_exercise_id = we.id
-      WHERE es.id = @targetId::uuid
-    )
-    WHEN 'workout_image' THEN (SELECT workout_id FROM workout_images WHERE id = @targetId::uuid)
-  END)
+  WHERE id = ($_commentTargetWorkout)
 ),
 _rel AS (
   SELECT w.*, _relation(@readerId, w.user_id) AS r

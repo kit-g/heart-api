@@ -3,15 +3,17 @@ part of 'db.dart';
 mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
   @override
   Future<void> hideWorkout({required String userId, required String workoutId, DateTime? at}) async {
-    await _pool.execute(
+    final rows = await _pool.execute(
       _hideWorkout.toSql(),
       parameters: {'userId': userId, 'workoutId': workoutId, 'at': at?.toUtc()},
     );
+    if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
   }
 
   @override
   Future<void> unhideWorkout({required String userId, required String workoutId}) async {
-    await _pool.execute(_unhideWorkout.toSql(), parameters: {'userId': userId, 'workoutId': workoutId});
+    final rows = await _pool.execute(_unhideWorkout.toSql(), parameters: {'userId': userId, 'workoutId': workoutId});
+    if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
   }
 
   @override

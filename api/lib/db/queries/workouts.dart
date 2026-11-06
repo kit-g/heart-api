@@ -31,22 +31,32 @@ UNION ALL
 SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true FROM _rel WHERE (r).scope IS NULL
 ''';
 
+/// Hiding what is already hidden keeps the first time. Either way the answer is
+/// the workout, so one that isn't the caller's, or isn't here yet, reads as missing.
 const _hideWorkout = '''
-UPDATE workouts
-SET hidden_at = least(coalesce(@at::timestamptz, now()), now())
-WHERE id = @workoutId::uuid
-  AND user_id = @userId
-  AND hidden_at IS NULL
-RETURNING id
+WITH
+_hidden AS (
+  UPDATE workouts
+  SET hidden_at = least(coalesce(@at::timestamptz, now()), now())
+  WHERE id = @workoutId::uuid
+    AND user_id = @userId
+    AND hidden_at IS NULL
+  RETURNING id
+)
+SELECT id FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId
 ''';
 
 const _unhideWorkout = '''
-UPDATE workouts
-SET hidden_at = NULL
-WHERE id = @workoutId::uuid
-  AND user_id = @userId
-  AND hidden_at IS NOT NULL
-RETURNING id
+WITH
+_shown AS (
+  UPDATE workouts
+  SET hidden_at = NULL
+  WHERE id = @workoutId::uuid
+    AND user_id = @userId
+    AND hidden_at IS NOT NULL
+  RETURNING id
+)
+SELECT id FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId
 ''';
 
 const _listHiddenWorkouts = '''

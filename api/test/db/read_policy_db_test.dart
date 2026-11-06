@@ -127,11 +127,27 @@ void main() {
       expect((await h.db.getHiddenWorkouts(userId: student)).items, isEmpty);
     });
 
-    test('someone else cannot hide a workout', () async {
+    test('someone else cannot hide a workout, and finds no such thing', () async {
       final (coach, student) = (await h.seedProfile(), await h.seedProfile());
       final workout = await workoutOf(student, after);
-      await h.db.hideWorkout(userId: coach, workoutId: workout);
+      await expectLater(h.db.hideWorkout(userId: coach, workoutId: workout), throwsA(isA<NotFound>()));
       expect((await h.db.getHiddenWorkouts(userId: student)).items, isEmpty);
+    });
+
+    // Offline, a hide can arrive before the workout it hides; a success then would
+    // leave the device sure of something the server never did.
+    test('hiding or showing a workout the server hasn\'t got is a 404, and doing it twice is not', () async {
+      final student = await h.seedProfile();
+      final missing = uuidV7();
+      await expectLater(h.db.hideWorkout(userId: student, workoutId: missing), throwsA(isA<NotFound>()));
+      await expectLater(h.db.unhideWorkout(userId: student, workoutId: missing), throwsA(isA<NotFound>()));
+
+      final workout = await workoutOf(student, after);
+      await h.db.hideWorkout(userId: student, workoutId: workout, at: after);
+      await h.db.hideWorkout(userId: student, workoutId: workout);
+      expect((await h.db.getHiddenWorkouts(userId: student)).items.single.at, after);
+      await h.db.unhideWorkout(userId: student, workoutId: workout);
+      await h.db.unhideWorkout(userId: student, workoutId: workout);
     });
 
     test('gets no photos', () async {
@@ -194,6 +210,27 @@ void main() {
         shares: {.goals},
       );
       expect(await h.db.getTargetUserGoals(requesterId: coach, targetUserId: student), isEmpty);
+    });
+
+    test('reads no goals while any domain is paused', () async {
+      final (coach, student) = (await h.seedProfile(), await h.seedProfile());
+      await connect(coach, student, acceptedAt: accepted);
+      await connect(coach, student, domain: 'running', acceptedAt: accepted);
+      await h.db.changeConnectionShares(
+        actorId: student,
+        targetId: coach,
+        role: .student,
+        domain: .fitness,
+        shares: {.goals},
+      );
+      await h.exec("UPDATE connections SET status = 'paused' WHERE initiator_id = @c AND domain = 'running'", {
+        'c': coach,
+      });
+
+      await expectLater(
+        h.db.getTargetUserGoals(requesterId: coach, targetUserId: student),
+        throwsA(isA<Forbidden>()),
+      );
     });
 
     test('reads skips without their reason or weather, and only in scope', () async {

@@ -7,9 +7,10 @@ WITH target_exists AS (
 ),
 -- An ended peer relationship can be asked for again, and the one asking is
 -- then the one who can't answer. A coach's only restarts from an invitation.
+-- It's accepted again when it's answered again.
 reopened AS (
   UPDATE connections
-  SET status = 'pending', status_by = @initiatorId
+  SET status = 'pending', status_by = @initiatorId, accepted_at = NULL
   WHERE domain = @domain
     AND status = 'severed'
     AND initiator_role = 'PEER'
@@ -90,10 +91,11 @@ WHERE domain = @domain
 ''';
 
 /// Ending is either party's call — except while a block stands, when only the
-/// blocker may. The row stays, because "this person was a client" outlives it.
+/// blocker may. The row stays, because "this person was a client" outlives it,
+/// and one already ended stays as it ended, by whom it ended.
 ///
-/// Returns one row either way: `existed` separates "nothing there" (a no-op, as
-/// it has always been) from `ended` false, which is a refusal.
+/// Returns one row either way: `refused` is the block guard; anything else not
+/// ended was nothing to end, a no-op as it has always been.
 const _endConnection = '''
 WITH
 _pair AS (
@@ -110,12 +112,11 @@ _ended AS (
     (@actorId, @targetId, @domain),
     (@targetId, @actorId, @domain)
   )
+  AND status <> 'severed'
   AND EXISTS (SELECT 1 FROM _pair WHERE status <> 'blocked' OR status_by = @actorId)
   RETURNING 1
 )
-SELECT
-  EXISTS (SELECT 1 FROM _ended) AS ended,
-  EXISTS (SELECT 1 FROM _pair) AS existed
+SELECT EXISTS (SELECT 1 FROM _pair WHERE status = 'blocked' AND status_by IS DISTINCT FROM @actorId) AS refused
 ''';
 
 /// The rules that turn on *which* side is asking, enforced here rather than in
@@ -128,6 +129,7 @@ SELECT
 /// - a coach's row becomes pending or active from a request only by invitation.
 /// - only the student resumes a paused coach's row.
 /// - only whoever set a block may lift it.
+/// - nothing starts again while a block stands, from either side.
 ///
 /// `@expectedStatus` makes the write optimistic-locked against the status the
 /// caller read, so a concurrent change loses rather than silently overwriting.
@@ -139,7 +141,7 @@ WHERE (initiator_id, target_id, domain) IN (
   (@targetId, @actorId, @domain)
 )
 AND status = @expectedStatus
-AND (@newStatus NOT IN ('active', 'declined') OR status <> 'pending' OR status_by IS DISTINCT FROM @actorId)
+AND (@newStatus NOT IN ('active', 'declined') OR status <> 'pending' OR coalesce(status_by, initiator_id) <> @actorId)
 AND (
   initiator_role = 'PEER'
   OR NOT (@newStatus = 'pending' OR (status = 'pending' AND @newStatus = 'active'))
@@ -152,6 +154,7 @@ AND (
   OR (target_id = @actorId AND target_role = 'STUDENT')
 )
 AND (status <> 'blocked' OR status_by = @actorId)
+AND (@newStatus NOT IN ('pending', 'active', 'paused') OR NOT _blocked_between(@actorId, @targetId))
 RETURNING
   id AS connection_id,
   CASE WHEN initiator_id = @actorId THEN target_id ELSE initiator_id END AS target_id,
@@ -167,6 +170,7 @@ WHERE (
   OR (initiator_id = @targetId AND target_id = @actorId AND target_role = 'STUDENT')
 )
 AND domain = @domain
+AND status IN ('active', 'paused')
 RETURNING
   id AS connection_id,
   CASE WHEN initiator_id = @actorId THEN target_id ELSE initiator_id END AS target_id,

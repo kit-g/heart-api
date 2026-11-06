@@ -44,11 +44,14 @@ Future<User> authenticate(String firebaseId, String authToken) async {
   return claims.toUser();
 }
 
-extension on OpenIdClaims {
+extension FirebaseClaims on OpenIdClaims {
+  /// Who a verified ID token is for. The name is what the sign-in provider gave,
+  /// which is all an account made on the web has until the app sends a profile.
   User toUser() {
     return User(
       id: subject,
       email: email,
+      displayName: name,
     );
   }
 }

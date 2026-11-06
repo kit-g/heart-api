@@ -1,5 +1,7 @@
 part of 'db.dart';
 
+const _onlyTheStudentShares = 'Only the student of a live coaching connection chooses what it shares.';
+
 mixin _Connections on _DatabaseBase implements ConnectionsService {
   @override
   Future<Connection> createConnection({
@@ -8,7 +10,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     required ConnectionRole role,
     required ConnectionDomain domain,
   }) async {
-    final result = await _pool.execute(
+    Future<Result> create() => _pool.execute(
       _createConnection.toSql(),
       parameters: {
         'initiatorId': initiatorId,
@@ -19,6 +21,13 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       },
     );
 
+    // Empty is also the other person asking at the same moment: the insert waited
+    // for theirs and stood down, and the read can't see a row committed after the
+    // statement began. A second run sees it.
+    final result = switch (await create()) {
+      final Result rows when rows.isEmpty => await create(),
+      final rows => rows,
+    };
     if (result.isEmpty) throw NotFound(type: 'User', id: targetId);
     return Connection.fromRow(result.first.toColumnMap());
   }
@@ -59,10 +68,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       parameters: {'actorId': actorId, 'targetId': targetId, 'domain': domain.value},
     );
 
-    final row = result.first.toColumnMap();
-    // Nothing there is a no-op, as it always has been. Something there that did
-    // not end is the block guard refusing.
-    if (row['existed'] == true && row['ended'] != true) {
+    if (result.first.toColumnMap() case {'refused': true}) {
       throw const Forbidden(reason: 'You cannot remove a connection that blocks you.');
     }
   }
@@ -116,6 +122,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     required ConnectionDomain domain,
     required Set<ConnectionShare> shares,
   }) async {
+    if (role != .student) throw const Forbidden(reason: _onlyTheStudentShares);
     final updated = await _pool.execute(
       _updateConnectionShares.toSql(),
       parameters: {
@@ -126,7 +133,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       },
     );
     if (updated.isEmpty) {
-      throw const Forbidden(reason: 'Only the student of a coaching connection chooses what it shares.');
+      throw const Forbidden(reason: _onlyTheStudentShares);
     }
     return Connection.fromRow(updated.first.toColumnMap());
   }
