@@ -5,6 +5,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/workouts.dart';
 import 'package:heart/routes/program_changes.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -163,6 +164,167 @@ void main() {
       }
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
+  });
+
+  test('a replace or a patch by the student still says who entered it', () async {
+    final (coach, student) = await coaching();
+    final exercise = await h.seedGlobalExercise();
+    final json = body(exercise);
+    final (created, _) = await h.db.createWorkout(
+      userId: student,
+      body: WorkoutRequest(userId: student, body: json),
+      imageUrl: imageUrl,
+      loggedBy: coach,
+    );
+    expect(created.loggedByName, 'u_$coach', reason: 'the first answer as much as a retry');
+
+    final id = json['id'] as String;
+    final replaced = await h.db.updateWorkout(
+      userId: student,
+      workoutId: id,
+      body: WorkoutRequest(userId: student, body: {...json, 'name': 'Renamed'}),
+      imageUrl: imageUrl,
+    );
+    expect((replaced.loggedBy, replaced.loggedByName), (coach, 'u_$coach'));
+    final patched = await h.db.patchWorkout(userId: student, workoutId: id, imageUrl: imageUrl, name: 'Again');
+    expect((patched.loggedBy, patched.loggedByName), (coach, 'u_$coach'));
+  });
+
+  group('what a log may name', () {
+    Future<String> program(String student, {String? coach}) async {
+      final connection = switch (coach) {
+        null => null,
+        _ => (await h.db.getConnections(coach)).single.connectionId,
+      };
+      return h.insertId(
+        '''
+        INSERT INTO programs (user_id, name, coach_id, connection_id)
+        VALUES (@s, 'Plan', @c, @connection::uuid)
+        RETURNING id
+        ''',
+        {'s': student, 'c': coach, 'connection': connection},
+      );
+    }
+
+    test('only the coach\'s own copy, so a log moves no program they can\'t write', () async {
+      final (coach, student) = await coaching();
+      final exercise = await h.seedGlobalExercise();
+      final theirs = await program(student, coach: coach);
+      final own = await program(student);
+
+      final linked = body(exercise);
+      await logWorkoutForStudent(logging(coach, student, {...linked, 'programId': theirs}), student);
+      final unlinked = body(exercise);
+      await logWorkoutForStudent(logging(coach, student, {...unlinked, 'programId': own}), student);
+
+      final rows = await h.exec('SELECT id::text, program_id::text FROM workouts WHERE user_id = @s', {'s': student});
+      final programs = {for (final row in rows) row[0]: row[1]};
+      expect(programs[linked['id']], theirs);
+      expect(programs[unlinked['id']], isNull, reason: 'the student\'s own program is no link for a coach');
+    });
+
+    test('nothing from before coaching began, without the history', () async {
+      final (coach, student) = await coaching();
+      final exercise = await h.seedGlobalExercise();
+      await expectLater(
+        logWorkoutForStudent(logging(coach, student, {...body(exercise), 'start': '2019-06-01T10:00:00Z'}), student),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'not_loggable')),
+      );
+      expect(await h.exec('SELECT 1 FROM workouts WHERE user_id = @s', {'s': student}), isEmpty);
+    });
+
+    test('a retry doesn\'t bring back what the student deleted', () async {
+      final (coach, student) = await coaching();
+      final exercise = await h.seedGlobalExercise();
+      final json = body(exercise);
+      await logWorkoutForStudent(logging(coach, student, json), student);
+      await h.db.deleteWorkout(userId: student, workoutId: json['id'] as String);
+
+      await expectLater(
+        logWorkoutForStudent(logging(coach, student, json), student),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'not_loggable')),
+      );
+      expect(await h.exec('SELECT 1 FROM workouts WHERE user_id = @s', {'s': student}), isEmpty);
+    });
+  });
+
+  group('a base a coach moves', () {
+    Future<String> copy(String coach, String student) async {
+      final connection = (await h.db.getConnections(coach)).single.connectionId;
+      return h.insertId(
+        '''
+        INSERT INTO programs (user_id, name, coach_id, connection_id)
+        VALUES (@s, 'Plan', @c, @connection::uuid)
+        RETURNING id
+        ''',
+        {'s': student, 'c': coach, 'connection': connection},
+      );
+    }
+
+    ProgramBase base(String exercise, String? workout, {String? id}) {
+      return ProgramBase(
+        id: id ?? uuidV7(),
+        exerciseId: exercise,
+        value: 100,
+        workoutId: workout,
+        at: DateTime.utc(2026, 10),
+      );
+    }
+
+    test('goes only by a workout they logged', () async {
+      final (coach, student) = await coaching();
+      final exercise = await h.seedGlobalExercise();
+      final program = await copy(coach, student);
+      final json = body(exercise);
+      await logWorkoutForStudent(logging(coach, student, json), student);
+      final own = await h.seedWorkout(userId: student, start: DateTime.utc(2026), end: DateTime.utc(2026));
+
+      final (_, created) = await h.db.createProgramBase(
+        userId: student,
+        programId: program,
+        base: base(exercise, json['id'] as String),
+        loggedBy: coach,
+      );
+      expect(created, isTrue);
+      await expectLater(
+        h.db.createProgramBase(userId: student, programId: program, base: base(exercise, own), loggedBy: coach),
+        throwsA(isA<NotFound>().having((e) => e.code, 'code', 'unknown_workout')),
+      );
+    });
+
+    test('a replay answers only with a base of this program, from what they can read', () async {
+      final (coach, student) = await coaching();
+      final exercise = await h.seedGlobalExercise();
+      final program = await copy(coach, student);
+      final json = body(exercise);
+      await logWorkoutForStudent(logging(coach, student, json), student);
+      final workout = json['id'] as String;
+      final moved = base(exercise, workout);
+      await h.db.createProgramBase(userId: student, programId: program, base: moved, loggedBy: coach);
+
+      final elsewhere = await h.insertId("INSERT INTO programs (user_id, name) VALUES (@s, 'Mine') RETURNING id", {
+        's': student,
+      });
+      final mine = base(exercise, null);
+      await h.db.createProgramBase(userId: student, programId: elsewhere, base: mine);
+      await expectLater(
+        h.db.createProgramBase(
+          userId: student,
+          programId: program,
+          base: base(exercise, null, id: mine.id),
+          loggedBy: coach,
+        ),
+        throwsA(isA<Forbidden>()),
+        reason: 'the id is taken, and what it holds is not handed back',
+      );
+
+      await h.db.hideWorkout(userId: student, workoutId: workout);
+      await expectLater(
+        h.db.createProgramBase(userId: student, programId: program, base: base(exercise, workout), loggedBy: coach),
+        throwsA(isA<NotFound>()),
+        reason: 'a base a hidden workout moved stays out of the coach\'s view',
+      );
+    });
   });
 
   test('a coach\'s plan goes only on a workout they logged', () async {

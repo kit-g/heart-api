@@ -13,6 +13,7 @@ import 'package:heart/models/ids.dart';
 import 'package:heart/models/imports.dart';
 import 'package:heart/models/lens.dart';
 import 'package:heart/models/program_copy.dart';
+import 'package:heart/models/roster.dart';
 import 'package:heart/models/sets.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart/notifications/topics.dart';

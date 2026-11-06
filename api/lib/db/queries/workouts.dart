@@ -1,6 +1,13 @@
 part of '../db.dart';
 
-const _listWorkouts = '''
+/// Who entered a workout for its owner, for every query a [Workout] is read from. It
+/// reads `logged_by` unqualified, from whichever row the query selects.
+const _loggedByColumns = '''
+logged_by,
+(SELECT username FROM profiles coach WHERE coach.id = logged_by) AS logged_by_name''';
+
+const _listWorkouts =
+    '''
 WITH
 _rel AS (
   SELECT _relation(@requesterId, @targetUserId) AS r
@@ -8,8 +15,7 @@ _rel AS (
 _workouts AS (
   SELECT
     id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at,
-    logged_by,
-    (SELECT username FROM profiles coach WHERE coach.id = workouts.logged_by) AS logged_by_name,
+    $_loggedByColumns,
     _workout_exercises(id) AS exercises,
     CASE
       WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
@@ -59,7 +65,8 @@ ORDER BY id DESC
 LIMIT @limit
 ''';
 
-const _getWorkout = '''
+const _getWorkout =
+    '''
 SELECT
   w.id,
   w.name,
@@ -71,8 +78,7 @@ SELECT
   w.template_id,
   w.program_id,
   w.created_at,
-  w.logged_by,
-  (SELECT username FROM profiles coach WHERE coach.id = w.logged_by) AS logged_by_name,
+  $_loggedByColumns,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -83,15 +89,15 @@ FROM workouts w
 WHERE w.id = @workoutId::uuid AND w.user_id = @userId
 ''';
 
-const _getTargetWorkout = '''
+const _getTargetWorkout =
+    '''
 WITH
 _rel AS (
   SELECT _relation(@requesterId, @targetUserId) AS r
 )
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
-  w.logged_by,
-  (SELECT username FROM profiles coach WHERE coach.id = w.logged_by) AS logged_by_name,
+  $_loggedByColumns,
   _workout_exercises(w.id) AS exercises,
   CASE
     WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
@@ -121,18 +127,37 @@ SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, N
 /// 400s, unchanged. An id owned by someone else matches neither branch, so the
 /// INSERT is attempted and trips `workouts_pkey` — `403 id_taken` via
 /// `_rethrowForeignId`.
-const _saveWorkout = '''
+///
+/// A coach logging for the owner (`@loggedBy`) links only their own copy, live, and its
+/// sessions, so the log can't move a program they don't write. They log only what
+/// they could read, and not a workout the owner deleted: either returns no row.
+const _saveWorkout =
+    '''
 WITH
 _existing_workout AS (
   SELECT id FROM workouts WHERE id = @id::uuid AND user_id = @userId
 ),
 -- the template and program are the caller's own or nothing: a session saved
 -- before its template synced, or after it was deleted, still saves, unlinked
-_template AS (
-  SELECT id FROM templates WHERE id = @templateId::uuid AND user_id = @userId
-),
 _program AS (
-  SELECT id FROM programs WHERE id = @programId::uuid AND user_id = @userId
+  SELECT p.id
+  FROM programs p
+  WHERE p.id = @programId::uuid
+    AND p.user_id = @userId
+    AND (
+      @loggedBy::text IS NULL
+      OR (
+        p.coach_id = @loggedBy
+        AND EXISTS (SELECT 1 FROM connections c WHERE c.id = p.connection_id AND c.status = 'active')
+      )
+    )
+),
+_template AS (
+  SELECT id
+  FROM templates
+  WHERE id = @templateId::uuid
+    AND user_id = @userId
+    AND (@loggedBy::text IS NULL OR program_id IN (SELECT id FROM _program))
 ),
 _order_to_id AS (
   SELECT
@@ -174,6 +199,13 @@ _workout AS (
     (SELECT id FROM _program),
     @loggedBy::text
   WHERE NOT EXISTS (SELECT 1 FROM _existing_workout)
+    AND (
+      @loggedBy::text IS NULL
+      OR (
+        _readable_at(_relation(@loggedBy, @userId), @startedAt::timestamptz, NULL)
+        AND NOT EXISTS (SELECT 1 FROM archive.deleted_workouts d WHERE d.id = @id::uuid AND d.user_id = @userId)
+      )
+    )
   RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, logged_by
 ),
 _inserted_exercises AS (
@@ -275,7 +307,7 @@ SELECT
   w.template_id,
   w.program_id,
   w.created_at,
-  w.logged_by,
+  $_loggedByColumns,
   coalesce(ej.exercises_json, '[]'::jsonb) AS exercises,
   '[]'::jsonb AS images,
   true AS created
@@ -294,7 +326,7 @@ SELECT
   w.template_id,
   w.program_id,
   w.created_at,
-  w.logged_by,
+  $_loggedByColumns,
   _workout_exercises(w.id) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -662,7 +694,8 @@ SELECT
 /// untouched and answers with what the workout already has, so a shallow PUT
 /// can no longer strip a session's body; true replaces, and an empty array
 /// legitimately empties. See [WorkoutRequest.replacesExercises].
-const _replaceWorkout = '''
+const _replaceWorkout =
+    '''
 WITH
 _order_to_id AS (
   SELECT
@@ -715,7 +748,7 @@ _workout AS (
       ELSE _clip_pauses(pauses, @startedAt::timestamptz, @completedAt::timestamptz)
     END
   WHERE id = @workoutId::uuid AND user_id = @userId
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, logged_by
 ),
 -- The body as stored, read from the statement's snapshot: every CTE sees the
 -- rows as they were before this replace, whatever the others write.
@@ -897,6 +930,7 @@ _exercises_json AS (
 )
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
+  $_loggedByColumns,
   -- the replacing branch reads its own RETURNING, because a CTE cannot see
   -- rows it just wrote; the preserving branch reads the table, which is
   -- untouched in that case and so already final
@@ -913,7 +947,8 @@ FROM _workout w
 LEFT JOIN _exercises_json ej ON true
 ''';
 
-const _patchWorkout = '''
+const _patchWorkout =
+    '''
 WITH _updated AS (
   UPDATE workouts
   SET
@@ -934,7 +969,7 @@ WITH _updated AS (
       )
     END
   WHERE id = @workoutId::uuid AND user_id = @userId
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, logged_by
 )
 SELECT
   u.id,
@@ -947,6 +982,7 @@ SELECT
   u.template_id,
   u.program_id,
   u.created_at,
+  $_loggedByColumns,
   _workout_exercises(u.id) AS exercises,
   coalesce(
     (
@@ -985,7 +1021,8 @@ WHERE id = @workoutId::uuid
 // Transaction ids belong to one cluster. A cursor at or past the snapshot's
 // xmax can't have come from this one: the database was moved, and its new
 // counter started lower. That cursor is stale, never read from.
-const _workoutChanges = '''
+const _workoutChanges =
+    '''
 WITH _check AS (
   SELECT @sinceXid::text IS NOT NULL
          AND @sinceXid::text::xid8 >= pg_snapshot_xmax(pg_current_snapshot()) AS stale
@@ -1009,8 +1046,7 @@ SELECT
   c.stale,
   p.id, p.xid::text AS xid, p.at, p.deleted,
   w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
-  w.logged_by,
-  (SELECT username FROM profiles coach WHERE coach.id = w.logged_by) AS logged_by_name,
+  $_loggedByColumns,
   CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id) END AS exercises,
   CASE WHEN p.deleted THEN NULL ELSE COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)

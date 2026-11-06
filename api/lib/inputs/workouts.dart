@@ -133,6 +133,25 @@ class ImportWorkoutsIn {
 /// (CLAUDE.md, *The device-only health rule*). It exists on PATCH because the
 /// estimate is a function of the session's timing: a patch that moves `start`
 /// or `end` carries the device's recomputed figure.
+/// `POST /accounts/:targetUserId/workouts` — a workout a coach enters for a client, in
+/// the shape `POST /workouts` takes. Every read of a workout needs its name and start,
+/// and the owner can't be asked to fix one somebody else wrote, so both are required
+/// here. The whole body is checked before anything is written for it.
+class WorkoutLogIn {
+  final Map<String, dynamic> body;
+
+  const new _(this.body);
+
+  static Future<WorkoutLogIn> fromRequest(Request req) async {
+    final json = await req.json();
+    json
+      ..string('name')
+      ..timestamp('start');
+    WorkoutRequest(userId: '', body: json).toParams();
+    return WorkoutLogIn._(json);
+  }
+}
+
 /// `PUT /workouts/:workoutId/hidden` — optionally `{at}`, when the device says it
 /// happened.
 class WorkoutHideIn {

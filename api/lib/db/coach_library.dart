@@ -78,9 +78,13 @@ mixin _CoachLibrary on _DatabaseBase implements CoachLibraryService {
     required String coachId,
     required String studentId,
   }) async {
-    final rows = await _pool.execute(
-      _matchExercisesForStudent.toSql(),
-      parameters: {'ids': ids, 'coachId': coachId, 'studentId': studentId},
+    // two first logs of the same custom race to copy it, and the loser's retry finds
+    // the winner's copy
+    final rows = await _retryOnCreateRace(
+      () => _pool.execute(
+        _matchExercisesForStudent.toSql(),
+        parameters: {'ids': ids, 'coachId': coachId, 'studentId': studentId},
+      ),
     );
     return {for (final row in rows) row[0].toString(): row[1].toString()};
   }

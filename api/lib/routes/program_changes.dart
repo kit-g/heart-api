@@ -10,6 +10,7 @@ import 'package:heart/models/program_copy.dart';
 import 'package:heart/models/programs.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart/notifications/topics.dart';
+import 'package:heart/routes/programs.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -337,7 +338,7 @@ Future<Model> logWorkoutFor(Request req) => logWorkoutForStudent(req, req.rawPat
 
 Future<Model> logWorkoutForStudent(Request req, String student) async {
   await _assertCanLog(req, student);
-  final json = await req.json();
+  final json = (await WorkoutLogIn.fromRequest(req)).body;
   final exercises = await req.coachLibraryService.matchExercisesForStudent(
     ids: idsIn(json['exercises']).toList(),
     coachId: req.userId,
@@ -366,17 +367,15 @@ Future<Model> logWorkoutForStudent(Request req, String student) async {
   );
 }
 
+/// The base a workout the coach logged moved, worked out on their device. The
+/// student's app is told, so it plans from the new base.
 Future<Model> moveBaseFor(Request req) async {
   final student = req.rawPathParameters[#targetUserId]!;
   final programId = req.rawPathParameters[#programId]!;
   await _assertCanWrite(req, student, programId);
-  final input = await ProgramBaseIn.fromRequest(req);
-  final (base, created) = await req.programService.createProgramBase(
-    userId: student,
-    programId: programId,
-    base: input.base,
-  );
-  return created ? Created(base) : base;
+  final base = await createProgramBaseFor(req, programId, userId: student, loggedBy: req.userId);
+  await tellOtherSide(req, programId);
+  return base;
 }
 
 Future<Model> savePlanFor(Request req) async {
