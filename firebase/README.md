@@ -10,10 +10,10 @@ The API enqueues events to the `heart-firebase-events` SQS queue; this Lambda co
 
 ## Events
 
-| Type              | Payload                                                           | Handler                                    |
-|-------------------|-------------------------------------------------------------------|--------------------------------------------|
-| `push.notification` | `{tokens: [...], title?, body?, silent?, channel?, collapseKey?, data: {...}}` | `notify.send_comment_push` — FCM multicast |
-| `account.delete`  | `{uid: "<firebase-uid>"}`                                         | `auth.delete_user` — Admin SDK             |
+| Type                | Payload                                                                 | Handler                            |
+|---------------------|-------------------------------------------------------------------------|------------------------------------|
+| `push.notification` | `{tokens: [...], title?, silent?, channel?, collapseKey?, data: {...}}` | `notify.send_push` — FCM multicast |
+| `account.delete`    | `{uid: "<firebase-uid>"}`                                               | `auth.delete_user` — Admin SDK     |
 
 Add a new event:
 

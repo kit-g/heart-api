@@ -1,10 +1,6 @@
 part of 'inputs.dart';
 
-String _publicKey(Map<String, dynamic> json, String field) {
-  final key = json.string(field);
-  if (key.isEmpty || key.length > 128) throw BadRequest(reason: '$field must be a public key');
-  return key;
-}
+const _maxPublicKey = 128;
 
 /// `POST /keys/devices`.
 class DevicePublishIn {
@@ -28,21 +24,20 @@ class DevicePublishIn {
     final json = await req.json();
     final id = json.string('id');
     if (!isUuidV7(id)) throw const BadRequest(reason: 'id must be a UUIDv7');
+    // a vouch is a device and its signature, or nothing: either one alone would
+    // show a device as vouched for when nobody signed
+    final (signature, vouchedBy) = switch ((json.stringOrNull('signature', maxLength: 256), json['vouchedBy'])) {
+      (null, null) => (null, null),
+      (final String signature, final String device) when isUuidV7(device) => (signature, device),
+      _ => throw const BadRequest(reason: 'a vouch is a signature and the id of the device that made it'),
+    };
     return DevicePublishIn._(
       id: id,
-      identityKey: _publicKey(json, 'identityKey'),
-      signingKey: _publicKey(json, 'signingKey'),
-      fallbackKey: _publicKey(json, 'fallbackKey'),
-      signature: switch (json['signature']) {
-        null => null,
-        final String signature when signature.length <= 256 => signature,
-        _ => throw const BadRequest(reason: 'signature must be text of at most 256 characters'),
-      },
-      vouchedBy: switch (json['vouchedBy']) {
-        null => null,
-        final String device when isUuidV7(device) => device,
-        _ => throw const BadRequest(reason: 'vouchedBy must be a device id'),
-      },
+      identityKey: json.string('identityKey', maxLength: _maxPublicKey),
+      signingKey: json.string('signingKey', maxLength: _maxPublicKey),
+      fallbackKey: json.string('fallbackKey', maxLength: _maxPublicKey),
+      signature: signature,
+      vouchedBy: vouchedBy,
     );
   }
 }
@@ -54,30 +49,32 @@ class FallbackKeyIn {
   const new _(this.key);
 
   static Future<FallbackKeyIn> fromRequest(Request req) async {
-    return FallbackKeyIn._(_publicKey(await req.json(), 'key'));
+    return FallbackKeyIn._((await req.json()).string('key', maxLength: _maxPublicKey));
   }
 }
 
-/// `POST /keys/devices/:deviceId/one-time-keys` — `{keys: {id: key}}`.
+/// `POST /keys/devices/:deviceId/one-time-keys` — `{keys: {id: key}}`, no more
+/// at once than a device can hold.
 class OneTimeKeysIn {
   final Map<String, String> keys;
 
   const new _(this.keys);
 
+  static bool _isKey(MapEntry entry) {
+    return switch ((entry.key, entry.value)) {
+      (final String id, final String public) =>
+        id.isNotEmpty && id.length <= 64 && public.isNotEmpty && public.length <= _maxPublicKey,
+      _ => false,
+    };
+  }
+
   static Future<OneTimeKeysIn> fromRequest(Request req) async {
     final json = await req.json();
     return switch (json['keys']) {
-      final Map keys when keys.isNotEmpty && keys.length <= 100 => OneTimeKeysIn._({
-        for (final MapEntry(:key, :value) in keys.entries)
-          switch ((key, value)) {
-            (final String id, final String _) when id.isNotEmpty && id.length <= 64 => id,
-            _ => throw const BadRequest(reason: 'keys must map a name to a key'),
-          }: switch (value) {
-            final String public when public.isNotEmpty && public.length <= 128 => public,
-            _ => throw const BadRequest(reason: 'keys must map a name to a key'),
-          },
-      }),
-      _ => throw const BadRequest(reason: 'keys must map a name to a key'),
+      final Map keys when keys.isNotEmpty && keys.length <= 50 && keys.entries.every(_isKey) => OneTimeKeysIn._(
+        Map.of(keys.cast<String, String>()),
+      ),
+      _ => throw const BadRequest(reason: 'keys must map a name to a key, at most 50 of them'),
     };
   }
 }
@@ -124,6 +121,20 @@ class EnqueueIn {
       kind: kind,
       content: content,
     );
+  }
+}
+
+/// `GET /keys/queue` — `?deviceId=`, a device of the caller's.
+class QueueQuery {
+  final String deviceId;
+
+  const new _(this.deviceId);
+
+  factory fromRequest(Request req) {
+    return switch (req.url.queryParameters['deviceId']) {
+      final String id when isUuidV7(id) => QueueQuery._(id),
+      _ => throw const BadRequest(reason: 'deviceId must be a device id'),
+    };
   }
 }
 

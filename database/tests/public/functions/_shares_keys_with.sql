@@ -21,6 +21,12 @@ BEGIN
     UPDATE connections SET status = 'severed' WHERE initiator_id = _a;
     RETURN NEXT ok(_shares_keys_with(_a, _b), 'an ended one: a new phone still needs keys for the history');
 
+    UPDATE connections SET status = 'pending' WHERE initiator_id = _a;
+    RETURN NEXT ok(_shares_keys_with(_a, _b), 'an ended one asked again, while nobody has answered');
+
+    UPDATE connections SET status = 'declined' WHERE initiator_id = _a;
+    RETURN NEXT ok(_shares_keys_with(_a, _b), 'an ended one asked again and declined');
+
     INSERT INTO blocks (blocker_id, blocked_id) VALUES (_b, _a);
     RETURN NEXT ok(NOT _shares_keys_with(_a, _b), 'never across a block');
 END
@@ -29,8 +35,10 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test__clean_up_device_queue() RETURNS SETOF TEXT AS
 $$
 DECLARE
-    _a TEXT := create_test_profile();
-    _d UUID := uuidv7();
+    _a   TEXT := create_test_profile();
+    _d   UUID := uuidv7();
+    _old UUID;
+    _new UUID;
 BEGIN
     RETURN NEXT has_function('public'::name, '_clean_up_device_queue'::name);
 
@@ -46,6 +54,20 @@ BEGIN
         (SELECT array_agg(content) FROM device_queue WHERE recipient_device_id = _d),
         ARRAY ['y'],
         'kept for at least 90 days'
+    );
+
+    _old := uuidv7();
+    _new := uuidv7();
+    RETURN NEXT is((SELECT count(*) FROM device_queue_receipts WHERE recipient_device_id = _d), 0::bigint, 'no receipts yet');
+    INSERT INTO device_queue_receipts (id, recipient_device_id, confirmed_at)
+    VALUES (_old, _d, now() - INTERVAL '91 days'),
+           (_new, _d, now() - INTERVAL '89 days');
+    PERFORM _clean_up_device_queue();
+
+    RETURN NEXT is(
+        (SELECT array_agg(id) FROM device_queue_receipts WHERE recipient_device_id = _d),
+        ARRAY [_new],
+        'a receipt is kept for at least 90 days too'
     );
 END
 $$ LANGUAGE plpgsql;

@@ -12,7 +12,7 @@ from events import PushNotification
 
 def _event(tokens, data=None):
     return PushNotification(
-        tokens=list(tokens), title="t", body="b", data=data or {}
+        tokens=list(tokens), title="t", data=data or {}
     )
 
 
@@ -58,7 +58,7 @@ class TestChannel:
         notify.send_push(PushNotification(tokens=["t1"], title="t", channel="messages", collapse_key="k"))
 
         fcm.AndroidNotification.assert_called_once_with(channel_id="messages")
-        fcm.Notification.assert_called_once_with(title="t", body=None)
+        fcm.Notification.assert_called_once_with(title="t")
 
 
 class TestEmptyTokens:
@@ -80,7 +80,7 @@ class TestSuccessfulSend:
             data={"commentId": "c-1"},
             android=fcm.AndroidConfig.return_value,
         )
-        fcm.Notification.assert_called_once_with(title="t", body="b")
+        fcm.Notification.assert_called_once_with(title="t")
         fcm.send_each_for_multicast.assert_called_once_with(
             fcm.MulticastMessage.return_value
         )

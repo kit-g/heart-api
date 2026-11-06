@@ -1,3 +1,4 @@
+import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -91,9 +92,61 @@ void main() {
     verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).called(2);
   });
 
-  test('one-time keys must map a name to a key', () async {
-    final res = await app.send('POST', '/keys/devices/$device/one-time-keys', body: {'keys': []});
-    expect(res.status, 400);
+  test('removing a device nobody had tells nobody', () async {
+    when(
+      app.db.removeDevice(userId: anyNamed('userId'), deviceId: anyNamed('deviceId')),
+    ).thenThrow(const NotFound(type: 'Device', id: device));
+
+    final res = await app.send('DELETE', '/keys/devices/$device');
+    expect(res.status, 404);
+    verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
+  });
+
+  test('a device in the path that cannot be one is not there, and a query one is refused', () async {
+    for (final (method, path, body) in [
+      ('DELETE', '/keys/devices/nope', null),
+      ('PUT', '/keys/devices/nope/fallback', {'key': 'k'}),
+      ('GET', '/keys/devices/nope/one-time-keys', null),
+      (
+        'POST',
+        '/keys/devices/nope/one-time-keys',
+        {
+          'keys': {'k': 'v'},
+        },
+      ),
+    ]) {
+      final res = await app.send(method, path, body: body);
+      expect(res.status, 404, reason: '$method $path');
+    }
+    expect((await app.send('GET', '/keys/queue?deviceId=nope')).status, 400);
+    expect((await app.send('GET', '/keys/queue')).status, 400);
+    verifyZeroInteractions(app.db);
+  });
+
+  test('a vouch is a signature and the device that made it, or nothing', () async {
+    for (final vouch in [
+      {'vouchedBy': other},
+      {'signature': 'sig'},
+      {'vouchedBy': other, 'signature': ''},
+    ]) {
+      final res = await app.send(
+        'POST',
+        '/keys/devices',
+        body: {'id': device, 'identityKey': 'i', 'signingKey': 's', 'fallbackKey': 'f', ...vouch},
+      );
+      expect(res.status, 400, reason: '$vouch');
+    }
+  });
+
+  test('one-time keys must map a name to a key, no more than a device holds', () async {
+    for (final keys in [
+      [],
+      {'k': 1},
+      {for (var i = 0; i < 51; i++) 'k$i': 'v'},
+    ]) {
+      final res = await app.send('POST', '/keys/devices/$device/one-time-keys', body: {'keys': keys});
+      expect(res.status, 400);
+    }
   });
 
   test('confirmations must be item ids', () async {

@@ -65,7 +65,8 @@ Future<NoContent> handler(Request request) async {
   /// Caveat worth knowing: rethrowing fails the *batch*, and the mapping reads
   /// up to 10 records at a time, so records already handled in the same batch
   /// are redelivered too. In practice these events arrive one at a time, and
-  /// every handler is idempotent or writes behind a unique key. Moving to
+  /// every handler is idempotent or writes behind a unique key, except a push,
+  /// which then goes again: a repeated push is the lesser loss. Moving to
   /// `ReportBatchItemFailures` is the real fix if batches ever fill up.
   Future<void> runRecord(Future<void> Function() handle) async {
     try {

@@ -3,6 +3,7 @@ library;
 
 import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
+import 'package:postgres/postgres.dart' show Sql;
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -42,6 +43,36 @@ void main() {
 
       await publish('first');
       expect((await publish('second')).identityKey, 'first');
+    });
+
+    test('a publish racing another of the same id answers the device, not a stranger\'s id', () async {
+      final me = await h.seedProfile();
+      final id = uuidV7();
+      final published = await h.runBlocked(
+        hold: (tx) async {
+          await tx.execute(
+            Sql.named(
+              'INSERT INTO crypto_devices (id, user_id, identity_key, signing_key, fallback_key) '
+              "VALUES (@id::uuid, @me, 'first', 's', 'f')",
+            ),
+            parameters: {'id': id, 'me': me},
+          );
+        },
+        calls: [
+          () => h.db.publishDevice(userId: me, id: id, identityKey: 'retry', signingKey: 's', fallbackKey: 'f'),
+        ],
+      );
+      expect(published.single.identityKey, 'first');
+    });
+
+    test('a removed device stays removed, and says so', () async {
+      final me = await h.seedProfile();
+      final id = await device(me);
+      await h.db.removeDevice(userId: me, deviceId: id);
+      await expectLater(
+        h.db.publishDevice(userId: me, id: id, identityKey: 'i', signingKey: 's', fallbackKey: 'f'),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'device_removed')),
+      );
     });
 
     test('someone else cannot take a device id', () async {
@@ -111,7 +142,7 @@ void main() {
         content: 'sealed',
       );
 
-      await h.db.removeDevice(userId: b, deviceId: mine);
+      await expectLater(h.db.removeDevice(userId: b, deviceId: mine), throwsA(isA<NotFound>()));
       expect(
         await h.db.getDevices(readerId: a, ownerId: a),
         hasLength(1),
@@ -120,6 +151,11 @@ void main() {
 
       await h.db.removeDevice(userId: a, deviceId: mine);
       expect(await h.db.getDevices(readerId: a, ownerId: a), isEmpty);
+      await expectLater(
+        h.db.removeDevice(userId: a, deviceId: mine),
+        throwsA(isA<NotFound>()),
+        reason: 'nothing changed, so nobody is told',
+      );
       final held = await h.exec('SELECT 1 FROM one_time_keys WHERE device_id = @d::uuid', {'d': mine});
       expect(held, isEmpty);
       expect(await h.db.getQueue(userId: a, deviceId: mine), isEmpty);
@@ -139,6 +175,33 @@ void main() {
         throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'key_limit')),
       );
       expect(await h.db.countOneTimeKeys(userId: me, deviceId: id), 50);
+    });
+
+    test('two uploads at once still stop at 50', () async {
+      final me = await h.seedProfile();
+      final id = await device(me);
+      final uploads = await h.runBlocked(
+        hold: (tx) async {
+          await tx.execute(
+            Sql.named('SELECT id FROM crypto_devices WHERE id = @id::uuid FOR UPDATE'),
+            parameters: {'id': id},
+          );
+          await tx.execute(
+            Sql.named(
+              'INSERT INTO one_time_keys (device_id, key_id, key) '
+              "SELECT @id::uuid, 'first-' || n, 'v' FROM generate_series(1, 30) n",
+            ),
+            parameters: {'id': id},
+          );
+        },
+        calls: [
+          () => h.db
+              .addOneTimeKeys(userId: me, deviceId: id, keys: {for (var i = 0; i < 30; i++) 'second-$i': 'v'})
+              .then<Object>((count) => count, onError: (Object e) => e),
+        ],
+      );
+      expect(uploads.single, isA<BadRequest>().having((e) => e.code, 'code', 'key_limit'));
+      expect(await h.db.countOneTimeKeys(userId: me, deviceId: id), 30);
     });
 
     test('only on your own device', () async {
@@ -261,6 +324,47 @@ void main() {
       expect(await h.db.getQueue(userId: b, deviceId: theirs), hasLength(1));
     });
 
+    test('a retry after the item was confirmed delivers nothing again', () async {
+      final (a, b) = await connected();
+      final (mine, theirs) = (await device(a), await device(b));
+      final id = uuidV7();
+      Future<bool> enqueue() {
+        return h.db.enqueue(
+          userId: a,
+          id: id,
+          recipientDeviceId: theirs,
+          senderDeviceId: mine,
+          kind: 'key',
+          content: 'x',
+        );
+      }
+
+      expect(await enqueue(), isTrue);
+      await h.db.confirm(userId: b, deviceId: theirs, ids: [id]);
+      expect(await enqueue(), isFalse);
+      expect(await h.db.getQueue(userId: b, deviceId: theirs), isEmpty);
+    });
+
+    test('an id is one item: another pair can\'t reuse it, and a stranger learns nothing of it', () async {
+      final (a, b) = await connected();
+      final stranger = await h.seedProfile();
+      final (mine, theirs, another, strangers) = (
+        await device(a),
+        await device(b),
+        await device(b),
+        await device(stranger),
+      );
+      final id = uuidV7();
+      await send(a, mine, theirs, 'x', id: id);
+
+      await expectLater(
+        send(a, mine, another, 'y', id: id),
+        throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'id_taken')),
+      );
+      await expectLater(send(stranger, strangers, theirs, 'z', id: id), throwsA(isA<Forbidden>()));
+      expect(await h.db.getQueue(userId: b, deviceId: another), isEmpty);
+    });
+
     test('only your own device reads or confirms its queue', () async {
       final (a, b) = await connected();
       final (mine, theirs) = (await device(a), await device(b));
@@ -288,6 +392,14 @@ void main() {
       await expectLater(send(a, mine, theirs, 'x'), throwsA(isA<Forbidden>()));
     });
 
+    test('a block stops what was already waiting, too', () async {
+      final (a, b) = await connected();
+      final (mine, theirs) = (await device(a), await device(b));
+      await send(a, mine, theirs, 'x');
+      await h.exec('INSERT INTO blocks (blocker_id, blocked_id) VALUES (@b, @a)', {'a': a, 'b': b});
+      expect(await h.db.getQueue(userId: b, deviceId: theirs), isEmpty);
+    });
+
     test('stops at 2000 from one device to another', () async {
       final (a, b) = await connected();
       final (mine, theirs) = (await device(a), await device(b));
@@ -311,6 +423,26 @@ void main() {
       await send(a, mine, theirs, 'x', kind: 'key_request');
       expect((await h.db.getQueue(userId: b, deviceId: theirs)).single.kind, 'key_request');
       expect(await h.db.getKeyPeers(userId: a), [b]);
+    });
+
+    test('an ended relationship asked again, or declined again, still had one', () async {
+      final (a, b) = await connected();
+      final (mine, theirs) = (await device(a), await device(b));
+      await h.exec("UPDATE connections SET accepted_at = now(), status = 'pending' WHERE initiator_id = @a", {'a': a});
+      await send(a, mine, theirs, 'x', kind: 'key_request');
+      expect(await h.db.getDevices(readerId: a, ownerId: b), hasLength(1));
+      expect(await h.db.getKeyPeers(userId: a), [b]);
+
+      await h.exec("UPDATE connections SET status = 'declined' WHERE initiator_id = @a", {'a': a});
+      expect(await h.db.getKeyPeers(userId: b), [a]);
+    });
+
+    test('a block leaves someone out of who is told', () async {
+      final (a, b) = await connected();
+      await h.exec('UPDATE connections SET accepted_at = now() WHERE initiator_id = @a', {'a': a});
+      expect(await h.db.getKeyPeers(userId: a), [b]);
+      await h.exec('INSERT INTO blocks (blocker_id, blocked_id) VALUES (@b, @a)', {'a': a, 'b': b});
+      expect(await h.db.getKeyPeers(userId: a), isEmpty);
     });
   });
 }

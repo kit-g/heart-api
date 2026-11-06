@@ -42,27 +42,43 @@ extension Notifier on Request {
         return;
     }
 
-    await sendPush(devices: audience.devices, topic: topic, name: name, variant: variant, data: data);
+    await _sendPush(devices: audience.devices, topic: topic, name: name, variant: variant, data: data);
   }
 
   /// What the daily job calls for a digest it claimed: [userId] may have turned
-  /// the topic off since it was queued.
+  /// the topic off since it was queued. A digest doesn't know whose activity
+  /// queued it, so it goes while the topic, or any one person, still wants it.
   Future<void> deliverDigest({required String userId, required PushTopic topic}) async {
+    final said = [
+      for (final preference in await pushService.getPushPreferences(userId: userId))
+        if (preference.topic == topic.key) preference,
+    ];
+    final forTopic = [
+      for (final preference in said)
+        if (preference.connectionId == null) preference.delivery,
+    ].firstOrNull;
+    final wanted = [
+      topic.deliveryFor(forTopic: forTopic),
+      for (final preference in said)
+        if (preference.connectionId != null) topic.deliveryFor(forPerson: preference.delivery, forTopic: forTopic),
+    ].any((delivery) => delivery != PushTopic.off);
+    if (!wanted) return;
+
     final audience = await pushService.getPushAudience(userId: userId, topic: topic.key);
-    if (topic.deliveryFor(forTopic: audience.forTopic) == PushTopic.off) return;
-    await sendPush(devices: audience.devices, topic: topic);
+    await _sendPush(devices: audience.devices, topic: topic);
   }
 
-  Future<void> sendPush({
+  Future<void> _sendPush({
     required List<({String token, String locale})> devices,
     required PushTopic topic,
     String? name,
     String variant = 'title',
     Map<String, String> data = const {},
   }) async {
+    // A silent push has no words, so every device gets the one message.
     final byLocale = <String, List<String>>{};
     for (final device in devices) {
-      byLocale.putIfAbsent(device.locale, () => []).add(device.token);
+      byLocale.putIfAbsent(topic.silent ? config.defaultLocale : device.locale, () => []).add(device.token);
     }
 
     for (final MapEntry(key: locale, value: tokens) in byLocale.entries) {
@@ -78,14 +94,30 @@ extension Notifier on Request {
               locale: locale,
               eventType: topic.key,
               variant: variant,
-              args: {'name': name ?? ''},
+              args: {'name': name.orSomeone(locale, defaultLocale: config.defaultLocale)},
               defaultLocale: config.defaultLocale,
             ),
           'channel': ?topic.channel,
-          'collapseKey': topic.key,
+          if (topic.collapses) 'collapseKey': topic.key,
           'data': {'topic': topic.key, ...data},
         },
       );
     }
+  }
+}
+
+extension on String? {
+  /// Someone with no name still reads as a person, in the push's own language.
+  String orSomeone(String locale, {required String defaultLocale}) {
+    return switch (this) {
+      final String name when name.trim().isNotEmpty => name,
+      _ => renderTitle(
+        locale: locale,
+        eventType: 'person',
+        variant: 'unnamed',
+        args: const {},
+        defaultLocale: defaultLocale,
+      ),
+    };
   }
 }

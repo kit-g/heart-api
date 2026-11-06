@@ -1,7 +1,10 @@
 import 'package:heart/middleware/database.dart';
 import 'package:heart/notifications/notifier.dart';
 import 'package:heart/notifications/topics.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:relic/relic.dart';
+
+final _logger = logging.Logger('pushes');
 
 /// The evening's hour a daily push goes out at, in the person's own time.
 const _digestHour = 18;
@@ -25,11 +28,19 @@ Future<void> pushRequested(Request req, Map event) async {
 }
 
 /// The hourly schedule: sends what's owed to people whose evening it is.
+///
+/// The claim has already removed every row it returns, so a redelivery finds
+/// nothing to send. One person's failed send is theirs alone, and the rest of the
+/// evening still goes out.
 Future<void> deliverDigests(Request req) async {
   final due = await req.pushService.claimDueDigests(localHour: _digestHour);
   for (final (:userId, :topic) in due) {
     if (PushTopic.of(topic) case final PushTopic known) {
-      await req.deliverDigest(userId: userId, topic: known);
+      try {
+        await req.deliverDigest(userId: userId, topic: known);
+      } catch (e, st) {
+        _logger.warning('could not send a $topic digest to $userId', e, st);
+      }
     }
   }
 }
