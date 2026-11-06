@@ -20,10 +20,11 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
       parameters: {'senderId': senderId, 'threadId': threadId},
     );
     return switch (rows.firstOrNull?.toColumnMap()) {
-      {'recipient_id': final String recipientId} => (
+      {'recipient_id': final String recipientId, 'connection_id': final String connectionId} => (
         threadId: threadId,
         senderId: senderId,
         recipientId: recipientId,
+        connectionId: connectionId,
       ),
       _ => null,
     };

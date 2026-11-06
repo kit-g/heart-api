@@ -205,9 +205,21 @@ void main() {
       expect((await say(a, thread)).cursor, isNull);
     });
 
+    test('a pause pauses the sharing, not the conversation', () async {
+      final (a, b, thread) = await open();
+      await h.exec(
+        "UPDATE connections SET status = 'paused' WHERE id = (SELECT connection_id FROM threads WHERE id = @t::uuid)",
+        {'t': thread},
+      );
+      expect((await h.db.getThreadParties(senderId: b, threadId: thread))?.recipientId, a);
+      expect((await say(b, thread)).threadId, thread);
+    });
+
     test('takes nothing once the connection ended, or across a block', () async {
       final (a, b, thread) = await open();
-      expect((await h.db.getThreadParties(senderId: a, threadId: thread))?.recipientId, b);
+      final parties = await h.db.getThreadParties(senderId: a, threadId: thread);
+      expect(parties?.recipientId, b);
+      expect(parties?.connectionId, (await h.db.getConnections(a)).single.connectionId);
       expect(await h.db.getThreadParties(senderId: await h.seedProfile(), threadId: thread), isNull);
 
       await h.db.deleteConnection(actorId: a, targetId: b, role: .peer, domain: .fitness);

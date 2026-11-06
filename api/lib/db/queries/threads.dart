@@ -78,12 +78,14 @@ $_threadOther
 ''';
 
 const _threadParties = '''
-SELECT CASE WHEN t.person_a = @senderId THEN t.person_b ELSE t.person_a END AS recipient_id
+SELECT
+  CASE WHEN t.person_a = @senderId THEN t.person_b ELSE t.person_a END AS recipient_id,
+  t.connection_id
 FROM threads t
 JOIN connections c ON c.id = t.connection_id
 WHERE t.id = @threadId::uuid
   AND @senderId IN (t.person_a, t.person_b)
-  AND c.status = 'active'
+  AND c.status IN ('active', 'paused')
   AND NOT _blocked_between(t.person_a, t.person_b)
 ''';
 
@@ -108,7 +110,7 @@ _open AS (
   JOIN connections c ON c.id = t.connection_id
   WHERE t.id = @threadId::uuid
     AND @senderId IN (t.person_a, t.person_b)
-    AND c.status = 'active'
+    AND c.status IN ('active', 'paused')
     AND NOT _blocked_between(t.person_a, t.person_b)
 ),
 _recent AS (

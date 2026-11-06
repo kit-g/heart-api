@@ -66,7 +66,7 @@ void main() {
       when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
       when(
         app.db.getThreadParties(senderId: anyNamed('senderId'), threadId: anyNamed('threadId')),
-      ).thenAnswer((_) async => (threadId: thread, senderId: 'me', recipientId: 'them'));
+      ).thenAnswer((_) async => (threadId: thread, senderId: 'me', recipientId: 'them', connectionId: 'c1'));
       when(
         app.db.addThreadItem(
           senderId: anyNamed('senderId'),
@@ -114,6 +114,12 @@ void main() {
       final message = published();
       expect(message['userId'], 'them');
       expect(message.toString(), isNot(contains('sealed')));
+    });
+
+    test('names the connection, so their setting for this one person applies', () async {
+      stubSend();
+      await app.send('POST', '/threads/$thread/items', body: body());
+      expect(published()['connectionId'], 'c1');
     });
 
     test('a retry tells them again, in case the push is what failed the first time', () async {
