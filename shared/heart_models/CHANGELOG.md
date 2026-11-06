@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.51.0
+
+- Changed: `ThreadParties` carries the thread's `connectionId`, so a message's push can apply the
+  recipient's setting for that one person. Only the API builds one; no app build reads it yet.
+
 ## 2.50.0
 
 Reading coaching's answers back.

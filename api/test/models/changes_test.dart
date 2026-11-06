@@ -23,5 +23,10 @@ void main() {
         expect(() => ChangeCursor.parse(raw), throwsA(isA<BadRequest>()), reason: raw);
       }
     });
+
+    test('twenty digits past what a transaction id holds is a 400, not a database error', () {
+      const cursor = ChangeCursor(xid: '18446744073709551616', id: '019a0000-0000-7000-8000-000000000001');
+      expect(() => ChangeCursor.parse(cursor.toString()), throwsA(isA<BadRequest>()));
+    });
   });
 }

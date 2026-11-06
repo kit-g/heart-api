@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(28);
+SELECT plan(29);
 
 SELECT has_table('public'::name, 'threads'::name);
 
@@ -59,6 +59,12 @@ SELECT fk_ok('public', 'thread_items', 'sender_id', 'public', 'profiles', 'id');
 
 SELECT has_index('public'::name, 'thread_items'::name, 'thread_items_order_idx'::name);
 SELECT has_index('public'::name, 'thread_items'::name, 'thread_items_subject_idx'::name);
+SELECT has_index(
+               'public'::name,
+               'thread_items'::name,
+               'thread_items_sender_idx'::name,
+               ARRAY ['sender_id', 'created_at']::name[]
+       );
 
 SELECT has_table('public'::name, 'thread_reads'::name);
 

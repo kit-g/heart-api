@@ -1,8 +1,9 @@
 import '../models/pagination.dart';
 import '../models/thread.dart';
 
-/// A connection's two people, as a send needs them.
-typedef ThreadParties = ({String threadId, String senderId, String recipientId});
+/// A connection's two people, as a send needs them, and the connection, so the
+/// recipient's settings for that one person apply.
+typedef ThreadParties = ({String threadId, String senderId, String recipientId, String connectionId});
 
 abstract interface class ThreadService {
   /// Gets or opens the thread of a connection [userId] is in. Null if they aren't,
@@ -10,7 +11,7 @@ abstract interface class ThreadService {
   Future<Thread?> openThread({required String userId, required String connectionId});
 
   /// The two people of a live thread, as [senderId] would write in it. Null when
-  /// they can't: it isn't theirs, its connection isn't active, or a block stands.
+  /// they can't: it isn't theirs, its connection has ended, or a block stands.
   Future<ThreadParties?> getThreadParties({required String senderId, required String threadId});
 
   /// Stores an item once. `false` if this id had already arrived.

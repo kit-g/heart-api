@@ -98,8 +98,6 @@ class EnqueueIn {
     required this.content,
   });
 
-  static final _kind = RegExp(r'^[a-z][a-z0-9_]{0,31}$');
-
   static Future<EnqueueIn> fromRequest(Request req) async {
     final json = await req.json();
     String device(String field) {
@@ -111,7 +109,7 @@ class EnqueueIn {
     final id = json.string('id');
     if (!isUuidV7(id)) throw const BadRequest(reason: 'id must be a UUIDv7');
     final kind = json.string('kind');
-    if (!_kind.hasMatch(kind)) throw const BadRequest(reason: 'kind must be a snake_case word');
+    if (!_snakeWord.hasMatch(kind)) throw const BadRequest(reason: 'kind must be a snake_case word');
     // A string and nothing else, so nothing readable can ride in structure.
     final content = switch (json['content']) {
       final String content when content.isNotEmpty && content.length <= 1024 => content,
