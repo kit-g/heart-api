@@ -24,9 +24,10 @@ Consequences for API work:
 - Alerts derived from health data use contentless/silent pushes: the server stores only the
   schedule, the device evaluates and composes the notification.
 - Coaching's messages and notes may hold health-shaped words, and the server stores them only as
-  ciphertext the people involved can open (`docs/2026-11-01.coaching.md`). A report's words are sealed
-  to a key the server doesn't hold. Nothing readable arrives by these routes, and no new kind of thing
-  rides in them without an explicit decision.
+  ciphertext the people involved can open (`docs/2026-11-01.coaching.md`). A report's words arrive
+  readable only at `POST /reports`, are checked in memory, and are stored only sealed, to a key the
+  server doesn't hold. A message's subject and a report's reason travel in clear as references, never
+  as what was said. No new kind of thing rides in these routes without an explicit decision.
 - The server's role around health features is: reference content, algorithm parameters,
   schemas, and coordination — never storage.
 - Enforced, not just stated: `Request.json()` (`api/lib/core/request.dart`) rejects a body with a
