@@ -5,6 +5,8 @@
     <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="robots" content="noindex"/>
+    <!-- the address carries the link's secret, and the page loads someone else's photo -->
+    <meta name="referrer" content="no-referrer"/>
     <title>An invitation - Heart of Yours</title>
     <link rel="stylesheet" href="assets/tokens.css">
     <link rel="stylesheet" href="assets/site.css">
@@ -58,6 +60,7 @@
                     </button>
                     <button id="block" type="button" class="text-sm text-muted underline mt-2">Block this person</button>
                 </div>
+                <p id="ask-error" class="text-sm text-destructive mt-4" hidden></p>
                 <p class="text-sm text-muted mt-6">
                     Signed in as <span id="signed-in-as"></span>.
                     <button id="sign-out" type="button" class="underline">Not you?</button>
@@ -86,14 +89,19 @@
             </p>
             <div id="make-signed-out" class="flex flex-col gap-3"></div>
             <form id="make-form" hidden class="flex flex-col gap-3 text-left">
-                <input id="invitee-name" required maxlength="100" placeholder="Their name, just for you"
+                <input id="invitee-name" required maxlength="100" pattern=".*\S.*" placeholder="Their name, just for you"
                        class="h-11 px-4 rounded border bg-ground text-ink w-full"/>
                 <button type="submit"
                         class="inline-flex items-center justify-center h-11 px-6 rounded bg-accent text-on-accent font-medium">
                     Make the link
                 </button>
+                <p id="make-error" class="text-sm text-destructive" hidden></p>
                 <p class="text-sm text-muted text-center">
                     A link made here can't carry your key for checking messages. Make it in the app if you can.
+                </p>
+                <p class="text-sm text-muted text-center">
+                    Signed in as <span id="make-signed-in-as"></span>.
+                    <button id="make-sign-out" type="button" class="underline">Not you?</button>
                 </p>
             </form>
         </section>
@@ -110,6 +118,13 @@
             <a id="done-open-app" class="inline-flex items-center justify-center h-11 px-6 rounded bg-accent text-on-accent font-medium">
                 Open in Heart
             </a>
+            <p class="text-sm text-muted mt-4">
+                Don't have it?
+                <a class="underline" href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener">iPhone</a>
+                or
+                <a class="underline" href="https://play.google.com/store/apps/details?id=me.heart.android"
+                   target="_blank" rel="noopener">Android</a>.
+            </p>
         </section>
 
         <section id="state-message" hidden>

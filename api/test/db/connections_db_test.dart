@@ -637,6 +637,109 @@ void main() {
       expect(await h.db.areConnected(userA: a, userB: b), isFalse);
     });
   });
+
+  group('the edges of a relationship', () {
+    Future<Connection> ask(String from, String to) {
+      return h.db.createConnection(initiatorId: from, targetId: to, role: .peer, domain: .fitness);
+    }
+
+    Future<Connection> move(String actor, String other, ConnectionStatus to) {
+      return h.db.changeConnectionStatus(actorId: actor, targetId: other, role: .peer, domain: .fitness, newStatus: to);
+    }
+
+    test('ending what already ended leaves it as it ended, by whom', () async {
+      final (a, b) = await pair();
+      await ask(a, b);
+      await move(b, a, .active);
+      await h.db.deleteConnection(actorId: a, targetId: b, role: .peer, domain: .fitness);
+      await h.db.deleteConnection(actorId: b, targetId: a, role: .peer, domain: .fitness);
+
+      final row = await h.exec('SELECT status, status_by FROM connections WHERE initiator_id = @a', {'a': a});
+      expect(row.first.toColumnMap(), {'status': 'severed', 'status_by': a});
+    });
+
+    test('asked again after an ending, it is accepted again when answered', () async {
+      final (a, b) = await pair();
+      await ask(a, b);
+      await move(b, a, .active);
+      await h.exec("UPDATE connections SET accepted_at = '2020-01-01Z' WHERE initiator_id = @a", {'a': a});
+      await h.db.deleteConnection(actorId: a, targetId: b, role: .peer, domain: .fitness);
+
+      final again = await ask(a, b);
+      expect(again.status, ConnectionStatus.pending);
+      expect(again.acceptedAt, isNull);
+      expect((await move(b, a, .active)).acceptedAt!.isAfter(DateTime.utc(2021)), isTrue);
+    });
+
+    test('two people asking each other at once both get the one row', () async {
+      final (a, b) = await pair();
+      final answers = await h.runBlocked<Connection>(
+        hold: (tx) => tx.execute(
+          Sql.named(
+            'INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status_by) '
+            "VALUES (@a, @b, 'PEER', 'PEER', 'fitness', @a)",
+          ),
+          parameters: {'a': a, 'b': b},
+        ),
+        calls: [() => ask(b, a)],
+      );
+      expect(answers.single.targetId, a);
+      expect(answers.single.status, ConnectionStatus.pending);
+    });
+
+    test('nothing starts again while a block stands', () async {
+      final (a, b) = await pair();
+      await ask(a, b);
+      await h.seedConnection(initiator: a, target: b, domain: 'general');
+      await move(b, a, .active);
+      await h.db.changeConnectionStatus(
+        actorId: a,
+        targetId: b,
+        role: .peer,
+        domain: .general,
+        newStatus: .blocked,
+      );
+
+      await expectLater(move(b, a, .pending), throwsA(isA<Forbidden>()));
+      final row = await h.exec("SELECT status FROM connections WHERE initiator_id = @a AND domain = 'fitness'", {
+        'a': a,
+      });
+      expect(row.first[0], 'severed');
+    });
+
+    test('a request with nobody recorded as its author is still not its initiator\'s to answer', () async {
+      final (a, b) = await pair();
+      await h.seedConnection(initiator: a, target: b, status: 'pending');
+      await h.exec('UPDATE connections SET status_by = NULL WHERE initiator_id = @a', {'a': a});
+
+      await expectLater(move(a, b, .active), throwsA(isA<Forbidden>()));
+      expect((await move(b, a, .active)).status, ConnectionStatus.active);
+    });
+
+    test('what a coaching connection shares is the live student\'s to choose', () async {
+      final (coach, student) = await pair();
+      await h.exec(
+        'INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status) '
+        "VALUES (@c, @s, 'COACH', 'STUDENT', 'fitness', 'active')",
+        {'c': coach, 's': student},
+      );
+      Future<Connection> share(ConnectionRole role) {
+        return h.db.changeConnectionShares(
+          actorId: student,
+          targetId: coach,
+          role: role,
+          domain: .fitness,
+          shares: {.goals},
+        );
+      }
+
+      await expectLater(share(.coach), throwsA(isA<Forbidden>()), reason: 'that id is the coach\'s side');
+      expect((await share(.student)).shares, ['goals']);
+
+      await h.db.deleteConnection(actorId: student, targetId: coach, role: .student, domain: .fitness);
+      await expectLater(share(.student), throwsA(isA<Forbidden>()), reason: 'an ended one shares nothing');
+    });
+  });
 }
 
 class _Harness extends DatabaseTestBase;

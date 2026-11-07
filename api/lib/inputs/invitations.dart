@@ -32,6 +32,22 @@ class InvitationCreateIn {
   }
 }
 
+/// `GET /invitations?cursor=&limit=`, an inviter's links a page at a time.
+class InvitationsQuery {
+  final String? cursor;
+  final int limit;
+
+  const new _({required this.cursor, required this.limit});
+
+  static InvitationsQuery fromRequest(Request req) {
+    final page = PageQuery.fromRequest(req);
+    if (page.cursor case final cursor? when !isUuidV7(cursor)) {
+      throw const BadRequest(reason: 'cursor must be the one the previous page returned');
+    }
+    return InvitationsQuery._(cursor: page.cursor, limit: page.limit);
+  }
+}
+
 /// `POST /invitation-links/:token/accept` — optionally `{shares: [...]}`.
 class InvitationAcceptIn {
   final Set<ConnectionShare> shares;
@@ -43,7 +59,7 @@ class InvitationAcceptIn {
     return InvitationAcceptIn._(
       switch (json['shares']) {
         null => const {},
-        final List shares => ConnectionSharesIn.parse(shares),
+        final List shares => ConnectionSharesIn._parse(shares),
         _ => throw const BadRequest(reason: 'shares must be a list'),
       },
     );

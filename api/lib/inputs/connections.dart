@@ -61,12 +61,12 @@ class ConnectionSharesIn {
   static Future<ConnectionSharesIn> fromRequest(Request req) async {
     final json = await req.json();
     return switch (json['shares']) {
-      final List shares => ConnectionSharesIn._(parse(shares)),
+      final List shares => ConnectionSharesIn._(_parse(shares)),
       _ => throw const BadRequest(reason: 'shares must be a list'),
     };
   }
 
-  static Set<ConnectionShare> parse(List shares) {
+  static Set<ConnectionShare> _parse(List shares) {
     try {
       return {for (final share in shares) ConnectionShare.fromString('$share')};
     } on ArgumentError catch (e) {

@@ -118,6 +118,19 @@ class ImportWorkoutsIn {
   }
 }
 
+/// `PUT /workouts/:workoutId/hidden` — optionally `{at}`, when the device says it
+/// happened.
+class WorkoutHideIn {
+  final DateTime? at;
+
+  const new _(this.at);
+
+  static Future<WorkoutHideIn> fromRequest(Request req) async {
+    final json = await req.json();
+    return WorkoutHideIn._(json.dateOrNull('at'));
+  }
+}
+
 /// Body for `PATCH /workouts/:workoutId` — a partial update of a workout's own
 /// fields (name, start, end, calories, note, pauses), leaving its exercises
 /// untouched.
@@ -133,25 +146,6 @@ class ImportWorkoutsIn {
 /// (CLAUDE.md, *The device-only health rule*). It exists on PATCH because the
 /// estimate is a function of the session's timing: a patch that moves `start`
 /// or `end` carries the device's recomputed figure.
-/// `PUT /workouts/:workoutId/hidden` — optionally `{at}`, when the device says it
-/// happened.
-class WorkoutHideIn {
-  final DateTime? at;
-
-  const new _(this.at);
-
-  static Future<WorkoutHideIn> fromRequest(Request req) async {
-    final json = await req.json();
-    return WorkoutHideIn._(
-      switch (json['at']) {
-        null => null,
-        final String at when DateTime.tryParse(at) != null => DateTime.parse(at),
-        _ => throw const BadRequest(reason: 'at must be an ISO-8601 time'),
-      },
-    );
-  }
-}
-
 class WorkoutPatchIn {
   final String? name;
   final DateTime? start;

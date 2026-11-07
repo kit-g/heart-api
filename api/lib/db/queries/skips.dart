@@ -1,6 +1,5 @@
 part of '../db.dart';
 
-/// The caller's skips, newest first, a page at a time.
 /// A coach's view of a student's skips: that a session was set aside and when.
 /// The reason and the weather are the student's own.
 const _listTargetSkips = '''
@@ -22,6 +21,7 @@ ORDER BY id DESC
 LIMIT @limit
 ''';
 
+/// The caller's skips, newest first, a page at a time.
 const _listSkips = '''
 SELECT id, at, reason, weather, template_id, program_id
 FROM skips

@@ -7,7 +7,19 @@ const _maxPendingInvitations = 50;
 /// has many accepted, and one who is bothering people has many declined.
 const _maxRecentDeclines = 20;
 
+/// Live clients one coach can hold: a guard, never expected to bind.
+const _maxClients = 1000;
+
 const _invitationLife = Duration(days: 7);
+
+const _notEntitled = Forbidden(code: 'coaching_beta', reason: 'coaching is open to testers for now');
+
+const _tooMany = BadRequest(
+  code: 'invitation_limit',
+  reason: 'you have too many open or recently declined invitations',
+);
+
+const _ownInvitation = BadRequest(code: 'own_invitation', reason: 'this is your own invitation');
 
 mixin _Invitations on _DatabaseBase implements InvitationService {
   @override
@@ -21,6 +33,7 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
       _createInvitation.toSql(),
       parameters: {
         'inviterId': inviterId,
+        'invitationId': null,
         'name': name,
         'domain': domain.value,
         'tokenHash': TokenSecret.hash(token),
@@ -29,14 +42,8 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
     );
     final row = rows.first.toColumnMap();
     return switch (row) {
-      {'entitled': false} => throw const Forbidden(
-        code: 'coaching_beta',
-        reason: 'coaching is open to testers for now',
-      ),
-      {'id': null} => throw const BadRequest(
-        code: 'invitation_limit',
-        reason: 'you have too many open or recently declined invitations',
-      ),
+      {'entitled': false} => throw _notEntitled,
+      {'id': null} => throw _tooMany,
       _ => Invitation.fromRow(row, token: token),
     };
   }
@@ -75,8 +82,13 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
         'expiresAt': DateTime.now().toUtc().add(_invitationLife),
       },
     );
-    if (rows.isEmpty) throw NotFound(type: 'Invitation', id: invitationId);
-    return Invitation.fromRow(rows.first.toColumnMap(), token: token);
+    final row = rows.first.toColumnMap();
+    return switch (row) {
+      {'found': false} => throw NotFound(type: 'Invitation', id: invitationId),
+      {'entitled': false} => throw _notEntitled,
+      {'id': null} => throw _tooMany,
+      _ => Invitation.fromRow(row, token: token),
+    };
   }
 
   @override
@@ -102,7 +114,7 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
   }) async {
     final tokenHash = TokenSecret.hash(token);
     final row = await _pool.runTx((tx) async {
-      await tx.execute(_lockInvitation.toSql(), parameters: {'tokenHash': tokenHash});
+      await tx.execute(_lockInvitation.toSql(), parameters: {'tokenHash': tokenHash, 'userId': userId});
       final rows = await tx.execute(
         _acceptInvitation.toSql(),
         parameters: {
@@ -117,7 +129,7 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
     });
     return switch (row) {
       null => throw const NotFound(type: 'Invitation', id: 'that link'),
-      {'own': true} => throw const BadRequest(code: 'own_invitation', reason: 'this is your own invitation'),
+      {'own': true} => throw _ownInvitation,
       {'connection_id': final Object _} => Connection.fromRow(row),
       _ => throw const BadRequest(code: 'invitation_gone', reason: 'this invitation is no longer good'),
     };
@@ -129,7 +141,7 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
       _declineInvitation.toSql(),
       parameters: {'userId': userId, 'tokenHash': TokenSecret.hash(token), 'email': email, 'name': name},
     );
-    if (rows.isEmpty) throw const NotFound(type: 'Invitation', id: 'that link');
+    _answered(rows);
   }
 
   @override
@@ -138,7 +150,16 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
       _blockInviter.toSql(),
       parameters: {'userId': userId, 'tokenHash': TokenSecret.hash(token), 'email': email, 'name': name},
     );
-    if (rows.isEmpty) throw const NotFound(type: 'Invitation', id: 'that link');
+    _answered(rows);
+  }
+
+  static void _answered(Result rows) {
+    switch (rows.firstOrNull?.toColumnMap()) {
+      case null:
+        throw const NotFound(type: 'Invitation', id: 'that link');
+      case {'own': true}:
+        throw _ownInvitation;
+    }
   }
 
   @override

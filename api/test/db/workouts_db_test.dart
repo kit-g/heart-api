@@ -432,6 +432,19 @@ void main() {
         );
       });
     }
+
+    // A paused coach still reads what came before the pause; a paused peer reads nothing.
+    test('a peer whose connection is paused is Forbidden', () async {
+      final owner = await h.seedProfile();
+      final asker = await h.seedProfile();
+      await h.seedWorkout(userId: owner);
+      await h.seedConnection(initiator: asker, target: owner, status: 'paused');
+
+      await expectLater(
+        h.db.getWorkouts(userId: asker, targetUserId: owner, limit: 10, imageUrl: imageUrl),
+        throwsA(isA<Forbidden>()),
+      );
+    });
   });
 
   group('updateWorkout', () {

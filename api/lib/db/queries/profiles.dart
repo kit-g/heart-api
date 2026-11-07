@@ -1,5 +1,11 @@
 part of '../db.dart';
 
+/// A [User] as every profile read and write answers it.
+const _userColumns = '''
+  id, email, username, avatar_url, scheduled_for_deletion_at, settings,
+  (SELECT array_agg(entitlement ORDER BY entitlement) FROM entitlements WHERE user_id = profiles.id) AS entitlements
+''';
+
 const _updateAccount = '''
 INSERT INTO profiles (id, email, username, avatar_url, settings, updated_at)
 VALUES (@id, @email, @username, @avatar, @settings::jsonb, now())
@@ -11,10 +17,7 @@ email = EXCLUDED.email,
 avatar_url = EXCLUDED.avatar_url,
 settings = profiles.settings || EXCLUDED.settings,
 updated_at = now()
-RETURNING
-  id, email, username, avatar_url, scheduled_for_deletion_at, settings,
-  (SELECT array_agg(entitlement ORDER BY entitlement) FROM entitlements WHERE user_id = profiles.id) AS entitlements
-''';
+RETURNING $_userColumns''';
 
 const _scheduleAccountDeletion = '''
 UPDATE profiles
@@ -24,8 +27,7 @@ SET
   apple_refresh_token = coalesce(@appleRefreshToken, apple_refresh_token),
   apple_client_id = coalesce(@appleClientId, apple_client_id)
 WHERE id = @userId
-RETURNING id, email, username, avatar_url, scheduled_for_deletion_at, settings
-''';
+RETURNING $_userColumns''';
 
 /// The Apple grant to revoke before the account goes.
 ///
@@ -45,8 +47,7 @@ SET
   avatar_url = @avatarUrl, 
   updated_at = now()
 WHERE id = @userId
-RETURNING id, email, username, avatar_url, scheduled_for_deletion_at, settings
-''';
+RETURNING $_userColumns''';
 
 const _undoAccountDeletion = '''
 UPDATE profiles
@@ -58,8 +59,7 @@ SET
   apple_refresh_token = NULL,
   apple_client_id = NULL
 WHERE id = @userId
-RETURNING id, email, username, avatar_url, scheduled_for_deletion_at, settings
-''';
+RETURNING $_userColumns''';
 
 const _deleteAccount = '''
 DELETE FROM profiles
@@ -86,9 +86,9 @@ WHERE id = @userId
 /// uuids render as canonical lowercase hex with the dashes at fixed positions,
 /// so text order and uuid order are the same thing.
 ///
-/// `connections` is the one collection without it — keyed by
-/// `(initiator_id, target_id, domain)`, it has no id to be newest — so it emits
-/// a typed NULL to keep every branch the same shape for the reader.
+/// `connections` is the one collection without it: it had no id when this
+/// summary was made, and its `latest` stays the typed NULL a reader already
+/// knows, which also keeps every branch the same shape.
 ///
 /// Scope notes: `custom_exercises` is the user's own rows only (a global library
 /// row is not the account's to export); `template_shares` is the coach side,
@@ -201,10 +201,9 @@ FROM _custom_exercises,
      _skips
 ''';
 
-const _getProfile = '''
-SELECT
-  id, username, email, avatar_url, scheduled_for_deletion_at, settings,
-  (SELECT array_agg(entitlement ORDER BY entitlement) FROM entitlements WHERE user_id = profiles.id) AS entitlements
+const _getProfile =
+    '''
+SELECT $_userColumns
 FROM profiles
 WHERE id = @userId
 ''';

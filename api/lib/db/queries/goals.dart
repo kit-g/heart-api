@@ -9,7 +9,8 @@ _rel AS (
   SELECT _relation(@requesterId, @targetUserId) AS r
 ),
 _allowed AS (
-  SELECT (r).scope IN ('self', 'peer') OR ((r).scope = 'coach' AND 'goals' = ANY ((r).shares)) AS allowed
+  -- goals have no date to fall inside a pause, so a pause anywhere stops them all
+  SELECT (r).scope IN ('self', 'peer') OR ((r).scope = 'coach' AND (r).active AND 'goals' = ANY ((r).shares)) AS allowed
   FROM _rel
 ),
 _goals AS (

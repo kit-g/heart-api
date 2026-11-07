@@ -10,42 +10,47 @@ const _invitationStatus = '''
   END
 ''';
 
+/// What stops an inviter making a link, or sending one again. A link being sent
+/// again isn't counted against itself.
+const _invitationLoad =
+    '''
+SELECT
+  EXISTS (SELECT 1 FROM entitlements WHERE user_id = @inviterId AND entitlement = 'coach') AS entitled,
+  (
+    SELECT count(*)
+    FROM invitations i
+    WHERE i.inviter_id = @inviterId
+      AND i.id IS DISTINCT FROM @invitationId::uuid
+      AND i.canceled_at IS NULL
+      AND i.expires_at > now()
+      AND NOT EXISTS (SELECT 1 FROM invitation_responses r WHERE r.invitation_id = i.id AND r.at >= i.renewed_at)
+  ) < $_maxPendingInvitations
+  AND (
+    SELECT count(*)
+    FROM invitation_responses r
+    JOIN invitations i ON i.id = r.invitation_id
+    WHERE i.inviter_id = @inviterId
+      AND r.response = 'declined'
+      AND r.at > now() - INTERVAL '30 days'
+  ) < $_maxRecentDeclines AS within
+''';
+
 const _createInvitation =
     '''
 WITH
-_entitled AS (
-  SELECT EXISTS (SELECT 1 FROM entitlements WHERE user_id = @inviterId AND entitlement = 'coach') AS entitled
-),
 _load AS (
-  SELECT
-    (
-      SELECT count(*)
-      FROM invitations i
-      WHERE i.inviter_id = @inviterId
-        AND i.canceled_at IS NULL
-        AND i.expires_at > now()
-        AND NOT EXISTS (SELECT 1 FROM invitation_responses r WHERE r.invitation_id = i.id AND r.at >= i.renewed_at)
-    ) AS pending,
-    (
-      SELECT count(*)
-      FROM invitation_responses r
-      JOIN invitations i ON i.id = r.invitation_id
-      WHERE i.inviter_id = @inviterId
-        AND r.response = 'declined'
-        AND r.at > now() - INTERVAL '30 days'
-    ) AS declines
+  $_invitationLoad
 ),
 _inserted AS (
   INSERT INTO invitations (inviter_id, domain, token_hash, name, expires_at)
   SELECT @inviterId, @domain, @tokenHash, @name, @expiresAt
-  FROM _entitled, _load
+  FROM _load
   WHERE entitled
-    AND pending < $_maxPendingInvitations
-    AND declines < $_maxRecentDeclines
+    AND within
   RETURNING id, name, role, domain, expires_at, created_at
 )
-SELECT e.entitled, n.id, n.name, n.role, n.domain, n.expires_at, n.created_at, 'pending' AS status
-FROM _entitled e
+SELECT l.entitled, n.id, n.name, n.role, n.domain, n.expires_at, n.created_at, 'pending' AS status
+FROM _load l
 LEFT JOIN _inserted n ON true
 ''';
 
@@ -69,49 +74,108 @@ WHERE i.id = @invitationId::uuid
 RETURNING id
 ''';
 
-const _renewInvitation = '''
-UPDATE invitations i
-SET token_hash = @tokenHash, expires_at = @expiresAt, canceled_at = NULL, renewed_at = now()
-WHERE i.id = @invitationId::uuid
-  AND i.inviter_id = @inviterId
-  AND NOT EXISTS (SELECT 1 FROM invitation_responses r WHERE r.invitation_id = i.id AND r.response = 'accepted')
-RETURNING i.id, i.name, i.role, i.domain, i.expires_at, i.created_at, 'pending' AS status
+/// Sending a link again is making one, so it answers to the same limits.
+const _renewInvitation =
+    '''
+WITH
+_load AS (
+  $_invitationLoad
+),
+_invitation AS (
+  SELECT i.id
+  FROM invitations i
+  WHERE i.id = @invitationId::uuid
+    AND i.inviter_id = @inviterId
+    AND NOT EXISTS (SELECT 1 FROM invitation_responses r WHERE r.invitation_id = i.id AND r.response = 'accepted')
+),
+_renewed AS (
+  UPDATE invitations i
+  SET token_hash = @tokenHash, expires_at = @expiresAt, canceled_at = NULL, renewed_at = now()
+  FROM _load l
+  WHERE i.id IN (SELECT id FROM _invitation)
+    AND l.entitled
+    AND l.within
+  RETURNING i.id, i.name, i.role, i.domain, i.expires_at, i.created_at
+)
+SELECT
+  EXISTS (SELECT 1 FROM _invitation) AS found,
+  l.entitled,
+  n.id, n.name, n.role, n.domain, n.expires_at, n.created_at, 'pending' AS status
+FROM _load l
+LEFT JOIN _renewed n ON true
 ''';
 
 /// Whether a link can still be accepted. Someone who declined can change their
 /// mind, so only accepting uses it up here; [_acceptInvitation] holds the rest.
+/// Who made a link that is no longer good is nobody's to read.
 const _previewInvitation = '''
+WITH
+_preview AS (
+  SELECT
+    p.username,
+    p.avatar_url,
+    (
+      i.canceled_at IS NULL
+      AND i.expires_at > now()
+      AND (
+        SELECT count(*) FROM invitation_responses r
+        WHERE r.invitation_id = i.id AND r.response = 'accepted'
+      ) < i.max_uses
+    ) AS good
+  FROM invitations i
+  JOIN profiles p ON p.id = i.inviter_id
+  WHERE i.token_hash = @tokenHash
+)
 SELECT
-  p.username,
-  p.avatar_url,
-  (
-    i.canceled_at IS NULL
-    AND i.expires_at > now()
-    AND (
-      SELECT count(*) FROM invitation_responses r
-      WHERE r.invitation_id = i.id AND r.response = 'accepted'
-    ) < i.max_uses
-  ) AS good
-FROM invitations i
-JOIN profiles p ON p.id = i.inviter_id
-WHERE i.token_hash = @tokenHash
+  CASE WHEN good THEN username END AS username,
+  CASE WHEN good THEN avatar_url END AS avatar_url,
+  good
+FROM _preview
+''';
+
+/// Whether `i` can still be answered by `@userId`: it stands, and nobody else's
+/// answer has used it up. An acceptance uses it up for good, a decline until the
+/// link is sent again.
+const _invitationOpen = '''
+(
+  i.canceled_at IS NULL
+  AND i.expires_at > now()
+  AND (
+    SELECT count(*) FROM invitation_responses r
+    WHERE r.invitation_id = i.id
+      AND r.user_id IS DISTINCT FROM @userId
+      AND (r.at >= i.renewed_at OR r.response = 'accepted')
+  ) < i.max_uses
+)
+''';
+
+/// Someone can answer on the web, with an account made a moment ago and away from
+/// any device, so answering makes their profile if need be. Reads `_answering`.
+const _answeringPerson = '''
+INSERT INTO profiles (id, email, username)
+SELECT @userId, @email, @name
+FROM _answering
+ON CONFLICT (id) DO NOTHING
+RETURNING id
 ''';
 
 /// Holds the invitation for [_acceptInvitation], which runs next in the same
 /// transaction. They can't be one statement: one that waited for this lock would still
 /// count answers as they stood before it waited, so two people racing would both get in.
+/// The pair's lock does the same for a block between the two being set meanwhile.
 const _lockInvitation = '''
-SELECT id FROM invitations WHERE token_hash = @tokenHash FOR UPDATE
+SELECT id, _lock_pair(inviter_id, @userId)
+FROM invitations
+WHERE token_hash = @tokenHash
+FOR UPDATE
 ''';
 
 /// A row the pair already holds in this domain is rewritten: the new relationship reads
 /// from now, and shares only what was said just now. One the same coach already holds
-/// live is left alone.
-const _acceptInvitation = '''
+/// live is left alone, and the link is answered all the same.
+const _acceptInvitation =
+    '''
 WITH
-_invitation AS (
-  SELECT * FROM invitations WHERE token_hash = @tokenHash
-),
 _standing AS (
   SELECT
     i.*,
@@ -121,17 +185,20 @@ _standing AS (
       WHERE r.invitation_id = i.id AND r.user_id = @userId AND r.response = 'accepted'
     ) AS repeated,
     (
-      i.canceled_at IS NULL
-      AND i.expires_at > now()
+      $_invitationOpen
       AND NOT _blocked_between(i.inviter_id, @userId)
       AND (
-        SELECT count(*) FROM invitation_responses r
-        WHERE r.invitation_id = i.id
-          AND r.user_id IS DISTINCT FROM @userId
-          AND r.at >= i.renewed_at
-      ) < i.max_uses
+        SELECT count(*)
+        FROM connections c
+        WHERE c.status IN ('active', 'paused')
+          AND (
+            (c.initiator_id = i.inviter_id AND c.initiator_role = 'COACH')
+            OR (c.target_id = i.inviter_id AND c.target_role = 'COACH')
+          )
+      ) < $_maxClients
     ) AS good
-  FROM _invitation i
+  FROM invitations i
+  WHERE i.token_hash = @tokenHash
 ),
 _live AS (
   SELECT c.id
@@ -142,13 +209,15 @@ _live AS (
     AND c.initiator_role = s.role
     AND c.status IN ('active', 'paused')
 ),
-_go AS (
+_answering AS (
   SELECT *
   FROM _standing
   WHERE good
     AND NOT own
     AND NOT repeated
-    AND NOT EXISTS (SELECT 1 FROM _live)
+),
+_go AS (
+  SELECT * FROM _answering WHERE NOT EXISTS (SELECT 1 FROM _live)
 ),
 _connection AS (
   INSERT INTO connections
@@ -179,14 +248,14 @@ _connection AS (
 _response AS (
   INSERT INTO invitation_responses (invitation_id, user_id, response)
   SELECT id, @userId, 'accepted'
-  FROM _go
+  FROM _answering
   ON CONFLICT (invitation_id, user_id) DO UPDATE
   SET response = 'accepted', at = now()
   RETURNING 1
 ),
 -- Someone can accept on the web, with an account made a moment ago and away from
 -- any device, so this makes their profile if need be, and records the answer the
--- app would have, in the shape it syncs.
+-- app would have, in the shape it syncs, beside whatever else that feature keeps.
 _person AS (
   INSERT INTO profiles (id, email, username, settings)
   SELECT
@@ -200,7 +269,14 @@ _person AS (
     profiles.settings,
     '{features}',
     coalesce(profiles.settings -> 'features', '{}'::jsonb)
-      || (EXCLUDED.settings -> 'features')
+      || jsonb_build_object(
+        'yourCoach',
+        CASE jsonb_typeof(profiles.settings -> 'features' -> 'yourCoach')
+          WHEN 'object' THEN profiles.settings -> 'features' -> 'yourCoach'
+          ELSE '{}'::jsonb
+        END
+          || (EXCLUDED.settings -> 'features' -> 'yourCoach')
+      )
   )
   RETURNING id
 ),
@@ -216,6 +292,7 @@ _row AS (
   FROM connections c, _standing s
   WHERE (s.repeated OR EXISTS (SELECT 1 FROM _live))
     AND c.domain = s.domain
+    AND c.status IN ('active', 'paused')
     AND (c.initiator_id, c.target_id) IN ((s.inviter_id, @userId), (@userId, s.inviter_id))
 )
 SELECT
@@ -233,64 +310,67 @@ LEFT JOIN _row r ON NOT s.own
 ''';
 
 /// A person can decline and later accept the same link, and someone it is not
-/// for finds it answered.
-const _declineInvitation = '''
+/// for finds it answered. A link that is no longer theirs to answer takes nothing.
+const _declineInvitation =
+    '''
 WITH
 _invitation AS (
-  SELECT i.id, i.max_uses
+  SELECT i.id, i.inviter_id = @userId AS own, $_invitationOpen AS open
   FROM invitations i
   WHERE i.token_hash = @tokenHash
-    AND i.inviter_id <> @userId
+),
+_answering AS (
+  SELECT id FROM _invitation WHERE open AND NOT own
 ),
 _person AS (
-  INSERT INTO profiles (id, email, username)
-  SELECT @userId, @email, @name
-  FROM _invitation
-  ON CONFLICT (id) DO NOTHING
-  RETURNING id
+  $_answeringPerson
 ),
 _response AS (
   INSERT INTO invitation_responses (invitation_id, user_id, response)
   SELECT id, @userId, 'declined'
-  FROM _invitation
+  FROM _answering
   ON CONFLICT (invitation_id, user_id) DO UPDATE
   SET response = 'declined', at = now()
   WHERE invitation_responses.response <> 'accepted'
   RETURNING 1
 )
-SELECT id FROM _invitation
+SELECT own FROM _invitation
 ''';
 
-const _blockInviter = '''
+/// A block is against the person, so any link of theirs sets one. It counts as an
+/// answer only where declining would.
+const _blockInviter =
+    '''
 WITH
 _invitation AS (
-  SELECT i.id, i.inviter_id
+  SELECT i.id, i.inviter_id, i.inviter_id = @userId AS own, $_invitationOpen AS open
   FROM invitations i
   WHERE i.token_hash = @tokenHash
-    AND i.inviter_id <> @userId
+),
+_answering AS (
+  SELECT id, inviter_id, open FROM _invitation WHERE NOT own
 ),
 _person AS (
-  INSERT INTO profiles (id, email, username)
-  SELECT @userId, @email, @name
-  FROM _invitation
-  ON CONFLICT (id) DO NOTHING
-  RETURNING id
+  $_answeringPerson
 ),
 _block AS (
   INSERT INTO blocks (blocker_id, blocked_id)
   SELECT @userId, inviter_id
-  FROM _invitation
+  FROM _answering
   ON CONFLICT DO NOTHING
   RETURNING 1
 ),
 _response AS (
   INSERT INTO invitation_responses (invitation_id, user_id, response)
   SELECT id, @userId, 'declined'
-  FROM _invitation
-  ON CONFLICT (invitation_id, user_id) DO NOTHING
+  FROM _answering
+  WHERE open
+  ON CONFLICT (invitation_id, user_id) DO UPDATE
+  SET response = 'declined', at = now()
+  WHERE invitation_responses.response <> 'accepted'
   RETURNING 1
 )
-SELECT id FROM _invitation
+SELECT own FROM _invitation
 ''';
 
 const _listBlocks = '''
