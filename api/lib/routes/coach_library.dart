@@ -48,10 +48,12 @@ Future<Model> deleteCoachProgram(Request req) async {
   throw const NoContent();
 }
 
+/// A program that isn't the coach's answers 404, as reading it does, rather than an
+/// empty list.
 Future<CoachProgramHolders> getCoachProgramHolders(Request req) async {
-  return CoachProgramHolders(
-    await req.coachLibraryService.getCoachProgramHolders(coachId: req.userId, id: libraryIdOf(req)),
-  );
+  final id = libraryIdOf(req);
+  await req.coachLibraryService.getCoachProgram(coachId: req.userId, id: id);
+  return CoachProgramHolders(await req.coachLibraryService.getCoachProgramHolders(coachId: req.userId, id: id));
 }
 
 Future<ProgramDeliveries> sendCoachProgram(Request req) async {
