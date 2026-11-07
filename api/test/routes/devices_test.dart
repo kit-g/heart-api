@@ -124,5 +124,12 @@ void main() {
       request = build({'platform': 'blackberry', 'token': 'tok-1'});
       expect(() => registerDevice(request), throwsA(isA<BadRequest>()));
     });
+
+    test('an offset is from UTC-12 to UTC+14, in whole minutes', () async {
+      for (final offset in [-721, 841, 60.5, '60']) {
+        request = build({'platform': 'ios', 'token': 'tok-1', 'utcOffsetMinutes': offset});
+        await expectLater(registerDevice(request), throwsA(isA<BadRequest>()), reason: '$offset');
+      }
+    });
   });
 }

@@ -67,7 +67,7 @@ Future<Model> addThreadItem(Request req) async {
       'type': 'push.requested',
       'userId': parties.recipientId,
       'topic': PushTopic.coachingMessage.key,
-      'name': req.user.displayName ?? '',
+      'name': ?req.user.displayName,
       'actorId': req.userId,
       'data': {'threadId': threadId},
     },

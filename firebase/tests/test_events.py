@@ -16,14 +16,23 @@ class TestParsePushNotification:
         assert isinstance(evt, PushNotification)
         assert evt.tokens == ['t1', 't2']
         assert evt.title == 'Sarah commented on your Push Day'
-        assert evt.body == 'nice form'
+        assert not hasattr(evt, 'body'), 'no text reaches Apple or Google'
         assert evt.data == {'commentId': 'c-1', 'workoutId': 'w-1'}
 
     def test_data_defaults_to_empty(self):
         evt = parse_event(
-            {'type': 'push.notification', 'tokens': ['t'], 'title': 'x', 'body': 'y'}
+            {'type': 'push.notification', 'tokens': ['t'], 'title': 'x'}
         )
         assert evt.data == {}
+
+    def test_a_visible_push_needs_a_title(self):
+        with pytest.raises(ValueError, match='needs a title'):
+            parse_event({'type': 'push.notification', 'tokens': ['t']})
+
+    def test_a_silent_push_needs_none(self):
+        evt = parse_event({'type': 'push.notification', 'tokens': ['t'], 'silent': True})
+        assert evt.silent
+        assert evt.title is None
 
     def test_coerces_data_values_to_strings(self):
         evt = parse_event(
@@ -31,7 +40,6 @@ class TestParsePushNotification:
                 'type': 'push.notification',
                 'tokens': ['t'],
                 'title': 'x',
-                'body': 'y',
                 'data': {'count': 42},
             }
         )

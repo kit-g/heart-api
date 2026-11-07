@@ -35,7 +35,6 @@ class TestDispatch:
                     "type": "push.notification",
                     "tokens": ["t1"],
                     "title": "x",
-                    "body": "y",
                 }
             ),
             None,

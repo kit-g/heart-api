@@ -21,6 +21,7 @@ enum PushTopic {
     fallback: daily,
     options: [daily, off],
     channel: 'coaching',
+    collapses: true,
   ),
   invitationAccepted(
     key: 'coaching.invitation_accepted',
@@ -51,6 +52,11 @@ enum PushTopic {
   final bool silent;
   final String? channel;
 
+  /// Whether a newer push of this topic replaces one still waiting for an
+  /// offline device. Only for a topic whose pushes all say the same thing: two
+  /// messages, or two people's device changes, are two things to hear about.
+  final bool collapses;
+
   new({
     required this.key,
     required this.group,
@@ -58,6 +64,7 @@ enum PushTopic {
     this.options = const [],
     this.silent = false,
     this.channel,
+    this.collapses = false,
   });
 
   static PushTopic? of(String key) {
