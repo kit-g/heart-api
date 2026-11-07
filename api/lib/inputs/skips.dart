@@ -5,8 +5,6 @@ part of 'inputs.dart';
 /// The health snapshot the app records beside a skip never arrives here:
 /// `Request.json()` refuses a body carrying one (`400 health_data`).
 class SkipIn {
-  static final _reason = RegExp(r'^[a-z][a-z0-9_]{0,31}$');
-
   /// The fields a weather reading has, each with the range a real one falls in.
   static const _weather = {
     'temperature': (-90, 60),
@@ -27,7 +25,7 @@ class SkipIn {
         at: json.timestamp('at'),
         reason: switch (json['reason']) {
           null => null,
-          final String reason when _reason.hasMatch(reason) => reason,
+          final String reason when _snakeWord.hasMatch(reason) => reason,
           _ => throw const BadRequest(code: 'invalid_reason', reason: 'reason must be a snake_case tag of at most 32'),
         },
         weather: switch (json['weather']) {

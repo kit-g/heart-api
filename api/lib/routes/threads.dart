@@ -11,17 +11,13 @@ import 'package:heart/models/errors.dart';
 import 'package:heart/models/pagination.dart';
 import 'package:heart/notifications/sealing.dart';
 import 'package:heart/notifications/topics.dart';
-import 'package:heart_aws/heart_aws.dart';
 import 'package:heart_models/heart_models.dart';
-import 'package:logging/logging.dart' as logging;
 import 'package:relic/relic.dart';
-
-final _logger = logging.Logger('Threads');
 
 MessageTags _tags(Request req) => req.config.messageTags ?? (throw UnimplementedError('messages are not configured'));
 
 Future<Thread> openThread(Request req) async {
-  final connectionId = req.rawPathParameters[#connectionId]!;
+  final connectionId = req.threadConnectionId;
   final thread = await req.threadService.openThread(userId: req.userId, connectionId: connectionId);
   return thread ?? (throw NotFound(type: 'Connection', id: connectionId));
 }
@@ -31,7 +27,7 @@ Future<ThreadList> getThreads(Request req) async {
 }
 
 Future<Model> addThreadItem(Request req) async {
-  final threadId = req.rawPathParameters[#threadId]!;
+  final threadId = req.threadId;
   final input = await ThreadItemIn.fromRequest(req);
   final parties = await req.threadService.getThreadParties(senderId: req.userId, threadId: threadId);
   if (parties == null) {
@@ -39,7 +35,10 @@ Future<Model> addThreadItem(Request req) async {
   }
 
   final tags = _tags(req);
-  final createdAt = DateTime.timestamp();
+  // Milliseconds only: the tag signs this time as text, and a device that keeps a
+  // time to the millisecond (a web build, say) has to be able to write it back
+  // exactly when it reports the message.
+  final createdAt = DateTime.fromMillisecondsSinceEpoch(DateTime.timestamp().millisecondsSinceEpoch, isUtc: true);
   final (item, created) = await req.threadService.addThreadItem(
     senderId: req.userId,
     threadId: threadId,
@@ -60,7 +59,8 @@ Future<Model> addThreadItem(Request req) async {
     subjectId: input.subjectId,
   );
 
-  if (!created) return item;
+  // A retry asks again too: it may be retrying because this push failed after the
+  // message was stored, and pushes on this topic collapse into one on the device.
   await req.events.publish(
     queueUrl: req.config.eventsQueueUrl,
     message: {
@@ -69,17 +69,19 @@ Future<Model> addThreadItem(Request req) async {
       'topic': PushTopic.coachingMessage.key,
       'name': ?req.user.displayName,
       'actorId': req.userId,
+      'connectionId': parties.connectionId,
       'data': {'threadId': threadId},
     },
   );
-  return Created(item);
+  return created ? Created(item) : item;
 }
 
 Future<Paginated<ThreadItem>> getThreadItems(Request req) async {
+  final threadId = req.threadId;
   final query = ThreadItemsQuery.fromRequest(req);
   final page = await req.threadService.getThreadItems(
     userId: req.userId,
-    threadId: req.rawPathParameters[#threadId]!,
+    threadId: threadId,
     since: query.since,
     before: query.before,
     subjectType: query.subjectType,
@@ -90,17 +92,14 @@ Future<Paginated<ThreadItem>> getThreadItems(Request req) async {
 }
 
 Future<Model> markThreadRead(Request req) async {
+  final threadId = req.threadId;
   final input = await ThreadReadIn.fromRequest(req);
-  await req.threadService.markThreadRead(
-    userId: req.userId,
-    threadId: req.rawPathParameters[#threadId]!,
-    cursor: input.cursor,
-  );
+  await req.threadService.markThreadRead(userId: req.userId, threadId: threadId, cursor: input.cursor);
   throw const NoContent();
 }
 
 Future<Model> clearThread(Request req) async {
-  final threadId = req.rawPathParameters[#threadId]!;
+  final threadId = req.threadId;
   final other = await req.threadService.clearThread(userId: req.userId, threadId: threadId);
   if (other != null) {
     await req.events.publish(
@@ -109,6 +108,7 @@ Future<Model> clearThread(Request req) async {
         'type': 'push.requested',
         'userId': other,
         'topic': PushTopic.threadCleared.key,
+        'actorId': req.userId,
         'data': {'threadId': threadId},
       },
     );
@@ -127,10 +127,10 @@ Future<CoachNote> saveNote(Request req) async {
 }
 
 Future<Paginated<CoachNote>> getNotes(Request req) async {
-  final query = PageQuery.fromRequest(req);
+  final query = NotesQuery.fromRequest(req);
   final page = await req.noteService.getNotes(
     coachId: req.userId,
-    connectionId: req.url.queryParameters['connectionId'],
+    connectionId: query.connectionId,
     cursor: query.cursor,
     limit: query.limit,
   );
@@ -138,7 +138,7 @@ Future<Paginated<CoachNote>> getNotes(Request req) async {
 }
 
 Future<Model> deleteNote(Request req) async {
-  await req.noteService.deleteNote(coachId: req.userId, id: req.rawPathParameters[#noteId]!);
+  await req.noteService.deleteNote(coachId: req.userId, id: req.noteId);
   throw const NoContent();
 }
 
@@ -147,25 +147,11 @@ Future<Model> deleteNote(Request req) async {
 Future<Model> fileReport(Request req) async {
   final input = await ReportIn.fromRequest(req);
   final reviewKey = req.config.reportReviewKey ?? (throw UnimplementedError('reports are not configured'));
-  final tags = _tags(req);
-
-  final people = {req.userId, input.reportedId};
-  final verified =
-      input.messages.any((message) => message.senderId == input.reportedId) &&
-      input.messages.every(
-        (message) =>
-            {message.senderId, message.recipientId}.containsAll(people) &&
-            tags.confirms(
-              words: message.words,
-              reporterKey: message.key,
-              commitment: message.commitment,
-              tag: message.tag,
-              tagKey: message.tagKey,
-              senderId: message.senderId,
-              recipientId: message.recipientId,
-              at: message.createdAt,
-            ),
-      );
+  final verified = _tags(req).verifies(
+    reporterId: req.userId,
+    reportedId: input.reportedId,
+    messages: input.messages,
+  );
 
   await req.reportService.fileReport(
     reporterId: req.userId,
@@ -182,16 +168,9 @@ Future<Model> fileReport(Request req) async {
     verified: verified,
   );
 
-  try {
-    final sns = Sns(credentialsProvider: req.awsConfig.credentialsProvider, region: req.awsConfig.region);
-    await sns.publish(
-      topicArn: req.config.monitoringTopicArn,
-      subject: 'A report was filed',
-      message: 'A person filed a report (${input.reason}). Verified: $verified.',
-    );
-  } catch (e, st) {
-    // the report is stored, and an alert must never fail the request it is about
-    _logger.warning('failed to alert about a report', e, st);
-  }
+  await req.alertOwner(
+    subject: 'A report was filed',
+    message: 'A person filed a report (${input.reason}). Verified: $verified.',
+  );
   throw const NoContent();
 }

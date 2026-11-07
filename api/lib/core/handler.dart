@@ -105,7 +105,10 @@ Handler apiHandler(ModelHandler handler) {
         body: BadRequest(code: 'malformed_request', reason: 'malformed request: ${e.toString()}'),
       );
     } on FormatException catch (e) {
-      _logger.warning('Malformed request (FormatException):', e);
+      // The message only: the exception's own text quotes the input around the
+      // fault, and a body can hold words that must never reach a log, such as a
+      // report's.
+      _logger.warning('Malformed request (FormatException): ${e.message}');
       return JsonResponse(
         400,
         body: BadRequest(code: 'malformed_request', reason: 'malformed request: ${e.message}'),

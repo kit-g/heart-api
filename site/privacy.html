@@ -154,7 +154,7 @@
             had. On Android, Heart’s local database is excluded from device backups. On iPhone it is part of the app’s
             data, so it is included in your device backup if you have one — that backup is yours, and we never see it.</p>
 
-        <h3>Coaching</h3>
+        <h3 id="coaching">Coaching</h3>
         <p>Coaching is optional, and only happens if you accept an invitation from someone.</p>
         <p><strong>What your coach sees:</strong> the workouts you log after you accept, with their notes and sets, your
             program and how it’s going, that you skipped a session and when, and the name you use in Heart. You can
@@ -172,7 +172,7 @@
             account, a conversation stays with the other person unless you delete it first.</p>
         <p><strong>Reports:</strong> if you report someone, what you send with the report is stored encrypted, so that
             only the person reviewing it can read it. It is deleted 90 days after the report is closed, or after a year
-            at most, and it stays until then even if either account is deleted.</p>
+            if it is never closed, and it stays until then even if either account is deleted.</p>
 
         <h3>App Usage &amp; Debug Info</h3>
         <p>We collect basic analytics through Firebase Analytics (like which screens are used) and crash logs to help
@@ -223,7 +223,9 @@
         <p>Deletion is then scheduled 30 days out. During that window you can sign in and reverse it, and the app
             offers you the button to do so. If you don’t, the account and all synced workout data are permanently
             removed when the window closes. Deleted means deleted. Health data was never there to begin with — see
-            above for how to clear the copy on your phone.</p>
+            above for how to clear the copy on your phone. If you were coached or coached someone, two things stay,
+            as <a href="#coaching">Coaching</a> says: a conversation stays with the other person unless you delete it
+            first, and a report stays until its deadline.</p>
 
         <h2>Other Details</h2>
 

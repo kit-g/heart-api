@@ -15,6 +15,7 @@ import 'package:heart/models/lens.dart';
 import 'package:heart/models/program_copy.dart';
 import 'package:heart/models/sets.dart';
 import 'package:heart/models/workouts.dart';
+import 'package:heart/notifications/sealing.dart';
 import 'package:heart/notifications/topics.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mime/mime.dart';
@@ -45,3 +46,7 @@ part 'templates.dart';
 part 'threads.dart';
 part 'tokens.dart';
 part 'workouts.dart';
+
+/// A word in an open vocabulary: a kind, a reason, a tag. The columns that store one
+/// check the same shape.
+final _snakeWord = RegExp(r'^[a-z][a-z0-9_]{0,31}$');

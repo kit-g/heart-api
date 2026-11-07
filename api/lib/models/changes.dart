@@ -24,12 +24,17 @@ class ChangeCursor {
     try {
       final decoded = utf8.decode(base64Url.decode(base64Url.normalize(raw)));
       final [xid, id] = decoded.split('|');
-      if (!RegExp(r'^[0-9]{1,20}$').hasMatch(xid) || !isUuidV7(id)) throw const FormatException();
+      if (!RegExp(r'^[0-9]{1,20}$').hasMatch(xid) || BigInt.parse(xid) > _maxXid || !isUuidV7(id)) {
+        throw const FormatException();
+      }
       return .new(xid: xid, id: id);
     } catch (_) {
       throw BadRequest(reason: 'since is not a cursor from this feed: $raw');
     }
   }
+
+  /// An `xid8` is unsigned 64-bit: twenty digits can say more than it holds.
+  static final _maxXid = BigInt.parse('18446744073709551615');
 
   @override
   String toString() => base64Url.encode(utf8.encode('$xid|$id')).replaceAll('=', '');

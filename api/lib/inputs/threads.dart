@@ -5,14 +5,33 @@ part of 'inputs.dart';
 /// docs/2026-11-01.coaching.md, *Messages*.
 const _threadItemKinds = {'message'};
 
-final _snakeWord = RegExp(r'^[a-z][a-z0-9_]{0,31}$');
+/// Postgres refuses NUL in text, and JSON allows it: without this, a request that
+/// can never succeed answers 500 and gets retried.
+bool _storable(String text) => !text.contains('\u0000');
 
 /// A string and nothing else, so nothing readable can ride in structure.
 String _ciphertext(Map<String, dynamic> json) {
   return switch (json['content']) {
-    final String content when content.isNotEmpty && content.length <= 16384 => content,
+    final String content when content.isNotEmpty && content.length <= 16384 && _storable(content) => content,
     _ => throw const BadRequest(reason: 'content must be text of at most 16 KB'),
   };
+}
+
+/// The ids in the thread and note paths, checked before anything casts them: one
+/// that can't be an id answers like one that isn't there.
+extension ThreadPaths on Request {
+  String get threadId => _uuidPath(#threadId, 'Thread');
+
+  String get threadConnectionId => _uuidPath(#connectionId, 'Connection');
+
+  String get noteId => _uuidPath(#noteId, 'Note');
+
+  String _uuidPath(Symbol name, String type) {
+    return switch (rawPathParameters[name]!) {
+      final id when isUuidV7(id) => id,
+      final id => throw NotFound(type: type, id: id),
+    };
+  }
 }
 
 /// `POST /threads/:threadId/items`.
@@ -48,10 +67,12 @@ class ThreadItemIn {
 
     final (subjectType, subjectId) = switch ((json['subjectType'], json['subjectId'])) {
       (null, null) => (null, null),
-      (final String type, final String id) when _snakeWord.hasMatch(type) && id.isNotEmpty && id.length <= 64 => (
-        type,
-        id,
-      ),
+      (final String type, final String id)
+          when _snakeWord.hasMatch(type) && id.isNotEmpty && id.length <= 64 && _storable(id) =>
+        (
+          type,
+          id,
+        ),
       _ => throw const BadRequest(reason: 'a subject has a subjectType and a subjectId'),
     };
 
@@ -95,11 +116,15 @@ class ThreadItemsQuery {
     final since = query['since'];
     final before = query['before'];
     if (since != null && before != null) throw const BadRequest(reason: 'since or before, not both');
+    final (subjectType, subjectId) = (query['subjectType'], query['subjectId']);
+    if (![subjectType, subjectId].nonNulls.every(_storable)) {
+      throw const BadRequest(reason: 'a subject has a subjectType and a subjectId');
+    }
     return ThreadItemsQuery._(
       since: since,
       before: before,
-      subjectType: query['subjectType'],
-      subjectId: query['subjectId'],
+      subjectType: subjectType,
+      subjectId: subjectId,
       limit: PageQuery.fromRequest(req).limit,
     );
   }
@@ -133,17 +158,31 @@ class NoteIn {
   }
 }
 
-/// One message a report carries: what the device opened, and what proves it.
-typedef ReportedMessage = ({
-  String words,
-  String key,
-  String commitment,
-  String tag,
-  String tagKey,
-  String senderId,
-  String recipientId,
-  DateTime createdAt,
-});
+/// `GET /notes?connectionId=&cursor=&limit=`.
+class NotesQuery {
+  final String? connectionId;
+  final String? cursor;
+  final int limit;
+
+  const new _({this.connectionId, this.cursor, required this.limit});
+
+  static NotesQuery fromRequest(Request req) {
+    final page = PageQuery.fromRequest(req);
+    return NotesQuery._(
+      connectionId: switch (req.url.queryParameters['connectionId']) {
+        null => null,
+        final String id when isUuidV7(id) => id,
+        _ => throw const BadRequest(reason: 'connectionId must be a connection\'s id'),
+      },
+      cursor: switch (page.cursor) {
+        null => null,
+        final String cursor when isUuidV7(cursor) => cursor,
+        _ => throw const BadRequest(reason: 'cursor must be the one the previous page returned'),
+      },
+      limit: page.limit,
+    );
+  }
+}
 
 /// `POST /reports`.
 class ReportIn {
@@ -156,6 +195,12 @@ class ReportIn {
 
   static const _maxMessages = 100;
 
+  /// An account id is at most this long.
+  static const _maxId = 128;
+
+  /// What a message's ciphertext can hold, opened.
+  static const _maxWords = 16384;
+
   static Future<ReportIn> fromRequest(Request req) async {
     final json = await req.json();
     final reason = json.string('reason');
@@ -166,7 +211,10 @@ class ReportIn {
       _ => throw const BadRequest(reason: 'messages must be a list of at most $_maxMessages'),
     };
     return ReportIn._(
-      reportedId: json.string('reportedId'),
+      reportedId: switch (json['reportedId']) {
+        final String id when id.isNotEmpty && id.length <= _maxId && _storable(id) => id,
+        _ => throw const BadRequest(reason: 'reportedId must be a person\'s id'),
+      },
       connectionId: switch (json['connectionId']) {
         null => null,
         final String id when isUuidV7(id) => id,
@@ -189,7 +237,7 @@ class ReportIn {
         'recipientId': final String recipientId,
         'createdAt': final String createdAt,
       }
-          when DateTime.tryParse(createdAt) != null =>
+          when words.length <= _maxWords && DateTime.tryParse(createdAt) != null =>
         (
           words: words,
           key: key,

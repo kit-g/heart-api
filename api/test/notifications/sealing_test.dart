@@ -53,10 +53,74 @@ void main() {
     });
   });
 
-  test('no keys configured reads as none', () {
+  group('what a sender controls', () {
+    test('a key that isn\'t base64 fails the message, and refuses nothing', () {
+      final committed = commit('words');
+      expect(
+        tags.confirms(
+          words: 'words',
+          reporterKey: 'not base64!',
+          commitment: committed,
+          tag: tagFor(committed),
+          tagKey: 'new',
+          senderId: 'coach',
+          recipientId: 'student',
+          at: at,
+        ),
+        isFalse,
+      );
+    });
+
+    test('a commitment or tag that isn\'t base64 fails the message', () {
+      expect(confirm(commitment: 'not base64!', tag: tagFor(commit('words'))), isFalse);
+      expect(confirm(tag: 'not base64!'), isFalse);
+    });
+
+    test('a commitment sent in the URL-safe alphabet checks like the standard one', () {
+      // a commitment with a '+' in it, which the URL-safe alphabet writes as '-'
+      var words = 'words 0';
+      for (var i = 1; !commit(words).contains('+'); i++) {
+        words = 'words $i';
+      }
+      final standard = commit(words);
+      final urlSafe = standard.replaceAll('+', '-').replaceAll('/', '_');
+      expect(confirm(words: words, commitment: urlSafe, tag: tagFor(urlSafe)), isTrue);
+    });
+  });
+
+  group('a report', () {
+    ReportedMessage message({String from = 'coach', String to = 'student'}) {
+      final committed = commit('words');
+      return (
+        words: 'words',
+        key: reporterKey,
+        commitment: committed,
+        tag: tagFor(committed, sender: from, recipient: to),
+        tagKey: 'new',
+        senderId: from,
+        recipientId: to,
+        createdAt: at,
+      );
+    }
+
+    test('of what the reported person sent the reporter verifies', () {
+      expect(tags.verifies(reporterId: 'student', reportedId: 'coach', messages: [message()]), isTrue);
+    });
+
+    test('about oneself verifies nothing', () {
+      expect(
+        tags.verifies(reporterId: 'coach', reportedId: 'coach', messages: [message()]),
+        isFalse,
+      );
+    });
+  });
+
+  test('no keys configured reads as none, and so does a value that isn\'t keys', () {
     expect(MessageTags.parse(null), isNull);
     expect(MessageTags.parse(''), isNull);
-    expect(() => MessageTags.parse('not-a-pair'), throwsArgumentError);
+    expect(MessageTags.parse('not-a-pair'), isNull);
+    expect(MessageTags.parse('a:${base64.encode(List.filled(32, 1))},'), isNull);
+    expect(MessageTags.parse('a:not base64!'), isNull);
   });
 
   test('sealing writes the throwaway key, the nonce, and the box, and differs each time', () async {

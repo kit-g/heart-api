@@ -12,7 +12,6 @@ import 'package:heart/models/errors.dart';
 import 'package:heart/models/imports.dart';
 import 'package:heart/models/pagination.dart';
 import 'package:heart/models/workouts.dart';
-import 'package:heart_aws/heart_aws.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:relic/relic.dart';
@@ -125,8 +124,7 @@ Future<Model> _importBatch(Request request, ImportWorkoutsIn input, WorkoutImpor
   if (report.workoutsCreated >= 500 || report.setsCreated >= 5000) {
     // a big import is legitimate exactly once per user per source app —
     // worth a human glance either way
-    await _alertOwner(
-      request,
+    await request.alertOwner(
       subject: 'Large workout import',
       message:
           'User ${request.userId} just imported ${report.workoutsCreated} workouts '
@@ -146,8 +144,7 @@ Future<Model> _parkExport(Request request, ImportWorkoutsIn input) async {
   // the same file sent again (a retry, a dry run then a commit) is one object
   // and one alert
   if (!already) {
-    await _alertOwner(
-      request,
+    await request.alertOwner(
       subject: 'Parked workout import',
       message:
           'User ${request.userId} sent a ${input.source.label} export the parser could not read '
@@ -169,20 +166,6 @@ Future<void> _keepPartial(Request request, ImportWorkoutsIn input) async {
     );
   } catch (e, st) {
     _logger.warning('failed to keep a partially read ${input.source.label} export', e, st);
-  }
-}
-
-/// Tells the owner, best-effort: an alert must never fail the request it is
-/// about.
-Future<void> _alertOwner(Request request, {required String subject, required String message}) async {
-  try {
-    final sns = Sns(
-      credentialsProvider: request.awsConfig.credentialsProvider,
-      region: request.awsConfig.region,
-    );
-    await sns.publish(topicArn: request.config.monitoringTopicArn, subject: subject, message: message);
-  } catch (e, st) {
-    _logger.warning('failed to publish the alert "$subject"', e, st);
   }
 }
 
