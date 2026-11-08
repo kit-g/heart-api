@@ -59,8 +59,11 @@ Future<Model> addThreadItem(Request req) async {
     subjectId: input.subjectId,
   );
 
-  // A retry asks again too: it may be retrying because this push failed after the
-  // message was stored, and pushes on this topic collapse into one on the device.
+  // A reaction says nothing worth a push, and the other person's app finds it on its
+  // next read. A retry asks again too: it may be retrying because this push failed
+  // after the message was stored, and pushes on this topic collapse into one on the
+  // device.
+  if (input.kind == 'reaction') return created ? Created(item) : item;
   await req.events.publish(
     queueUrl: req.config.eventsQueueUrl,
     message: {

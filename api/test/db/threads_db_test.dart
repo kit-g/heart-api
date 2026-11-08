@@ -35,13 +35,14 @@ void main() {
     DateTime? at,
     String? subjectType,
     String? subjectId,
+    String kind = 'message',
   }) async {
     final now = DateTime.timestamp();
     final (item, _) = await h.db.addThreadItem(
       senderId: sender,
       threadId: thread,
       id: id ?? uuidV7(),
-      kind: 'message',
+      kind: kind,
       content: content,
       commitment: 'c',
       tag: 't',
@@ -356,6 +357,15 @@ void main() {
 
       await say(a, thread);
       expect((await h.db.getThreads(userId: b)).single.unread, 1);
+    });
+
+    test('a reaction arrives, but is nothing to read', () async {
+      final (a, b, thread) = await open();
+      final message = await say(b, thread);
+      await say(a, thread, kind: 'reaction', subjectType: 'message', subjectId: message.id);
+
+      expect((await h.db.getThreads(userId: b)).single.unread, 0);
+      expect((await newest(b, thread, count: 2)).first.kind, 'reaction', reason: 'it reads like any item');
     });
 
     test('an offline message stored later still counts', () async {

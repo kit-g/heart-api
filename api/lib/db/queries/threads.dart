@@ -1,7 +1,8 @@
 part of '../db.dart';
 
 /// One thread as one of its people sees it, `t` being the thread: who the other is,
-/// when something last arrived, and what's unread. The last arrival is the newest
+/// when something last arrived, and what's unread. A reaction arrives but isn't
+/// something to read. The last arrival is the newest
 /// item in stored order, since a device's own time can be days old or years ahead.
 const _threadAsSeen = '''
 SELECT
@@ -25,6 +26,7 @@ SELECT
     LEFT JOIN thread_reads r ON r.thread_id = t.id AND r.user_id = @userId
     WHERE i.thread_id = t.id
       AND i.sender_id IS DISTINCT FROM @userId
+      AND i.kind <> 'reaction'
       AND (r.user_id IS NULL OR (i.xid, i.id) > (r.read_xid, r.read_id))
   ) AS unread
 ''';

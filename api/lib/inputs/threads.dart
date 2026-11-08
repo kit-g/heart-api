@@ -1,9 +1,10 @@
 part of 'inputs.dart';
 
-/// What a thread accepts today. Sealing something for the other person (a skip's
-/// reason, say) would be one more word here, and that's a policy decision: see
-/// docs/2026-11-01.coaching.md, *Messages*.
-const _threadItemKinds = {'message'};
+/// What a thread accepts today: a message, and a reaction to one, sealed like it.
+/// Sealing something else for the other person (a skip's reason, say) would be one
+/// more word here, and that's a policy decision: see docs/2026-11-01.coaching.md,
+/// *Messages*.
+const _threadItemKinds = {'message', 'reaction'};
 
 /// Postgres refuses NUL in text, and JSON allows it: without this, a request that
 /// can never succeed answers 500 and gets retried.
@@ -62,7 +63,7 @@ class ThreadItemIn {
     final kind = switch (json['kind']) {
       null => 'message',
       final String kind when _threadItemKinds.contains(kind) => kind,
-      _ => throw const BadRequest(code: 'invalid_kind', reason: 'a thread takes messages'),
+      _ => throw const BadRequest(code: 'invalid_kind', reason: 'a thread takes messages and reactions to them'),
     };
 
     final (subjectType, subjectId) = switch ((json['subjectType'], json['subjectId'])) {
@@ -75,6 +76,10 @@ class ThreadItemIn {
         ),
       _ => throw const BadRequest(reason: 'a subject has a subjectType and a subjectId'),
     };
+    // a reaction is to one message, named by its id
+    if (kind == 'reaction' && (subjectType != 'message' || !isUuidV7(subjectId!))) {
+      throw const BadRequest(code: 'invalid_subject', reason: 'a reaction is to a message: subjectType message');
+    }
 
     return ThreadItemIn._(
       id: id,
