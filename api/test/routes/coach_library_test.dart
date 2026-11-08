@@ -138,6 +138,17 @@ void main() {
     expect(delivery['programId'], theirs);
   });
 
+  test("another coach's program has no holders to list: 404, as reading it is", () async {
+    when(
+      app.db.getCoachProgram(coachId: anyNamed('coachId'), id: anyNamed('id')),
+    ).thenThrow(const NotFound(type: 'Library program', id: program));
+
+    final res = await app.send('GET', '/library-programs/$program/holders');
+
+    expect(res.status, 404);
+    verifyNever(app.db.getCoachProgramHolders(coachId: anyNamed('coachId'), id: anyNamed('id')));
+  });
+
   for (final (method, path) in [
     ('GET', '/library-programs/abc'),
     ('GET', '/library-programs/abc/holders'),

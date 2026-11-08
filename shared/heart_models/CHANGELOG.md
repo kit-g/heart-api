@@ -21,6 +21,8 @@ Reading coaching's answers back.
   no `reason`, which the answer doesn't carry.
 - Fixed: `Workout.copy(sameId: true)` dropped `loggedBy` and `loggedByName`. A fresh-id copy
   still leaves them behind.
+- What each of these answers means, and the routes that send them: heart-of-yours#552 to
+  heart-of-yours#560, one per part of coaching.
 
 ## 2.49.1
 

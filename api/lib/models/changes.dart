@@ -29,7 +29,7 @@ class ChangeCursor {
       }
       return .new(xid: xid, id: id);
     } catch (_) {
-      throw BadRequest(reason: 'since is not a cursor from this feed: $raw');
+      throw BadRequest(reason: 'not a cursor from this feed: $raw');
     }
   }
 
