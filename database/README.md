@@ -19,7 +19,7 @@ database/
 
 ## Migrations
 
-Forward-only. Naming: `YYYY-MM-DD.<title>.sql`. Applied in lexical order — the date prefix orders them.
+Forward-only. Naming: `YYYY-MM-DD.HHMM.<title>.sql`, the date and UTC time it was written. Applied in byte order, so the date and time order them. Files up to 2026-11-04 have no time and keep their names; `scripts/apply_migrations.sh` refuses a later file without one, or two at the same minute.
 
 ### Conventions
 
@@ -117,13 +117,13 @@ CI runs the exact same script against an ephemeral Postgres provisioned on the r
 
 ### Adding a table
 
-1. Migration: `database/migrations/YYYY-MM-DD.<table>.sql` with `DROP TABLE IF EXISTS … CASCADE; CREATE TABLE …;`
+1. Migration: `database/migrations/YYYY-MM-DD.HHMM.<table>.sql` with `DROP TABLE IF EXISTS … CASCADE; CREATE TABLE …;`
 2. Test: `database/tests/public/tables/<table>.sql` covering everything in the table.
 3. Helper (optional): `create_test_<table>(...)` builder in `test_utils/helpers.sql` if other tests need to stage rows.
 
 ### Adding a function
 
-1. Migration: `database/migrations/YYYY-MM-DD.<feature>-functions.sql`
+1. Migration: `database/migrations/YYYY-MM-DD.HHMM.<feature>-functions.sql`
 2. Test: `database/tests/public/functions/<function>.sql` using `runtests()` style — define `test_*()` plpgsql functions, end with `SELECT * FROM runtests();`
 3. JSON validator (optional): if the function returns JSON, add `validate_format_<thing>` to `helpers.sql`.
 
