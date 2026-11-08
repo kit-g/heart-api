@@ -130,7 +130,8 @@ WHERE l.id = @id::uuid
 
 /// Any exercise the body names, as the one the student has: the one an earlier send
 /// chose (@known) while they still have it, so a rename keeps it, then their own by
-/// that name, then the library's, and otherwise a copy made for them. An id that
+/// that name, then the library's, and otherwise a copy made for them. A name matches
+/// whatever its case, as an import's does, and the same spelling wins a tie. An id that
 /// isn't an exercise, such as a session's, finds no row and stays out of the answer.
 /// So does someone else's private exercise: a coach can pass on only what they can see.
 const _matchExercisesForStudent = '''
@@ -153,9 +154,9 @@ _matched AS (
       ),
       (
         SELECT e2.id FROM exercises e2
-        WHERE e2.name = s.name
+        WHERE lower(e2.name) = lower(s.name)
           AND (e2.user_id IS NULL OR e2.user_id = @studentId)
-        ORDER BY e2.user_id NULLS LAST
+        ORDER BY e2.user_id NULLS LAST, e2.name = s.name DESC, e2.id
         LIMIT 1
       )
     ) AS resolved_id

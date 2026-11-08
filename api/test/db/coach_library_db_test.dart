@@ -167,6 +167,28 @@ void main() {
       final owner = await h.exec('SELECT user_id FROM exercises WHERE id = @id::uuid', {'id': matched[onlyCoach]});
       expect(owner.first[0], student);
     });
+
+    // heart-api#395: "Bench" from the coach made a second "Bench" beside the student's "bench"
+    test('a name matches whatever its case, and the same spelling wins a tie', () async {
+      final (coach, student, _) = await coaching();
+      Future<String> custom(String owner, String name) => h.insertId(
+        "INSERT INTO exercises (name, category, target, user_id) VALUES (@n, 'Barbell', 'Chest', @u) RETURNING id",
+        {'n': name, 'u': owner},
+      );
+      final name = 'Bench ${h.uid('x')}';
+      final coaches = await custom(coach, name);
+      final lower = await custom(student, name.toLowerCase());
+
+      expect((await h.db.matchExercisesForStudent(ids: [coaches], coachId: coach, studentId: student))[coaches], lower);
+      final copies = await h.exec(
+        'SELECT count(*) FROM exercises WHERE user_id = @s AND lower(name) = lower(@n)',
+        {'s': student, 'n': name},
+      );
+      expect(copies.first[0], 1, reason: 'no second exercise for the student');
+
+      final exact = await custom(student, name);
+      expect((await h.db.matchExercisesForStudent(ids: [coaches], coachId: coach, studentId: student))[coaches], exact);
+    });
   });
 
   test('someone else\'s private exercise doesn\'t get copied to anyone', () async {
