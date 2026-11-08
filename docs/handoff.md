@@ -28,7 +28,7 @@ feature off to the Flutter app. This file is about finishing work *here*.)
    public API, patch for fixes; a removed or changed signature needs an app
    migration first and is out of scope for an agent. Test-, docs- or
    lint-only changes don't bump.
-4. **Migrations** — new files only, named `YYYY-MM-DD.slug.sql`; never edit
+4. **Migrations** — new files only, named `YYYY-MM-DD.HHMM.slug.sql` (UTC time); never edit
    one that has been applied anywhere (the runner tracks by filename and
    silently skips it). Every new table or function has a pgtap test under
    `database/tests/`. snake_case columns, house style per the

@@ -9,7 +9,9 @@ The migration runner applies `database/migrations/*.sql` in filename sort order,
 
 ## Naming
 
-`database/migrations/YYYY-MM-DD.short-name.sql` — date-prefixed (sorts chronologically = apply order), kebab-case slug. Use today's date. If two migrations share a date, the slug breaks the tie alphabetically — name them so the intended order holds.
+`database/migrations/YYYY-MM-DD.HHMM.short-name.sql` — today's date and the current UTC time (`date -u +%Y-%m-%d.%H%M`), then a kebab-case slug. The name is the apply order, compared byte by byte, so a migration that depends on another is written after it and gets a later time; two in the same minute take the next minute for the second.
+
+Files dated up to 2026-11-04 are `YYYY-MM-DD.short-name.sql`, where a shared date fell back on the slug's alphabetical order. That held by luck, so the time is required after that date: the runner refuses a later file without one, or two files with the same date and time, before it applies anything. The old files keep their names, since a renamed file runs again (below).
 
 ### Editing an already-applied migration is a silent no-op
 
