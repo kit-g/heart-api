@@ -38,6 +38,11 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
       'name': 'Invitations accepted',
       'description': 'When someone accepts your invitation',
     },
+    'coaching.program_received': {
+      'title': '{name} sent you a program',
+      'name': 'Programs from your coach',
+      'description': 'When your coach sends you a program',
+    },
   },
   'en_CA': {
     'person': {'unnamed': 'Someone'},
@@ -64,6 +69,11 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
       'name': 'Invitations accepted',
       'description': 'When someone accepts your invitation',
     },
+    'coaching.program_received': {
+      'title': '{name} sent you a program',
+      'name': 'Programs from your coach',
+      'description': 'When your coach sends you a program',
+    },
   },
   'ru': {
     'person': {'unnamed': 'Кто-то'},
@@ -89,6 +99,11 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
       'title': '{name}: приглашение принято',
       'name': 'Принятые приглашения',
       'description': 'Когда кто-то принимает ваше приглашение',
+    },
+    'coaching.program_received': {
+      'title': '{name}: новая программа',
+      'name': 'Программы от тренера',
+      'description': 'Когда тренер присылает вам программу',
     },
   },
   // neutral international Spanish; es_ES reaches these via the renderer's
@@ -118,6 +133,11 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
       'name': 'Invitaciones aceptadas',
       'description': 'Cuando alguien acepta tu invitación',
     },
+    'coaching.program_received': {
+      'title': '{name} te ha enviado un programa',
+      'name': 'Programas de tu entrenador',
+      'description': 'Cuando tu entrenador te envía un programa',
+    },
   },
   // neutral international French; fr_CA reaches these via the same fallback
   'fr': {
@@ -144,6 +164,11 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
       'title': '{name} a accepté votre invitation',
       'name': 'Invitations acceptées',
       'description': 'Quand quelqu\'un accepte votre invitation',
+    },
+    'coaching.program_received': {
+      'title': '{name} vous a envoyé un programme',
+      'name': 'Programmes de votre coach',
+      'description': 'Quand votre coach vous envoie un programme',
     },
   },
 };

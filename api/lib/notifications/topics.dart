@@ -30,6 +30,13 @@ enum PushTopic {
     options: [instant, off],
     channel: 'coaching',
   ),
+  programReceived(
+    key: 'coaching.program_received',
+    group: 'coaching',
+    fallback: instant,
+    options: [instant, off],
+    channel: 'coaching',
+  ),
 
   /// Wakes the app to fetch what changed. It says nothing, so nothing to choose.
   programChanged(key: 'coaching.program_changed', group: 'coaching', silent: true),
