@@ -157,11 +157,12 @@ locals {
 # until its object is uploaded the variable stays empty and that feature stays
 # off, so a plan never fails on a key nobody has generated yet. Both objects are
 # stored as text/plain, or `body` reads back empty (see the Apple key above).
+# `scripts/coaching_keys.py <env>` makes and uploads both, and rotates the first.
 #
 # message-tag-keys.txt: the HMAC keys that tag messages, `id:base64` pairs,
 # comma-separated, newest first; rotating adds a pair at the front.
-# report-review-key.txt: the public half from `scripts/open_report.py
-# --generate`. The private half never goes in this bucket.
+# report-review-key.txt: the public half of the pair reports are sealed to. The
+# private half never goes in this bucket.
 data "aws_s3_objects" "coaching_keys" {
   bucket = module.content.static_bucket.bucket
   prefix = "secrets/coaching/"
