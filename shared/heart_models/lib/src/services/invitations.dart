@@ -27,9 +27,10 @@ abstract interface class InvitationService {
   Future<InvitationPreview?> previewInvitation({required String token});
 
   /// Starts the relationship, opening [shares] to the inviter. Accepting twice
-  /// is a no-op. Throws when the link is no longer good. Someone who only just
-  /// made an account on the web gets a profile from [email] and [name].
-  Future<Connection> acceptInvitation({
+  /// is a no-op, and answers the same connection: `connected` says whether this
+  /// call is the one that made it. Throws when the link is no longer good. Someone
+  /// who only just made an account on the web gets a profile from [email] and [name].
+  Future<({Connection connection, bool connected})> acceptInvitation({
     required String userId,
     required String token,
     Set<ConnectionShare> shares = const {},

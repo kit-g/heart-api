@@ -118,11 +118,11 @@ void main() {
       final student = await h.seedProfile();
       final invitation = await invite(c);
 
-      final connection = await h.db.acceptInvitation(
+      final connection = (await h.db.acceptInvitation(
         userId: student,
         token: invitation.token!,
         shares: {.goals},
-      );
+      )).connection;
       expect(connection.targetId, c);
       expect(connection.role, ConnectionRole.student);
       expect(connection.status, ConnectionStatus.active);
@@ -136,11 +136,32 @@ void main() {
       final student = await h.seedProfile();
       final invitation = await invite(c);
 
-      final first = await h.db.acceptInvitation(userId: student, token: invitation.token!);
-      final second = await h.db.acceptInvitation(userId: student, token: invitation.token!, shares: {.goals});
+      final first = (await h.db.acceptInvitation(userId: student, token: invitation.token!)).connection;
+      final second = (await h.db.acceptInvitation(
+        userId: student,
+        token: invitation.token!,
+        shares: {.goals},
+      )).connection;
       expect(second.connectionId, first.connectionId);
       expect(second.acceptedAt, first.acceptedAt);
       expect(second.shares, isEmpty);
+    });
+
+    test('says which accept made the connection', () async {
+      final c = await coach();
+      final student = await h.seedProfile();
+      final invitation = await invite(c);
+
+      expect((await h.db.acceptInvitation(userId: student, token: invitation.token!)).connected, isTrue);
+      expect((await h.db.acceptInvitation(userId: student, token: invitation.token!)).connected, isFalse);
+      expect(
+        (await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!)).connected,
+        isFalse,
+        reason: 'a second link from a coach already live connects nothing new',
+      );
+
+      await h.db.deleteConnection(actorId: c, targetId: student, role: .coach, domain: .fitness);
+      expect((await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!)).connected, isTrue);
     });
 
     // The statements have to overlap: both wait on a lock this test holds, so each
@@ -219,7 +240,7 @@ void main() {
       expect((await h.db.getInvitations(inviterId: c)).items.single.status, 'declined');
       await expectLater(h.db.acceptInvitation(userId: other, token: invitation.token!), refusedWith('invitation_gone'));
 
-      final connection = await h.db.acceptInvitation(userId: student, token: invitation.token!);
+      final connection = (await h.db.acceptInvitation(userId: student, token: invitation.token!)).connection;
       expect(connection.status, ConnectionStatus.active);
       expect((await h.db.getInvitations(inviterId: c)).items.single.status, 'accepted');
     });
@@ -236,17 +257,17 @@ void main() {
     test('a former client starts again from a new date, with nothing shared', () async {
       final c = await coach();
       final student = await h.seedProfile();
-      final first = await h.db.acceptInvitation(
+      final first = (await h.db.acceptInvitation(
         userId: student,
         token: (await invite(c)).token!,
         shares: {.history},
-      );
+      )).connection;
       await h.exec("UPDATE connections SET accepted_at = '2020-01-01Z' WHERE id = @id::uuid", {
         'id': first.connectionId,
       });
       await h.db.deleteConnection(actorId: c, targetId: student, role: .coach, domain: .fitness);
 
-      final again = await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!);
+      final again = (await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!)).connection;
       expect(again.connectionId, first.connectionId);
       expect(again.status, ConnectionStatus.active);
       expect(again.acceptedAt!.isAfter(DateTime.utc(2021)), isTrue);
@@ -256,8 +277,12 @@ void main() {
     test('a coach already live in the domain keeps what they have', () async {
       final c = await coach();
       final student = await h.seedProfile();
-      final first = await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!, shares: {.goals});
-      final second = await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!);
+      final first = (await h.db.acceptInvitation(
+        userId: student,
+        token: (await invite(c)).token!,
+        shares: {.goals},
+      )).connection;
+      final second = (await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!)).connection;
       expect(second.acceptedAt, first.acceptedAt);
       expect(second.shares, ['goals']);
     });
@@ -267,7 +292,7 @@ void main() {
       final student = await h.seedProfile();
       await h.seedConnection(initiator: student, target: c);
 
-      final connection = await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!);
+      final connection = (await h.db.acceptInvitation(userId: student, token: (await invite(c)).token!)).connection;
       expect(connection.role, ConnectionRole.student);
       expect((await h.db.getConnections(c)).single.role, ConnectionRole.coach);
     });
@@ -284,12 +309,12 @@ void main() {
       final c = await coach();
       final person = await newAccount();
 
-      final connection = await h.db.acceptInvitation(
+      final connection = (await h.db.acceptInvitation(
         userId: person,
         token: (await invite(c)).token!,
         email: 'new@test.local',
         name: 'New Person',
-      );
+      )).connection;
       expect(connection.status, ConnectionStatus.active);
 
       final profile = await h.db.getProfile(person);
@@ -411,7 +436,10 @@ void main() {
       token: TokenSecret.random(),
     );
     expect((await h.db.getInvitations(inviterId: c)).items.single.status, 'pending');
-    expect((await h.db.acceptInvitation(userId: other, token: renewed.token!)).status, ConnectionStatus.active);
+    expect(
+      (await h.db.acceptInvitation(userId: other, token: renewed.token!)).connection.status,
+      ConnectionStatus.active,
+    );
 
     final kept = await h.exec(
       "SELECT count(*) FROM invitation_responses WHERE invitation_id = @id::uuid AND response = 'declined'",
@@ -432,7 +460,10 @@ void main() {
     );
     expect(renewed.token, isNot(invitation.token));
     expect(await h.db.previewInvitation(token: invitation.token!), isNull);
-    expect((await h.db.acceptInvitation(userId: student, token: renewed.token!)).status, ConnectionStatus.active);
+    expect(
+      (await h.db.acceptInvitation(userId: student, token: renewed.token!)).connection.status,
+      ConnectionStatus.active,
+    );
 
     await expectLater(
       h.db.renewInvitation(inviterId: c, invitationId: invitation.id, token: TokenSecret.random()),

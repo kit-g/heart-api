@@ -281,14 +281,14 @@ _person AS (
   RETURNING id
 ),
 _row AS (
-  SELECT id, initiator_id AS other_id, target_role AS role, domain, status, created_at, accepted_at, shares
+  SELECT id, initiator_id AS other_id, target_role AS role, domain, status, created_at, accepted_at, shares, true AS fresh
   FROM _connection
   UNION ALL
   SELECT
     c.id,
     CASE WHEN c.initiator_id = @userId THEN c.target_id ELSE c.initiator_id END,
     CASE WHEN c.initiator_id = @userId THEN c.initiator_role ELSE c.target_role END,
-    c.domain, c.status, c.created_at, c.accepted_at, c.shares
+    c.domain, c.status, c.created_at, c.accepted_at, c.shares, false
   FROM connections c, _standing s
   WHERE (s.repeated OR EXISTS (SELECT 1 FROM _live))
     AND c.domain = s.domain
@@ -304,7 +304,8 @@ SELECT
   r.status,
   r.created_at,
   r.accepted_at,
-  r.shares
+  r.shares,
+  r.fresh
 FROM _standing s
 LEFT JOIN _row r ON NOT s.own
 ''';

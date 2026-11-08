@@ -73,24 +73,28 @@ Future<AcceptedInvitation> acceptInvitation(Request req) async {
   final input = await InvitationAcceptIn.fromRequest(req);
   final token = req.rawPathParameters[#token]!;
   final program = await req.coachLibraryService.invitationProgram(token: token);
-  final connection = await req.invitationService.acceptInvitation(
+  final (:connection, :connected) = await req.invitationService.acceptInvitation(
     userId: req.userId,
     token: token,
     shares: input.shares,
     email: req.user.email,
     name: req.user.displayName,
   );
-  await req.events.publish(
-    queueUrl: req.config.eventsQueueUrl,
-    message: {
-      'type': 'push.requested',
-      'userId': connection.targetId,
-      'topic': PushTopic.invitationAccepted.key,
-      'name': ?req.user.displayName,
-      'actorId': req.userId,
-      'connectionId': connection.connectionId,
-    },
-  );
+  // only the accept that connected them: a repeat, or a second link from someone
+  // they're already connected to, has nothing new to tell
+  if (connected) {
+    await req.events.publish(
+      queueUrl: req.config.eventsQueueUrl,
+      message: {
+        'type': 'push.requested',
+        'userId': connection.targetId,
+        'topic': PushTopic.invitationAccepted.key,
+        'name': ?req.user.displayName,
+        'actorId': req.userId,
+        'connectionId': connection.connectionId,
+      },
+    );
+  }
   // a separate step: their limit shouldn't stop them connecting, and the coach
   // sees it didn't arrive and can send it again
   final delivery = switch (program) {
