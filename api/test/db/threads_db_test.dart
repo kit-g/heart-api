@@ -382,6 +382,22 @@ void main() {
         throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'stale_cursor')),
       );
     });
+
+    test('someone who cannot read the thread cannot move a position on it', () async {
+      final (a, b, thread) = await open();
+      final item = await say(a, thread);
+      final cursor = await cursorOf(b, thread, item);
+
+      await expectLater(
+        h.db.markThreadRead(userId: await h.seedProfile(), threadId: thread, cursor: cursor),
+        throwsA(isA<Forbidden>()),
+      );
+      await expectLater(
+        h.db.markThreadRead(userId: b, threadId: uuidV7(), cursor: cursor),
+        throwsA(isA<Forbidden>()),
+      );
+      expect((await h.db.getThreads(userId: b)).single.unread, 1);
+    });
   });
 
   group('deleting', () {
@@ -404,7 +420,7 @@ void main() {
     test('a stranger cannot, and either can after the connection ended', () async {
       final (a, b, thread) = await open();
       await say(a, thread);
-      expect(await h.db.clearThread(userId: await h.seedProfile(), threadId: thread), isNull);
+      await expectLater(h.db.clearThread(userId: await h.seedProfile(), threadId: thread), throwsA(isA<Forbidden>()));
       expect(await newest(a, thread), hasLength(1));
 
       await h.db.deleteConnection(actorId: a, targetId: b, role: .peer, domain: .fitness);

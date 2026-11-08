@@ -330,6 +330,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
       parameters: {'ownerId': ownerId, 'programId': programId, 'xid': after?.xid, 'changeId': after?.id},
     );
     final columns = [for (final row in rows) row.toColumnMap()];
+    if (columns.first['owned'] != true) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
     if (columns.first['stale_cursor'] == true) {
       throw const BadRequest(
         code: 'stale_cursor',
