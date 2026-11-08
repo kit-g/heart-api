@@ -65,6 +65,9 @@ release on the API, the CDN content and `heart_models` are read by builds we don
   re-meaning it, tightening what the server accepts, changing a status code or error `code`,
   or changing a `heart_models` signature is a **breaking change**: it gets a migration plan
   before any code (the `breaking-change` skill) and ships in phases, never in one PR.
+- Until the app ships coaching, coaching's routes and its `heart_models` signatures have no
+  installed reader, and may change without a phased plan. From the first app release that
+  uses them, they are contract like everything else (`docs/2026-11-01.coaching.md`).
 - Raising the minimal app version (a 426 to every older build) is a product decision,
   announced ahead, never a shortcut for a schema change.
 - Every prod release (`v*` tag) carries a compatibility note: each contract change since the
