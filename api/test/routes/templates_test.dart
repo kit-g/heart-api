@@ -8,6 +8,7 @@ import 'package:mockito/mockito.dart';
 import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
 
+import '../helpers/app_harness.dart';
 import '../helpers/request.dart';
 import '../mocks.mocks.dart';
 
@@ -271,6 +272,102 @@ void main() {
       final result = await getMyTemplateShares(getReq('/templates/shares'));
 
       expect(result.toMap().containsKey('cursor'), isFalse);
+    });
+  });
+
+  group('through the real app', () {
+    late AppHarness app;
+
+    setUp(() async => app = await AppHarness.start());
+    tearDown(() => app.stop());
+
+    test('an edit of a template that is no copy\'s session is a plain one, and tells nobody', () async {
+      when(
+        app.db.writeSession(
+          ownerId: anyNamed('ownerId'),
+          actorId: anyNamed('actorId'),
+          sessionId: anyNamed('sessionId'),
+          body: anyNamed('body'),
+          programId: anyNamed('programId'),
+          baseRevision: anyNamed('baseRevision'),
+          changeId: anyNamed('changeId'),
+        ),
+      ).thenAnswer((_) async => null);
+      when(
+        app.db.updateTemplate(userId: anyNamed('userId'), templateId: anyNamed('templateId'), body: anyNamed('body')),
+      ).thenAnswer((_) async => _fakeTemplate(_v7Id));
+
+      final res = await app.send('PUT', '/templates/$_v7Id', body: {'name': 'Day', 'exercises': <Object?>[]});
+
+      expect(res.status, 200);
+      verify(app.db.updateTemplate(userId: _meId, templateId: _v7Id, body: anyNamed('body'))).called(1);
+      verifyZeroInteractions(app.events);
+    });
+
+    test('reads the caller\'s own template', () async {
+      when(
+        app.db.getTemplate(userId: anyNamed('userId'), templateId: anyNamed('templateId')),
+      ).thenAnswer((_) async => _fakeTemplate(_v7Id));
+
+      final res = await app.send('GET', '/templates/$_v7Id');
+
+      expect(res.status, 200);
+      verify(app.db.getTemplate(userId: _meId, templateId: _v7Id)).called(1);
+    });
+
+    test('assigning a template to someone shares it from the caller', () async {
+      when(
+        app.db.shareTemplate(
+          coachId: anyNamed('coachId'),
+          targetUserId: anyNamed('targetUserId'),
+          masterTemplateId: anyNamed('masterTemplateId'),
+        ),
+      ).thenAnswer((_) async => _fakeShare('share-1'));
+
+      final res = await app.send('POST', '/accounts/s1/templates/$_v7Id');
+
+      expect(res.status, 200);
+      verify(app.db.shareTemplate(coachId: _meId, targetUserId: 's1', masterTemplateId: _v7Id)).called(1);
+    });
+
+    test('assigning a template to oneself is refused before anything is shared', () async {
+      final res = await app.send('POST', '/accounts/$_meId/templates/$_v7Id');
+
+      expect(res.status, 403);
+      verifyNever(
+        app.db.shareTemplate(
+          coachId: anyNamed('coachId'),
+          targetUserId: anyNamed('targetUserId'),
+          masterTemplateId: anyNamed('masterTemplateId'),
+        ),
+      );
+    });
+
+    test('deleting a template that is no copy\'s session deletes it plainly, 204', () async {
+      when(
+        app.db.removeSession(
+          ownerId: anyNamed('ownerId'),
+          actorId: anyNamed('actorId'),
+          sessionId: anyNamed('sessionId'),
+        ),
+      ).thenAnswer((_) async => null);
+      when(
+        app.db.deleteTemplate(coachId: anyNamed('coachId'), templateId: anyNamed('templateId')),
+      ).thenAnswer((_) async {});
+
+      final res = await app.send('DELETE', '/templates/$_v7Id');
+
+      expect(res.status, 204);
+      verify(app.db.deleteTemplate(coachId: _meId, templateId: _v7Id)).called(1);
+    });
+
+    test('deleting a share names the caller and the share, 204', () async {
+      when(app.db.deleteShare(coachId: anyNamed('coachId'), shareId: anyNamed('shareId'))).thenAnswer((_) async {});
+
+      final res = await app.send('DELETE', '/templates/shares/share-1');
+
+      expect(res.status, 204);
+      verify(app.db.deleteShare(coachId: _meId, shareId: 'share-1')).called(1);
     });
   });
 }

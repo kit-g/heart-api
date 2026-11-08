@@ -165,4 +165,32 @@ void main() {
       );
     });
   });
+
+  for (final (who, query, reasons, cursor) in [
+    ('a client with something to look at', 'cursor=0:$one', ['quiet'], '0:$two'),
+    ('a client with nothing to look at', 'cursor=1:$one', <String>[], '1:$two'),
+    ('a former client', 'former=true', <String>[], '0:$two'),
+  ]) {
+    test('the next page starts after $who, in the order the list is in', () async {
+      when(
+        app.db.getRoster(
+          coachId: anyNamed('coachId'),
+          reason: anyNamed('reason'),
+          former: anyNamed('former'),
+          cursor: anyNamed('cursor'),
+          limit: anyNamed('limit'),
+        ),
+      ).thenAnswer(
+        (_) async => Page(
+          items: [ClientSummary(connectionId: two, studentId: 's2', status: 'active', reasons: reasons)],
+          hasMore: true,
+        ),
+      );
+
+      final res = await app.send('GET', '/coach/clients?$query');
+
+      expect(res.status, 200);
+      expect((jsonDecode(res.body) as Map)['cursor'], cursor);
+    });
+  }
 }

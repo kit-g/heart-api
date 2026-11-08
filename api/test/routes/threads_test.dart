@@ -311,4 +311,243 @@ void main() {
     );
     expect(res.status, 400);
   });
+
+  const connection = '01900000-0000-7000-8000-000000000003';
+
+  ThreadItem stored({String? cursor}) => ThreadItem(
+    id: item,
+    threadId: thread,
+    kind: 'message',
+    content: 'sealed',
+    commitment: commitment,
+    tag: 't',
+    tagKey: 'k',
+    at: DateTime.utc(2026),
+    createdAt: DateTime.utc(2026),
+    cursor: cursor,
+  );
+
+  group('a thread', () {
+    test('opens on a connection the caller is in', () async {
+      when(
+        app.db.openThread(userId: anyNamed('userId'), connectionId: anyNamed('connectionId')),
+      ).thenAnswer((_) async => Thread(id: thread, connectionId: connection));
+
+      final res = await app.send('POST', '/connections/$connection/thread');
+
+      expect(res.status, 200);
+      expect(Thread.fromJson(jsonDecode(res.body) as Map).id, thread);
+      verify(app.db.openThread(userId: 'u1', connectionId: connection)).called(1);
+    });
+
+    test('doesn\'t open on a connection the caller isn\'t in, or that was never accepted', () async {
+      when(
+        app.db.openThread(userId: anyNamed('userId'), connectionId: anyNamed('connectionId')),
+      ).thenAnswer((_) async => null);
+
+      final res = await app.send('POST', '/connections/$connection/thread');
+
+      expect(res.status, 404);
+    });
+
+    test('the inbox lists the caller\'s threads', () async {
+      when(app.db.getThreads(userId: anyNamed('userId'))).thenAnswer((_) async => [Thread(id: thread, unread: 2)]);
+
+      final res = await app.send('GET', '/threads');
+
+      expect(res.status, 200);
+      expect(ThreadList.fromJson(jsonDecode(res.body) as Map).threads.single.unread, 2);
+      verify(app.db.getThreads(userId: 'u1')).called(1);
+    });
+
+    test('reads items after a cursor, about one subject, with the next cursor while there are more', () async {
+      when(
+        app.db.getThreadItems(
+          userId: anyNamed('userId'),
+          threadId: anyNamed('threadId'),
+          since: anyNamed('since'),
+          before: anyNamed('before'),
+          subjectType: anyNamed('subjectType'),
+          subjectId: anyNamed('subjectId'),
+          limit: anyNamed('limit'),
+        ),
+      ).thenAnswer((_) async => Page(items: [stored(cursor: 'next')], hasMore: true));
+
+      final res = await app.send('GET', '/threads/$thread/items?since=c1&subjectType=workout&subjectId=w1&limit=5');
+
+      expect(res.status, 200);
+      expect((jsonDecode(res.body) as Map)['cursor'], 'next');
+      verify(
+        app.db.getThreadItems(
+          userId: 'u1',
+          threadId: thread,
+          since: 'c1',
+          before: null,
+          subjectType: 'workout',
+          subjectId: 'w1',
+          limit: 5,
+        ),
+      ).called(1);
+    });
+
+    for (final (what, query) in [
+      ('both a since and a before', 'since=a&before=b'),
+      ('a subject the database can\'t store', 'subjectType=workout&subjectId=w%00'),
+    ]) {
+      test('a read with $what is refused before the database sees it', () async {
+        final res = await app.send('GET', '/threads/$thread/items?$query');
+        expect(res.status, 400);
+        verifyZeroInteractions(app.db);
+      });
+    }
+
+    test('marking it read moves the caller\'s position to the cursor given', () async {
+      when(
+        app.db.markThreadRead(userId: anyNamed('userId'), threadId: anyNamed('threadId'), cursor: anyNamed('cursor')),
+      ).thenAnswer((_) async {});
+
+      final res = await app.send('PUT', '/threads/$thread/read', body: {'cursor': 'c9'});
+
+      expect(res.status, 204);
+      verify(app.db.markThreadRead(userId: 'u1', threadId: thread, cursor: 'c9')).called(1);
+    });
+
+    test('a message about a subject carries it as a reference', () async {
+      when(app.config.messageTags).thenReturn(MessageTags({'k': List.filled(32, 1)}));
+      when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+      when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
+      when(
+        app.db.getThreadParties(senderId: anyNamed('senderId'), threadId: anyNamed('threadId')),
+      ).thenAnswer((_) async => (threadId: thread, senderId: 'u1', recipientId: 'them', connectionId: connection));
+      when(
+        app.db.addThreadItem(
+          senderId: anyNamed('senderId'),
+          threadId: anyNamed('threadId'),
+          id: anyNamed('id'),
+          kind: anyNamed('kind'),
+          content: anyNamed('content'),
+          commitment: anyNamed('commitment'),
+          tag: anyNamed('tag'),
+          tagKey: anyNamed('tagKey'),
+          at: anyNamed('at'),
+          createdAt: anyNamed('createdAt'),
+          subjectType: anyNamed('subjectType'),
+          subjectId: anyNamed('subjectId'),
+        ),
+      ).thenAnswer((_) async => (stored(), true));
+
+      final res = await app.send(
+        'POST',
+        '/threads/$thread/items',
+        body: {...body(), 'subjectType': 'workout', 'subjectId': 'w1'},
+      );
+
+      expect(res.status, 201);
+      final captured = verify(
+        app.db.addThreadItem(
+          senderId: anyNamed('senderId'),
+          threadId: anyNamed('threadId'),
+          id: anyNamed('id'),
+          kind: anyNamed('kind'),
+          content: anyNamed('content'),
+          commitment: anyNamed('commitment'),
+          tag: anyNamed('tag'),
+          tagKey: anyNamed('tagKey'),
+          at: anyNamed('at'),
+          createdAt: anyNamed('createdAt'),
+          subjectType: captureAnyNamed('subjectType'),
+          subjectId: captureAnyNamed('subjectId'),
+        ),
+      ).captured;
+      expect(captured, ['workout', 'w1']);
+    });
+
+    test('a commitment that isn\'t base64 is refused as one', () async {
+      final res = await app.send('POST', '/threads/$thread/items', body: body(commit: 'not base64!'));
+      expect(res.status, 400);
+      expect(res.body, contains('invalid_commitment'));
+    });
+  });
+
+  group('notes', () {
+    const note = '01900000-0000-7000-8000-000000000004';
+
+    CoachNote saved() =>
+        CoachNote(id: note, connectionId: connection, content: 'sealed', updatedAt: DateTime.utc(2026));
+
+    test('a coach saves one on a client, as ciphertext', () async {
+      when(
+        app.db.saveNote(
+          coachId: anyNamed('coachId'),
+          id: anyNamed('id'),
+          connectionId: anyNamed('connectionId'),
+          content: anyNamed('content'),
+        ),
+      ).thenAnswer((_) async => saved());
+
+      final res = await app.send('PUT', '/notes/$note', body: {'connectionId': connection, 'content': 'sealed'});
+
+      expect(res.status, 200);
+      verify(app.db.saveNote(coachId: 'u1', id: note, connectionId: connection, content: 'sealed')).called(1);
+    });
+
+    test('a coach lists them on one client, with the next cursor while there are more', () async {
+      when(
+        app.db.getNotes(
+          coachId: anyNamed('coachId'),
+          connectionId: anyNamed('connectionId'),
+          cursor: anyNamed('cursor'),
+          limit: anyNamed('limit'),
+        ),
+      ).thenAnswer((_) async => Page(items: [saved()], hasMore: true));
+
+      final res = await app.send('GET', '/notes?connectionId=$connection&cursor=$note');
+
+      expect(res.status, 200);
+      expect((jsonDecode(res.body) as Map)['cursor'], note);
+      verify(app.db.getNotes(coachId: 'u1', connectionId: connection, cursor: note, limit: 30)).called(1);
+    });
+
+    test('a coach deletes one, 204', () async {
+      when(app.db.deleteNote(coachId: anyNamed('coachId'), id: anyNamed('id'))).thenAnswer((_) async {});
+
+      final res = await app.send('DELETE', '/notes/$note');
+
+      expect(res.status, 204);
+      verify(app.db.deleteNote(coachId: 'u1', id: note)).called(1);
+    });
+  });
+
+  test('a report names the connection it came from', () async {
+    when(app.config.reportReviewKey).thenReturn(base64.encode(List.filled(32, 1)));
+    when(app.config.messageTags).thenReturn(MessageTags({'k': List.filled(32, 1)}));
+    when(
+      app.db.fileReport(
+        reporterId: anyNamed('reporterId'),
+        reportedId: anyNamed('reportedId'),
+        connectionId: anyNamed('connectionId'),
+        reason: anyNamed('reason'),
+        sealed: anyNamed('sealed'),
+        verified: anyNamed('verified'),
+      ),
+    ).thenAnswer((_) async {});
+
+    final res = await app.send(
+      'POST',
+      '/reports',
+      body: {'reportedId': 'them', 'connectionId': connection, 'reason': 'abuse'},
+    );
+
+    expect(res.status, 204);
+    verify(
+      app.db.fileReport(
+        reporterId: 'u1',
+        reportedId: 'them',
+        connectionId: connection,
+        reason: 'abuse',
+        sealed: anyNamed('sealed'),
+        verified: false,
+      ),
+    ).called(1);
+  });
 }

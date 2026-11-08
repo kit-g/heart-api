@@ -13,6 +13,7 @@ import 'package:mockito/mockito.dart';
 import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
 
+import '../helpers/app_harness.dart';
 import '../helpers/request.dart';
 import '../mocks.mocks.dart';
 
@@ -701,6 +702,30 @@ void main() {
       ).called(1);
     });
 
+    test('a partial export that can\'t be kept loses the sample, not the import', () async {
+      const partial =
+          '$csv'
+          '2023-01-15 17:35:12,Push Day,1h,Squat (Barbell),2,NaN,5,0,0\n';
+      when(
+        imports.keep(
+          userId: anyNamed('userId'),
+          source: anyNamed('source'),
+          bytes: anyNamed('bytes'),
+          as: anyNamed('as'),
+        ),
+      ).thenThrow(Exception('the bucket is down'));
+      when(
+        workouts.importWorkouts(
+          userId: anyNamed('userId'),
+          batch: anyNamed('batch'),
+          createCustom: anyNamed('createCustom'),
+        ),
+      ).thenAnswer((_) async => report);
+
+      expect(await importWorkouts(importReq(body: partial)), isA<WorkoutImportReport>());
+      verify(imports.keep(userId: _meId, source: .strong, bytes: anyNamed('bytes'), as: .partial)).called(1);
+    });
+
     test('rejects an empty body, which is nothing to keep', () async {
       await expectLater(importWorkouts(importReq(body: ' \n')), throwsA(isA<BadRequest>()));
     });
@@ -710,6 +735,115 @@ void main() {
         importWorkouts(importReq(query: {'source': 'strong', 'tzOffset': 'PST'})),
         throwsA(isA<BadRequest>()),
       );
+    });
+  });
+
+  group('through the real app', () {
+    late AppHarness app;
+
+    setUp(() async => app = await AppHarness.start());
+    tearDown(() => app.stop());
+
+    const workout = '01900000-0000-7000-8000-000000000001';
+
+    test('lists someone else\'s workouts as the caller can read them', () async {
+      when(
+        app.db.getWorkouts(
+          userId: anyNamed('userId'),
+          targetUserId: anyNamed('targetUserId'),
+          imageUrl: anyNamed('imageUrl'),
+          cursor: anyNamed('cursor'),
+          limit: anyNamed('limit'),
+        ),
+      ).thenAnswer((_) async => Page(items: [_fakeWorkout(workout)], hasMore: false));
+
+      final res = await app.send('GET', '/accounts/$_targetUserId/workouts');
+
+      expect(res.status, 200);
+      expect(((jsonDecode(res.body) as Map)['workouts'] as List).single, containsPair('id', workout));
+      verify(
+        app.db.getWorkouts(
+          userId: _meId,
+          targetUserId: _targetUserId,
+          imageUrl: anyNamed('imageUrl'),
+          cursor: null,
+          limit: 30,
+        ),
+      ).called(1);
+    });
+
+    test('reads one of someone else\'s workouts as the caller', () async {
+      when(
+        app.db.getTargetWorkout(
+          requesterId: anyNamed('requesterId'),
+          targetUserId: anyNamed('targetUserId'),
+          workoutId: anyNamed('workoutId'),
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).thenAnswer((_) async => _fakeWorkout(workout));
+
+      final res = await app.send('GET', '/accounts/$_targetUserId/workouts/$workout');
+
+      expect(res.status, 200);
+      verify(
+        app.db.getTargetWorkout(
+          requesterId: _meId,
+          targetUserId: _targetUserId,
+          workoutId: workout,
+          imageUrl: anyNamed('imageUrl'),
+        ),
+      ).called(1);
+    });
+
+    test('a patch goes to the workout in the path', () async {
+      when(
+        app.db.patchWorkout(
+          userId: anyNamed('userId'),
+          workoutId: anyNamed('workoutId'),
+          imageUrl: anyNamed('imageUrl'),
+          name: anyNamed('name'),
+          start: anyNamed('start'),
+          end: anyNamed('end'),
+          calories: anyNamed('calories'),
+          note: anyNamed('note'),
+          pauses: anyNamed('pauses'),
+        ),
+      ).thenAnswer((_) async => _fakeWorkout(workout));
+
+      final res = await app.send('PATCH', '/workouts/$workout', body: {'name': 'Pull'});
+
+      expect(res.status, 200);
+      verify(
+        app.db.patchWorkout(
+          userId: _meId,
+          workoutId: workout,
+          imageUrl: anyNamed('imageUrl'),
+          name: 'Pull',
+          start: anyNamed('start'),
+          end: anyNamed('end'),
+          calories: anyNamed('calories'),
+          note: anyNamed('note'),
+          pauses: anyNamed('pauses'),
+        ),
+      ).called(1);
+    });
+
+    test('deleting a workout deletes its images first, then the workout, 204', () async {
+      when(
+        app.db.getWorkoutImageKeys(userId: anyNamed('userId'), workoutId: anyNamed('workoutId')),
+      ).thenAnswer((_) async => ['a.jpg', 'b.jpg']);
+      when(app.storage.deleteObject(key: anyNamed('key'))).thenAnswer((_) async {});
+      when(app.db.deleteWorkout(userId: anyNamed('userId'), workoutId: anyNamed('workoutId'))).thenAnswer((_) async {});
+
+      final res = await app.send('DELETE', '/workouts/$workout');
+
+      expect(res.status, 204);
+      verifyInOrder([
+        app.db.getWorkoutImageKeys(userId: _meId, workoutId: workout),
+        app.storage.deleteObject(key: 'a.jpg'),
+        app.storage.deleteObject(key: 'b.jpg'),
+        app.db.deleteWorkout(userId: _meId, workoutId: workout),
+      ]);
     });
   });
 }
