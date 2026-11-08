@@ -17,7 +17,7 @@ import 'package:relic/relic.dart';
 MessageTags _tags(Request req) => req.config.messageTags ?? (throw UnimplementedError('messages are not configured'));
 
 Future<Thread> openThread(Request req) async {
-  final connectionId = req.threadConnectionId;
+  final connectionId = req.connectionIdInPath;
   final thread = await req.threadService.openThread(userId: req.userId, connectionId: connectionId);
   return thread ?? (throw NotFound(type: 'Connection', id: connectionId));
 }

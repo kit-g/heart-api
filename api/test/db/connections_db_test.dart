@@ -182,6 +182,17 @@ void main() {
       expect(c.role, ConnectionRole.peer);
     });
 
+    test('by its id, from either side, and to nobody else', () async {
+      final (a, b) = await pair();
+      await h.db.createConnection(initiatorId: a, targetId: b, role: .peer, domain: .fitness);
+      final id = (await h.db.getConnections(a)).single.connectionId!;
+
+      expect((await h.db.getConnectionById(actorId: a, connectionId: id))?.targetId, b);
+      expect((await h.db.getConnectionById(actorId: b, connectionId: id))?.targetId, a);
+      expect(await h.db.getConnectionById(actorId: await h.seedProfile(), connectionId: id), isNull);
+      expect(await h.db.getConnectionById(actorId: a, connectionId: uuidV7()), isNull);
+    });
+
     test('returns null when no connection matches', () async {
       final (a, b) = await pair(); // never connected
       final c = await h.db.getConnection(

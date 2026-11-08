@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.52.0
+
+Coaching's gaps closed. No app build calls `/connections` or `/invitations` yet, so nothing
+installed reads what changed on the wire.
+
+- Changed: `Connection.toMap` writes `role` and `domain` in lower case, as every newer answer's words
+  are, and no longer writes the viewer-relative `id`. `fromJson` reads either case.
+- Deprecated: `Connection.id` and `Connection.fromId`. Every `/connections/:connectionId` route now
+  takes `connectionId`, the connection's identity.
+- New: `ConnectionsService.getConnectionById`, one connection by its identity, from the caller's side.
+- Changed: `InvitationService.acceptInvitation` answers `({Connection connection, bool connected})`,
+  so a repeated accept can be told from the one that connected. Only the API implements or calls it.
+- New: `PushAudience.actorName`, the name the person a push is about goes by in Heart. Only the API
+  builds one.
+- Docs: `markThreadRead` and `clearThread` throw for a thread the caller can't read or isn't on.
+
 ## 2.51.0
 
 - Changed: `ThreadParties` carries the thread's `connectionId`, so a message's push can apply the

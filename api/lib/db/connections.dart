@@ -57,6 +57,18 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
   }
 
   @override
+  Future<Connection?> getConnectionById({required String actorId, required String connectionId}) async {
+    final result = await _pool.execute(
+      _getConnectionById.toSql(),
+      parameters: {'userId': actorId, 'connectionId': connectionId},
+    );
+    return switch (result.firstOrNull?.toColumnMap()) {
+      null => null,
+      final row => Connection.fromRow(row),
+    };
+  }
+
+  @override
   Future<void> deleteConnection({
     required String actorId,
     required String targetId,

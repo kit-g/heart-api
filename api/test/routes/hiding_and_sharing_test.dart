@@ -65,6 +65,17 @@ void main() {
   });
 
   test('what a student shares is the whole list', () async {
+    const connectionId = '01900000-0000-7000-8000-0000000000c1';
+    when(app.db.getConnectionById(actorId: 'u1', connectionId: connectionId)).thenAnswer(
+      (_) async => Connection(
+        targetId: 'coach-1',
+        role: .student,
+        domain: .fitness,
+        status: .active,
+        createdAt: DateTime.utc(2026),
+        connectionId: connectionId,
+      ),
+    );
     when(
       app.db.changeConnectionShares(
         actorId: anyNamed('actorId'),
@@ -86,7 +97,7 @@ void main() {
 
     final res = await app.send(
       'PUT',
-      '/connections/coach-1|STUDENT|FITNESS/shares',
+      '/connections/$connectionId/shares',
       body: {
         'shares': ['goals'],
       },

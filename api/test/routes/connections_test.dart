@@ -6,14 +6,16 @@ import 'package:test/test.dart';
 
 import '../helpers/app_harness.dart';
 
-/// Route-level HTTP tests for `routes/connections.dart`. Connections are keyed
-/// by a composite `targetId|role|domain` id; these cover the happy paths plus
-/// the id-parsing and validation branches that map bad input to 400.
+/// Route-level HTTP tests for `routes/connections.dart`. A path names a
+/// connection by its `connectionId`; these cover the happy paths, an id that
+/// isn't the caller's, and the validation branches that map bad input to 400.
 void main() {
   late AppHarness app;
 
   setUp(() async => app = await AppHarness.start());
   tearDown(() => app.stop());
+
+  const id = '01900000-0000-7000-8000-0000000000c1';
 
   Connection sample() => Connection(
     targetId: 't1',
@@ -21,7 +23,15 @@ void main() {
     domain: ConnectionDomain.fitness,
     status: ConnectionStatus.pending,
     createdAt: DateTime.utc(2026, 1, 1),
+    connectionId: id,
   );
+
+  void known() {
+    when(
+      app.db.getConnectionById(actorId: anyNamed('actorId'), connectionId: anyNamed('connectionId')),
+    ).thenAnswer((_) async => null);
+    when(app.db.getConnectionById(actorId: 'u1', connectionId: id)).thenAnswer((_) async => sample());
+  }
 
   group('GET /connections', () {
     test('lists connections and applies a role filter from the query', () async {
@@ -29,7 +39,11 @@ void main() {
 
       final res = await app.send('GET', '/connections?role=COACH');
       expect(res.status, 200);
-      expect(jsonDecode(res.body), hasLength(1));
+      final connection = ((jsonDecode(res.body) as Map)['connections'] as List).single as Map;
+      expect(connection['connectionId'], id);
+      expect(connection['role'], 'coach', reason: 'words in lower case, as invitations answer them');
+      expect(connection['domain'], 'fitness');
+      expect(connection.containsKey('id'), isFalse);
       verify(app.db.getConnections('u1', roleFilter: ConnectionRole.coach)).called(1);
     });
 
@@ -115,7 +129,8 @@ void main() {
   });
 
   group('DELETE /connections/:connectionId', () {
-    test('parses the composite id and deletes (204)', () async {
+    test('ends the connection the id names, from the caller\'s side (204)', () async {
+      known();
       when(
         app.db.deleteConnection(
           actorId: anyNamed('actorId'),
@@ -125,7 +140,7 @@ void main() {
         ),
       ).thenAnswer((_) async {});
 
-      final res = await app.send('DELETE', '/connections/t1%7CCOACH%7Cfitness');
+      final res = await app.send('DELETE', '/connections/$id');
       expect(res.status, 204);
       verify(
         app.db.deleteConnection(
@@ -137,13 +152,23 @@ void main() {
       ).called(1);
     });
 
-    test('rejects a malformed id with 400', () async {
-      expect((await app.send('DELETE', '/connections/not-a-valid-id')).status, 400);
+    test('an id that was never one, the old composite form included, is a 404', () async {
+      for (final path in ['not-a-valid-id', 't1%7CCOACH%7Cfitness']) {
+        expect((await app.send('DELETE', '/connections/$path')).status, 404, reason: path);
+      }
+      verifyZeroInteractions(app.db);
+    });
+
+    test('a connection the caller isn\'t on is a 404', () async {
+      known();
+      final res = await app.send('DELETE', '/connections/01900000-0000-7000-8000-0000000000c2');
+      expect(res.status, 404);
     });
   });
 
   group('PUT /connections/:connectionId', () {
     test('changes status from the body', () async {
+      known();
       when(
         app.db.changeConnectionStatus(
           actorId: anyNamed('actorId'),
@@ -154,7 +179,7 @@ void main() {
         ),
       ).thenAnswer((_) async => sample());
 
-      final res = await app.send('PUT', '/connections/t1%7CCOACH%7Cfitness', body: {'status': 'active'});
+      final res = await app.send('PUT', '/connections/$id', body: {'status': 'active'});
       expect(res.status, 200);
       verify(
         app.db.changeConnectionStatus(
@@ -168,19 +193,20 @@ void main() {
     });
 
     test('rejects a missing status with 400', () async {
-      expect((await app.send('PUT', '/connections/t1%7CCOACH%7Cfitness', body: {})).status, 400);
+      expect((await app.send('PUT', '/connections/$id', body: {})).status, 400);
     });
 
     test('rejects an unknown status with 400 instead of reading it as pending', () async {
-      final res = await app.send('PUT', '/connections/t1%7CCOACH%7Cfitness', body: {'status': 'nonsense'});
+      final res = await app.send('PUT', '/connections/$id', body: {'status': 'nonsense'});
       expect(res.status, 400);
     });
 
-    test('rejects a malformed connection id with 400', () async {
-      expect((await app.send('PUT', '/connections/bogus', body: {'status': 'active'})).status, 400);
+    test('a malformed connection id is a 404', () async {
+      expect((await app.send('PUT', '/connections/bogus', body: {'status': 'active'})).status, 404);
     });
 
     test('maps an illegal status transition (StateError) to 400', () async {
+      known();
       when(
         app.db.changeConnectionStatus(
           actorId: anyNamed('actorId'),
@@ -191,7 +217,7 @@ void main() {
         ),
       ).thenThrow(StateError('cannot transition'));
 
-      final res = await app.send('PUT', '/connections/t1%7CCOACH%7Cfitness', body: {'status': 'active'});
+      final res = await app.send('PUT', '/connections/$id', body: {'status': 'active'});
       expect(res.status, 400);
     });
   });
@@ -199,7 +225,7 @@ void main() {
   test('a share nobody has heard of is refused, naming it, before anything changes', () async {
     final res = await app.send(
       'PUT',
-      '/connections/t1%7CCOACH%7Cfitness/shares',
+      '/connections/$id/shares',
       body: {
         'shares': ['everything'],
       },
