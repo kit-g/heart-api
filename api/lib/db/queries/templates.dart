@@ -575,9 +575,9 @@ _master_exercises AS (
     e.name, e.category, e.target, e.instructions, e.asset, e.thumbnail, e.muscles, e.movement, e.health,
     (
       SELECT e2.id FROM exercises e2
-      WHERE e2.name = e.name
+      WHERE lower(e2.name) = lower(e.name)
         AND (e2.user_id IS NULL OR e2.user_id = @studentId)
-      ORDER BY e2.user_id NULLS LAST
+      ORDER BY e2.user_id NULLS LAST, e2.name = e.name DESC, e2.id
       LIMIT 1
     ) AS resolved_id
   FROM template_exercises te
@@ -587,9 +587,11 @@ _master_exercises AS (
 -- Copy any unresolved exercises into the student's library so the FK holds.
 -- DISTINCT ON dedupes across masters that name the same missing exercise.
 _copied_exercises AS (
-  INSERT INTO exercises (name, category, target, instructions, asset, thumbnail, muscles, movement, health, user_id)
-  SELECT DISTINCT ON (name)
-    name, category, target, instructions, asset, thumbnail, muscles, movement, health, @studentId
+  INSERT INTO exercises (
+    name, category, target, instructions, asset, thumbnail, muscles, movement, health, user_id, coach_id
+  )
+  SELECT DISTINCT ON (lower(name))
+    name, category, target, instructions, asset, thumbnail, muscles, movement, health, @studentId, @coachId
   FROM _master_exercises
   WHERE resolved_id IS NULL
   RETURNING id, name
@@ -607,7 +609,7 @@ _resolved_exercises AS (
     me.total_reps,
     coalesce(me.resolved_id, c.id) AS exercise_id
   FROM _master_exercises me
-  LEFT JOIN _copied_exercises c ON c.name = me.name AND me.resolved_id IS NULL
+  LEFT JOIN _copied_exercises c ON lower(c.name) = lower(me.name) AND me.resolved_id IS NULL
 ),
 -- The student's copies land unfiled — folder_id defaults to NULL. The coach's
 -- filing is the coach's business; the student organises their own library.

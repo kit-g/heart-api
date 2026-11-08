@@ -163,9 +163,12 @@ _matched AS (
   FROM _sources s
 ),
 _copied AS (
-  INSERT INTO exercises (name, category, target, instructions, asset, thumbnail, muscles, movement, health, user_id)
+  INSERT INTO exercises (
+    name, category, target, instructions, asset, thumbnail, muscles, movement, health, user_id, coach_id
+  )
   SELECT DISTINCT ON (s.name)
-    s.name, s.category, s.target, s.instructions, s.asset, s.thumbnail, s.muscles, s.movement, s.health, @studentId
+    s.name, s.category, s.target, s.instructions, s.asset, s.thumbnail, s.muscles, s.movement, s.health, @studentId,
+    @coachId
   FROM _sources s
   JOIN _matched m ON m.source_id = s.id
   WHERE m.resolved_id IS NULL
