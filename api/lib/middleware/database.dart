@@ -32,6 +32,7 @@ final _programChangesProperty = ContextProperty<ProgramChangeService>('ProgramCh
 final _rosterProperty = ContextProperty<RosterService>('RosterService');
 final _skipsProperty = ContextProperty<SkipService>('SkipService');
 final _commentsProperty = ContextProperty<CommentService>('CommentService');
+final _reactionsProperty = ContextProperty<ReactionService>('ReactionService');
 final _connectionsProperty = ContextProperty<ConnectionsService>('ConnectionsService');
 final _devicesProperty = ContextProperty<DeviceService>('DeviceService');
 final _apiTokensProperty = ContextProperty<ApiTokenService>('ApiTokenService');
@@ -211,6 +212,15 @@ Middleware commentsDb({required CommentService db}) {
   };
 }
 
+Middleware reactionsDb({required ReactionService db}) {
+  return (Handler next) {
+    return (request) {
+      _reactionsProperty[request] = db;
+      return next(request);
+    };
+  };
+}
+
 Middleware programsDb({required ProgramService db}) {
   return (Handler next) {
     return (request) {
@@ -349,6 +359,10 @@ extension DatabaseContext on Request {
   CommentService get commentService => _commentsProperty.get(this);
 
   set commentService(CommentService v) => _commentsProperty[this] = v;
+
+  ReactionService get reactionService => _reactionsProperty.get(this);
+
+  set reactionService(ReactionService v) => _reactionsProperty[this] = v;
 
   ApiImageDbService get imageDbService => _imageDbProperty.get(this);
 

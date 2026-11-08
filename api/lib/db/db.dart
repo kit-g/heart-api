@@ -41,6 +41,7 @@ part 'profiles.dart';
 part 'program_changes.dart';
 part 'programs.dart';
 part 'push.dart';
+part 'reactions.dart';
 part 'roster.dart';
 part 'skips.dart';
 part 'template_folders.dart';
@@ -65,6 +66,7 @@ part 'queries/profiles.dart';
 part 'queries/program_changes.dart';
 part 'queries/programs.dart';
 part 'queries/push.dart';
+part 'queries/reactions.dart';
 part 'queries/roster.dart';
 part 'queries/skips.dart';
 part 'queries/template_folders.dart';
@@ -255,6 +257,7 @@ class Database extends _DatabaseBase
         _Profiles,
         _Programs,
         _ProgramChanges,
+        _Reactions,
         _Skips,
         _Workouts,
         _Templates,
@@ -266,6 +269,7 @@ class Database extends _DatabaseBase
         ChartPreferenceService,
         ApiExercisePreferenceService,
         CommentService,
+        ReactionService,
         ConnectionsService,
         InvitationService,
         PushService,

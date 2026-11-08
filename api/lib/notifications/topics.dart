@@ -8,6 +8,13 @@ enum PushTopic {
     options: [instant, off],
     channel: 'comments',
   ),
+  reactionCreated(
+    key: 'reaction.created',
+    group: 'reactions',
+    fallback: instant,
+    options: [instant, off],
+    channel: 'reactions',
+  ),
   coachingMessage(
     key: 'coaching.message',
     group: 'coaching',

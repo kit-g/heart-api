@@ -23,6 +23,14 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
       'exercise_set': '{name}: new comment on your set',
       'workout_image': '{name}: new comment on your photo',
     },
+    'reaction.created': {
+      'name': 'New reactions',
+      'description': 'When someone reacts to your workout',
+      'workout': '{name} reacted to your workout',
+      'workout_exercise': '{name} reacted to your exercise',
+      'exercise_set': '{name} reacted to your set',
+      'workout_image': '{name} reacted to your photo',
+    },
     'coaching.message': {
       'title': '{name} messaged you',
       'name': 'Messages',
@@ -54,6 +62,14 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
       'exercise_set': '{name}: new comment on your set',
       'workout_image': '{name}: new comment on your photo',
     },
+    'reaction.created': {
+      'name': 'New reactions',
+      'description': 'When someone reacts to your workout',
+      'workout': '{name} reacted to your workout',
+      'workout_exercise': '{name} reacted to your exercise',
+      'exercise_set': '{name} reacted to your set',
+      'workout_image': '{name} reacted to your photo',
+    },
     'coaching.message': {
       'title': '{name} messaged you',
       'name': 'Messages',
@@ -84,6 +100,14 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
       'workout_exercise': '{name}: новый комментарий к вашему упражнению',
       'exercise_set': '{name}: новый комментарий к вашему подходу',
       'workout_image': '{name}: новый комментарий к вашему фото',
+    },
+    'reaction.created': {
+      'name': 'Новые реакции',
+      'description': 'Когда кто-то реагирует на вашу тренировку',
+      'workout': '{name}: реакция на вашу тренировку',
+      'workout_exercise': '{name}: реакция на ваше упражнение',
+      'exercise_set': '{name}: реакция на ваш подход',
+      'workout_image': '{name}: реакция на ваше фото',
     },
     'coaching.message': {
       'title': '{name}: новое сообщение',
@@ -118,6 +142,14 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
       'exercise_set': '{name}: nuevo comentario en tu serie',
       'workout_image': '{name}: nuevo comentario en tu foto',
     },
+    'reaction.created': {
+      'name': 'Reacciones nuevas',
+      'description': 'Cuando alguien reacciona a tu entrenamiento',
+      'workout': '{name} ha reaccionado a tu entrenamiento',
+      'workout_exercise': '{name} ha reaccionado a tu ejercicio',
+      'exercise_set': '{name} ha reaccionado a tu serie',
+      'workout_image': '{name} ha reaccionado a tu foto',
+    },
     'coaching.message': {
       'title': '{name} te ha escrito',
       'name': 'Mensajes',
@@ -149,6 +181,14 @@ const Map<String, Map<String, Map<String, String>>> notificationTemplates = {
       'workout_exercise': '{name} : nouveau commentaire sur votre exercice',
       'exercise_set': '{name} : nouveau commentaire sur votre série',
       'workout_image': '{name} : nouveau commentaire sur votre photo',
+    },
+    'reaction.created': {
+      'name': 'Nouvelles réactions',
+      'description': 'Quand quelqu\'un réagit à votre entraînement',
+      'workout': '{name} a réagi à votre entraînement',
+      'workout_exercise': '{name} a réagi à votre exercice',
+      'exercise_set': '{name} a réagi à votre série',
+      'workout_image': '{name} a réagi à votre photo',
     },
     'coaching.message': {
       'title': '{name} vous a écrit',

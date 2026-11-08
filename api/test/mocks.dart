@@ -39,6 +39,7 @@ import 'package:mockito/annotations.dart';
   ProgramService,
   SkipService,
   CommentService,
+  ReactionService,
   ConnectionsService,
   InvitationService,
   PushService,

@@ -30,6 +30,7 @@ part 'comments.dart';
 part 'invitations.dart';
 part 'keys.dart';
 part 'push.dart';
+part 'reactions.dart';
 part 'roster.dart';
 part 'connections.dart';
 part 'devices.dart';
