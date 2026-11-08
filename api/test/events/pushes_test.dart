@@ -40,7 +40,12 @@ void main() {
       ..config = config;
   });
 
-  void audience(String userId, List<({String token, String locale})> devices, {String? forTopic}) {
+  void audience(
+    String userId,
+    List<({String token, String locale})> devices, {
+    String? forTopic,
+    String? actorName,
+  }) {
     when(
       push.getPushAudience(
         userId: userId,
@@ -48,7 +53,9 @@ void main() {
         connectionId: anyNamed('connectionId'),
         actorId: anyNamed('actorId'),
       ),
-    ).thenAnswer((_) async => (blocked: false, forPerson: null, forTopic: forTopic, devices: devices));
+    ).thenAnswer(
+      (_) async => (blocked: false, forPerson: null, forTopic: forTopic, devices: devices, actorName: actorName),
+    );
   }
 
   List<Map<String, dynamic>> sent() {
@@ -153,6 +160,20 @@ void main() {
       final message = sent().single;
       expect(message['title'], 'Alex messaged you');
       expect(message.containsKey('collapseKey'), isFalse);
+    });
+
+    test('the name is the one their profile holds, and the sign-in\'s only without one', () async {
+      audience('coach', [(token: 't', locale: 'en')], actorName: 'Alex Rivera');
+
+      await pushRequested(request, {
+        'type': 'push.requested',
+        'userId': 'coach',
+        'topic': PushTopic.coachingMessage.key,
+        'name': 'alex@relay.example',
+        'actorId': 'student',
+      });
+
+      expect(sent().single['title'], 'Alex Rivera messaged you');
     });
 
     test('a silent push has no words, so devices in two languages get one message', () async {

@@ -76,19 +76,4 @@ void main() {
       expect(() => parse({'role': 'SENSEI'}), throwsA(isA<BadRequest>()));
     });
   });
-
-  group('ConnectionRef.parse — composite id', () {
-    test('splits <targetId>|<ROLE>|<domain>', () {
-      final ref = ConnectionRef.parse('t1|COACH|fitness');
-      expect(ref.targetId, 't1');
-      expect(ref.role, ConnectionRole.coach);
-      expect(ref.domain, ConnectionDomain.fitness);
-    });
-
-    for (final malformed in ['not-a-valid-id', 't1|COACH', 't1|COACH|fitness|extra']) {
-      test('rejects the malformed id "$malformed" with BadRequest', () {
-        expect(() => ConnectionRef.parse(malformed), throwsA(isA<BadRequest>()));
-      });
-    }
-  });
 }

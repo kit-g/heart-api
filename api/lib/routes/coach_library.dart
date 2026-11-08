@@ -1,11 +1,17 @@
+import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/middleware/events.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/pagination.dart';
 import 'package:heart/models/program_copy.dart';
+import 'package:heart/notifications/topics.dart';
 import 'package:heart_models/heart_models.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:relic/relic.dart';
+
+final _logger = logging.Logger('CoachLibrary');
 
 Future<CoachProgram> saveCoachProgram(Request req) async {
   final input = await CoachProgramIn.fromRequest(req, id: req.rawPathParameters[#programId]!);
@@ -61,7 +67,7 @@ Future<ProgramDeliveries> sendCoachProgram(Request req) async {
   final input = await CoachProgramSendIn.fromRequest(req);
   return ProgramDeliveries([
     for (final connectionId in input.connectionIds)
-      await deliverCoachProgram(req, coachId: req.userId, id: id, connectionId: connectionId),
+      await deliverCoachProgram(req, coachId: req.userId, id: id, connectionId: connectionId, tellStudent: true),
   ]);
 }
 
@@ -75,6 +81,7 @@ Future<ProgramDelivery> deliverCoachProgram(
   required String coachId,
   required String id,
   required String connectionId,
+  bool tellStudent = false,
 }) async {
   final context = await req.coachLibraryService.getCoachSendContext(
     coachId: coachId,
@@ -110,7 +117,7 @@ Future<ProgramDelivery> deliverCoachProgram(
     if (missing.isNotEmpty) {
       return ProgramDelivery(connectionId: connectionId, delivered: false, reason: 'unknown_exercise');
     }
-    final (program, _) = await req.programService.createProgramOrExisting(
+    final (program, created) = await req.programService.createProgramOrExisting(
       userId: studentId,
       program: input.program,
       sessions: input.sessions,
@@ -123,10 +130,13 @@ Future<ProgramDelivery> deliverCoachProgram(
         waits: context.studentBusy,
       ),
     );
+    if ((created && tellStudent, program.id) case (true, final String programId)) {
+      await _tellStudent(req, studentId: studentId, programId: programId, connectionId: connectionId);
+    }
     return ProgramDelivery(connectionId: connectionId, delivered: true, programId: program.id);
   } on Conflict {
     // another send made it first: what they hold now answers this one
-    return deliverCoachProgram(req, coachId: coachId, id: id, connectionId: connectionId);
+    return deliverCoachProgram(req, coachId: coachId, id: id, connectionId: connectionId, tellStudent: tellStudent);
   } on ApiException catch (error) {
     return ProgramDelivery(connectionId: connectionId, delivered: false, reason: error.code);
   }
@@ -137,4 +147,30 @@ Future<Model> startProgram(Request req) async {
   if (!isUuidV7(programId)) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
   await req.coachLibraryService.startProgram(userId: req.userId, programId: programId);
   throw const NoContent();
+}
+
+/// The copy is theirs by now, and their app finds it on its next fetch anyway, so a
+/// push that can't go out doesn't make a delivered program look undelivered.
+Future<void> _tellStudent(
+  Request req, {
+  required String studentId,
+  required String programId,
+  required String connectionId,
+}) async {
+  try {
+    await req.events.publish(
+      queueUrl: req.config.eventsQueueUrl,
+      message: {
+        'type': 'push.requested',
+        'userId': studentId,
+        'topic': PushTopic.programReceived.key,
+        'name': ?req.user.displayName,
+        'actorId': req.userId,
+        'connectionId': connectionId,
+        'data': {'programId': programId},
+      },
+    );
+  } catch (error, stack) {
+    _logger.warning('could not tell $studentId of program $programId', error, stack);
+  }
 }

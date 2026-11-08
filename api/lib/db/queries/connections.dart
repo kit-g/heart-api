@@ -90,6 +90,18 @@ WHERE domain = @domain
   )
 ''';
 
+/// Either side's view of one connection, by its identity.
+const _getConnectionById = '''
+SELECT
+  id AS connection_id,
+  CASE WHEN initiator_id = @userId THEN target_id ELSE initiator_id END AS target_id,
+  CASE WHEN initiator_id = @userId THEN initiator_role ELSE target_role END AS role,
+  domain, status, created_at, accepted_at, shares
+FROM connections
+WHERE id = @connectionId::uuid
+  AND @userId IN (initiator_id, target_id)
+''';
+
 /// Ending is either party's call — except while a block stands, when only the
 /// blocker may. The row stays, because "this person was a client" outlives it,
 /// and one already ended stays as it ended, by whom it ended.

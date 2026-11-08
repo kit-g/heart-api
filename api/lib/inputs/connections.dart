@@ -92,25 +92,3 @@ class ConnectionListQuery {
     );
   }
 }
-
-/// The path segment of `PUT`/`DELETE /connections/:connectionId`.
-///
-/// The id is synthetic and viewer-relative — `<targetId>|<ROLE>|<DOMAIN>`, which
-/// [Connection.fromId] parses back into the three things needed to address the
-/// row from the caller's side.
-class ConnectionRef {
-  final String targetId;
-  final ConnectionRole role;
-  final ConnectionDomain domain;
-
-  const new _({required this.targetId, required this.role, required this.domain});
-
-  static ConnectionRef parse(String connectionId) {
-    try {
-      final (targetId, role, domain) = Connection.fromId(connectionId);
-      return ConnectionRef._(targetId: targetId, role: role, domain: domain);
-    } on ArgumentError catch (e) {
-      throw BadRequest(reason: e.message.toString());
-    }
-  }
-}

@@ -224,27 +224,29 @@ final _listThreadItemsForward = _listThreadItems(forward: true);
 
 final _listThreadItemsBackward = _listThreadItems(forward: false);
 
-/// The last row says whether the cursor was stale, and then nothing moved.
+/// Whoever can read the thread moves their position, as a read does. The one row
+/// says whether they couldn't, or the cursor was stale, and then nothing moved.
 const _markThreadRead =
     '''
 WITH
+$_threadReadable,
 $_cursorStale,
 _read AS (
   INSERT INTO thread_reads (thread_id, user_id, read_xid, read_id)
-  SELECT t.id, @userId, @xid::text::xid8, @itemId::uuid
-  FROM threads t
-  WHERE t.id = @threadId::uuid
-    AND @userId IN (t.person_a, t.person_b)
+  SELECT @threadId::uuid, @userId, @xid::text::xid8, @itemId::uuid
+  WHERE (SELECT readable FROM _readable)
     AND NOT (SELECT stale FROM _cursor)
   ON CONFLICT (thread_id, user_id) DO UPDATE
   SET read_xid = EXCLUDED.read_xid, read_id = EXCLUDED.read_id
   WHERE (EXCLUDED.read_xid, EXCLUDED.read_id) > (thread_reads.read_xid, thread_reads.read_id)
   RETURNING thread_id
 )
-SELECT stale FROM _cursor
+SELECT NOT r.readable AS forbidden, c.stale
+FROM _readable r, _cursor c
 ''';
 
-/// Either person, whatever the connection's status, including across a block.
+/// Either person, whatever the connection's status, including across a block. No
+/// row when the thread isn't the caller's.
 const _clearThread = '''
 WITH
 _cleared AS (

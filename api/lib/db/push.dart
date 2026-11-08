@@ -59,6 +59,7 @@ mixin _Push on _DatabaseBase implements PushService {
         for (final device in row['devices'] as List)
           (token: (device as Map)['token'] as String, locale: device['locale'] as String),
       ],
+      actorName: row['actor_name'] as String?,
     );
   }
 

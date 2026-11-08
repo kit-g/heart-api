@@ -46,11 +46,12 @@ abstract interface class ThreadService {
     int limit = 50,
   });
 
-  /// Moves [userId]'s read position forward, never back.
+  /// Moves [userId]'s read position forward, never back. Throws if [userId] can't
+  /// read the thread.
   Future<void> markThreadRead({required String userId, required String threadId, required String cursor});
 
-  /// Deletes everything said, for both sides. Who else to tell is the answer. Null
-  /// if the thread isn't [userId]'s.
+  /// Deletes everything said, for both sides. Who else to tell is the answer, null
+  /// once they have gone. Throws if the thread isn't [userId]'s.
   Future<String?> clearThread({required String userId, required String threadId});
 }
 

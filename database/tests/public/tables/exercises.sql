@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(39);
+SELECT plan(42);
 
 SELECT has_table('public'::name, 'exercises'::name);
 
@@ -23,7 +23,8 @@ SELECT columns_are(
                    'created_at',
                    'validated',
                    'key',
-                   'aliases'
+                   'aliases',
+                   'coach_id'
                    ]
        );
 
@@ -43,6 +44,7 @@ SELECT col_type_is('public'::name, 'exercises'::name, 'created_at'::name, 'times
 SELECT col_type_is('public'::name, 'exercises'::name, 'validated'::name, 'boolean'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'key'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'exercises'::name, 'aliases'::name, 'text[]'::name);
+SELECT col_type_is('public'::name, 'exercises'::name, 'coach_id'::name, 'text'::name);
 
 SELECT has_pk('public'::name, 'exercises'::name, 'exercises has a primary key');
 SELECT col_is_pk('public'::name, 'exercises'::name, 'id'::name, 'id is the primary key');
@@ -59,12 +61,14 @@ SELECT col_default_is('public', 'exercises', 'archived', 'false', 'archived defa
 SELECT col_default_is('public', 'exercises', 'created_at', 'now()', 'created_at default is now()');
 
 SELECT fk_ok('public', 'exercises', 'user_id', 'public', 'profiles', 'id');
+SELECT fk_ok('public', 'exercises', 'coach_id', 'public', 'profiles', 'id');
 
 SELECT has_index('public'::name, 'exercises'::name, 'exercises_global_name_idx'::name);
 SELECT has_index('public'::name, 'exercises'::name, 'exercises_user_name_idx'::name);
 SELECT has_index('public'::name, 'exercises'::name, 'exercises_user_id_idx'::name);
 SELECT has_index('public'::name, 'exercises'::name, 'exercises_movement_groups_idx'::name);
 SELECT has_index('public'::name, 'exercises'::name, 'exercises_global_key_idx'::name);
+SELECT has_index('public'::name, 'exercises'::name, 'exercises_coach_idx'::name);
 
 SELECT index_is_unique('public'::name, 'exercises'::name, 'exercises_global_name_idx'::name);
 SELECT index_is_unique('public'::name, 'exercises'::name, 'exercises_user_name_idx'::name);

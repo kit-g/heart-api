@@ -36,7 +36,7 @@ void main() {
     });
   }
 
-  test('accepting through the real app tells the inviter', () async {
+  void accepts({required bool connected, String connectionId = 'c1'}) {
     when(
       app.db.acceptInvitation(
         userId: anyNamed('userId'),
@@ -46,15 +46,22 @@ void main() {
         name: anyNamed('name'),
       ),
     ).thenAnswer(
-      (_) async => Connection(
-        targetId: 'coach-1',
-        connectionId: 'c1',
-        role: .student,
-        domain: .fitness,
-        status: .active,
-        createdAt: DateTime.utc(2026),
+      (_) async => (
+        connection: Connection(
+          targetId: 'coach-1',
+          connectionId: connectionId,
+          role: .student,
+          domain: .fitness,
+          status: .active,
+          createdAt: DateTime.utc(2026),
+        ),
+        connected: connected,
       ),
     );
+  }
+
+  test('accepting through the real app tells the inviter', () async {
+    accepts(connected: true);
     when(app.db.invitationProgram(token: anyNamed('token'))).thenAnswer((_) async => null);
     when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
     when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
@@ -68,26 +75,19 @@ void main() {
     expect(message['topic'], 'coaching.invitation_accepted');
   });
 
+  test('accepting again answers the same connection and tells nobody', () async {
+    accepts(connected: false);
+    when(app.db.invitationProgram(token: anyNamed('token'))).thenAnswer((_) async => null);
+
+    final res = await app.send('POST', '/invitation-links/abc/accept', body: {});
+    expect(res.status, 200);
+    expect(res.body, contains('"connectionId":"c1"'));
+    verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
+  });
+
   test('accepting connects even when the program it names is gone by then', () async {
     const program = '01900000-0000-7000-8000-000000000001';
-    when(
-      app.db.acceptInvitation(
-        userId: anyNamed('userId'),
-        token: anyNamed('token'),
-        shares: anyNamed('shares'),
-        email: anyNamed('email'),
-        name: anyNamed('name'),
-      ),
-    ).thenAnswer(
-      (_) async => Connection(
-        targetId: 'coach-1',
-        connectionId: '01900000-0000-7000-8000-000000000002',
-        role: .student,
-        domain: .fitness,
-        status: .active,
-        createdAt: DateTime.utc(2026),
-      ),
-    );
+    accepts(connected: true, connectionId: '01900000-0000-7000-8000-000000000002');
     when(app.db.invitationProgram(token: anyNamed('token'))).thenAnswer((_) async => program);
     when(
       app.db.getCoachSendContext(

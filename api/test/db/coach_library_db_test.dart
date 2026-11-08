@@ -166,6 +166,14 @@ void main() {
       expect(matched, hasLength(3), reason: 'an id that is no exercise stays out');
       final owner = await h.exec('SELECT user_id FROM exercises WHERE id = @id::uuid', {'id': matched[onlyCoach]});
       expect(owner.first[0], student);
+      expect(
+        await h.db.getCoachedExercises(student),
+        {matched[onlyCoach]: isA<String>()},
+        reason: 'only the copy is the coach\'s words',
+      );
+
+      await h.exec('DELETE FROM profiles WHERE id = @c', {'c': coach});
+      expect(await h.db.getCoachedExercises(student), isEmpty, reason: 'a coach gone leaves it the student\'s own');
     });
 
     // heart-api#395: "Bench" from the coach made a second "Bench" beside the student's "bench"

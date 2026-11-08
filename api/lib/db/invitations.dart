@@ -105,7 +105,7 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
   }
 
   @override
-  Future<Connection> acceptInvitation({
+  Future<({Connection connection, bool connected})> acceptInvitation({
     required String userId,
     required String token,
     Set<ConnectionShare> shares = const {},
@@ -130,7 +130,10 @@ mixin _Invitations on _DatabaseBase implements InvitationService {
     return switch (row) {
       null => throw const NotFound(type: 'Invitation', id: 'that link'),
       {'own': true} => throw _ownInvitation,
-      {'connection_id': final Object _} => Connection.fromRow(row),
+      {'connection_id': final Object _, 'fresh': final bool fresh} => (
+        connection: Connection.fromRow(row),
+        connected: fresh,
+      ),
       _ => throw const BadRequest(code: 'invitation_gone', reason: 'this invitation is no longer good'),
     };
   }

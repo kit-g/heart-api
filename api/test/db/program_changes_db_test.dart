@@ -782,6 +782,16 @@ void main() {
       );
     });
 
+    test('a program that isn\'t the reader\'s is missing, not one without history', () async {
+      final c = await sent(sessions: 0);
+      for (final (owner, program) in [(c.coach, c.program), (c.student, uuidV7())]) {
+        await expectLater(
+          h.db.getProgramChanges(ownerId: owner, programId: program),
+          throwsA(isA<NotFound>().having((e) => e.code, 'code', 'program_not_found')),
+        );
+      }
+    });
+
     test('a former coach isn\'t told of the student\'s changes', () async {
       final c = await sent(sessions: 0);
       expect(await h.db.otherSideOf(actorId: c.student, programId: c.program), c.coach);

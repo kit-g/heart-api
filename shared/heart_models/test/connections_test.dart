@@ -105,21 +105,6 @@ void main() {
       expect(connection.domain, equals(ConnectionDomain.fitness));
       expect(connection.status, equals(ConnectionStatus.active));
       expect(connection.createdAt, equals(now));
-      expect(connection.id, equals('user_123|COACH|FITNESS'));
-    });
-
-    test('fromId parses id string correctly', () {
-      final id = 'user_123|COACH|FITNESS';
-      final (targetId, role, domain) = Connection.fromId(id);
-
-      expect(targetId, equals('user_123'));
-      expect(role, equals(ConnectionRole.coach));
-      expect(domain, equals(ConnectionDomain.fitness));
-    });
-
-    test('fromId throws on invalid format', () {
-      expect(() => Connection.fromId('invalid_id'), throwsArgumentError);
-      expect(() => Connection.fromId('user_123|COACH'), throwsArgumentError);
     });
 
     test('toMap converts model to JSON format', () {
@@ -136,10 +121,9 @@ void main() {
       expect(
         map,
         equals({
-          'id': 'user_123|STUDENT|SWIMMING',
           'targetId': 'user_123',
-          'role': 'STUDENT',
-          'domain': 'SWIMMING',
+          'role': 'student',
+          'domain': 'swimming',
           'status': 'pending',
           'createdAt': now.toIso8601String(),
           'shares': <String>[],
@@ -166,10 +150,9 @@ void main() {
         equals({
           'connections': [
             {
-              'id': 'user_1|PEER|GENERAL',
               'targetId': 'user_1',
-              'role': 'PEER',
-              'domain': 'GENERAL',
+              'role': 'peer',
+              'domain': 'general',
               'status': 'active',
               'createdAt': now.toIso8601String(),
               'shares': <String>[],
@@ -292,13 +275,17 @@ void main() {
         ...wire(accepted),
         'shares': ['history', 'something_new'],
       });
-      expect(read.id, 'coach|COACH|FITNESS');
       expect(
         (read.role, read.domain, read.status),
         (ConnectionRole.coach, ConnectionDomain.fitness, ConnectionStatus.active),
       );
       expect(read.acceptedAt, later);
       expect(read.shares, ['history', 'something_new']);
+    });
+
+    test('the upper-case words an earlier server wrote still read', () {
+      final read = Connection.fromJson({...wire(accepted), 'role': 'COACH', 'domain': 'FITNESS'});
+      expect((read.role, read.domain), (ConnectionRole.coach, ConnectionDomain.fitness));
     });
 
     test('a connection in a status this build does not know leaves the rest of the list', () {

@@ -312,6 +312,11 @@ void main() {
       );
       expect((copy['movement'] as Map)['groups'], ['squat_bilateral']);
       expect((copy['movement'] as Map)['axialLoad'], 'high');
+      expect(
+        (await h.db.getCoachedExercises(student)).keys,
+        [copy['id']],
+        reason: 'the copy says whose words its name is',
+      );
 
       // Unlike the other cases here, this one leaves user-owned exercises behind
       // that template_exercises references under a RESTRICT FK. Drop the
@@ -319,6 +324,43 @@ void main() {
       await h.exec('DELETE FROM templates WHERE user_id = ANY(@ids)', {
         'ids': [coach, student],
       });
+    });
+
+    test('a coach\'s exercise matches the student\'s whatever its case', () async {
+      final coach = await h.seedProfile();
+      final student = await h.seedProfile();
+      await h.seedConnection(initiator: coach, target: student, role: 'COACH');
+      // the student's copy references their exercise under a RESTRICT FK
+      addTearDown(
+        () => h.exec('DELETE FROM templates WHERE user_id = ANY(@ids)', {
+          'ids': [coach, student],
+        }),
+      );
+      final name = h.uniqueName('Bench');
+      Future<String> custom(String owner, String name) => h.insertId(
+        "INSERT INTO exercises (name, category, target, user_id) VALUES (@n, 'Barbell', 'Chest', @u) RETURNING id",
+        {'n': name, 'u': owner},
+      );
+      final coaches = await custom(coach, name);
+      final students = await custom(student, name.toLowerCase());
+      final master = await h.insertId(
+        'INSERT INTO templates (user_id, name, order_index) VALUES (@u, @n, 0) RETURNING id',
+        {'u': coach, 'n': h.uniqueName('CaseMaster')},
+      );
+      await h.exec(
+        'INSERT INTO template_exercises (template_id, exercise_id, exercise_order) VALUES (@t, @e, 0)',
+        {'t': master, 'e': coaches},
+      );
+
+      await h.db.shareTemplate(coachId: coach, targetUserId: student, masterTemplateId: master);
+
+      final used = await h.exec(
+        'SELECT te.exercise_id::text FROM template_exercises te JOIN templates t ON t.id = te.template_id '
+        'WHERE t.user_id = @s AND t.source_template_id = @m::uuid',
+        {'s': student, 'm': master},
+      );
+      expect(used.single[0], students);
+      expect(await h.db.getCoachedExercises(student), isEmpty, reason: 'nothing was copied');
     });
 
     test('shareTemplate reports the master it came from', () async {

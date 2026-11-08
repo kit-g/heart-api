@@ -108,6 +108,74 @@ void main() {
     expect((deliveries.last as Map)['delivered'], isTrue);
   });
 
+  test('a student is told of a copy the send made, and not of one they already held', () async {
+    const held = '01900000-0000-7000-8000-0000000000aa';
+    when(
+      app.db.getCoachSendContext(coachId: anyNamed('coachId'), id: anyNamed('id'), connectionId: one),
+    ).thenAnswer((_) async => context(student: 's1'));
+    when(
+      app.db.getCoachSendContext(coachId: anyNamed('coachId'), id: anyNamed('id'), connectionId: two),
+    ).thenAnswer((_) async => context(student: 's2', existing: held));
+    stubMatch();
+    when(
+      app.db.createProgramOrExisting(
+        userId: anyNamed('userId'),
+        program: anyNamed('program'),
+        sessions: anyNamed('sessions'),
+        copy: anyNamed('copy'),
+      ),
+    ).thenAnswer((_) async => (Program(id: program, name: 'Plan'), true));
+    when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+    when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
+
+    final res = await app.send(
+      'POST',
+      '/library-programs/$program/send',
+      body: {
+        'connectionIds': [one, two],
+      },
+    );
+
+    expect(res.status, 200);
+    final message =
+        verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: captureAnyNamed('message'))).captured.single
+            as Map;
+    expect(message['userId'], 's1');
+    expect(message['topic'], 'coaching.program_received');
+    expect(message['connectionId'], one);
+    expect(message['data'], {'programId': program});
+  });
+
+  test('a push that fails leaves the copy delivered', () async {
+    when(
+      app.db.getCoachSendContext(coachId: anyNamed('coachId'), id: anyNamed('id'), connectionId: one),
+    ).thenAnswer((_) async => context(student: 's1'));
+    stubMatch();
+    when(
+      app.db.createProgramOrExisting(
+        userId: anyNamed('userId'),
+        program: anyNamed('program'),
+        sessions: anyNamed('sessions'),
+        copy: anyNamed('copy'),
+      ),
+    ).thenAnswer((_) async => (Program(id: program, name: 'Plan'), true));
+    when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+    when(
+      app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')),
+    ).thenThrow(Exception('queue down'));
+
+    final res = await app.send(
+      'POST',
+      '/library-programs/$program/send',
+      body: {
+        'connectionIds': [one],
+      },
+    );
+
+    expect(res.status, 200);
+    expect((((jsonDecode(res.body) as Map)['deliveries'] as List).single as Map)['delivered'], isTrue);
+  });
+
   test('a copy another send made first answers that copy', () async {
     const theirs = '01900000-0000-7000-8000-0000000000aa';
     var reads = 0;

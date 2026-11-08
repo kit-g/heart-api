@@ -124,7 +124,7 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
     final maps = rows.map((row) => row.toColumnMap()).toList();
     switch (maps.firstOrNull) {
       case {'forbidden': true}:
-        throw const Forbidden(reason: 'You do not have permission to read this thread.');
+        throw _notYourThread;
       case {'stale': true}:
         throw _staleCursor;
     }
@@ -146,8 +146,17 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
       _markThreadRead.toSql(),
       parameters: {'userId': userId, 'threadId': threadId, 'xid': position.xid, 'itemId': position.id},
     );
-    if (rows.single.toColumnMap()['stale'] == true) throw _staleCursor;
+    switch (rows.single.toColumnMap()) {
+      case {'forbidden': true}:
+        throw _notYourThread;
+      case {'stale': true}:
+        throw _staleCursor;
+    }
   }
+
+  /// The same answer for a thread that doesn't exist, one between other people, and
+  /// one whose other person blocked the caller.
+  Forbidden get _notYourThread => const Forbidden(reason: 'You do not have permission to read this thread.');
 
   /// A cursor from before the database moved, or one no read handed out: a read
   /// position there would hide everything until the counter caught up.
@@ -159,7 +168,10 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
   @override
   Future<String?> clearThread({required String userId, required String threadId}) async {
     final rows = await _pool.execute(_clearThread.toSql(), parameters: {'userId': userId, 'threadId': threadId});
-    return rows.firstOrNull?.toColumnMap()['other_id'] as String?;
+    return switch (rows.firstOrNull?.toColumnMap()) {
+      null => throw const Forbidden(reason: 'You do not have permission to clear this thread.'),
+      final row => row['other_id'] as String?,
+    };
   }
 
   @override

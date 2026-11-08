@@ -3,6 +3,10 @@ import 'package:heart_models/heart_models.dart';
 abstract interface class ExerciseService {
   Future<Map<String, dynamic>> getExercises(String userId, {String? locale, bool owned = false});
 
+  /// [userId]'s custom exercises that came with something a coach sent, by id,
+  /// each with that coach's name, or null when they have none.
+  Future<Map<String, String?>> getCoachedExercises(String userId);
+
   Future<Map<String, dynamic>> createExercise({
     required String userId,
     String? id,

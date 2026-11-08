@@ -13,6 +13,8 @@ abstract interface class Invitation implements Model {
   /// server may add a word. Plain text, so a build that doesn't know one keeps it.
   String get status;
 
+  /// The role the inviter takes, in lower case like every word on the wire:
+  /// `coach` today.
   String get role;
 
   String get domain;
@@ -40,7 +42,8 @@ abstract interface class Invitation implements Model {
       id: row['id'].toString(),
       name: row['name'] as String,
       status: row['status'] as String,
-      role: row['role'] as String,
+      // stored upper case, as connections store it
+      role: (row['role'] as String).toLowerCase(),
       domain: row['domain'] as String,
       expiresAt: row['expires_at'] as DateTime,
       createdAt: row['created_at'] as DateTime,

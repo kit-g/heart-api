@@ -105,7 +105,9 @@ enum ConnectionShare {
 
 abstract interface class Connection implements Model {
   /// Viewer-relative: the same relationship has a different one from each side.
-  /// It addresses a row and identifies nothing. [connectionId] does.
+  /// It identifies nothing, and no longer reaches the wire: [connectionId] is
+  /// what every route takes.
+  @Deprecated('Use connectionId, which every route takes')
   String get id;
 
   /// The relationship's identity, the same from both sides.
@@ -180,6 +182,7 @@ abstract interface class Connection implements Model {
     );
   }
 
+  @Deprecated('Routes take connectionId')
   static (String, ConnectionRole, ConnectionDomain) fromId(String id) {
     return switch (id.split('|')) {
       [String id, String role, String domain] => (
@@ -224,15 +227,16 @@ class _Connection implements Connection {
   });
 
   @override
-  String get id => '$targetId|${role.value.toUpperCase()}|${domain.value.toUpperCase()}';
+  String get id => '$targetId|${role.value}|${domain.value.toUpperCase()}';
 
+  /// [role] and [domain] go out in lower case, as every newer answer's words do;
+  /// [ConnectionRole.fromString] and [ConnectionDomain.fromString] read either.
   @override
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'targetId': targetId,
-      'role': role.value.toUpperCase(),
-      'domain': domain.value.toUpperCase(),
+      'role': role.name,
+      'domain': domain.name,
       'status': status.name,
       'createdAt': createdAt.toIso8601String(),
       'connectionId': ?connectionId,
@@ -314,6 +318,10 @@ abstract interface class ConnectionsService {
     required ConnectionRole role,
     required ConnectionDomain domain,
   });
+
+  /// The connection [connectionId] as [actorId] sees it. Null if there is none, or
+  /// [actorId] isn't on it.
+  Future<Connection?> getConnectionById({required String actorId, required String connectionId});
 
   /// What the student of a coach connection has opened to their coach. Throws if
   /// [actorId] isn't that student.

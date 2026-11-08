@@ -178,24 +178,28 @@ const _programChangeColumns = '''
 /// Stops short of the oldest transaction still running, as the workout feed does,
 /// and like it refuses a cursor at or past the counter: one from before the
 /// database moved to a cluster that counts from lower (the row with `stale_cursor`).
+/// The check's row says too whether the program is the owner's at all, so one that
+/// isn't reads as missing rather than as a program with no history.
 const _listProgramChanges =
     '''
 WITH
 _check AS (
-  SELECT @xid::text IS NOT NULL
-         AND @xid::text::xid8 >= pg_snapshot_xmax(pg_current_snapshot()) AS stale_cursor
+  SELECT
+    @xid::text IS NOT NULL
+      AND @xid::text::xid8 >= pg_snapshot_xmax(pg_current_snapshot()) AS stale_cursor,
+    EXISTS (SELECT 1 FROM programs p WHERE p.id = @programId::uuid AND p.user_id = @ownerId) AS owned
 ),
 _page AS (
   SELECT $_programChangeColumns
   FROM program_changes
   WHERE program_id = @programId::uuid
-    AND EXISTS (SELECT 1 FROM programs p WHERE p.id = @programId::uuid AND p.user_id = @ownerId)
+    AND (SELECT owned FROM _check)
     AND xid < pg_snapshot_xmin(pg_current_snapshot())
     AND (@xid::text IS NULL OR (xid, id) > (@xid::text::xid8, @changeId::uuid))
   ORDER BY xid, id
   LIMIT 500
 )
-SELECT c.stale_cursor, p.*
+SELECT c.stale_cursor, c.owned, p.*
 FROM _check c
 LEFT JOIN _page p ON NOT c.stale_cursor
 ORDER BY p.xid_text::xid8, p.id

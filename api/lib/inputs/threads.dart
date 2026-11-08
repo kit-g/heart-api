@@ -17,12 +17,12 @@ String _ciphertext(Map<String, dynamic> json) {
   };
 }
 
-/// The ids in the thread and note paths, checked before anything casts them: one
+/// The ids in the thread, note and connection paths, checked before anything casts them: one
 /// that can't be an id answers like one that isn't there.
 extension ThreadPaths on Request {
   String get threadId => _uuidPath(#threadId, 'Thread');
 
-  String get threadConnectionId => _uuidPath(#connectionId, 'Connection');
+  String get connectionIdInPath => _uuidPath(#connectionId, 'Connection');
 
   String get noteId => _uuidPath(#noteId, 'Note');
 
