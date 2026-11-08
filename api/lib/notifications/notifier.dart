@@ -12,7 +12,8 @@ import 'package:relic/relic.dart';
 /// weights or health values can reach one. [data] carries ids for the app.
 extension Notifier on Request {
   /// Sends [topic] to [userId], as they want it. [actorId] is who it's about, and
-  /// nothing goes across a block. [variant] picks a topic's wording.
+  /// nothing goes across a block. [variant] picks a topic's wording. The push names
+  /// [actorId] as their profile does, and by [name] only when it holds none.
   Future<void> notify({
     required String userId,
     required PushTopic topic,
@@ -42,7 +43,10 @@ extension Notifier on Request {
         return;
     }
 
-    await _sendPush(devices: audience.devices, topic: topic, name: name, variant: variant, data: data);
+    // the name their profile holds, as the inbox and the roster show it; [name],
+    // from the sign-in token, only for someone whose profile has none
+    final who = audience.actorName ?? name;
+    await _sendPush(devices: audience.devices, topic: topic, name: who, variant: variant, data: data);
   }
 
   /// What the daily job calls for a digest it claimed: [userId] may have turned

@@ -72,6 +72,16 @@ void main() {
     expect(audience.blocked, isFalse, reason: 'with nobody it is about');
   });
 
+  test('the audience names who it is about as their profile does', () async {
+    final (me, other) = (await h.seedProfile(), await h.seedProfile());
+    await h.exec("UPDATE profiles SET username = 'Alex Rivera' WHERE id = @id", {'id': other});
+    expect((await h.db.getPushAudience(userId: me, topic: topic, actorId: other)).actorName, 'Alex Rivera');
+
+    await h.exec("UPDATE profiles SET username = '  ' WHERE id = @id", {'id': other});
+    expect((await h.db.getPushAudience(userId: me, topic: topic, actorId: other)).actorName, isNull);
+    expect((await h.db.getPushAudience(userId: me, topic: topic)).actorName, isNull);
+  });
+
   test('a push about a person reads what was said about them, with no relationship named', () async {
     final (me, other) = (await h.seedProfile(), await h.seedProfile());
     await h.seedConnection(initiator: me, target: other);

@@ -67,7 +67,8 @@ SELECT
       WHERE profile_id = @userId
     ),
     '[]'::jsonb
-  ) AS devices
+  ) AS devices,
+  (SELECT nullif(trim(username), '') FROM profiles WHERE id = @actorId::text) AS actor_name
 ''';
 
 const _queueDigest = '''

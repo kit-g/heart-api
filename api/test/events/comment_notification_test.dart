@@ -41,7 +41,9 @@ void main() {
         connectionId: anyNamed('connectionId'),
         actorId: anyNamed('actorId'),
       ),
-    ).thenAnswer((_) async => (blocked: blocked, forPerson: null, forTopic: forTopic, devices: devices));
+    ).thenAnswer(
+      (_) async => (blocked: blocked, forPerson: null, forTopic: forTopic, devices: devices, actorName: null),
+    );
   }
 
   Map<String, dynamic> event() => {
