@@ -65,7 +65,7 @@ The API wires a route across ~8 files. Miss one and it fails late (compile error
     make test-api-db    # the api's db-tagged integration tests
     ```
 
-    CI runs the unit tests in the `dart-test` job; `db-test` runs pgtap and then the **full** api suite with `--run-skipped` under coverage, failing below an 82% floor (`api/tool/check_coverage.dart`) — so an untested handler or query can fail CI even when everything else is green.
+    CI runs the unit tests in the `dart-test` job; `db-test` runs pgtap and then the **full** api suite with `--run-skipped` under coverage, failing below a 92% floor (`api/tool/check_coverage.dart`) — so an untested handler or query can fail CI even when everything else is green.
 
 ## Self-check before declaring done
 

@@ -175,4 +175,82 @@ void main() {
     final res = await app.send('GET', '/library-programs?cursor=abc');
     expect(res.status, 400);
   });
+
+  CoachProgram saved({String id = program}) {
+    return CoachProgram(id: id, name: 'Plan', version: 2, updatedAt: DateTime.utc(2026, 11));
+  }
+
+  test('saving a version keeps the coach\'s program under the id in the path', () async {
+    when(
+      app.db.saveCoachProgram(
+        coachId: anyNamed('coachId'),
+        id: anyNamed('id'),
+        name: anyNamed('name'),
+        body: anyNamed('body'),
+      ),
+    ).thenAnswer((_) async => saved());
+
+    final res = await app.send(
+      'PUT',
+      '/library-programs/$program',
+      body: {
+        'name': 'Plan',
+        'sessions': [
+          {'name': 'A'},
+        ],
+      },
+    );
+
+    expect(res.status, 200);
+    final body =
+        verify(
+              app.db.saveCoachProgram(coachId: 'u1', id: program, name: 'Plan', body: captureAnyNamed('body')),
+            ).captured.single
+            as Map;
+    expect(body, isNot(contains('id')));
+    expect(body['sessions'] as List, hasLength(1));
+  });
+
+  test('a version under an id that was never one is refused before it is saved', () async {
+    final res = await app.send('PUT', '/library-programs/abc', body: {'name': 'Plan'});
+
+    expect(res.status, 400);
+    verifyZeroInteractions(app.db);
+  });
+
+  test('lists the coach\'s library, with the next cursor while there are more', () async {
+    when(
+      app.db.getCoachPrograms(coachId: anyNamed('coachId'), cursor: anyNamed('cursor'), limit: anyNamed('limit')),
+    ).thenAnswer((_) async => Page(items: [saved(id: two)], hasMore: true));
+
+    final res = await app.send('GET', '/library-programs?cursor=$one&limit=1');
+
+    expect(res.status, 200);
+    final json = jsonDecode(res.body) as Map;
+    expect((json['programs'] as List).single, containsPair('id', two));
+    expect(json['cursor'], two);
+    verify(app.db.getCoachPrograms(coachId: 'u1', cursor: one, limit: 1)).called(1);
+  });
+
+  test('the holders of the coach\'s own program are listed', () async {
+    when(app.db.getCoachProgram(coachId: anyNamed('coachId'), id: anyNamed('id'))).thenAnswer((_) async => saved());
+    when(app.db.getCoachProgramHolders(coachId: anyNamed('coachId'), id: anyNamed('id'))).thenAnswer(
+      (_) async => [CoachProgramHolder(connectionId: one, studentId: 's1', programId: two, version: 1)],
+    );
+
+    final res = await app.send('GET', '/library-programs/$program/holders');
+
+    expect(res.status, 200);
+    expect(CoachProgramHolders.fromJson(jsonDecode(res.body) as Map).holders.single.studentId, 's1');
+    verify(app.db.getCoachProgramHolders(coachId: 'u1', id: program)).called(1);
+  });
+
+  test('a student starts a program that was waiting for them, 204', () async {
+    when(app.db.startProgram(userId: anyNamed('userId'), programId: anyNamed('programId'))).thenAnswer((_) async {});
+
+    final res = await app.send('POST', '/programs/$program/start');
+
+    expect(res.status, 204);
+    verify(app.db.startProgram(userId: 'u1', programId: program)).called(1);
+  });
 }

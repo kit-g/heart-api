@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:heart/core/handler.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
@@ -8,6 +10,7 @@ import 'package:mockito/mockito.dart';
 import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
 
+import '../helpers/app_harness.dart';
 import '../helpers/request.dart';
 import '../mocks.mocks.dart';
 
@@ -243,5 +246,111 @@ void main() {
     verifyNever(
       service.updateProgram(userId: anyNamed('userId'), programId: anyNamed('programId'), program: anyNamed('program')),
     );
+  });
+
+  group('through the real app', () {
+    late AppHarness app;
+
+    setUp(() async => app = await AppHarness.start());
+    tearDown(() => app.stop());
+
+    const action = '019def00-0000-7000-8000-000000000030';
+    const base = '019def00-0000-7000-8000-000000000031';
+    const exercise = '019def00-0000-7000-8000-000000000001';
+
+    test('reads the caller\'s own program', () async {
+      when(
+        app.db.getProgram(userId: anyNamed('userId'), programId: anyNamed('programId')),
+      ).thenAnswer((_) async => Program(id: _programId, name: 'Mine'));
+
+      final res = await app.send('GET', '/programs/$_programId');
+
+      expect(res.status, 200);
+      expect(Program.fromJson(jsonDecode(res.body) as Map).name, 'Mine');
+      verify(app.db.getProgram(userId: _meId, programId: _programId)).called(1);
+    });
+
+    test('a new action goes on the program in the path, 201', () async {
+      when(
+        app.db.createProgramAction(
+          userId: anyNamed('userId'),
+          programId: anyNamed('programId'),
+          action: anyNamed('action'),
+        ),
+      ).thenAnswer((i) async => (i.namedArguments[#action] as ProgramAction, true));
+
+      final res = await app.send(
+        'POST',
+        '/programs/$_programId/actions',
+        body: {'id': action, 'kind': 'pause', 'at': '2026-10-14T18:00:00Z'},
+      );
+
+      expect(res.status, 201);
+      verify(app.db.createProgramAction(userId: _meId, programId: _programId, action: anyNamed('action'))).called(1);
+    });
+
+    test('undoing an action names the program and the action, 204', () async {
+      when(
+        app.db.deleteProgramAction(
+          userId: anyNamed('userId'),
+          programId: anyNamed('programId'),
+          actionId: anyNamed('actionId'),
+        ),
+      ).thenAnswer((_) async {});
+
+      final res = await app.send('DELETE', '/programs/$_programId/actions/$action');
+
+      expect(res.status, 204);
+      verify(app.db.deleteProgramAction(userId: _meId, programId: _programId, actionId: action)).called(1);
+    });
+
+    test('lists the program\'s bases', () async {
+      when(app.db.getProgramBases(userId: anyNamed('userId'), programId: anyNamed('programId'))).thenAnswer(
+        (_) async => [ProgramBase(id: base, exerciseId: exercise, value: 100, at: DateTime.utc(2026, 10))],
+      );
+
+      final res = await app.send('GET', '/programs/$_programId/bases');
+
+      expect(res.status, 200);
+      expect(((jsonDecode(res.body) as Map)['bases'] as List).single, containsPair('id', base));
+      verify(app.db.getProgramBases(userId: _meId, programId: _programId)).called(1);
+    });
+
+    test('a new base is the caller\'s own, logged by nobody else, 201', () async {
+      when(
+        app.db.createProgramBase(
+          userId: anyNamed('userId'),
+          programId: anyNamed('programId'),
+          base: anyNamed('base'),
+          loggedBy: anyNamed('loggedBy'),
+        ),
+      ).thenAnswer((i) async => (i.namedArguments[#base] as ProgramBase, true));
+
+      final res = await app.send(
+        'POST',
+        '/programs/$_programId/bases',
+        body: {'exerciseId': exercise, 'value': 100, 'at': '2026-10-14T18:00:00Z'},
+      );
+
+      expect(res.status, 201);
+      verify(
+        app.db.createProgramBase(userId: _meId, programId: _programId, base: anyNamed('base'), loggedBy: null),
+      ).called(1);
+    });
+
+    test('deleting a base names the program and the base, 204', () async {
+      when(
+        app.db.deleteProgramBase(
+          userId: anyNamed('userId'),
+          programId: anyNamed('programId'),
+          baseId: anyNamed('baseId'),
+        ),
+      ).thenAnswer((_) async {});
+
+      final res = await app.send('DELETE', '/programs/$_programId/bases/$base');
+
+      expect(res.status, 204);
+      verify(app.db.deleteProgramBase(userId: _meId, programId: _programId, baseId: base)).called(1);
+    });
   });
 }

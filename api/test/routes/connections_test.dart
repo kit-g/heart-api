@@ -195,4 +195,18 @@ void main() {
       expect(res.status, 400);
     });
   });
+
+  test('a share nobody has heard of is refused, naming it, before anything changes', () async {
+    final res = await app.send(
+      'PUT',
+      '/connections/t1%7CCOACH%7Cfitness/shares',
+      body: {
+        'shares': ['everything'],
+      },
+    );
+
+    expect(res.status, 400);
+    expect(res.body, contains('everything'));
+    verifyZeroInteractions(app.db);
+  });
 }

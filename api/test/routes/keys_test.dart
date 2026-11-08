@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -164,5 +166,112 @@ void main() {
   test('the routes need a sign-in', () async {
     final res = await app.send('GET', '/keys/devices', token: null);
     expect(res.status, 401);
+  });
+
+  CryptoDevice published({String userId = 'them'}) => CryptoDevice(
+    id: device,
+    userId: userId,
+    identityKey: 'i',
+    signingKey: 's',
+    fallbackKey: 'f',
+    createdAt: DateTime.utc(2026),
+  );
+
+  group('reading devices', () {
+    setUp(() {
+      when(
+        app.db.getDevices(readerId: anyNamed('readerId'), ownerId: anyNamed('ownerId')),
+      ).thenAnswer((_) async => [published()]);
+    });
+
+    test('someone else\'s, as the caller reads them', () async {
+      final res = await app.send('GET', '/keys/devices?userId=them');
+
+      expect(res.status, 200);
+      expect(CryptoDevices.fromJson(jsonDecode(res.body) as Map).devices.single.id, device);
+      verify(app.db.getDevices(readerId: 'u1', ownerId: 'them')).called(1);
+    });
+
+    test('the caller\'s own when nobody else is named', () async {
+      final res = await app.send('GET', '/keys/devices');
+
+      expect(res.status, 200);
+      verify(app.db.getDevices(readerId: 'u1', ownerId: 'u1')).called(1);
+    });
+  });
+
+  test('a new fallback key goes on the caller\'s device, 204', () async {
+    when(
+      app.db.replaceFallbackKey(userId: anyNamed('userId'), deviceId: anyNamed('deviceId'), key: anyNamed('key')),
+    ).thenAnswer((_) async {});
+
+    final res = await app.send('PUT', '/keys/devices/$device/fallback', body: {'key': 'k2'});
+
+    expect(res.status, 204);
+    verify(app.db.replaceFallbackKey(userId: 'u1', deviceId: device, key: 'k2')).called(1);
+  });
+
+  test('adding one-time keys answers how many the device holds now, and counting them does too', () async {
+    when(
+      app.db.addOneTimeKeys(userId: anyNamed('userId'), deviceId: anyNamed('deviceId'), keys: anyNamed('keys')),
+    ).thenAnswer((_) async => 7);
+    when(
+      app.db.countOneTimeKeys(userId: anyNamed('userId'), deviceId: anyNamed('deviceId')),
+    ).thenAnswer((_) async => 7);
+
+    final added = await app.send(
+      'POST',
+      '/keys/devices/$device/one-time-keys',
+      body: {
+        'keys': {'k1': 'v1'},
+      },
+    );
+    expect(added.status, 200);
+    expect(OneTimeKeyCount.fromJson(jsonDecode(added.body) as Map).count, 7);
+    verify(app.db.addOneTimeKeys(userId: 'u1', deviceId: device, keys: {'k1': 'v1'})).called(1);
+
+    final counted = await app.send('GET', '/keys/devices/$device/one-time-keys');
+    expect(counted.status, 200);
+    expect(OneTimeKeyCount.fromJson(jsonDecode(counted.body) as Map).count, 7);
+    verify(app.db.countOneTimeKeys(userId: 'u1', deviceId: device)).called(1);
+  });
+
+  test('claiming keys takes one from each of the owner\'s devices, as the caller', () async {
+    when(
+      app.db.claimKeys(claimerId: anyNamed('claimerId'), ownerId: anyNamed('ownerId')),
+    ).thenAnswer((_) async => [published()]);
+
+    final res = await app.send('POST', '/keys/claims/them', body: {});
+
+    expect(res.status, 200);
+    expect(CryptoDevices.fromJson(jsonDecode(res.body) as Map).devices, hasLength(1));
+    verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them')).called(1);
+  });
+
+  test('a device reads what waits for it, and confirms what it received', () async {
+    when(app.db.getQueue(userId: anyNamed('userId'), deviceId: anyNamed('deviceId'))).thenAnswer(
+      (_) async => [
+        QueuedItem(id: item, recipientDeviceId: device, kind: 'key', content: 'sealed', createdAt: DateTime.utc(2026)),
+      ],
+    );
+    when(
+      app.db.confirm(userId: anyNamed('userId'), deviceId: anyNamed('deviceId'), ids: anyNamed('ids')),
+    ).thenAnswer((_) async {});
+
+    final read = await app.send('GET', '/keys/queue?deviceId=$device');
+    expect(read.status, 200);
+    expect(QueuedItems.fromJson(jsonDecode(read.body) as Map).items.single.id, item);
+    verify(app.db.getQueue(userId: 'u1', deviceId: device)).called(1);
+
+    final confirmed = await app.send(
+      'POST',
+      '/keys/queue/confirmations',
+      body: {
+        'deviceId': device,
+        'ids': [item],
+      },
+    );
+    expect(confirmed.status, 204);
+    verify(app.db.confirm(userId: 'u1', deviceId: device, ids: [item])).called(1);
   });
 }
