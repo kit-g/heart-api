@@ -19,6 +19,9 @@ import 'units.dart';
 /// Calories are the MET estimate and say so wherever they show. Weights and
 /// distances show in the user's units (`unitSystem` on the result).
 ///
+/// A workout a coach logged carries its name and notes under `quoted`, with who
+/// wrote them, and the card says so, as the template card does.
+///
 /// Sets in a row that read the same collapse into one line ("1–3  59 kg ×
 /// 14"), and exercises flow into columns when the frame is wide enough, so a
 /// long session stays short.
@@ -31,6 +34,8 @@ class WorkoutCard extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     final units = Units.of(workout['unitSystem']);
+    final quoted = workout.object('quoted');
+    final text = quoted ?? workout;
     final exercises = [
       if (workout['exercises'] case final List exercises)
         for (final exercise in exercises)
@@ -64,10 +69,11 @@ class WorkoutCard extends StatelessComponent {
     ];
 
     return section(classes: 'card', [
-      h1(classes: 'title', [.text(workout.text('name') ?? 'Workout')]),
+      if (quoted != null) div(classes: 'muted', [.text('Logged by ${quoted.text('by') ?? 'another account'}')]),
+      h1(classes: 'title', [.text(text.text('name') ?? 'Workout')]),
       if (workout['start'] case final String start) div(classes: 'muted', [.text(format.dateTime(start))]),
       if (stats.isNotEmpty) div(classes: 'stats', stats),
-      if (workout['note'] case final String note) p(classes: 'note', [.text(note)]),
+      if (text.text('note') case final note?) p(classes: 'note', [.text(note)]),
       if (exercises.isNotEmpty) const div(classes: 'rule', []),
       if (exercises.isNotEmpty)
         div(classes: 'exercises', [for (final exercise in exercises) _exercise(exercise, units)]),
@@ -92,7 +98,8 @@ class WorkoutCard extends StatelessComponent {
         span(classes: 'name', [.text(exercise.text('name') ?? 'Exercise')]),
         span(classes: 'muted', [.text(sets.length == 1 ? '1 set' : '${sets.length} sets')]),
       ]),
-      if (exercise['note'] case final String note) div(classes: 'exercise-note', [.text(note)]),
+      if ((exercise.object('quoted') ?? exercise).text('note') case final note?)
+        div(classes: 'exercise-note', [.text(note)]),
       div(classes: 'sets', [
         for (final run in sets.toRuns(format, units))
           div(classes: run.done ? 'row' : 'row undone', [

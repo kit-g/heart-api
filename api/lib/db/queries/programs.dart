@@ -286,10 +286,25 @@ WHERE program_id = @programId::uuid
 ORDER BY at, id
 ''';
 
+/// A workout a coach may move a base by: one they logged, and can still read. Null
+/// `@loggedBy` is the owner, who may use any of their own.
+const _baseWorkoutByCoach = '''
+@loggedBy::text IS NULL
+OR EXISTS (
+  SELECT 1
+  FROM workouts w
+  WHERE w.id = @workoutId::uuid
+    AND w.logged_by = @loggedBy
+    AND _readable_at(_relation(@loggedBy, @userId), w.started_at, w.hidden_at)
+)''';
+
 // Idempotent twice over: on the id, and on (exercise, workout), so a second
 // device replaying the same bump gets the first one back. The exercise must be
 // one the caller can see and the workout one they own; when either isn't, or
-// the program is full, nothing is written and the db layer tells which.
+// the program is full, nothing is written and the db layer tells which. A coach
+// writing for the owner (`@loggedBy`) moves bases only by a workout they logged
+// and can read, and a replay answers only with a base of this program, so the
+// route can't plant a base on the owner's own workout or read one it can't see.
 const _createProgramBase =
     '''
 WITH
@@ -304,6 +319,21 @@ _existing AS (
         AND exercise_id = @exerciseId::uuid
         AND slot IS NOT DISTINCT FROM @slot::uuid
         AND workout_id = @workoutId::uuid
+      )
+    )
+    AND (
+      @loggedBy::text IS NULL
+      OR (
+        program_id = @programId::uuid
+        AND (
+          program_bases.workout_id IS NULL
+          OR EXISTS (
+            SELECT 1
+            FROM workouts w
+            WHERE w.id = program_bases.workout_id
+              AND _readable_at(_relation(@loggedBy, @userId), w.started_at, w.hidden_at)
+          )
+        )
       )
     )
   LIMIT 1
@@ -329,7 +359,10 @@ _ins AS (
     )
     AND (
       @workoutId::uuid IS NULL
-      OR EXISTS (SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId)
+      OR (
+        EXISTS (SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId)
+        AND ($_baseWorkoutByCoach)
+      )
     )
     AND (SELECT count(*) FROM program_bases WHERE program_id = @programId::uuid) < $_maxProgramBases
   RETURNING id, program_id, exercise_id, slot, value, workout_id, action_id, at
@@ -341,7 +374,8 @@ WHERE NOT EXISTS (SELECT 1 FROM _ins)
 ''';
 
 /// Why `_createProgramBase` wrote nothing, asked only when it didn't.
-const _diagnoseProgramBase = '''
+const _diagnoseProgramBase =
+    '''
 SELECT
   EXISTS (
     SELECT 1
@@ -351,7 +385,10 @@ SELECT
   ) AS exercise_known,
   (
     @workoutId::uuid IS NULL
-    OR EXISTS (SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId)
+    OR (
+      EXISTS (SELECT 1 FROM workouts WHERE id = @workoutId::uuid AND user_id = @userId)
+      AND ($_baseWorkoutByCoach)
+    )
   ) AS workout_known
 ''';
 

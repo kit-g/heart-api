@@ -42,6 +42,11 @@ void main() {
     for (final statement in [
       'CREATE SCHEMA cron',
       'CREATE TABLE cron.calls (jobname TEXT, schedule TEXT, command TEXT, db TEXT)',
+      'CREATE TABLE cron.job (jobid BIGINT, jobname TEXT)',
+      "INSERT INTO cron.job VALUES (1, 'client-summaries-mark')",
+      'CREATE FUNCTION cron.unschedule(job_id BIGINT) '
+          'RETURNS BOOLEAN LANGUAGE sql '
+          'AS \$\$ DELETE FROM cron.job WHERE jobid = job_id RETURNING true \$\$',
       'CREATE FUNCTION cron.schedule_in_database(job_name TEXT, schedule TEXT, command TEXT, database TEXT) '
           'RETURNS BIGINT LANGUAGE sql '
           'AS \$\$ INSERT INTO cron.calls VALUES (job_name, schedule, command, database) RETURNING 1 \$\$',
@@ -59,7 +64,6 @@ void main() {
       ];
       expect(calls.map((c) => c['jobname']), [
         'anomaly-sweep',
-        'client-summaries-mark',
         'cron-history-cleanup',
         'device-queue-cleanup',
         'device-token-cleanup',
@@ -82,6 +86,8 @@ void main() {
         calls.firstWhere((call) => call['jobname'] == 'cron-history-cleanup')['command'],
         contains('cron.job_run_details'),
       );
+      expect(await h.exec('SELECT jobname FROM cron.job', {}), isEmpty, reason: 'a job no longer listed is gone');
+      expect(await declare(), 7, reason: 'and declaring again finds nothing to remove');
     } finally {
       await h.exec('DROP SCHEMA cron CASCADE', {});
     }
