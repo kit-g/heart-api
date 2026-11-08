@@ -24,23 +24,29 @@ abstract interface class ProgramChangeService {
 
   /// Adds a session to a copy, or puts a deleted one back under its own ids, with
   /// the workouts and skips [links] names linked to it again. Refuses an id already in
-  /// use, so it can't take over a template that isn't this copy's.
+  /// use, so it can't take over a template that isn't this copy's. Over a
+  /// [baseRevision], `409 program_changed` when someone else changed it since, its
+  /// deletion included. [changeId] makes a retried write the same change.
   Future<Template> restoreSession({
     required String ownerId,
     required String actorId,
     required String programId,
     required TemplateRequest body,
     Map<String, dynamic>? links,
+    int? baseRevision,
+    String? changeId,
     String kind = 'create',
   });
 
-  /// Deletes a session of a copy, recording who named it. False if it isn't one, or
-  /// isn't one of [programId] when that's given.
-  Future<bool> removeSession({
+  /// Deletes a session of a copy, recording who named it, and answers the program it
+  /// was in. Null if it isn't one, or isn't one of [programId] when that's given.
+  /// Over a [baseRevision], as [writeSession] is.
+  Future<String?> removeSession({
     required String ownerId,
     required String actorId,
     required String sessionId,
     String? programId,
+    int? baseRevision,
     String kind = 'delete',
   });
 

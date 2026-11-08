@@ -15,10 +15,14 @@ mixin _CoachLibrary on _DatabaseBase implements CoachLibraryService {
       _saveCoachProgram.toSql(),
       parameters: {'coachId': coachId, 'id': id, 'name': name, 'body': jsonEncode(body)},
     );
-    if (rows.isEmpty) {
-      throw const BadRequest(code: 'library_limit', reason: 'a library holds at most $_maxCoachPrograms programs');
-    }
-    return CoachProgram.fromRow(rows.first.toColumnMap());
+    return switch (rows.firstOrNull?.toColumnMap()) {
+      null => throw const BadRequest(
+        code: 'library_limit',
+        reason: 'a library holds at most $_maxCoachPrograms programs',
+      ),
+      {'taken': true} => throw _idTaken,
+      final row => CoachProgram.fromRow(row),
+    };
   }
 
   @override
@@ -67,6 +71,7 @@ mixin _CoachLibrary on _DatabaseBase implements CoachLibraryService {
         body: (row['body'] as Map).cast<String, dynamic>(),
         studentId: row['student_id'] as String?,
         existingProgramId: row['existing_id']?.toString(),
+        existingVersion: row['existing_version'] as int?,
         studentBusy: row['on_something'] as bool,
       ),
     };
@@ -77,12 +82,20 @@ mixin _CoachLibrary on _DatabaseBase implements CoachLibraryService {
     required List<String> ids,
     required String coachId,
     required String studentId,
+    Map<String, String> known = const {},
   }) async {
-    final rows = await _pool.execute(
-      _matchExercisesForStudent.toSql(),
-      parameters: {'ids': ids, 'coachId': coachId, 'studentId': studentId},
-    );
-    return {for (final row in rows) row[0].toString(): row[1].toString()};
+    try {
+      // two sends copying one exercise race on the student's name: the retry finds it
+      final rows = await _retryOnCreateRace(
+        () => _pool.execute(
+          _matchExercisesForStudent.toSql(),
+          parameters: {'ids': ids, 'coachId': coachId, 'studentId': studentId, 'known': jsonEncode(known)},
+        ),
+      );
+      return {for (final row in rows) row[0].toString(): row[1].toString()};
+    } on ServerException catch (e) {
+      _rethrowCapped(e);
+    }
   }
 
   @override
@@ -106,6 +119,7 @@ mixin _CoachLibrary on _DatabaseBase implements CoachLibraryService {
 
   @override
   Future<void> startProgram({required String userId, required String programId}) async {
-    await _pool.execute(_startProgram.toSql(), parameters: {'userId': userId, 'programId': programId});
+    final rows = await _pool.execute(_startProgram.toSql(), parameters: {'userId': userId, 'programId': programId});
+    if (rows.isEmpty) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
   }
 }

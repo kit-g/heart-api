@@ -8,6 +8,9 @@ typedef CoachSendContext = ({
   String? studentId,
   String? existingProgramId,
 
+  /// The version the copy they hold was last brought to.
+  int? existingVersion,
+
   /// The student is on something else, so a new program waits for them to start it.
   bool studentBusy,
 });
@@ -41,11 +44,13 @@ abstract interface class CoachLibraryService {
   });
 
   /// For each of [ids] that is an exercise [coachId] can see, the one [studentId]
-  /// has: their own by that name, the library's, or a copy made for them.
+  /// has: what [known] chose before while they still have it, their own by that
+  /// name, the library's, or a copy made for them.
   Future<Map<String, String>> matchExercisesForStudent({
     required List<String> ids,
     required String coachId,
     required String studentId,
+    Map<String, String> known,
   });
 
   /// The program an invitation names, if any.

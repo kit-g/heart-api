@@ -1,3 +1,4 @@
+import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -63,6 +64,60 @@ void main() {
             as Map;
     expect(message['userId'], 'coach-1');
     expect(message['topic'], 'coaching.invitation_accepted');
+  });
+
+  test('accepting connects even when the program it names is gone by then', () async {
+    const program = '01900000-0000-7000-8000-000000000001';
+    when(
+      app.db.acceptInvitation(
+        userId: anyNamed('userId'),
+        token: anyNamed('token'),
+        shares: anyNamed('shares'),
+        email: anyNamed('email'),
+        name: anyNamed('name'),
+      ),
+    ).thenAnswer(
+      (_) async => Connection(
+        targetId: 'coach-1',
+        connectionId: '01900000-0000-7000-8000-000000000002',
+        role: .student,
+        domain: .fitness,
+        status: .active,
+        createdAt: DateTime.utc(2026),
+      ),
+    );
+    when(app.db.invitationProgram(token: anyNamed('token'))).thenAnswer((_) async => program);
+    when(
+      app.db.getCoachSendContext(
+        coachId: anyNamed('coachId'),
+        id: anyNamed('id'),
+        connectionId: anyNamed('connectionId'),
+      ),
+    ).thenAnswer((_) async => null);
+    when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+    when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
+
+    final res = await app.send('POST', '/invitation-links/abc/accept', body: {});
+    expect(res.status, 200);
+    expect(res.body, contains('"programDelivered":false'));
+  });
+
+  test('an invitation naming a program that isn\'t the coach\'s is refused before it is made', () async {
+    const program = '01900000-0000-7000-8000-000000000001';
+    when(
+      app.db.getCoachProgram(coachId: anyNamed('coachId'), id: anyNamed('id')),
+    ).thenThrow(const NotFound(type: 'Library program', id: program));
+
+    final res = await app.send('POST', '/invitations', body: {'name': 'Alex', 'programId': program});
+    expect(res.status, 404);
+    verifyNever(
+      app.db.createInvitation(
+        inviterId: anyNamed('inviterId'),
+        name: anyNamed('name'),
+        domain: anyNamed('domain'),
+        token: anyNamed('token'),
+      ),
+    );
   });
 
   test('making an invitation mints the token server-side', () async {

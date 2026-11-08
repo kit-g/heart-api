@@ -9,7 +9,8 @@ RETURNING id
 ''';
 
 /// Holds a copy's session while it changes. No row means it isn't a session of a copy,
-/// or of the program a coach named. What the writer is up against is the next statement:
+/// or of the program a coach named. The lock serializes writers, and leaves foreign
+/// keys naming the row, such as a workout's, free to check it meanwhile. What the writer is up against is the next statement:
 /// one that waited for this lock would still see the world from before it waited, and
 /// miss the very write it queued behind.
 const _lockCopySession = '''
@@ -20,7 +21,7 @@ WHERE t.id = @sessionId::uuid
   AND t.user_id = @ownerId
   AND p.coach_id IS NOT NULL
   AND (@programId::uuid IS NULL OR t.program_id = @programId::uuid)
-FOR UPDATE OF t
+FOR NO KEY UPDATE OF t
 ''';
 
 /// Someone else having changed it since the writer's base is a conflict, and the writer's
@@ -50,7 +51,7 @@ FROM programs p
 WHERE p.id = @programId::uuid
   AND p.user_id = @ownerId
   AND p.coach_id IS NOT NULL
-FOR UPDATE OF p
+FOR NO KEY UPDATE OF p
 ''';
 
 const _copyStanding = '''
@@ -75,9 +76,39 @@ const _templateIdTaken = '''
 SELECT 1 FROM templates WHERE id = @id::uuid
 ''';
 
+/// A session put back or added over a base: someone else changed it since, a
+/// deletion included, which leaves no session for [_copySessionStanding] to read.
+const _goneSessionConflict = '''
+SELECT max(c.revision)
+FROM program_changes c
+WHERE c.program_id = @programId::uuid
+  AND c.session_id = @sessionId::uuid
+  AND c.revision > @baseRevision::int
+  AND c.actor_id IS DISTINCT FROM @actorId
+''';
+
+/// What a session says, without its revision or who it's quoted as: equal before
+/// and after a write means the write changed nothing.
+const _sessionContent = '''
+SELECT ((to_jsonb(t) - 'revision' - 'assigned_by') || jsonb_build_object('exercises', _template_exercises(t.id)))::text
+FROM templates t
+WHERE t.id = @sessionId::uuid
+''';
+
+/// As [_sessionContent], for a program's own fields.
+const _programContent = '''
+SELECT (to_jsonb(p) - 'revision' - 'updated_at')::text
+FROM programs p
+WHERE p.id = @programId::uuid
+''';
+
+/// Someone else writing a session makes its words theirs too, so the assistant
+/// reads them quoted even on a session the student added.
 const _bumpSessionRevision = '''
 UPDATE templates
-SET revision = revision + 1
+SET
+  revision = revision + 1,
+  assigned_by = CASE WHEN user_id = @actorId THEN assigned_by ELSE coalesce(assigned_by, @actorId) END
 WHERE id = @sessionId::uuid
 RETURNING revision
 ''';
@@ -101,7 +132,7 @@ const _deleteSession = '''
 DELETE FROM templates
 WHERE id = @sessionId::uuid
   AND user_id = @ownerId
-RETURNING id
+RETURNING id, program_id
 ''';
 
 /// Links a session put back to what named it, and to the copy it left. Its revision
@@ -144,17 +175,30 @@ const _programChangeColumns = '''
   id, program_id, session_id, actor_id, kind, revision, before, after, stale, at, xid::text AS xid_text
 ''';
 
-/// Stops short of the oldest transaction still running, as the workout feed does.
+/// Stops short of the oldest transaction still running, as the workout feed does,
+/// and like it refuses a cursor at or past the counter: one from before the
+/// database moved to a cluster that counts from lower (the row with `stale_cursor`).
 const _listProgramChanges =
     '''
-SELECT $_programChangeColumns
-FROM program_changes
-WHERE program_id = @programId::uuid
-  AND EXISTS (SELECT 1 FROM programs p WHERE p.id = @programId::uuid AND p.user_id = @ownerId)
-  AND xid < pg_snapshot_xmin(pg_current_snapshot())
-  AND (@xid::text IS NULL OR (xid, id) > (@xid::text::xid8, @changeId::uuid))
-ORDER BY xid, id
-LIMIT 500
+WITH
+_check AS (
+  SELECT @xid::text IS NOT NULL
+         AND @xid::text::xid8 >= pg_snapshot_xmax(pg_current_snapshot()) AS stale_cursor
+),
+_page AS (
+  SELECT $_programChangeColumns
+  FROM program_changes
+  WHERE program_id = @programId::uuid
+    AND EXISTS (SELECT 1 FROM programs p WHERE p.id = @programId::uuid AND p.user_id = @ownerId)
+    AND xid < pg_snapshot_xmin(pg_current_snapshot())
+    AND (@xid::text IS NULL OR (xid, id) > (@xid::text::xid8, @changeId::uuid))
+  ORDER BY xid, id
+  LIMIT 500
+)
+SELECT c.stale_cursor, p.*
+FROM _check c
+LEFT JOIN _page p ON NOT c.stale_cursor
+ORDER BY p.xid_text::xid8, p.id
 ''';
 
 const _getProgramChange =
@@ -232,11 +276,13 @@ WHERE id = @programId::uuid
 RETURNING id
 ''';
 
+/// Who to tell: the coach only while they still read the copy as its coach.
 const _otherSideOf = '''
 SELECT CASE WHEN user_id = @actorId THEN coach_id ELSE user_id END
 FROM programs
 WHERE id = @programId::uuid
   AND coach_id IS NOT NULL
+  AND (_relation(coach_id, user_id)).scope IS NOT DISTINCT FROM 'coach'
 ''';
 
 /// One row either way, saying whether the workout is theirs.

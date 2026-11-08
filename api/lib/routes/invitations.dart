@@ -14,6 +14,11 @@ import 'package:relic/relic.dart';
 
 Future<Model> createInvitation(Request req) async {
   final input = await InvitationCreateIn.fromRequest(req);
+  // checked first: a program that isn't theirs would otherwise leave a live
+  // invitation whose link they never got
+  if (input.programId case final String programId) {
+    await req.coachLibraryService.getCoachProgram(coachId: req.userId, id: programId);
+  }
   final invitation = await req.invitationService.createInvitation(
     inviterId: req.userId,
     name: input.name,
@@ -89,15 +94,21 @@ Future<AcceptedInvitation> acceptInvitation(Request req) async {
   // a separate step: their limit shouldn't stop them connecting, and the coach
   // sees it didn't arrive and can send it again
   final delivery = switch (program) {
-    final String id => await deliverCoachProgram(
-      req,
-      coachId: connection.targetId,
-      id: id,
-      connectionId: connection.connectionId!,
-    ),
+    final String id => await _deliverOnAccept(req, connection: connection, id: id),
     null => null,
   };
   return AcceptedInvitation(connection, delivery: delivery);
+}
+
+/// They're connected by now, so nothing about the program, such as the coach
+/// having deleted it since, turns that into an error.
+Future<ProgramDelivery> _deliverOnAccept(Request req, {required Connection connection, required String id}) async {
+  final connectionId = connection.connectionId!;
+  try {
+    return await deliverCoachProgram(req, coachId: connection.targetId, id: id, connectionId: connectionId);
+  } on ApiException catch (error) {
+    return ProgramDelivery(connectionId: connectionId, delivered: false, reason: error.code);
+  }
 }
 
 Future<Model> declineInvitation(Request req) async {

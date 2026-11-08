@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(37);
+SELECT plan(38);
 
 SELECT has_table('public'::name, 'programs'::name);
 
@@ -67,6 +67,7 @@ SELECT col_default_is('public', 'programs', 'archived', 'false', 'archived defau
 
 SELECT fk_ok('public', 'programs', 'user_id', 'public', 'profiles', 'id');
 SELECT has_index('public'::name, 'programs'::name, 'programs_user_id_idx'::name);
+SELECT has_index('public'::name, 'programs'::name, 'programs_library_program_idx'::name);
 
 -- the shape checks
 SELECT throws_ok(

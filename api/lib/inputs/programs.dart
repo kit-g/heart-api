@@ -382,12 +382,15 @@ class ProgramBaseIn {
   }
 }
 
+/// A revision is a Postgres `integer`: past it a base can't be compared, only refused.
+const _maxRevision = 0x7fffffff;
+
 extension _ChangeFields on Map<String, dynamic> {
   /// What a write to a coach's copy started from.
   int? baseRevision() {
     return switch (this['baseRevision']) {
       null => null,
-      final int revision when revision >= 0 => revision,
+      final int revision when revision >= 0 && revision <= _maxRevision => revision,
       _ => throw const BadRequest(reason: 'baseRevision must be a revision'),
     };
   }
