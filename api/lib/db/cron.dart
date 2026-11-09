@@ -28,6 +28,8 @@ const _cronJobs = [
   "SELECT cron.schedule_in_database('device-queue-cleanup', '40 4 * * *', 'SELECT _clean_up_device_queue()', @database)",
   // 04:43 UTC daily: reports past their deadline
   "SELECT cron.schedule_in_database('report-cleanup', '43 4 * * *', 'SELECT _clean_up_reports()', @database)",
+  // 04:52 UTC daily: the ChatGPT plugin's demo account keeps a recent log
+  "SELECT cron.schedule_in_database('demo-history', '52 4 * * *', 'SELECT _bring_history_forward(''tcbbFMUux9Nvk9epHq00bBqVAGf1'')', @database)",
   // gone: a program's week moves only when a cycle completes, never with the calendar
   "SELECT cron.unschedule(jobid) FROM cron.job WHERE jobname = 'client-summaries-mark'",
   // 04:47 UTC daily: pg_cron's own run log, which otherwise grows forever
