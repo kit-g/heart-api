@@ -15,11 +15,14 @@ import 'package:heart/models/workouts.dart';
 import 'package:heart/models/library.dart';
 import 'package:heart/routes/library.dart' show libraryView;
 import 'package:heart/routes/me.dart' as me;
+import 'package:heart/routes/program_changes.dart' as copies;
 import 'package:heart/routes/programs.dart' as programs;
+import 'package:heart/routes/roster.dart' show refreshRoster;
 import 'package:heart/oauth/protocol.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
+part 'tools/coaching.dart';
 part 'tools/templates.dart';
 
 /// A tool the model can call. The reads are each backed by a `/me` route's
@@ -60,7 +63,7 @@ class McpTool {
     this.idempotent = true,
   });
 
-  bool get readOnly => scope == .read;
+  bool get readOnly => !scope.writes;
 
   Map<String, dynamic> toJson() {
     return {
@@ -90,7 +93,8 @@ class ToolError implements Exception {
 
 /// What the model is told about the server as a whole. [writes] is whether
 /// this credential is offered the template writes; a personal token never is.
-String instructionsFor({required bool writes}) {
+/// [coaching] is whether it is offered a coach's tools.
+String instructionsFor({required bool writes, required bool coaching}) {
   return "Heart is the user's workout log: workouts, sets, templates, goals and custom exercises. "
       'It has no health data: no heart rate, sleep, steps or body weight from the health store, because '
       'that never leaves the user\'s phone. Do not offer to look it up. Workout calories, where present, '
@@ -101,7 +105,7 @@ String instructionsFor({required bool writes}) {
       'one is returned. ${writes ? _writes : 'Everything here is read-only. '}The log is as the user entered it, '
       'so expect timers left running, typos and weights in the wrong unit: nothing is corrected or dropped. Prefer '
       'medians for typical values, point out an outlier rather than quietly leave it out, and say you excluded '
-      'something only if you did. $_quotedRule';
+      'something only if you did. $_quotedRule${coaching ? _coaching : ''}';
 }
 
 /// The writes, said once: what they may do, and that the user sees first.
@@ -890,6 +894,7 @@ final List<McpTool> tools = [
     },
   ),
   ..._templateWrites,
+  ..._coachTools,
 ];
 
 /// [plan] for an assistant: exercises by name, and a share of another lift
@@ -987,9 +992,7 @@ extension on Template {
   Map<String, dynamic> quotedIfAssigned(Map<String, dynamic> text) {
     return switch (assignedBy) {
       null => text,
-      final Profile by => {
-        'quoted': {'by': by.quotedName, ...text},
-      },
+      final Profile by => _quoted(text, by: by.quotedName),
     };
   }
 }
@@ -1000,9 +1003,7 @@ extension on Program {
   Map<String, dynamic> quotedIfSent(Map<String, dynamic> text) {
     return switch (coachId) {
       null => text,
-      _ => {
-        'quoted': {'by': coachName ?? _anotherAccount, ...text},
-      },
+      _ => _quoted(text, by: coachName),
     };
   }
 }
@@ -1014,6 +1015,19 @@ extension on Profile {
 
 /// Quoted text's author, when the tools don't know their name.
 const _anotherAccount = 'another account';
+
+/// [text] as the tools return words from another account: under `quoted`, with
+/// [by] naming who wrote it, so a model reads them as theirs and never as
+/// instructions.
+Map<String, dynamic> _quoted(Map<String, dynamic> text, {required String? by}) {
+  if (text.isEmpty) return text;
+  return {
+    'quoted': {'by': by ?? _anotherAccount, ...text},
+  };
+}
+
+/// How a converter quotes the words it returns.
+typedef _Quote = Map<String, dynamic> Function(Map<String, dynamic> text);
 
 /// The user's custom exercises that came with something a coach sent, and who
 /// sent each. Their name and instructions are the coach's words, though the
@@ -1106,9 +1120,9 @@ extension on Map<String, dynamic> {
 extension on Workout {
   /// A row in `list_workouts`: each exercise with its completed sets and
   /// best set, not the sets themselves.
-  Map<String, dynamic> toMcpSummary({required _Coached coached}) {
+  Map<String, dynamic> toMcpSummary({required _Coached coached, _Quote? quote}) {
     return {
-      ..._toMcpHeader(),
+      ..._toMcpHeader(quote: quote ?? quotedIfLogged),
       'minutes': ?end?.difference(start).inMinutes,
       'exercises': [
         for (final exercise in this)
@@ -1124,9 +1138,10 @@ extension on Workout {
 
   /// `get_workout`: every exercise and set, a target's lift by its name in
   /// [names].
-  Map<String, dynamic> toMcpDetail({required Map<String, Object> names, required _Coached coached}) {
+  Map<String, dynamic> toMcpDetail({required Map<String, Object> names, required _Coached coached, _Quote? quote}) {
+    final quoted = quote ?? quotedIfLogged;
     return {
-      ..._toMcpHeader(withNote: true),
+      ..._toMcpHeader(quote: quoted, withNote: true),
       'end': ?end?.toUtc().toIso8601String(),
       'caloriesEstimate': ?calories?.round(),
       'exercises': [
@@ -1136,7 +1151,7 @@ extension on Workout {
             'name': exercise.exercise.name,
             'category': exercise.exercise.category.value,
             'quotedFrom': ?coached.from(exercise.exercise.id),
-            ...quotedIfLogged({'note': ?exercise.note}),
+            ...quoted({'note': ?exercise.note}),
             'sets': [
               for (final set in exercise) {...set.toMcp(), 'target': ?set.target?.toMcp(names: names)},
             ],
@@ -1145,11 +1160,11 @@ extension on Workout {
     };
   }
 
-  Map<String, dynamic> _toMcpHeader({bool withNote = false}) {
+  Map<String, dynamic> _toMcpHeader({required _Quote quote, bool withNote = false}) {
     return {
       'id': id,
       'start': start.toUtc().toIso8601String(),
-      ...quotedIfLogged({'name': ?name, if (withNote) 'note': ?note}),
+      ...quote({'name': ?name, if (withNote) 'note': ?note}),
     };
   }
 
@@ -1159,10 +1174,7 @@ extension on Workout {
   Map<String, dynamic> quotedIfLogged(Map<String, dynamic> text) {
     return switch (loggedBy) {
       null => text,
-      _ when text.isEmpty => text,
-      _ => {
-        'quoted': {'by': loggedByName ?? _anotherAccount, ...text},
-      },
+      _ => _quoted(text, by: loggedByName),
     };
   }
 }
