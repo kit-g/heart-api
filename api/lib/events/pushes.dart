@@ -11,7 +11,8 @@ const _digestHour = 18;
 
 /// Consumes a `push.requested` event off the API's events queue: a route asks for
 /// a push and gets on with answering. An unknown topic is a message from a newer
-/// deploy during a rollout, and is dropped.
+/// deploy during a rollout, and is dropped. `variant` picks a topic's wording, such
+/// as which kind of thing a reaction is on.
 Future<void> pushRequested(Request req, Map event) async {
   final topic = PushTopic.of(event['topic'] as String);
   if (topic == null) return;
@@ -19,6 +20,7 @@ Future<void> pushRequested(Request req, Map event) async {
     userId: event['userId'] as String,
     topic: topic,
     name: event['name'] as String?,
+    variant: event['variant'] as String? ?? 'title',
     data: {
       for (final MapEntry(:key, :value) in ((event['data'] as Map?) ?? const {}).entries) '$key': '$value',
     },

@@ -70,10 +70,10 @@ WHERE id = @userId
 /// export has to match, so the app can compare it against its local mirror and
 /// know the export is complete rather than assume it.
 ///
-/// Fourteen independent counts in one round trip; the final cross join is
-/// fourteen one-row relations. Most ride an existing index on their owner
+/// Fifteen independent counts in one round trip; the final cross join is
+/// fifteen one-row relations. Most ride an existing index on their owner
 /// column; `program_actions` and `program_bases` are indexed by program, not
-/// owner, and scan like the two below. The exceptions are `comments` (no `author_id` index — the table's
+/// owner, and scan like the two below; `reactions` rides `reactions_author_idx`. The exceptions are `comments` (no `author_id` index — the table's
 /// indexes are all on the four target columns) and `goals` (`goals_user_id_idx`
 /// is partial on `NOT archived`, and an export counts archived goals too), both
 /// of which scan. Fine for a call made once before an export; the thing to
@@ -136,6 +136,10 @@ WITH
     SELECT count(*) AS n, max(id::text) AS latest
     FROM comments WHERE author_id = @userId
   ),
+  _reactions AS (
+    SELECT count(*) AS n, max(id::text) AS latest
+    FROM reactions WHERE author_id = @userId
+  ),
   _connections AS (
     SELECT count(*) AS n, NULL::text AS latest
     FROM connections WHERE initiator_id = @userId OR target_id = @userId
@@ -175,6 +179,8 @@ SELECT
   _goals.latest               AS goals_latest,
   _comments.n                 AS comments_count,
   _comments.latest            AS comments_latest,
+  _reactions.n                AS reactions_count,
+  _reactions.latest           AS reactions_latest,
   _connections.n              AS connections_count,
   _connections.latest         AS connections_latest,
   _programs.n                 AS programs_count,
@@ -194,6 +200,7 @@ FROM _custom_exercises,
      _workout_images,
      _goals,
      _comments,
+     _reactions,
      _connections,
      _programs,
      _program_actions,

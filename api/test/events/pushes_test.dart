@@ -176,6 +176,20 @@ void main() {
       expect(sent().single['title'], 'Alex Rivera messaged you');
     });
 
+    test('a variant picks the wording, such as which thing a reaction is on', () async {
+      audience('owner', [(token: 't', locale: 'en')], actorName: 'Alex');
+
+      await pushRequested(request, {
+        'type': 'push.requested',
+        'userId': 'owner',
+        'topic': PushTopic.reactionCreated.key,
+        'variant': 'exercise_set',
+        'actorId': 'friend',
+      });
+
+      expect(sent().single['title'], 'Alex reacted to your set');
+    });
+
     test('a silent push has no words, so devices in two languages get one message', () async {
       audience('coach', [(token: 't-en', locale: 'en'), (token: 't-ru', locale: 'ru')]);
 

@@ -125,6 +125,7 @@ mixin _Profiles on _DatabaseBase implements ApiProfileService {
         .programActions: of('program_actions'),
         .programBases: of('program_bases'),
         .skips: of('skips'),
+        .reactions: of('reactions'),
       },
     );
   }

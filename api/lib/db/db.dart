@@ -19,6 +19,7 @@ import 'package:heart/models/program_changes.dart';
 import 'package:heart/models/programs.dart';
 import 'package:heart/models/roster.dart';
 import 'package:heart/models/skips.dart';
+import 'package:heart/models/thread_kinds.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart' hide WorkoutService, TemplateService, ExerciseService;
@@ -41,6 +42,7 @@ part 'profiles.dart';
 part 'program_changes.dart';
 part 'programs.dart';
 part 'push.dart';
+part 'reactions.dart';
 part 'roster.dart';
 part 'skips.dart';
 part 'template_folders.dart';
@@ -65,6 +67,7 @@ part 'queries/profiles.dart';
 part 'queries/program_changes.dart';
 part 'queries/programs.dart';
 part 'queries/push.dart';
+part 'queries/reactions.dart';
 part 'queries/roster.dart';
 part 'queries/skips.dart';
 part 'queries/template_folders.dart';
@@ -189,6 +192,11 @@ const _missingReferenceCodes = <String, String>{
   'program_actions_program_fk': 'unknown_program',
   'program_bases_program_fk': 'unknown_program',
   'program_bases_action_fk': 'unknown_action',
+  'reactions_workout_id_fkey': 'unknown_reaction_target',
+  'reactions_workout_exercise_id_fkey': 'unknown_reaction_target',
+  'reactions_exercise_set_id_fkey': 'unknown_reaction_target',
+  'reactions_workout_image_id_fkey': 'unknown_reaction_target',
+  'reaction_notices_workout_id_fkey': 'unknown_reaction_target',
   'comments_workout_id_fkey': 'unknown_comment_target',
   'comments_workout_exercise_id_fkey': 'unknown_comment_target',
   'comments_exercise_set_id_fkey': 'unknown_comment_target',
@@ -255,6 +263,7 @@ class Database extends _DatabaseBase
         _Profiles,
         _Programs,
         _ProgramChanges,
+        _Reactions,
         _Skips,
         _Workouts,
         _Templates,
@@ -266,6 +275,7 @@ class Database extends _DatabaseBase
         ChartPreferenceService,
         ApiExercisePreferenceService,
         CommentService,
+        ReactionService,
         ConnectionsService,
         InvitationService,
         PushService,

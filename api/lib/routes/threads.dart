@@ -9,6 +9,7 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/events.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/pagination.dart';
+import 'package:heart/models/thread_kinds.dart';
 import 'package:heart/notifications/sealing.dart';
 import 'package:heart/notifications/topics.dart';
 import 'package:heart_models/heart_models.dart';
@@ -59,8 +60,10 @@ Future<Model> addThreadItem(Request req) async {
     subjectId: input.subjectId,
   );
 
-  // A retry asks again too: it may be retrying because this push failed after the
+  // A quiet kind, such as a reaction, is found on the other person's next read. A
+  // retry asks again too: it may be retrying because this push failed after the
   // message was stored, and pushes on this topic collapse into one on the device.
+  if (threadItemKinds[input.kind]?.pushes != true) return created ? Created(item) : item;
   await req.events.publish(
     queueUrl: req.config.eventsQueueUrl,
     message: {

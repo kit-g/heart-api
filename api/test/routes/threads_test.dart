@@ -43,6 +43,25 @@ void main() {
       expect(res.body, contains('invalid_kind'));
     });
 
+    test('a reaction is to a message, named by its id', () async {
+      for (final subject in [
+        <String, dynamic>{},
+        {'subjectType': 'workout', 'subjectId': item},
+        {'subjectType': 'message', 'subjectId': 'not-an-id'},
+      ]) {
+        final res = await app.send(
+          'POST',
+          '/threads/$thread/items',
+          body: {
+            ...body(kind: 'reaction'),
+            ...subject,
+          },
+        );
+        expect(res.status, 400, reason: '$subject');
+        expect(res.body, contains('invalid_subject'), reason: '$subject');
+      }
+    });
+
     test('a commitment is 32 bytes', () async {
       final res = await app.send('POST', '/threads/$thread/items', body: body(commit: base64.encode([1, 2, 3])));
       expect(res.status, 400);
@@ -114,6 +133,21 @@ void main() {
       final message = published();
       expect(message['userId'], 'them');
       expect(message.toString(), isNot(contains('sealed')));
+    });
+
+    test('a reaction to a message is stored, and pushes nothing', () async {
+      stubSend();
+      final res = await app.send(
+        'POST',
+        '/threads/$thread/items',
+        body: {
+          ...body(kind: 'reaction'),
+          'subjectType': 'message',
+          'subjectId': item,
+        },
+      );
+      expect(res.status, 201);
+      verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
     });
 
     test('names the connection, so their setting for this one person applies', () async {

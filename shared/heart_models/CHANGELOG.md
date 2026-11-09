@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.53.0
+
+Reactions.
+
+- New: `Reaction`, one person's reaction to a workout, an exercise in it, a set or a photo (the
+  targets a comment has, as `ReactionTarget`). `kind` is an open vocabulary, `cheer` and `like` so
+  far, and a word this build doesn't know is carried as it arrived.
+- New: `Reactions`, what `GET /reactions/:targetType/:targetId` answers: a page of who reacted, the
+  `counts` of each word, and the reader's own (`mine`). A reaction this build can't read is left out
+  of the page; the counts keep every word.
+- New: `ReactionService` and `ReactionSummary`. Only the API implements the service.
+- New: `ExportableCollection.reactions`, so an export's inventory counts the reactions an account
+  left. A build that doesn't know it skips it, as `tryParse` already does.
+
 ## 2.52.0
 
 Coaching's gaps closed. No app build calls `/connections` or `/invitations` yet, so nothing

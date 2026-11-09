@@ -24,7 +24,8 @@ enum ExportableCollection {
   skips,
   goals,
   comments,
-  connections;
+  connections,
+  reactions;
 
   /// The collection named [key], or `null` when this build has never heard of
   /// it. Unknown keys are skipped rather than thrown on: the app pulls this
