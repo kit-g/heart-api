@@ -6,6 +6,9 @@ BEGIN
     RETURN NEXT has_function('public'::name, '_relation'::name, ARRAY ['text', 'text']);
     RETURN NEXT function_returns('public'::name, '_relation'::name, ARRAY ['text', 'text'], 'relation');
     RETURN NEXT function_lang_is('public'::name, '_relation'::name, ARRAY ['text', 'text'], 'plpgsql'::name);
+    RETURN NEXT has_function('public'::name, '_relation'::name, ARRAY ['text', 'text', 'boolean']);
+    RETURN NEXT function_returns('public'::name, '_relation'::name, ARRAY ['text', 'text', 'boolean'], 'relation');
+    RETURN NEXT function_lang_is('public'::name, '_relation'::name, ARRAY ['text', 'text', 'boolean'], 'sql'::name);
     RETURN NEXT has_function('public'::name, '_blocked_between'::name, ARRAY ['text', 'text']);
     RETURN NEXT has_function('public'::name, '_readable_at'::name, ARRAY ['relation', 'timestamp with time zone', 'timestamp with time zone']);
 END
@@ -195,6 +198,34 @@ $$
 BEGIN
     RETURN NEXT has_function('public'::name, '_lock_pair'::name, ARRAY ['text', 'text']);
     RETURN NEXT function_returns('public'::name, '_lock_pair'::name, ARRAY ['text', 'text'], 'void');
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__an_assistant_reads_what_was_shared_with_it() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _coach   TEXT := create_test_profile();
+    _student TEXT := create_test_profile();
+    _friend  TEXT := create_test_profile();
+BEGIN
+    INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status, shares)
+    VALUES (_coach, _student, 'COACH', 'STUDENT', 'fitness', 'active', '{goals}'),
+           (_friend, _student, 'PEER', 'PEER', 'general', 'active', '{}');
+
+    RETURN NEXT is((_relation(_coach, _coach, TRUE)).scope, 'self', 'your assistant reads your own');
+    RETURN NEXT is((_relation(_coach, _student, FALSE)).scope, 'coach', 'without one, the coach''s view');
+    RETURN NEXT is((_relation(_coach, _student, TRUE)).scope, NULL, 'an assistant reads nothing not shared with it');
+
+    UPDATE connections SET shares = '{goals,assistant}' WHERE initiator_id = _coach;
+    RETURN NEXT is((_relation(_coach, _student, TRUE)).scope, 'coach', 'shared, it reads as the coach does');
+    RETURN NEXT is((_relation(_coach, _student, TRUE)).shares, ARRAY ['assistant', 'goals'], 'and no more');
+
+    UPDATE connections SET status = 'paused' WHERE initiator_id = _coach;
+    RETURN NEXT is((_relation(_coach, _student, TRUE)).scope, NULL, 'a pause shares nothing with it');
+
+    UPDATE connections SET shares = '{assistant}' WHERE initiator_id = _friend;
+    RETURN NEXT is((_relation(_friend, _student, FALSE)).scope, 'peer', 'a friend reads as a peer');
+    RETURN NEXT is((_relation(_friend, _student, TRUE)).scope, NULL, 'and their assistant never does');
 END
 $$ LANGUAGE plpgsql;
 
