@@ -2,26 +2,26 @@ part of 'db.dart';
 
 mixin _Reactions on _DatabaseBase implements ReactionService {
   @override
-  Future<(Reaction, bool created)> setReaction({
+  Future<({Reaction reaction, bool created, String? notify})> setReaction({
     required String authorId,
     required ReactionTarget targetType,
     required String targetId,
     required String kind,
+    DateTime? at,
   }) async {
-    Future<Result> attempt() => _pool.execute(
-      _setReaction.toSql(),
-      parameters: {'authorId': authorId, 'targetType': targetType.value, 'targetId': targetId, 'kind': kind},
+    final rows = await _pool.execute(
+      _setReactionSql[targetType]!.toSql(),
+      parameters: {
+        'authorId': authorId,
+        'readerId': authorId,
+        'targetType': targetType.value,
+        'targetId': targetId,
+        'kind': kind,
+        'at': at?.toUtc(),
+      },
     );
-
-    // a second try sees a row the same person's other request committed meanwhile
-    final rows = switch (await attempt()) {
-      final Result rows when rows.isEmpty => await attempt(),
-      final rows => rows,
-    };
-    return switch (rows.firstOrNull?.toColumnMap()) {
-      null => throw NotFound(type: targetType.value, id: targetId),
-      final row => (Reaction.fromRow(row), row['created'] as bool),
-    };
+    final row = _readable(rows, targetType, targetId);
+    return (reaction: Reaction.fromRow(row), created: row['created'] as bool, notify: row['notify'] as String?);
   }
 
   @override
@@ -31,43 +31,51 @@ mixin _Reactions on _DatabaseBase implements ReactionService {
     required String targetId,
   }) async {
     await _pool.execute(
-      _removeReaction.toSql(),
-      parameters: {'authorId': authorId, 'targetType': targetType.value, 'targetId': targetId},
+      _removeReactionSql[targetType]!.toSql(),
+      parameters: {'authorId': authorId, 'targetId': targetId},
     );
   }
 
   @override
-  Future<Page<Reaction>> listReactions({
+  Future<({Page<Reaction> page, ReactionSummary summary})> getReactions({
+    required String readerId,
     required ReactionTarget targetType,
     required String targetId,
     String? cursor,
     int limit = 50,
   }) async {
     final rows = await _pool.execute(
-      _listReactions.toSql(),
-      parameters: {'targetType': targetType.value, 'targetId': targetId, 'cursor': cursor, 'limit': limit + 1},
+      _getReactionsSql[targetType]!.toSql(),
+      parameters: {
+        'readerId': readerId,
+        'targetType': targetType.value,
+        'targetId': targetId,
+        'cursor': cursor,
+        'limit': limit + 1,
+      },
     );
-    final reactions = [for (final row in rows) Reaction.fromRow(row.toColumnMap())];
+    final row = _readable(rows, targetType, targetId);
+    final reactions = [for (final each in row['page'] as List) Reaction.fromRow((each as Map).cast<String, dynamic>())];
     final hasMore = reactions.length > limit;
-    return Page(items: hasMore ? reactions.sublist(0, limit) : reactions, hasMore: hasMore);
+    return (
+      page: Page(items: hasMore ? reactions.sublist(0, limit) : reactions, hasMore: hasMore),
+      summary: (
+        counts: {
+          for (final MapEntry(:key, :value) in (row['counts'] as Map).entries) '$key': (value as num).toInt(),
+        },
+        mine: row['mine'] as String?,
+      ),
+    );
   }
 
-  @override
-  Future<ReactionSummary> summarizeReactions({
-    required String readerId,
-    required ReactionTarget targetType,
-    required String targetId,
-  }) async {
-    final rows = await _pool.execute(
-      _summarizeReactions.toSql(),
-      parameters: {'readerId': readerId, 'targetType': targetType.value, 'targetId': targetId},
-    );
-    final row = rows.single.toColumnMap();
-    return (
-      counts: {
-        for (final MapEntry(:key, :value) in (row['counts'] as Map).entries) '$key': (value as num).toInt(),
-      },
-      mine: row['mine'] as String?,
-    );
+  /// The comments' answers: a stranger is refused, and what the reader can't see
+  /// doesn't exist for them.
+  static Map<String, dynamic> _readable(Result rows, ReactionTarget target, String id) {
+    return switch (rows.firstOrNull?.toColumnMap()) {
+      null => throw NotFound(type: target.value, id: id),
+      {'related': false} => throw const Forbidden(reason: 'not connected to the owner of this content'),
+      {'readable': false} => throw NotFound(type: target.value, id: id),
+      final row => row,
+    };
   }
 }

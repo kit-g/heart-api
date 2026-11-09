@@ -42,7 +42,12 @@ abstract interface class Reaction implements Model {
       kind: row['kind'] as String,
       targetType: CommentTarget.fromString(row['target_type'] as String),
       targetId: row['target_id'].toString(),
-      createdAt: row['created_at'] as DateTime,
+      createdAt: switch (row['created_at']) {
+        final DateTime at => at,
+        // a row aggregated into json carries its times as text
+        final String at => DateTime.parse(at),
+        _ => throw ArgumentError.value(row['created_at'], 'created_at'),
+      },
     );
   }
 

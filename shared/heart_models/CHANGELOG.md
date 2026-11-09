@@ -11,6 +11,8 @@ Reactions.
   `counts` of each word, and the reader's own (`mine`). A reaction this build can't read is left out
   of the page; the counts keep every word.
 - New: `ReactionService` and `ReactionSummary`. Only the API implements the service.
+- New: `ExportableCollection.reactions`, so an export's inventory counts the reactions an account
+  left. A build that doesn't know it skips it, as `tryParse` already does.
 
 ## 2.52.0
 

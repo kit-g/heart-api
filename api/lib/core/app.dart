@@ -127,7 +127,6 @@ RelicApp buildApp({
     ..use('/comments', connectionsDb(db: database))
     ..use('/comments', events(publisher: eventPublisher))
     ..use('/reactions', reactionsDb(db: database))
-    ..use('/reactions', commentsDb(db: database))
     ..use('/reactions', events(publisher: eventPublisher))
     ..use('/devices', devicesDb(db: database))
     ..use('/exercises', exercisesDb(db: database))

@@ -26,35 +26,31 @@ void main() {
     );
   }
 
-  void access({String owner = 'owner', bool related = true, bool readable = true, bool exists = true}) {
-    when(
-      app.db.accessOfTarget(
-        readerId: anyNamed('readerId'),
-        targetType: anyNamed('targetType'),
-        targetId: anyNamed('targetId'),
-      ),
-    ).thenAnswer((_) async => exists ? (ownerId: owner, related: related, readable: readable) : null);
-  }
-
-  void sets({required bool created}) {
+  void sets({required bool created, String? notify}) {
     when(
       app.db.setReaction(
         authorId: anyNamed('authorId'),
         targetType: anyNamed('targetType'),
         targetId: anyNamed('targetId'),
         kind: anyNamed('kind'),
+        at: anyNamed('at'),
       ),
-    ).thenAnswer((i) async => (reaction(kind: i.namedArguments[#kind] as String), created));
+    ).thenAnswer(
+      (i) async => (reaction: reaction(kind: i.namedArguments[#kind] as String), created: created, notify: notify),
+    );
     when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
     when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
   }
 
   group('PUT /reactions/:targetType/:targetId', () {
-    test('a new reaction is 201, and the owner hears which kind of thing it is on', () async {
-      access();
-      sets(created: true);
+    test('a first reaction is 201, and the owner the service names hears what it is on', () async {
+      sets(created: true, notify: 'owner');
 
-      final res = await app.send('PUT', '/reactions/exercise_set/$set', body: {'kind': 'cheer'});
+      final res = await app.send(
+        'PUT',
+        '/reactions/exercise_set/$set',
+        body: {'kind': 'cheer', 'at': '2026-11-01T09:00:00.000Z'},
+      );
 
       expect(res.status, 201);
       expect((jsonDecode(res.body) as Map)['kind'], 'cheer');
@@ -67,31 +63,32 @@ void main() {
       expect(message['topic'], 'reaction.created');
       expect(message['variant'], 'exercise_set');
       expect(message['data'], {'targetType': 'exercise_set', 'targetId': set});
-      verify(app.db.setReaction(authorId: 'u1', targetType: CommentTarget.exerciseSet, targetId: set, kind: 'cheer'));
+      verify(
+        app.db.setReaction(
+          authorId: 'u1',
+          targetType: CommentTarget.exerciseSet,
+          targetId: set,
+          kind: 'cheer',
+          at: DateTime.utc(2026, 11, 1, 9),
+        ),
+      );
     });
 
-    test('a changed word is 200, and tells nobody', () async {
-      access();
+    test('a changed word is 200, and nobody the service doesn\'t name hears of anything', () async {
       sets(created: false);
+      expect((await app.send('PUT', '/reactions/workout/$workout', body: {'kind': 'like'})).status, 200);
 
-      final res = await app.send('PUT', '/reactions/workout/$workout', body: {'kind': 'like'});
-
-      expect(res.status, 200);
-      verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
-    });
-
-    test('reacting to one\'s own workout tells nobody', () async {
-      access(owner: 'u1');
       sets(created: true);
+      expect((await app.send('PUT', '/reactions/workout/$workout', body: {'kind': 'like'})).status, 201);
 
-      expect((await app.send('PUT', '/reactions/workout/$workout', body: {'kind': 'cheer'})).status, 201);
       verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
     });
 
-    test('a word that isn\'t a reaction is refused before anything is read', () async {
+    test('a word that isn\'t a reaction, or a time that isn\'t one, is refused before anything is read', () async {
       final res = await app.send('PUT', '/reactions/workout/$workout', body: {'kind': 'heartRate'});
       expect(res.status, 400);
       expect((jsonDecode(res.body) as Map)['code'], 'invalid_kind');
+      expect((await app.send('PUT', '/reactions/workout/$workout', body: {'kind': 'cheer', 'at': 'soon'})).status, 400);
       verifyZeroInteractions(app.db);
     });
 
@@ -100,26 +97,6 @@ void main() {
         expect((await app.send('PUT', '/reactions/$path', body: {'kind': 'cheer'})).status, 404, reason: path);
       }
       verifyZeroInteractions(app.db);
-    });
-
-    test('a stranger is refused, and what the reader can\'t see is missing', () async {
-      access(related: false, readable: false);
-      expect((await app.send('PUT', '/reactions/workout/$workout', body: {'kind': 'cheer'})).status, 403);
-
-      access(readable: false);
-      expect((await app.send('PUT', '/reactions/workout/$workout', body: {'kind': 'cheer'})).status, 404);
-
-      access(exists: false);
-      expect((await app.send('PUT', '/reactions/workout/$workout', body: {'kind': 'cheer'})).status, 404);
-
-      verifyNever(
-        app.db.setReaction(
-          authorId: anyNamed('authorId'),
-          targetType: anyNamed('targetType'),
-          targetId: anyNamed('targetId'),
-          kind: anyNamed('kind'),
-        ),
-      );
     });
   });
 
@@ -137,22 +114,20 @@ void main() {
   });
 
   test('the list carries the counts and the reader\'s own, and pages', () async {
-    access();
     when(
-      app.db.listReactions(
+      app.db.getReactions(
+        readerId: anyNamed('readerId'),
         targetType: anyNamed('targetType'),
         targetId: anyNamed('targetId'),
         cursor: anyNamed('cursor'),
         limit: anyNamed('limit'),
       ),
-    ).thenAnswer((_) async => Page(items: [reaction()], hasMore: true));
-    when(
-      app.db.summarizeReactions(
-        readerId: anyNamed('readerId'),
-        targetType: anyNamed('targetType'),
-        targetId: anyNamed('targetId'),
+    ).thenAnswer(
+      (_) async => (
+        page: Page(items: [reaction()], hasMore: true),
+        summary: (counts: {'cheer': 3, 'like': 1}, mine: 'cheer'),
       ),
-    ).thenAnswer((_) async => (counts: {'cheer': 3, 'like': 1}, mine: 'cheer'));
+    );
 
     final res = await app.send('GET', '/reactions/workout/$workout?limit=1');
 
@@ -162,7 +137,9 @@ void main() {
     expect(read.counts, {'cheer': 3, 'like': 1});
     expect(read.mine, 'cheer');
     expect(read.cursor, '01900000-0000-7000-8000-0000000000b1');
-    verify(app.db.listReactions(targetType: CommentTarget.workout, targetId: workout, cursor: null, limit: 1));
+    verify(
+      app.db.getReactions(readerId: 'u1', targetType: CommentTarget.workout, targetId: workout, cursor: null, limit: 1),
+    );
   });
 
   test('a cursor that was never one is a 400', () async {
