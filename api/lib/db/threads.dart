@@ -5,7 +5,7 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
   Future<Thread?> openThread({required String userId, required String connectionId}) async {
     final rows = await _pool.execute(
       _openThread.toSql(),
-      parameters: {'userId': userId, 'connectionId': connectionId},
+      parameters: {'userId': userId, 'connectionId': connectionId, 'quietKinds': quietThreadKinds},
     );
     return switch (rows.firstOrNull?.toColumnMap()) {
       null => null,
@@ -93,7 +93,10 @@ mixin _Threads on _DatabaseBase implements ThreadService, CoachNoteService, Repo
 
   @override
   Future<List<Thread>> getThreads({required String userId}) async {
-    final rows = await _pool.execute(_listThreads.toSql(), parameters: {'userId': userId});
+    final rows = await _pool.execute(
+      _listThreads.toSql(),
+      parameters: {'userId': userId, 'quietKinds': quietThreadKinds},
+    );
     return rows.map((row) => Thread.fromRow(row.toColumnMap())).toList();
   }
 

@@ -1,11 +1,5 @@
 part of 'inputs.dart';
 
-/// What a thread accepts today: a message, and a reaction to one, sealed like it.
-/// Sealing something else for the other person (a skip's reason, say) would be one
-/// more word here, and that's a policy decision: see docs/2026-11-01.coaching.md,
-/// *Messages*.
-const _threadItemKinds = {'message', 'reaction'};
-
 /// Postgres refuses NUL in text, and JSON allows it: without this, a request that
 /// can never succeed answers 500 and gets retried.
 bool _storable(String text) => !text.contains('\u0000');
@@ -62,7 +56,7 @@ class ThreadItemIn {
 
     final kind = switch (json['kind']) {
       null => 'message',
-      final String kind when _threadItemKinds.contains(kind) => kind,
+      final String kind when threadItemKinds.containsKey(kind) => kind,
       _ => throw const BadRequest(code: 'invalid_kind', reason: 'a thread takes messages and reactions to them'),
     };
 

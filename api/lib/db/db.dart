@@ -19,6 +19,7 @@ import 'package:heart/models/program_changes.dart';
 import 'package:heart/models/programs.dart';
 import 'package:heart/models/roster.dart';
 import 'package:heart/models/skips.dart';
+import 'package:heart/models/thread_kinds.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart' hide WorkoutService, TemplateService, ExerciseService;

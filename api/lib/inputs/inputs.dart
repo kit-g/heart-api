@@ -15,6 +15,7 @@ import 'package:heart/models/lens.dart';
 import 'package:heart/models/program_copy.dart';
 import 'package:heart/models/roster.dart';
 import 'package:heart/models/sets.dart';
+import 'package:heart/models/thread_kinds.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart/notifications/sealing.dart';
 import 'package:heart/notifications/topics.dart';
