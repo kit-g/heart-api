@@ -90,7 +90,10 @@ enum ConnectionShare {
   history,
 
   /// The student's goals.
-  goals;
+  goals,
+
+  /// What the coach reads, to the coach's assistant too.
+  assistant;
 
   /// Throws [ArgumentError] on an unknown value. The server's own check: a
   /// connection read from the wire carries `shares` as plain strings, so a value

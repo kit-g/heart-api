@@ -25,6 +25,7 @@ void main() {
       'recent': [at, later],
       'last_trained_at': later,
       'reasons': ['lighter', 'gap'],
+      'assistant': true,
     };
 
     test('ClientSummary round-trips', () {
@@ -33,6 +34,12 @@ void main() {
         ClientSummary(connectionId: connection, studentId: 's2', status: 'active'),
         ClientSummary.fromJson,
       );
+    });
+
+    test("ClientSummary says whether the client shares with the coach's assistant, false when not said", () {
+      expect(ClientSummary.fromRow(row).assistant, isTrue);
+      expect(ClientSummary.fromJson(wire(ClientSummary.fromRow(row))).assistant, isTrue);
+      expect(ClientSummary.fromJson({...wire(ClientSummary.fromRow(row))}..remove('assistant')).assistant, isFalse);
     });
 
     test('ClientSummary reads a roster page as the API sends it, a reason it does not know too', () {

@@ -31,6 +31,9 @@ abstract interface class ClientSummary implements Model {
 
   List<String> get reasons;
 
+  /// Whether they give the coach [ConnectionShare.assistant].
+  bool get assistant;
+
   factory({
     required String connectionId,
     required String studentId,
@@ -45,6 +48,7 @@ abstract interface class ClientSummary implements Model {
     List<DateTime> recent,
     DateTime? lastTrainedAt,
     List<String> reasons,
+    bool assistant,
   }) = _ClientSummary.new;
 
   factory fromRow(Map row) {
@@ -62,6 +66,7 @@ abstract interface class ClientSummary implements Model {
       recent: [for (final at in (row['recent'] as List?) ?? const []) at as DateTime],
       lastTrainedAt: row['last_trained_at'] as DateTime?,
       reasons: [for (final reason in (row['reasons'] as List?) ?? const []) '$reason'],
+      assistant: row['assistant'] == true,
     );
   }
 
@@ -86,6 +91,7 @@ abstract interface class ClientSummary implements Model {
         _ => null,
       },
       reasons: [for (final reason in (json['reasons'] as List?) ?? const []) '$reason'],
+      assistant: json['assistant'] == true,
     );
   }
 }
@@ -117,6 +123,8 @@ class _ClientSummary implements ClientSummary {
   final DateTime? lastTrainedAt;
   @override
   final List<String> reasons;
+  @override
+  final bool assistant;
 
   const new({
     required this.connectionId,
@@ -132,6 +140,7 @@ class _ClientSummary implements ClientSummary {
     this.recent = const [],
     this.lastTrainedAt,
     this.reasons = const [],
+    this.assistant = false,
   });
 
   @override
@@ -150,6 +159,7 @@ class _ClientSummary implements ClientSummary {
       'recent': [for (final at in recent) at.toIso8601String()],
       'lastTrainedAt': ?lastTrainedAt?.toIso8601String(),
       'reasons': reasons,
+      'assistant': assistant,
     };
   }
 }
