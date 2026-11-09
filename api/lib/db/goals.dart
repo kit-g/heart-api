@@ -6,10 +6,16 @@ mixin _Goals on _DatabaseBase implements IdempotentGoalService {
     required String requesterId,
     required String targetUserId,
     bool archived = false,
+    bool assistant = false,
   }) async {
     final rows = await _pool.execute(
       _listTargetGoals.toSql(),
-      parameters: {'requesterId': requesterId, 'targetUserId': targetUserId, 'archived': archived},
+      parameters: {
+        'requesterId': requesterId,
+        'targetUserId': targetUserId,
+        'archived': archived,
+        'assistant': assistant,
+      },
     );
     if (rows.isNotEmpty && rows.first.toColumnMap()['forbidden'] == true) {
       throw const Forbidden(reason: 'You do not have permission to view these goals.');

@@ -19,6 +19,16 @@ library;
 import 'package:heart_models/heart_models.dart';
 
 abstract interface class IdempotentGoalService implements GoalService {
+  /// With [assistant], what the requester's assistant may read: their own, and a
+  /// student's who shares it with the assistant as well as their goals.
+  @override
+  Future<Iterable<Goal>> getTargetUserGoals({
+    required String requesterId,
+    required String targetUserId,
+    bool archived = false,
+    bool assistant = false,
+  });
+
   /// Goals carry no natural key, so the id is the only thing a retry can match
   /// on; a retry never counts against the active-goal cap.
   Future<(Goal, bool created)> createGoalOrExisting(Goal goal, String userId);

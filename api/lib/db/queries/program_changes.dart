@@ -179,7 +179,9 @@ const _programChangeColumns = '''
 /// and like it refuses a cursor at or past the counter: one from before the
 /// database moved to a cluster that counts from lower (the row with `stale_cursor`).
 /// The check's row says too whether the program is the owner's at all, so one that
-/// isn't reads as missing rather than as a program with no history.
+/// isn't reads as missing rather than as a program with no history. A coach as
+/// @readerId reads only a copy they sent, while they hold a coach's view of the
+/// student, and their assistant only while the student shares it with it.
 const _listProgramChanges =
     '''
 WITH
@@ -187,19 +189,27 @@ _check AS (
   SELECT
     @xid::text IS NOT NULL
       AND @xid::text::xid8 >= pg_snapshot_xmax(pg_current_snapshot()) AS stale_cursor,
-    EXISTS (SELECT 1 FROM programs p WHERE p.id = @programId::uuid AND p.user_id = @ownerId) AS owned
+    EXISTS (
+      SELECT 1
+      FROM programs p
+      WHERE p.id = @programId::uuid
+        AND p.user_id = @ownerId
+        AND (@readerId::text IS NULL OR p.coach_id = @readerId)
+    ) AS owned,
+    @readerId::text IS NULL
+      OR (_relation(@readerId, @ownerId, @assistant::boolean)).scope IS NOT DISTINCT FROM 'coach' AS readable
 ),
 _page AS (
   SELECT $_programChangeColumns
   FROM program_changes
   WHERE program_id = @programId::uuid
-    AND (SELECT owned FROM _check)
+    AND (SELECT owned AND readable FROM _check)
     AND xid < pg_snapshot_xmin(pg_current_snapshot())
     AND (@xid::text IS NULL OR (xid, id) > (@xid::text::xid8, @changeId::uuid))
   ORDER BY xid, id
-  LIMIT 500
+  LIMIT $_programChangesPage + 1
 )
-SELECT c.stale_cursor, c.owned, p.*
+SELECT c.stale_cursor, c.owned, c.readable, p.*
 FROM _check c
 LEFT JOIN _page p ON NOT c.stale_cursor
 ORDER BY p.xid_text::xid8, p.id
@@ -214,8 +224,12 @@ WHERE id = @changeId::uuid
   AND EXISTS (SELECT 1 FROM programs p WHERE p.id = @programId::uuid AND p.user_id = @ownerId)
 ''';
 
+/// The most changes one read returns.
+const _programChangesPage = 500;
+
 /// A coach reads what they sent while they hold a coach's view, paused included,
-/// and writes only across the live connection it came through.
+/// and writes only across the live connection it came through. Their assistant
+/// reads it only while the student shares it with the assistant.
 const _copyAccess = '''
 WITH
 _copy AS (
@@ -226,8 +240,9 @@ _copy AS (
     AND coach_id = @coachId
 )
 SELECT
+  EXISTS (SELECT 1 FROM _copy) AS sent,
   EXISTS (SELECT 1 FROM _copy)
-    AND (_relation(@coachId, @studentId)).scope IS NOT DISTINCT FROM 'coach' AS readable,
+    AND (_relation(@coachId, @studentId, @assistant::boolean)).scope IS NOT DISTINCT FROM 'coach' AS readable,
   EXISTS (
     SELECT 1
     FROM _copy p
@@ -243,13 +258,13 @@ SELECT $_programColumns
 FROM programs p
 WHERE p.user_id = @studentId
   AND p.coach_id = @coachId
-  AND (_relation(@coachId, @studentId)).scope = 'coach'
+  AND (_relation(@coachId, @studentId, @assistant::boolean)).scope = 'coach'
 ORDER BY p.id
 ''';
 
 const _listVisibleMarks = '''
 WITH _rel AS (
-  SELECT _relation(@readerId, @ownerId) AS r
+  SELECT _relation(@readerId, @ownerId, @assistant::boolean) AS r
 )
 SELECT template_id, started_at AS at, true AS is_workout
 FROM workouts

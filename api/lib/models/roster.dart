@@ -27,13 +27,15 @@ abstract interface class RosterService {
   });
 
   /// A page of clients, those who need a word first. [reason] keeps those it applies
-  /// to. [former] lists former clients, with no more than who and when.
+  /// to. [former] lists former clients, with no more than who and when. With
+  /// [assistant], so does a client who doesn't share with the coach's assistant.
   Future<Page<ClientSummary>> getRoster({
     required String coachId,
     String? reason,
     bool former = false,
     OrderedCursor? cursor,
     int limit = 50,
+    bool assistant = false,
   });
 
   /// The coach has looked: reasons from now on count only what comes after. False
@@ -41,5 +43,14 @@ abstract interface class RosterService {
   Future<bool> markReviewed({required String coachId, required String connectionId, DateTime? at});
 
   /// Finished workouts, skips and programs ending across their clients, newest first.
-  Future<Page<CoachFeedItem>> getCoachFeed({required String coachId, FeedCursor? cursor, int limit = 50});
+  /// With [assistant], across those who share with the coach's assistant.
+  Future<Page<CoachFeedItem>> getCoachFeed({
+    required String coachId,
+    FeedCursor? cursor,
+    int limit = 50,
+    bool assistant = false,
+  });
+
+  /// Whether [userId] coaches: has had a client, or has a library to send from.
+  Future<bool> coaches(String userId);
 }

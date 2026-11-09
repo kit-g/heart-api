@@ -73,11 +73,23 @@ RETURNING connection_id
 /// clear when they stop being true, and a gap counts from the last of training,
 /// accepting and resuming. Former clients are who and when, and no more, so a reason
 /// doesn't filter them, and someone under a block isn't one: a block reads as no such
-/// person, and a lifted one as an ending.
+/// person, and a lifted one as an ending. For the coach's assistant, a client who
+/// doesn't share with it is who and when too.
 const _roster = '''
 WITH
 _clients AS (
   SELECT
+    -- the assistant's share, as _relation reads it: from a live connection between them
+    EXISTS (
+      SELECT 1
+      FROM connections k
+      WHERE k.status = 'active'
+        AND 'assistant' = ANY (k.shares)
+        AND (
+          (k.initiator_id = @coachId AND k.target_id = s.student_id AND k.initiator_role = 'COACH')
+          OR (k.initiator_id = s.student_id AND k.target_id = @coachId AND k.target_role = 'COACH')
+        )
+    ) AS assistant,
     s.connection_id,
     s.student_id,
     CASE WHEN c.status = 'blocked' THEN 'severed' ELSE c.status END AS status,
@@ -120,7 +132,7 @@ _clients AS (
         CASE WHEN s.ending THEN 'ending' END
       ],
       NULL
-    ) AS reasons
+    ) AS reasons_seen
   FROM client_summaries s
   JOIN connections c ON c.id = s.connection_id
   JOIN profiles profile ON profile.id = s.student_id
@@ -130,11 +142,18 @@ _clients AS (
       OR (NOT @former::boolean AND c.status IN ('active', 'paused'))
     )
 ),
+_shown AS (
+  SELECT
+    c.*,
+    NOT @assistant::boolean OR c.assistant AS readable,
+    CASE WHEN NOT @assistant::boolean OR c.assistant THEN c.reasons_seen ELSE '{}'::text[] END AS reasons
+  FROM _clients c
+),
 _ranked AS (
   SELECT
     *,
     CASE WHEN NOT @former::boolean AND cardinality(reasons) = 0 THEN 1 ELSE 0 END AS rank
-  FROM _clients
+  FROM _shown
   WHERE @former::boolean
     OR @reason::text IS NULL
     OR @reason = ANY (reasons)
@@ -146,13 +165,14 @@ SELECT
   accepted_at,
   username,
   avatar_url,
-  CASE WHEN @former::boolean THEN NULL ELSE program_id END AS program_id,
-  CASE WHEN @former::boolean THEN NULL ELSE program_name END AS program_name,
-  CASE WHEN @former::boolean THEN NULL ELSE program_week END AS program_week,
-  CASE WHEN @former::boolean THEN NULL ELSE program_weeks END AS program_weeks,
-  CASE WHEN @former::boolean THEN '{}'::timestamptz[] ELSE recent END AS recent,
-  CASE WHEN @former::boolean THEN NULL ELSE last_trained_at END AS last_trained_at,
-  CASE WHEN @former::boolean THEN '{}'::text[] ELSE reasons END AS reasons
+  CASE WHEN @former::boolean OR NOT readable THEN NULL ELSE program_id END AS program_id,
+  CASE WHEN @former::boolean OR NOT readable THEN NULL ELSE program_name END AS program_name,
+  CASE WHEN @former::boolean OR NOT readable THEN NULL ELSE program_week END AS program_week,
+  CASE WHEN @former::boolean OR NOT readable THEN NULL ELSE program_weeks END AS program_weeks,
+  CASE WHEN @former::boolean OR NOT readable THEN '{}'::timestamptz[] ELSE recent END AS recent,
+  CASE WHEN @former::boolean OR NOT readable THEN NULL ELSE last_trained_at END AS last_trained_at,
+  CASE WHEN @former::boolean THEN '{}'::text[] ELSE reasons END AS reasons,
+  assistant
 FROM _ranked
 WHERE @afterRank::int IS NULL OR (rank, connection_id) > (@afterRank::int, @afterId::uuid)
 ORDER BY rank, connection_id
@@ -170,7 +190,8 @@ RETURNING connection_id
 
 /// A student coached in two domains has two summaries, and is one reader's client
 /// once. Each kind takes its own page before they're merged, so a page reads no more
-/// of a client's history than it shows.
+/// of a client's history than it shows. The coach's assistant reads only the clients
+/// who share with it.
 const _coachFeed = '''
 WITH
 _summaries AS (
@@ -181,7 +202,7 @@ _summaries AS (
     AND c.status IN ('active', 'paused')
 ),
 _clients AS (
-  SELECT student_id, _relation(@coachId, student_id) AS r
+  SELECT student_id, _relation(@coachId, student_id, @assistant::boolean) AS r
   FROM (SELECT DISTINCT student_id FROM _summaries) students
 ),
 _items AS (
@@ -210,8 +231,10 @@ _items AS (
   UNION ALL
   SELECT 'ending', s.program_id::text, s.student_id, s.ending_since, s.program_name
   FROM _summaries s
+  JOIN _clients c ON c.student_id = s.student_id
   WHERE s.ending_since IS NOT NULL
     AND s.program_id IS NOT NULL
+    AND (c.r).scope = 'coach'
     AND (@afterAt::timestamptz IS NULL OR (s.ending_since, s.program_id::text) < (@afterAt::timestamptz, @afterId::text))
 )
 SELECT i.kind, i.id, i.student_id, i.at, i.title, p.username, p.avatar_url
@@ -219,4 +242,12 @@ FROM _items i
 JOIN profiles p ON p.id = i.student_id
 ORDER BY i.at DESC, i.id DESC
 LIMIT @limit
+''';
+
+/// Whether someone coaches: has had a client, former ones included, or has a library
+/// to send from.
+const _coaches = '''
+SELECT
+  EXISTS (SELECT 1 FROM client_summaries WHERE coach_id = @userId)
+  OR EXISTS (SELECT 1 FROM library_programs WHERE coach_id = @userId)
 ''';

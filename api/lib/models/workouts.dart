@@ -58,12 +58,15 @@ abstract interface class ApiWorkoutService {
     DateTime? to,
   });
 
+  /// With [assistant], what the requester's assistant may read: their own, and a
+  /// student's who shares it with the assistant. A peer's view never reaches it.
   Future<Page<Workout>> getWorkouts({
     required String userId,
     required String targetUserId,
     required String Function(String) imageUrl,
     String? cursor,
     int limit,
+    bool assistant = false,
   });
 
   Future<Workout> getWorkout({
@@ -72,11 +75,13 @@ abstract interface class ApiWorkoutService {
     required String Function(String) imageUrl,
   });
 
+  /// [assistant] as for [getWorkouts].
   Future<Workout> getTargetWorkout({
     required String requesterId,
     required String targetUserId,
     required String workoutId,
     required String Function(String) imageUrl,
+    bool assistant = false,
   });
 
   /// `created` is true when this call minted the row; false when [body]'s

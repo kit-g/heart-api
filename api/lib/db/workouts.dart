@@ -34,11 +34,18 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required String Function(String) imageUrl,
     String? cursor,
     int limit = 30,
+    bool assistant = false,
   }) async {
     // Fetch one extra row so hasMore is authoritative without a second query.
     final rows = await _pool.execute(
       _listWorkouts.toSql(),
-      parameters: {'requesterId': userId, 'targetUserId': targetUserId, 'cursor': cursor, 'limit': limit + 1},
+      parameters: {
+        'requesterId': userId,
+        'targetUserId': targetUserId,
+        'cursor': cursor,
+        'limit': limit + 1,
+        'assistant': assistant,
+      },
     );
     if (rows.isNotEmpty && rows.first.toColumnMap()['forbidden'] == true) {
       throw const Forbidden(reason: 'You do not have permission to view these workouts.');
@@ -242,10 +249,16 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required String targetUserId,
     required String workoutId,
     required String Function(String) imageUrl,
+    bool assistant = false,
   }) async {
     final rows = await _pool.execute(
       _getTargetWorkout.toSql(),
-      parameters: {'requesterId': requesterId, 'targetUserId': targetUserId, 'workoutId': workoutId},
+      parameters: {
+        'requesterId': requesterId,
+        'targetUserId': targetUserId,
+        'workoutId': workoutId,
+        'assistant': assistant,
+      },
     );
     if (rows.isNotEmpty && rows.first.toColumnMap()['forbidden'] == true) {
       throw const Forbidden(reason: 'You do not have permission to view this workout.');

@@ -54,10 +54,12 @@ mixin _Roster on _DatabaseBase implements RosterService {
     bool former = false,
     OrderedCursor? cursor,
     int limit = 50,
+    bool assistant = false,
   }) async {
     final rows = await _pool.execute(
       _roster.toSql(),
       parameters: {
+        'assistant': assistant,
         'coachId': coachId,
         'reason': reason,
         'former': former,
@@ -81,10 +83,21 @@ mixin _Roster on _DatabaseBase implements RosterService {
   }
 
   @override
-  Future<Page<CoachFeedItem>> getCoachFeed({required String coachId, FeedCursor? cursor, int limit = 50}) async {
+  Future<Page<CoachFeedItem>> getCoachFeed({
+    required String coachId,
+    FeedCursor? cursor,
+    int limit = 50,
+    bool assistant = false,
+  }) async {
     final rows = await _pool.execute(
       _coachFeed.toSql(),
-      parameters: {'coachId': coachId, 'afterAt': cursor?.at.toUtc(), 'afterId': cursor?.id, 'limit': limit + 1},
+      parameters: {
+        'coachId': coachId,
+        'afterAt': cursor?.at.toUtc(),
+        'afterId': cursor?.id,
+        'limit': limit + 1,
+        'assistant': assistant,
+      },
     );
     final items = [
       for (final row in rows.map((row) => row.toColumnMap()))
@@ -92,5 +105,11 @@ mixin _Roster on _DatabaseBase implements RosterService {
     ];
     final hasMore = items.length > limit;
     return Page(items: hasMore ? items.sublist(0, limit) : items, hasMore: hasMore);
+  }
+
+  @override
+  Future<bool> coaches(String userId) async {
+    final rows = await _pool.execute(_coaches.toSql(), parameters: {'userId': userId});
+    return rows.first[0] as bool;
   }
 }

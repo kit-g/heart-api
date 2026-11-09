@@ -6,7 +6,7 @@ part of '../db.dart';
 const _listTargetGoals = '''
 WITH
 _rel AS (
-  SELECT _relation(@requesterId, @targetUserId) AS r
+  SELECT _relation(@requesterId, @targetUserId, @assistant::boolean) AS r
 ),
 _allowed AS (
   -- goals have no date to fall inside a pause, so a pause anywhere stops them all

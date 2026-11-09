@@ -89,7 +89,7 @@ void main() {
   // sharing this database keep some running: wait for the horizon to pass.
   Future<List<ProgramChange>> history(String student, String program, {int count = 1}) async {
     for (var i = 0; ; i++) {
-      final changes = await h.db.getProgramChanges(ownerId: student, programId: program);
+      final changes = (await h.db.getProgramChanges(ownerId: student, programId: program)).items;
       if (changes.length >= count || i == 50) return changes;
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
@@ -248,7 +248,7 @@ void main() {
       await h.exec("UPDATE program_changes SET xid = '999'::xid8 WHERE id = @id::uuid", {'id': saved.first.id});
       await h.exec("UPDATE program_changes SET xid = '1000'::xid8 WHERE id = @id::uuid", {'id': saved.last.id});
 
-      final changes = await h.db.getProgramChanges(ownerId: c.student, programId: c.program);
+      final changes = (await h.db.getProgramChanges(ownerId: c.student, programId: c.program)).items;
       expect(changes.map((change) => change.after?['name']), ['Older', 'Newer']);
     });
 
@@ -831,6 +831,38 @@ void main() {
       await h.exec('INSERT INTO blocks (blocker_id, blocked_id) VALUES (@s, @c)', {'s': c.student, 'c': c.coach});
       access = await h.db.getCopyAccess(coachId: c.coach, studentId: c.student, programId: c.program);
       expect(access, (readable: false, writable: false));
+    });
+
+    test('a coach reads the copy they sent, its sessions in order, and its history', () async {
+      final c = await sent();
+      final read = await h.db.readCopy(coachId: c.coach, studentId: c.student, programId: c.program);
+      expect(read.program.id, c.program);
+      expect([for (final session in read.sessions) session.id], read.program.sessions);
+      expect(
+        (await h.db.getProgramChanges(ownerId: c.student, programId: c.program, readerId: c.coach)).hasMore,
+        isFalse,
+      );
+
+      final other = await h.seedProfile();
+      await expectLater(
+        h.db.readCopy(coachId: other, studentId: c.student, programId: c.program),
+        throwsA(isA<NotFound>()),
+        reason: 'what another coach sent is no copy of theirs',
+      );
+      await expectLater(
+        h.db.getProgramChanges(ownerId: c.student, programId: c.program, readerId: other),
+        throwsA(isA<NotFound>()),
+      );
+
+      await h.db.deleteConnection(actorId: c.student, targetId: c.coach, role: .student, domain: .fitness);
+      await expectLater(
+        h.db.readCopy(coachId: c.coach, studentId: c.student, programId: c.program),
+        throwsA(isA<Forbidden>()),
+      );
+      await expectLater(
+        h.db.getProgramChanges(ownerId: c.student, programId: c.program, readerId: c.coach),
+        throwsA(isA<Forbidden>()),
+      );
     });
 
     test('what a coach counts leaves out what is hidden', () async {

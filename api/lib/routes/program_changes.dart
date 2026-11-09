@@ -42,13 +42,12 @@ Future<void> _tellOtherSide(Request req, String programId) async {
 }
 
 Future<ProgramChanges> getProgramChanges(Request req) async {
-  return ProgramChanges(
-    await req.programChangeService.getProgramChanges(
-      ownerId: req.userId,
-      programId: req.rawPathParameters[#programId]!,
-      since: req.url.queryParameters['since'],
-    ),
+  final page = await req.programChangeService.getProgramChanges(
+    ownerId: req.userId,
+    programId: req.rawPathParameters[#programId]!,
+    since: req.url.queryParameters['since'],
   );
+  return ProgramChanges(page.items);
 }
 
 Future<Model> revertProgramChange(Request req) {
@@ -121,15 +120,6 @@ Future<Model> revertById(
   throw const NoContent();
 }
 
-Future<void> _assertCanRead(Request req, String student, String programId) async {
-  final access = await req.programChangeService.getCopyAccess(
-    coachId: req.userId,
-    studentId: student,
-    programId: programId,
-  );
-  if (!access.readable) throw const Forbidden(reason: 'You do not have permission to read this program.');
-}
-
 Future<void> _assertCanWrite(Request req, String student, String programId) async {
   final access = await req.programChangeService.getCopyAccess(
     coachId: req.userId,
@@ -150,18 +140,22 @@ Future<ProgramsResponse> getCopies(Request req) async {
 
 /// Worked out from what the coach can read, so a hidden workout leaves its session
 /// undone here, and the week can trail the student's own.
-Future<CoachProgramView> getCopy(Request req) async {
-  final student = req.rawPathParameters[#targetUserId]!;
-  final programId = req.rawPathParameters[#programId]!;
-  await _assertCanRead(req, student, programId);
+Future<CoachProgramView> getCopy(Request req) {
+  return copyView(req, student: req.rawPathParameters[#targetUserId]!, programId: req.rawPathParameters[#programId]!);
+}
 
-  final program = await req.programService.getProgram(userId: student, programId: programId);
-  final (marks, actions) = await (
-    req.programChangeService.getVisibleMarks(readerId: req.userId, ownerId: student, programId: programId),
-    req.programService.getProgramActions(userId: student, programId: programId),
-  ).wait;
-  final sessions = await Future.wait(
-    program.sessions.map((id) => req.templatesService.getTemplate(userId: student, templateId: id)),
+/// [getCopy], and with [assistant] what the coach's assistant reads of it.
+Future<CoachProgramView> copyView(
+  Request req, {
+  required String student,
+  required String programId,
+  bool assistant = false,
+}) async {
+  final (:program, :sessions, :actions, :marks) = await req.programChangeService.readCopy(
+    coachId: req.userId,
+    studentId: student,
+    programId: programId,
+    assistant: assistant,
   );
   return CoachProgramView(
     program: program,
@@ -171,15 +165,29 @@ Future<CoachProgramView> getCopy(Request req) async {
 }
 
 Future<ProgramChanges> getCopyChanges(Request req) async {
-  final student = req.rawPathParameters[#targetUserId]!;
-  final programId = req.rawPathParameters[#programId]!;
-  await _assertCanRead(req, student, programId);
-  return ProgramChanges(
-    await req.programChangeService.getProgramChanges(
-      ownerId: student,
-      programId: programId,
-      since: req.url.queryParameters['since'],
-    ),
+  final page = await copyChanges(
+    req,
+    student: req.rawPathParameters[#targetUserId]!,
+    programId: req.rawPathParameters[#programId]!,
+    since: req.url.queryParameters['since'],
+  );
+  return ProgramChanges(page.items);
+}
+
+/// [getCopyChanges], and with [assistant] what the coach's assistant reads of them.
+Future<Page<ProgramChange>> copyChanges(
+  Request req, {
+  required String student,
+  required String programId,
+  String? since,
+  bool assistant = false,
+}) {
+  return req.programChangeService.getProgramChanges(
+    ownerId: student,
+    programId: programId,
+    since: since,
+    readerId: req.userId,
+    assistant: assistant,
   );
 }
 
