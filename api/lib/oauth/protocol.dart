@@ -9,16 +9,26 @@ import 'package:relic/relic.dart';
 /// verb, so a user can let an assistant build templates without letting it
 /// touch their history (`docs/2026-10-04.oauth.md`, *Scopes*).
 enum Scope {
-  /// Everything under `/me` and every read-only MCP tool.
+  /// Everything under `/me` and every read-only MCP tool about the user's own
+  /// training.
   read('read'),
+
+  /// What a coach reads of their clients, for those who share it with the
+  /// coach's assistant (`docs/2026-11-09.coach-assistant.md`). Apart from
+  /// [read], so a connection made before it doesn't start reading other
+  /// people's training.
+  readCoaching('read:coaching'),
 
   /// The MCP server's template writes: creating templates and folders, and
   /// replacing a template.
-  writeTemplates('write:templates');
+  writeTemplates('write:templates', writes: true);
 
   final String value;
 
-  new(this.value);
+  /// Whether what it grants changes anything.
+  final bool writes;
+
+  new(this.value, {this.writes = false});
 }
 
 /// Every scope this server grants, as the metadata documents list them.

@@ -46,7 +46,7 @@ void main() {
 
   group('toScopes', () {
     test('absent asks for everything the resource grants', () {
-      expect((null as String?).toScopes(), ['read', 'write:templates']);
+      expect((null as String?).toScopes(), ['read', 'read:coaching', 'write:templates']);
       expect((null as String?).toScopes(writes: false), ['read']);
     });
     test('read alone is held to reading', () => expect('read'.toScopes(), ['read']));
