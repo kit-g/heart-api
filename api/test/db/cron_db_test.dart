@@ -57,7 +57,7 @@ void main() {
       await h.exec(statement, {});
     }
     try {
-      expect(await declare(), 7);
+      expect(await declare(), 8);
       final calls = [
         for (final row in await h.exec('SELECT jobname, schedule, command, db FROM cron.calls ORDER BY jobname', {}))
           row.toColumnMap(),
@@ -65,6 +65,7 @@ void main() {
       expect(calls.map((c) => c['jobname']), [
         'anomaly-sweep',
         'cron-history-cleanup',
+        'demo-history',
         'device-queue-cleanup',
         'device-token-cleanup',
         'oauth-cleanup',
@@ -83,11 +84,15 @@ void main() {
         'db': database,
       });
       expect(
+        calls.firstWhere((call) => call['jobname'] == 'demo-history')['command'],
+        "SELECT _bring_history_forward('tcbbFMUux9Nvk9epHq00bBqVAGf1')",
+      );
+      expect(
         calls.firstWhere((call) => call['jobname'] == 'cron-history-cleanup')['command'],
         contains('cron.job_run_details'),
       );
       expect(await h.exec('SELECT jobname FROM cron.job', {}), isEmpty, reason: 'a job no longer listed is gone');
-      expect(await declare(), 7, reason: 'and declaring again finds nothing to remove');
+      expect(await declare(), 8, reason: 'and declaring again finds nothing to remove');
     } finally {
       await h.exec('DROP SCHEMA cron CASCADE', {});
     }
