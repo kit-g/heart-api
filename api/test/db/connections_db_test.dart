@@ -340,7 +340,7 @@ void main() {
 
     // A hard delete makes the pair re-requestable, so letting the blocked party
     // delete the row is letting them unblock themselves.
-    test('the blocked party cannot delete the block away', () async {
+    test('the blocked party cannot delete the block away, and can\'t tell they tried', () async {
       final (blocker, blocked) = await pair();
       await h.seedConnection(initiator: blocked, target: blocker);
       await h.db.changeConnectionStatus(
@@ -351,16 +351,13 @@ void main() {
         newStatus: ConnectionStatus.blocked,
       );
 
-      await expectLater(
-        h.db.deleteConnection(
-          actorId: blocked,
-          targetId: blocker,
-          role: ConnectionRole.peer,
-          domain: ConnectionDomain.fitness,
-        ),
-        throwsA(isA<Forbidden>()),
+      await h.db.deleteConnection(
+        actorId: blocked,
+        targetId: blocker,
+        role: ConnectionRole.peer,
+        domain: ConnectionDomain.fitness,
       );
-      expect(await h.db.getConnections(blocker), hasLength(1));
+      expect((await h.db.getConnections(blocker)).single.status, ConnectionStatus.blocked, reason: 'nothing changed');
     });
 
     test('the blocker can end their own block, which lifts it', () async {
@@ -549,7 +546,7 @@ void main() {
       expect(resumed.status, ConnectionStatus.active);
     });
 
-    test('only the person who blocked can lift the block', () async {
+    test('only the person who blocked can lift the block; to the other there is nothing there', () async {
       final (blocker, blocked) = await pair();
       await h.seedConnection(initiator: blocked, target: blocker);
       await h.db.changeConnectionStatus(
@@ -568,7 +565,7 @@ void main() {
           domain: ConnectionDomain.fitness,
           newStatus: ConnectionStatus.severed,
         ),
-        throwsA(isA<Forbidden>()),
+        throwsA(isA<NotFound>()),
       );
 
       final lifted = await h.db.changeConnectionStatus(

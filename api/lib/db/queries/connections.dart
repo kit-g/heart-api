@@ -130,7 +130,7 @@ SELECT
   id AS connection_id,
   CASE WHEN initiator_id = @userId THEN target_id ELSE initiator_id END AS target_id,
   CASE WHEN initiator_id = @userId THEN initiator_role ELSE target_role END AS role,
-  domain, status, created_at, accepted_at, shares
+  domain, status, status_by, created_at, accepted_at, shares
 FROM connections
 WHERE domain = @domain
   AND (
@@ -166,8 +166,9 @@ $_connectionOther
 /// blocker may. The row stays, because "this person was a client" outlives it,
 /// and one already ended stays as it ended, by whom it ended.
 ///
-/// Returns one row either way: `refused` is the block guard; anything else not
-/// ended was nothing to end, a no-op as it has always been.
+/// One the other person blocked is left as it is, and reads as ended to the one
+/// blocked, so the caller is answered as for one already ended. `refused` says
+/// which it was, for a reader of the statement.
 const _endConnection = '''
 WITH
 _pair AS (

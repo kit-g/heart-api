@@ -75,14 +75,13 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     required ConnectionRole role,
     required ConnectionDomain domain,
   }) async {
-    final result = await _pool.execute(
+    // A connection the other person blocked reads as ended to the one blocked, and
+    // the statement leaves it as it is: ending it again changes nothing, as it
+    // would if it had ended.
+    await _pool.execute(
       _endConnection.toSql(),
       parameters: {'actorId': actorId, 'targetId': targetId, 'domain': domain.value},
     );
-
-    if (result.first.toColumnMap() case {'refused': true}) {
-      throw const Forbidden(reason: 'You cannot remove a connection that blocks you.');
-    }
   }
 
   @override
@@ -93,14 +92,18 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     required ConnectionDomain domain,
     required ConnectionStatus newStatus,
   }) async {
-    final existing = await getConnection(
-      actorId: actorId,
-      targetId: targetId,
-      role: role,
-      domain: domain,
+    final rows = await _pool.execute(
+      _getConnection.toSql(),
+      parameters: {'userId': actorId, 'targetId': targetId, 'role': role.value, 'domain': domain.value},
     );
-
-    if (existing == null) throw StateError('No connection between these users');
+    final row = rows.firstOrNull?.toColumnMap();
+    if (row == null) throw StateError('No connection between these users');
+    final existing = Connection.fromRow(row);
+    // The one blocked can't tell: to them it's an ended connection, and acting on
+    // it fails as it would with someone who isn't there.
+    if (existing.status == .blocked && row['status_by'] == targetId) {
+      throw NotFound(type: 'Connection', id: existing.connectionId ?? targetId);
+    }
     if (!existing.status.canTransitionTo(newStatus)) {
       throw StateError('Cannot transition from ${existing.status.name} to ${newStatus.name}');
     }
