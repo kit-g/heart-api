@@ -48,6 +48,37 @@ mixin _Keys on _DatabaseBase implements KeyService {
   }
 
   @override
+  Future<({CryptoDevice device, bool changed})> vouchForDevice({
+    required String userId,
+    required String deviceId,
+    required String vouchedBy,
+    required String signature,
+  }) async {
+    Future<Map<String, dynamic>> vouch() async {
+      final rows = await _pool.execute(
+        _vouchForDevice.toSql(),
+        parameters: {'userId': userId, 'deviceId': deviceId, 'vouchedBy': vouchedBy, 'signature': signature},
+      );
+      return rows.first.toColumnMap();
+    }
+
+    // A vouch racing another sees the device unvouched in its snapshot, and the
+    // other's vouch only when it asks again.
+    var row = await vouch();
+    if (row case {'owned': true, 'changed': false, 'voucher_owned': true, 'vouched_by': null}) row = await vouch();
+    return switch (row) {
+      {'owned': false} => throw NotFound(type: 'Device', id: deviceId),
+      {'changed': true} => (device: CryptoDevice.fromRow(row), changed: true),
+      {'vouched_by': final by, 'signature': final said} when '$by' == vouchedBy && said == signature => (
+        device: CryptoDevice.fromRow(row),
+        changed: false,
+      ),
+      {'voucher_owned': false} => throw const BadRequest(reason: 'vouchedBy must be another device of yours'),
+      _ => throw const Conflict(code: 'already_vouched', reason: 'this device is already vouched for'),
+    };
+  }
+
+  @override
   Future<List<CryptoDevice>> getDevices({required String readerId, required String ownerId}) async {
     final rows = await _pool.execute(_listDevices.toSql(), parameters: {'readerId': readerId, 'ownerId': ownerId});
     final maps = rows.map((row) => row.toColumnMap()).toList();
@@ -131,7 +162,7 @@ mixin _Keys on _DatabaseBase implements KeyService {
   }
 
   @override
-  Future<bool> enqueue({
+  Future<({bool delivered, String? notify})> enqueue({
     required String userId,
     required String id,
     required String recipientDeviceId,
@@ -155,9 +186,9 @@ mixin _Keys on _DatabaseBase implements KeyService {
       {'sender_owned': false} => throw NotFound(type: 'Device', id: senderDeviceId),
       {'forbidden': true} => throw const Forbidden(reason: 'You do not have permission to reach this device.'),
       {'taken': true} => throw _idTaken,
-      {'seen': true} => false,
+      {'seen': true} => (delivered: false, notify: null),
       {'is_full': true} => throw const BadRequest(code: 'queue_full', reason: 'this device has too much waiting'),
-      _ => row['inserted'] == true,
+      _ => (delivered: row['inserted'] == true, notify: row['notify'] as String?),
     };
   }
 

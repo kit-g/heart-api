@@ -36,7 +36,7 @@ void main() {
           kind: anyNamed('kind'),
           content: anyNamed('content'),
         ),
-      ).thenAnswer((_) async => true);
+      ).thenAnswer((_) async => (delivered: true, notify: null));
     }
 
     test('takes a string', () async {

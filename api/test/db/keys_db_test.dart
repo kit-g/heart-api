@@ -114,6 +114,79 @@ void main() {
       expect(not.signature, isNull);
     });
 
+    test('a published device is vouched for once, by another device of the same owner in use', () async {
+      final (me, other) = (await h.seedProfile(), await h.seedProfile());
+      final (trusted, fresh, another, theirs) = (
+        await device(me),
+        await device(me),
+        await device(me),
+        await device(other),
+      );
+      Future<({CryptoDevice device, bool changed})> vouch(String by, {String signature = 'sig', String? as}) {
+        return h.db.vouchForDevice(userId: as ?? me, deviceId: fresh, vouchedBy: by, signature: signature);
+      }
+
+      for (final by in [theirs, fresh, uuidV7()]) {
+        await expectLater(vouch(by), throwsA(isA<BadRequest>()), reason: 'not another device of mine');
+      }
+      await expectLater(vouch(trusted, as: other), throwsA(isA<NotFound>()), reason: 'not their device');
+
+      final first = await vouch(trusted);
+      expect(first.changed, isTrue);
+      expect((first.device.vouchedBy, first.device.signature), (trusted, 'sig'));
+
+      final again = await vouch(trusted);
+      expect(again.changed, isFalse, reason: 'the same vouch again is a retry');
+      expect(again.device.vouchedBy, trusted);
+
+      await expectLater(
+        vouch(another),
+        throwsA(isA<Conflict>().having((e) => e.code, 'code', 'already_vouched')),
+      );
+      await expectLater(vouch(trusted, signature: 'other'), throwsA(isA<Conflict>()));
+      expect((await h.db.getDevices(readerId: me, ownerId: me)).firstWhere((d) => d.id == fresh).signature, 'sig');
+    });
+
+    test('a removed device can neither be vouched for nor vouch', () async {
+      final me = await h.seedProfile();
+      final (kept, gone) = (await device(me), await device(me));
+      await h.db.removeDevice(userId: me, deviceId: gone);
+
+      await expectLater(
+        h.db.vouchForDevice(userId: me, deviceId: gone, vouchedBy: kept, signature: 's'),
+        throwsA(isA<NotFound>()),
+      );
+      await expectLater(
+        h.db.vouchForDevice(userId: me, deviceId: kept, vouchedBy: gone, signature: 's'),
+        throwsA(isA<BadRequest>()),
+      );
+    });
+
+    test('of two vouches racing, one lands and the other is told', () async {
+      final me = await h.seedProfile();
+      final (one, two, fresh) = (await device(me), await device(me), await device(me));
+      final results = await h.runBlocked(
+        hold: (tx) async {
+          await tx.execute(
+            Sql.named(
+              'UPDATE crypto_devices SET vouched_by = @one::uuid, signature = \'first\' WHERE id = @fresh::uuid',
+            ),
+            parameters: {'one': one, 'fresh': fresh},
+          );
+        },
+        calls: [
+          () => h.db
+              .vouchForDevice(userId: me, deviceId: fresh, vouchedBy: two, signature: 'second')
+              .then<Object>((result) => result, onError: (Object e) => e),
+          () => h.db
+              .vouchForDevice(userId: me, deviceId: fresh, vouchedBy: one, signature: 'first')
+              .then<Object>((result) => result, onError: (Object e) => e),
+        ],
+      );
+      expect(results.first, isA<Conflict>());
+      expect(results.last, isA<({CryptoDevice device, bool changed})>().having((r) => r.changed, 'changed', isFalse));
+    });
+
     test('the list is for yourself and the people you share keys with', () async {
       final (a, b) = await connected();
       final stranger = await h.seedProfile();
@@ -283,6 +356,7 @@ void main() {
       final items = await h.db.getQueue(userId: b, deviceId: theirs);
       expect(items.map((item) => item.content), [for (var i = 0; i < 5; i++) 'item-$i']);
       expect(items.first.senderDeviceId, mine);
+      expect(items.first.senderUserId, a, reason: 'the account the server knows sent it');
 
       final again = await h.db.getQueue(userId: b, deviceId: theirs);
       expect(again, hasLength(5), reason: 'nothing goes until it is confirmed');
@@ -295,41 +369,40 @@ void main() {
       ]);
     });
 
+    test('an arrival wakes the recipient\'s account, at most once a minute for a device', () async {
+      final (a, b) = await connected();
+      final (mine, theirs, another) = (await device(a), await device(b), await device(b));
+      Future<String?> notify(String to, {String? id}) async {
+        final (delivered: _, :notify) = await h.db.enqueue(
+          userId: a,
+          id: id ?? uuidV7(),
+          recipientDeviceId: to,
+          senderDeviceId: mine,
+          kind: 'key',
+          content: 'x',
+        );
+        return notify;
+      }
+
+      final first = uuidV7();
+      expect(await notify(theirs, id: first), b);
+      expect(await notify(theirs), isNull, reason: 'something already arrived this minute');
+      expect(await notify(theirs, id: first), isNull, reason: 'a retry is nothing new');
+      expect(await notify(another), b, reason: 'another device has its own minute');
+
+      await h.exec(
+        "UPDATE device_queue SET created_at = now() - INTERVAL '2 minutes' WHERE recipient_device_id = @to::uuid",
+        {'to': theirs},
+      );
+      expect(await notify(theirs), b, reason: 'still waiting a minute later, so it asks again');
+    });
+
     test('a retry delivers once', () async {
       final (a, b) = await connected();
       final (mine, theirs) = (await device(a), await device(b));
       final id = uuidV7();
-      expect(
-        await h.db.enqueue(
-          userId: a,
-          id: id,
-          recipientDeviceId: theirs,
-          senderDeviceId: mine,
-          kind: 'key',
-          content: 'x',
-        ),
-        isTrue,
-      );
-      expect(
-        await h.db.enqueue(
-          userId: a,
-          id: id,
-          recipientDeviceId: theirs,
-          senderDeviceId: mine,
-          kind: 'key',
-          content: 'x',
-        ),
-        isFalse,
-      );
-      expect(await h.db.getQueue(userId: b, deviceId: theirs), hasLength(1));
-    });
-
-    test('a retry after the item was confirmed delivers nothing again', () async {
-      final (a, b) = await connected();
-      final (mine, theirs) = (await device(a), await device(b));
-      final id = uuidV7();
-      Future<bool> enqueue() {
-        return h.db.enqueue(
+      for (final expected in [true, false]) {
+        final sent = await h.db.enqueue(
           userId: a,
           id: id,
           recipientDeviceId: theirs,
@@ -337,6 +410,25 @@ void main() {
           kind: 'key',
           content: 'x',
         );
+        expect(sent.delivered, expected);
+      }
+      expect(await h.db.getQueue(userId: b, deviceId: theirs), hasLength(1));
+    });
+
+    test('a retry after the item was confirmed delivers nothing again', () async {
+      final (a, b) = await connected();
+      final (mine, theirs) = (await device(a), await device(b));
+      final id = uuidV7();
+      Future<bool> enqueue() async {
+        final (:delivered, notify: _) = await h.db.enqueue(
+          userId: a,
+          id: id,
+          recipientDeviceId: theirs,
+          senderDeviceId: mine,
+          kind: 'key',
+          content: 'x',
+        );
+        return delivered;
       }
 
       expect(await enqueue(), isTrue);
