@@ -124,9 +124,10 @@ abstract interface class Connection implements Model {
 
   String get targetId;
 
-  /// What the other person goes by in Heart now, as their profile says. Answered
-  /// on reads (`GET /connections`, and one by its id); absent elsewhere, and when
-  /// they have none or blocked the reader.
+  /// What the other person goes by in Heart now, as their profile says, on
+  /// `GET /connections` and the answer to a status or shares change. Absent when
+  /// they have none, blocked the reader, or were only asked by the reader and
+  /// never accepted.
   String? get name;
 
   /// The other person's photo, on the same terms as [name].
