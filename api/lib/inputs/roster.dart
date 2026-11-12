@@ -10,13 +10,20 @@ class CoachFeedQuery {
   static CoachFeedQuery fromRequest(Request req) {
     final page = PageQuery.fromRequest(req, defaultLimit: 50);
     return CoachFeedQuery._(
-      cursor: switch (page.cursor?.split('|')) {
+      cursor: switch (page.cursor) {
         null => null,
-        [final at, final id] when DateTime.tryParse(at) != null && id.isNotEmpty => (at: DateTime.parse(at), id: id),
-        _ => throw const BadRequest(reason: 'cursor is not one from this feed'),
+        final raw => cursorOf(raw) ?? (throw const BadRequest(reason: 'cursor is not one from this feed')),
       },
       limit: page.limit,
     );
+  }
+
+  /// [raw] as a cursor of this feed's, or null if it can't be one.
+  static FeedCursor? cursorOf(String raw) {
+    return switch (raw.split('|')) {
+      [final at, final id] when DateTime.tryParse(at) != null && id.isNotEmpty => (at: DateTime.parse(at), id: id),
+      _ => null,
+    };
   }
 }
 
@@ -38,13 +45,18 @@ class RosterQuery {
       former: query.boolean('former'),
       cursor: switch (page.cursor) {
         null => null,
-        final raw => switch (OrderedCursor.tryParse(raw)) {
-          final OrderedCursor cursor when (cursor.order == 0 || cursor.order == 1) && isUuidV7(cursor.id) => cursor,
-          _ => throw const BadRequest(reason: 'cursor is not one from this list'),
-        },
+        final raw => cursorOf(raw) ?? (throw const BadRequest(reason: 'cursor is not one from this list')),
       },
       limit: page.limit,
     );
+  }
+
+  /// [raw] as a cursor of this list's, or null if it can't be one.
+  static OrderedCursor? cursorOf(String raw) {
+    return switch (OrderedCursor.tryParse(raw)) {
+      final OrderedCursor cursor when (cursor.order == 0 || cursor.order == 1) && isUuidV7(cursor.id) => cursor,
+      _ => null,
+    };
   }
 }
 

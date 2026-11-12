@@ -4,6 +4,15 @@ import 'package:heart_models/heart_models.dart';
 /// [writable] across the live connection it came through.
 typedef CopyAccess = ({bool readable, bool writable});
 
+/// A copy as its coach reads it: the program, its sessions in order, and the steps
+/// and the workouts and skips its position is worked out from.
+typedef CopyRead = ({
+  Program program,
+  List<Template> sessions,
+  Iterable<ProgramAction> actions,
+  Iterable<ProgramMark> marks,
+});
+
 /// Two people on one copy of a program. Only a copy a coach sent pays for any of
 /// this: on a person's own program each of these says so, and the plain route runs.
 abstract interface class ProgramChangeService {
@@ -61,8 +70,17 @@ abstract interface class ProgramChangeService {
     String kind = 'edit',
   });
 
-  /// What changed on a copy, in stored order, after [since].
-  Future<List<ProgramChange>> getProgramChanges({required String ownerId, required String programId, String? since});
+  /// What changed on a copy, in stored order, after [since], a page at a time.
+  /// With [readerId], as that coach reads it: [NotFound] unless it is a copy they
+  /// sent, [Forbidden] without a coach's view of the student, which with [assistant]
+  /// takes the student's share with the assistant.
+  Future<Page<ProgramChange>> getProgramChanges({
+    required String ownerId,
+    required String programId,
+    String? since,
+    String? readerId,
+    bool assistant = false,
+  });
 
   /// One change, and the links it kept. Null if it isn't one of this copy's.
   Future<({ProgramChange change, Map<String, dynamic>? links})?> getProgramChange({
@@ -73,14 +91,27 @@ abstract interface class ProgramChangeService {
 
   Future<CopyAccess> getCopyAccess({required String coachId, required String studentId, required String programId});
 
-  /// The copies this coach sent this student.
-  Future<List<Program>> getCopies({required String coachId, required String studentId});
+  /// A copy this coach sent, read in one snapshot with the check that allows it:
+  /// [NotFound] unless they sent it, [Forbidden] without a coach's view of the
+  /// student. With [assistant], what the coach's assistant reads: only while the
+  /// student shares it with the assistant.
+  Future<CopyRead> readCopy({
+    required String coachId,
+    required String studentId,
+    required String programId,
+    bool assistant = false,
+  });
+
+  /// The copies this coach sent this student. [assistant] as for [readCopy].
+  Future<List<Program>> getCopies({required String coachId, required String studentId, bool assistant = false});
 
   /// A copy's workouts and skips that [readerId] can read, as its position reads them.
+  /// [assistant] as for [readCopy].
   Future<Iterable<ProgramMark>> getVisibleMarks({
     required String readerId,
     required String ownerId,
     required String programId,
+    bool assistant = false,
   });
 
   /// The copy's map from library ids to its own, and records the version it now holds.

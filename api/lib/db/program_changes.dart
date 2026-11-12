@@ -316,10 +316,12 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
   }
 
   @override
-  Future<List<ProgramChange>> getProgramChanges({
+  Future<Page<ProgramChange>> getProgramChanges({
     required String ownerId,
     required String programId,
     String? since,
+    String? readerId,
+    bool assistant = false,
   }) async {
     final after = switch (since) {
       null => null,
@@ -327,17 +329,27 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     };
     final rows = await _pool.execute(
       _listProgramChanges.toSql(),
-      parameters: {'ownerId': ownerId, 'programId': programId, 'xid': after?.xid, 'changeId': after?.id},
+      parameters: {
+        'ownerId': ownerId,
+        'programId': programId,
+        'xid': after?.xid,
+        'changeId': after?.id,
+        'readerId': readerId,
+        'assistant': assistant,
+      },
     );
     final columns = [for (final row in rows) row.toColumnMap()];
     if (columns.first['owned'] != true) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
+    if (columns.first['readable'] != true) {
+      throw const Forbidden(reason: 'You do not have permission to read this program.');
+    }
     if (columns.first['stale_cursor'] == true) {
       throw const BadRequest(
         code: 'stale_cursor',
         reason: 'this cursor is from before the database moved; start again without since',
       );
     }
-    return [
+    final changes = [
       // the check's row stands alone when there's nothing to report
       for (final row in columns)
         if (row['id'] != null)
@@ -346,6 +358,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
             cursor: ChangeCursor(xid: row['xid_text'] as String, id: row['id'].toString()).toString(),
           ),
     ];
+    return Page(items: changes.take(_programChangesPage).toList(), hasMore: changes.length > _programChangesPage);
   }
 
   @override
@@ -372,15 +385,64 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
   }) async {
     final rows = await _pool.execute(
       _copyAccess.toSql(),
-      parameters: {'coachId': coachId, 'studentId': studentId, 'programId': programId},
+      parameters: {'coachId': coachId, 'studentId': studentId, 'programId': programId, 'assistant': false},
     );
     final row = rows.first.toColumnMap();
     return (readable: row['readable'] as bool, writable: row['writable'] as bool);
   }
 
   @override
-  Future<List<Program>> getCopies({required String coachId, required String studentId}) async {
-    final rows = await _pool.execute(_listCopies.toSql(), parameters: {'coachId': coachId, 'studentId': studentId});
+  Future<CopyRead> readCopy({
+    required String coachId,
+    required String studentId,
+    required String programId,
+    bool assistant = false,
+  }) {
+    // one snapshot, taken by the check: what it allowed is what the reads see
+    return _pool.runTx(
+      (tx) async {
+        final access = (await tx.execute(
+          _copyAccess.toSql(),
+          parameters: {'coachId': coachId, 'studentId': studentId, 'programId': programId, 'assistant': assistant},
+        )).first.toColumnMap();
+        if (access['sent'] != true) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
+        if (access['readable'] != true) {
+          throw const Forbidden(reason: 'You do not have permission to read this program.');
+        }
+        final program = await _readProgram(tx, userId: studentId, programId: programId);
+        final sessions = <Template>[];
+        for (final id in program.sessions) {
+          final rows = await tx.execute(_getTemplate.toSql(), parameters: {'userId': studentId, 'templateId': id});
+          if (rows.isEmpty) throw NotFound(type: 'Template', id: id);
+          sessions.add(Template.fromRow(rows.first.toColumnMap()));
+        }
+        final actions = await tx.execute(
+          _listProgramActions.toSql(),
+          parameters: {'userId': studentId, 'programId': programId},
+        );
+        return (
+          program: program,
+          sessions: sessions,
+          actions: [for (final row in actions) ProgramAction.fromRow(row.toColumnMap())],
+          marks: await _visibleMarks(
+            tx,
+            readerId: coachId,
+            ownerId: studentId,
+            programId: programId,
+            assistant: assistant,
+          ),
+        );
+      },
+      settings: TransactionSettings(isolationLevel: IsolationLevel.repeatableRead, accessMode: AccessMode.readOnly),
+    );
+  }
+
+  @override
+  Future<List<Program>> getCopies({required String coachId, required String studentId, bool assistant = false}) async {
+    final rows = await _pool.execute(
+      _listCopies.toSql(),
+      parameters: {'coachId': coachId, 'studentId': studentId, 'assistant': assistant},
+    );
     return [for (final row in rows) Program.fromRow(row.toColumnMap())];
   }
 
@@ -389,19 +451,31 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     required String readerId,
     required String ownerId,
     required String programId,
+    bool assistant = false,
+  }) {
+    return _visibleMarks(_pool, readerId: readerId, ownerId: ownerId, programId: programId, assistant: assistant);
+  }
+
+  Future<List<ProgramMark>> _visibleMarks(
+    Session session, {
+    required String readerId,
+    required String ownerId,
+    required String programId,
+    required bool assistant,
   }) async {
-    final rows = await _pool.execute(
+    final rows = await session.execute(
       _listVisibleMarks.toSql(),
-      parameters: {'readerId': readerId, 'ownerId': ownerId, 'programId': programId},
+      parameters: {'readerId': readerId, 'ownerId': ownerId, 'programId': programId, 'assistant': assistant},
     );
-    return rows.map((row) {
-      final map = row.toColumnMap();
-      return ProgramMark(
-        templateId: map['template_id']?.toString(),
-        at: map['at'] as DateTime,
-        isWorkout: map['is_workout'] as bool,
-      );
-    });
+    return [
+      for (final row in rows)
+        if (row.toColumnMap() case final map)
+          ProgramMark(
+            templateId: map['template_id']?.toString(),
+            at: map['at'] as DateTime,
+            isWorkout: map['is_workout'] as bool,
+          ),
+    ];
   }
 
   @override

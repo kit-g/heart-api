@@ -10,7 +10,7 @@ const _listWorkouts =
     '''
 WITH
 _rel AS (
-  SELECT _relation(@requesterId, @targetUserId) AS r
+  SELECT _relation(@requesterId, @targetUserId, @assistant::boolean) AS r
 ),
 _workouts AS (
   SELECT
@@ -103,7 +103,7 @@ const _getTargetWorkout =
     '''
 WITH
 _rel AS (
-  SELECT _relation(@requesterId, @targetUserId) AS r
+  SELECT _relation(@requesterId, @targetUserId, @assistant::boolean) AS r
 )
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:heart/models/errors.dart';
 import 'package:heart/models/coach_library.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -309,7 +310,7 @@ void main() {
           programId: anyNamed('programId'),
           since: anyNamed('since'),
         ),
-      ).thenAnswer((_) async => [recorded()]);
+      ).thenAnswer((_) async => Page(items: [recorded()], hasMore: false));
 
       final res = await app.send('GET', '/programs/$program/changes?since=c1');
 
@@ -410,34 +411,35 @@ void main() {
       );
     });
 
-    test('a coach reads the history of the student\'s copy', () async {
+    test('a coach reads the history of the student\'s copy, as one they sent', () async {
       when(
         app.db.getProgramChanges(
           ownerId: anyNamed('ownerId'),
           programId: anyNamed('programId'),
           since: anyNamed('since'),
+          readerId: anyNamed('readerId'),
         ),
-      ).thenAnswer((_) async => [recorded()]);
+      ).thenAnswer((_) async => Page(items: [recorded()], hasMore: false));
 
       final res = await app.send('GET', '/accounts/s/programs/$program/changes');
 
       expect(res.status, 200);
-      verify(app.db.getProgramChanges(ownerId: 's', programId: program, since: null)).called(1);
+      verify(app.db.getProgramChanges(ownerId: 's', programId: program, since: null, readerId: 'u1')).called(1);
     });
 
     test('a coach without a view of the student reads no history', () async {
-      access(readable: false, writable: false);
-
-      final res = await app.send('GET', '/accounts/s/programs/$program/changes');
-
-      expect(res.status, 403);
-      verifyNever(
+      when(
         app.db.getProgramChanges(
           ownerId: anyNamed('ownerId'),
           programId: anyNamed('programId'),
           since: anyNamed('since'),
+          readerId: anyNamed('readerId'),
         ),
-      );
+      ).thenThrow(const Forbidden(reason: 'no'));
+
+      final res = await app.send('GET', '/accounts/s/programs/$program/changes');
+
+      expect(res.status, 403);
     });
   });
 
@@ -456,21 +458,19 @@ void main() {
 
     test('reads one with its sessions and a position worked out from what they can see', () async {
       when(
-        app.db.getProgram(userId: anyNamed('userId'), programId: anyNamed('programId')),
-      ).thenAnswer((_) async => Program(id: program, name: 'Plan', sessions: const [session]));
-      when(
-        app.db.getVisibleMarks(
-          readerId: anyNamed('readerId'),
-          ownerId: anyNamed('ownerId'),
+        app.db.readCopy(
+          coachId: anyNamed('coachId'),
+          studentId: anyNamed('studentId'),
           programId: anyNamed('programId'),
         ),
-      ).thenAnswer((_) async => const []);
-      when(
-        app.db.getProgramActions(userId: anyNamed('userId'), programId: anyNamed('programId')),
-      ).thenAnswer((_) async => const []);
-      when(
-        app.db.getTemplate(userId: anyNamed('userId'), templateId: anyNamed('templateId')),
-      ).thenAnswer((_) async => template());
+      ).thenAnswer(
+        (_) async => (
+          program: Program(id: program, name: 'Plan', sessions: const [session]),
+          sessions: [template()],
+          actions: const <ProgramAction>[],
+          marks: const <ProgramMark>[],
+        ),
+      );
 
       final res = await app.send('GET', '/accounts/s/programs/$program');
 
@@ -479,17 +479,22 @@ void main() {
       expect(view.program.id, program);
       expect(view.sessions.single.id, session);
       expect(view.position, isNotEmpty);
-      verify(app.db.getVisibleMarks(readerId: 'u1', ownerId: 's', programId: program)).called(1);
+      verify(app.db.readCopy(coachId: 'u1', studentId: 's', programId: program)).called(1);
       verifyNever(app.db.getProgramMarks(userId: anyNamed('userId'), programId: anyNamed('programId')));
     });
 
     test('a coach without a view of the student reads nothing of the copy', () async {
-      access(readable: false, writable: false);
+      when(
+        app.db.readCopy(
+          coachId: anyNamed('coachId'),
+          studentId: anyNamed('studentId'),
+          programId: anyNamed('programId'),
+        ),
+      ).thenThrow(const Forbidden(reason: 'no'));
 
       final res = await app.send('GET', '/accounts/s/programs/$program');
 
       expect(res.status, 403);
-      verifyNever(app.db.getProgram(userId: anyNamed('userId'), programId: anyNamed('programId')));
     });
   });
 

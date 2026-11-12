@@ -102,6 +102,7 @@ function start() {
         const reads = scopes.includes('read');
         const writes = scopes.includes('write:templates');
         $('scope-read').hidden = !reads;
+        $('scope-read-coaching').hidden = !scopes.includes('read:coaching');
         $('scope-read-only').hidden = writes;
         $('scope-write-templates').hidden = !writes;
         $('consent-ask').textContent = reads && writes

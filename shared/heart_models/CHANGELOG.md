@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.54.0
+
+A coach's assistant.
+
+- New: `ConnectionShare.assistant`, a share a student can give their coach, alongside `history` and
+  `goals`, for the coach's assistant. A build that doesn't know the value carries it as it arrived.
+- New: `ClientSummary.assistant`, whether that client gives the share. False when a server doesn't
+  say.
+
 ## 2.53.0
 
 Reactions.

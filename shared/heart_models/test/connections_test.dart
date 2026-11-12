@@ -182,6 +182,7 @@ void main() {
 
     test('ConnectionShare refuses an unknown value', () {
       expect(ConnectionShare.fromString('goals'), ConnectionShare.goals);
+      expect(ConnectionShare.fromString('assistant'), ConnectionShare.assistant);
       expect(() => ConnectionShare.fromString('photos'), throwsArgumentError);
     });
   });

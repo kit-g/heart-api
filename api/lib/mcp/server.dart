@@ -144,6 +144,12 @@ Future<Response> _respond(
     if (id == null) return .new(202);
 
     final writes = use.offersWrites;
+    // a coach's tools are offered to a coach alone, so nobody else's assistant
+    // carries them
+    final coaching = switch (method) {
+      'initialize' || 'server/discover' || 'tools/list' => await _offersCoaching(request, use),
+      _ => false,
+    };
     if (method == 'tools/call') {
       if (_scopeRefusal(request, use: use, id: id, params: params, modern: modern) case final Response refused) {
         return refused;
@@ -151,13 +157,18 @@ Future<Response> _respond(
     }
 
     final result = switch (method) {
-      'initialize' => _initialize(params, writes: writes),
-      'server/discover' => _discover(writes: writes),
+      'initialize' => _initialize(params, writes: writes, coaching: coaching),
+      'server/discover' => _discover(writes: writes, coaching: coaching),
       'ping' when modern == null => <String, dynamic>{},
       'tools/list' => {
         'tools': [
           for (final tool in tools)
-            if (tool.scope == .read || writes) tool.toJson(),
+            if (switch (tool.scope) {
+              .read => true,
+              .writeTemplates => writes,
+              .readCoaching => coaching,
+            })
+              tool.toJson(),
         ],
         if (modern != null) ...{'ttlMs': _listTtl.inMilliseconds, 'cacheScope': 'private'},
       },
@@ -237,7 +248,7 @@ void _checkModern(
   }
 }
 
-Map<String, dynamic> _initialize(Map<String, dynamic> params, {required bool writes}) {
+Map<String, dynamic> _initialize(Map<String, dynamic> params, {required bool writes, required bool coaching}) {
   final requested = params['protocolVersion'];
   return {
     'protocolVersion': legacyVersions.contains(requested) ? requested : legacyVersions.first,
@@ -246,15 +257,15 @@ Map<String, dynamic> _initialize(Map<String, dynamic> params, {required bool wri
       'resources': {'listChanged': false},
     },
     'serverInfo': _serverInfo(writes: writes),
-    'instructions': instructionsFor(writes: writes),
+    'instructions': instructionsFor(writes: writes, coaching: coaching),
   };
 }
 
-Map<String, dynamic> _discover({required bool writes}) {
+Map<String, dynamic> _discover({required bool writes, required bool coaching}) {
   return {
     'supportedVersions': supportedVersions,
     'capabilities': {'tools': <String, dynamic>{}, 'resources': <String, dynamic>{}},
-    'instructions': instructionsFor(writes: writes),
+    'instructions': instructionsFor(writes: writes, coaching: coaching),
     'ttlMs': _listTtl.inMilliseconds,
     // the instructions differ by credential: a grant is told about the writes
     'cacheScope': 'private',
@@ -290,9 +301,12 @@ Response? _scopeRefusal(
   };
   if (tool == null || use.scopes.contains(tool.scope.value)) return null;
 
-  final message = switch (use.clientId) {
-    // a personal token is read-only for good: there is nothing to widen
-    null =>
+  final message = switch ((use.clientId, tool.scope)) {
+    // a personal token reads the user's own training for good: there is nothing to widen
+    (null, .readCoaching) =>
+      '${tool.name} needs a connection with the ${tool.scope.value} permission. Personal tokens read only your own '
+          "training; connect Heart to this assistant by signing in to read your clients'.",
+    (null, _) =>
       '${tool.name} needs a connection with the ${tool.scope.value} permission. Personal tokens only read; '
           'connect Heart to this assistant by signing in to change templates.',
     _ =>
@@ -386,6 +400,14 @@ extension on TokenUse {
   /// personal token never is. It stays read-only (`docs/2026-09-23.developer-api.md`,
   /// *Phase 4*), so a write would only ever be refused.
   bool get offersWrites => clientId != null;
+}
+
+/// Whether this credential is shown a coach's tools: a grant, as for the writes,
+/// and only to someone who coaches. A grant made before the scope existed is
+/// told to widen it when it calls one.
+Future<bool> _offersCoaching(Request request, TokenUse use) async {
+  if (!use.offersWrites) return false;
+  return request.rosterService.coaches(use.userId);
 }
 
 Response _json(int status, Map<String, dynamic> body) {
