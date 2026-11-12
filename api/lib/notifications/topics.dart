@@ -1,3 +1,5 @@
+import 'package:heart_models/heart_models.dart';
+
 /// Every push Heart can send. A new one is an entry here and its copy in
 /// `templates.dart`: no migration and no app release.
 enum PushTopic {
@@ -7,6 +9,7 @@ enum PushTopic {
     fallback: instant,
     options: [instant, off],
     channel: 'comments',
+    perPersonAs: [.coach, .student, .peer],
   ),
   reactionCreated(
     key: 'reaction.created',
@@ -14,6 +17,7 @@ enum PushTopic {
     fallback: instant,
     options: [instant, off],
     channel: 'reactions',
+    perPersonAs: [.coach, .student, .peer],
   ),
   coachingMessage(
     key: 'coaching.message',
@@ -21,6 +25,7 @@ enum PushTopic {
     fallback: instant,
     options: [instant, off],
     channel: 'messages',
+    perPersonAs: [.coach, .student, .peer],
   ),
   coachingWorkoutDigest(
     key: 'coaching.workout_digest',
@@ -43,6 +48,7 @@ enum PushTopic {
     fallback: instant,
     options: [instant, off],
     channel: 'coaching',
+    perPersonAs: [.student],
   ),
 
   /// Wakes the app to fetch what changed. It says nothing, so nothing to choose.
@@ -75,6 +81,14 @@ enum PushTopic {
   /// messages, or two people's device changes, are two things to hear about.
   final bool collapses;
 
+  /// The reader's roles in a connection for which a choice about one person reaches
+  /// a push: the side this topic is sent to, about that person (`notify`'s
+  /// `actorId`, or the connection it names). Empty where no such choice can matter:
+  /// the daily digest, which goes while the topic or anyone at all still wants it,
+  /// and `coaching.invitation_accepted`, which goes once, before anyone could
+  /// choose for that person.
+  final List<ConnectionRole> perPersonAs;
+
   new({
     required this.key,
     required this.group,
@@ -83,6 +97,7 @@ enum PushTopic {
     this.silent = false,
     this.channel,
     this.collapses = false,
+    this.perPersonAs = const [],
   });
 
   static PushTopic? of(String key) {

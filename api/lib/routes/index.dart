@@ -83,6 +83,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/connections/:connectionId/shares', .put): connections.changeConnectionShares,
   ('/connections/:connectionId/thread', .post): threads.openThread,
   ('/devices', .post): devices.registerDevice,
+  ('/devices/removals', .post): devices.unregisterDevice,
   ('/invitations', .get): invitations.getInvitations,
   ('/invitations', .post): invitations.createInvitation,
   ('/invitations/:invitationId', .delete): invitations.cancelInvitation,

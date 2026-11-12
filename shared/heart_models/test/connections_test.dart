@@ -180,6 +180,30 @@ void main() {
       expect(connection.shares, ['goals', 'a_later_share'], reason: 'a share this build does not know is kept');
     });
 
+    test('says who the other person is, and reads one that does not', () {
+      final connection = Connection.fromRow({
+        'target_id': 'u',
+        'role': 'STUDENT',
+        'domain': 'fitness',
+        'status': 'active',
+        'created_at': DateTime.utc(2026),
+        'username': 'Alex',
+        'avatar_url': 'https://example.com/a.jpg',
+      });
+      final read = Connection.fromJson(connection.toMap());
+      expect((read.name, read.avatar), ('Alex', 'https://example.com/a.jpg'));
+
+      final unnamed = Connection.fromJson({
+        'targetId': 'u',
+        'role': 'student',
+        'domain': 'fitness',
+        'status': 'active',
+        'createdAt': '2026-01-01T00:00:00.000Z',
+      });
+      expect((unnamed.name, unnamed.avatar), (null, null));
+      expect(unnamed.toMap().keys, isNot(contains('name')));
+    });
+
     test('ConnectionShare refuses an unknown value', () {
       expect(ConnectionShare.fromString('goals'), ConnectionShare.goals);
       expect(ConnectionShare.fromString('assistant'), ConnectionShare.assistant);

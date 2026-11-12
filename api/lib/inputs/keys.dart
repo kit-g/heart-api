@@ -101,6 +101,35 @@ class OneTimeKeysIn {
   }
 }
 
+/// `POST /keys/claims/:ownerId` — `{deviceIds?}`: keys only from those devices of
+/// the owner's. No `deviceIds`, or no body at all, which the route never read
+/// before, takes one from each. An empty body is read by its text, whatever its
+/// content type says, since a server can't tell a length of 0 from an unknown one.
+class ClaimKeysIn {
+  final List<String>? deviceIds;
+
+  const new _(this.deviceIds);
+
+  static Future<ClaimKeysIn> fromRequest(Request req) async {
+    final text = await req.readAsString();
+    if (text.trim().isEmpty) return const ClaimKeysIn._(null);
+    if (req.body.bodyType?.mimeType != .json) {
+      throw const UnsupportedMediaType(reason: 'expected an application/json request body');
+    }
+    final json = switch (jsonDecode(text)) {
+      final Map json => json,
+      _ => throw const BadRequest(reason: 'expected a JSON object'),
+    };
+    rejectHealthFields(json);
+    return switch (json['deviceIds']) {
+      null => const ClaimKeysIn._(null),
+      final List ids when ids.isNotEmpty && ids.length <= 10 && ids.every((id) => id is String && isUuidV7(id)) =>
+        ClaimKeysIn._({for (final id in ids.cast<String>()) id.toLowerCase()}.toList()),
+      _ => throw const BadRequest(reason: 'deviceIds must list one to ten device ids'),
+    };
+  }
+}
+
 /// `POST /keys/queue` — one sealed item for one device.
 class EnqueueIn {
   final String id;

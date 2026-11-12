@@ -19,6 +19,12 @@ abstract interface class PushSetting implements Model {
   /// What they can choose from.
   List<String> get options;
 
+  /// The sides of a connection this topic can be chosen for one person from, as the
+  /// reader's own role in it: `coach`, `student`, `peer`, or a word a later server
+  /// adds. A coach is offered `coaching.program_received` for nobody, since it only
+  /// ever reaches a student. Empty: the topic is chosen for everyone at once.
+  List<String> get perPersonAs;
+
   factory({
     required String topic,
     required String group,
@@ -26,6 +32,7 @@ abstract interface class PushSetting implements Model {
     required String description,
     required String delivery,
     required List<String> options,
+    List<String> perPersonAs,
   }) = _PushSetting.new;
 
   factory fromJson(Map json) {
@@ -36,6 +43,7 @@ abstract interface class PushSetting implements Model {
       description: json['description'] as String,
       delivery: json['delivery'] as String,
       options: [for (final option in json['options'] as List) '$option'],
+      perPersonAs: [for (final role in (json['perPersonAs'] as List?) ?? const []) '$role'],
     );
   }
 }
@@ -53,6 +61,8 @@ class _PushSetting implements PushSetting {
   final String delivery;
   @override
   final List<String> options;
+  @override
+  final List<String> perPersonAs;
 
   const new({
     required this.topic,
@@ -61,6 +71,7 @@ class _PushSetting implements PushSetting {
     required this.description,
     required this.delivery,
     required this.options,
+    this.perPersonAs = const [],
   });
 
   @override
@@ -72,6 +83,7 @@ class _PushSetting implements PushSetting {
       'description': description,
       'delivery': delivery,
       'options': options,
+      'perPersonAs': perPersonAs,
     };
   }
 }

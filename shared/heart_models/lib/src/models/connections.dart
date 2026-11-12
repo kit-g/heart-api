@@ -124,6 +124,15 @@ abstract interface class Connection implements Model {
 
   String get targetId;
 
+  /// What the other person goes by in Heart now, as their profile says, on
+  /// `GET /connections` and the answer to a status or shares change. Absent when
+  /// they have none, blocked the reader, or were only asked by the reader and
+  /// never accepted.
+  String? get name;
+
+  /// The other person's photo, on the same terms as [name].
+  String? get avatar;
+
   ConnectionRole get role;
 
   ConnectionDomain get domain;
@@ -141,6 +150,8 @@ abstract interface class Connection implements Model {
     String? connectionId,
     DateTime? acceptedAt,
     List<String> shares,
+    String? name,
+    String? avatar,
   }) = _Connection.new;
 
   factory fromRow(Map<String, dynamic> row) {
@@ -160,6 +171,8 @@ abstract interface class Connection implements Model {
         final List shares => [for (final share in shares) '$share'],
         _ => const [],
       },
+      name: row['username'] as String?,
+      avatar: row['avatar_url'] as String?,
     );
   }
 
@@ -182,6 +195,8 @@ abstract interface class Connection implements Model {
         final List shares => [for (final share in shares) '$share'],
         _ => const [],
       },
+      name: json['name'] as String?,
+      avatar: json['avatar'] as String?,
     );
   }
 
@@ -217,6 +232,10 @@ class _Connection implements Connection {
   final DateTime? acceptedAt;
   @override
   final List<String> shares;
+  @override
+  final String? name;
+  @override
+  final String? avatar;
 
   const new({
     required this.targetId,
@@ -227,6 +246,8 @@ class _Connection implements Connection {
     this.connectionId,
     this.acceptedAt,
     this.shares = const [],
+    this.name,
+    this.avatar,
   });
 
   @override
@@ -245,6 +266,8 @@ class _Connection implements Connection {
       'connectionId': ?connectionId,
       'acceptedAt': ?acceptedAt?.toIso8601String(),
       'shares': shares,
+      'name': ?name,
+      'avatar': ?avatar,
     };
   }
 

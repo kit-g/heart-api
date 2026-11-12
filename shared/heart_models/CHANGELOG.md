@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.56.0
+
+The app's requests from coaching. No app build calls these routes yet, so nothing installed reads
+what changed.
+
+- Fixed: `Program.copyWith` keeps `coachId`, `coachName`, `waitingSince`, `revision` and
+  `sessionRevisions`. It dropped them, so a renamed or stopped copy of a coach's program forgot who
+  sent it and the revision a shared edit sends as its base (heart-api#423).
+- New: `Connection.name` and `Connection.avatar`, who the other person is now, as `GET /connections`
+  and the answers to a status or shares change say it (heart-api#409).
+- New: `PushSetting.perPersonAs`, the caller's roles in a connection for which a topic can be chosen
+  for one person: `coach`, `student`, `peer`, or a later word. Empty when it's chosen only as a
+  whole (heart-api#416).
+- New: `DeviceService.unregisterDevice`, behind `POST /devices/removals` (heart-api#415), and
+  `KeyService.claimKeys` takes `deviceIds`, the devices to take keys from (heart-api#424). Only the API
+  implements them.
+
 ## 2.55.0
 
 Key delivery, from the app's requests. No app build calls `/keys` yet, so nothing installed reads

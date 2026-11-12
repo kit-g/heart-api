@@ -192,6 +192,36 @@ void main() {
       ).called(1);
     });
 
+    test('answers with who the other person is, as the read before the change said', () async {
+      when(app.db.getConnectionById(actorId: 'u1', connectionId: id)).thenAnswer(
+        (_) async => Connection(
+          targetId: 't1',
+          role: ConnectionRole.coach,
+          domain: ConnectionDomain.fitness,
+          status: ConnectionStatus.active,
+          createdAt: DateTime.utc(2026, 1, 1),
+          connectionId: id,
+          name: 'Sam',
+          avatar: 'https://a/s.jpg',
+        ),
+      );
+      when(
+        app.db.changeConnectionStatus(
+          actorId: anyNamed('actorId'),
+          targetId: anyNamed('targetId'),
+          role: anyNamed('role'),
+          domain: anyNamed('domain'),
+          newStatus: anyNamed('newStatus'),
+        ),
+      ).thenAnswer((_) async => sample());
+
+      final res = await app.send('PUT', '/connections/$id', body: {'status': 'paused'});
+      expect(res.status, 200);
+      final answered = Connection.fromJson(jsonDecode(res.body) as Map);
+      expect((answered.name, answered.avatar), ('Sam', 'https://a/s.jpg'));
+      expect(answered.status, ConnectionStatus.pending, reason: 'the rest is the change\'s own answer');
+    });
+
     test('rejects a missing status with 400', () async {
       expect((await app.send('PUT', '/connections/$id', body: {})).status, 400);
     });

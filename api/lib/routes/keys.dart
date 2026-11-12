@@ -116,7 +116,10 @@ Future<OneTimeKeyCount> countOneTimeKeys(Request req) async {
 
 Future<CryptoDevices> claimKeys(Request req) async {
   final owner = req.rawPathParameters[#ownerId]!;
-  return CryptoDevices(await req.keyService.claimKeys(claimerId: req.userId, ownerId: owner));
+  final input = await ClaimKeysIn.fromRequest(req);
+  return CryptoDevices(
+    await req.keyService.claimKeys(claimerId: req.userId, ownerId: owner, deviceIds: input.deviceIds),
+  );
 }
 
 Future<Model> enqueue(Request req) async {

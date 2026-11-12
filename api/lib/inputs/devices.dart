@@ -35,3 +35,14 @@ class DeviceRegisterIn {
     );
   }
 }
+
+/// `POST /devices/removals` — `{token}`, the push token this device registered.
+class DeviceUnregisterIn {
+  final String token;
+
+  const new _(this.token);
+
+  static Future<DeviceUnregisterIn> fromRequest(Request req) async {
+    return DeviceUnregisterIn._((await req.json()).string('token'));
+  }
+}

@@ -132,4 +132,31 @@ void main() {
       }
     });
   });
+
+  group('unregisterDevice', () {
+    late MockDeviceService deviceService;
+
+    setUp(() {
+      deviceService = MockDeviceService();
+      when(
+        deviceService.unregisterDevice(profileId: anyNamed('profileId'), token: anyNamed('token')),
+      ).thenAnswer((_) async {});
+    });
+
+    Request build(Map<String, dynamic> body) {
+      return jsonRequest(path: '/devices/removals', body: body)
+        ..user = User(id: 'u1')
+        ..deviceService = deviceService;
+    }
+
+    test('stops the caller\'s pushes to that token, 204', () async {
+      await expectLater(unregisterDevice(build({'token': 'tok-123'})), throwsA(isA<NoContent>()));
+      verify(deviceService.unregisterDevice(profileId: 'u1', token: 'tok-123')).called(1);
+    });
+
+    test('needs a token', () async {
+      await expectLater(unregisterDevice(build({})), throwsA(isA<BadRequest>()));
+      verifyZeroInteractions(deviceService);
+    });
+  });
 }

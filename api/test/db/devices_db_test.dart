@@ -188,6 +188,23 @@ void main() {
       expect(await rowCount(token), 0);
     });
   });
+
+  group('unregisterDevice', () {
+    test('stops the caller\'s own registration, and leaves another account\'s alone', () async {
+      final token = h.token + h.uid('tok');
+      await h.db.registerDevice(profileId: ownerId, platform: .ios, token: token, locale: 'en', settings: const {});
+
+      await h.db.unregisterDevice(profileId: otherId, token: token);
+      expect(await rowCount(token), 1, reason: 'the token is the owner\'s now');
+
+      await h.db.unregisterDevice(profileId: ownerId, token: token);
+      expect(await rowCount(token), 0);
+      expect(await h.db.tokensWithLocale(ownerId), isNot(contains((token: token, locale: 'en'))));
+
+      await h.db.unregisterDevice(profileId: ownerId, token: token);
+      expect(await rowCount(token), 0, reason: 'again is harmless');
+    });
+  });
 }
 
 class _Harness extends DatabaseTestBase;

@@ -240,4 +240,22 @@ void main() {
       expect(row.joined['t1'], DateTime.utc(2026, 10, 3));
     });
   });
+
+  test('copyWith keeps a coach\'s copy\'s fields it does not change (heart-api#423)', () {
+    final sent = Program(
+      name: 'Plan',
+      coachId: 'coach',
+      coachName: 'Coach',
+      waitingSince: DateTime.utc(2026, 11, 10),
+      revision: 3,
+      sessionRevisions: {'s1': 2},
+    );
+    final renamed = sent.copyWith(name: 'Mine now', archived: true);
+    expect(renamed.name, 'Mine now');
+    expect(renamed.coachId, 'coach');
+    expect(renamed.coachName, 'Coach');
+    expect(renamed.waitingSince, DateTime.utc(2026, 11, 10));
+    expect(renamed.revision, 3);
+    expect(renamed.sessionRevisions, {'s1': 2});
+  });
 }

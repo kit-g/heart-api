@@ -212,6 +212,7 @@ _devices AS (
   FROM crypto_devices d, _count c
   WHERE d.user_id = @ownerId
     AND d.removed_at IS NULL
+    AND (@deviceIds::uuid[] IS NULL OR d.id = ANY (@deviceIds::uuid[]))
     AND c.claims <= $_maxKeyClaims
 ),
 _picked AS (

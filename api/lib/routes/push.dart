@@ -38,6 +38,7 @@ Future<PushSettings> getPushSettings(Request req) async {
           description: copy(topic, 'description'),
           delivery: topic.deliveryFor(forTopic: forTopic[topic.key]),
           options: topic.options,
+          perPersonAs: [for (final role in topic.perPersonAs) role.name],
         ),
     ],
     forPeople: [

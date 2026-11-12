@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:heart/inputs/inputs.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
+import 'package:relic_core/relic_core.dart' show MimeType;
 import 'package:test/test.dart';
 
 import '../helpers/app_harness.dart';
+import '../helpers/request.dart';
 
 void main() {
   late AppHarness app;
@@ -371,16 +374,65 @@ void main() {
     verify(app.db.countOneTimeKeys(userId: 'u1', deviceId: device)).called(1);
   });
 
-  test('claiming keys takes one from each of the owner\'s devices, as the caller', () async {
-    when(
-      app.db.claimKeys(claimerId: anyNamed('claimerId'), ownerId: anyNamed('ownerId')),
-    ).thenAnswer((_) async => [published()]);
+  group('POST /keys/claims/:ownerId', () {
+    setUp(() {
+      when(
+        app.db.claimKeys(
+          claimerId: anyNamed('claimerId'),
+          ownerId: anyNamed('ownerId'),
+          deviceIds: anyNamed('deviceIds'),
+        ),
+      ).thenAnswer((_) async => [published()]);
+    });
 
-    final res = await app.send('POST', '/keys/claims/them', body: {});
+    test('takes one from each of the owner\'s devices, as the caller', () async {
+      final res = await app.send('POST', '/keys/claims/them', body: {});
 
-    expect(res.status, 200);
-    expect(CryptoDevices.fromJson(jsonDecode(res.body) as Map).devices, hasLength(1));
-    verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them')).called(1);
+      expect(res.status, 200);
+      expect(CryptoDevices.fromJson(jsonDecode(res.body) as Map).devices, hasLength(1));
+      verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them')).called(1);
+    });
+
+    test('with no body at all, too, whatever its content type says', () async {
+      for (final headers in [
+        const <String, String>{},
+        {'content-type': 'application/json'},
+      ]) {
+        final res = await app.send('POST', '/keys/claims/them', extraHeaders: headers);
+        expect(res.status, 200, reason: '$headers');
+      }
+      verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them')).called(2);
+    });
+
+    test('a body that is not JSON is refused, not read as asking for every device', () async {
+      final req = textRequest(body: '{"deviceIds": ["$device"]}', mimeType: MimeType.plainText);
+      await expectLater(ClaimKeysIn.fromRequest(req), throwsA(isA<UnsupportedMediaType>()));
+    });
+
+    test('only from the devices named, each once, whatever their case', () async {
+      final res = await app.send(
+        'POST',
+        '/keys/claims/them',
+        body: {
+          'deviceIds': [device, device.toUpperCase()],
+        },
+      );
+      expect(res.status, 200);
+      verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them', deviceIds: [device])).called(1);
+    });
+
+    test('names one to ten devices', () async {
+      for (final ids in [
+        [],
+        ['nope'],
+        [for (var i = 0; i < 11; i++) '01900000-0000-7000-8000-0000000001${i.toString().padLeft(2, '0')}'],
+        device,
+      ]) {
+        final res = await app.send('POST', '/keys/claims/them', body: {'deviceIds': ids});
+        expect(res.status, 400, reason: '$ids');
+      }
+      verifyZeroInteractions(app.db);
+    });
   });
 
   test('a device reads what waits for it, and confirms what it received', () async {

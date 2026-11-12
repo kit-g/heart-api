@@ -128,6 +128,62 @@ void main() {
       expect(forStudent.single.role, ConnectionRole.student); // reciprocal
     });
 
+    test('says who the other person is now, unless they blocked the reader', () async {
+      final (coach, student) = await pair();
+      await h.db.createConnection(initiatorId: coach, targetId: student, role: .peer, domain: .fitness);
+      final id = (await h.db.getConnections(coach)).single.connectionId!;
+      await h.exec("UPDATE connections SET status = 'active', accepted_at = now() WHERE id = @id::uuid", {'id': id});
+      await h.exec("UPDATE profiles SET username = 'Coach Dana', avatar_url = 'https://a/d.jpg' WHERE id = @c", {
+        'c': coach,
+      });
+
+      final seen = (await h.db.getConnections(student)).single;
+      expect((seen.name, seen.avatar), ('Coach Dana', 'https://a/d.jpg'));
+      expect((await h.db.getConnectionById(actorId: student, connectionId: id))?.name, 'Coach Dana');
+      expect((await h.db.getConnections(coach)).single.name, 'u_$student');
+
+      await h.db.changeConnectionStatus(
+        actorId: coach,
+        targetId: student,
+        role: .peer,
+        domain: .fitness,
+        newStatus: .blocked,
+      );
+      final blocked = (await h.db.getConnections(student)).single;
+      expect((blocked.name, blocked.avatar), (null, null));
+      expect(blocked.status, ConnectionStatus.severed, reason: 'the one blocked sees an ended connection');
+      expect((await h.db.getConnectionById(actorId: student, connectionId: id))?.name, isNull);
+      final blocker = (await h.db.getConnections(coach)).single;
+      expect((blocker.name, blocker.status), ('u_$student', ConnectionStatus.blocked));
+
+      await h.exec('UPDATE blocks SET lifted_at = now() WHERE blocker_id = @c', {'c': coach});
+      expect((await h.db.getConnections(student)).single.name, 'Coach Dana', reason: 'a lifted block hides nothing');
+    });
+
+    test('a request nobody accepted names the one who asked, not the one asked', () async {
+      final (asker, asked) = await pair();
+      await h.db.createConnection(initiatorId: asker, targetId: asked, role: .peer, domain: .fitness);
+
+      expect((await h.db.getConnections(asker)).single.name, isNull, reason: 'asking reveals nobody');
+      expect((await h.db.getConnections(asked)).single.name, 'u_$asker');
+
+      await h.db.changeConnectionStatus(
+        actorId: asked,
+        targetId: asker,
+        role: .peer,
+        domain: .fitness,
+        newStatus: .declined,
+      );
+      expect((await h.db.getConnections(asker)).single.name, isNull, reason: 'nor does being declined');
+    });
+
+    test('a blank name is no name', () async {
+      final (a, b) = await pair();
+      await h.db.createConnection(initiatorId: a, targetId: b, role: .peer, domain: .fitness);
+      await h.exec("UPDATE profiles SET username = '  ' WHERE id = @a", {'a': a});
+      expect((await h.db.getConnections(b)).single.name, isNull);
+    });
+
     test('filters by role, matching the requester side of each connection', () async {
       final owner = await h.seedProfile();
       final peerTarget = await h.seedProfile();
