@@ -4,14 +4,14 @@ part of '../db.dart';
 /// published at once count each other: a statement counts from the snapshot it
 /// started with.
 const _lockPublishing = '''
-SELECT pg_advisory_xact_lock(hashtext('crypto_devices:' || @userId))
+SELECT pg_advisory_xact_lock(hashtextextended('crypto_devices:' || @userId, 0))
 ''';
 
 /// A device id is chosen by the device, so publishing twice answers what is
 /// there, and someone else's id answers nothing. A signature only counts if it
 /// names a device of the same owner. A device its owner removed stays removed,
 /// and says so. A new one past the account's limit of devices in use is no
-/// device, and `is_full` says why.
+/// device, and `is_full` says why. `added` says this statement added it.
 const _publishDevice =
     '''
 WITH
@@ -38,16 +38,20 @@ _inserted AS (
   ON CONFLICT (id) DO NOTHING
   RETURNING *
 )
-SELECT id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at, false AS removed, false AS is_full
+SELECT
+  id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at,
+  false AS removed, false AS is_full, true AS added
 FROM _inserted
 UNION ALL
-SELECT id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at, removed_at IS NOT NULL, false
+SELECT
+  id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at,
+  removed_at IS NOT NULL, false, false
 FROM crypto_devices
 WHERE id = @id::uuid
   AND user_id = @userId
   AND NOT EXISTS (SELECT 1 FROM _inserted)
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, false
 FROM _live
 WHERE is_full
   AND NOT EXISTS (SELECT 1 FROM crypto_devices WHERE id = @id::uuid)

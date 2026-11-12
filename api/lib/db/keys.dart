@@ -15,7 +15,7 @@ const _maxQueuedPerPair = 2000;
 
 mixin _Keys on _DatabaseBase implements KeyService {
   @override
-  Future<CryptoDevice> publishDevice({
+  Future<({CryptoDevice device, bool added})> publishDevice({
     required String userId,
     required String id,
     required String identityKey,
@@ -53,7 +53,7 @@ mixin _Keys on _DatabaseBase implements KeyService {
         reason: 'an account has at most $_maxDevices devices with keys; remove one first',
       ),
       {'removed': true} => throw const Forbidden(code: 'device_removed', reason: 'this device was removed'),
-      _ => CryptoDevice.fromRow(row),
+      _ => (device: CryptoDevice.fromRow(row), added: row['added'] == true),
     };
   }
 

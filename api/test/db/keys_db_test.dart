@@ -24,7 +24,7 @@ void main() {
       vouchedBy: vouchedBy,
       signature: signature,
     );
-    return published.id;
+    return published.device.id;
   }
 
   Future<(String, String)> connected() async {
@@ -37,12 +37,13 @@ void main() {
     test('publishing twice answers what is there', () async {
       final me = await h.seedProfile();
       final id = uuidV7();
-      Future<CryptoDevice> publish(String key) {
+      Future<({CryptoDevice device, bool added})> publish(String key) {
         return h.db.publishDevice(userId: me, id: id, identityKey: key, signingKey: 's', fallbackKey: 'f');
       }
 
-      await publish('first');
-      expect((await publish('second')).identityKey, 'first');
+      expect((await publish('first')).added, isTrue);
+      final again = await publish('second');
+      expect((again.device.identityKey, again.added), ('first', false));
     });
 
     test('a publish racing another of the same id answers the device, not a stranger\'s id', () async {
@@ -62,7 +63,7 @@ void main() {
           () => h.db.publishDevice(userId: me, id: id, identityKey: 'retry', signingKey: 's', fallbackKey: 'f'),
         ],
       );
-      expect(published.single.identityKey, 'first');
+      expect((published.single.device.identityKey, published.single.added), ('first', false));
     });
 
     test('a removed device stays removed, and says so', () async {
@@ -89,7 +90,7 @@ void main() {
         signingKey: 's',
         fallbackKey: 'f',
       );
-      expect(again.id, ten.first, reason: 'publishing one that is there again is no new device');
+      expect(again.device.id, ten.first, reason: 'publishing one that is there again is no new device');
 
       await h.db.removeDevice(userId: me, deviceId: ten.last);
       expect(await device(me), isNotNull);
@@ -103,7 +104,7 @@ void main() {
       final results = await h.runBlocked(
         hold: (tx) async {
           await tx.execute(
-            Sql.named("SELECT pg_advisory_xact_lock(hashtext('crypto_devices:' || @me))"),
+            Sql.named("SELECT pg_advisory_xact_lock(hashtextextended('crypto_devices:' || @me, 0))"),
             parameters: {'me': me},
           );
           await tx.execute(
@@ -142,8 +143,8 @@ void main() {
         vouchedBy: mine,
         signature: 'sig',
       );
-      expect(vouched.vouchedBy, mine);
-      expect(vouched.signature, 'sig');
+      expect(vouched.device.vouchedBy, mine);
+      expect(vouched.device.signature, 'sig');
 
       final not = await h.db.publishDevice(
         userId: me,
@@ -154,8 +155,8 @@ void main() {
         vouchedBy: theirs,
         signature: 'sig',
       );
-      expect(not.vouchedBy, isNull);
-      expect(not.signature, isNull);
+      expect(not.device.vouchedBy, isNull);
+      expect(not.device.signature, isNull);
     });
 
     test('a published device is vouched for once, by another device of the same owner in use', () async {
