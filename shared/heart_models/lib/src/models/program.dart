@@ -989,6 +989,11 @@ class _Program implements Program {
         for (final MapEntry(:key, :value) in unreadRules.entries)
           if (rules == null || !rules.containsKey(key)) key: value,
       },
+      coachId: coachId,
+      coachName: coachName,
+      waitingSince: waitingSince,
+      revision: revision,
+      sessionRevisions: sessionRevisions,
     );
   }
 

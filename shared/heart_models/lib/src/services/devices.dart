@@ -37,4 +37,8 @@ abstract interface class DeviceService {
   Future<Iterable<DeviceToken>> tokensWithLocale(String profileId);
 
   Future<void> deleteToken(String token);
+
+  /// Stops [token] getting [profileId]'s pushes, as on sign-out. A token that
+  /// isn't registered to them, or at all, changes nothing.
+  Future<void> unregisterDevice({required String profileId, required String token});
 }

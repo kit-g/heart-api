@@ -33,6 +33,11 @@ mixin _Devices on _DatabaseBase implements DeviceService {
   }
 
   @override
+  Future<void> unregisterDevice({required String profileId, required String token}) async {
+    await _pool.execute(_unregisterDevice.toSql(), parameters: {'profileId': profileId, 'token': token});
+  }
+
+  @override
   Future<void> deleteToken(String token) async {
     await _pool.execute(
       _deleteDeviceToken.toSql(),

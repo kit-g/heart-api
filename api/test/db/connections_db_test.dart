@@ -128,6 +128,32 @@ void main() {
       expect(forStudent.single.role, ConnectionRole.student); // reciprocal
     });
 
+    test('says who the other person is now, unless they blocked the reader', () async {
+      final (coach, student) = await pair();
+      await h.db.createConnection(initiatorId: coach, targetId: student, role: .coach, domain: .fitness);
+      await h.exec("UPDATE profiles SET username = 'Coach Dana', avatar_url = 'https://a/d.jpg' WHERE id = @c", {
+        'c': coach,
+      });
+
+      final seen = (await h.db.getConnections(student)).single;
+      expect((seen.name, seen.avatar), ('Coach Dana', 'https://a/d.jpg'));
+      final byId = await h.db.getConnectionById(actorId: student, connectionId: seen.connectionId!);
+      expect(byId?.name, 'Coach Dana');
+      expect((await h.db.getConnections(coach)).single.name, 'u_$student');
+
+      await h.exec('INSERT INTO blocks (blocker_id, blocked_id) VALUES (@c, @s)', {'c': coach, 's': student});
+      final blocked = (await h.db.getConnections(student)).single;
+      expect((blocked.name, blocked.avatar), (null, null));
+      expect(
+        (await h.db.getConnectionById(actorId: student, connectionId: seen.connectionId!))?.name,
+        isNull,
+      );
+      expect((await h.db.getConnections(coach)).single.name, 'u_$student', reason: 'the blocker still sees who');
+
+      await h.exec('UPDATE blocks SET lifted_at = now() WHERE blocker_id = @c', {'c': coach});
+      expect((await h.db.getConnections(student)).single.name, 'Coach Dana', reason: 'a lifted block hides nothing');
+    });
+
     test('filters by role, matching the requester side of each connection', () async {
       final owner = await h.seedProfile();
       final peerTarget = await h.seedProfile();

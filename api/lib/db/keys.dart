@@ -145,8 +145,15 @@ mixin _Keys on _DatabaseBase implements KeyService {
   }
 
   @override
-  Future<List<CryptoDevice>> claimKeys({required String claimerId, required String ownerId}) async {
-    final rows = await _pool.execute(_claimKeys.toSql(), parameters: {'claimerId': claimerId, 'ownerId': ownerId});
+  Future<List<CryptoDevice>> claimKeys({
+    required String claimerId,
+    required String ownerId,
+    List<String>? deviceIds,
+  }) async {
+    final rows = await _pool.execute(
+      _claimKeys.toSql(),
+      parameters: {'claimerId': claimerId, 'ownerId': ownerId, 'deviceIds': deviceIds},
+    );
     final maps = rows.map((row) => row.toColumnMap()).toList();
     final first = maps.first;
     if (first['forbidden'] == true) {

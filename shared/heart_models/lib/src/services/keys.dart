@@ -41,9 +41,10 @@ abstract interface class KeyService {
 
   Future<int> countOneTimeKeys({required String userId, required String deviceId});
 
-  /// One single-use key from each of [ownerId]'s devices, none of them handed out
-  /// twice. A device with none left answers its fallback key.
-  Future<List<CryptoDevice>> claimKeys({required String claimerId, required String ownerId});
+  /// One single-use key from each of [ownerId]'s devices, or only from those of
+  /// them [deviceIds] names, none handed out twice. A device with none left answers
+  /// its fallback key. A named device that isn't theirs, or is removed, is left out.
+  Future<List<CryptoDevice>> claimKeys({required String claimerId, required String ownerId, List<String>? deviceIds});
 
   /// Sends a sealed item to one device. `delivered` is `false` if this id had
   /// already arrived. `notify` names the account to wake: the recipient's, when this

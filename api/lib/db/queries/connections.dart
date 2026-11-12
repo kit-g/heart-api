@@ -55,25 +55,39 @@ WHERE domain = @domain
   )
 ''';
 
+/// Each with who the other person is, as their profile says now, unless they
+/// blocked the reader: a blocked person sees an ended connection, not a new face.
 const _listConnections = '''
 SELECT
-  id AS connection_id,
-  target_id,
-  initiator_role AS role,
-  domain,
-  status,
-  created_at,
-  accepted_at,
-  shares
-FROM connections
-WHERE initiator_id = @userId
-  AND (@role::text IS NULL OR initiator_role = @role)
-UNION ALL
-SELECT id AS connection_id, initiator_id AS target_id, target_role AS role, domain, status, created_at, accepted_at, shares
-FROM connections
-WHERE target_id = @userId
-  AND (@role::text IS NULL OR target_role = @role)
-ORDER BY created_at DESC
+  c.*,
+  CASE WHEN NOT b.blocked THEN p.username END AS username,
+  CASE WHEN NOT b.blocked THEN p.avatar_url END AS avatar_url
+FROM (
+  SELECT
+    id AS connection_id,
+    target_id,
+    initiator_role AS role,
+    domain,
+    status,
+    created_at,
+    accepted_at,
+    shares
+  FROM connections
+  WHERE initiator_id = @userId
+    AND (@role::text IS NULL OR initiator_role = @role)
+  UNION ALL
+  SELECT id AS connection_id, initiator_id AS target_id, target_role AS role, domain, status, created_at, accepted_at, shares
+  FROM connections
+  WHERE target_id = @userId
+    AND (@role::text IS NULL OR target_role = @role)
+) c
+LEFT JOIN profiles p ON p.id = c.target_id
+CROSS JOIN LATERAL (
+  SELECT EXISTS (
+    SELECT 1 FROM blocks WHERE blocker_id = c.target_id AND blocked_id = @userId AND lifted_at IS NULL
+  ) AS blocked
+) b
+ORDER BY c.created_at DESC
 ''';
 
 const _getConnection = '''
@@ -90,16 +104,29 @@ WHERE domain = @domain
   )
 ''';
 
-/// Either side's view of one connection, by its identity.
+/// Either side's view of one connection, by its identity, with who the other
+/// person is, as [_listConnections] says it.
 const _getConnectionById = '''
 SELECT
-  id AS connection_id,
-  CASE WHEN initiator_id = @userId THEN target_id ELSE initiator_id END AS target_id,
-  CASE WHEN initiator_id = @userId THEN initiator_role ELSE target_role END AS role,
-  domain, status, created_at, accepted_at, shares
-FROM connections
-WHERE id = @connectionId::uuid
-  AND @userId IN (initiator_id, target_id)
+  c.*,
+  CASE WHEN NOT b.blocked THEN p.username END AS username,
+  CASE WHEN NOT b.blocked THEN p.avatar_url END AS avatar_url
+FROM (
+  SELECT
+    id AS connection_id,
+    CASE WHEN initiator_id = @userId THEN target_id ELSE initiator_id END AS target_id,
+    CASE WHEN initiator_id = @userId THEN initiator_role ELSE target_role END AS role,
+    domain, status, created_at, accepted_at, shares
+  FROM connections
+  WHERE id = @connectionId::uuid
+    AND @userId IN (initiator_id, target_id)
+) c
+LEFT JOIN profiles p ON p.id = c.target_id
+CROSS JOIN LATERAL (
+  SELECT EXISTS (
+    SELECT 1 FROM blocks WHERE blocker_id = c.target_id AND blocked_id = @userId AND lifted_at IS NULL
+  ) AS blocked
+) b
 ''';
 
 /// Ending is either party's call — except while a block stands, when only the

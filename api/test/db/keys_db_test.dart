@@ -300,6 +300,24 @@ void main() {
       expect(again.firstWhere((d) => d.id == one).oneTimeKey, isNull);
     });
 
+    test('a claim can take keys only from the devices it names', () async {
+      final (a, b) = await connected();
+      final (one, two, three) = (await device(a), await device(a), await device(a));
+      for (final id in [one, two, three]) {
+        await h.db.addOneTimeKeys(userId: a, deviceId: id, keys: {'k': 'v-$id'});
+      }
+      final removed = await device(a);
+      await h.db.removeDevice(userId: a, deviceId: removed);
+      final strangers = await device(await h.seedProfile());
+
+      final claimed = await h.db.claimKeys(claimerId: b, ownerId: a, deviceIds: [two, removed, strangers]);
+      expect(claimed.map((d) => d.id), [two], reason: 'a removed device or someone else\'s is left out');
+      expect(claimed.single.oneTimeKey, 'v-$two');
+      for (final (id, left) in [(one, 1), (two, 0), (three, 1)]) {
+        expect(await h.db.countOneTimeKeys(userId: a, deviceId: id), left);
+      }
+    });
+
     test('of claims racing, no key goes out twice', () async {
       final (a, b) = await connected();
       final id = await device(a);
