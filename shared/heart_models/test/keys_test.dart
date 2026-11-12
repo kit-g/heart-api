@@ -50,12 +50,18 @@ void main() {
       'id': 'q1',
       'recipient_device_id': 'd1',
       'sender_device_id': 'd2',
+      'sender_user_id': 'u2',
       'kind': 'key',
       'content': 'sealed',
       'created_at': at,
     });
 
     test('QueuedItems round-trips', () => expectRoundTrip(QueuedItems([item]), QueuedItems.fromJson));
+
+    test('a queued item names the account that sent it', () {
+      expect(item.senderUserId, 'u2');
+      expect(item.toMap()['senderUserId'], 'u2');
+    });
 
     test('QueuedItems reads the queue the API sends, a kind it does not know too', () {
       final read = QueuedItems.fromJson({
@@ -71,6 +77,7 @@ void main() {
       });
       expect(read.items.single.kind, 'something_new');
       expect(read.items.single.senderDeviceId, isNull);
+      expect(read.items.single.senderUserId, isNull);
       expect(read.items.single.createdAt, at);
     });
 

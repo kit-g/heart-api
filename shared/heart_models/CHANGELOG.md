@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.55.0
+
+Key delivery, from the app's requests. No app build calls `/keys` yet, so nothing installed reads
+what changed.
+
+- New: `QueuedItem.senderUserId`, the account that sent an item, as the server knows it, so the
+  recipient checks the sender's device against that account without trusting the item. Null once
+  that account is deleted.
+- New: `KeyService.vouchForDevice`, a vouch attached to a device that already published. Only the
+  API implements it.
+- Changed: `KeyService.enqueue` answers `({bool delivered, String? notify})`, so the API knows whom
+  to wake when something arrives. Only the API implements or calls it.
+
 ## 2.54.0
 
 A coach's assistant.

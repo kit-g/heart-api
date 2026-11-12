@@ -122,6 +122,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/keys/devices', .post): keys.publishDevice,
   ('/keys/devices/:deviceId', .delete): keys.removeDevice,
   ('/keys/devices/:deviceId/fallback', .put): keys.replaceFallbackKey,
+  ('/keys/devices/:deviceId/vouch', .put): keys.vouchForDevice,
   ('/keys/devices/:deviceId/one-time-keys', .get): keys.countOneTimeKeys,
   ('/keys/devices/:deviceId/one-time-keys', .post): keys.addOneTimeKeys,
   ('/keys/claims/:ownerId', .post): keys.claimKeys,

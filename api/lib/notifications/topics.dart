@@ -53,6 +53,10 @@ enum PushTopic {
 
   /// Wakes the app to look at the other person's devices.
   devicesChanged(key: 'security.devices_changed', group: 'security', silent: true),
+
+  /// Wakes the app to read its key queue: something arrived for one of its devices.
+  /// Each says the same, so one waiting for an offline phone stands for them all.
+  queueWaiting(key: 'security.queue_waiting', group: 'security', silent: true, collapses: true),
   ;
 
   static const instant = 'instant';

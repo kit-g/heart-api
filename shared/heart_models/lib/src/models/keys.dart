@@ -130,6 +130,11 @@ abstract interface class QueuedItem implements Model {
 
   String? get senderDeviceId;
 
+  /// The account that sent it, as the server knows it, so the recipient can check
+  /// the sending device against that account's devices without trusting what the
+  /// item says. Null once that account is deleted.
+  String? get senderUserId;
+
   /// What the item is, in the app's words.
   String get kind;
 
@@ -142,6 +147,7 @@ abstract interface class QueuedItem implements Model {
     required String id,
     required String recipientDeviceId,
     String? senderDeviceId,
+    String? senderUserId,
     required String kind,
     required String content,
     required DateTime createdAt,
@@ -152,6 +158,7 @@ abstract interface class QueuedItem implements Model {
       id: row['id'].toString(),
       recipientDeviceId: row['recipient_device_id'].toString(),
       senderDeviceId: row['sender_device_id']?.toString(),
+      senderUserId: row['sender_user_id'] as String?,
       kind: row['kind'] as String,
       content: row['content'] as String,
       createdAt: row['created_at'] as DateTime,
@@ -163,6 +170,7 @@ abstract interface class QueuedItem implements Model {
       id: json['id'] as String,
       recipientDeviceId: json['recipientDeviceId'] as String,
       senderDeviceId: json['senderDeviceId'] as String?,
+      senderUserId: json['senderUserId'] as String?,
       kind: json['kind'] as String,
       content: json['content'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -178,6 +186,8 @@ class _QueuedItem implements QueuedItem {
   @override
   final String? senderDeviceId;
   @override
+  final String? senderUserId;
+  @override
   final String kind;
   @override
   final String content;
@@ -188,6 +198,7 @@ class _QueuedItem implements QueuedItem {
     required this.id,
     required this.recipientDeviceId,
     this.senderDeviceId,
+    this.senderUserId,
     required this.kind,
     required this.content,
     required this.createdAt,
@@ -199,6 +210,7 @@ class _QueuedItem implements QueuedItem {
       'id': id,
       'recipientDeviceId': recipientDeviceId,
       'senderDeviceId': ?senderDeviceId,
+      'senderUserId': ?senderUserId,
       'kind': kind,
       'content': content,
       'createdAt': createdAt.toIso8601String(),

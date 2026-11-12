@@ -26,7 +26,7 @@ void main() {
   };
 
   group('POST /keys/queue', () {
-    void stub() {
+    void stub({String? notify}) {
       when(
         app.db.enqueue(
           userId: anyNamed('userId'),
@@ -36,8 +36,47 @@ void main() {
           kind: anyNamed('kind'),
           content: anyNamed('content'),
         ),
-      ).thenAnswer((_) async => true);
+      ).thenAnswer((_) async => (delivered: true, notify: notify));
+      when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
     }
+
+    test('an arrival wakes the recipient with a silent push naming only the device', () async {
+      stub(notify: 'them');
+      when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
+
+      final res = await app.send('POST', '/keys/queue', body: body('sealed'));
+
+      expect(res.status, 204);
+      final message =
+          verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: captureAnyNamed('message')))
+                  .captured
+                  .single
+              as Map;
+      expect(message, {
+        'type': 'push.requested',
+        'userId': 'them',
+        'topic': 'security.queue_waiting',
+        'actorId': 'u1',
+        'data': {'deviceId': device},
+      });
+    });
+
+    test('nothing to wake for sends no push', () async {
+      stub();
+      final res = await app.send('POST', '/keys/queue', body: body('sealed'));
+      expect(res.status, 204);
+      verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
+    });
+
+    test('a push that cannot go out leaves the delivered item delivered', () async {
+      stub(notify: 'them');
+      when(
+        app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')),
+      ).thenThrow(Exception('sqs down'));
+
+      final res = await app.send('POST', '/keys/queue', body: body('sealed'));
+      expect(res.status, 204);
+    });
 
     test('takes a string', () async {
       stub();
@@ -108,12 +147,15 @@ void main() {
     for (final (method, path, body) in [
       ('DELETE', '/keys/devices/nope', null),
       ('PUT', '/keys/devices/nope/fallback', {'key': 'k'}),
+      ('PUT', '/keys/devices/nope/vouch', {'vouchedBy': other, 'signature': 'sig'}),
       ('GET', '/keys/devices/nope/one-time-keys', null),
       (
         'POST',
         '/keys/devices/nope/one-time-keys',
         {
-          'keys': {'k': 'v'},
+          'keys': [
+            {'id': 'k', 'key': 'v'},
+          ],
         },
       ),
     ]) {
@@ -140,15 +182,106 @@ void main() {
     }
   });
 
-  test('one-time keys must map a name to a key, no more than a device holds', () async {
+  test('one-time keys are a list of {id, key}, each id once, no more than a device holds', () async {
     for (final keys in [
       [],
-      {'k': 1},
-      {for (var i = 0; i < 51; i++) 'k$i': 'v'},
+      {'k': 'v'},
+      [
+        {'id': 'k', 'key': 1},
+      ],
+      [
+        {'id': '', 'key': 'v'},
+      ],
+      [
+        {'id': 'k', 'key': 'v'},
+        {'id': 'k', 'key': 'w'},
+      ],
+      [
+        for (var i = 0; i < 51; i++) {'id': 'k$i', 'key': 'v'},
+      ],
     ]) {
       final res = await app.send('POST', '/keys/devices/$device/one-time-keys', body: {'keys': keys});
-      expect(res.status, 400);
+      expect(res.status, 400, reason: '$keys');
     }
+    verifyZeroInteractions(app.db);
+  });
+
+  test('a key id that reads like a health field is only a value, so it gets through', () async {
+    when(
+      app.db.addOneTimeKeys(userId: anyNamed('userId'), deviceId: anyNamed('deviceId'), keys: anyNamed('keys')),
+    ).thenAnswer((_) async => 1);
+
+    final res = await app.send(
+      'POST',
+      '/keys/devices/$device/one-time-keys',
+      body: {
+        'keys': [
+          {'id': 'aHRvSleep', 'key': 'v'},
+        ],
+      },
+    );
+    expect(res.status, 200);
+  });
+
+  group('PUT /keys/devices/:deviceId/vouch', () {
+    void stub({required bool changed}) {
+      when(
+        app.db.vouchForDevice(
+          userId: anyNamed('userId'),
+          deviceId: anyNamed('deviceId'),
+          vouchedBy: anyNamed('vouchedBy'),
+          signature: anyNamed('signature'),
+        ),
+      ).thenAnswer(
+        (_) async => (
+          device: CryptoDevice(
+            id: device,
+            userId: 'u1',
+            identityKey: 'i',
+            signingKey: 's',
+            fallbackKey: 'f',
+            signature: 'sig',
+            vouchedBy: other,
+            createdAt: DateTime.utc(2026),
+          ),
+          changed: changed,
+        ),
+      );
+      when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+      when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
+    }
+
+    test('vouches for the caller\'s device and tells the people who share keys', () async {
+      stub(changed: true);
+      final res = await app.send('PUT', '/keys/devices/$device/vouch', body: {'vouchedBy': other, 'signature': 'sig'});
+
+      expect(res.status, 200);
+      expect(CryptoDevice.fromJson(jsonDecode(res.body) as Map).id, device);
+      verify(app.db.vouchForDevice(userId: 'u1', deviceId: device, vouchedBy: other, signature: 'sig')).called(1);
+      verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).called(1);
+    });
+
+    test('the same vouch again tells nobody', () async {
+      stub(changed: false);
+      final res = await app.send('PUT', '/keys/devices/$device/vouch', body: {'vouchedBy': other, 'signature': 'sig'});
+
+      expect(res.status, 200);
+      verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
+    });
+
+    test('a vouch is both a device and a signature', () async {
+      for (final vouch in [
+        {'vouchedBy': other},
+        {'signature': 'sig'},
+        {'vouchedBy': 'nope', 'signature': 'sig'},
+        {'vouchedBy': other, 'signature': ''},
+        {'vouchedBy': other, 'signature': 'x' * 257},
+      ]) {
+        final res = await app.send('PUT', '/keys/devices/$device/vouch', body: vouch);
+        expect(res.status, 400, reason: '$vouch');
+      }
+      verifyZeroInteractions(app.db);
+    });
   });
 
   test('confirmations must be item ids', () async {
@@ -223,7 +356,9 @@ void main() {
       'POST',
       '/keys/devices/$device/one-time-keys',
       body: {
-        'keys': {'k1': 'v1'},
+        'keys': [
+          {'id': 'k1', 'key': 'v1'},
+        ],
       },
     );
     expect(added.status, 200);

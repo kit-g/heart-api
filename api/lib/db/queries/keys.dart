@@ -32,6 +32,55 @@ WHERE id = @id::uuid
   AND NOT EXISTS (SELECT 1 FROM _inserted)
 ''';
 
+/// A device is vouched for once, by another device of the same owner in use. The
+/// update checks the row it locks, so of two vouches racing, one lands and the
+/// other finds it there.
+const _vouchForDevice = '''
+WITH
+_device AS (
+  SELECT id, vouched_by, signature
+  FROM crypto_devices
+  WHERE id = @deviceId::uuid
+    AND user_id = @userId
+    AND removed_at IS NULL
+),
+_voucher AS (
+  SELECT id
+  FROM crypto_devices
+  WHERE id = @vouchedBy::uuid
+    AND id <> @deviceId::uuid
+    AND user_id = @userId
+    AND removed_at IS NULL
+),
+_vouched AS (
+  UPDATE crypto_devices d
+  SET
+    vouched_by = v.id,
+    signature = @signature
+  FROM _voucher v
+  WHERE d.id = @deviceId::uuid
+    AND d.user_id = @userId
+    AND d.removed_at IS NULL
+    AND d.vouched_by IS NULL
+  RETURNING d.id, d.user_id, d.identity_key, d.signing_key, d.fallback_key, d.signature, d.vouched_by, d.created_at
+)
+SELECT
+  EXISTS (SELECT 1 FROM _device) AS owned,
+  EXISTS (SELECT 1 FROM _voucher) AS voucher_owned,
+  EXISTS (SELECT 1 FROM _vouched) AS changed,
+  coalesce(v.id, d.id) AS id,
+  coalesce(v.user_id, d.user_id) AS user_id,
+  coalesce(v.identity_key, d.identity_key) AS identity_key,
+  coalesce(v.signing_key, d.signing_key) AS signing_key,
+  coalesce(v.fallback_key, d.fallback_key) AS fallback_key,
+  coalesce(v.signature, d.signature) AS signature,
+  coalesce(v.vouched_by, d.vouched_by) AS vouched_by,
+  coalesce(v.created_at, d.created_at) AS created_at
+FROM (SELECT 1) one
+LEFT JOIN _vouched v ON true
+LEFT JOIN crypto_devices d ON d.id = (SELECT id FROM _device)
+''';
+
 const _listDevices = '''
 WITH _status AS (
   SELECT NOT _shares_keys_with(@readerId, @ownerId) AS forbidden
@@ -216,11 +265,19 @@ _sender AS (
     AND removed_at IS NULL
 ),
 _recipient AS (
-  SELECT id
+  SELECT id, user_id
   FROM crypto_devices
   WHERE id = @recipientDeviceId::uuid
     AND removed_at IS NULL
     AND _shares_keys_with(@userId, user_id)
+),
+_recent AS (
+  SELECT EXISTS (
+    SELECT 1
+    FROM device_queue
+    WHERE recipient_device_id = @recipientDeviceId::uuid
+      AND created_at > now() - INTERVAL '1 minute'
+  ) AS recent
 ),
 _load AS (
   SELECT count(*) >= $_maxQueuedPerPair AS is_full
@@ -247,12 +304,16 @@ SELECT
   ) AS taken,
   EXISTS (SELECT 1 FROM _seen) AS seen,
   (SELECT is_full FROM _load) AS is_full,
-  EXISTS (SELECT 1 FROM _inserted) AS inserted
+  EXISTS (SELECT 1 FROM _inserted) AS inserted,
+  CASE
+    WHEN EXISTS (SELECT 1 FROM _inserted) AND NOT (SELECT recent FROM _recent) THEN (SELECT user_id FROM _recipient)
+  END AS notify
 ''';
 
-/// A block stops what was sent before it, too.
+/// A block stops what was sent before it, too. The sender's account is the one the
+/// server knows, not one the item claims.
 const _listQueue = '''
-SELECT q.id, q.recipient_device_id, q.sender_device_id, q.kind, q.content, q.created_at
+SELECT q.id, q.recipient_device_id, q.sender_device_id, s.user_id AS sender_user_id, q.kind, q.content, q.created_at
 FROM device_queue q
 JOIN crypto_devices d ON d.id = q.recipient_device_id
 LEFT JOIN crypto_devices s ON s.id = q.sender_device_id

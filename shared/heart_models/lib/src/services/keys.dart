@@ -13,6 +13,16 @@ abstract interface class KeyService {
     String? vouchedBy,
   });
 
+  /// Attaches a vouch to a device of the caller's that already published: [vouchedBy],
+  /// another device of theirs in use, signed it. A device is vouched for once; the
+  /// same vouch again changes nothing, and `changed` says whether this one did.
+  Future<({CryptoDevice device, bool changed})> vouchForDevice({
+    required String userId,
+    required String deviceId,
+    required String vouchedBy,
+    required String signature,
+  });
+
   /// [ownerId]'s devices in use. Throws unless [readerId] shares keys with them.
   Future<List<CryptoDevice>> getDevices({required String readerId, required String ownerId});
 
@@ -35,8 +45,10 @@ abstract interface class KeyService {
   /// twice. A device with none left answers its fallback key.
   Future<List<CryptoDevice>> claimKeys({required String claimerId, required String ownerId});
 
-  /// Sends a sealed item to one device. `false` if this id had already arrived.
-  Future<bool> enqueue({
+  /// Sends a sealed item to one device. `delivered` is `false` if this id had
+  /// already arrived. `notify` names the account to wake: the recipient's, when this
+  /// item arrived and nothing else reached that device in the last minute.
+  Future<({bool delivered, String? notify})> enqueue({
     required String userId,
     required String id,
     required String recipientDeviceId,

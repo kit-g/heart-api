@@ -6,13 +6,37 @@ import 'package:heart/middleware/database.dart';
 import 'package:heart/middleware/events.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
+import 'package:heart/notifications/topics.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:relic/relic.dart';
+
+final _logger = logging.Logger('Keys');
 
 Future<void> _tellPeers(Request req) {
   return req.events.publish(
     queueUrl: req.config.eventsQueueUrl,
     message: {'type': 'devices.changed', 'userId': req.userId},
   );
+}
+
+/// A silent push: the recipient's app reads its queue. The item is stored by now and
+/// is read on the app's next start anyway, so a push that can't go out doesn't turn
+/// a delivered item into an error a sender would retry.
+Future<void> _wake(Request req, {required String userId, required String deviceId}) async {
+  try {
+    await req.events.publish(
+      queueUrl: req.config.eventsQueueUrl,
+      message: {
+        'type': 'push.requested',
+        'userId': userId,
+        'topic': PushTopic.queueWaiting.key,
+        'actorId': req.userId,
+        'data': {'deviceId': deviceId},
+      },
+    );
+  } catch (error, stack) {
+    _logger.warning('could not wake the device $deviceId', error, stack);
+  }
 }
 
 /// A device in the path is one of the caller's, by an id it chose, so anything
@@ -37,6 +61,18 @@ Future<Model> publishDevice(Request req) async {
   );
   await _tellPeers(req);
   return Created(device);
+}
+
+Future<CryptoDevice> vouchForDevice(Request req) async {
+  final input = await DeviceVouchIn.fromRequest(req);
+  final (:device, :changed) = await req.keyService.vouchForDevice(
+    userId: req.userId,
+    deviceId: _deviceId(req),
+    vouchedBy: input.vouchedBy,
+    signature: input.signature,
+  );
+  if (changed) await _tellPeers(req);
+  return device;
 }
 
 Future<CryptoDevices> getDevices(Request req) async {
@@ -85,7 +121,7 @@ Future<CryptoDevices> claimKeys(Request req) async {
 
 Future<Model> enqueue(Request req) async {
   final input = await EnqueueIn.fromRequest(req);
-  await req.keyService.enqueue(
+  final (delivered: _, :notify) = await req.keyService.enqueue(
     userId: req.userId,
     id: input.id,
     recipientDeviceId: input.recipientDeviceId,
@@ -93,6 +129,7 @@ Future<Model> enqueue(Request req) async {
     kind: input.kind,
     content: input.content,
   );
+  if (notify != null) await _wake(req, userId: notify, deviceId: input.recipientDeviceId);
   throw const NoContent();
 }
 
