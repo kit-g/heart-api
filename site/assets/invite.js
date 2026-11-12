@@ -162,7 +162,8 @@ async function answering() {
         'accept',
         {shares: [...($('share-history').checked ? ['history'] : []), ...($('share-goals').checked ? ['goals'] : [])]},
         'You\'re connected',
-        'Open Heart on your phone for your program and your messages. Messages wait until you do.',
+        'Open this same link on your phone, with Heart on it, for your program and your messages. Messages wait '
+            + 'until you do.',
     )();
     $('decline').onclick = answer('decline', {}, 'You said no', 'They\'ll see that you declined.');
     const block = answer(
