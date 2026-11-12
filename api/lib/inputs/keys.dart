@@ -101,6 +101,25 @@ class OneTimeKeysIn {
   }
 }
 
+/// `POST /keys/claims/:ownerId` — `{deviceIds?}`: keys only from those devices of
+/// the owner's. No `deviceIds`, or no JSON body at all, which the route never read
+/// before, takes one from each.
+class ClaimKeysIn {
+  final List<String>? deviceIds;
+
+  const new _(this.deviceIds);
+
+  static Future<ClaimKeysIn> fromRequest(Request req) async {
+    if (req.isEmpty || req.body.bodyType?.mimeType != .json) return const ClaimKeysIn._(null);
+    return switch ((await req.json())['deviceIds']) {
+      null => const ClaimKeysIn._(null),
+      final List ids when ids.isNotEmpty && ids.length <= 10 && ids.every((id) => id is String && isUuidV7(id)) =>
+        ClaimKeysIn._(ids.cast<String>().toSet().toList()),
+      _ => throw const BadRequest(reason: 'deviceIds must list one to ten device ids'),
+    };
+  }
+}
+
 /// `POST /keys/queue` — one sealed item for one device.
 class EnqueueIn {
   final String id;

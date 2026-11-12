@@ -371,16 +371,55 @@ void main() {
     verify(app.db.countOneTimeKeys(userId: 'u1', deviceId: device)).called(1);
   });
 
-  test('claiming keys takes one from each of the owner\'s devices, as the caller', () async {
-    when(
-      app.db.claimKeys(claimerId: anyNamed('claimerId'), ownerId: anyNamed('ownerId')),
-    ).thenAnswer((_) async => [published()]);
+  group('POST /keys/claims/:ownerId', () {
+    setUp(() {
+      when(
+        app.db.claimKeys(
+          claimerId: anyNamed('claimerId'),
+          ownerId: anyNamed('ownerId'),
+          deviceIds: anyNamed('deviceIds'),
+        ),
+      ).thenAnswer((_) async => [published()]);
+    });
 
-    final res = await app.send('POST', '/keys/claims/them', body: {});
+    test('takes one from each of the owner\'s devices, as the caller', () async {
+      final res = await app.send('POST', '/keys/claims/them', body: {});
 
-    expect(res.status, 200);
-    expect(CryptoDevices.fromJson(jsonDecode(res.body) as Map).devices, hasLength(1));
-    verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them')).called(1);
+      expect(res.status, 200);
+      expect(CryptoDevices.fromJson(jsonDecode(res.body) as Map).devices, hasLength(1));
+      verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them')).called(1);
+    });
+
+    test('with no body at all, too', () async {
+      final res = await app.send('POST', '/keys/claims/them');
+      expect(res.status, 200);
+      verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them')).called(1);
+    });
+
+    test('only from the devices named, each once', () async {
+      final res = await app.send(
+        'POST',
+        '/keys/claims/them',
+        body: {
+          'deviceIds': [device, device],
+        },
+      );
+      expect(res.status, 200);
+      verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them', deviceIds: [device])).called(1);
+    });
+
+    test('names one to ten devices', () async {
+      for (final ids in [
+        [],
+        ['nope'],
+        [for (var i = 0; i < 11; i++) '01900000-0000-7000-8000-0000000001${i.toString().padLeft(2, '0')}'],
+        device,
+      ]) {
+        final res = await app.send('POST', '/keys/claims/them', body: {'deviceIds': ids});
+        expect(res.status, 400, reason: '$ids');
+      }
+      verifyZeroInteractions(app.db);
+    });
   });
 
   test('a device reads what waits for it, and confirms what it received', () async {

@@ -17,3 +17,11 @@ Future<Model> registerDevice(Request req) async {
   );
   throw const NoContent();
 }
+
+/// The app stops getting the caller's pushes on this device, on sign-out or when
+/// pushes are turned off. One that isn't registered is already stopped.
+Future<Model> unregisterDevice(Request req) async {
+  final input = await DeviceUnregisterIn.fromRequest(req);
+  await req.deviceService.unregisterDevice(profileId: req.userId, token: input.token);
+  throw const NoContent();
+}
