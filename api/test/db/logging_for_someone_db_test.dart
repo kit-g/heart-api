@@ -143,6 +143,14 @@ void main() {
     final (coach, student) = await coaching();
     final peer = await h.seedProfile();
     await h.seedConnection(initiator: student, target: peer);
+    final otherCoach = await h.seedProfile();
+    await h.exec(
+      '''
+      INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status, accepted_at)
+      VALUES (@c, @s, 'COACH', 'STUDENT', 'general', 'active', '2020-01-01Z')
+      ''',
+      {'c': otherCoach, 's': student},
+    );
     final exercise = await h.seedGlobalExercise();
     final json = body(exercise);
     await logWorkoutForStudent(logging(coach, student, json), student);
@@ -158,6 +166,20 @@ void main() {
       imageUrl: imageUrl,
     );
     expect((read.loggedBy, read.loggedByName), (null, null));
+    final byOtherCoach = await h.db.getTargetWorkout(
+      requesterId: otherCoach,
+      targetUserId: student,
+      workoutId: id,
+      imageUrl: imageUrl,
+    );
+    expect((byOtherCoach.loggedBy, byOtherCoach.loggedByName), (null, null), reason: 'nor another coach of theirs');
+    final listedByOtherCoach = await h.db.getWorkouts(
+      userId: otherCoach,
+      targetUserId: student,
+      limit: 5,
+      imageUrl: imageUrl,
+    );
+    expect(listedByOtherCoach.items.single.loggedBy, isNull);
 
     final byCoach = await h.db.getWorkouts(userId: coach, targetUserId: student, limit: 5, imageUrl: imageUrl);
     expect((byCoach.items.single.loggedBy, byCoach.items.single.loggedByName), (coach, 'u_$coach'));

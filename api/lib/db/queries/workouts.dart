@@ -1,22 +1,21 @@
 part of '../db.dart';
 
-/// Who entered a workout for its owner, for every query a [Workout] is read from. It
-/// reads `logged_by` unqualified, from whichever row the query selects.
+/// Who entered a workout for its owner, for a query that reads the caller's own
+/// workouts. It reads `logged_by` unqualified, from whichever row the query
+/// selects. A read of someone else's workouts uses [_loggedByColumnsForReader].
 const _loggedByColumns = '''
 logged_by,
 (SELECT username FROM profiles coach WHERE coach.id = logged_by) AS logged_by_name''';
 
 /// [_loggedByColumns] for a query `@requesterId` reads someone's workouts through:
 /// that a coach logged one is the owner's to see and that coach's, and every other
-/// reader gets the workout without it. It reads `logged_by` and `user_id` unqualified.
+/// reader gets the workout without it. It reads `logged_by` and `user_id`
+/// unqualified, from the workouts row.
 const _loggedByColumnsForReader = '''
 CASE WHEN @requesterId IN (logged_by, user_id) THEN logged_by END AS logged_by,
-(
-  SELECT username
-  FROM profiles coach
-  WHERE coach.id = logged_by
-    AND @requesterId IN (logged_by, user_id)
-) AS logged_by_name''';
+CASE
+  WHEN @requesterId IN (logged_by, user_id) THEN (SELECT username FROM profiles coach WHERE coach.id = logged_by)
+END AS logged_by_name''';
 
 const _listWorkouts =
     '''

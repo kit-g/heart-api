@@ -146,7 +146,7 @@ final List<McpTool> _coachTools = [
             {
               ...workout.toMcpSummary(
                 coached: client.exercises,
-                quote: client.quote(workout, coachId: request.userId),
+                quote: client.quote,
               ),
               if (workout.loggedBy == request.userId) 'loggedByYou': true,
             },
@@ -199,7 +199,7 @@ final List<McpTool> _coachTools = [
         ...workout.toMcpDetail(
           names: client.names,
           coached: client.exercises,
-          quote: client.quote(workout, coachId: request.userId),
+          quote: client.quote,
         ),
         if (workout.loggedBy == request.userId) 'loggedByYou': true,
       };
@@ -498,16 +498,11 @@ enum _Lifts { none, own, all }
 typedef _Client = ({String? name, _Coached exercises, Map<String, Object> names});
 
 extension on _Client {
-  /// A workout's words, quoted: as the client's, a workout this coach logged
-  /// included, since the client can change it; as another account's that logged it.
-  _Quote quote(Workout workout, {required String coachId}) {
-    final by = switch (workout.loggedBy) {
-      null => name,
-      final id when id == coachId => name,
-      _ => workout.loggedByName,
-    };
-    return (text) => _quoted(text, by: by);
-  }
+  /// A workout's words, quoted as the client's, whoever logged it: the client can
+  /// change it, and who logged one is the client's and that coach's to know
+  /// (heart-api#405), so another coach's reads as the client's own.
+  _Quote get quote =>
+      (text) => _quoted(text, by: name);
 }
 
 extension on Request {
