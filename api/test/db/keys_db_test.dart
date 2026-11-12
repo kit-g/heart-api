@@ -75,6 +75,50 @@ void main() {
       );
     });
 
+    test('an account has at most ten devices in use, and removing one frees a slot', () async {
+      final me = await h.seedProfile();
+      final ten = [for (var i = 0; i < 10; i++) await device(me)];
+      await expectLater(
+        device(me),
+        throwsA(isA<Conflict>().having((e) => e.code, 'code', 'device_limit')),
+      );
+      final again = await h.db.publishDevice(
+        userId: me,
+        id: ten.first,
+        identityKey: 'x',
+        signingKey: 's',
+        fallbackKey: 'f',
+      );
+      expect(again.id, ten.first, reason: 'publishing one that is there again is no new device');
+
+      await h.db.removeDevice(userId: me, deviceId: ten.last);
+      expect(await device(me), isNotNull);
+    });
+
+    test('a device published while another is being published counts it', () async {
+      final me = await h.seedProfile();
+      for (var i = 0; i < 9; i++) {
+        await device(me);
+      }
+      final results = await h.runBlocked(
+        hold: (tx) async {
+          await tx.execute(
+            Sql.named("SELECT pg_advisory_xact_lock(hashtext('crypto_devices:' || @me))"),
+            parameters: {'me': me},
+          );
+          await tx.execute(
+            Sql.named(
+              'INSERT INTO crypto_devices (id, user_id, identity_key, signing_key, fallback_key) '
+              "VALUES (@id::uuid, @me, 'i', 's', 'f')",
+            ),
+            parameters: {'id': uuidV7(), 'me': me},
+          );
+        },
+        calls: [() => device(me).then<Object>((id) => id, onError: (Object e) => e)],
+      );
+      expect(results.single, isA<Conflict>().having((e) => e.code, 'code', 'device_limit'));
+    });
+
     test('someone else cannot take a device id', () async {
       final (me, other) = (await h.seedProfile(), await h.seedProfile());
       final id = await device(me);
