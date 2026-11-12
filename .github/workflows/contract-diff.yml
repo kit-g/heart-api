@@ -29,6 +29,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.13.7 # pages/ doesn't resolve on 3.14 yet; see pages/pubspec.yaml
       - uses: actions/cache@v6
         with:
           path: ~/.pub-cache

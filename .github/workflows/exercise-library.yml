@@ -78,6 +78,8 @@ jobs:
         run: aws s3 cp "s3://${{ inputs.SECRETS_BUCKET }}/secrets/supabase.json" /tmp/supabase.json
 
       - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.13.7 # pages/ doesn't resolve on 3.14 yet; see pages/pubspec.yaml
       - uses: actions/cache@v6
         with:
           path: ~/.pub-cache
