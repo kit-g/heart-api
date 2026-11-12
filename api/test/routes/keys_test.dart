@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:heart/inputs/inputs.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
+import 'package:relic_core/relic_core.dart' show MimeType;
 import 'package:test/test.dart';
 
 import '../helpers/app_harness.dart';
+import '../helpers/request.dart';
 
 void main() {
   late AppHarness app;
@@ -390,18 +393,28 @@ void main() {
       verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them')).called(1);
     });
 
-    test('with no body at all, too', () async {
-      final res = await app.send('POST', '/keys/claims/them');
-      expect(res.status, 200);
-      verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them')).called(1);
+    test('with no body at all, too, whatever its content type says', () async {
+      for (final headers in [
+        const <String, String>{},
+        {'content-type': 'application/json'},
+      ]) {
+        final res = await app.send('POST', '/keys/claims/them', extraHeaders: headers);
+        expect(res.status, 200, reason: '$headers');
+      }
+      verify(app.db.claimKeys(claimerId: 'u1', ownerId: 'them')).called(2);
     });
 
-    test('only from the devices named, each once', () async {
+    test('a body that is not JSON is refused, not read as asking for every device', () async {
+      final req = textRequest(body: '{"deviceIds": ["$device"]}', mimeType: MimeType.plainText);
+      await expectLater(ClaimKeysIn.fromRequest(req), throwsA(isA<UnsupportedMediaType>()));
+    });
+
+    test('only from the devices named, each once, whatever their case', () async {
       final res = await app.send(
         'POST',
         '/keys/claims/them',
         body: {
-          'deviceIds': [device, device],
+          'deviceIds': [device, device.toUpperCase()],
         },
       );
       expect(res.status, 200);

@@ -43,6 +43,6 @@ class DeviceUnregisterIn {
   const new _(this.token);
 
   static Future<DeviceUnregisterIn> fromRequest(Request req) async {
-    return DeviceUnregisterIn._((await req.json()).string('token', maxLength: 4096));
+    return DeviceUnregisterIn._((await req.json()).string('token'));
   }
 }

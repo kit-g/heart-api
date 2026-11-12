@@ -19,7 +19,9 @@ SELECT token, locale FROM device_tokens WHERE profile_id = @profileId
 
 /// Only the caller's own: a token another account holds now stays theirs.
 const _unregisterDevice = '''
-DELETE FROM device_tokens WHERE token = @token AND profile_id = @profileId
+DELETE FROM device_tokens
+WHERE token = @token
+  AND profile_id = @profileId
 ''';
 
 const _deleteDeviceToken = '''

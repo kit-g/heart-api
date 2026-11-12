@@ -9,6 +9,7 @@ enum PushTopic {
     fallback: instant,
     options: [instant, off],
     channel: 'comments',
+    perPersonAs: [.coach, .student, .peer],
   ),
   reactionCreated(
     key: 'reaction.created',
@@ -16,6 +17,7 @@ enum PushTopic {
     fallback: instant,
     options: [instant, off],
     channel: 'reactions',
+    perPersonAs: [.coach, .student, .peer],
   ),
   coachingMessage(
     key: 'coaching.message',
@@ -32,7 +34,6 @@ enum PushTopic {
     options: [daily, off],
     channel: 'coaching',
     collapses: true,
-    perPersonAs: [.coach],
   ),
   invitationAccepted(
     key: 'coaching.invitation_accepted',
@@ -81,9 +82,11 @@ enum PushTopic {
   final bool collapses;
 
   /// The reader's roles in a connection for which a choice about one person reaches
-  /// a push: the side this topic is sent to, with that person's connection. Empty
-  /// for a topic sent without one, and for `coaching.invitation_accepted`, which
-  /// goes once, before anyone could choose for that person.
+  /// a push: the side this topic is sent to, about that person (`notify`'s
+  /// `actorId`, or the connection it names). Empty where no such choice can matter:
+  /// the daily digest, which goes while the topic or anyone at all still wants it,
+  /// and `coaching.invitation_accepted`, which goes once, before anyone could
+  /// choose for that person.
   final List<ConnectionRole> perPersonAs;
 
   new({

@@ -55,20 +55,50 @@ WHERE domain = @domain
   )
 ''';
 
-/// Each with who the other person is, as their profile says now, unless they
-/// blocked the reader: a blocked person sees an ended connection, not a new face.
-const _listConnections = '''
+/// Who the other side of connection `c` is, for `@userId`: their name and photo as
+/// their profile says now, to someone they asked or who they accepted, never to
+/// someone who only asked them, and never to someone they blocked. The one they blocked sees an ended connection, as the
+/// roster shows them. `c` needs `target_id` (the other person), `initiator_id`,
+/// `status`, `status_by`, `accepted_at` and the rest of a connection's columns.
+const _connectionOther = '''
 SELECT
-  c.*,
-  CASE WHEN NOT b.blocked THEN p.username END AS username,
-  CASE WHEN NOT b.blocked THEN p.avatar_url END AS avatar_url
-FROM (
+  c.connection_id,
+  c.target_id,
+  c.role,
+  c.domain,
+  CASE WHEN c.status = 'blocked' AND b.id IS NOT NULL THEN 'severed' ELSE c.status END AS status,
+  c.created_at,
+  c.accepted_at,
+  c.shares,
+  nullif(trim(p.username), '') AS username,
+  p.avatar_url
+FROM _side c
+LEFT JOIN blocks b
+  ON b.blocker_id = c.target_id
+  AND b.blocked_id = @userId
+  AND b.lifted_at IS NULL
+LEFT JOIN profiles p
+  ON p.id = c.target_id
+  AND b.id IS NULL
+  AND (
+    c.accepted_at IS NOT NULL
+    OR c.initiator_id = c.target_id
+    OR (c.status = 'pending' AND c.status_by = c.target_id)
+  )
+''';
+
+/// Every connection of the caller's, both directions, as [_connectionOther] says it.
+const _listConnections =
+    '''
+WITH _side AS (
   SELECT
     id AS connection_id,
     target_id,
+    initiator_id,
     initiator_role AS role,
     domain,
     status,
+    status_by,
     created_at,
     accepted_at,
     shares
@@ -76,17 +106,22 @@ FROM (
   WHERE initiator_id = @userId
     AND (@role::text IS NULL OR initiator_role = @role)
   UNION ALL
-  SELECT id AS connection_id, initiator_id AS target_id, target_role AS role, domain, status, created_at, accepted_at, shares
+  SELECT
+    id AS connection_id,
+    initiator_id AS target_id,
+    initiator_id,
+    target_role AS role,
+    domain,
+    status,
+    status_by,
+    created_at,
+    accepted_at,
+    shares
   FROM connections
   WHERE target_id = @userId
     AND (@role::text IS NULL OR target_role = @role)
-) c
-LEFT JOIN profiles p ON p.id = c.target_id
-CROSS JOIN LATERAL (
-  SELECT EXISTS (
-    SELECT 1 FROM blocks WHERE blocker_id = c.target_id AND blocked_id = @userId AND lifted_at IS NULL
-  ) AS blocked
-) b
+)
+$_connectionOther
 ORDER BY c.created_at DESC
 ''';
 
@@ -104,29 +139,27 @@ WHERE domain = @domain
   )
 ''';
 
-/// Either side's view of one connection, by its identity, with who the other
-/// person is, as [_listConnections] says it.
-const _getConnectionById = '''
-SELECT
-  c.*,
-  CASE WHEN NOT b.blocked THEN p.username END AS username,
-  CASE WHEN NOT b.blocked THEN p.avatar_url END AS avatar_url
-FROM (
+/// Either side's view of one connection, by its identity, as [_connectionOther]
+/// says it: the routes that change one answer with who the other person is.
+const _getConnectionById =
+    '''
+WITH _side AS (
   SELECT
     id AS connection_id,
     CASE WHEN initiator_id = @userId THEN target_id ELSE initiator_id END AS target_id,
+    initiator_id,
     CASE WHEN initiator_id = @userId THEN initiator_role ELSE target_role END AS role,
-    domain, status, created_at, accepted_at, shares
+    domain,
+    status,
+    status_by,
+    created_at,
+    accepted_at,
+    shares
   FROM connections
   WHERE id = @connectionId::uuid
     AND @userId IN (initiator_id, target_id)
-) c
-LEFT JOIN profiles p ON p.id = c.target_id
-CROSS JOIN LATERAL (
-  SELECT EXISTS (
-    SELECT 1 FROM blocks WHERE blocker_id = c.target_id AND blocked_id = @userId AND lifted_at IS NULL
-  ) AS blocked
-) b
+)
+$_connectionOther
 ''';
 
 /// Ending is either party's call — except while a block stands, when only the

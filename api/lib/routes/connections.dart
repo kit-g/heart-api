@@ -50,28 +50,49 @@ Future<Model?> deleteConnection(Request request) async {
 Future<Connection> changeConnectionShares(Request request) async {
   final input = await ConnectionSharesIn.fromRequest(request);
   final connection = await _connectionInPath(request);
-  return request.connectionsService.changeConnectionShares(
+  final changed = await request.connectionsService.changeConnectionShares(
     actorId: request.userId,
     targetId: connection.targetId,
     role: connection.role,
     domain: connection.domain,
     shares: input.shares,
   );
+  return changed.naming(connection);
 }
 
 Future<Connection?> reactToConnection(Request request) async {
   final input = await ConnectionStatusIn.fromRequest(request);
   final connection = await _connectionInPath(request);
   try {
-    return await request.connectionsService.changeConnectionStatus(
+    final changed = await request.connectionsService.changeConnectionStatus(
       actorId: request.userId,
       targetId: connection.targetId,
       role: connection.role,
       domain: connection.domain,
       newStatus: input.status,
     );
+    return changed.naming(connection);
   } on StateError catch (e) {
     // A transition the state machine forbids outright, or the row gone since.
     throw BadRequest(reason: e.message.toString(), payload: request.signature());
+  }
+}
+
+extension on Connection {
+  /// This connection, saying who the other person is as [read] did, so an app that
+  /// keeps the answer to a change keeps their name and photo too.
+  Connection naming(Connection read) {
+    return Connection(
+      targetId: targetId,
+      role: role,
+      domain: domain,
+      status: status,
+      createdAt: createdAt,
+      connectionId: connectionId,
+      acceptedAt: acceptedAt,
+      shares: shares,
+      name: read.name,
+      avatar: read.avatar,
+    );
   }
 }

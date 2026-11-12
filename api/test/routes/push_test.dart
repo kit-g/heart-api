@@ -35,10 +35,11 @@ void main() {
       expect(topics['coaching.workout_digest']?['delivery'], 'daily');
       expect(topics['coaching.workout_digest']?['options'], ['daily', 'off']);
       expect(topics['coaching.message']?['perPersonAs'], ['coach', 'student', 'peer']);
-      expect(topics['coaching.workout_digest']?['perPersonAs'], ['coach']);
+      expect(topics['coaching.workout_digest']?['perPersonAs'], isEmpty, reason: 'one person off stops nothing');
       expect(topics['coaching.program_received']?['perPersonAs'], ['student']);
       expect(topics['coaching.invitation_accepted']?['perPersonAs'], isEmpty);
-      expect(topics['comment.created']?['perPersonAs'], isEmpty);
+      expect(topics['comment.created']?['perPersonAs'], ['coach', 'student', 'peer']);
+      expect(topics['reaction.created']?['perPersonAs'], ['coach', 'student', 'peer']);
       expect(body['forPeople'], [
         {'topic': 'coaching.workout_digest', 'connectionId': 'c', 'delivery': 'off'},
       ]);
