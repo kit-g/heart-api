@@ -139,6 +139,30 @@ void main() {
     });
   });
 
+  test('only the owner and the coach who logged it are told who entered it', () async {
+    final (coach, student) = await coaching();
+    final peer = await h.seedProfile();
+    await h.seedConnection(initiator: student, target: peer);
+    final exercise = await h.seedGlobalExercise();
+    final json = body(exercise);
+    await logWorkoutForStudent(logging(coach, student, json), student);
+    final id = json['id'] as String;
+
+    final listed = await h.db.getWorkouts(userId: peer, targetUserId: student, limit: 5, imageUrl: imageUrl);
+    expect(listed.items.single.id, id, reason: 'the peer reads the workout');
+    expect((listed.items.single.loggedBy, listed.items.single.loggedByName), (null, null));
+    final read = await h.db.getTargetWorkout(
+      requesterId: peer,
+      targetUserId: student,
+      workoutId: id,
+      imageUrl: imageUrl,
+    );
+    expect((read.loggedBy, read.loggedByName), (null, null));
+
+    final byCoach = await h.db.getWorkouts(userId: coach, targetUserId: student, limit: 5, imageUrl: imageUrl);
+    expect((byCoach.items.single.loggedBy, byCoach.items.single.loggedByName), (coach, 'u_$coach'));
+  });
+
   test('every read of the workout says who entered it', () async {
     final (coach, student) = await coaching();
     final exercise = await h.seedGlobalExercise();

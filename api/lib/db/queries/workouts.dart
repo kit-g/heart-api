@@ -6,6 +6,18 @@ const _loggedByColumns = '''
 logged_by,
 (SELECT username FROM profiles coach WHERE coach.id = logged_by) AS logged_by_name''';
 
+/// [_loggedByColumns] for a query `@requesterId` reads someone's workouts through:
+/// that a coach logged one is the owner's to see and that coach's, and every other
+/// reader gets the workout without it. It reads `logged_by` and `user_id` unqualified.
+const _loggedByColumnsForReader = '''
+CASE WHEN @requesterId IN (logged_by, user_id) THEN logged_by END AS logged_by,
+(
+  SELECT username
+  FROM profiles coach
+  WHERE coach.id = logged_by
+    AND @requesterId IN (logged_by, user_id)
+) AS logged_by_name''';
+
 const _listWorkouts =
     '''
 WITH
@@ -15,7 +27,7 @@ _rel AS (
 _workouts AS (
   SELECT
     id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at,
-    $_loggedByColumns,
+    $_loggedByColumnsForReader,
     _workout_exercises(id) AS exercises,
     CASE
       WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
@@ -107,7 +119,7 @@ _rel AS (
 )
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
-  $_loggedByColumns,
+  $_loggedByColumnsForReader,
   _workout_exercises(w.id) AS exercises,
   CASE
     WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
