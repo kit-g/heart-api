@@ -546,7 +546,7 @@ void main() {
       expect(resumed.status, ConnectionStatus.active);
     });
 
-    test('only the person who blocked can lift the block; to the other there is nothing there', () async {
+    test('only the person who blocked can lift the block; to the other it is an ended connection', () async {
       final (blocker, blocked) = await pair();
       await h.seedConnection(initiator: blocked, target: blocker);
       await h.db.changeConnectionStatus(
@@ -557,6 +557,8 @@ void main() {
         newStatus: ConnectionStatus.blocked,
       );
 
+      final seen = await h.db.getConnection(actorId: blocked, targetId: blocker, role: .peer, domain: .fitness);
+      expect(seen!.status, ConnectionStatus.severed);
       await expectLater(
         h.db.changeConnectionStatus(
           actorId: blocked,
@@ -565,7 +567,19 @@ void main() {
           domain: ConnectionDomain.fitness,
           newStatus: ConnectionStatus.severed,
         ),
-        throwsA(isA<NotFound>()),
+        throwsA(isA<StateError>()),
+        reason: 'as ending an ended one is',
+      );
+      await expectLater(
+        h.db.changeConnectionStatus(
+          actorId: blocked,
+          targetId: blocker,
+          role: ConnectionRole.peer,
+          domain: ConnectionDomain.fitness,
+          newStatus: ConnectionStatus.pending,
+        ),
+        throwsA(isA<Forbidden>()),
+        reason: 'nothing starts again while a block stands',
       );
 
       final lifted = await h.db.changeConnectionStatus(
@@ -576,6 +590,53 @@ void main() {
         newStatus: ConnectionStatus.severed,
       );
       expect(lifted.status, ConnectionStatus.severed);
+    });
+
+    test('the one blocked can block back from the row, as from any ended one', () async {
+      final (blocker, blocked) = await pair();
+      await h.seedConnection(initiator: blocked, target: blocker);
+      await h.seedConnection(initiator: blocked, target: blocker, domain: 'general');
+      Future<Connection> block(String actor, String other, {ConnectionDomain domain = .fitness}) {
+        return h.db.changeConnectionStatus(
+          actorId: actor,
+          targetId: other,
+          role: .peer,
+          domain: domain,
+          newStatus: .blocked,
+        );
+      }
+
+      await block(blocker, blocked);
+      final back = await block(blocked, blocker);
+
+      expect(back.status, ConnectionStatus.blocked);
+      final live = await h.exec(
+        'SELECT blocker_id FROM blocks WHERE @b IN (blocker_id, blocked_id) AND lifted_at IS NULL ORDER BY blocker_id',
+        {'b': blocked},
+      );
+      expect({for (final row in live) row[0]}, {blocker, blocked}, reason: 'both blocks stand');
+      Future<Map<ConnectionDomain, ConnectionStatus>> seenBy(String reader) async => {
+        for (final c in await h.db.getConnections(reader)) c.domain: c.status,
+      };
+      expect(await seenBy(blocked), {
+        ConnectionDomain.fitness: ConnectionStatus.blocked,
+        ConnectionDomain.general: ConnectionStatus.severed,
+      });
+      expect(await seenBy(blocker), {
+        ConnectionDomain.fitness: ConnectionStatus.severed,
+        ConnectionDomain.general: ConnectionStatus.severed,
+      });
+
+      // the first blocker's own block on another row reads as theirs, whatever the other did since
+      await block(blocker, blocked, domain: .general);
+      expect(await seenBy(blocker), {
+        ConnectionDomain.fitness: ConnectionStatus.severed,
+        ConnectionDomain.general: ConnectionStatus.blocked,
+      });
+      expect(await seenBy(blocked), {
+        ConnectionDomain.fitness: ConnectionStatus.blocked,
+        ConnectionDomain.general: ConnectionStatus.severed,
+      });
     });
 
     // `changeConnectionStatus` reads the status, then writes. Without the
