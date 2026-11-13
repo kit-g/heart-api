@@ -75,27 +75,40 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
   Future<Map<String, dynamic>> updateExercise({
     required String userId,
     required String exerciseId,
+    String? name,
     String? category,
     String? target,
     String? instructions,
     bool? archived,
     ({String? value})? pattern,
   }) async {
-    final rows = await _pool.execute(
-      _updateExercise.toSql(),
-      parameters: {
-        'userId': userId,
-        'exerciseId': exerciseId,
-        'category': category,
-        'target': target,
-        'instructions': instructions,
-        'archived': archived,
-        'setsPattern': pattern != null,
-        'pattern': pattern?.value,
-      },
-    );
+    final nameTaken = Conflict(code: 'name_taken', reason: 'you already have an exercise called "$name"');
+    final Result rows;
+    try {
+      rows = await _pool.execute(
+        _updateExercise.toSql(),
+        parameters: {
+          'userId': userId,
+          'exerciseId': exerciseId,
+          'name': name,
+          'category': category,
+          'target': target,
+          'instructions': instructions,
+          'archived': archived,
+          'setsPattern': pattern != null,
+          'pattern': pattern?.value,
+        },
+      );
+    } on ServerException catch (e) {
+      // the pre-check and the write are one statement but not one step: a
+      // concurrent create or rename to the same name lands on the index
+      if (e.code == '23505' && e.constraintName == 'exercises_user_name_idx') throw nameTaken;
+      rethrow;
+    }
     if (rows.isEmpty) throw NotFound(type: 'Exercise', id: exerciseId);
-    return rows.first.toColumnMap();
+    final row = rows.first.toColumnMap();
+    if (row.remove('name_taken') == true) throw nameTaken;
+    return row;
   }
 
   @override

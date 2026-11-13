@@ -18,10 +18,13 @@ abstract interface class ExerciseService {
   });
 
   /// [pattern] null leaves the movement pattern alone; `(value: null)` clears
-  /// it.
+  /// it. A [name] another of [userId]'s exercises already has, in any case,
+  /// throws [Conflict] (`name_taken`): the create and the imports resolve a
+  /// name to an exercise that way.
   Future<Map<String, dynamic>> updateExercise({
     required String userId,
     required String exerciseId,
+    String? name,
     String? category,
     String? target,
     String? instructions,
