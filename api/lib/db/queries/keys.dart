@@ -1,11 +1,26 @@
 part of '../db.dart';
 
+/// Taken before [_publishDevice], in a statement of its own, so two new devices
+/// published at once count each other: a statement counts from the snapshot it
+/// started with.
+const _lockPublishing = '''
+SELECT pg_advisory_xact_lock(hashtextextended('crypto_devices:' || @userId, 0))
+''';
+
 /// A device id is chosen by the device, so publishing twice answers what is
 /// there, and someone else's id answers nothing. A signature only counts if it
 /// names a device of the same owner. A device its owner removed stays removed,
-/// and says so.
-const _publishDevice = '''
+/// and says so. A new one past the account's limit of devices in use is no
+/// device, and `is_full` says why. `added` says this statement added it.
+const _publishDevice =
+    '''
 WITH
+_live AS (
+  SELECT count(*) >= $_maxDevices AS is_full
+  FROM crypto_devices
+  WHERE user_id = @userId
+    AND removed_at IS NULL
+),
 _inserted AS (
   INSERT INTO crypto_devices (id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by)
   SELECT
@@ -19,17 +34,27 @@ _inserted AS (
   FROM (SELECT 1) one
   LEFT JOIN crypto_devices voucher
     ON voucher.id = @vouchedBy::uuid AND voucher.user_id = @userId AND voucher.removed_at IS NULL
+  WHERE NOT (SELECT is_full FROM _live)
   ON CONFLICT (id) DO NOTHING
   RETURNING *
 )
-SELECT id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at, false AS removed
+SELECT
+  id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at,
+  false AS removed, false AS is_full, true AS added
 FROM _inserted
 UNION ALL
-SELECT id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at, removed_at IS NOT NULL
+SELECT
+  id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at,
+  removed_at IS NOT NULL, false, false
 FROM crypto_devices
 WHERE id = @id::uuid
   AND user_id = @userId
   AND NOT EXISTS (SELECT 1 FROM _inserted)
+UNION ALL
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, false
+FROM _live
+WHERE is_full
+  AND NOT EXISTS (SELECT 1 FROM crypto_devices WHERE id = @id::uuid)
 ''';
 
 /// A device is vouched for once, by another device of the same owner in use. The

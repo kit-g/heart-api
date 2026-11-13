@@ -1,10 +1,21 @@
 part of '../db.dart';
 
-/// Who entered a workout for its owner, for every query a [Workout] is read from. It
-/// reads `logged_by` unqualified, from whichever row the query selects.
+/// Who entered a workout for its owner, for a query that reads the caller's own
+/// workouts. It reads `logged_by` unqualified, from whichever row the query
+/// selects. A read of someone else's workouts uses [_loggedByColumnsForReader].
 const _loggedByColumns = '''
 logged_by,
 (SELECT username FROM profiles coach WHERE coach.id = logged_by) AS logged_by_name''';
+
+/// [_loggedByColumns] for a query `@requesterId` reads someone's workouts through:
+/// that a coach logged one is the owner's to see and that coach's, and every other
+/// reader gets the workout without it. It reads `logged_by` and `user_id`
+/// unqualified, from the workouts row.
+const _loggedByColumnsForReader = '''
+CASE WHEN @requesterId IN (logged_by, user_id) THEN logged_by END AS logged_by,
+CASE
+  WHEN @requesterId IN (logged_by, user_id) THEN (SELECT username FROM profiles coach WHERE coach.id = logged_by)
+END AS logged_by_name''';
 
 const _listWorkouts =
     '''
@@ -15,7 +26,7 @@ _rel AS (
 _workouts AS (
   SELECT
     id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at,
-    $_loggedByColumns,
+    $_loggedByColumnsForReader,
     _workout_exercises(id) AS exercises,
     CASE
       WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
@@ -107,7 +118,7 @@ _rel AS (
 )
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
-  $_loggedByColumns,
+  $_loggedByColumnsForReader,
   _workout_exercises(w.id) AS exercises,
   CASE
     WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb

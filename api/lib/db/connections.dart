@@ -75,14 +75,10 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     required ConnectionRole role,
     required ConnectionDomain domain,
   }) async {
-    final result = await _pool.execute(
+    await _pool.execute(
       _endConnection.toSql(),
       parameters: {'actorId': actorId, 'targetId': targetId, 'domain': domain.value},
     );
-
-    if (result.first.toColumnMap() case {'refused': true}) {
-      throw const Forbidden(reason: 'You cannot remove a connection that blocks you.');
-    }
   }
 
   @override
@@ -93,13 +89,8 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     required ConnectionDomain domain,
     required ConnectionStatus newStatus,
   }) async {
-    final existing = await getConnection(
-      actorId: actorId,
-      targetId: targetId,
-      role: role,
-      domain: domain,
-    );
-
+    // As the caller reads it: one the other person blocked is an ended one to them.
+    final existing = await getConnection(actorId: actorId, targetId: targetId, role: role, domain: domain);
     if (existing == null) throw StateError('No connection between these users');
     if (!existing.status.canTransitionTo(newStatus)) {
       throw StateError('Cannot transition from ${existing.status.name} to ${newStatus.name}');
@@ -152,7 +143,8 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
 
   /// The UPDATE matched nothing. The legality and existence checks already
   /// passed, so it is one of the actor rules — or, rarely, someone else moved
-  /// the status between the read and the write.
+  /// the status between the read and the write. A `blocked` status is read only
+  /// by whoever set it, so a block refused is a change in between.
   static String _refusal(Connection existing, ConnectionStatus to) {
     final from = existing.status;
     final coaching = existing.role != .peer;
@@ -164,9 +156,6 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     }
     if (from == .pending && to.isTheTargetsAlone) {
       return 'Only the person you sent this request to can ${to == ConnectionStatus.active ? 'accept' : 'decline'} it.';
-    }
-    if (from == .blocked) {
-      return 'Only the person who blocked can lift a block.';
     }
     return 'This connection changed while you were acting on it. Fetch it again.';
   }

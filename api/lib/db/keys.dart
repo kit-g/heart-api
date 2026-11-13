@@ -1,5 +1,8 @@
 part of 'db.dart';
 
+/// Devices with keys an account can have in use: a beta guard, not a promise.
+const _maxDevices = 10;
+
 /// Single-use keys a device can hold.
 const _maxOneTimeKeys = 50;
 
@@ -12,7 +15,7 @@ const _maxQueuedPerPair = 2000;
 
 mixin _Keys on _DatabaseBase implements KeyService {
   @override
-  Future<CryptoDevice> publishDevice({
+  Future<({CryptoDevice device, bool added})> publishDevice({
     required String userId,
     required String id,
     required String identityKey,
@@ -21,8 +24,8 @@ mixin _Keys on _DatabaseBase implements KeyService {
     String? signature,
     String? vouchedBy,
   }) async {
-    Future<Map<String, dynamic>?> publish() async {
-      final rows = await _pool.execute(
+    Future<Map<String, dynamic>?> publish(TxSession tx) async {
+      final rows = await tx.execute(
         _publishDevice.toSql(),
         parameters: {
           'userId': userId,
@@ -39,11 +42,18 @@ mixin _Keys on _DatabaseBase implements KeyService {
 
     // A publish racing another of the same id waits for it, then reads from a
     // snapshot taken before it committed and finds nothing. Asking again sees it.
-    final row = await publish() ?? await publish();
+    final row = await _pool.runTx((tx) async {
+      await tx.execute(_lockPublishing.toSql(), parameters: {'userId': userId});
+      return await publish(tx) ?? await publish(tx);
+    });
     return switch (row) {
       null => throw _idTaken,
+      {'is_full': true} => throw const Conflict(
+        code: 'device_limit',
+        reason: 'an account has at most $_maxDevices devices with keys; remove one first',
+      ),
       {'removed': true} => throw const Forbidden(code: 'device_removed', reason: 'this device was removed'),
-      _ => CryptoDevice.fromRow(row),
+      _ => (device: CryptoDevice.fromRow(row), added: row['added'] == true),
     };
   }
 

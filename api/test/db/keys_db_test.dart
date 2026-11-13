@@ -24,7 +24,7 @@ void main() {
       vouchedBy: vouchedBy,
       signature: signature,
     );
-    return published.id;
+    return published.device.id;
   }
 
   Future<(String, String)> connected() async {
@@ -37,12 +37,13 @@ void main() {
     test('publishing twice answers what is there', () async {
       final me = await h.seedProfile();
       final id = uuidV7();
-      Future<CryptoDevice> publish(String key) {
+      Future<({CryptoDevice device, bool added})> publish(String key) {
         return h.db.publishDevice(userId: me, id: id, identityKey: key, signingKey: 's', fallbackKey: 'f');
       }
 
-      await publish('first');
-      expect((await publish('second')).identityKey, 'first');
+      expect((await publish('first')).added, isTrue);
+      final again = await publish('second');
+      expect((again.device.identityKey, again.added), ('first', false));
     });
 
     test('a publish racing another of the same id answers the device, not a stranger\'s id', () async {
@@ -62,7 +63,7 @@ void main() {
           () => h.db.publishDevice(userId: me, id: id, identityKey: 'retry', signingKey: 's', fallbackKey: 'f'),
         ],
       );
-      expect(published.single.identityKey, 'first');
+      expect((published.single.device.identityKey, published.single.added), ('first', false));
     });
 
     test('a removed device stays removed, and says so', () async {
@@ -73,6 +74,50 @@ void main() {
         h.db.publishDevice(userId: me, id: id, identityKey: 'i', signingKey: 's', fallbackKey: 'f'),
         throwsA(isA<Forbidden>().having((e) => e.code, 'code', 'device_removed')),
       );
+    });
+
+    test('an account has at most ten devices in use, and removing one frees a slot', () async {
+      final me = await h.seedProfile();
+      final ten = [for (var i = 0; i < 10; i++) await device(me)];
+      await expectLater(
+        device(me),
+        throwsA(isA<Conflict>().having((e) => e.code, 'code', 'device_limit')),
+      );
+      final again = await h.db.publishDevice(
+        userId: me,
+        id: ten.first,
+        identityKey: 'x',
+        signingKey: 's',
+        fallbackKey: 'f',
+      );
+      expect(again.device.id, ten.first, reason: 'publishing one that is there again is no new device');
+
+      await h.db.removeDevice(userId: me, deviceId: ten.last);
+      expect(await device(me), isNotNull);
+    });
+
+    test('a device published while another is being published counts it', () async {
+      final me = await h.seedProfile();
+      for (var i = 0; i < 9; i++) {
+        await device(me);
+      }
+      final results = await h.runBlocked(
+        hold: (tx) async {
+          await tx.execute(
+            Sql.named("SELECT pg_advisory_xact_lock(hashtextextended('crypto_devices:' || @me, 0))"),
+            parameters: {'me': me},
+          );
+          await tx.execute(
+            Sql.named(
+              'INSERT INTO crypto_devices (id, user_id, identity_key, signing_key, fallback_key) '
+              "VALUES (@id::uuid, @me, 'i', 's', 'f')",
+            ),
+            parameters: {'id': uuidV7(), 'me': me},
+          );
+        },
+        calls: [() => device(me).then<Object>((id) => id, onError: (Object e) => e)],
+      );
+      expect(results.single, isA<Conflict>().having((e) => e.code, 'code', 'device_limit'));
     });
 
     test('someone else cannot take a device id', () async {
@@ -98,8 +143,8 @@ void main() {
         vouchedBy: mine,
         signature: 'sig',
       );
-      expect(vouched.vouchedBy, mine);
-      expect(vouched.signature, 'sig');
+      expect(vouched.device.vouchedBy, mine);
+      expect(vouched.device.signature, 'sig');
 
       final not = await h.db.publishDevice(
         userId: me,
@@ -110,8 +155,8 @@ void main() {
         vouchedBy: theirs,
         signature: 'sig',
       );
-      expect(not.vouchedBy, isNull);
-      expect(not.signature, isNull);
+      expect(not.device.vouchedBy, isNull);
+      expect(not.device.signature, isNull);
     });
 
     test('a published device is vouched for once, by another device of the same owner in use', () async {
