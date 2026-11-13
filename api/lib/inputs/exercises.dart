@@ -72,6 +72,10 @@ class ExerciseMoveIn {
 }
 
 class ExerciseUpdateIn {
+  /// Null leaves the name alone. The id is the exercise's identity, so a
+  /// rename is display text only: everything that names the exercise reads it
+  /// from the row.
+  final String? name;
   final String? category;
   final String? target;
   final String? instructions;
@@ -82,6 +86,7 @@ class ExerciseUpdateIn {
   final ({String? value})? pattern;
 
   const new _({
+    required this.name,
     required this.category,
     required this.target,
     required this.instructions,
@@ -92,6 +97,12 @@ class ExerciseUpdateIn {
   static Future<ExerciseUpdateIn> fromRequest(Request req) async {
     final json = await req.json();
     return ExerciseUpdateIn._(
+      // the rules a create's name has
+      name: switch (json.stringOrNull('name', maxLength: 200)?.trim()) {
+        null => null,
+        String s when s.isNotEmpty => s,
+        _ => throw const BadRequest(reason: 'name must be a non-empty string'),
+      },
       category: json.stringOrNull('category', maxLength: 100),
       target: json.stringOrNull('target', maxLength: 100),
       instructions: json.stringOrNull('instructions', maxLength: 10000),

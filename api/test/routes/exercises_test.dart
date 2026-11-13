@@ -304,5 +304,38 @@ void main() {
         ),
       ).called(1);
     });
+
+    test('a rename forwards the name trimmed', () async {
+      when(
+        app.db.updateExercise(userId: anyNamed('userId'), exerciseId: anyNamed('exerciseId'), name: anyNamed('name')),
+      ).thenAnswer((_) async => {'id': 'e1', 'name': 'Bench Press'});
+
+      final res = await app.send('PUT', '/exercises/e1', body: {'name': '  Bench Press '});
+      expect(res.status, 200);
+      verify(app.db.updateExercise(userId: 'u1', exerciseId: 'e1', name: 'Bench Press')).called(1);
+    });
+
+    for (final name in ['', '   ']) {
+      test('a blank name ("$name") is a 400 and never reaches the database', () async {
+        final res = await app.send('PUT', '/exercises/e1', body: {'name': name});
+        expect(res.status, 400);
+        verifyNever(app.db.updateExercise(userId: anyNamed('userId'), exerciseId: anyNamed('exerciseId')));
+      });
+    }
+
+    test('a name over 200 characters is a 400', () async {
+      final res = await app.send('PUT', '/exercises/e1', body: {'name': 'x' * 201});
+      expect(res.status, 400);
+    });
+
+    test('a name the user already has is a 409 name_taken', () async {
+      when(
+        app.db.updateExercise(userId: anyNamed('userId'), exerciseId: anyNamed('exerciseId'), name: anyNamed('name')),
+      ).thenThrow(const Conflict(code: 'name_taken', reason: 'taken'));
+
+      final res = await app.send('PUT', '/exercises/e1', body: {'name': 'Squat'});
+      expect(res.status, 409);
+      expect(jsonDecode(res.body), containsPair('code', 'name_taken'));
+    });
   });
 }

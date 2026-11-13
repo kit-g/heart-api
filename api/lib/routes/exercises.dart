@@ -47,6 +47,7 @@ Future<ExerciseModel> updateExercise(Request request) async {
   final row = await request.exerciseService.updateExercise(
     userId: request.userId,
     exerciseId: exerciseId,
+    name: input.name,
     category: input.category,
     target: input.target,
     instructions: input.instructions,

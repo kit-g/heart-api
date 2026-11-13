@@ -608,6 +608,95 @@ void main() {
     });
   });
 
+  group('renaming an own exercise (heart-api#429)', () {
+    test('the new name comes back, the rest of the row kept', () async {
+      final created = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('Typo'),
+        category: 'Barbell',
+        target: 'Chest',
+      );
+      final name = h.uniqueName('Fixed');
+      final renamed = await h.db.updateExercise(userId: ownerId, exerciseId: created['id'].toString(), name: name);
+      expect(renamed['name'], name);
+      expect(renamed['category'], 'Barbell');
+      expect(renamed.containsKey('name_taken'), isFalse);
+
+      final listed = await h.db.getExercises(ownerId, owned: true);
+      expect(findEx(listed['exercises'] as List, created['id'].toString())?['name'], name);
+    });
+
+    test('a case-only fix of its own name goes through', () async {
+      final name = h.uniqueName('bench');
+      final created = await h.db.createExercise(userId: ownerId, name: name, category: 'Barbell', target: 'Chest');
+      final renamed = await h.db.updateExercise(
+        userId: ownerId,
+        exerciseId: created['id'].toString(),
+        name: name.toUpperCase(),
+      );
+      expect(renamed['name'], name.toUpperCase());
+    });
+
+    test('a name another own exercise has, in any case, is a name_taken Conflict and changes nothing', () async {
+      final taken = h.uniqueName('Taken');
+      await h.db.createExercise(userId: ownerId, name: taken, category: 'Barbell', target: 'Chest');
+      final created = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('Mine'),
+        category: 'Barbell',
+        target: 'Chest',
+      );
+      final id = created['id'].toString();
+
+      for (final name in [taken, taken.toLowerCase()]) {
+        await expectLater(
+          h.db.updateExercise(userId: ownerId, exerciseId: id, name: name, category: 'Dumbbell'),
+          throwsA(isA<Conflict>().having((e) => e.code, 'code', 'name_taken')),
+        );
+      }
+      final listed = await h.db.getExercises(ownerId, owned: true);
+      final row = findEx(listed['exercises'] as List, id)!;
+      expect(row['name'], created['name']);
+      expect(row['category'], 'Barbell');
+    });
+
+    test('another user\'s name is no collision', () async {
+      final name = h.uniqueName('Theirs');
+      await h.db.createExercise(userId: otherId, name: name, category: 'Barbell', target: 'Chest');
+      final created = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('Ours'),
+        category: 'Barbell',
+        target: 'Chest',
+      );
+      final renamed = await h.db.updateExercise(userId: ownerId, exerciseId: created['id'].toString(), name: name);
+      expect(renamed['name'], name);
+    });
+
+    test('someone else\'s exercise is NotFound even when the name collides with one of the caller\'s', () async {
+      final taken = h.uniqueName('Collides');
+      await h.db.createExercise(userId: ownerId, name: taken, category: 'Barbell', target: 'Chest');
+      final theirs = await h.db.createExercise(
+        userId: otherId,
+        name: h.uniqueName('Foreign'),
+        category: 'Barbell',
+        target: 'Chest',
+      );
+      await expectLater(
+        h.db.updateExercise(userId: ownerId, exerciseId: theirs['id'].toString(), name: taken),
+        throwsA(isA<NotFound>()),
+      );
+    });
+
+    test('a library exercise cannot be renamed (NotFound)', () async {
+      final id = await h.seedGlobalExercise();
+      await expectLater(
+        h.db.updateExercise(userId: ownerId, exerciseId: id, name: h.uniqueName('Library')),
+        throwsA(isA<NotFound>()),
+      );
+    });
+  });
+
   group('setExerciseMedia', () {
     final asset = {'link': 'https://cdn.test/asset.mp4', 'width': 640, 'height': 480};
     final thumbnail = {'link': 'https://cdn.test/thumb.jpg', 'width': 160, 'height': 120};

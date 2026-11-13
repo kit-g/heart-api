@@ -120,25 +120,63 @@ FROM _by_name
 WHERE NOT EXISTS (SELECT 1 FROM _ins) AND NOT EXISTS (SELECT 1 FROM _by_id)
 ''';
 
+/// Three outcomes, told apart without a second round trip, as a folder's
+/// rename: no rows (the exercise is not the caller's own), one row with
+/// `name_taken` (the rename would collide with another own exercise,
+/// case-insensitively, as the create matches names), one row with the
+/// exercise (updated).
 const _updateExercise = '''
-UPDATE exercises
-SET
-  category = coalesce(@category, category),
-  target = coalesce(@target, target),
-  instructions = coalesce(@instructions, instructions),
-  archived = coalesce(@archived, archived),
-  -- the pattern is the movement's groups: set, or cleared, with whatever else
-  -- the movement says kept; a movement left empty is none
-  movement = CASE
-    WHEN NOT @setsPattern::boolean THEN movement
-    WHEN @pattern::text IS NOT NULL
-      THEN jsonb_set(coalesce(movement, '{}'), '{groups}', jsonb_build_array(@pattern::text))
-    ELSE nullif(movement - 'groups', '{}')
-  END
-WHERE id = @exerciseId::uuid 
-  AND user_id = @userId
-RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived,
-          user_id IS NOT NULL AS own
+WITH
+_target AS (
+  SELECT id
+  FROM exercises
+  WHERE id = @exerciseId::uuid
+    AND user_id = @userId
+),
+_conflict AS (
+  SELECT 1
+  FROM exercises
+  WHERE user_id = @userId
+    AND lower(name) = lower(@name::text)
+    AND id <> @exerciseId::uuid
+),
+_updated AS (
+  UPDATE exercises
+  SET
+    name = coalesce(@name::text, name),
+    category = coalesce(@category, category),
+    target = coalesce(@target, target),
+    instructions = coalesce(@instructions, instructions),
+    archived = coalesce(@archived, archived),
+    -- the pattern is the movement's groups: set, or cleared, with whatever else
+    -- the movement says kept; a movement left empty is none
+    movement = CASE
+      WHEN NOT @setsPattern::boolean THEN movement
+      WHEN @pattern::text IS NOT NULL
+        THEN jsonb_set(coalesce(movement, '{}'), '{groups}', jsonb_build_array(@pattern::text))
+      ELSE nullif(movement - 'groups', '{}')
+    END
+  WHERE id = (SELECT id FROM _target)
+    AND NOT EXISTS (SELECT 1 FROM _conflict)
+  RETURNING id, name, category, target, instructions, asset, thumbnail, muscles, movement, health, archived,
+            user_id IS NOT NULL AS own
+)
+SELECT
+  t.id,
+  u.name,
+  u.category,
+  u.target,
+  u.instructions,
+  u.asset,
+  u.thumbnail,
+  u.muscles,
+  u.movement,
+  u.health,
+  u.archived,
+  u.own,
+  EXISTS (SELECT 1 FROM _conflict) AS name_taken
+FROM _target t
+LEFT JOIN _updated u ON u.id = t.id
 ''';
 
 const _setExerciseMedia = '''
