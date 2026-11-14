@@ -102,6 +102,57 @@ void main() {
     });
   });
 
+  group('weighted body weight', () {
+    const category = 'Weighted Body Weight';
+
+    test('a bodyweight-only history has a reps record and no weight records', () {
+      final rows = [
+        // the phone leaves an unloaded set's weight empty, the watch sends 0
+        row(weight: null, reps: 12, workoutId: 'w1', start: '2026-01-01T10:00:00Z'),
+        row(weight: 0, reps: 18, workoutId: 'w2', start: '2026-02-01T10:00:00Z'),
+        row(weight: 0, reps: 15, workoutId: 'w3', start: '2026-03-01T10:00:00Z'),
+      ];
+
+      final records = fold(category, rows)!;
+      expect(records['mostReps'], {
+        'reps': 18,
+        'workoutId': 'w2',
+        'at': '2026-02-01T10:00:00Z',
+        'previous': {'reps': 12, 'workoutId': 'w1', 'at': '2026-01-01T10:00:00Z'},
+      });
+      for (final key in ['heaviest', 'oneRepMax', 'bestVolume', 'repMaxes', 'totalVolume']) {
+        expect(records.containsKey(key), isFalse, reason: key);
+      }
+      expect(records['sessions'], 3);
+    });
+
+    test('weight records count only sets that carried added weight, and no 1RM', () {
+      final rows = [
+        row(weight: 0, reps: 30, workoutId: 'w1', start: '2026-01-01T10:00:00Z'),
+        row(weight: 10, reps: 8, workoutId: 'w2', start: '2026-02-01T10:00:00Z'),
+        row(weight: 20, reps: 5, workoutId: 'w3', start: '2026-03-01T10:00:00Z'),
+      ];
+
+      final records = fold(category, rows)!;
+      // the loaded sets' reps don't compete with the unloaded ones
+      expect((records['mostReps'] as Map)['reps'], 30);
+      expect((records['heaviest'] as Map)['weight'], 20.0);
+      expect((records['heaviest'] as Map)['previous'], {
+        'weight': 10.0,
+        'reps': 8,
+        'workoutId': 'w2',
+        'at': '2026-02-01T10:00:00Z',
+      });
+      expect((records['bestVolume'] as Map)['value'], 100.0);
+      expect(records['totalVolume'], 10.0 * 8 + 20 * 5);
+      expect(records.containsKey('oneRepMax'), isFalse);
+    });
+
+    test('unloaded sets without reps measure nothing', () {
+      expect(fold(category, [row(weight: 0, reps: null), row(weight: null, reps: 0)]), isNull);
+    });
+  });
+
   group('total volume', () {
     test('counts high-rep work that sets no rep max', () {
       const category = 'Barbell';

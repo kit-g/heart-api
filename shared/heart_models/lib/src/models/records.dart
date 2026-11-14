@@ -16,11 +16,15 @@ extension PersonalRecords on List<RecordSet> {
   /// glued together (the old query reported max(weight) alongside max(reps),
   /// describing a set that may never have existed). Shape, by [category]:
   ///
-  /// - barbell / dumbbell / machine / weightedBodyWeight:
+  /// - barbell / dumbbell / machine:
   ///   `heaviest {weight, reps?, workoutId, at}`,
   ///   `oneRepMax {value, weight, reps, workoutId, at}` (Brzycki),
   ///   `bestVolume {value, weight, reps, workoutId, at}` (weight × reps),
   ///   `repMaxes [{reps 1..10, weight, workoutId, at}]`, `totalVolume`
+  /// - weightedBodyWeight: `mostReps {reps, workoutId, at}` over the sets with
+  ///   no added weight (empty or 0), and `heaviest`, `bestVolume`, `repMaxes`
+  ///   and `totalVolume` over the sets that carried some. No `oneRepMax`: an
+  ///   estimate from the added weight alone isn't a 1RM of anything
   /// - assistedBodyWeight: `mostReps`, `lightestAssistance` (weight is the
   ///   assistance, so less is better)
   /// - repsOnly: `mostReps {reps, workoutId, at}`, `totalReps`
@@ -74,6 +78,11 @@ extension PersonalRecords on List<RecordSet> {
 
     switch (category) {
       case .barbell || .dumbbell || .machine || .weightedBodyWeight:
+        // on a push-up the weight is what was added to the body: a set
+        // without any (the phone leaves it empty, the watch sends 0) is
+        // measured by its reps, and never stands as a 0 kg weight record
+        final bodyweight = category == .weightedBodyWeight;
+        RecordSet? mostReps;
         RecordSet? heaviest;
         RecordSet? oneRepMax;
         RecordSet? bestVolume;
@@ -82,6 +91,10 @@ extension PersonalRecords on List<RecordSet> {
 
         for (final set in sets) {
           final RecordSet(:weight, :reps) = set;
+          if (bodyweight && (weight ?? 0) <= 0) {
+            if (reps != null && reps > 0 && reps > (mostReps?.reps ?? -1)) mostReps = set;
+            continue;
+          }
           if (weight == null) continue;
           if (weight > (heaviest?.weight ?? -1)) heaviest = set;
           if (reps == null || reps <= 0) continue;
@@ -90,8 +103,12 @@ extension PersonalRecords on List<RecordSet> {
           if (weight * reps > (bestVolume?.volume ?? -1)) bestVolume = set;
           // the Brzycki denominator crosses zero just under 37 reps; past that
           // the estimate is meaningless, not merely imprecise
-          if (reps < 37 && set.oneRepMax > (oneRepMax?.oneRepMax ?? -1)) oneRepMax = set;
+          if (!bodyweight && reps < 37 && set.oneRepMax > (oneRepMax?.oneRepMax ?? -1)) oneRepMax = set;
           if (reps <= 10 && weight > (repMaxes[reps]?.weight ?? -1)) repMaxes[reps] = set;
+        }
+
+        if (mostReps case final set?) {
+          records['mostReps'] = {'reps': set.reps, 'workoutId': set.workoutId, 'at': set.at};
         }
 
         if (heaviest case final set?) {
