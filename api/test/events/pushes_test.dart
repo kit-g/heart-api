@@ -206,15 +206,16 @@ void main() {
     });
   });
 
-  test('a change to someone\'s devices wakes each person who shares keys with them, about them', () async {
+  test('a change to someone\'s devices wakes their own and each person who shares keys with them', () async {
     when(keys.getKeyPeers(userId: 'student')).thenAnswer((_) async => ['coach', 'friend']);
+    audience('student', [(token: 't-student', locale: 'en')]);
     audience('coach', [(token: 't-coach', locale: 'en')]);
     audience('friend', [(token: 't-friend', locale: 'en')]);
 
     await devicesChanged(request, {'type': 'devices.changed', 'userId': 'student'});
 
     final messages = sent();
-    expect([for (final message in messages) ...message['tokens'] as List], ['t-coach', 't-friend']);
+    expect([for (final message in messages) ...message['tokens'] as List], ['t-student', 't-coach', 't-friend']);
     for (final message in messages) {
       expect(message['silent'], isTrue);
       expect(message['data'], {'topic': 'security.devices_changed', 'userId': 'student'});

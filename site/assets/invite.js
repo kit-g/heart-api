@@ -121,10 +121,6 @@ async function answering() {
         $('inviter-photo').src = invitation.inviterAvatar;
         $('inviter-photo').hidden = false;
     }
-    // this address opens Heart when it's installed, with its fragment, which is
-    // how the coach's key reaches a device
-    $('open-app').href = location.href;
-    $('done-open-app').href = location.href;
     show('ask');
 
     let fb;
@@ -166,7 +162,8 @@ async function answering() {
         'accept',
         {shares: [...($('share-history').checked ? ['history'] : []), ...($('share-goals').checked ? ['goals'] : [])]},
         'You\'re connected',
-        'Open Heart on your phone for your program and your messages. Messages wait until you do.',
+        'Open this same link on your phone, with Heart on it, for your program and your messages. Messages wait '
+            + 'until you do.',
     )();
     $('decline').onclick = answer('decline', {}, 'You said no', 'They\'ll see that you declined.');
     const block = answer(

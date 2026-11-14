@@ -50,7 +50,7 @@ String _deviceId(Request req) {
 
 Future<Model> publishDevice(Request req) async {
   final input = await DevicePublishIn.fromRequest(req);
-  final device = await req.keyService.publishDevice(
+  final (:device, :added) = await req.keyService.publishDevice(
     userId: req.userId,
     id: input.id,
     identityKey: input.identityKey,
@@ -59,7 +59,8 @@ Future<Model> publishDevice(Request req) async {
     signature: input.signature,
     vouchedBy: input.vouchedBy,
   );
-  await _tellPeers(req);
+  // a device publishing itself again, as it may on every start, changes nothing
+  if (added) await _tellPeers(req);
   return Created(device);
 }
 

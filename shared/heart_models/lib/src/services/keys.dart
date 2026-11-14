@@ -1,9 +1,10 @@
 import '../models/keys.dart';
 
 abstract interface class KeyService {
-  /// Publishes a device, idempotent on its id. [signature] and [vouchedBy] say
-  /// another device of the owner's vouched for it, and [vouchedBy] has to be theirs.
-  Future<CryptoDevice> publishDevice({
+  /// Publishes a device, idempotent on its id: one already there is answered as it
+  /// is, and `added` says whether this call added it. [signature] and [vouchedBy]
+  /// say another device of the owner's vouched for it, and [vouchedBy] has to be theirs.
+  Future<({CryptoDevice device, bool added})> publishDevice({
     required String userId,
     required String id,
     required String identityKey,

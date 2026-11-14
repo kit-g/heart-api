@@ -98,7 +98,7 @@ void main() {
     });
   });
 
-  test('publishing and removing a device tell the people who share keys, through the real app', () async {
+  void stubPublish({required bool added}) {
     when(
       app.db.publishDevice(
         userId: anyNamed('userId'),
@@ -110,15 +110,22 @@ void main() {
         vouchedBy: anyNamed('vouchedBy'),
       ),
     ).thenAnswer(
-      (_) async => CryptoDevice(
-        id: device,
-        userId: 'u',
-        identityKey: 'i',
-        signingKey: 's',
-        fallbackKey: 'f',
-        createdAt: DateTime.utc(2026),
+      (_) async => (
+        device: CryptoDevice(
+          id: device,
+          userId: 'u',
+          identityKey: 'i',
+          signingKey: 's',
+          fallbackKey: 'f',
+          createdAt: DateTime.utc(2026),
+        ),
+        added: added,
       ),
     );
+  }
+
+  test('publishing and removing a device tell the people who share keys, through the real app', () async {
+    stubPublish(added: true);
     when(app.db.removeDevice(userId: anyNamed('userId'), deviceId: anyNamed('deviceId'))).thenAnswer((_) async {});
     when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
     when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
@@ -134,6 +141,18 @@ void main() {
     expect(removed.status, 204);
 
     verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).called(2);
+  });
+
+  test('a device publishing itself again tells nobody', () async {
+    stubPublish(added: false);
+
+    final published = await app.send(
+      'POST',
+      '/keys/devices',
+      body: {'id': device, 'identityKey': 'i', 'signingKey': 's', 'fallbackKey': 'f'},
+    );
+    expect(published.status, 201);
+    verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
   });
 
   test('removing a device nobody had tells nobody', () async {

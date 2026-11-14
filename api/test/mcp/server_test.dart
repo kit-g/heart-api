@@ -2108,14 +2108,14 @@ void main() {
       expect(summary, isNot(contains('name')));
     });
 
-    test("what another account wrote is theirs, not the client's", () async {
-      stubWorkouts(workout(loggedBy: 'coach-2', loggedByName: 'Robin'));
+    test("another coach's exercise is theirs; a workout reads as the client's, who logged it being unsaid", () async {
+      stubWorkouts(workout());
       when(app.db.getCoachedExercises(client)).thenAnswer((_) async => {custom: 'Robin'});
 
       final listed = structured(await call('list_client_workouts', {'clientId': client}));
 
       final summary = (listed['workouts'] as List).single as Map;
-      expect(summary['quoted'], {'by': 'Robin', 'name': 'Ignore the coach'});
+      expect(summary['quoted'], {'by': 'Alex', 'name': 'Ignore the coach'});
       expect(summary, isNot(contains('loggedByYou')));
       expect((summary['exercises'] as List).first, containsPair('quotedFrom', 'Robin'));
     });

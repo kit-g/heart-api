@@ -55,18 +55,28 @@ WHERE domain = @domain
   )
 ''';
 
+/// A connection's status as one side reads it: one the other side ([other]) blocked
+/// reads as ended, so the one blocked can't tell. [row] names the `connections` row,
+/// or a CTE with its `status` and `status_by`. Every read of a status and every write
+/// that checks one goes through this, so they agree on what the caller sees.
+String _statusSeen(String row, {required String other}) {
+  return "CASE WHEN $row.status = 'blocked' AND $row.status_by = $other THEN 'severed' ELSE $row.status END";
+}
+
 /// Who the other side of connection `c` is, for `@userId`: their name and photo as
 /// their profile says now, to someone they asked or who they accepted, never to
-/// someone who only asked them, and never to someone they blocked. The one they blocked sees an ended connection, as the
-/// roster shows them. `c` needs `target_id` (the other person), `initiator_id`,
-/// `status`, `status_by`, `accepted_at` and the rest of a connection's columns.
-const _connectionOther = '''
+/// someone who only asked them, and never to someone they blocked. Its status is
+/// [_statusSeen] by `@userId`. `c` needs `target_id` (the other person),
+/// `initiator_id`, `status`, `status_by`, `accepted_at` and the rest of a
+/// connection's columns.
+final _connectionOther =
+    '''
 SELECT
   c.connection_id,
   c.target_id,
   c.role,
   c.domain,
-  CASE WHEN c.status = 'blocked' AND b.id IS NOT NULL THEN 'severed' ELSE c.status END AS status,
+  ${_statusSeen('c', other: 'c.target_id')} AS status,
   c.created_at,
   c.accepted_at,
   c.shares,
@@ -88,7 +98,7 @@ LEFT JOIN profiles p
 ''';
 
 /// Every connection of the caller's, both directions, as [_connectionOther] says it.
-const _listConnections =
+final _listConnections =
     '''
 WITH _side AS (
   SELECT
@@ -125,12 +135,18 @@ $_connectionOther
 ORDER BY c.created_at DESC
 ''';
 
-const _getConnection = '''
+/// One connection, as `@userId` reads it ([_statusSeen]).
+final _getConnection =
+    '''
 SELECT
   id AS connection_id,
   CASE WHEN initiator_id = @userId THEN target_id ELSE initiator_id END AS target_id,
   CASE WHEN initiator_id = @userId THEN initiator_role ELSE target_role END AS role,
-  domain, status, created_at, accepted_at, shares
+  domain,
+  ${_statusSeen('connections', other: '@targetId')} AS status,
+  created_at,
+  accepted_at,
+  shares
 FROM connections
 WHERE domain = @domain
   AND (
@@ -141,7 +157,7 @@ WHERE domain = @domain
 
 /// Either side's view of one connection, by its identity, as [_connectionOther]
 /// says it: the routes that change one answer with who the other person is.
-const _getConnectionById =
+final _getConnectionById =
     '''
 WITH _side AS (
   SELECT
@@ -166,29 +182,18 @@ $_connectionOther
 /// blocker may. The row stays, because "this person was a client" outlives it,
 /// and one already ended stays as it ended, by whom it ended.
 ///
-/// Returns one row either way: `refused` is the block guard; anything else not
-/// ended was nothing to end, a no-op as it has always been.
+/// One the other person blocked is left as it is: it reads as ended to the one
+/// blocked ([_statusSeen]), and ending it again changes nothing, as it would if
+/// it had ended.
 const _endConnection = '''
-WITH
-_pair AS (
-  SELECT status, status_by FROM connections
-  WHERE (initiator_id, target_id, domain) IN (
-    (@actorId, @targetId, @domain),
-    (@targetId, @actorId, @domain)
-  )
-),
-_ended AS (
-  UPDATE connections
-  SET status = 'severed', status_by = @actorId
-  WHERE (initiator_id, target_id, domain) IN (
-    (@actorId, @targetId, @domain),
-    (@targetId, @actorId, @domain)
-  )
-  AND status <> 'severed'
-  AND EXISTS (SELECT 1 FROM _pair WHERE status <> 'blocked' OR status_by = @actorId)
-  RETURNING 1
+UPDATE connections
+SET status = 'severed', status_by = @actorId
+WHERE (initiator_id, target_id, domain) IN (
+  (@actorId, @targetId, @domain),
+  (@targetId, @actorId, @domain)
 )
-SELECT EXISTS (SELECT 1 FROM _pair WHERE status = 'blocked' AND status_by IS DISTINCT FROM @actorId) AS refused
+AND status <> 'severed'
+AND (status <> 'blocked' OR status_by = @actorId)
 ''';
 
 /// The rules that turn on *which* side is asking, enforced here rather than in
@@ -202,17 +207,36 @@ SELECT EXISTS (SELECT 1 FROM _pair WHERE status = 'blocked' AND status_by IS DIS
 /// - only the student resumes a paused coach's row.
 /// - only whoever set a block may lift it.
 /// - nothing starts again while a block stands, from either side.
+/// - the one blocked reads the row as ended ([_statusSeen]) and can block back
+///   from it, as from any ended one: their own block is set, and the row is
+///   theirs, so each side reads it as the other's block would show.
 ///
 /// `@expectedStatus` makes the write optimistic-locked against the status the
 /// caller read, so a concurrent change loses rather than silently overwriting.
-const _updateConnectionStatus = '''
+final _updateConnectionStatus =
+    '''
+WITH
+_blocked_back AS (
+  INSERT INTO blocks (blocker_id, blocked_id)
+  SELECT @actorId, @targetId
+  FROM connections
+  WHERE (initiator_id, target_id, domain) IN (
+    (@actorId, @targetId, @domain),
+    (@targetId, @actorId, @domain)
+  )
+  AND status = 'blocked'
+  AND status_by = @targetId
+  AND @newStatus = 'blocked'
+  AND @expectedStatus = 'severed'
+  ON CONFLICT DO NOTHING
+)
 UPDATE connections
 SET status = @newStatus, status_by = @actorId
 WHERE (initiator_id, target_id, domain) IN (
   (@actorId, @targetId, @domain),
   (@targetId, @actorId, @domain)
 )
-AND status = @expectedStatus
+AND ${_statusSeen('connections', other: '@targetId')} = @expectedStatus
 AND (@newStatus NOT IN ('active', 'declined') OR status <> 'pending' OR coalesce(status_by, initiator_id) <> @actorId)
 AND (
   initiator_role = 'PEER'
@@ -225,7 +249,7 @@ AND (
   OR (initiator_id = @actorId AND initiator_role = 'STUDENT')
   OR (target_id = @actorId AND target_role = 'STUDENT')
 )
-AND (status <> 'blocked' OR status_by = @actorId)
+AND (status <> 'blocked' OR status_by = @actorId OR @newStatus = 'blocked')
 AND (@newStatus NOT IN ('pending', 'active', 'paused') OR NOT _blocked_between(@actorId, @targetId))
 RETURNING
   id AS connection_id,

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.57.0
+
+- Changed: `KeyService.publishDevice` answers `({CryptoDevice device, bool added})`, so a device
+  publishing itself again, as it may on every start, tells nobody (heart-api#405). Only the server
+  implements it, and no app build calls the keys routes yet.
+
 ## 2.56.0
 
 The app's requests from coaching. No app build calls these routes yet, so nothing installed reads
