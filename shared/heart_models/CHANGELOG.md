@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.56.1
+
+Records for bodyweight exercises (heart-api#414).
+
+- Fixed: `toPersonalRecords` for Weighted Body Weight (Push Up and the rest) gives a `mostReps`
+  record over the sets with no added weight, empty and 0 alike, with `previous` as every headline
+  record has. `heaviest`, `bestVolume`, `repMaxes` and `totalVolume` count only the sets that
+  carried added weight, so a bodyweight-only history no longer shows a row of 0 kg records, and
+  the category has no `oneRepMax`. Other categories are unchanged.
+
 ## 2.56.0
 
 The app's requests from coaching. No app build calls these routes yet, so nothing installed reads
