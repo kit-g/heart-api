@@ -125,5 +125,43 @@ deny	aws scheduler delete-schedule --name x
 deny	aws iam attach-role-policy --role-name heart-agent --policy-arn arn:x
 deny	aws sts assume-role --role-arn arn:x --role-session-name s
 EOF2
+
+# Deleting a branch: allowed only when every commit on it is already on a
+# remote. A throwaway repo whose remote-tracking refs are written by hand.
+repo="$(mktemp -d)"
+trap 'rm -r "$repo"' EXIT
+g() { git -C "$repo" -c user.name=t -c user.email=t@t -c commit.gpgsign=false "$@" >/dev/null; }
+commit() { echo "$2" >"$repo/$1" && g add "$1" && g commit -q -m "$3"; }
+g init -q -b main
+commit base base 'base'
+g branch base
+# on the remote as itself
+g switch -q -c pushed base && commit a a 'pushed change' && g update-ref refs/remotes/origin/pushed HEAD
+# on the remote as the same change under another message (patch id)
+g switch -q -c picked base && commit p p 'picked change'
+g switch -q -c upstream base && commit other other 'moved on' && commit p p 'squashed: picked change'
+# on the remote as a rebuilt copy: same subject, the change resolved differently
+g switch -q -c rebuilt base && commit r one 'rebuilt change'
+g switch -q upstream && commit r two 'rebuilt change' && g update-ref refs/remotes/origin/main HEAD
+# nowhere else
+g switch -q -c unique base && commit u u 'only here'
+g switch -q main
+
+while IFS=$'\t' read -r want cmd; do
+  [[ -z "$want" || "$want" == \#* ]] && continue
+  check "$want" agent "${cmd//REPO/$repo}"
+  check "$want" "" "${cmd//REPO/$repo}"
+done <<'EOF3'
+allow	git -C REPO branch -D pushed
+allow	git -C REPO branch -D picked
+allow	git -C REPO branch -D rebuilt
+allow	git -C REPO branch -D base pushed picked rebuilt
+deny	git -C REPO branch -D unique
+deny	git -C REPO branch -D pushed unique
+deny	git -C REPO branch -D missing
+deny	git -C REPO branch -D pushed; echo done
+deny	git -C REPO branch -D pushed && git -C REPO reset --hard
+EOF3
+
 [[ $fail -eq 0 ]] && echo "all cases pass"
 exit $fail

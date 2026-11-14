@@ -53,7 +53,10 @@ PreToolUse hook for every session in this repo — hooks still fire under
 bypassPermissions. Like the app repo's, it denies `git commit`/`push` to
 agents only: a session started by `agent` or `host-agent`, which set
 `HEART_AGENT=1`, or any session in a container. Your own interactive session
-commits and pushes. For everyone it denies work-destroying git and recursive
+commits and pushes. For everyone it denies work-destroying git (a plain
+`git branch -D` passes when every commit on the branch is already on a remote,
+as itself, as the same change, or by the same author under the same subject:
+deleting it loses nothing, and a session cleans up its own branches) and recursive
 force-deletes outside build dirs, and it blocks the ways a session could
 reach a shared environment from here (`hooks/guard_test.sh` is the
 regression matrix):

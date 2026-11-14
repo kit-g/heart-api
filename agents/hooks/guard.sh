@@ -42,8 +42,35 @@ if agent && grep -Eq '(^|[|;&(`])\s*git[^|;&]*\b(commit|push)\b' <<<"$cmd"; then
   deny "Commits and pushes are reserved for the user. Leave work in the tree; run 'git add -N .' so new files show in git diff."
 fi
 
+# `git branch -D` loses only the commits that exist nowhere else. A branch whose
+# every commit is already on a remote, as itself, as the same change (patch id),
+# or as a commit by the same author with the same subject (a copy rebuilt onto a
+# newer base, conflicts resolved), loses nothing, so deleting it passes. Only the
+# plain command qualifies: nothing chained, every name an existing local branch.
+branch_delete_is_safe() {
+  local re='^[[:space:]]*git([[:space:]]+-C[[:space:]]+([^[:space:];&|`$()]+))?[[:space:]]+branch[[:space:]]+-D(([[:space:]]+[A-Za-z0-9._/-]+)+)[[:space:]]*$'
+  [[ "$cmd" =~ $re ]] || return 1
+  local dir="${BASH_REMATCH[2]:-${CLAUDE_PROJECT_DIR:-$PWD}}" names="${BASH_REMATCH[3]}"
+  local g=(git -C "$dir") name commit known=''
+  for name in $names; do
+    "${g[@]}" rev-parse -q --verify "refs/heads/$name" >/dev/null || return 1
+    for commit in $("${g[@]}" rev-list --no-merges "refs/heads/$name" --not --remotes); do
+      if [[ -z "$known" ]]; then
+        # what the remotes hold, read once: patch ids and author/subject pairs
+        known="$("${g[@]}" log --remotes --no-merges -n 3000 -p | git patch-id --stable | cut -d' ' -f1
+                 "${g[@]}" log --remotes --no-merges -n 3000 --format='%an%x09%s')"
+      fi
+      grep -qxF -- "$("${g[@]}" show "$commit" | git patch-id --stable | cut -d' ' -f1)" <<<"$known" \
+        || grep -qxF -- "$("${g[@]}" log -1 --format='%an%x09%s' "$commit")" <<<"$known" \
+        || return 1
+    done
+  done
+}
+
+branch_delete_is_safe && exit 0
+
 if grep -Eq '(^|[|;&(`])\s*git[^|;&]*\b(reset[^|;&]*--hard|clean[^|;&]* -[a-zA-Z]*f| (rebase|merge)(\s|$)|branch[^|;&]* -D|checkout[^|;&]* \.|restore[^|;&]* \.|stash[^|;&]*\b(drop|clear))' <<<"$cmd"; then
-  deny "Destructive git operation blocked — it can erase uncommitted work. Explain what you need and let the user run it."
+  deny "Destructive git operation blocked — it can erase uncommitted work or commits that exist nowhere else. Explain what you need and let the user run it."
 fi
 
 # --- rm ----------------------------------------------------------------------
