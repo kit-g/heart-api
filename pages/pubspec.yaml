@@ -4,7 +4,8 @@ publish_to: none
 
 # Below 3.14 until Jaspr moves: jaspr_cli and jaspr_builder 0.23.5 need analyzer 12,
 # which build_web_compilers pairs only with SDKs below 3.14, and jaspr_cli doesn't build
-# against analyzer 13. CI pins setup-dart to 3.13.7 for this; unpin both together.
+# against analyzer 13. CI pins setup-dart to 3.13.7 for this, and scripts/dart_sdk.sh
+# fetches it on a machine whose dart is newer; unpin all three together.
 environment:
   sdk: ">=3.13.0 <3.14.0"
 

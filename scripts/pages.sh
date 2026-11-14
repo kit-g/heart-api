@@ -24,6 +24,10 @@ BUILT="$ROOT/pages/build/jaspr"
 if [ "$ENV" = prod ]; then ORIGIN=https://heart-of.me; else ORIGIN=https://dev.heart-of.me; fi
 if [ "$ENV" = prod ]; then API=https://api.heart-of.me; else API=https://api.dev.heart-of.me; fi
 
+# Jaspr resolves only below Dart 3.14 for now; this picks a Dart it runs on.
+DART_BIN="$("$ROOT/scripts/dart_sdk.sh")"
+export PATH="${DART_BIN:+$DART_BIN:}$PATH"
+
 (cd "$ROOT/pages" && dart pub get >/dev/null && dart run jaspr_cli:jaspr build --dart-define=HEART_ENV="$ENV")
 
 mkdir -p "$OUT"

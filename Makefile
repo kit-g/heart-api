@@ -1,11 +1,12 @@
 # Repo-wide entrypoints. `make test` runs the same matrix CI does.
 # Database targets need local Postgres + pgtap (see database/README.md).
 
-# HEART_DART_SDK points every target at a Dart SDK other than the one on PATH,
-# for a machine whose default Dart is past what pages/ resolves on (CI pins
-# 3.13.7 until Jaspr moves). Set it in the shell profile, unset it to go back.
-ifdef HEART_DART_SDK
-export PATH := $(HEART_DART_SDK)/bin:$(PATH)
+# Every target runs on the Dart SDK scripts/dart_sdk.sh picks: the one on PATH
+# while pages/ resolves on it, else the version CI pins, fetched once (Jaspr
+# needs below 3.14 for now). HEART_DART_SDK, an SDK's root, overrides it.
+DART_BIN := $(shell scripts/dart_sdk.sh)
+ifneq ($(DART_BIN),)
+export PATH := $(DART_BIN):$(PATH)
 endif
 
 .PHONY: bootstrap prepare-compat-tests test test-dart test-db test-api-db test-python test-tf test-pages deps generate cards openapi design lint format-check db-up db-down db-reset db-seed
