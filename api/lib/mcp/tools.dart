@@ -11,6 +11,7 @@ import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/lens.dart';
 import 'package:heart/models/me.dart';
+import 'package:heart/models/me_coaching.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart/models/library.dart';
 import 'package:heart/routes/library.dart' show libraryView;

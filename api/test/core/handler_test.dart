@@ -52,6 +52,18 @@ void main() {
     expect(await status((_) async => throw const Forbidden(reason: 'no')), 403);
   });
 
+  test('InsufficientScope becomes 403 with the step-up challenge', () async {
+    final result = await apiHandler((_) async => throw const InsufficientScope(held: ['read'], needed: .readCoaching))(
+      bareRequest(),
+    ) as Response;
+    expect(result.statusCode, 403);
+    expect(
+      result.headers['www-authenticate']?.single,
+      allOf(contains('insufficient_scope'), contains('read read:coaching')),
+    );
+    expect((jsonDecode(await result.readAsString()) as Map)['code'], 'insufficient_scope');
+  });
+
   test('NotFound becomes 404', () async {
     expect(await status((_) async => throw const NotFound(type: 'Workout', id: 'w-1')), 404);
   });

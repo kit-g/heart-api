@@ -23,6 +23,24 @@ final Map<String, ShapeOverride> shapeOverrides = {
   'ProgramRules.*': const .open('a rule by the name its sessions use, and those a newer build wrote.'),
   'GrowthRule.*': const .open('`kind` says which rule; its parameters sit beside it.'),
   'Weather.*': const .open('it carries what a newer build wrote.'),
+  // what a coach's client holds as the app wrote it, and the coach's own library
+  'MeClientProgramChange.before': .shape(
+    .mapOf(.unknown('the program, or the session, as it stood before the change, as the app writes it')),
+  ),
+  'MeClientProgramChange.after': .shape(
+    .mapOf(.unknown('the program, or the session, as it stood after the change, as the app writes it')),
+  ),
+  'MeLibraryProgram.*': const .open('the program as you saved it: its sessions, exercises, sets and growth rules.'),
+  'MeCoachingClient.sharesWithAssistant': const .describe(
+    'Whether they share their training with your apps and assistants. Only then is more of them here, or '
+    'anything of theirs under `/me/coaching/clients/:clientId`.',
+  ),
+  'MeCoachingClient.recent': const .describe('When they trained in the last 14 days.'),
+  'MeCoachingClient.reasons': const .describe(
+    'Why they need a word: `lighter`, `note`, `gap` or `ending`, and a word you don\'t know may be added.',
+  ),
+  'MeClientProgramChange.by': const .describe('`you` or `client`; absent for a change neither of you made.'),
+  'MeClientProgramChanges.cursor': const .describe('Where to resume: pass it back as `since`.'),
   // published content read back through the library
   'MeProgram.research': .shape(programResearchShape),
   // strings the server formats as moments, which their type can't say

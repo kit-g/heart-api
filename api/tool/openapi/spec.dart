@@ -25,7 +25,8 @@ Map<String, Object?> meOpenApi() {
     title: 'Heart Developer API',
     version: '1',
     description:
-        'Read-only access to your own Heart log with a personal access token. '
+        'Read-only access to your own Heart log with a personal access token, and, for a coach whose token '
+        'holds `read:coaching`, to what their clients share with their apps and assistants. '
         'Published and additive-only: fields and routes are added, never removed or re-meant.',
     servers: const ['https://api.heart-of.me/v1'],
     securitySchemes: {

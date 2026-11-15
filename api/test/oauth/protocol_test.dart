@@ -47,7 +47,7 @@ void main() {
   group('toScopes', () {
     test('absent asks for everything the resource grants', () {
       expect((null as String?).toScopes(), ['read', 'read:coaching', 'write:templates']);
-      expect((null as String?).toScopes(writes: false), ['read']);
+      expect((null as String?).toScopes(writes: false), ['read'], reason: "/me reads clients' only when asked to");
     });
     test('read alone is held to reading', () => expect('read'.toScopes(), ['read']));
     test('a write is granted when asked for, beside read', () {
@@ -55,6 +55,12 @@ void main() {
     });
     test('a resource that takes no writes drops them', () {
       expect('write:templates read'.toScopes(writes: false), ['read']);
+      expect('read:coaching read write:templates'.toScopes(writes: false), ['read', 'read:coaching']);
+      expect('read:coaching'.toScopes(writes: false), [
+        'read',
+        'read:coaching',
+      ], reason: '/me reads nothing without read');
+      expect('read:coaching'.toScopes(), ['read:coaching']);
       expect(() => 'write:templates'.toScopes(writes: false), throwsA(isA<OAuthError>()));
     });
     test("scopes this server doesn't grant are dropped, as hosts add their own", () {

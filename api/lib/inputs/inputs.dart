@@ -19,6 +19,7 @@ import 'package:heart/models/thread_kinds.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart/notifications/sealing.dart';
 import 'package:heart/notifications/topics.dart';
+import 'package:heart/oauth/protocol.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mime/mime.dart';
 import 'package:relic/relic.dart';

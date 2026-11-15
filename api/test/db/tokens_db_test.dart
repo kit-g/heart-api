@@ -22,13 +22,19 @@ void main() {
   setUpAll(h.setupDatabase);
   tearDownAll(h.teardownDatabase);
 
-  Future<(ApiToken, Uint8List)> mint(String userId, {String name = 'n', DateTime? expiresAt}) async {
+  Future<(ApiToken, Uint8List)> mint(
+    String userId, {
+    String name = 'n',
+    DateTime? expiresAt,
+    List<String> scopes = const ['read'],
+  }) async {
     final secret = TokenSecret.mint();
     final hash = TokenSecret.hash(secret);
     final token = await h.db.createToken(
       userId: userId,
       name: name,
       purpose: ApiTokenPurpose.script,
+      scopes: scopes,
       expiresAt: expiresAt,
       tokenHash: hash,
       hint: TokenSecret.hint(secret),
@@ -45,6 +51,14 @@ void main() {
       expect(token.purpose, ApiTokenPurpose.script);
       expect(token.scopes, ['read']);
       expect(token.isActive(), isTrue);
+    });
+
+    test('keeps the scopes it was made with, and is used with them', () async {
+      final user = await h.seedProfile();
+      final (token, hash) = await mint(user, scopes: ['read', 'read:coaching']);
+
+      expect(token.scopes, ['read', 'read:coaching']);
+      expect((await h.db.useToken(hash))!.scopes, ['read', 'read:coaching']);
     });
 
     test('refuses a sixth active token, but revoked and expired ones do not count', () async {

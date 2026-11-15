@@ -3,7 +3,9 @@ import 'package:heart/core/openapi/query.dart';
 import 'package:heart/core/openapi/shape.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/core/routing.dart';
+import 'package:heart/globals/globals.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/oauth/protocol.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
 
@@ -26,12 +28,15 @@ abstract interface class Endpoint {
   /// set relic's routing context.
   Future<Model?> call(Request request, {Map<String, String>? path});
 
-  /// This route's OpenAPI operation object.
-  Map<String, Object?> operation(Components components, {required String id});
+  /// This route's OpenAPI operation object. [everywhere] are the surface's own
+  /// refusals, listed beside the route's.
+  Map<String, Object?> operation(Components components, {required String id, List<Failure> everywhere = const []});
 
   /// A route that reads [input] and answers [reply]. [errors] are the
   /// refusals the handler itself can throw; a 400 for malformed input comes
   /// with any input, and the surface's own (401, 429) are the document's.
+  /// [scope] is what the request's token must hold beyond what the surface
+  /// asks of every route, refused before anything runs.
   static Endpoint of<Q, R>(
     Future<R> Function(Request request, Q input) handle, {
     required Input<Q> input,
@@ -39,8 +44,17 @@ abstract interface class Endpoint {
     String? summary,
     String? description,
     List<Failure> errors = const [],
+    Scope? scope,
   }) {
-    return _Endpoint(handle, input: input, reply: reply, summary: summary, description: description, errors: errors);
+    return _Endpoint(
+      handle,
+      input: input,
+      reply: reply,
+      summary: summary,
+      description: description,
+      errors: errors,
+      scope: scope,
+    );
   }
 
   /// A route with nothing to read.
@@ -50,6 +64,7 @@ abstract interface class Endpoint {
     String? summary,
     String? description,
     List<Failure> errors = const [],
+    Scope? scope,
   }) {
     return _Endpoint<Null, R>(
       (request, _) => handle(request),
@@ -58,6 +73,7 @@ abstract interface class Endpoint {
       summary: summary,
       description: description,
       errors: errors,
+      scope: scope,
     );
   }
 }
@@ -91,6 +107,8 @@ class Failure {
   const new(this.status, this.code, {this.description});
 
   const new badRequest([this.code = 'bad_request', this.description]) : status = 400;
+
+  const new forbidden([this.code = 'forbidden', this.description]) : status = 403;
 
   const new notFound([this.code = 'not_found', this.description]) : status = 404;
 
@@ -156,14 +174,28 @@ class _Endpoint<Q, R> implements Endpoint {
   final String? summary;
   final String? description;
   final List<Failure> errors;
+  final Scope? scope;
 
-  new(this.handle, {required this.input, required this.reply, this.summary, this.description, this.errors = const []});
+  new(
+    this.handle, {
+    required this.input,
+    required this.reply,
+    this.summary,
+    this.description,
+    this.errors = const [],
+    this.scope,
+  });
 
   @override
   ModelHandler get handler => call;
 
   @override
   Future<Model?> call(Request request, {Map<String, String>? path}) async {
+    // a request no token authenticated holds no scope at all
+    if (scope case final Scope needed) {
+      final held = request.scopes ?? const <String>[];
+      if (!held.contains(needed.value)) throw InsufficientScope(held: held, needed: needed);
+    }
     try {
       final query = path == null ? Query.of(request) : Query.values(request.url.queryParameters, path: path);
       final read = input == null ? null as Q : input!(query);
@@ -181,18 +213,32 @@ class _Endpoint<Q, R> implements Endpoint {
   }
 
   @override
-  Map<String, Object?> operation(Components components, {required String id}) {
+  Map<String, Object?> operation(Components components, {required String id, List<Failure> everywhere = const []}) {
+    final own = [
+      if (input != null) const Failure.badRequest(),
+      if (scope case final Scope scope) Failure.forbidden('insufficient_scope', 'a token without `${scope.value}`'),
+      ...errors,
+    ];
     final recording = Query.recording();
     input?.call(recording);
     final parameters = recording.parameters;
     return {
       'operationId': id,
       'summary': ?summary,
-      'description': ?description,
+      'description': ?switch (scope) {
+        final Scope scope =>
+          '${description ?? ''}${description == null ? '' : '\n\n'}Needs a token with `${scope.value}`.',
+        null => description,
+      },
       if (parameters.isNotEmpty) 'parameters': [for (final parameter in parameters) parameter.toMap()],
       'responses': {
         ...reply.describe(components),
-        ...describeFailures([if (input != null) const Failure.badRequest(), ...errors], components),
+        ...describeFailures([
+          ...own,
+          // the route's own word on a refusal the whole surface has says it for this route
+          for (final failure in everywhere)
+            if (!own.any((mine) => mine.status == failure.status && mine.code == failure.code)) failure,
+        ], components),
       },
     };
   }
@@ -292,14 +338,11 @@ Map<String, Object?> openApiDocument(
   final paths = <String, Map<String, Object?>>{};
   for (final MapEntry(key: (route, verb), value: endpoint) in table.entries) {
     final path = '$prefix${route == '/' ? '' : route}'.replaceAllMapped(RegExp(r':(\w+)'), (m) => '{${m[1]}}');
-    final operation = endpoint.operation(components, id: _operationId(verb, '$prefix$route'));
-    (paths[path.isEmpty ? '/' : path] ??= {})[verb.name] = {
-      ...operation,
-      'responses': {
-        ...operation['responses'] as Map<String, Object?>,
-        ...describeFailures(everywhere, components),
-      },
-    };
+    (paths[path.isEmpty ? '/' : path] ??= {})[verb.name] = endpoint.operation(
+      components,
+      id: _operationId(verb, '$prefix$route'),
+      everywhere: everywhere,
+    );
   }
   return {
     'openapi': '3.1.0',

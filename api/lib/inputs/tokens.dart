@@ -5,7 +5,12 @@ class ApiTokenCreateIn {
   final ApiTokenExpiry expiry;
   final ApiTokenPurpose? purpose;
 
-  const new _({required this.name, required this.expiry, this.purpose});
+  /// What the token may read, `read` always among them: a personal token reads
+  /// its owner's own training, and with `read:coaching` what their clients share
+  /// with their assistant too. Never a write.
+  final List<String> scopes;
+
+  const new _({required this.name, required this.expiry, this.purpose, required this.scopes});
 
   static Future<ApiTokenCreateIn> fromRequest(Request req) async {
     final json = await req.json();
@@ -17,6 +22,16 @@ class ApiTokenCreateIn {
       purpose: switch (json['purpose']) {
         null => null,
         _ => json.parsed('purpose', ApiTokenPurpose.fromString),
+      },
+      scopes: switch (json['scopes']) {
+        null => [Scope.read.value],
+        final List<dynamic> asked when asked.every(meScopes.contains) => [
+          ...{Scope.read.value, ...asked.cast<String>()},
+        ]..sort(),
+        _ => throw BadRequest(
+          code: 'token_scope',
+          reason: 'scopes is a list of what a personal token can hold: ${([...meScopes]..sort()).join(', ')}',
+        ),
       },
     );
   }

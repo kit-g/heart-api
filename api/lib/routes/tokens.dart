@@ -16,6 +16,7 @@ Future<Model> createApiToken(Request req) async {
     userId: req.userId,
     name: input.name,
     purpose: input.purpose,
+    scopes: input.scopes,
     expiresAt: switch (input.expiry) {
       .year => DateTime.now().toUtc().add(const Duration(days: 365)),
       .never => null,

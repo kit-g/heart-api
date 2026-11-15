@@ -423,13 +423,7 @@ final List<McpTool> _coachTools = [
       );
       return {
         'programs': [
-          for (final program in page.items)
-            {
-              'id': program.id,
-              'name': program.name,
-              'version': program.version,
-              'updatedAt': program.updatedAt.toUtc().toIso8601String(),
-            },
+          for (final program in page.items) MeLibraryEntry(program).toMap(),
         ],
         if (page.hasMore) 'cursor': page.items.last.id,
       };
@@ -466,10 +460,7 @@ final List<McpTool> _coachTools = [
       return {
         ...?(program.body.namedBy(library.toExerciseNames(coached)) as Map<String, dynamic>?),
         // the server's own say, over anything the body carries
-        'id': program.id,
-        'name': program.name,
-        'version': program.version,
-        'updatedAt': program.updatedAt.toUtc().toIso8601String(),
+        ...MeLibraryEntry(program).toMap(),
       };
     },
   ),
@@ -557,23 +548,16 @@ extension on Map<String, dynamic> {
 }
 
 extension on ClientSummary {
+  /// As `/me/coaching/clients` gives one, with their program's name quoted.
   Map<String, dynamic> toMcp() {
-    return {
-      'clientId': studentId,
-      'name': ?name,
-      'status': status,
-      'since': ?acceptedAt?.toUtc().toIso8601String(),
-      'sharesWithAssistant': assistant,
-      if (programName case final String program)
-        'program': {
-          ..._quoted({'name': program}, by: name),
-          'week': ?programWeek,
-          'weeks': ?programWeeks,
-        },
-      if (recent.isNotEmpty) 'recent': [for (final at in recent) at.toUtc().toIso8601String()],
-      'lastTrainedAt': ?lastTrainedAt?.toUtc().toIso8601String(),
-      if (reasons.isNotEmpty) 'reasons': reasons,
-    };
+    final map = MeCoachingClient(this).toMap();
+    if (map['program'] case final Map<String, dynamic> program) {
+      map['program'] = {
+        ..._quoted({'name': program.remove('name')}, by: name),
+        ...program,
+      };
+    }
+    return map;
   }
 }
 

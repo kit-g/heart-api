@@ -1,3 +1,4 @@
+import 'package:heart/oauth/protocol.dart';
 import 'package:heart_models/heart_models.dart';
 
 abstract class ApiException implements Model {
@@ -115,6 +116,30 @@ class Forbidden implements ApiException {
       'error': 'forbidden',
       'code': code,
       'reason': reason,
+    };
+  }
+}
+
+/// A good token without the scope a route needs: a `403` with the
+/// `insufficient_scope` challenge, naming what the token holds and [needed].
+class InsufficientScope implements ApiException {
+  final List<String> held;
+  final Scope needed;
+
+  const new({required this.held, required this.needed});
+
+  @override
+  int get statusCode => 403;
+
+  @override
+  String get code => 'insufficient_scope';
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'error': 'forbidden',
+      'code': code,
+      'reason': 'this needs the ${needed.value} scope',
     };
   }
 }

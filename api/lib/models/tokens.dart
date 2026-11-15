@@ -78,6 +78,7 @@ abstract interface class ApiTokenService {
     required String userId,
     required String name,
     ApiTokenPurpose? purpose,
+    List<String> scopes = const ['read'],
     DateTime? expiresAt,
     required Uint8List tokenHash,
     required String hint,
