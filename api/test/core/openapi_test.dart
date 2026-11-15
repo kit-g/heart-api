@@ -1,8 +1,10 @@
 import 'package:heart/core/openapi/endpoint.dart';
 import 'package:heart/core/openapi/query.dart';
 import 'package:heart/core/openapi/shape.dart';
+import 'package:heart/globals/globals.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/pagination.dart';
+import 'package:heart/oauth/protocol.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
@@ -183,6 +185,56 @@ void main() {
     });
   });
 
+  group('an endpoint that needs a scope', () {
+    var ran = false;
+    final coaching = Endpoint.none<_Thing>(
+      (_) async {
+        ran = true;
+        return const _Thing(_valid);
+      },
+      reply: .json(_thing),
+      scope: .readCoaching,
+    );
+
+    setUp(() => ran = false);
+
+    test('runs for a token that holds it', () async {
+      await coaching.call(bareRequest()..scopes = ['read', 'read:coaching']);
+      expect(ran, isTrue);
+    });
+
+    test('refuses one without it, naming what it holds, before anything runs', () {
+      expect(
+        () => coaching.call(bareRequest()..scopes = ['read']),
+        throwsA(
+          isA<InsufficientScope>()
+              .having((e) => e.held, 'held', ['read'])
+              .having((e) => e.needed, 'needed', Scope.readCoaching),
+        ),
+      );
+      expect(ran, isFalse);
+    });
+
+    test('and a request no token authenticated', () {
+      expect(() => coaching.call(bareRequest()), throwsA(isA<InsufficientScope>()));
+      expect(ran, isFalse);
+    });
+
+    test('says so in the document, in place of the whole surface\'s word on the same refusal', () {
+      final document = openApiDocument(
+        {('/coaching', Method.get): coaching},
+        prefix: '/v',
+        title: 'Things',
+        version: '1',
+        everywhere: [const .new(403, 'insufficient_scope', description: 'a token without read')],
+      );
+      final operation = ((document['paths']! as Map)['/v/coaching'] as Map)['get'] as Map;
+      expect(operation['description'], contains('`read:coaching`'));
+      final forbidden = (operation['responses'] as Map)['403'] as Map;
+      expect(forbidden['description'], '`insufficient_scope`: a token without `read:coaching`');
+    });
+  });
+
   test('the document says what the table declares', () {
     final document = openApiDocument(
       {
@@ -214,6 +266,7 @@ void main() {
     final operation = ((document['paths']! as Map)['/v/things/{id}'] as Map)['get'] as Map;
     expect(operation['operationId'], 'getVThingsId');
     expect(operation['summary'], 'One thing');
+    expect(operation, isNot(contains('description')), reason: 'a route without one says nothing, not null');
     expect((operation['parameters'] as List).single, containsPair('in', 'path'));
     expect((operation['responses'] as Map).keys, containsAll(['200', '400', '404', '401']));
     expect(((document['components']! as Map)['schemas'] as Map).keys, containsAll(['Thing', 'Error']));

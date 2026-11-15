@@ -1,8 +1,11 @@
 import 'package:heart/core/openapi/endpoint.dart';
+import 'package:heart/core/openapi/query.dart';
 import 'package:heart/inputs/inputs.dart';
+import 'package:heart/models/changes.dart';
 import 'package:heart/models/shape_overrides.dart';
 import 'package:heart/models/shapes.g.dart';
 import 'package:heart/routes/me.dart' as me;
+import 'package:heart/routes/me_coaching.dart' as coaching;
 
 /// Where the token-authenticated surface is attached.
 const tokenPrefix = '/me';
@@ -202,6 +205,138 @@ final EndpointTable meRoutes = {
     reply: .json(libraryProgramShape),
     errors: [const .notFound('library_program_not_found')],
   ),
+  ('/coaching/clients', .get): .of(
+    coaching.getMyClients,
+    summary: 'The people you coach, those who need a word first',
+    description:
+        'The people you coach: `clientId`, name, `status` (`active`, `paused`, or `severed` for a former client), '
+        'since when, and whether they share their training with your apps and assistants '
+        '(`sharesWithAssistant`), which the client turns on in the app. Only those who share can be read here: '
+        'for them, the program they are on and its week, the days they trained in the last 14 (`recent`), when '
+        'they last trained, and why they need a word (`reasons`: `lighter`, a workout fell short of its plan; '
+        '`note`, they left a note; `gap`, a week without training; `ending`, their program is in its last week). '
+        'One who doesn\'t share is named, with their status and since when, and nothing more. `?former=true` '
+        'lists former clients.',
+    input: RosterQuery.read,
+    reply: .json(.page('clients', meCoachingClientShape)),
+    scope: .readCoaching,
+  ),
+  ('/coaching/feed', .get): .of(
+    coaching.getMyCoachFeed,
+    summary: 'What your clients did lately, newest first',
+    description:
+        'What the clients who share with your apps and assistants did lately, newest first: a workout finished '
+        '(`id` is the workout\'s), a session skipped, a program in its last week.',
+    input: CoachFeedQuery.read,
+    reply: .json(.page('items', meCoachFeedItemShape)),
+    scope: .readCoaching,
+  ),
+  ('/coaching/clients/:clientId/workouts', .get): .of(
+    coaching.getClientWorkouts,
+    summary: 'A client\'s workouts, newest first',
+    description:
+        'One client\'s workouts, newest first, as `/me/workouts` gives your own, and `loggedByYou` on one you '
+        'logged for them. Only what you can read as their coach: from when coaching began (earlier only if they '
+        'share their history), nothing they hid, nothing from a pause.',
+    input: (query) => (clientId: _client(query), page: PageQuery.read(query)),
+    reply: .json(.page('workouts', meClientWorkoutShape)),
+    errors: [_notShared],
+    scope: .readCoaching,
+  ),
+  ('/coaching/clients/:clientId/workouts/:workoutId', .get): .of(
+    coaching.getClientWorkout,
+    summary: 'One of a client\'s workouts in full',
+    description: 'One of a client\'s workouts.',
+    input: (query) => (clientId: _client(query), workoutId: _id('workoutId')(query)),
+    reply: .json(meClientWorkoutShape),
+    errors: [_notShared, const .notFound()],
+    scope: .readCoaching,
+  ),
+  ('/coaching/clients/:clientId/programs', .get): .of(
+    coaching.getClientPrograms,
+    summary: 'The programs you sent a client',
+    description:
+        'The programs you sent one client, as they hold them: name, whether archived, and how many sessions. '
+        'Empty for a client who doesn\'t share with your apps and assistants.',
+    input: _client,
+    reply: .json(meClientProgramsShape),
+    errors: [_notShared],
+    scope: .readCoaching,
+  ),
+  ('/coaching/clients/:clientId/programs/:programId', .get): .of(
+    coaching.getClientProgram,
+    summary: 'One program you sent a client, as they hold it now',
+    description:
+        'One program you sent a client, as they hold it now: its sessions in order, as `/me/templates` gives a '
+        'template, with which are `done` in the open cycle and `sentByYou` on one you sent or wrote into; and '
+        'where they stand (`position`): the program week, the next session, whether it is paused or finished, '
+        'and workouts this week. Worked out from what you can read as their coach, so a workout they hid leaves '
+        'its session undone here.',
+    input: (query) => (clientId: _client(query), programId: _id('programId')(query)),
+    reply: .json(meClientProgramShape),
+    errors: [_notShared, const .notFound('program_not_found'), const .notFound()],
+    scope: .readCoaching,
+  ),
+  ('/coaching/clients/:clientId/programs/:programId/changes', .get): .of(
+    coaching.getClientProgramChanges,
+    summary: 'What changed in a program you sent a client, since a cursor, oldest first',
+    description:
+        'What changed in a program you sent a client, oldest first: who made each change (`by`: `you` or '
+        '`client`), what kind (`edit`, `create`, `delete`, `revert`, or `library_update`: you sent a new '
+        'version), which session (`sessionId`; none for the program itself), and how it stood `before` and '
+        '`after`. A feed like [`/me/workouts/changes`](#polling): without `since` it starts from the '
+        'beginning; after that, pass back the `cursor` you were given, while `hasMore` is true straight away. '
+        'When nothing changed you get an empty list and the same cursor.',
+    input: (query) => (
+      clientId: _client(query),
+      programId: _id('programId')(query),
+      since: switch (query.stringOrNull(
+        'since',
+        description: 'The `cursor` of the last page read; none starts from the beginning.',
+      )) {
+        // a cursor that can't be one is the caller's mistake, never a fresh start
+        final String raw => ChangeCursor.parse(raw).toString(),
+        null => null,
+      },
+    ),
+    reply: .json(meClientProgramChangesShape),
+    errors: [
+      _notShared,
+      const .notFound('program_not_found'),
+      const .badRequest('stale_cursor', 'a cursor from before the database moved: start again without `since`'),
+    ],
+    scope: .readCoaching,
+  ),
+  ('/coaching/clients/:clientId/goals', .get): .of(
+    coaching.getClientGoals,
+    summary: 'A client\'s goals',
+    description:
+        'One client\'s goals, as `/me/goals` gives your own, when they share their goals with you as well as '
+        'their training with your apps and assistants.',
+    input: (query) => (clientId: _client(query), query: GoalsQuery.read(query)),
+    reply: .json(goalsResponseShape),
+    errors: [_notShared],
+    scope: .readCoaching,
+  ),
+  ('/coaching/library', .get): .of(
+    coaching.getMyCoachingLibrary,
+    summary: 'Your coaching library, newest first',
+    description:
+        'The programs in your own coaching library, the ones you send to clients: name, version and when it last '
+        'changed. Not Heart\'s library, which is `/me/library/programs`.',
+    input: PageQuery.read,
+    reply: .json(.page('programs', meLibraryEntryShape)),
+    scope: .readCoaching,
+  ),
+  ('/coaching/library/:programId', .get): .of(
+    coaching.getMyCoachingLibraryProgram,
+    summary: 'One program of your coaching library in full',
+    description: 'One program of your coaching library, its current version in full, as you saved it.',
+    input: _id('programId'),
+    reply: .json(meLibraryProgramShape),
+    errors: [const .notFound('program_not_found')],
+    scope: .readCoaching,
+  ),
   ('/export', .get): .of(
     me.exportMe,
     summary: 'The whole account in another app\'s format, once a day',
@@ -217,3 +352,13 @@ Input<String> _id(String name) =>
 
 Input<String> _key(String name) =>
     (query) => query.path(name);
+
+/// A client, by the `clientId` `/me/coaching/clients` gives.
+String _client(Query query) => query.path('clientId', description: 'A `clientId` from `/me/coaching/clients`.');
+
+/// Anyone who isn't a client sharing what a route reads with the user's apps and
+/// assistants.
+const _notShared = Failure.forbidden(
+  'not_shared',
+  'not a client who shares it with your apps and assistants (`/me/coaching/clients` says who does)',
+);

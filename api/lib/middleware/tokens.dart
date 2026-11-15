@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:heart/core/handler.dart';
 import 'package:heart/core/response.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
@@ -27,15 +28,13 @@ Middleware tokenAuthentication({DateTime Function()? clock}) {
           return response;
         case TokenAccepted(:final use) when !use.scopes.contains(Scope.read.value):
           // every /me route reads; a grant of writes alone reads nothing
-          final response = JsonResponse(
-            403,
-            body: const Forbidden(code: 'insufficient_scope', reason: 'reading needs the read scope'),
-            headers: insufficientScopeHeaders(held: use.scopes, needed: .read),
-          );
+          final response = InsufficientScope(held: use.scopes, needed: .read).toResponse();
           logApiUsage(request, surface: 'me', status: response.statusCode, use: use);
           return response;
         case TokenAccepted(:final use):
-          request.user = User(id: use.userId);
+          request
+            ..user = User(id: use.userId)
+            ..scopes = use.scopes;
           final result = await next(request);
           logApiUsage(
             request,
@@ -149,33 +148,6 @@ Future<TokenCheck> checkToken(
   return TokenAccepted(use);
 }
 
-/// The step-up challenge for a good token that lacks [needed] (RFC 6750
-/// §3.1, and the MCP authorization spec's scope challenge):
-/// `WWW-Authenticate: Bearer error="insufficient_scope", scope="…"`, naming
-/// what the token holds plus what it needs, so a compliant host
-/// re-authorizes for the union instead of trading one scope for another.
-/// [challenge] adds parameters, such as where the resource's metadata is.
-/// Sent with a `403`.
-Headers insufficientScopeHeaders({
-  required Iterable<String> held,
-  required Scope needed,
-  List<AuthenticationParameter> challenge = const [],
-}) {
-  final scopes = {...held, needed.value}.where(supportedScopes.contains).toList()..sort();
-  return Headers.build(
-    (headers) => headers.wwwAuthenticate = .new(
-      scheme: 'Bearer',
-      parameters: [
-        const .new('realm', 'heart'),
-        const .new('error', 'insufficient_scope'),
-        .new('scope', scopes.join(' ')),
-        .new('error_description', 'this needs the ${needed.value} scope'),
-        ...challenge,
-      ],
-    ),
-  );
-}
-
 /// One structured line per request, for learning who uses the API and how
 /// much of it is AI. Never bodies, query values or anything from a workout.
 void logApiUsage(
@@ -189,7 +161,7 @@ void logApiUsage(
   _usage.info(
     jsonEncode({
       'surface': surface,
-      'route': route ?? request.url.path,
+      'route': route ?? request.url.path.withoutAccountIds(),
       'status': status,
       'credential': switch (use?.clientId) {
         String() => 'oauth',
@@ -205,6 +177,14 @@ void logApiUsage(
     }),
   );
 }
+
+extension on String {
+  /// A path with another person's account id in it, such as a coach's client's,
+  /// as its route says it, so the log never holds the id.
+  String withoutAccountIds() => replaceAllMapped(_clientSegment, (match) => '${match[1]}:clientId');
+}
+
+final _clientSegment = RegExp(r'(coaching/clients/)[^/]+');
 
 /// Enough of an account id to count distinct callers without logging the id.
 String _pseudonym(String userId) => sha256.convert(utf8.encode(userId)).toString().substring(0, 16);

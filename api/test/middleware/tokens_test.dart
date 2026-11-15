@@ -47,10 +47,10 @@ void main() {
     );
   }
 
-  Request build({String? bearer, String? userAgent}) {
+  Request build({String? bearer, String? userAgent, String path = '/me/workouts'}) {
     return bareRequest(
         method: Method.get,
-        path: '/me/workouts',
+        path: path,
         extraHeaders: {
           'authorization': ?(bearer == null ? null : 'Bearer $bearer'),
           'user-agent': ?userAgent,
@@ -152,6 +152,18 @@ void main() {
     });
     expect(lines.single, isNot(contains(secret)));
     expect(lines.single, isNot(contains('"u1"')));
+  });
+
+  test("a client's account id never reaches the usage line, only its place in the route", () async {
+    when(service.useToken(any)).thenAnswer((_) async => use());
+    final lines = <Map>[];
+    Logger.root.level = Level.ALL;
+    final sub = Logger('ApiUsage').onRecord.listen((r) => lines.add(jsonDecode(r.message) as Map));
+    addTearDown(sub.cancel);
+
+    await run(build(bearer: secret, path: '/me/coaching/clients/student-uid-1/workouts'));
+
+    expect(lines.single['route'], '/me/coaching/clients/:clientId/workouts');
   });
 
   test('the usage line groups User-Agents by the tool behind them', () async {

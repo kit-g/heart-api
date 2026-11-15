@@ -7,8 +7,10 @@ class CoachFeedQuery {
 
   const new _({this.cursor, required this.limit});
 
-  static CoachFeedQuery fromRequest(Request req) {
-    final page = PageQuery.fromRequest(req, defaultLimit: 50);
+  static CoachFeedQuery fromRequest(Request req) => read(Query.of(req));
+
+  static CoachFeedQuery read(Query query) {
+    final page = PageQuery.read(query, defaultLimit: 50);
     return CoachFeedQuery._(
       cursor: switch (page.cursor) {
         null => null,
@@ -37,12 +39,16 @@ class RosterQuery {
 
   const new _({this.reason, required this.former, this.cursor, required this.limit});
 
-  static RosterQuery fromRequest(Request req) {
-    final query = Query.of(req);
+  static RosterQuery fromRequest(Request req) => read(Query.of(req));
+
+  static RosterQuery read(Query query) {
     final page = PageQuery.read(query, defaultLimit: 50);
     return RosterQuery._(
-      reason: query.stringOrNull('reason'),
-      former: query.boolean('former'),
+      reason: query.stringOrNull(
+        'reason',
+        description: 'Only those who need a word for this reason: `lighter`, `note`, `gap` or `ending`.',
+      ),
+      former: query.boolean('former', description: 'Former clients instead of current ones.'),
       cursor: switch (page.cursor) {
         null => null,
         final raw => cursorOf(raw) ?? (throw const BadRequest(reason: 'cursor is not one from this list')),

@@ -151,16 +151,33 @@ Future<CoachProgramView> copyView(
   required String programId,
   bool assistant = false,
 }) async {
+  final (:program, :sessions, :position) = await copyState(
+    req,
+    student: student,
+    programId: programId,
+    assistant: assistant,
+  );
+  return CoachProgramView(program: program, sessions: sessions, position: position.toMap());
+}
+
+/// A copy the coach sent, read in one snapshot, and where the student stands in
+/// it as far as the coach can read.
+Future<({Program program, List<Template> sessions, ProgramPosition position})> copyState(
+  Request req, {
+  required String student,
+  required String programId,
+  bool assistant = false,
+}) async {
   final (:program, :sessions, :actions, :marks) = await req.programChangeService.readCopy(
     coachId: req.userId,
     studentId: student,
     programId: programId,
     assistant: assistant,
   );
-  return CoachProgramView(
+  return (
     program: program,
     sessions: sessions,
-    position: ProgramPosition.of(program, marks: marks, actions: actions, now: DateTime.timestamp()).toMap(),
+    position: ProgramPosition.of(program, marks: marks, actions: actions, now: DateTime.timestamp()),
   );
 }
 

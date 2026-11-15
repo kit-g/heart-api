@@ -47,6 +47,33 @@ final meScopes = {Scope.read.value, Scope.readCoaching.value};
 /// it, and anything more then goes through the `insufficient_scope` step-up.
 final meDefaultScopes = {Scope.read.value};
 
+/// The step-up challenge for a good token that lacks [needed] (RFC 6750
+/// §3.1, and the MCP authorization spec's scope challenge):
+/// `WWW-Authenticate: Bearer error="insufficient_scope", scope="…"`, naming
+/// what the token holds plus what it needs, so a compliant host
+/// re-authorizes for the union instead of trading one scope for another.
+/// [challenge] adds parameters, such as where the resource's metadata is.
+/// Sent with a `403`.
+Headers insufficientScopeHeaders({
+  required Iterable<String> held,
+  required Scope needed,
+  List<AuthenticationParameter> challenge = const [],
+}) {
+  final scopes = {...held, needed.value}.where(supportedScopes.contains).toList()..sort();
+  return Headers.build(
+    (headers) => headers.wwwAuthenticate = .new(
+      scheme: 'Bearer',
+      parameters: [
+        const .new('realm', 'heart'),
+        const .new('error', 'insufficient_scope'),
+        .new('scope', scopes.join(' ')),
+        .new('error_description', 'this needs the ${needed.value} scope'),
+        ...challenge,
+      ],
+    ),
+  );
+}
+
 /// An OAuth protocol failure (RFC 6749 §5.2): the protocol's own error shape,
 /// `{error, error_description}`, not the API's.
 class OAuthError implements Exception {

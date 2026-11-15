@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:heart/models/changes.dart';
+import 'package:heart/models/errors.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -17,12 +18,12 @@ void main() {
   final now = DateTime.now().toUtc();
   const workoutId = '019a0000-0000-7000-8000-0000000000aa';
 
-  TokenUse use({int minute = 1}) {
+  TokenUse use({int minute = 1, List<String> scopes = const ['read']}) {
     return (
       userId: 'u1',
       resource: null,
       clientId: null,
-      scopes: const ['read'],
+      scopes: scopes,
       purpose: null,
       minuteStart: now,
       minuteCount: minute,
@@ -386,5 +387,71 @@ void main() {
 
     expect(response.status, 200);
     expect(jsonDecode(response.body), {'workouts': [], 'deleted': [], 'hasMore': false});
+  });
+
+  group("a coach's reads", () {
+    const student = 'student-1';
+
+    test('need a token made to read clients, and say so as the step-up challenge', () async {
+      final response = await app.send('GET', '/me/coaching/clients', token: secret);
+
+      expect(response.status, 403);
+      expect((jsonDecode(response.body) as Map)['code'], 'insufficient_scope');
+      expect(
+        response.headers['www-authenticate'],
+        allOf(contains('insufficient_scope'), contains('read read:coaching')),
+      );
+      verifyNever(app.db.getRoster(coachId: anyNamed('coachId'), assistant: anyNamed('assistant')));
+    });
+
+    test("read as the coach's assistant does, and refuse a client who doesn't share", () async {
+      when(app.db.useToken(TokenSecret.hash(secret))).thenAnswer((_) async => use(scopes: ['read', 'read:coaching']));
+      when(app.db.getDirtySummaries(coachId: 'u1')).thenAnswer((_) async => const []);
+      when(
+        app.db.getRoster(coachId: 'u1', former: false, limit: 50, assistant: true),
+      ).thenAnswer(
+        (_) async => Page(
+          items: [
+            ClientSummary(
+              connectionId: '01900000-0000-7000-8000-0000000000d1',
+              studentId: student,
+              name: 'Alex',
+              status: 'active',
+              reasons: const [],
+              assistant: false,
+            ),
+          ],
+          hasMore: false,
+        ),
+      );
+
+      final roster = await app.send('GET', '/me/coaching/clients', token: secret);
+      expect(roster.status, 200);
+      expect(jsonDecode(roster.body), {
+        'clients': [
+          {
+            'clientId': student,
+            'name': 'Alex',
+            'status': 'active',
+            'sharesWithAssistant': false,
+            'recent': [],
+            'reasons': [],
+          },
+        ],
+      });
+
+      when(
+        app.db.getWorkouts(
+          userId: 'u1',
+          targetUserId: student,
+          imageUrl: anyNamed('imageUrl'),
+          limit: 30,
+          assistant: true,
+        ),
+      ).thenThrow(const Forbidden(reason: 'no'));
+      final refused = await app.send('GET', '/me/coaching/clients/$student/workouts', token: secret);
+      expect(refused.status, 403);
+      expect((jsonDecode(refused.body) as Map)['code'], 'not_shared');
+    });
   });
 }

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:heart/core/response.dart';
 import 'package:heart/db/db.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/oauth/protocol.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart';
 import 'package:relic/relic.dart' hide Logger;
@@ -66,6 +67,15 @@ class SeeOther implements Model {
 /// `UnimplementedError` → 501, and anything else → 500. This is the single
 /// choke point every route flows through, so its contract is worth testing
 /// directly.
+extension InsufficientScopeResponse on InsufficientScope {
+  /// The `403` with the step-up challenge, wherever a scope is refused.
+  Response toResponse() => JsonResponse(
+    statusCode,
+    body: this,
+    headers: insufficientScopeHeaders(held: held, needed: needed),
+  );
+}
+
 Handler apiHandler(ModelHandler handler) {
   return (Request request) async {
     try {
@@ -95,6 +105,8 @@ Handler apiHandler(ModelHandler handler) {
         body: e,
         headers: Headers.build((headers) => headers.retryAfter = RetryAfterHeader(delay: e.retryAfter)),
       );
+    } on InsufficientScope catch (e) {
+      return e.toResponse();
     } on ApiException catch (e) {
       _logger.warning('API exception:', e);
       return JsonResponse(e.statusCode, body: e);
