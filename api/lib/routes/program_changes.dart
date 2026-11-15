@@ -156,6 +156,11 @@ Future<CoachProgramView> copyView(
     studentId: student,
     programId: programId,
     assistant: assistant,
+    // an assistant's host says nothing about the coach's language
+    locale: switch (assistant) {
+      true => null,
+      false => req.contentLocale,
+    },
   );
   return CoachProgramView(
     program: program,
@@ -421,6 +426,7 @@ Future<Model> logWorkoutForStudent(Request req, String student) async {
     userId: student,
     body: WorkoutRequest(userId: student, body: body),
     imageUrl: req.config.cdnAssetUrl,
+    locale: req.contentLocale,
     loggedBy: req.userId,
   );
   if (created) return Created(workout);
@@ -435,6 +441,7 @@ Future<Model> logWorkoutForStudent(Request req, String student) async {
     targetUserId: student,
     workoutId: workout.id,
     imageUrl: req.config.cdnAssetUrl,
+    locale: req.contentLocale,
   );
 }
 

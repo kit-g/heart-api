@@ -459,6 +459,7 @@ void main() {
     test('reads one with its sessions and a position worked out from what they can see', () async {
       when(
         app.db.readCopy(
+          locale: anyNamed('locale'),
           coachId: anyNamed('coachId'),
           studentId: anyNamed('studentId'),
           programId: anyNamed('programId'),
@@ -479,13 +480,14 @@ void main() {
       expect(view.program.id, program);
       expect(view.sessions.single.id, session);
       expect(view.position, isNotEmpty);
-      verify(app.db.readCopy(coachId: 'u1', studentId: 's', programId: program)).called(1);
+      verify(app.db.readCopy(locale: anyNamed('locale'), coachId: 'u1', studentId: 's', programId: program)).called(1);
       verifyNever(app.db.getProgramMarks(userId: anyNamed('userId'), programId: anyNamed('programId')));
     });
 
     test('a coach without a view of the student reads nothing of the copy', () async {
       when(
         app.db.readCopy(
+          locale: anyNamed('locale'),
           coachId: anyNamed('coachId'),
           studentId: anyNamed('studentId'),
           programId: anyNamed('programId'),

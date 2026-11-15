@@ -34,9 +34,39 @@ abstract interface class IdempotentGoalService implements GoalService {
   Future<(Goal, bool created)> createGoalOrExisting(Goal goal, String userId);
 }
 
+/// Every call that answers with templates takes a `locale`, naming a library
+/// exercise in it as `ApiWorkoutService` does; null is the library's own name.
 abstract interface class IdempotentTemplateService implements ApiTemplateService {
   /// Matches on [TemplateRequest.id] only; content is ignored on a hit.
-  Future<(Template, bool created)> createTemplateOrExisting({required String userId, required TemplateRequest body});
+  Future<(Template, bool created)> createTemplateOrExisting({
+    required String userId,
+    required TemplateRequest body,
+    String? locale,
+  });
+
+  @override
+  Future<Template> createTemplate({required String userId, required TemplateRequest body, String? locale});
+
+  @override
+  Future<Template> updateTemplate({
+    required String userId,
+    required String templateId,
+    required TemplateRequest body,
+    String? locale,
+  });
+
+  @override
+  Future<Template> getTemplate({required String userId, required String templateId, String? locale});
+
+  @override
+  Future<Page<Template>> getTemplates({
+    required String userId,
+    OrderedCursor? cursor,
+    int limit,
+    String? folderId,
+    bool unfiledOnly,
+    String? locale,
+  });
 }
 
 abstract interface class IdempotentTemplateFolderService implements ApiTemplateFolderService {

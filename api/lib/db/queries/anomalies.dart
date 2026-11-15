@@ -2,7 +2,7 @@ part of '../db.dart';
 
 const _anomalyColumns = '''
   a.id, a.workout_id, COALESCE(w.started_at, w.created_at) AS workout_start, a.set_id,
-  we.exercise_id, e.name AS exercise_name, a.reason, a.observed, a.typical, a.status, a.detected_at, a.resolved_at
+  we.exercise_id, _exercise_name(e.id, e.name, @locale::text) AS exercise_name, a.reason, a.observed, a.typical, a.status, a.detected_at, a.resolved_at
 ''';
 
 const _anomalyJoins = '''

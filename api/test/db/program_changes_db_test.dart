@@ -411,6 +411,8 @@ void main() {
       events = MockEventPublisher();
       config = MockAppConfig();
       when(config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+      when(config.supportedLocales).thenReturn(['en']);
+      when(config.defaultLocale).thenReturn('en');
       when(events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
       return bareRequest()
         ..user = User(id: user)

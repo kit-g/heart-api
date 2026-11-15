@@ -1,5 +1,6 @@
 import 'dart:io' show File, Platform, SecurityContext;
 
+import 'package:heart/core/request.dart';
 import 'package:heart/models/tokens.dart';
 import 'package:heart/notifications/sealing.dart';
 import 'package:postgres/postgres.dart' hide Connection;
@@ -485,4 +486,8 @@ extension RequestConfig on Request {
   AppConfig get config => _configProperty.get(this);
 
   set config(AppConfig c) => _configProperty[this] = c;
+
+  /// The served locale the request's `Accept-Language` picks, the one a
+  /// library exercise is named in wherever an answer carries it.
+  String get contentLocale => locale(config.supportedLocales, config.defaultLocale);
 }

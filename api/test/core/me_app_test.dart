@@ -108,7 +108,7 @@ void main() {
       rules: {bench: const AddWeight(step: 2.5)},
     );
     when(app.db.getPrograms('u1')).thenAnswer((_) async => [program]);
-    when(app.db.getTemplate(userId: 'u1', templateId: session)).thenAnswer(
+    when(app.db.getTemplate(locale: anyNamed('locale'), userId: 'u1', templateId: session)).thenAnswer(
       (_) async => Template.fromJson(const {
         'id': session,
         'order': 0,
@@ -314,7 +314,7 @@ void main() {
       when(app.db.getProgramMarks(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
       when(app.db.getProgramActions(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
       when(app.db.getProgramBases(userId: 'u1', programId: programId)).thenAnswer((_) async => const []);
-      when(app.db.getTemplate(userId: 'u1', templateId: session)).thenAnswer(
+      when(app.db.getTemplate(locale: anyNamed('locale'), userId: 'u1', templateId: session)).thenAnswer(
         (_) async =>
             Template.fromJson(const {'id': session, 'order': 0, 'name': 'Walk and strengthen', 'exercises': []}),
       );
@@ -340,6 +340,7 @@ void main() {
   test('workouts are paginated and images keep only id and url', () async {
     when(
       app.db.getWorkouts(
+        locale: anyNamed('locale'),
         userId: 'u1',
         targetUserId: 'u1',
         imageUrl: anyNamed('imageUrl'),
@@ -375,6 +376,7 @@ void main() {
   test('/workouts/changes is the feed, not a workout id', () async {
     when(
       app.db.getWorkoutChanges(
+        locale: anyNamed('locale'),
         userId: 'u1',
         since: null,
         limit: 100,

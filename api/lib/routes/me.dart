@@ -47,6 +47,7 @@ Future<Paginated<MeWorkout>> getMyWorkouts(Request req, PageQuery query) async {
     limit: query.limit,
     cursor: query.cursor,
     imageUrl: req.config.cdnAssetUrl,
+    locale: req.contentLocale,
   );
   return Paginated<MeWorkout>.from(
     Page(items: page.items.map(MeWorkout.new).toList(), hasMore: page.hasMore),
@@ -61,6 +62,7 @@ Future<MeWorkout> getMyWorkout(Request req, String workoutId) async {
     userId: req.userId,
     workoutId: workoutId,
     imageUrl: req.config.cdnAssetUrl,
+    locale: req.contentLocale,
   );
   return MeWorkout(workout);
 }
@@ -224,6 +226,7 @@ Future<List<Workout>> _everyWorkout(Request req) async {
       limit: 100,
       cursor: cursor,
       imageUrl: (key) => key,
+      locale: req.contentLocale,
     );
     all.addAll(page.items);
     cursor = page.hasMore ? page.items.last.id : null;
@@ -239,6 +242,7 @@ Future<MeWorkoutChanges> getMyWorkoutChanges(Request req, ChangesQuery query) as
     since: query.since,
     limit: query.limit,
     imageUrl: req.config.cdnAssetUrl,
+    locale: req.contentLocale,
   );
   return MeWorkoutChanges(changes);
 }
@@ -253,8 +257,14 @@ Future<Paginated<MeExerciseSession>> getMyExerciseHistory(Request req, ExerciseH
       limit: query.limit,
       from: query.from,
       to: query.to,
+      locale: req.contentLocale,
     ),
-    req.anomalyService.getPendingAnomalies(userId: req.userId, from: query.from, to: query.to),
+    req.anomalyService.getPendingAnomalies(
+      userId: req.userId,
+      from: query.from,
+      to: query.to,
+      locale: req.contentLocale,
+    ),
   ).wait;
   final ExerciseHistory(:category, :sessions) = history ?? (throw NotFound(type: 'Exercise', id: query.exerciseId));
   final warnings = pending.onSessions(query.exerciseId, sessions.items);
@@ -290,8 +300,14 @@ Future<MeRecords> getMyRecords(Request req, RecordsQuery query) async {
       exerciseId: query.exerciseId,
       from: query.from,
       to: query.to,
+      locale: req.contentLocale,
     ),
-    req.anomalyService.getPendingAnomalies(userId: req.userId, from: query.from, to: query.to),
+    req.anomalyService.getPendingAnomalies(
+      userId: req.userId,
+      from: query.from,
+      to: query.to,
+      locale: req.contentLocale,
+    ),
   ).wait;
   return MeRecords.fold(sets, pending: pending);
 }

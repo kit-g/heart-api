@@ -35,6 +35,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     String? cursor,
     int limit = 30,
     bool assistant = false,
+    String? locale,
   }) async {
     // Fetch one extra row so hasMore is authoritative without a second query.
     final rows = await _pool.execute(
@@ -45,6 +46,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
         'cursor': cursor,
         'limit': limit + 1,
         'assistant': assistant,
+        'locale': locale,
       },
     );
     if (rows.isNotEmpty && rows.first.toColumnMap()['forbidden'] == true) {
@@ -61,6 +63,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     ChangeCursor? since,
     int limit = 100,
     required String Function(String) imageUrl,
+    String? locale,
   }) async {
     final rows = await _pool.execute(
       _workoutChanges.toSql(),
@@ -69,6 +72,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
         'sinceXid': since?.xid,
         'sinceId': since?.id,
         'limit': limit + 1,
+        'locale': locale,
       },
     );
     final columns = rows.map((row) => row.toColumnMap()).toList();
@@ -114,6 +118,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     int limit = 20,
     DateTime? from,
     DateTime? to,
+    String? locale,
   }) async {
     final rows = await _pool.execute(
       _exerciseHistory.toSql(),
@@ -124,6 +129,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
         'limit': limit + 1,
         'from': from,
         'to': to,
+        'locale': locale,
       },
     );
     if (rows.isEmpty) return null;
@@ -166,10 +172,11 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     String? exerciseId,
     DateTime? from,
     DateTime? to,
+    String? locale,
   }) async {
     final rows = await _pool.execute(
       _recordSets.toSql(),
-      parameters: {'userId': userId, 'exerciseId': exerciseId, 'from': from, 'to': to},
+      parameters: {'userId': userId, 'exerciseId': exerciseId, 'from': from, 'to': to, 'locale': locale},
     );
     final byExercise = <String, ExerciseRecordSets>{};
     for (final row in rows) {
@@ -234,10 +241,11 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required String userId,
     required String workoutId,
     required String Function(String) imageUrl,
+    String? locale,
   }) async {
     final rows = await _pool.execute(
       _getWorkout.toSql(),
-      parameters: {'workoutId': workoutId, 'userId': userId},
+      parameters: {'workoutId': workoutId, 'userId': userId, 'locale': locale},
     );
     if (rows.isEmpty) throw NotFound(type: 'Workout', id: workoutId);
     return Workout.fromRow(rows.first.toColumnMap(), imageUrl: imageUrl);
@@ -250,6 +258,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required String workoutId,
     required String Function(String) imageUrl,
     bool assistant = false,
+    String? locale,
   }) async {
     final rows = await _pool.execute(
       _getTargetWorkout.toSql(),
@@ -258,6 +267,7 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
         'targetUserId': targetUserId,
         'workoutId': workoutId,
         'assistant': assistant,
+        'locale': locale,
       },
     );
     if (rows.isNotEmpty && rows.first.toColumnMap()['forbidden'] == true) {
@@ -273,12 +283,13 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required WorkoutRequest body,
     required String Function(String) imageUrl,
     String? loggedBy,
+    String? locale,
   }) async {
     try {
       final rows = await _retryOnCreateRace(
         () => _pool.execute(
           _saveWorkout.toSql(),
-          parameters: {'id': body.id, 'loggedBy': loggedBy, ...body.toParams()},
+          parameters: {'id': body.id, 'loggedBy': loggedBy, 'locale': locale, ...body.toParams()},
         ),
       );
       // only a coach's log is ever refused
@@ -301,12 +312,14 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     required String workoutId,
     required WorkoutRequest body,
     required String Function(String) imageUrl,
+    String? locale,
   }) async {
     try {
       final rows = await _pool.execute(
         _replaceWorkout.toSql(),
         parameters: {
           'workoutId': workoutId,
+          'locale': locale,
           'replacesExercises': body.replacesExercises,
           'setsNote': body.setsNote,
           'setsPauses': body.setsPauses,
@@ -333,11 +346,13 @@ mixin _Workouts on _DatabaseBase implements ApiWorkoutService {
     double? calories,
     ({String? value})? note,
     List<WorkoutPause>? pauses,
+    String? locale,
   }) async {
     final rows = await _pool.execute(
       _patchWorkout.toSql(),
       parameters: {
         'workoutId': workoutId,
+        'locale': locale,
         'userId': userId,
         'name': name,
         'startedAt': start,

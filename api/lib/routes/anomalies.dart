@@ -1,3 +1,4 @@
+import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
@@ -15,6 +16,7 @@ Future<Paginated<Anomaly>> listAnomalies(Request req, AnomaliesQuery query) asyn
     status: query.status,
     cursor: query.cursor,
     limit: query.limit,
+    locale: req.contentLocale,
   );
   return Paginated<Anomaly>.from(page, itemsKey: 'anomalies', cursorOf: (anomaly) => anomaly.id);
 }
@@ -25,6 +27,11 @@ Future<Anomaly> resolveAnomaly(Request req) => resolveAnomalyById(req, req.rawPa
 Future<Anomaly> resolveAnomalyById(Request req, String anomalyId) async {
   if (!isUuidV7(anomalyId)) throw NotFound(type: 'Anomaly', id: anomalyId);
   final input = await AnomalyResolveIn.fromRequest(req);
-  return await req.anomalyService.resolveAnomaly(userId: req.userId, anomalyId: anomalyId, status: input.status) ??
+  return await req.anomalyService.resolveAnomaly(
+        userId: req.userId,
+        anomalyId: anomalyId,
+        status: input.status,
+        locale: req.contentLocale,
+      ) ??
       (throw NotFound(type: 'Anomaly', id: anomalyId));
 }

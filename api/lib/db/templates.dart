@@ -2,13 +2,14 @@ part of 'db.dart';
 
 mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
   @override
-  Future<Template> createTemplate({required String userId, required TemplateRequest body}) async =>
-      (await createTemplateOrExisting(userId: userId, body: body)).$1;
+  Future<Template> createTemplate({required String userId, required TemplateRequest body, String? locale}) async =>
+      (await createTemplateOrExisting(userId: userId, body: body, locale: locale)).$1;
 
   @override
   Future<(Template, bool created)> createTemplateOrExisting({
     required String userId,
     required TemplateRequest body,
+    String? locale,
   }) async {
     try {
       final rows = await _retryOnCreateRace(
@@ -16,6 +17,7 @@ mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
           _saveTemplate.toSql(),
           parameters: {
             'id': body.id,
+            'locale': locale,
             ...body.toParams(),
             'programId': body.programId,
             'joined': body.joined,
@@ -39,12 +41,14 @@ mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
     required String userId,
     required String templateId,
     required TemplateRequest body,
+    String? locale,
   }) async {
     try {
       final rows = await _pool.execute(
         _replaceTemplate.toSql(),
         parameters: {
           'templateId': templateId,
+          'locale': locale,
           'movesFolder': body.movesFolder,
           'movesProgram': body.movesProgram,
           'changesNote': body.changesNote,
@@ -62,10 +66,10 @@ mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
   }
 
   @override
-  Future<Template> getTemplate({required String userId, required String templateId}) async {
+  Future<Template> getTemplate({required String userId, required String templateId, String? locale}) async {
     final rows = await _pool.execute(
       _getTemplate.toSql(),
-      parameters: {'userId': userId, 'templateId': templateId},
+      parameters: {'userId': userId, 'templateId': templateId, 'locale': locale},
     );
     if (rows.isEmpty) throw NotFound(type: 'Template', id: templateId);
     return Template.fromRow(rows.first.toColumnMap());
@@ -78,6 +82,7 @@ mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
     int limit = 30,
     String? folderId,
     bool unfiledOnly = false,
+    String? locale,
   }) async {
     // Fetch one extra row so hasMore is authoritative without a second query.
     final rows = await _pool.execute(
@@ -89,6 +94,7 @@ mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
         'limit': limit + 1,
         'folderId': folderId,
         'unfiledOnly': unfiledOnly,
+        'locale': locale,
       },
     );
     final templates = rows.map((row) => Template.fromRow(row.toColumnMap())).toList();

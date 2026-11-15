@@ -34,7 +34,12 @@ void main() {
     goals = MockIdempotentGoalService();
     anomalies = MockApiAnomalyService();
     when(
-      anomalies.getPendingAnomalies(userId: anyNamed('userId'), from: anyNamed('from'), to: anyNamed('to')),
+      anomalies.getPendingAnomalies(
+        locale: anyNamed('locale'),
+        userId: anyNamed('userId'),
+        from: anyNamed('from'),
+        to: anyNamed('to'),
+      ),
     ).thenAnswer((_) async => []);
     config = MockAppConfig();
     when(config.supportedLocales).thenReturn(['en']);
@@ -69,7 +74,12 @@ void main() {
       throwsA(isA<NotFound>()),
     );
     verifyNever(
-      workouts.getWorkout(userId: anyNamed('userId'), workoutId: anyNamed('workoutId'), imageUrl: anyNamed('imageUrl')),
+      workouts.getWorkout(
+        locale: anyNamed('locale'),
+        userId: anyNamed('userId'),
+        workoutId: anyNamed('workoutId'),
+        imageUrl: anyNamed('imageUrl'),
+      ),
     );
   });
 
@@ -99,6 +109,7 @@ void main() {
       when(profiles.getProfile('u1')).thenAnswer((_) async => User(id: 'u1'));
       when(
         workouts.getWorkouts(
+          locale: anyNamed('locale'),
           userId: 'u1',
           targetUserId: 'u1',
           imageUrl: anyNamed('imageUrl'),
@@ -193,6 +204,7 @@ void main() {
     test('records read the window: a date is that day from midnight UTC, a moment as written', () async {
       when(
         workouts.getRecordSets(
+          locale: anyNamed('locale'),
           userId: 'u1',
           exerciseId: null,
           from: DateTime.utc(2026),
@@ -217,7 +229,7 @@ void main() {
         workoutId: 'w1',
         at: '2026-01-01T00:00:00.000Z',
       );
-      when(workouts.getRecordSets(userId: 'u1', exerciseId: null)).thenAnswer(
+      when(workouts.getRecordSets(locale: anyNamed('locale'), userId: 'u1', exerciseId: null)).thenAnswer(
         (_) async => [
           (exerciseId: 'b', name: 'squat', category: Category.barbell, sets: [set(140, 3)]),
           (exerciseId: 'a', name: 'Bench', category: Category.barbell, sets: [set(100, 5)]),
@@ -249,7 +261,7 @@ void main() {
       'status': 'pending',
       'detectedAt': '2026-01-02T00:00:00.000Z',
     });
-    when(workouts.getRecordSets(userId: 'u1', exerciseId: null)).thenAnswer(
+    when(workouts.getRecordSets(locale: anyNamed('locale'), userId: 'u1', exerciseId: null)).thenAnswer(
       (_) async => [
         (
           exerciseId: 'a',
@@ -268,7 +280,8 @@ void main() {
         ),
       ],
     );
-    when(anomalies.getPendingAnomalies(userId: 'u1')).thenAnswer((_) async => [pending('a'), pending('gone')]);
+    when(anomalies.getPendingAnomalies(locale: anyNamed('locale'), userId: 'u1'))
+        .thenAnswer((_) async => [pending('a'), pending('gone')]);
 
     final records = (await serve('/records', build('/me/records'))).toMap();
 
@@ -304,7 +317,7 @@ void main() {
       final goal = (progress['goals'] as List).single as Map;
       expect([goal['current'], goal['progress']], [1, 0.33]);
       expect(DateTime.parse((goal['period'] as Map)['from'] as String).weekday, DateTime.sunday);
-      verifyNever(workouts.getRecordSets(userId: anyNamed('userId')));
+      verifyNever(workouts.getRecordSets(locale: anyNamed('locale'), userId: anyNamed('userId')));
       verifyNever(exercises.getExercises(any));
     });
   });
@@ -320,7 +333,7 @@ void main() {
       // a Wednesday: the default window is the four Sunday weeks ending with its
       final to = DateTime.utc(2026, 10, 14);
       when(
-        workouts.getRecordSets(userId: 'u1', from: DateTime.utc(2026, 9, 20), to: to),
+        workouts.getRecordSets(locale: anyNamed('locale'), userId: 'u1', from: DateTime.utc(2026, 9, 20), to: to),
       ).thenAnswer((_) async => []);
       when(exercises.getExercises('u1')).thenAnswer((_) async => {'exercises': const []});
       when(workouts.getWorkoutSpans(userId: 'u1', from: DateTime.utc(2026, 9, 20), to: to)).thenAnswer(
@@ -353,7 +366,7 @@ void main() {
       when(pairs.readPairs()).thenAnswer((_) async => null);
       when(profiles.getProfile('u1')).thenAnswer((_) async => User(id: 'u1'));
       when(
-        workouts.getRecordSets(userId: 'u1', from: anyNamed('from'), to: anyNamed('to')),
+        workouts.getRecordSets(locale: anyNamed('locale'), userId: 'u1', from: anyNamed('from'), to: anyNamed('to')),
       ).thenAnswer((_) async => []);
       when(exercises.getExercises('u1')).thenAnswer((_) async => {'exercises': const []});
 
@@ -398,7 +411,13 @@ void main() {
 
     test("an exercise the user can't see is a 404", () {
       when(
-        workouts.getExerciseHistory(userId: 'u1', exerciseId: exercise, cursor: null, limit: 20),
+        workouts.getExerciseHistory(
+          locale: anyNamed('locale'),
+          userId: 'u1',
+          exerciseId: exercise,
+          cursor: null,
+          limit: 20,
+        ),
       ).thenAnswer((_) async => null);
 
       expect(
@@ -412,7 +431,15 @@ void main() {
     });
 
     test('sessions carry their sets and chart values, and the cursor is the last workout', () async {
-      when(workouts.getExerciseHistory(userId: 'u1', exerciseId: exercise, cursor: newer, limit: 2)).thenAnswer(
+      when(
+        workouts.getExerciseHistory(
+          locale: anyNamed('locale'),
+          userId: 'u1',
+          exerciseId: exercise,
+          cursor: newer,
+          limit: 2,
+        ),
+      ).thenAnswer(
         (_) async => (
           exerciseId: exercise,
           name: 'Bench',
@@ -455,7 +482,15 @@ void main() {
         'status': 'pending',
         'detectedAt': '2026-01-02T00:00:00.000Z',
       });
-      when(workouts.getExerciseHistory(userId: 'u1', exerciseId: exercise, cursor: null, limit: 20)).thenAnswer(
+      when(
+        workouts.getExerciseHistory(
+          locale: anyNamed('locale'),
+          userId: 'u1',
+          exerciseId: exercise,
+          cursor: null,
+          limit: 20,
+        ),
+      ).thenAnswer(
         (_) async => (
           exerciseId: exercise,
           name: 'Bench',
@@ -468,7 +503,7 @@ void main() {
           ),
         ),
       );
-      when(anomalies.getPendingAnomalies(userId: 'u1')).thenAnswer(
+      when(anomalies.getPendingAnomalies(locale: anyNamed('locale'), userId: 'u1')).thenAnswer(
         (_) async => [
           pending('019def00-0000-7000-8000-000000000061', workoutId: older, exerciseId: exercise),
           // another exercise in the same workout, the workout's own time, and a session not on this page

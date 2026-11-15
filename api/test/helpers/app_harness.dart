@@ -77,6 +77,8 @@ class AppHarness {
     when(config.firebaseProjectId).thenReturn('proj');
     when(config.allowedOrigins).thenReturn(allowedOrigins);
     when(config.oauth).thenReturn(null);
+    when(config.supportedLocales).thenReturn(['en']);
+    when(config.defaultLocale).thenReturn('en');
 
     final authenticated = user ?? User(id: 'u1', displayName: 'Sam');
     Future<User> verify(String _, String token) async {

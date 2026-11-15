@@ -69,6 +69,7 @@ mixin _Programs on _DatabaseBase implements ProgramService {
                 _saveTemplate.toSql(),
                 parameters: {
                   'id': session.id,
+                  'locale': null,
                   ...session.toParams(),
                   'programId': id,
                   'joined': session.joined,

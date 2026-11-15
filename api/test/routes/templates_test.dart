@@ -1,4 +1,5 @@
 import 'package:heart/core/handler.dart';
+import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
@@ -9,6 +10,7 @@ import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
 
 import '../helpers/app_harness.dart';
+import '../helpers/config.dart';
 import '../helpers/request.dart';
 import '../mocks.mocks.dart';
 
@@ -37,6 +39,7 @@ void main() {
 
   Request wire(Request req) => req
     ..user = User(id: _meId)
+    ..config = englishConfig()
     ..templatesService = templates;
 
   Request getReq(String path, {Map<String, String> query = const {}}) =>
@@ -48,7 +51,11 @@ void main() {
   group('createTemplate', () {
     void stub((Template, bool) answer) {
       when(
-        templates.createTemplateOrExisting(userId: anyNamed('userId'), body: anyNamed('body')),
+        templates.createTemplateOrExisting(
+          locale: anyNamed('locale'),
+          userId: anyNamed('userId'),
+          body: anyNamed('body'),
+        ),
       ).thenAnswer((_) async => answer);
     }
 
@@ -60,7 +67,8 @@ void main() {
 
       expect(result, isA<Created<Template>>());
       expect((result as Created<Template>).value, same(template));
-      verify(templates.createTemplateOrExisting(userId: _meId, body: anyNamed('body'))).called(1);
+      verify(templates.createTemplateOrExisting(locale: anyNamed('locale'), userId: _meId, body: anyNamed('body')))
+          .called(1);
     });
 
     test('a replayed id resolves to the existing template and responds 200, not 201', () async {
@@ -75,7 +83,11 @@ void main() {
 
     test('an id belonging to another account is Forbidden with id_taken', () async {
       when(
-        templates.createTemplateOrExisting(userId: anyNamed('userId'), body: anyNamed('body')),
+        templates.createTemplateOrExisting(
+          locale: anyNamed('locale'),
+          userId: anyNamed('userId'),
+          body: anyNamed('body'),
+        ),
       ).thenThrow(const Forbidden(code: 'id_taken', reason: 'this id belongs to another account'));
 
       await expectLater(
@@ -89,7 +101,13 @@ void main() {
         createTemplate(bodyReq({'id': 'not-a-uuid', 'name': 'Push'})),
         throwsA(isA<BadRequest>()),
       );
-      verifyNever(templates.createTemplateOrExisting(userId: anyNamed('userId'), body: anyNamed('body')));
+      verifyNever(
+        templates.createTemplateOrExisting(
+          locale: anyNamed('locale'),
+          userId: anyNamed('userId'),
+          body: anyNamed('body'),
+        ),
+      );
     });
   });
 
@@ -97,6 +115,7 @@ void main() {
     void stub(Page<Template> page) {
       when(
         templates.getTemplates(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           cursor: anyNamed('cursor'),
           limit: anyNamed('limit'),
@@ -132,6 +151,7 @@ void main() {
       final sent =
           verify(
                 templates.getTemplates(
+                  locale: anyNamed('locale'),
                   userId: _meId,
                   cursor: captureAnyNamed('cursor'),
                   limit: 100,
@@ -163,6 +183,7 @@ void main() {
       final sent =
           verify(
                 templates.getTemplates(
+                  locale: anyNamed('locale'),
                   userId: _meId,
                   cursor: captureAnyNamed('cursor'),
                   limit: anyNamed('limit'),
@@ -181,7 +202,14 @@ void main() {
       await getMyTemplates(getReq('/templates'));
 
       verify(
-        templates.getTemplates(userId: _meId, cursor: null, limit: 30, folderId: null, unfiledOnly: false),
+        templates.getTemplates(
+          locale: anyNamed('locale'),
+          userId: _meId,
+          cursor: null,
+          limit: 30,
+          folderId: null,
+          unfiledOnly: false,
+        ),
       ).called(1);
     });
 
@@ -192,6 +220,7 @@ void main() {
 
       verify(
         templates.getTemplates(
+          locale: anyNamed('locale'),
           userId: _meId,
           cursor: anyNamed('cursor'),
           limit: anyNamed('limit'),
@@ -208,6 +237,7 @@ void main() {
 
       verify(
         templates.getTemplates(
+          locale: anyNamed('locale'),
           userId: _meId,
           cursor: anyNamed('cursor'),
           limit: anyNamed('limit'),
@@ -224,6 +254,7 @@ void main() {
 
       verify(
         templates.getTemplates(
+          locale: anyNamed('locale'),
           userId: _meId,
           cursor: anyNamed('cursor'),
           limit: anyNamed('limit'),
@@ -240,6 +271,7 @@ void main() {
 
       verify(
         templates.getTemplates(
+          locale: anyNamed('locale'),
           userId: _meId,
           cursor: anyNamed('cursor'),
           limit: anyNamed('limit'),
@@ -294,25 +326,32 @@ void main() {
         ),
       ).thenAnswer((_) async => null);
       when(
-        app.db.updateTemplate(userId: anyNamed('userId'), templateId: anyNamed('templateId'), body: anyNamed('body')),
+        app.db.updateTemplate(
+          locale: anyNamed('locale'),
+          userId: anyNamed('userId'),
+          templateId: anyNamed('templateId'),
+          body: anyNamed('body'),
+        ),
       ).thenAnswer((_) async => _fakeTemplate(_v7Id));
 
       final res = await app.send('PUT', '/templates/$_v7Id', body: {'name': 'Day', 'exercises': <Object?>[]});
 
       expect(res.status, 200);
-      verify(app.db.updateTemplate(userId: _meId, templateId: _v7Id, body: anyNamed('body'))).called(1);
+      verify(
+        app.db.updateTemplate(locale: anyNamed('locale'), userId: _meId, templateId: _v7Id, body: anyNamed('body')),
+      ).called(1);
       verifyZeroInteractions(app.events);
     });
 
     test('reads the caller\'s own template', () async {
       when(
-        app.db.getTemplate(userId: anyNamed('userId'), templateId: anyNamed('templateId')),
+        app.db.getTemplate(locale: anyNamed('locale'), userId: anyNamed('userId'), templateId: anyNamed('templateId')),
       ).thenAnswer((_) async => _fakeTemplate(_v7Id));
 
       final res = await app.send('GET', '/templates/$_v7Id');
 
       expect(res.status, 200);
-      verify(app.db.getTemplate(userId: _meId, templateId: _v7Id)).called(1);
+      verify(app.db.getTemplate(locale: anyNamed('locale'), userId: _meId, templateId: _v7Id)).called(1);
     });
 
     test('assigning a template to someone shares it from the caller', () async {

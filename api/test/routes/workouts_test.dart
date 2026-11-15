@@ -39,6 +39,8 @@ void main() {
   setUp(() {
     workouts = MockApiWorkoutService();
     config = MockAppConfig();
+    when(config.supportedLocales).thenReturn(['en']);
+    when(config.defaultLocale).thenReturn('en');
   });
 
   Request wire(Request req) => req
@@ -49,6 +51,7 @@ void main() {
   void stubGetWorkouts(Page<Workout> page) {
     when(
       workouts.getWorkouts(
+        locale: anyNamed('locale'),
         userId: anyNamed('userId'),
         targetUserId: anyNamed('targetUserId'),
         imageUrl: anyNamed('imageUrl'),
@@ -87,6 +90,7 @@ void main() {
 
       verify(
         workouts.getWorkouts(
+          locale: anyNamed('locale'),
           userId: argThat(equals(_meId), named: 'userId'),
           targetUserId: argThat(equals(_targetUserId), named: 'targetUserId'),
           imageUrl: anyNamed('imageUrl'),
@@ -103,6 +107,7 @@ void main() {
 
       verify(
         workouts.getWorkouts(
+          locale: anyNamed('locale'),
           userId: argThat(equals(_meId), named: 'userId'),
           targetUserId: argThat(equals(_targetUserId), named: 'targetUserId'),
           imageUrl: anyNamed('imageUrl'),
@@ -115,6 +120,7 @@ void main() {
     test('propagates Forbidden from the service', () async {
       when(
         workouts.getWorkouts(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           targetUserId: anyNamed('targetUserId'),
           imageUrl: anyNamed('imageUrl'),
@@ -134,6 +140,7 @@ void main() {
     void stubPatch() {
       when(
         workouts.patchWorkout(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           workoutId: anyNamed('workoutId'),
           name: anyNamed('name'),
@@ -160,6 +167,7 @@ void main() {
       expect(out.id, 'w-1');
       verify(
         workouts.patchWorkout(
+          locale: anyNamed('locale'),
           userId: argThat(equals(_meId), named: 'userId'),
           workoutId: argThat(equals('w-1'), named: 'workoutId'),
           name: argThat(equals('Evening push'), named: 'name'),
@@ -177,6 +185,7 @@ void main() {
 
       verify(
         workouts.patchWorkout(
+          locale: anyNamed('locale'),
           userId: argThat(equals(_meId), named: 'userId'),
           workoutId: argThat(equals('w-1'), named: 'workoutId'),
           name: argThat(isNull, named: 'name'),
@@ -190,6 +199,7 @@ void main() {
     test('the note reaches the service, a null one as a clear', () async {
       when(
         workouts.patchWorkout(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           workoutId: anyNamed('workoutId'),
           note: anyNamed('note'),
@@ -202,6 +212,7 @@ void main() {
 
       verify(
         workouts.patchWorkout(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           workoutId: anyNamed('workoutId'),
           note: argThat(equals((value: 'felt strong')), named: 'note'),
@@ -210,6 +221,7 @@ void main() {
       ).called(1);
       verify(
         workouts.patchWorkout(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           workoutId: anyNamed('workoutId'),
           note: argThat(equals((value: null)), named: 'note'),
@@ -221,6 +233,7 @@ void main() {
     test('the pauses reach the service', () async {
       when(
         workouts.patchWorkout(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           workoutId: anyNamed('workoutId'),
           pauses: anyNamed('pauses'),
@@ -240,6 +253,7 @@ void main() {
       final pauses =
           verify(
                 workouts.patchWorkout(
+                  locale: anyNamed('locale'),
                   userId: anyNamed('userId'),
                   workoutId: anyNamed('workoutId'),
                   pauses: captureAnyNamed('pauses'),
@@ -254,6 +268,7 @@ void main() {
       await expectLater(patchWorkoutById(patchReq({}), 'w-1'), throwsA(isA<BadRequest>()));
       verifyNever(
         workouts.patchWorkout(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           workoutId: anyNamed('workoutId'),
           name: anyNamed('name'),
@@ -281,6 +296,7 @@ void main() {
     test('propagates NotFound for a workout the user does not own', () async {
       when(
         workouts.patchWorkout(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           workoutId: anyNamed('workoutId'),
           name: anyNamed('name'),
@@ -303,6 +319,7 @@ void main() {
     void stubCreate((Workout, bool) result) {
       when(
         workouts.createWorkout(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           body: anyNamed('body'),
           imageUrl: anyNamed('imageUrl'),
@@ -335,6 +352,7 @@ void main() {
       final id = uuidV7();
       when(
         workouts.createWorkout(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           body: anyNamed('body'),
           imageUrl: anyNamed('imageUrl'),
@@ -749,6 +767,7 @@ void main() {
     test('lists someone else\'s workouts as the caller can read them', () async {
       when(
         app.db.getWorkouts(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           targetUserId: anyNamed('targetUserId'),
           imageUrl: anyNamed('imageUrl'),
@@ -763,6 +782,7 @@ void main() {
       expect(((jsonDecode(res.body) as Map)['workouts'] as List).single, containsPair('id', workout));
       verify(
         app.db.getWorkouts(
+          locale: anyNamed('locale'),
           userId: _meId,
           targetUserId: _targetUserId,
           imageUrl: anyNamed('imageUrl'),
@@ -775,6 +795,7 @@ void main() {
     test('reads one of someone else\'s workouts as the caller', () async {
       when(
         app.db.getTargetWorkout(
+          locale: anyNamed('locale'),
           requesterId: anyNamed('requesterId'),
           targetUserId: anyNamed('targetUserId'),
           workoutId: anyNamed('workoutId'),
@@ -787,6 +808,7 @@ void main() {
       expect(res.status, 200);
       verify(
         app.db.getTargetWorkout(
+          locale: anyNamed('locale'),
           requesterId: _meId,
           targetUserId: _targetUserId,
           workoutId: workout,
@@ -798,6 +820,7 @@ void main() {
     test('a patch goes to the workout in the path', () async {
       when(
         app.db.patchWorkout(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           workoutId: anyNamed('workoutId'),
           imageUrl: anyNamed('imageUrl'),
@@ -815,6 +838,7 @@ void main() {
       expect(res.status, 200);
       verify(
         app.db.patchWorkout(
+          locale: anyNamed('locale'),
           userId: _meId,
           workoutId: workout,
           imageUrl: anyNamed('imageUrl'),

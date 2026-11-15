@@ -36,6 +36,8 @@ void main() {
     when(config.firebaseProjectId).thenReturn('test-project');
     when(config.allowedOrigins).thenReturn(const {});
     when(config.oauth).thenReturn(null);
+    when(config.supportedLocales).thenReturn(['en']);
+    when(config.defaultLocale).thenReturn('en');
     when(config.cdnAssetUrl(any)).thenAnswer((call) => 'https://cdn.example/${call.positionalArguments.single}');
     app = buildApp(
       config: config,

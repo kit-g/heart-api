@@ -41,6 +41,8 @@ void main() {
     when(config.shouldCheckVersion).thenReturn(false);
     when(config.firebaseProjectId).thenReturn('proj');
     when(config.allowedOrigins).thenReturn(const {});
+    when(config.supportedLocales).thenReturn(['en']);
+    when(config.defaultLocale).thenReturn('en');
 
     app = buildApp(
       config: config,

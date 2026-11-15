@@ -129,7 +129,12 @@ _exercises_json AS (
   SELECT jsonb_agg(
     jsonb_build_object(
       'id', ie.id,
-      'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
+      'exercise', jsonb_build_object(
+        'id', el.id,
+        'name', _exercise_name(el.id, el.name, @locale::text),
+        'category', el.category,
+        'target', el.target
+      ),
       'exercise_order', ie.exercise_order,
       'rest', ie.rest,
       'superset', ie.superset,
@@ -183,7 +188,7 @@ SELECT
   t.program_id,
   t.joined_program_at,
   t.note,
-  _template_exercises(t.id) AS exercises,
+  _template_exercises(t.id, @locale::text) AS exercises,
   false AS created
 FROM templates t
 LEFT JOIN template_folders f ON f.id = t.folder_id
@@ -386,7 +391,12 @@ _exercises_json AS (
   SELECT jsonb_agg(
     jsonb_build_object(
       'id', ke.id,
-      'exercise', jsonb_build_object('id', el.id, 'name', el.name, 'category', el.category, 'target', el.target),
+      'exercise', jsonb_build_object(
+        'id', el.id,
+        'name', _exercise_name(el.id, el.name, @locale::text),
+        'category', el.category,
+        'target', el.target
+      ),
       'exercise_order', ke.exercise_order,
       'rest', ke.rest,
       'superset', ke.superset,
@@ -441,7 +451,7 @@ SELECT
   t.program_id,
   t.joined_program_at,
   t.note,
-  _template_exercises(t.id) AS exercises
+  _template_exercises(t.id, @locale::text) AS exercises
 FROM templates t
 LEFT JOIN template_folders f ON f.id = t.folder_id
 LEFT JOIN profiles p ON p.id = t.assigned_by
@@ -474,7 +484,7 @@ SELECT
   t.program_id,
   t.joined_program_at,
   t.note,
-  _template_exercises(t.id) AS exercises
+  _template_exercises(t.id, @locale::text) AS exercises
 FROM templates t
 LEFT JOIN template_folders f ON f.id = t.folder_id
 LEFT JOIN profiles p ON p.id = t.assigned_by

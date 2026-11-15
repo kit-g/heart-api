@@ -228,6 +228,8 @@ void main() {
     Request request() {
       final config = MockAppConfig();
       when(config.cdnAssetUrl(any)).thenAnswer((call) => 'https://cdn.example/${call.positionalArguments.single}');
+      when(config.supportedLocales).thenReturn(['en']);
+      when(config.defaultLocale).thenReturn('en');
       return bareRequest(method: Method.get, path: '/me/workouts/x')
         ..user = User(id: 'u1')
         ..config = config
@@ -237,7 +239,12 @@ void main() {
     test('conforms to its shape, from the 1.13 compatibility fixture', () async {
       final workout = Workout.fromJson(_fixture());
       when(
-        workouts.getWorkout(userId: 'u1', workoutId: workout.id, imageUrl: anyNamed('imageUrl')),
+        workouts.getWorkout(
+          locale: anyNamed('locale'),
+          userId: 'u1',
+          workoutId: workout.id,
+          imageUrl: anyNamed('imageUrl'),
+        ),
       ).thenAnswer((_) async => workout);
 
       final body = (await meRoutes[('/workouts/:workoutId', Method.get)]!.call(

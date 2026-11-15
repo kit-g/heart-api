@@ -29,6 +29,7 @@ Future<Paginated<Workout>> getTargetUserWorkoutsFor(Request request, String targ
     limit: query.limit,
     cursor: query.cursor,
     imageUrl: request.config.cdnAssetUrl,
+    locale: request.contentLocale,
   );
   return Paginated<Workout>.from(page, itemsKey: 'workouts', cursorOf: (w) => w.id);
 }
@@ -67,6 +68,7 @@ Future<Workout> getWorkout(Request request) async {
     userId: request.userId,
     workoutId: workoutId,
     imageUrl: request.config.cdnAssetUrl,
+    locale: request.contentLocale,
   );
 }
 
@@ -78,6 +80,7 @@ Future<Workout> getTargetUserWorkout(Request request) async {
     targetUserId: targetUserId,
     workoutId: workoutId,
     imageUrl: request.config.cdnAssetUrl,
+    locale: request.contentLocale,
   );
 }
 
@@ -87,6 +90,7 @@ Future<Model> createWorkout(Request request) async {
     userId: request.userId,
     body: WorkoutRequest(userId: request.userId, body: body),
     imageUrl: request.config.cdnAssetUrl,
+    locale: request.contentLocale,
   );
   if (isNew) return Created(workout);
   return workout;
@@ -178,6 +182,7 @@ Future<Workout> updateWorkout(Request request) async {
     workoutId: workoutId,
     body: workout,
     imageUrl: request.config.cdnAssetUrl,
+    locale: request.contentLocale,
   );
 }
 
@@ -197,6 +202,7 @@ Future<Workout> patchWorkoutById(Request request, String workoutId) async {
     note: input.note,
     pauses: input.pauses,
     imageUrl: request.config.cdnAssetUrl,
+    locale: request.contentLocale,
   );
 }
 

@@ -1,3 +1,4 @@
+import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/errors.dart';
@@ -7,6 +8,7 @@ import 'package:mockito/mockito.dart';
 import 'package:relic_core/relic_core.dart';
 import 'package:test/test.dart';
 
+import '../helpers/config.dart';
 import '../helpers/request.dart';
 import '../mocks.mocks.dart';
 
@@ -35,13 +37,20 @@ void main() {
   Request wire(Request req) {
     return req
       ..user = User(id: _meId)
+      ..config = englishConfig()
       ..anomalyService = service;
   }
 
   group('getAnomalies', () {
     test('a page of one status, with the cursor of the last', () async {
       when(
-        service.getAnomalies(userId: _meId, status: AnomalyStatus.pending, cursor: null, limit: 1),
+        service.getAnomalies(
+          locale: anyNamed('locale'),
+          userId: _meId,
+          status: AnomalyStatus.pending,
+          cursor: null,
+          limit: 1,
+        ),
       ).thenAnswer((_) async => Page(items: [_anomaly()], hasMore: true));
 
       final page = await getAnomalies(
@@ -56,7 +65,7 @@ void main() {
 
     test('an empty status is no status, as any optional parameter', () async {
       when(
-        service.getAnomalies(userId: _meId, status: null, cursor: null, limit: 30),
+        service.getAnomalies(locale: anyNamed('locale'), userId: _meId, status: null, cursor: null, limit: 30),
       ).thenAnswer((_) async => const Page(items: [], hasMore: false));
 
       final page = await getAnomalies(
@@ -85,7 +94,12 @@ void main() {
 
     test('records the decision', () async {
       when(
-        service.resolveAnomaly(userId: _meId, anomalyId: _anomalyId, status: AnomalyStatus.invalid),
+        service.resolveAnomaly(
+          locale: anyNamed('locale'),
+          userId: _meId,
+          anomalyId: _anomalyId,
+          status: AnomalyStatus.invalid,
+        ),
       ).thenAnswer((_) async => _anomaly(status: 'invalid'));
 
       final resolved = await resolveAnomalyById(body({'status': 'invalid'}), _anomalyId);
@@ -104,7 +118,12 @@ void main() {
 
     test("a malformed id, or someone else's, is a 404", () {
       when(
-        service.resolveAnomaly(userId: _meId, anomalyId: _anomalyId, status: AnomalyStatus.valid),
+        service.resolveAnomaly(
+          locale: anyNamed('locale'),
+          userId: _meId,
+          anomalyId: _anomalyId,
+          status: AnomalyStatus.valid,
+        ),
       ).thenAnswer((_) async => null);
 
       expect(() => resolveAnomalyById(body({'status': 'valid'}), 'x'), throwsA(isA<NotFound>()));
