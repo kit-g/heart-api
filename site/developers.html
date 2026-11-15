@@ -93,14 +93,28 @@
         <p>with a <code>Retry-After</code> header in seconds.</p>
 
         <h2 id="routes">What you can read</h2>
-        <p>Everything is <code>GET</code>, and everything is about the account the token belongs to. Lists that
+        <p>Everything is <code>GET</code>, and everything is about the account the token belongs to, or the
+            people it coaches (<a href="#coaching">below</a>). Lists that
             page carry a <code>cursor</code> while there’s more: pass it back as <code>?cursor=</code>. No
-            <code>cursor</code> means the last page. <code>limit</code> is 1–100 (30 by default).</p>
+            <code>cursor</code> means the last page. <code>limit</code> is 1–100 (30 by default, 50 for your clients and
+            their feed).</p>
         <p>The <a href="#reference">reference</a> below has every route: what it answers, what it takes and how it can
             refuse.</p>
         <p>Weights are in kilograms and distances in kilometres, whatever unit the app shows you. Durations are in
             seconds, and times are ISO 8601 in UTC. Counts by week use UTC weeks starting on the day you chose in
             the app (<code>weekStart</code>, 1 for Monday), or Monday until the app has told us.</p>
+
+        <h2 id="coaching">If you coach</h2>
+        <p>A token can also read the people you coach, when you make it to: you’ll choose to let it read your
+            clients when you create it in the app. (That choice comes with an upcoming app update; until then, an
+            app connected by signing in can ask for it.) It reads only the clients who share their training with your apps and
+            assistants, which each of them turns on in the app, and only what you see of them as their coach.
+            Start at <code>/me/coaching/clients</code>, which lists everyone you coach and whether they share;
+            the routes under <code>/me/coaching</code> read one of them by the <code>clientId</code> it gives,
+            and your own coaching library. A token made without it gets:</p>
+        <pre><code>403 {"error": "forbidden", "code": "insufficient_scope", "reason": "…"}</code></pre>
+        <p>and a client who doesn’t share gets <code>403</code> with <code>not_shared</code>. Messages and notes
+            between you and a client are end-to-end encrypted and never reach the API.</p>
 
         <h2 id="polling">Keeping a copy in sync</h2>
         <p>To keep a spreadsheet or a home dashboard current, poll <code>/me/workouts/changes</code> instead of
@@ -134,7 +148,9 @@
         <p>The assistant can read your profile, workouts, templates and folders, goals, programs (with their history,
             the next session’s weights and the research behind them), Heart’s ready-made programs, personal
             records, an exercise’s history, your training volume per muscle and movement, your balance, your custom
-            exercises and the exercise library. With a personal token it can’t change anything. Connected by
+            exercises and the exercise library. If you coach, it can also read your clients who share their
+            training with your apps and assistants: connected by signing in, or, after an upcoming app update, with a
+            token made to. With a personal token it can’t change anything. Connected by
             signing in instead (a Claude connector, a ChatGPT app), it can also build templates and template folders
             once you allow that on the consent page; it is asked to show you each one before saving it. Only its
             calls, reads and writes alike, count against your limits, not the tool listing it does at the start of a
