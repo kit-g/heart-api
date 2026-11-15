@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(21);
+SELECT plan(22);
 
 SELECT has_table('public'::name, 'profiles'::name);
 
@@ -40,6 +40,7 @@ SELECT col_is_pk('public'::name, 'profiles'::name, 'id'::name, 'id is the primar
 SELECT col_not_null('public'::name, 'profiles'::name, 'id'::name);
 SELECT col_not_null('public'::name, 'profiles'::name, 'updated_at'::name);
 SELECT col_not_null('public'::name, 'profiles'::name, 'settings'::name);
+SELECT col_not_null('public'::name, 'profiles'::name, 'created_at'::name);
 
 SELECT col_default_is('public', 'profiles', 'updated_at', 'now()', 'updated_at default is now()');
 SELECT col_default_is('public', 'profiles', 'settings', '{}', 'settings default is empty jsonb');
