@@ -4,8 +4,8 @@ CREATE OR REPLACE FUNCTION test__template_exercises_signature() RETURNS SETOF TE
 $$
 BEGIN
     RETURN NEXT has_function('public'::name, '_template_exercises'::name);
-    RETURN NEXT function_lang_is('public'::name, '_template_exercises'::name, ARRAY ['uuid'::name], 'sql'::name);
-    RETURN NEXT function_returns('public'::name, '_template_exercises'::name, ARRAY ['uuid'::name], 'jsonb');
+    RETURN NEXT function_lang_is('public'::name, '_template_exercises'::name, ARRAY ['uuid'::name, 'text'::name], 'sql'::name);
+    RETURN NEXT function_returns('public'::name, '_template_exercises'::name, ARRAY ['uuid'::name, 'text'::name], 'jsonb');
 END
 $$ LANGUAGE plpgsql;
 

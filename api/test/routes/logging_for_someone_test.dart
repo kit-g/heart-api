@@ -25,6 +25,7 @@ void main() {
     ).thenAnswer((_) async => const {});
     when(
       app.db.createWorkout(
+        locale: anyNamed('locale'),
         userId: anyNamed('userId'),
         body: anyNamed('body'),
         imageUrl: anyNamed('imageUrl'),
@@ -52,6 +53,7 @@ void main() {
     final captured =
         verify(
               app.db.createWorkout(
+                locale: anyNamed('locale'),
                 userId: captureAnyNamed('userId'),
                 body: anyNamed('body'),
                 imageUrl: anyNamed('imageUrl'),
@@ -69,6 +71,7 @@ void main() {
     expect(res.status, 403);
     verifyNever(
       app.db.createWorkout(
+        locale: anyNamed('locale'),
         userId: anyNamed('userId'),
         body: anyNamed('body'),
         imageUrl: anyNamed('imageUrl'),
@@ -108,6 +111,7 @@ void main() {
       );
       verifyNever(
         app.db.createWorkout(
+          locale: anyNamed('locale'),
           userId: anyNamed('userId'),
           body: anyNamed('body'),
           imageUrl: anyNamed('imageUrl'),

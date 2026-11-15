@@ -55,6 +55,8 @@ void main() {
     when(config.allowedOrigins).thenReturn({'https://site.example'});
     when(config.oauth).thenReturn(oauth);
     when(config.freeApiLimits).thenReturn(ApiLimits.free);
+    when(config.supportedLocales).thenReturn(['en']);
+    when(config.defaultLocale).thenReturn('en');
 
     Future<Map<String, dynamic>> fetch(Uri uri) async {
       if (uri.toString() != clientId) throw StateError('unexpected fetch of $uri');

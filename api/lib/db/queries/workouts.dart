@@ -27,7 +27,7 @@ _workouts AS (
   SELECT
     id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at,
     $_loggedByColumnsForReader,
-    _workout_exercises(id) AS exercises,
+    _workout_exercises(id, @locale::text) AS exercises,
     CASE
       WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
       ELSE COALESCE(
@@ -100,7 +100,7 @@ SELECT
   w.program_id,
   w.created_at,
   $_loggedByColumns,
-  _workout_exercises(w.id) AS exercises,
+  _workout_exercises(w.id, @locale::text) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
      FROM workout_images wi WHERE wi.workout_id = w.id),
@@ -119,7 +119,7 @@ _rel AS (
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
   $_loggedByColumnsForReader,
-  _workout_exercises(w.id) AS exercises,
+  _workout_exercises(w.id, @locale::text) AS exercises,
   CASE
     WHEN (SELECT (r).scope FROM _rel) = 'coach' THEN '[]'::jsonb
     ELSE COALESCE(
@@ -302,7 +302,7 @@ _exercises_json AS (
         'id', el.exercise_id,
         'category', e.category,
         'target', e.target,
-        'name', e.name
+        'name', _exercise_name(e.id, e.name, @locale::text)
       ),
       'exercise_order', ie.exercise_order,
       'met', ie.met,
@@ -348,7 +348,7 @@ SELECT
   w.program_id,
   w.created_at,
   $_loggedByColumns,
-  _workout_exercises(w.id) AS exercises,
+  _workout_exercises(w.id, @locale::text) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
      FROM workout_images wi WHERE wi.workout_id = w.id),
@@ -934,7 +934,7 @@ _exercises_json AS (
         'id', el.exercise_id,
         'category', e.category,
         'target', e.target,
-        'name', e.name
+        'name', _exercise_name(e.id, e.name, @locale::text)
       ),
       'exercise_order', ie.exercise_order,
       'met', ie.met,
@@ -957,7 +957,7 @@ SELECT
   -- untouched in that case and so already final
   CASE
     WHEN @replacesExercises::boolean THEN coalesce(ej.exercises_json, '[]'::jsonb)
-    ELSE _workout_exercises(w.id)
+    ELSE _workout_exercises(w.id, @locale::text)
   END AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -1004,7 +1004,7 @@ SELECT
   u.program_id,
   u.created_at,
   $_loggedByColumns,
-  _workout_exercises(u.id) AS exercises,
+  _workout_exercises(u.id, @locale::text) AS exercises,
   coalesce(
     (
       SELECT jsonb_agg(
@@ -1068,7 +1068,7 @@ SELECT
   p.id, p.xid::text AS xid, p.at, p.deleted,
   w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
   $_loggedByColumns,
-  CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id) END AS exercises,
+  CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id, @locale::text) END AS exercises,
   CASE WHEN p.deleted THEN NULL ELSE COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
      FROM workout_images wi WHERE wi.workout_id = w.id),
@@ -1095,7 +1095,7 @@ NOT EXISTS (
 const _exerciseHistory =
     '''
 WITH _exercise AS (
-  SELECT id, name, category
+  SELECT id, _exercise_name(id, name, @locale::text) AS name, category
   FROM exercises
   WHERE id = @exerciseId::uuid
     AND (user_id IS NULL OR user_id = @userId)
@@ -1138,7 +1138,7 @@ ORDER BY ses.id DESC NULLS LAST, s.exercise_order, s.set_order
 const _recordSets =
     '''
 SELECT
-  e.id AS exercise_id, e.name, e.category,
+  e.id AS exercise_id, _exercise_name(e.id, e.name, @locale::text) AS name, e.category,
   s.weight, s.reps, s.duration, s.distance,
   w.id AS workout_id, COALESCE(w.started_at, w.created_at) AS started_at
 FROM exercise_sets s

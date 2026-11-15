@@ -54,7 +54,10 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
   }
 
   Future<Template> _readSession(Session tx, {required String userId, required String sessionId}) async {
-    final rows = await tx.execute(_getTemplate.toSql(), parameters: {'userId': userId, 'templateId': sessionId});
+    final rows = await tx.execute(
+      _getTemplate.toSql(),
+      parameters: {'userId': userId, 'templateId': sessionId, 'locale': null},
+    );
     return Template.fromRow(rows.first.toColumnMap());
   }
 
@@ -108,6 +111,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
           _replaceTemplate.toSql(),
           parameters: {
             'templateId': sessionId,
+            'locale': null,
             'movesFolder': body.movesFolder,
             'movesProgram': false,
             'changesNote': body.changesNote,
@@ -177,6 +181,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
           _saveTemplate.toSql(),
           parameters: {
             'id': body.id,
+            'locale': null,
             ...body.toParams(),
             'programId': programId,
             'joined': body.joined,
@@ -397,6 +402,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     required String studentId,
     required String programId,
     bool assistant = false,
+    String? locale,
   }) {
     // one snapshot, taken by the check: what it allowed is what the reads see
     return _pool.runTx(
@@ -412,7 +418,10 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
         final program = await _readProgram(tx, userId: studentId, programId: programId);
         final sessions = <Template>[];
         for (final id in program.sessions) {
-          final rows = await tx.execute(_getTemplate.toSql(), parameters: {'userId': studentId, 'templateId': id});
+          final rows = await tx.execute(
+            _getTemplate.toSql(),
+            parameters: {'userId': studentId, 'templateId': id, 'locale': locale},
+          );
           if (rows.isEmpty) throw NotFound(type: 'Template', id: id);
           sessions.add(Template.fromRow(rows.first.toColumnMap()));
         }

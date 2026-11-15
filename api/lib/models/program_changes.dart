@@ -94,12 +94,14 @@ abstract interface class ProgramChangeService {
   /// A copy this coach sent, read in one snapshot with the check that allows it:
   /// [NotFound] unless they sent it, [Forbidden] without a coach's view of the
   /// student. With [assistant], what the coach's assistant reads: only while the
-  /// student shares it with the assistant.
+  /// student shares it with the assistant. [locale] names its sessions' library
+  /// exercises, as `ApiWorkoutService` does.
   Future<CopyRead> readCopy({
     required String coachId,
     required String studentId,
     required String programId,
     bool assistant = false,
+    String? locale,
   });
 
   /// The copies this coach sent this student. [assistant] as for [readCopy].

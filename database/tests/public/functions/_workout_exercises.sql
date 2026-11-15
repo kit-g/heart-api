@@ -4,8 +4,8 @@ CREATE OR REPLACE FUNCTION test__we_signature() RETURNS SETOF TEXT AS
 $$
 BEGIN
     RETURN NEXT has_function('public'::name, '_workout_exercises'::name);
-    RETURN NEXT function_lang_is('public'::name, '_workout_exercises'::name, ARRAY ['uuid'::name], 'sql'::name);
-    RETURN NEXT function_returns('public'::name, '_workout_exercises'::name, ARRAY ['uuid'::name], 'jsonb');
+    RETURN NEXT function_lang_is('public'::name, '_workout_exercises'::name, ARRAY ['uuid'::name, 'text'::name], 'sql'::name);
+    RETURN NEXT function_returns('public'::name, '_workout_exercises'::name, ARRAY ['uuid'::name, 'text'::name], 'jsonb');
 END
 $$ LANGUAGE plpgsql;
 

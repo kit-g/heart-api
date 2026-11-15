@@ -8,6 +8,9 @@ import 'ids.dart';
 import 'imports.dart';
 import 'sets.dart';
 
+/// Every read and write that answers with exercises takes a `locale`: a library
+/// exercise is named in it (its translation, else its bare language's), an own
+/// exercise as its owner wrote it. Null is the library's own name.
 abstract interface class ApiWorkoutService {
   /// Hides [workoutId] from every connection of its owner, or does nothing if
   /// it's hidden already or isn't theirs. [at] is when the device says it
@@ -29,6 +32,7 @@ abstract interface class ApiWorkoutService {
     ChangeCursor? since,
     int limit,
     required String Function(String) imageUrl,
+    String? locale,
   });
 
   /// [userId]'s completed working sets grouped by exercise, oldest first;
@@ -39,6 +43,7 @@ abstract interface class ApiWorkoutService {
     String? exerciseId,
     DateTime? from,
     DateTime? to,
+    String? locale,
   });
 
   /// [userId]'s finished workouts, oldest first, within [from] (inclusive)
@@ -56,6 +61,7 @@ abstract interface class ApiWorkoutService {
     int limit,
     DateTime? from,
     DateTime? to,
+    String? locale,
   });
 
   /// With [assistant], what the requester's assistant may read: their own, and a
@@ -67,12 +73,14 @@ abstract interface class ApiWorkoutService {
     String? cursor,
     int limit,
     bool assistant = false,
+    String? locale,
   });
 
   Future<Workout> getWorkout({
     required String userId,
     required String workoutId,
     required String Function(String) imageUrl,
+    String? locale,
   });
 
   /// [assistant] as for [getWorkouts].
@@ -82,6 +90,7 @@ abstract interface class ApiWorkoutService {
     required String workoutId,
     required String Function(String) imageUrl,
     bool assistant = false,
+    String? locale,
   });
 
   /// `created` is true when this call minted the row; false when [body]'s
@@ -95,6 +104,7 @@ abstract interface class ApiWorkoutService {
 
     /// The coach who entered it for [userId], in the same write, so a retry can't lose it.
     String? loggedBy,
+    String? locale,
   });
 
   Future<Workout> updateWorkout({
@@ -102,6 +112,7 @@ abstract interface class ApiWorkoutService {
     required String workoutId,
     required WorkoutRequest body,
     required String Function(String) imageUrl,
+    String? locale,
   });
 
   /// Partial update of a workout the user owns — sets only the provided fields
@@ -119,6 +130,7 @@ abstract interface class ApiWorkoutService {
     double? calories,
     ({String? value})? note,
     List<WorkoutPause>? pauses,
+    String? locale,
   });
 
   Future<void> deleteWorkout({

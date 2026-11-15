@@ -1,4 +1,5 @@
 import 'package:heart/core/handler.dart';
+import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
@@ -13,6 +14,7 @@ Future<Model> createTemplate(Request request) async {
   final (template, isNew) = await request.templatesService.createTemplateOrExisting(
     userId: request.userId,
     body: input.request,
+    locale: request.contentLocale,
   );
   if (isNew) return Created(template);
   return template;
@@ -29,6 +31,7 @@ Future<Template> updateTemplateById(Request request, String templateId) async {
     userId: request.userId,
     templateId: templateId,
     body: input.request,
+    locale: request.contentLocale,
   );
 }
 
@@ -36,6 +39,7 @@ Future<Template> getMyTemplate(Request request) async {
   return request.templatesService.getTemplate(
     userId: request.userId,
     templateId: request.pathParameters.raw[#templateId]!,
+    locale: request.contentLocale,
   );
 }
 
@@ -50,6 +54,7 @@ Future<Paginated<Template>> listTemplates(Request request, TemplateListQuery que
     cursor: query.cursor,
     folderId: query.folderId,
     unfiledOnly: query.unfiledOnly,
+    locale: request.contentLocale,
   );
   // The listing walks (order, id), so the cursor has to carry both.
   return Paginated<Template>.from(

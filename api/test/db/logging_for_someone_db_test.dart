@@ -39,6 +39,8 @@ void main() {
   Request logging(String coach, String student, Map<String, dynamic> body) {
     final config = MockAppConfig();
     when(config.mediaDistribution).thenReturn('cdn.test');
+    when(config.supportedLocales).thenReturn(['en']);
+    when(config.defaultLocale).thenReturn('en');
     return jsonRequest(path: '/accounts/$student/workouts', body: body)
       ..user = User(id: coach)
       ..config = config
