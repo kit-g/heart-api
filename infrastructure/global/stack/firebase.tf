@@ -34,6 +34,10 @@ resource "google_firebase_project" "default" {
   depends_on = [google_project_service.firebase]
 }
 
+# FCM's APNs auth key (.p8, team-scoped, sandbox + production) is uploaded by
+# hand under Cloud Messaging in both projects: no Terraform resource or public
+# API covers it, and it would sit in state in clear if one did. The key is
+# kept at secrets/appstore/AuthKey_DN23Z389DN.p8 in each static bucket.
 resource "google_firebase_apple_app" "ios" {
   provider     = google-beta
   project      = var.firebase_project_config.project_id
