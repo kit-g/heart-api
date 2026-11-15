@@ -575,6 +575,30 @@ void main() {
       expect(archived['archived'], isTrue);
     });
 
+    test('an edit clears instructions, and one without them keeps them (heart-api#443)', () async {
+      final created = await h.db.createExercise(
+        userId: ownerId,
+        name: h.uniqueName('Instr'),
+        category: 'Barbell',
+        target: 'Chest',
+        instructions: 'original',
+      );
+      final id = created['id'].toString();
+
+      final changed = await h.db.updateExercise(userId: ownerId, exerciseId: id, instructions: (value: 'new'));
+      expect(changed['instructions'], 'new');
+
+      final cleared = await h.db.updateExercise(userId: ownerId, exerciseId: id, instructions: (value: null));
+      expect(cleared['instructions'], isNull);
+
+      final owned = await h.exec('SELECT instructions FROM exercises WHERE id = @id::uuid', {'id': id});
+      expect(owned.single[0], isNull, reason: 'gone from the row every read takes it from');
+
+      await h.db.updateExercise(userId: ownerId, exerciseId: id, instructions: (value: 'again'));
+      final kept = await h.db.updateExercise(userId: ownerId, exerciseId: id, target: 'Back');
+      expect(kept['instructions'], 'again', reason: 'an older build sends no instructions');
+    });
+
     test('updating another user\'s exercise throws NotFound', () async {
       final created = await h.db.createExercise(
         userId: ownerId,

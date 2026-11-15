@@ -305,6 +305,38 @@ void main() {
       ).called(1);
     });
 
+    test('instructions: text sets them, null or an empty string clears them, no key keeps them', () async {
+      when(
+        app.db.updateExercise(
+          userId: anyNamed('userId'),
+          exerciseId: anyNamed('exerciseId'),
+          instructions: anyNamed('instructions'),
+        ),
+      ).thenAnswer((_) async => {'id': 'e1'});
+
+      for (final (body, sent) in <(Map<String, dynamic>, ({String? value})?)>[
+        ({'instructions': 'Brace first.'}, (value: 'Brace first.')),
+        ({'instructions': null}, (value: null)),
+        ({'instructions': ''}, (value: null)),
+        (<String, dynamic>{}, null),
+      ]) {
+        final res = await app.send('PUT', '/exercises/e1', body: body);
+        expect(res.status, 200, reason: '$body');
+        final captured = verify(
+          app.db.updateExercise(
+            userId: 'u1',
+            exerciseId: 'e1',
+            instructions: captureAnyNamed('instructions'),
+          ),
+        ).captured.single;
+        expect(captured, sent, reason: '$body');
+      }
+
+      for (final bad in [42, 'x' * 10001]) {
+        expect((await app.send('PUT', '/exercises/e1', body: {'instructions': bad})).status, 400);
+      }
+    });
+
     test('a rename forwards the name trimmed', () async {
       when(
         app.db.updateExercise(userId: anyNamed('userId'), exerciseId: anyNamed('exerciseId'), name: anyNamed('name')),

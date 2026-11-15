@@ -146,7 +146,7 @@ _updated AS (
     name = coalesce(@name::text, name),
     category = coalesce(@category, category),
     target = coalesce(@target, target),
-    instructions = coalesce(@instructions, instructions),
+    instructions = CASE WHEN @setsInstructions::boolean THEN @instructions::text ELSE instructions END,
     archived = coalesce(@archived, archived),
     -- the pattern is the movement's groups: set, or cleared, with whatever else
     -- the movement says kept; a movement left empty is none

@@ -78,7 +78,11 @@ class ExerciseUpdateIn {
   final String? name;
   final String? category;
   final String? target;
-  final String? instructions;
+
+  /// Null leaves the instructions alone; `(value: null)` clears them, sent as
+  /// `null` or an empty string. Installed builds send no key, so their edits
+  /// never clear any.
+  final ({String? value})? instructions;
   final bool? archived;
 
   /// Null leaves the pattern alone; `(value: null)` clears it. A build that
@@ -105,7 +109,10 @@ class ExerciseUpdateIn {
       },
       category: json.stringOrNull('category', maxLength: 100),
       target: json.stringOrNull('target', maxLength: 100),
-      instructions: json.stringOrNull('instructions', maxLength: 10000),
+      instructions: switch (json.containsKey('instructions')) {
+        true => (value: json.instructions()),
+        false => null,
+      },
       archived: json.booleanOrNull('archived'),
       pattern: switch (json.containsKey('pattern')) {
         true => (value: json.pattern()),
@@ -116,6 +123,15 @@ class ExerciseUpdateIn {
 }
 
 extension on Map<String, dynamic> {
+  /// An edit's instructions: the text, or null for none, which `null` and an
+  /// empty string both say.
+  String? instructions() {
+    return switch (this['instructions']) {
+      null || '' => null,
+      _ => stringOrNull('instructions', maxLength: 10000),
+    };
+  }
+
   /// A custom exercise's movement pattern: a library pattern key, such as
   /// `horizontal_press`, or null for none. The library can add a pattern
   /// without a release, so the spelling is what is checked, as for a goal's.
