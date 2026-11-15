@@ -6,8 +6,8 @@ part of '../db.dart';
 // applies; an empty result is unambiguously the cap.
 const _createApiToken =
     '''
-INSERT INTO api_tokens (user_id, name, purpose, token_hash, hint, expires_at)
-SELECT @userId, @name, @purpose::text, @tokenHash::bytea, @hint, @expiresAt::timestamptz
+INSERT INTO api_tokens (user_id, name, purpose, scopes, token_hash, hint, expires_at)
+SELECT @userId, @name, @purpose::text, @scopes::text[], @tokenHash::bytea, @hint, @expiresAt::timestamptz
 WHERE (
   SELECT count(*)
   FROM api_tokens

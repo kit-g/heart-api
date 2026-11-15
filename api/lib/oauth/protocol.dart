@@ -34,12 +34,18 @@ enum Scope {
 /// Every scope this server grants, as the metadata documents list them.
 final supportedScopes = {for (final scope in Scope.values) scope.value};
 
-/// What `/me` grants, which has no writes. The MCP server grants every scope,
-/// to a client asking for none too, and its 401 names them all: the host
-/// confirms each write with the user as it runs, so connecting grants them up
-/// front. A host that asks for `read` alone is held to it, and a write then
-/// goes through the `insufficient_scope` step-up.
-final defaultScopes = {Scope.read.value};
+/// What `/me` can grant, and what a personal token can hold: each by name, so a
+/// scope added later reaches neither until it is meant to. Neither takes writes.
+final meScopes = {Scope.read.value, Scope.readCoaching.value};
+
+/// What `/me` grants a request that asks for none: the user's own training
+/// alone, as a generic integration needs nothing more. Reading clients is asked
+/// for by name. The MCP server grants every scope, the writes too, to a client
+/// asking for none, and its 401 names them all: the host confirms each write
+/// with the user as it runs, and offers a coach's tools only to a coach, so
+/// connecting grants them up front. A host that asks for `read` alone is held to
+/// it, and anything more then goes through the `insufficient_scope` step-up.
+final meDefaultScopes = {Scope.read.value};
 
 /// An OAuth protocol failure (RFC 6749 §5.2): the protocol's own error shape,
 /// `{error, error_description}`, not the API's.
@@ -121,11 +127,16 @@ extension OAuthScopes on String? {
   /// this server has never heard of.
   List<String> toScopes({bool writes = true}) {
     final asked = (this ?? '').split(' ').where((s) => s.isNotEmpty).toSet();
-    final grantable = writes ? supportedScopes : defaultScopes;
-    if (asked.isEmpty) return [...grantable]..sort();
-    final granted = asked.intersection(grantable);
+    if (asked.isEmpty) return [...(writes ? supportedScopes : meDefaultScopes)]..sort();
+    final granted = asked.intersection(writes ? supportedScopes : meScopes);
     if (granted.isEmpty) throw OAuthError('invalid_scope', 'none of these scopes exist here: ${asked.join(' ')}');
-    return [...granted]..sort();
+    return [
+      ...{
+        ...granted,
+        // `/me` refuses a token that doesn't read the user's own, so a grant to it does
+        if (!writes) Scope.read.value,
+      },
+    ]..sort();
   }
 }
 

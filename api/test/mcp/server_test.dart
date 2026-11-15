@@ -1972,6 +1972,35 @@ void main() {
       expect(await instructions(token: connected), isNot(contains('list_clients')));
     });
 
+    test(
+      "a personal token made to read a coach's clients is offered their tools; one made without is told how",
+      () async {
+        expect(await listed(), isNot(contains('list_clients')));
+        final refused = await rpc(
+          'tools/call',
+          params: {'name': 'list_clients', 'arguments': <String, dynamic>{}},
+        );
+        expect(refused.status, 403);
+        expect(text(refused.body['result'] as Map), contains('signing in'));
+
+        when(app.db.useToken(TokenSecret.hash(secret), count: anyNamed('count'))).thenAnswer(
+          (_) async => (
+            userId: 'u1',
+            resource: null,
+            clientId: null,
+            scopes: const ['read', 'read:coaching'],
+            purpose: ApiTokenPurpose.aiAssistant,
+            minuteStart: now,
+            minuteCount: 1,
+            dayStart: now,
+            dayCount: 1,
+          ),
+        );
+        expect(await listed(), contains('list_clients'));
+        expect(await listed(), isNot(contains('create_template')), reason: 'a personal token still only reads');
+      },
+    );
+
     test('a connection made without the scope is asked to widen it, and nothing is read', () async {
       connect(['read', 'write:templates']);
       final response = await rpc(

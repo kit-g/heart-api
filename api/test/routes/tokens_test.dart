@@ -38,6 +38,7 @@ void main() {
           userId: anyNamed('userId'),
           name: anyNamed('name'),
           purpose: anyNamed('purpose'),
+          scopes: anyNamed('scopes'),
           expiresAt: anyNamed('expiresAt'),
           tokenHash: anyNamed('tokenHash'),
           hint: anyNamed('hint'),
@@ -59,6 +60,7 @@ void main() {
           userId: 'u1',
           name: 'my sheet',
           purpose: ApiTokenPurpose.spreadsheet,
+          scopes: ['read'],
           expiresAt: null,
           tokenHash: captureAnyNamed('tokenHash'),
           hint: captureAnyNamed('hint'),
@@ -79,6 +81,7 @@ void main() {
                   userId: 'u1',
                   name: 'n',
                   purpose: null,
+                  scopes: anyNamed('scopes'),
                   expiresAt: captureAnyNamed('expiresAt'),
                   tokenHash: anyNamed('tokenHash'),
                   hint: anyNamed('hint'),
@@ -87,6 +90,46 @@ void main() {
               as DateTime;
       final days = expiresAt.difference(DateTime.now().toUtc()).inDays;
       expect(days, inInclusiveRange(364, 365));
+    });
+
+    test("a token can be made to read a coach's clients too, and always reads its owner's own", () async {
+      stubCreate(stored());
+
+      await createApiToken(
+        build({
+          'name': 'n',
+          'expiry': 'never',
+          'scopes': ['read:coaching'],
+        }),
+      );
+
+      final scopes = verify(
+        service.createToken(
+          userId: 'u1',
+          name: 'n',
+          purpose: null,
+          scopes: captureAnyNamed('scopes'),
+          expiresAt: null,
+          tokenHash: anyNamed('tokenHash'),
+          hint: anyNamed('hint'),
+        ),
+      ).captured.single;
+      expect(scopes, ['read', 'read:coaching']);
+    });
+
+    test('a write or an unknown scope is a 400 token_scope', () {
+      for (final scopes in [
+        ['write:templates'],
+        ['read', 'admin'],
+        'read',
+        [1],
+      ]) {
+        expect(
+          () => createApiToken(build({'name': 'n', 'expiry': 'never', 'scopes': scopes})),
+          throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'token_scope')),
+          reason: '$scopes',
+        );
+      }
     });
 
     test('the cap is a 400 token_limit', () async {

@@ -302,10 +302,11 @@ Response? _scopeRefusal(
   if (tool == null || use.scopes.contains(tool.scope.value)) return null;
 
   final message = switch ((use.clientId, tool.scope)) {
-    // a personal token reads the user's own training for good: there is nothing to widen
+    // a personal token's scopes are fixed when it's made, and no app build makes
+    // one that reads clients yet
     (null, .readCoaching) =>
-      '${tool.name} needs a connection with the ${tool.scope.value} permission. Personal tokens read only your own '
-          "training; connect Heart to this assistant by signing in to read your clients'.",
+      '${tool.name} needs the ${tool.scope.value} permission, which this personal token was made without. '
+          "Connect Heart to this assistant by signing in to read your clients' training.",
     (null, _) =>
       '${tool.name} needs a connection with the ${tool.scope.value} permission. Personal tokens only read; '
           'connect Heart to this assistant by signing in to change templates.',
@@ -402,11 +403,12 @@ extension on TokenUse {
   bool get offersWrites => clientId != null;
 }
 
-/// Whether this credential is shown a coach's tools: a grant, as for the writes,
-/// and only to someone who coaches. A grant made before the scope existed is
-/// told to widen it when it calls one.
+/// Whether this credential is shown a coach's tools, and only to someone who
+/// coaches: a grant, as for the writes, or a personal token made to read their
+/// clients. A grant made before the scope existed is told to widen it when it
+/// calls one.
 Future<bool> _offersCoaching(Request request, TokenUse use) async {
-  if (!use.offersWrites) return false;
+  if (!use.offersWrites && !use.scopes.contains(Scope.readCoaching.value)) return false;
   return request.rosterService.coaches(use.userId);
 }
 
