@@ -161,6 +161,18 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
   }
 
   @override
+  Future<bool> nameClient({required String actorId, required String connectionId, String? name}) async {
+    final result = await _pool.execute(
+      switch (name) {
+        null => _takeNameBack.toSql(),
+        _ => _giveName.toSql(),
+      },
+      parameters: {'userId': actorId, 'connectionId': connectionId, 'name': ?name},
+    );
+    return result.isNotEmpty;
+  }
+
+  @override
   Future<bool> areConnected({required String userA, required String userB}) async {
     final result = await _pool.execute(
       _areConnected.toSql(),

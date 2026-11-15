@@ -11,7 +11,8 @@ SELECT
   t.cleared_at,
   t.cleared_by,
   other.id AS other_id,
-  other.username AS other_name,
+  coalesce(_given_name(@userId, other.id), other.username) AS other_name,
+  _given_name(@userId, other.id) IS NOT NULL AS other_named_by_you,
   other.avatar_url AS other_avatar,
   (
     SELECT i.created_at

@@ -94,7 +94,8 @@ _clients AS (
     s.student_id,
     CASE WHEN c.status = 'blocked' THEN 'severed' ELSE c.status END AS status,
     c.accepted_at,
-    profile.username,
+    coalesce(given.name, profile.username) AS username,
+    given.name IS NOT NULL AS named_by_you,
     profile.avatar_url,
     s.program_id,
     s.program_name,
@@ -136,6 +137,7 @@ _clients AS (
   FROM client_summaries s
   JOIN connections c ON c.id = s.connection_id
   JOIN profiles profile ON profile.id = s.student_id
+  CROSS JOIN LATERAL (SELECT _given_name(@coachId, s.student_id) AS name) given
   WHERE s.coach_id = @coachId
     AND (
       (@former::boolean AND c.status IN ('severed', 'blocked') AND NOT _blocked_between(@coachId, s.student_id))
@@ -164,6 +166,7 @@ SELECT
   status,
   accepted_at,
   username,
+  named_by_you,
   avatar_url,
   CASE WHEN @former::boolean OR NOT readable THEN NULL ELSE program_id END AS program_id,
   CASE WHEN @former::boolean OR NOT readable THEN NULL ELSE program_name END AS program_name,
@@ -237,9 +240,18 @@ _items AS (
     AND (c.r).scope = 'coach'
     AND (@afterAt::timestamptz IS NULL OR (s.ending_since, s.program_id::text) < (@afterAt::timestamptz, @afterId::text))
 )
-SELECT i.kind, i.id, i.student_id, i.at, i.title, p.username, p.avatar_url
+SELECT
+  i.kind,
+  i.id,
+  i.student_id,
+  i.at,
+  i.title,
+  coalesce(given.name, p.username) AS username,
+  given.name IS NOT NULL AS named_by_you,
+  p.avatar_url
 FROM _items i
 JOIN profiles p ON p.id = i.student_id
+CROSS JOIN LATERAL (SELECT _given_name(@coachId, i.student_id) AS name) given
 ORDER BY i.at DESC, i.id DESC
 LIMIT @limit
 ''';

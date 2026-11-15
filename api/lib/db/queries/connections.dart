@@ -65,7 +65,9 @@ String _statusSeen(String row, {required String other}) {
 
 /// Who the other side of connection `c` is, for `@userId`: their name and photo as
 /// their profile says now, to someone they asked or who they accepted, never to
-/// someone who only asked them, and never to someone they blocked. Its status is
+/// someone who only asked them, and never to someone they blocked. A name
+/// `@userId` gave them ([_given_name]) goes first, on the same terms, so a block
+/// still reads as an ending without a name. Its status is
 /// [_statusSeen] by `@userId`. `c` needs `target_id` (the other person),
 /// `initiator_id`, `status`, `status_by`, `accepted_at` and the rest of a
 /// connection's columns.
@@ -80,7 +82,8 @@ SELECT
   c.created_at,
   c.accepted_at,
   c.shares,
-  nullif(trim(p.username), '') AS username,
+  coalesce(given.name, nullif(trim(p.username), '')) AS username,
+  given.name IS NOT NULL AS named_by_you,
   p.avatar_url
 FROM _side c
 LEFT JOIN blocks b
@@ -95,6 +98,7 @@ LEFT JOIN profiles p
     OR c.initiator_id = c.target_id
     OR (c.status = 'pending' AND c.status_by = c.target_id)
   )
+LEFT JOIN LATERAL (SELECT _given_name(@userId, c.target_id) AS name) given ON p.id IS NOT NULL
 ''';
 
 /// Every connection of the caller's, both directions, as [_connectionOther] says it.
@@ -284,4 +288,49 @@ WHERE status = 'active'
     (initiator_id = @userB AND target_id = @userA)
   )
 LIMIT 1
+''';
+
+/// The person `@userId` names through connection `@connectionId`: their client, now
+/// or before, across a connection that was accepted once and no block stands on.
+const _namedPerson = '''
+_person AS (
+  SELECT CASE WHEN c.initiator_id = @userId THEN c.target_id ELSE c.initiator_id END AS person_id
+  FROM connections c
+  WHERE c.id = @connectionId::uuid
+    AND c.accepted_at IS NOT NULL
+    AND (
+      (c.initiator_id = @userId AND c.initiator_role = 'COACH')
+      OR (c.target_id = @userId AND c.target_role = 'COACH')
+    )
+    AND NOT _blocked_between(c.initiator_id, c.target_id)
+)''';
+
+/// One row when the name was given, none when [_namedPerson] finds nobody.
+const _giveName =
+    '''
+WITH
+$_namedPerson
+INSERT INTO given_names (giver_id, person_id, name)
+SELECT @userId, person_id, @name
+FROM _person
+ON CONFLICT (giver_id, person_id) DO UPDATE
+SET
+  name = EXCLUDED.name,
+  updated_at = now()
+RETURNING person_id
+''';
+
+/// One row when [_namedPerson] finds someone, whether or not a name was there to go.
+const _takeNameBack =
+    '''
+WITH
+$_namedPerson,
+_gone AS (
+  DELETE FROM given_names g
+  USING _person p
+  WHERE g.giver_id = @userId
+    AND g.person_id = p.person_id
+  RETURNING g.person_id
+)
+SELECT person_id FROM _person
 ''';

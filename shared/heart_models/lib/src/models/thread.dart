@@ -10,9 +10,15 @@ abstract interface class Thread implements Model {
   /// The other person; null once their account is gone.
   String? get otherId;
 
+  /// What this person calls the other: a name they gave ([otherNamedByYou]), or
+  /// else what the other goes by in Heart.
   String? get otherName;
 
   String? get otherAvatar;
+
+  /// Whether [otherName] is one this person gave the other, such as a coach's own
+  /// name for a client. Only the one who gave it ever reads it.
+  bool get otherNamedByYou;
 
   /// From the other person, after this person's read position.
   int get unread;
@@ -31,6 +37,7 @@ abstract interface class Thread implements Model {
     String? otherId,
     String? otherName,
     String? otherAvatar,
+    bool otherNamedByYou,
     int unread,
     DateTime? lastAt,
     DateTime? clearedAt,
@@ -44,6 +51,7 @@ abstract interface class Thread implements Model {
       otherId: row['other_id'] as String?,
       otherName: row['other_name'] as String?,
       otherAvatar: row['other_avatar'] as String?,
+      otherNamedByYou: row['other_named_by_you'] == true,
       unread: (row['unread'] as num?)?.toInt() ?? 0,
       lastAt: row['last_at'] as DateTime?,
       clearedAt: row['cleared_at'] as DateTime?,
@@ -58,6 +66,7 @@ abstract interface class Thread implements Model {
       otherId: json['otherId'] as String?,
       otherName: json['otherName'] as String?,
       otherAvatar: json['otherAvatar'] as String?,
+      otherNamedByYou: json['otherNamedByYou'] == true,
       unread: (json['unread'] as num?)?.toInt() ?? 0,
       lastAt: switch (json['lastAt']) {
         final String at => DateTime.parse(at),
@@ -84,6 +93,8 @@ class _Thread implements Thread {
   @override
   final String? otherAvatar;
   @override
+  final bool otherNamedByYou;
+  @override
   final int unread;
   @override
   final DateTime? lastAt;
@@ -98,6 +109,7 @@ class _Thread implements Thread {
     this.otherId,
     this.otherName,
     this.otherAvatar,
+    this.otherNamedByYou = false,
     this.unread = 0,
     this.lastAt,
     this.clearedAt,
@@ -112,6 +124,7 @@ class _Thread implements Thread {
       'otherId': ?otherId,
       'otherName': ?otherName,
       'otherAvatar': ?otherAvatar,
+      'otherNamedByYou': otherNamedByYou,
       'unread': unread,
       'lastAt': ?lastAt?.toIso8601String(),
       'clearedAt': ?clearedAt?.toIso8601String(),

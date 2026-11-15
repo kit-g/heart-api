@@ -252,6 +252,77 @@ void main() {
     });
   });
 
+  group('a coach\'s name for a client', () {
+    void named() {
+      known();
+      when(
+        app.db.nameClient(
+          actorId: anyNamed('actorId'),
+          connectionId: anyNamed('connectionId'),
+          name: anyNamed('name'),
+        ),
+      ).thenAnswer((_) async => true);
+    }
+
+    test('PUT gives one, trimmed, and answers with the connection as read after', () async {
+      named();
+      final res = await app.send('PUT', '/connections/$id/name', body: {'name': '  Sam  '});
+      expect(res.status, 200);
+      expect((jsonDecode(res.body) as Map)['connectionId'], id);
+      verify(app.db.nameClient(actorId: 'u1', connectionId: id, name: 'Sam')).called(1);
+      verify(app.db.getConnectionById(actorId: 'u1', connectionId: id)).called(2);
+    });
+
+    test('DELETE takes it back', () async {
+      named();
+      final res = await app.send('DELETE', '/connections/$id/name');
+      expect(res.status, 200);
+      verify(app.db.nameClient(actorId: 'u1', connectionId: id, name: null)).called(1);
+    });
+
+    test('a name of nothing, or past 100 characters, is a 400 before anything is read', () async {
+      for (final name in ['   ', 'x' * 101, null]) {
+        final res = await app.send('PUT', '/connections/$id/name', body: {'name': name});
+        expect(res.status, 400, reason: '$name');
+      }
+      verifyZeroInteractions(app.db);
+    });
+
+    test('the client, or a peer, is refused with 403', () async {
+      when(app.db.getConnectionById(actorId: 'u1', connectionId: id)).thenAnswer(
+        (_) async => Connection(
+          targetId: 't1',
+          role: .student,
+          domain: .fitness,
+          status: .active,
+          createdAt: DateTime.utc(2026),
+          connectionId: id,
+        ),
+      );
+      final res = await app.send('PUT', '/connections/$id/name', body: {'name': 'Coach'});
+      expect(res.status, 403);
+      verifyNever(
+        app.db.nameClient(actorId: anyNamed('actorId'), connectionId: anyNamed('connectionId'), name: anyNamed('name')),
+      );
+    });
+
+    test('one that isn\'t the caller\'s, or that the coach can\'t name, is a 404', () async {
+      known();
+      when(
+        app.db.nameClient(
+          actorId: anyNamed('actorId'),
+          connectionId: anyNamed('connectionId'),
+          name: anyNamed('name'),
+        ),
+      ).thenAnswer((_) async => false);
+      expect((await app.send('PUT', '/connections/$id/name', body: {'name': 'Sam'})).status, 404);
+      expect(
+        (await app.send('PUT', '/connections/01900000-0000-7000-8000-0000000000c2/name', body: {'name': 'Sam'})).status,
+        404,
+      );
+    });
+  });
+
   test('a share nobody has heard of is refused, naming it, before anything changes', () async {
     final res = await app.send(
       'PUT',

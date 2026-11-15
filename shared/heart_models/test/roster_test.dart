@@ -76,6 +76,25 @@ void main() {
 
     test('CoachFeedItem round-trips', () => expectRoundTrip(item, CoachFeedItem.fromJson));
 
+    test('a name the coach gave says so, in the roster and the feed, false when not said', () {
+      final summary = ClientSummary.fromRow({...row, 'named_by_you': true});
+      expect(summary.namedByYou, isTrue);
+      expectRoundTrip(summary, ClientSummary.fromJson);
+      expect(ClientSummary.fromRow(row).namedByYou, isFalse);
+      expect(ClientSummary.fromJson({...wire(summary)}..remove('namedByYou')).namedByYou, isFalse);
+
+      final named = CoachFeedItem.fromRow({
+        'kind': 'skip',
+        'id': 'k1',
+        'student_id': 's1',
+        'at': at,
+        'named_by_you': true,
+      });
+      expect(named.namedByYou, isTrue);
+      expect(CoachFeedItem.fromJson(wire(named)).namedByYou, isTrue);
+      expect(item.namedByYou, isFalse);
+    });
+
     test('CoachFeedItem reads a feed page as the API sends it, a kind it does not know too', () {
       final page = {
         'items': [

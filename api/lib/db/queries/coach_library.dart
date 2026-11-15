@@ -80,7 +80,8 @@ const _listCoachProgramHolders = '''
 SELECT
   p.connection_id,
   p.user_id AS student_id,
-  profile.username,
+  coalesce(_given_name(@coachId, p.user_id), profile.username) AS username,
+  _given_name(@coachId, p.user_id) IS NOT NULL AS named_by_you,
   profile.avatar_url,
   p.id AS program_id,
   p.library_version
@@ -92,7 +93,7 @@ WHERE l.id = @id::uuid
   AND p.coach_id = @coachId
   AND p.connection_id IS NOT NULL
   AND (_relation(@coachId, p.user_id)).scope IS NOT DISTINCT FROM 'coach'
-ORDER BY profile.username
+ORDER BY username
 ''';
 
 /// A student is who's across an active coach row from this coach, under no block.

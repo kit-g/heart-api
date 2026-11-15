@@ -180,6 +180,22 @@ void main() {
       expect(connection.shares, ['goals', 'a_later_share'], reason: 'a share this build does not know is kept');
     });
 
+    test('says whether the reader gave the other person their name, false when not said', () {
+      final row = {
+        'target_id': 'u',
+        'role': 'COACH',
+        'domain': 'fitness',
+        'status': 'active',
+        'created_at': DateTime.utc(2026),
+        'username': 'Sam',
+      };
+      final named = Connection.fromRow({...row, 'named_by_you': true});
+      expect(named.namedByYou, isTrue);
+      expect(Connection.fromJson(named.toMap()).namedByYou, isTrue);
+      expect(Connection.fromRow(row).namedByYou, isFalse);
+      expect(Connection.fromJson(Connection.fromRow(row).toMap()..remove('namedByYou')).namedByYou, isFalse);
+    });
+
     test('says who the other person is, and reads one that does not', () {
       final connection = Connection.fromRow({
         'target_id': 'u',

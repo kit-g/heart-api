@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.58.0
+
+A coach's own name for each client (heart-api#444).
+
+- Added: `ConnectionsService.nameClient`, for `PUT` and `DELETE /connections/:connectionId/name`.
+  Only the server implements it.
+- Added: `namedByYou` on `Connection`, `ClientSummary` and `CoachFeedItem`, `otherNamedByYou` on
+  `Thread`, and `studentNamedByYou` on `CoachProgramHolder`, all false when not said. When true,
+  the name beside it is one the reader gave, by hand or on the invitation the person accepted,
+  rather than the person's own Heart name. Only the one who gave a name ever reads it.
+
 ## 2.57.1
 
 Records for bodyweight exercises (heart-api#414).

@@ -46,6 +46,20 @@ void main() {
 
     test('CoachProgramHolder round-trips', () => expectRoundTrip(holder, CoachProgramHolder.fromJson));
 
+    test('CoachProgramHolder says whether the coach gave the name, false when not said', () {
+      expect(holder.studentNamedByYou, isFalse);
+      final named = CoachProgramHolder.fromRow({
+        'connection_id': connection,
+        'student_id': 's1',
+        'username': 'Sam',
+        'program_id': program,
+        'library_version': 1,
+        'named_by_you': true,
+      });
+      expect(named.studentNamedByYou, isTrue);
+      expect(CoachProgramHolder.fromJson(wire(named)).studentNamedByYou, isTrue);
+    });
+
     test('CoachProgramHolders round-trips and reads as the API sends it', () {
       expectRoundTrip(CoachProgramHolders([holder]), CoachProgramHolders.fromJson);
       final read = CoachProgramHolders.fromJson(wire(CoachProgramHolders([holder])));
