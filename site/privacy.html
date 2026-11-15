@@ -57,7 +57,7 @@
 <main class="flex-grow w-full max-w-3xl mx-auto px-6 py-16 md:py-24">
     <article class="prose prose-h1:text-4xl prose-h1:tracking-tight max-w-none">
         <h1>Privacy Policy</h1>
-        <p><strong>Last updated: November 1, 2026</strong></p>
+        <p><strong>Last updated: November 15, 2026</strong></p>
         <p>Last reviewed against the app’s behaviour: October 2, 2026.</p>
 
         <p>Thanks for using Heart of Yours. This document explains what data we collect, how we use it, and what choices
@@ -160,6 +160,9 @@
             program and how it’s going, that you skipped a session and when, and the name you use in Heart. You can
             choose to also share earlier workouts and your goals, hide any single workout, pause the sharing, or leave
             at any time, and all of that takes effect immediately.</p>
+        <p><strong>A workout your coach logs for you:</strong> if you train together, your coach can log that
+            session for you. It goes into your history marked with their name, and it’s yours from then on: they can’t
+            change it afterwards, you can change or delete it like any other workout, and it is never public.</p>
         <p><strong>What your coach never sees:</strong> anything from Apple Health or Health Connect, your progress
             photos, why you skipped a session, what you’ve said to go easy on, or your email address.</p>
         <p><strong>After it ends:</strong> your coach can no longer read any of your data, and you keep your program as
@@ -173,6 +176,20 @@
         <p><strong>Reports:</strong> if you report someone, what you send with the report is stored encrypted, so that
             only the person reviewing it can read it. It is deleted 90 days after the report is closed, or after a year
             if it is never closed, and it stays until then even if either account is deleted.</p>
+
+        <h3 id="notifications">Notifications</h3>
+        <p>Heart sends push notifications only while coaching is switched on in its settings, as a coach or as
+            someone being coached. To reach your phone, we keep its push token (the address Apple or Google gives it,
+            used through Firebase Cloud Messaging), its language, its offset from UTC so a daily summary arrives in
+            your evening, and whether the phone allows notifications. We also keep what you change in your
+            notification settings: which kinds you get, and whether each comes right away, once a day, or not at
+            all.</p>
+        <p>A notification says who did something, never what: “Sam messaged you”, not the message. No message text,
+            weights or health values are ever in one. Some carry no words at all and only tell the app to fetch
+            something.</p>
+        <p>Switching coaching off on a phone, or signing out, removes that phone’s token from our servers, and
+            deleting your account removes all of it. A token a phone hasn’t used for 270 days is deleted on its
+            own.</p>
 
         <h3>App Usage &amp; Debug Info</h3>
         <p>We collect basic analytics through Firebase Analytics (like which screens are used) and crash logs to help
