@@ -34,7 +34,7 @@ final class ProgramMark implements Model {
 
   @override
   Map<String, dynamic> toMap() {
-    return {'templateId': ?templateId, 'at': at.toIso8601String(), 'isWorkout': isWorkout};
+    return {'templateId': ?templateId, 'at': at.toUtc().toIso8601String(), 'isWorkout': isWorkout};
   }
 }
 

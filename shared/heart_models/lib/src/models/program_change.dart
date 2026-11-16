@@ -173,10 +173,9 @@ class CoachProgramView implements Model {
   final List<Template> sessions;
   final Map<String, dynamic> position;
 
-  /// What the student's own device plans a session from, as far as the coach
-  /// can read it: the program's steps, its bases (slots included), and the
-  /// marks [position] is folded from. A workout the coach can't read moves none
-  /// of them, so the coach's plan can trail the student's (heart-api#439).
+  /// What the student's own device plans a session from: the program's steps,
+  /// its bases (slots included), and the marks [position] is folded from, each
+  /// oldest first (heart-api#439).
   final List<ProgramAction> actions;
   final List<ProgramBase> bases;
   final List<ProgramMark> marks;
@@ -197,9 +196,9 @@ class CoachProgramView implements Model {
       program: Program.fromJson(json['program'] as Map),
       sessions: readIndexed(json['sessions'], Template.fromJson).items,
       position: (json['position'] as Map).cast<String, dynamic>(),
-      actions: readIndexed(json['actions'] ?? const [], ProgramAction.fromJson).items,
-      bases: readIndexed(json['bases'] ?? const [], ProgramBase.fromJson).items,
-      marks: readIndexed(json['marks'] ?? const [], ProgramMark.fromJson).items,
+      actions: readIndexed(json['actions'], ProgramAction.fromJson).items,
+      bases: readIndexed(json['bases'], ProgramBase.fromJson).items,
+      marks: readIndexed(json['marks'], ProgramMark.fromJson).items,
     );
   }
 

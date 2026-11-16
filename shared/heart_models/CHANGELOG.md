@@ -4,9 +4,9 @@
 
 What a coach plans a client's session from (heart-api#439).
 
-- Added: `CoachProgramView.actions`, `bases` and `marks`, what the student's own device plans the
-  next session from, as far as the coach can read. Empty when an answer predates them.
-- Added: `ProgramMark.fromJson` and `toMap`; `ProgramMark` is now a `Model`.
+- Added: `CoachProgramView.actions` (`List<ProgramAction>`), `bases` (`List<ProgramBase>`) and
+  `marks` (`List<ProgramMark>`), each empty when an answer predates them.
+- Added: `ProgramMark.fromJson` and `toMap` (`at` in UTC); `ProgramMark` is now a `Model`.
 
 ## 2.58.0
 
