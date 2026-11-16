@@ -75,7 +75,8 @@ RETURNING connection_id
 /// doesn't filter them, and someone under a block isn't one: a block reads as no such
 /// person, and a lifted one as an ending. For the coach's assistant, a client who
 /// doesn't share with it is who and when too.
-const _roster = '''
+final _roster =
+    '''
 WITH
 _clients AS (
   SELECT
@@ -94,8 +95,8 @@ _clients AS (
     s.student_id,
     CASE WHEN c.status = 'blocked' THEN 'severed' ELSE c.status END AS status,
     c.accepted_at,
-    coalesce(given.name, profile.username) AS username,
-    given.name IS NOT NULL AS named_by_you,
+    named.name AS username,
+    named.given AS named_by_you,
     profile.avatar_url,
     s.program_id,
     s.program_name,
@@ -137,7 +138,7 @@ _clients AS (
   FROM client_summaries s
   JOIN connections c ON c.id = s.connection_id
   JOIN profiles profile ON profile.id = s.student_id
-  CROSS JOIN LATERAL (SELECT _given_name(@coachId, s.student_id) AS name) given
+  ${_named('_given_name(@coachId, s.student_id)', username: 'profile.username')}
   WHERE s.coach_id = @coachId
     AND (
       (@former::boolean AND c.status IN ('severed', 'blocked') AND NOT _blocked_between(@coachId, s.student_id))
@@ -195,7 +196,8 @@ RETURNING connection_id
 /// once. Each kind takes its own page before they're merged, so a page reads no more
 /// of a client's history than it shows. The coach's assistant reads only the clients
 /// who share with it.
-const _coachFeed = '''
+final _coachFeed =
+    '''
 WITH
 _summaries AS (
   SELECT s.student_id, s.program_id, s.program_name, s.ending_since
@@ -205,8 +207,15 @@ _summaries AS (
     AND c.status IN ('active', 'paused')
 ),
 _clients AS (
-  SELECT student_id, _relation(@coachId, student_id, @assistant::boolean) AS r
+  SELECT
+    students.student_id,
+    _relation(@coachId, students.student_id, @assistant::boolean) AS r,
+    named.name,
+    named.given,
+    p.avatar_url
   FROM (SELECT DISTINCT student_id FROM _summaries) students
+  JOIN profiles p ON p.id = students.student_id
+  ${_named('_given_name(@coachId, students.student_id)', username: 'p.username')}
 ),
 _items AS (
   (
@@ -246,12 +255,11 @@ SELECT
   i.student_id,
   i.at,
   i.title,
-  coalesce(given.name, p.username) AS username,
-  given.name IS NOT NULL AS named_by_you,
-  p.avatar_url
+  c.name AS username,
+  c.given AS named_by_you,
+  c.avatar_url
 FROM _items i
-JOIN profiles p ON p.id = i.student_id
-CROSS JOIN LATERAL (SELECT _given_name(@coachId, i.student_id) AS name) given
+JOIN _clients c ON c.student_id = i.student_id
 ORDER BY i.at DESC, i.id DESC
 LIMIT @limit
 ''';
@@ -262,4 +270,12 @@ const _coaches = '''
 SELECT
   EXISTS (SELECT 1 FROM client_summaries WHERE coach_id = @userId)
   OR EXISTS (SELECT 1 FROM library_programs WHERE coach_id = @userId)
+''';
+
+final _clientName =
+    '''
+SELECT named.name
+FROM profiles p
+${_named('_given_name(@coachId, p.id)', username: 'p.username')}
+WHERE p.id = @clientId
 ''';

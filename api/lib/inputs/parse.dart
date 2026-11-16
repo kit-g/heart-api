@@ -22,6 +22,15 @@ extension on Map<String, dynamic> {
     };
   }
 
+  /// A name a person writes for someone: trimmed, and 1 to [max] characters, as
+  /// the database counts them, so an emoji is one.
+  String personName(String field, {int max = 100}) {
+    return switch (this[field]) {
+      final String s when s.trim().isNotEmpty && s.trim().runes.length <= max => s.trim(),
+      _ => throw BadRequest(reason: '$field must be between 1 and $max characters'),
+    };
+  }
+
   /// Optional bool. Absent stays null.
   bool? booleanOrNull(String field) {
     return switch (this[field]) {

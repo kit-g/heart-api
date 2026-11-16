@@ -1,12 +1,12 @@
 part of '../db.dart';
 
 /// A reaction as it reads back, on one target column, `r` being the row and
-/// `author` its author's profile.
+/// `author` its author's profile, named by [_reactionAuthor].
 String _reactionColumns(CommentTarget target) =>
     '''
 r.id,
 r.author_id,
-author.username AS author_name,
+named.name AS author_name,
 r.kind,
 r.created_at,
 r.${target.column} AS target_id,
@@ -14,6 +14,13 @@ r.${target.column} AS target_id,
 
 /// The reader's standing towards the target, by the comments' rule: whoever can
 /// comment on a thing can react to it. No row when the target doesn't exist.
+/// The author of reaction `r`, as [reader] calls them.
+String _reactionAuthor(String reader) {
+  return '''
+LEFT JOIN profiles author ON author.id = r.author_id
+${_named('_given_name($reader, r.author_id)', username: 'author.username')}''';
+}
+
 const _reactionAccess =
     '''
 _access AS (
@@ -58,7 +65,7 @@ SELECT
   a.readable
 FROM _access a
 LEFT JOIN _written r ON true
-LEFT JOIN profiles author ON author.id = r.author_id
+${_reactionAuthor('@authorId')}
 ''';
 
 String _removeReaction(CommentTarget target) =>
@@ -89,7 +96,7 @@ _visible AS (
 _page AS (
   SELECT ${_reactionColumns(target)}
   FROM _visible r
-  LEFT JOIN profiles author ON author.id = r.author_id
+  ${_reactionAuthor('@readerId')}
   WHERE @cursor::uuid IS NULL
      OR (r.created_at, r.id) < (SELECT c.created_at, c.id FROM reactions c WHERE c.id = @cursor::uuid)
   ORDER BY r.created_at DESC, r.id DESC

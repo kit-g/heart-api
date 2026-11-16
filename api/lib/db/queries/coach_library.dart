@@ -76,18 +76,20 @@ RETURNING id
 
 /// Who holds a copy, of those the coach still reads as a coach: what ended or is
 /// under a block isn't theirs to see.
-const _listCoachProgramHolders = '''
+final _listCoachProgramHolders =
+    '''
 SELECT
   p.connection_id,
   p.user_id AS student_id,
-  coalesce(_given_name(@coachId, p.user_id), profile.username) AS username,
-  _given_name(@coachId, p.user_id) IS NOT NULL AS named_by_you,
+  named.name AS username,
+  named.given AS named_by_you,
   profile.avatar_url,
   p.id AS program_id,
   p.library_version
 FROM programs p
 JOIN library_programs l ON l.id = p.library_program_id
 JOIN profiles profile ON profile.id = p.user_id
+${_named('_given_name(@coachId, p.user_id)', username: 'profile.username')}
 WHERE l.id = @id::uuid
   AND l.coach_id = @coachId
   AND p.coach_id = @coachId

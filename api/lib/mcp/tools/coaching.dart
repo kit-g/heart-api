@@ -498,11 +498,11 @@ extension on _Client {
 
 extension on Request {
   /// Read only once a read of theirs was allowed, so nothing here says more of
-  /// someone than that read did.
+  /// someone than that read did. They're named as the coach names them.
   Future<_Client> client(String clientId, {_Lifts lifts = .none}) async {
     final empty = Future.value(const <String, dynamic>{});
-    final (profile, exercises, sentBy) = await (
-      profileService.getProfile(clientId),
+    final (name, exercises, sentBy) = await (
+      rosterService.clientName(coachId: userId, clientId: clientId),
       switch (lifts) {
         .none => empty,
         .own => exerciseService.getExercises(clientId, owned: true),
@@ -513,7 +513,6 @@ extension on Request {
         _ => exerciseService.getCoachedExercises(clientId),
       },
     ).wait;
-    final name = profile?.displayName;
     final coached = _Coached({
       for (final row in exercises['exercises'] as List? ?? const [])
         if (row case {'id': final String id} when lifts == .own || row['own'] == true)

@@ -71,8 +71,8 @@ abstract interface class CoachProgramHolder implements Model {
 
   String get studentId;
 
-  /// What the coach calls them: a name the coach gave ([studentNamedByYou]), or
-  /// else what they go by in Heart.
+  /// What the coach calls them: a name the coach gave, or else what they go by
+  /// in Heart.
   String? get studentName;
 
   String? get studentAvatar;

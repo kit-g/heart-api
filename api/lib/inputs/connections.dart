@@ -84,11 +84,7 @@ class ClientNameIn {
 
   static Future<ClientNameIn> fromRequest(Request req) async {
     final json = await req.json();
-    final name = json.string('name').trim();
-    if (name.isEmpty || name.length > 100) {
-      throw const BadRequest(reason: 'name must be between 1 and 100 characters');
-    }
-    return ClientNameIn._(name);
+    return ClientNameIn._(json.personName('name'));
   }
 }
 

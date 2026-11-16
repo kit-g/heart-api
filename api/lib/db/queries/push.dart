@@ -68,10 +68,7 @@ SELECT
     ),
     '[]'::jsonb
   ) AS devices,
-  coalesce(
-    _given_name(@userId, @actorId::text),
-    (SELECT nullif(trim(username), '') FROM profiles WHERE id = @actorId::text)
-  ) AS actor_name
+  (SELECT nullif(trim(username), '') FROM profiles WHERE id = @actorId::text) AS actor_name
 ''';
 
 const _queueDigest = '''

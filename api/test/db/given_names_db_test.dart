@@ -1,6 +1,7 @@
 @Tags(['db'])
 library;
 
+import 'package:heart/models/errors.dart';
 import 'package:heart/models/program_copy.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
@@ -48,27 +49,25 @@ void main() {
   }
 
   group('naming', () {
-    test('a coach sets, changes and clears a name', () async {
+    test('a coach sets, changes and clears a name, each answered with the connection as read after', () async {
       final (coach, student, connection) = await coaching();
       expect((await seen(coach, connection))?.name, 'u_$student');
       expect((await seen(coach, connection))?.namedByYou, isFalse);
 
-      expect(await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam'), isTrue);
+      final named = await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam');
+      expect((named?.name, named?.namedByYou, named?.connectionId), ('Sam', true, connection));
       expect((await seen(coach, connection))?.name, 'Sam');
-      expect((await seen(coach, connection))?.namedByYou, isTrue);
 
-      await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Samantha');
+      final renamed = await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Samantha');
+      expect(renamed?.name, 'Samantha');
       expect((await seen(coach, connection))?.name, 'Samantha');
 
-      expect(await h.db.nameClient(actorId: coach, connectionId: connection), isTrue);
+      final cleared = await h.db.nameClient(actorId: coach, connectionId: connection);
+      expect((cleared?.name, cleared?.namedByYou), ('u_$student', false));
       expect((await seen(coach, connection))?.name, 'u_$student');
-      expect((await seen(coach, connection))?.namedByYou, isFalse);
 
-      expect(
-        await h.db.nameClient(actorId: coach, connectionId: connection),
-        isTrue,
-        reason: 'nothing to clear',
-      );
+      final again = await h.db.nameClient(actorId: coach, connectionId: connection);
+      expect(again?.name, 'u_$student', reason: 'nothing to clear');
     });
 
     test('the default is the invitation\'s name, then the client\'s own', () async {
@@ -78,7 +77,8 @@ void main() {
       expect((await seen(coach, connection))?.namedByYou, isTrue);
 
       await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam');
-      await h.db.nameClient(actorId: coach, connectionId: connection);
+      final cleared = await h.db.nameClient(actorId: coach, connectionId: connection);
+      expect((cleared?.name, cleared?.namedByYou), ('Sam from the gym', true));
       expect((await seen(coach, connection))?.name, 'Sam from the gym');
     });
 
@@ -99,22 +99,28 @@ void main() {
       await h.db.deleteConnection(actorId: student, targetId: coach, role: .student, domain: .fitness);
       expect((await seen(coach, connection))?.name, 'Sam');
 
-      expect(await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam, before'), isTrue);
+      expect(
+        (await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam, before'))?.name,
+        'Sam, before',
+      );
       final former = await h.db.getRoster(coachId: coach, former: true);
       expect(former.items.single.name, 'Sam, before');
       expect(former.items.single.namedByYou, isTrue);
     });
 
-    test('only the coach, of someone who accepted, with no block between them', () async {
+    test('only the coach gives one, on a connection of theirs that was accepted', () async {
       final (coach, student, connection) = await coaching();
-      expect(await h.db.nameClient(actorId: student, connectionId: connection, name: 'Coach'), isFalse);
+      await expectLater(
+        h.db.nameClient(actorId: student, connectionId: connection, name: 'Coach'),
+        throwsA(isA<Forbidden>()),
+      );
 
       final stranger = await h.seedProfile();
-      expect(await h.db.nameClient(actorId: stranger, connectionId: connection, name: 'Who'), isFalse);
+      expect(await h.db.nameClient(actorId: stranger, connectionId: connection, name: 'Who'), isNull);
 
       final (asked, _, pending) = await coaching(status: 'pending');
       await h.exec('UPDATE connections SET accepted_at = NULL WHERE id = @id::uuid', {'id': pending});
-      expect(await h.db.nameClient(actorId: asked, connectionId: pending, name: 'Not yet'), isFalse);
+      expect(await h.db.nameClient(actorId: asked, connectionId: pending, name: 'Not yet'), isNull);
 
       final (a, b) = (await h.seedProfile(), await h.seedProfile());
       final peers = await h.exec(
@@ -125,13 +131,39 @@ void main() {
         ''',
         {'a': a, 'b': b},
       );
-      expect(await h.db.nameClient(actorId: a, connectionId: peers.first[0].toString(), name: 'Pal'), isFalse);
+      await expectLater(
+        h.db.nameClient(actorId: a, connectionId: peers.first[0].toString(), name: 'Pal'),
+        throwsA(isA<Forbidden>()),
+      );
+      expect(await h.db.nameClient(actorId: stranger, connectionId: connection), isNull);
+    });
 
-      await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam');
+    test('a client who blocked the coach reads as an ending: the name is kept, and shown to nobody', () async {
+      final (coach, student, connection) = await coaching();
       await h.exec('INSERT INTO blocks (blocker_id, blocked_id) VALUES (@s, @c)', {'s': student, 'c': coach});
-      expect((await seen(coach, connection))?.name, isNull, reason: 'a block reads as an ending, without a name');
-      expect(await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam'), isFalse);
-      expect(await h.db.nameClient(actorId: coach, connectionId: connection), isFalse);
+
+      final named = await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam');
+      expect(named?.status, ConnectionStatus.severed);
+      expect((named?.name, named?.namedByYou), (null, false));
+      expect((await h.db.nameClient(actorId: coach, connectionId: connection))?.name, isNull);
+    });
+
+    test('a name given as a coach can be taken back after the roles turn', () async {
+      final (a, b, connection) = await coaching();
+      await h.db.nameClient(actorId: a, connectionId: connection, name: 'Bobby');
+      await h.exec(
+        '''
+        UPDATE connections
+        SET initiator_id = @b, target_id = @a
+        WHERE id = @id::uuid
+        ''',
+        {'a': a, 'b': b, 'id': connection},
+      );
+      expect((await seen(a, connection))?.role, ConnectionRole.student);
+      expect((await seen(a, connection))?.name, 'Bobby');
+
+      final cleared = await h.db.nameClient(actorId: a, connectionId: connection);
+      expect((cleared?.name, cleared?.namedByYou), ('u_$b', false));
     });
   });
 
@@ -201,15 +233,37 @@ void main() {
       expect(holder.studentNamedByYou, isTrue);
     });
 
-    test('a push to the coach names the client as the coach does', () async {
+    test('a push never carries it: what reaches Apple or Google is the client\'s own name', () async {
       final (coach, student, connection) = await coaching();
-      await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam');
+      await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam, knee rehab');
 
       final toCoach = await h.db.getPushAudience(userId: coach, topic: 'coaching.message', actorId: student);
-      expect(toCoach.actorName, 'Sam');
+      expect(toCoach.actorName, 'u_$student');
+    });
 
-      final toStudent = await h.db.getPushAudience(userId: student, topic: 'coaching.message', actorId: coach);
-      expect(toStudent.actorName, 'u_$coach');
+    test('the assistant, the shares, blocks and reactions name the client as the coach does', () async {
+      final (coach, student, connection) = await coaching();
+      await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam');
+      expect(await h.db.clientName(coachId: coach, clientId: student), 'Sam');
+      expect(await h.db.clientName(coachId: student, clientId: coach), 'u_$coach');
+
+      final template = await h.insertId(
+        'INSERT INTO templates (user_id, name) VALUES (@u, @n) RETURNING id',
+        {'u': coach, 'n': 'Push'},
+      );
+      await h.exec(
+        '''
+        INSERT INTO template_shares (coach_id, student_id, master_template_id, student_template_id)
+        VALUES (@c, @s, @t::uuid, @t::uuid)
+        ''',
+        {'c': coach, 's': student, 't': template},
+      );
+      final shares = await h.db.getTemplateShares(userId: coach);
+      expect(shares.items.single.assignedTo.name, 'Sam');
+
+      await h.exec('INSERT INTO blocks (blocker_id, blocked_id) VALUES (@c, @s)', {'c': coach, 's': student});
+      final blocked = await h.db.getBlocks(userId: coach);
+      expect(blocked.items.single.name, 'Sam');
     });
   });
 
@@ -217,8 +271,12 @@ void main() {
     final (coach, student, connection) = await coaching();
     await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam');
     await h.exec('DELETE FROM profiles WHERE id = @s', {'s': student});
-    final left = await h.exec('SELECT count(*) FROM given_names WHERE giver_id = @c', {'c': coach});
-    expect(left.single[0], 0);
+    expect((await h.exec('SELECT count(*) FROM given_names WHERE giver_id = @c', {'c': coach})).single[0], 0);
+
+    final (giver, person, other) = await coaching();
+    await h.db.nameClient(actorId: giver, connectionId: other, name: 'Pat');
+    await h.exec('DELETE FROM profiles WHERE id = @g', {'g': giver});
+    expect((await h.exec('SELECT count(*) FROM given_names WHERE person_id = @p', {'p': person})).single[0], 0);
   });
 }
 

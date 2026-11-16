@@ -67,22 +67,19 @@ Future<Connection> nameClient(Request request) async {
   return _nameClient(request, input.name);
 }
 
-/// Back to the invitation's name, or the client's own.
+/// Back to the invitation's name, or the client's own when there was no
+/// invitation. Either side may: a name given as a coach stays if the roles turn.
 Future<Connection> unnameClient(Request request) => _nameClient(request, null);
 
 Future<Connection> _nameClient(Request request, String? name) async {
-  final connection = await _connectionInPath(request);
-  if (connection.role != .coach) throw const Forbidden(reason: _onlyTheCoachNames);
+  final connectionId = request.connectionIdInPath;
   final named = await request.connectionsService.nameClient(
     actorId: request.userId,
-    connectionId: request.connectionIdInPath,
+    connectionId: connectionId,
     name: name,
   );
-  if (!named) throw NotFound(type: 'Connection', id: request.connectionIdInPath);
-  return await _connectionInPath(request);
+  return named ?? (throw NotFound(type: 'Connection', id: connectionId));
 }
-
-const _onlyTheCoachNames = 'Only the coach on a connection names its client.';
 
 Future<Connection?> reactToConnection(Request request) async {
   final input = await ConnectionStatusIn.fromRequest(request);

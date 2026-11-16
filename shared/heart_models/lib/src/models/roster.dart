@@ -7,8 +7,8 @@ abstract interface class ClientSummary implements Model {
 
   String get studentId;
 
-  /// What the coach calls them: a name the coach gave ([namedByYou]), or else
-  /// what they go by in Heart.
+  /// What the coach calls them: a name the coach gave, or else what they go by
+  /// in Heart.
   String? get name;
 
   String? get avatar;
@@ -187,8 +187,8 @@ abstract interface class CoachFeedItem implements Model {
 
   String get studentId;
 
-  /// What the coach calls them: a name the coach gave ([namedByYou]), or else
-  /// what they go by in Heart.
+  /// What the coach calls them: a name the coach gave, or else what they go by
+  /// in Heart.
   String? get name;
 
   String? get avatar;

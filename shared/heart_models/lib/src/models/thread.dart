@@ -10,8 +10,8 @@ abstract interface class Thread implements Model {
   /// The other person; null once their account is gone.
   String? get otherId;
 
-  /// What this person calls the other: a name they gave ([otherNamedByYou]), or
-  /// else what the other goes by in Heart.
+  /// What this person calls the other: a name they gave, or else what the other
+  /// goes by in Heart.
   String? get otherName;
 
   String? get otherAvatar;

@@ -253,73 +253,61 @@ void main() {
   });
 
   group('a coach\'s name for a client', () {
-    void named() {
-      known();
+    void named({Connection? answer}) {
       when(
         app.db.nameClient(
           actorId: anyNamed('actorId'),
           connectionId: anyNamed('connectionId'),
           name: anyNamed('name'),
         ),
-      ).thenAnswer((_) async => true);
+      ).thenAnswer((_) async => answer);
     }
 
-    test('PUT gives one, trimmed, and answers with the connection as read after', () async {
-      named();
+    final sam = Connection(
+      targetId: 't1',
+      role: .coach,
+      domain: .fitness,
+      status: .active,
+      createdAt: DateTime.utc(2026),
+      connectionId: id,
+      name: 'Sam',
+      namedByYou: true,
+    );
+
+    test('PUT gives one, trimmed, and answers with the connection the write read back', () async {
+      named(answer: sam);
       final res = await app.send('PUT', '/connections/$id/name', body: {'name': '  Sam  '});
       expect(res.status, 200);
-      expect((jsonDecode(res.body) as Map)['connectionId'], id);
+      expect(jsonDecode(res.body), containsPair('namedByYou', true));
       verify(app.db.nameClient(actorId: 'u1', connectionId: id, name: 'Sam')).called(1);
-      verify(app.db.getConnectionById(actorId: 'u1', connectionId: id)).called(2);
+      verifyNever(app.db.getConnectionById(actorId: anyNamed('actorId'), connectionId: anyNamed('connectionId')));
     });
 
     test('DELETE takes it back', () async {
-      named();
+      named(answer: sam);
       final res = await app.send('DELETE', '/connections/$id/name');
       expect(res.status, 200);
       verify(app.db.nameClient(actorId: 'u1', connectionId: id, name: null)).called(1);
     });
 
     test('a name of nothing, or past 100 characters, is a 400 before anything is read', () async {
-      for (final name in ['   ', 'x' * 101, null]) {
+      for (final name in ['   ', 'x' * 101, null, 7]) {
         final res = await app.send('PUT', '/connections/$id/name', body: {'name': name});
         expect(res.status, 400, reason: '$name');
       }
       verifyZeroInteractions(app.db);
     });
 
-    test('the client, or a peer, is refused with 403', () async {
-      when(app.db.getConnectionById(actorId: 'u1', connectionId: id)).thenAnswer(
-        (_) async => Connection(
-          targetId: 't1',
-          role: .student,
-          domain: .fitness,
-          status: .active,
-          createdAt: DateTime.utc(2026),
-          connectionId: id,
-        ),
-      );
-      final res = await app.send('PUT', '/connections/$id/name', body: {'name': 'Coach'});
-      expect(res.status, 403);
-      verifyNever(
-        app.db.nameClient(actorId: anyNamed('actorId'), connectionId: anyNamed('connectionId'), name: anyNamed('name')),
-      );
+    test('characters count as people see them: 100 emoji are a name', () async {
+      named(answer: sam);
+      final res = await app.send('PUT', '/connections/$id/name', body: {'name': '💪' * 100});
+      expect(res.status, 200);
     });
 
-    test('one that isn\'t the caller\'s, or that the coach can\'t name, is a 404', () async {
-      known();
-      when(
-        app.db.nameClient(
-          actorId: anyNamed('actorId'),
-          connectionId: anyNamed('connectionId'),
-          name: anyNamed('name'),
-        ),
-      ).thenAnswer((_) async => false);
+    test('one that isn\'t the caller\'s is a 404', () async {
+      named();
       expect((await app.send('PUT', '/connections/$id/name', body: {'name': 'Sam'})).status, 404);
-      expect(
-        (await app.send('PUT', '/connections/01900000-0000-7000-8000-0000000000c2/name', body: {'name': 'Sam'})).status,
-        404,
-      );
+      expect((await app.send('DELETE', '/connections/$id/name')).status, 404);
     });
   });
 

@@ -112,4 +112,13 @@ mixin _Roster on _DatabaseBase implements RosterService {
     final rows = await _pool.execute(_coaches.toSql(), parameters: {'userId': userId});
     return rows.first[0] as bool;
   }
+
+  @override
+  Future<String?> clientName({required String coachId, required String clientId}) async {
+    final rows = await _pool.execute(
+      _clientName.toSql(),
+      parameters: {'coachId': coachId, 'clientId': clientId},
+    );
+    return rows.firstOrNull?[0] as String?;
+  }
 }

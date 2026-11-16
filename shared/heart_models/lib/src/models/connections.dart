@@ -372,12 +372,14 @@ abstract interface class ConnectionsService {
     required Set<ConnectionShare> shares,
   });
 
-  /// Gives the other person on [connectionId] a name only [actorId] reads, or with
-  /// a null [name] takes it back, so they read as the invitation or their profile
-  /// names them again. The name is for the person, not the one connection, so it
-  /// stays after the connection ends. False when [actorId] isn't the coach on a
-  /// connection that was accepted once, or a block stands between the two.
-  Future<bool> nameClient({required String actorId, required String connectionId, String? name});
+  /// Gives the client on [connectionId] a name only [actorId] reads, or with a null
+  /// [name] takes it back, so they read as the invitation or their profile names
+  /// them again, and answers with the connection as [actorId] then reads it. The
+  /// name is for the person, not the one connection, so it stays after the
+  /// connection ends. Null when the connection isn't [actorId]'s or was never
+  /// accepted. Giving one throws unless [actorId] is its coach; either side may take
+  /// one back.
+  Future<Connection?> nameClient({required String actorId, required String connectionId, String? name});
 
   /// True if there is any active connection between the two users in any
   /// direction or domain, and no block stands between them.
