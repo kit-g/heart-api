@@ -596,7 +596,7 @@ void main() {
 
       await h.db.updateExercise(userId: ownerId, exerciseId: id, instructions: (value: 'again'));
       final kept = await h.db.updateExercise(userId: ownerId, exerciseId: id, target: 'Back');
-      expect(kept['instructions'], 'again', reason: 'an older build sends no instructions');
+      expect(kept['instructions'], 'again', reason: 'an edit without the key keeps them');
     });
 
     test('updating another user\'s exercise throws NotFound', () async {

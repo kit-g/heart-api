@@ -4,6 +4,7 @@ import 'package:heart/globals/config.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/s3.dart';
+import 'package:heart/models/errors.dart';
 import 'package:heart/models/exercises.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:relic/relic.dart';
@@ -42,6 +43,8 @@ Future<Model> createExercise(Request request) async {
 
 Future<ExerciseModel> updateExercise(Request request) async {
   final exerciseId = request.pathParameters.raw[#exerciseId]!;
+  // an id that couldn't be one names nothing, rather than failing the cast in SQL
+  if (!_uuid.hasMatch(exerciseId)) throw NotFound(type: 'Exercise', id: exerciseId);
   final input = await ExerciseUpdateIn.fromRequest(request);
 
   final row = await request.exerciseService.updateExercise(
@@ -69,3 +72,5 @@ Future<ExerciseMoveReport> moveExerciseHistory(Request request) async {
     dryRun: input.dryRun,
   );
 }
+
+final _uuid = RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', caseSensitive: false);

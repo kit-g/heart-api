@@ -31,6 +31,15 @@ extension on Map<String, dynamic> {
     };
   }
 
+  /// An edit's field that can be cleared: null when the body leaves [field] out,
+  /// so the stored value stays, else what [parse] reads, null clearing it.
+  ({T? value})? present<T>(String field, T? Function() parse) {
+    return switch (containsKey(field)) {
+      true => (value: parse()),
+      false => null,
+    };
+  }
+
   /// Optional bool. Absent stays null.
   bool? booleanOrNull(String field) {
     return switch (this[field]) {

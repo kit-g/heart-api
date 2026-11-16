@@ -31,7 +31,7 @@ class ExerciseCreateIn {
       },
       category: json.string('category', maxLength: 100),
       target: json.string('target', maxLength: 100),
-      instructions: json.stringOrNull('instructions', maxLength: 10000),
+      instructions: json.instructions(),
       pattern: json.pattern(),
     );
   }
@@ -80,8 +80,7 @@ class ExerciseUpdateIn {
   final String? target;
 
   /// Null leaves the instructions alone; `(value: null)` clears them, sent as
-  /// `null` or an empty string. Installed builds send no key, so their edits
-  /// never clear any.
+  /// `null` or blank text.
   final ({String? value})? instructions;
   final bool? archived;
 
@@ -109,26 +108,22 @@ class ExerciseUpdateIn {
       },
       category: json.stringOrNull('category', maxLength: 100),
       target: json.stringOrNull('target', maxLength: 100),
-      instructions: switch (json.containsKey('instructions')) {
-        true => (value: json.instructions()),
-        false => null,
-      },
+      instructions: json.present('instructions', json.instructions),
       archived: json.booleanOrNull('archived'),
-      pattern: switch (json.containsKey('pattern')) {
-        true => (value: json.pattern()),
-        false => null,
-      },
+      pattern: json.present('pattern', json.pattern),
     );
   }
 }
 
 extension on Map<String, dynamic> {
-  /// An edit's instructions: the text, or null for none, which `null` and an
-  /// empty string both say.
+  /// An exercise's instructions: the text as written, or null for none, which
+  /// `null` and blank text both say.
   String? instructions() {
     return switch (this['instructions']) {
-      null || '' => null,
-      _ => stringOrNull('instructions', maxLength: 10000),
+      null => null,
+      final String text when text.trim().isEmpty => null,
+      final String text when text.length <= 10000 => text,
+      _ => throw const BadRequest(reason: 'instructions must be text of at most 10000 characters, or null'),
     };
   }
 

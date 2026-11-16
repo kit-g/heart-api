@@ -144,6 +144,10 @@ result → 404, one row with `forbidden = true` → 403, otherwise data. Not a
 separate ownership `SELECT` first.
 
 **Partial updates are `coalesce(@col, col)`.** Pass `null` for "unchanged".
+A column an edit can also clear can't tell "unchanged" from "none" that way:
+its input is `({T? value})?` (`present` in `inputs/parse.dart`: no key is
+null, a key is its value, null included), and the SQL is
+`CASE WHEN @setsCol::boolean THEN @col ELSE col END`.
 
 **Non-trivial SQL gets a `db`-tagged test** (`api/test/db/*_db_test.dart`,
 `make test-api-db`). Route tests mock the service and prove
