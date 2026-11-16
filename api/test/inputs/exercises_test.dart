@@ -85,6 +85,35 @@ void main() {
     });
   });
 
+  group('instructions (heart-api#443)', () {
+    Future<ExerciseUpdateIn> edit(Map<String, dynamic> body) => ExerciseUpdateIn.fromRequest(jsonRequest(body: body));
+    Future<ExerciseCreateIn> create(Map<String, dynamic> body) => ExerciseCreateIn.fromRequest(
+      jsonRequest(body: {'name': 'Landmine press', 'category': 'Barbell', 'target': 'Shoulders', ...body}),
+    );
+
+    test('an edit sets them, clears them with null or blank text, and leaves them alone when absent', () async {
+      expect((await edit({'instructions': '  Brace first.\n'})).instructions, (value: '  Brace first.\n'));
+      for (final none in [null, '', '   ', '\n\t']) {
+        expect((await edit({'instructions': none})).instructions, (value: null), reason: '$none');
+      }
+      expect((await edit({'target': 'Chest'})).instructions, isNull);
+    });
+
+    test('a create reads blank text as none, as an edit does', () async {
+      expect((await create({'instructions': ''})).instructions, isNull);
+      expect((await create({'instructions': '  '})).instructions, isNull);
+      expect((await create({'instructions': 'Slow down'})).instructions, 'Slow down');
+    });
+
+    test('anything but text of at most 10000 characters is a 400', () async {
+      for (final bad in [42, true, 'x' * 10001]) {
+        await expectLater(edit({'instructions': bad}), throwsA(isA<BadRequest>()), reason: '$bad');
+        await expectLater(create({'instructions': bad}), throwsA(isA<BadRequest>()), reason: '$bad');
+      }
+      expect((await edit({'instructions': 'x' * 10000})).instructions?.value, hasLength(10000));
+    });
+  });
+
   group('ExerciseCreateIn — a movement pattern (heart-api#269)', () {
     Future<ExerciseCreateIn> parse(Map<String, dynamic> body) => ExerciseCreateIn.fromRequest(
       jsonRequest(body: {'name': 'Landmine press', 'category': 'Barbell', 'target': 'Shoulders', ...body}),

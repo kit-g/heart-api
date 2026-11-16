@@ -78,7 +78,7 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
     String? name,
     String? category,
     String? target,
-    String? instructions,
+    ({String? value})? instructions,
     bool? archived,
     ({String? value})? pattern,
   }) async {
@@ -93,7 +93,8 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
           'name': name,
           'category': category,
           'target': target,
-          'instructions': instructions,
+          'setsInstructions': instructions != null,
+          'instructions': instructions?.value,
           'archived': archived,
           'setsPattern': pattern != null,
           'pattern': pattern?.value,

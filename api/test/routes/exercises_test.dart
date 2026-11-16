@@ -279,6 +279,14 @@ void main() {
   });
 
   group('PUT /exercises/:exerciseId', () {
+    const e1 = '01900000-0000-7000-8000-0000000000e1';
+
+    test('an id that couldn\'t be an exercise\'s is a 404 that never reaches the database', () async {
+      final res = await app.send('PUT', '/exercises/not-a-uuid', body: {'archived': true});
+      expect(res.status, 404);
+      verifyZeroInteractions(app.db);
+    });
+
     test('captures the path id and forwards the patch fields', () async {
       when(
         app.db.updateExercise(
@@ -291,12 +299,12 @@ void main() {
         ),
       ).thenAnswer((_) async => {'id': 'e1', 'archived': true});
 
-      final res = await app.send('PUT', '/exercises/e1', body: {'archived': true});
+      final res = await app.send('PUT', '/exercises/$e1', body: {'archived': true});
       expect(res.status, 200);
       verify(
         app.db.updateExercise(
           userId: 'u1',
-          exerciseId: 'e1',
+          exerciseId: e1,
           category: null,
           target: null,
           instructions: null,
@@ -305,26 +313,59 @@ void main() {
       ).called(1);
     });
 
+    test('instructions: text sets them, null or an empty string clears them, no key keeps them', () async {
+      when(
+        app.db.updateExercise(
+          userId: anyNamed('userId'),
+          exerciseId: anyNamed('exerciseId'),
+          instructions: anyNamed('instructions'),
+        ),
+      ).thenAnswer((_) async => {'id': 'e1'});
+
+      for (final (body, sent) in <(Map<String, dynamic>, ({String? value})?)>[
+        ({'instructions': 'Brace first.'}, (value: 'Brace first.')),
+        ({'instructions': null}, (value: null)),
+        ({'instructions': ''}, (value: null)),
+        ({'instructions': ' \n '}, (value: null)),
+        (<String, dynamic>{}, null),
+      ]) {
+        final res = await app.send('PUT', '/exercises/$e1', body: body);
+        expect(res.status, 200, reason: '$body');
+        final captured = verify(
+          app.db.updateExercise(
+            userId: 'u1',
+            exerciseId: e1,
+            instructions: captureAnyNamed('instructions'),
+          ),
+        ).captured.single;
+        expect(captured, sent, reason: '$body');
+      }
+
+      for (final bad in [42, 'x' * 10001]) {
+        expect((await app.send('PUT', '/exercises/$e1', body: {'instructions': bad})).status, 400);
+      }
+    });
+
     test('a rename forwards the name trimmed', () async {
       when(
         app.db.updateExercise(userId: anyNamed('userId'), exerciseId: anyNamed('exerciseId'), name: anyNamed('name')),
       ).thenAnswer((_) async => {'id': 'e1', 'name': 'Bench Press'});
 
-      final res = await app.send('PUT', '/exercises/e1', body: {'name': '  Bench Press '});
+      final res = await app.send('PUT', '/exercises/$e1', body: {'name': '  Bench Press '});
       expect(res.status, 200);
-      verify(app.db.updateExercise(userId: 'u1', exerciseId: 'e1', name: 'Bench Press')).called(1);
+      verify(app.db.updateExercise(userId: 'u1', exerciseId: e1, name: 'Bench Press')).called(1);
     });
 
     for (final name in ['', '   ']) {
       test('a blank name ("$name") is a 400 and never reaches the database', () async {
-        final res = await app.send('PUT', '/exercises/e1', body: {'name': name});
+        final res = await app.send('PUT', '/exercises/$e1', body: {'name': name});
         expect(res.status, 400);
         verifyNever(app.db.updateExercise(userId: anyNamed('userId'), exerciseId: anyNamed('exerciseId')));
       });
     }
 
     test('a name over 200 characters is a 400', () async {
-      final res = await app.send('PUT', '/exercises/e1', body: {'name': 'x' * 201});
+      final res = await app.send('PUT', '/exercises/$e1', body: {'name': 'x' * 201});
       expect(res.status, 400);
     });
 
@@ -333,7 +374,7 @@ void main() {
         app.db.updateExercise(userId: anyNamed('userId'), exerciseId: anyNamed('exerciseId'), name: anyNamed('name')),
       ).thenThrow(const Conflict(code: 'name_taken', reason: 'taken'));
 
-      final res = await app.send('PUT', '/exercises/e1', body: {'name': 'Squat'});
+      final res = await app.send('PUT', '/exercises/$e1', body: {'name': 'Squat'});
       expect(res.status, 409);
       expect(jsonDecode(res.body), containsPair('code', 'name_taken'));
     });
