@@ -10,6 +10,7 @@ typedef CopyRead = ({
   Program program,
   List<Template> sessions,
   Iterable<ProgramAction> actions,
+  Iterable<ProgramBase> bases,
   Iterable<ProgramMark> marks,
 });
 
@@ -95,7 +96,8 @@ abstract interface class ProgramChangeService {
   /// [NotFound] unless they sent it, [Forbidden] without a coach's view of the
   /// student. With [assistant], what the coach's assistant reads: only while the
   /// student shares it with the assistant. [locale] names its sessions' library
-  /// exercises, as `ApiWorkoutService` does.
+  /// exercises, as `ApiWorkoutService` does. Its steps, bases and marks are what
+  /// the reader may see: a workout they can't read moves none of them.
   Future<CopyRead> readCopy({
     required String coachId,
     required String studentId,

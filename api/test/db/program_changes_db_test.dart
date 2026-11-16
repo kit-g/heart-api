@@ -7,6 +7,7 @@ import 'package:heart/middleware/events.dart';
 import 'package:heart/globals/config.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/program_changes.dart';
 import 'package:heart/models/program_copy.dart';
 import 'package:heart/routes/coach_library.dart';
 import 'package:heart/routes/program_changes.dart' as routes;
@@ -886,6 +887,75 @@ void main() {
       await h.db.hideWorkout(userId: c.student, workoutId: workout);
       expect(await seen(), 0);
       expect(await h.db.getProgramMarks(userId: c.student, programId: c.program), hasLength(1));
+    });
+  });
+
+  group('what a coach plans from (heart-api#439)', () {
+    test('the steps, bases and marks the student plans from, less what a hidden workout moved', () async {
+      final c = await sent();
+      final exercise = await h.seedGlobalExercise();
+      Future<String> trained(String name) => h.insertId(
+        '''
+        INSERT INTO workouts (user_id, name, started_at, completed_at, template_id, program_id)
+        VALUES (@u, @n, now(), now(), @t::uuid, @p::uuid)
+        RETURNING id
+        ''',
+        {'u': c.student, 'n': name, 't': c.sessions.first, 'p': c.program},
+      );
+      final (shown, hidden) = (await trained('Shown'), await trained('Hidden'));
+
+      Future<String> step(String kind, {String? workout}) => h.insertId(
+        '''
+        INSERT INTO program_actions (user_id, program_id, kind, exercise_id, stage, workout_id, at)
+        VALUES (
+          @u, @p::uuid, @k,
+          CASE WHEN @k = 'stage' THEN @e::uuid END,
+          CASE WHEN @k = 'stage' THEN 1 END,
+          @w::uuid, now()
+        )
+        RETURNING id
+        ''',
+        {'u': c.student, 'p': c.program, 'k': kind, 'e': exercise, 'w': workout},
+      );
+      final repeat = await step('repeat');
+      final shownStage = await step('stage', workout: shown);
+      final hiddenStage = await step('stage', workout: hidden);
+
+      Future<void> base(num value, {String? workout, String? action}) => h.exec(
+        '''
+        INSERT INTO program_bases (user_id, program_id, exercise_id, slot, value, workout_id, action_id, at)
+        VALUES (@u, @p::uuid, @e::uuid, @slot::uuid, @v, @w::uuid, @a::uuid, now())
+        ''',
+        {
+          'u': c.student,
+          'p': c.program,
+          'e': exercise,
+          'slot': c.sessions.first,
+          'v': value,
+          'w': workout,
+          'a': action,
+        },
+      );
+      await base(100);
+      await base(105, workout: shown);
+      await base(110, workout: hidden);
+      await base(90, action: hiddenStage);
+
+      Future<CopyRead> read() => h.db.readCopy(coachId: c.coach, studentId: c.student, programId: c.program);
+      var copy = await read();
+      expect(copy.bases.map((b) => b.value), [100, 105, 110, 90]);
+      expect(copy.bases.first.slot, c.sessions.first, reason: 'with their slots');
+      expect(copy.actions.map((a) => a.id), [repeat, shownStage, hiddenStage]);
+      expect(copy.marks, hasLength(2));
+
+      await h.db.hideWorkout(userId: c.student, workoutId: hidden);
+      copy = await read();
+      expect(copy.bases.map((b) => b.value), [100, 105], reason: "a hidden workout's moves are the student's alone");
+      expect(copy.actions.map((a) => a.id), [repeat, shownStage]);
+      expect(copy.marks, hasLength(1));
+
+      final own = await h.db.getProgramBases(userId: c.student, programId: c.program);
+      expect(own.map((b) => b.value), [100, 105, 110, 90], reason: 'the student still plans from all of them');
     });
   });
 

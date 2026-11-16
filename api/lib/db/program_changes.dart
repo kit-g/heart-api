@@ -425,14 +425,14 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
           if (rows.isEmpty) throw NotFound(type: 'Template', id: id);
           sessions.add(Template.fromRow(rows.first.toColumnMap()));
         }
-        final actions = await tx.execute(
-          _listProgramActions.toSql(),
-          parameters: {'userId': studentId, 'programId': programId},
-        );
+        final visible = {'readerId': coachId, 'ownerId': studentId, 'programId': programId, 'assistant': assistant};
+        final actions = await tx.execute(_listVisibleActions.toSql(), parameters: visible);
+        final bases = await tx.execute(_listVisibleBases.toSql(), parameters: visible);
         return (
           program: program,
           sessions: sessions,
           actions: [for (final row in actions) ProgramAction.fromRow(row.toColumnMap())],
+          bases: [for (final row in bases) ProgramBase.fromRow(row.toColumnMap())],
           marks: await _visibleMarks(
             tx,
             readerId: coachId,

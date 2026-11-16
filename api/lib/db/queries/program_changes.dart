@@ -280,6 +280,38 @@ WHERE program_id = @programId::uuid
   AND _readable_at((SELECT r FROM _rel), at, NULL)
 ''';
 
+/// The program's steps a reader sees: an advance or a stage a workout caused stays
+/// out unless they can read that workout, as its mark does.
+const _listVisibleActions = '''
+WITH _rel AS (
+  SELECT _relation(@readerId, @ownerId, @assistant::boolean) AS r
+)
+SELECT a.id, a.program_id, a.kind, a.week, a.from_exercise, a.to_exercise, a.exercise_id, a.slot, a.stage, a.workout_id, a.at
+FROM program_actions a
+LEFT JOIN workouts w ON w.id = a.workout_id
+WHERE a.program_id = @programId::uuid
+  AND a.user_id = @ownerId
+  AND (a.workout_id IS NULL OR _readable_at((SELECT r FROM _rel), w.started_at, w.hidden_at))
+ORDER BY a.at, a.id
+''';
+
+/// The program's bases a reader sees: a move a workout made, or an action that
+/// workout caused, stays out unless they can read that workout. A hidden workout's
+/// base move is the owner's alone.
+const _listVisibleBases = '''
+WITH _rel AS (
+  SELECT _relation(@readerId, @ownerId, @assistant::boolean) AS r
+)
+SELECT b.id, b.program_id, b.exercise_id, b.slot, b.value, b.workout_id, b.action_id, b.at
+FROM program_bases b
+LEFT JOIN program_actions a ON a.id = b.action_id
+LEFT JOIN workouts w ON w.id = coalesce(b.workout_id, a.workout_id)
+WHERE b.program_id = @programId::uuid
+  AND b.user_id = @ownerId
+  AND (w.id IS NULL OR _readable_at((SELECT r FROM _rel), w.started_at, w.hidden_at))
+ORDER BY b.at, b.id
+''';
+
 const _getCopyIds = '''
 SELECT library_ids
 FROM programs

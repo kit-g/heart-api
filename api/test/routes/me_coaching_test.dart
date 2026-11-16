@@ -221,6 +221,7 @@ void main() {
           session(theirs, by: 'coach-2'),
         ],
         actions: const <ProgramAction>[],
+        bases: const <ProgramBase>[],
         marks: const <ProgramMark>[],
       ),
     );

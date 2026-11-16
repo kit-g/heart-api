@@ -106,7 +106,7 @@ Future<MeClientPrograms> getClientPrograms(Request req, String clientId) async {
 Future<MeClientProgram> getClientProgram(Request req, ({String clientId, String programId}) input) async {
   final (:clientId, :programId) = input;
   if (!isUuidV7(programId)) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
-  final (:program, :sessions, :position) = await _asClient(
+  final (:program, :sessions, :position, read: _) = await _asClient(
     req,
     clientId,
     () => copies.copyState(req, student: clientId, programId: programId, assistant: true),
