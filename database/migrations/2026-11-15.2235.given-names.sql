@@ -26,8 +26,27 @@ COMMENT ON CONSTRAINT given_names_name_check ON given_names IS 'Between 1 and 10
 COMMENT ON CONSTRAINT given_names_not_self ON given_names IS 'A name is for someone else';
 COMMENT ON INDEX given_names_person_idx IS 'The cascade when a named person''s profile is deleted';
 
--- The name a giver set, or else the one they wrote on the last invitation of theirs
--- the person accepted. NULL when they gave neither.
+-- The name a giver wrote on the last invitation of theirs the person accepted.
+CREATE OR REPLACE FUNCTION _invited_as(_giver TEXT, _person TEXT) RETURNS TEXT
+    LANGUAGE sql
+    STABLE
+AS
+$$
+SELECT i.name
+FROM invitation_responses r
+JOIN invitations i ON i.id = r.invitation_id
+WHERE r.user_id = _person
+  AND r.response = 'accepted'
+  AND i.inviter_id = _giver
+ORDER BY r.at DESC
+LIMIT 1
+$$;
+
+COMMENT ON FUNCTION _invited_as(TEXT, TEXT) IS
+    'The name the first person wrote on their last invitation the second accepted';
+
+-- The name a giver set, or else the one they invited the person by. NULL when they
+-- gave neither.
 CREATE OR REPLACE FUNCTION _given_name(_giver TEXT, _person TEXT) RETURNS TEXT
     LANGUAGE sql
     STABLE
@@ -40,18 +59,9 @@ SELECT coalesce(
         WHERE g.giver_id = _giver
           AND g.person_id = _person
     ),
-    (
-        SELECT i.name
-        FROM invitation_responses r
-        JOIN invitations i ON i.id = r.invitation_id
-        WHERE r.user_id = _person
-          AND r.response = 'accepted'
-          AND i.inviter_id = _giver
-        ORDER BY r.at DESC
-        LIMIT 1
-    )
+    _invited_as(_giver, _person)
 )
 $$;
 
 COMMENT ON FUNCTION _given_name(TEXT, TEXT) IS
-    'What the first person calls the second: the name they set, else the one on their last invitation the second accepted';
+    'What the first person calls the second: the name they set, else the one they invited them by';

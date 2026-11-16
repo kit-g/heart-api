@@ -12,6 +12,8 @@ BEGIN
     RETURN NEXT has_function('public'::name, '_given_name'::name, ARRAY ['text', 'text']);
     RETURN NEXT function_returns('public'::name, '_given_name'::name, ARRAY ['text', 'text'], 'text');
     RETURN NEXT function_lang_is('public'::name, '_given_name'::name, ARRAY ['text', 'text'], 'sql'::name);
+    RETURN NEXT has_function('public'::name, '_invited_as'::name, ARRAY ['text', 'text']);
+    RETURN NEXT function_returns('public'::name, '_invited_as'::name, ARRAY ['text', 'text'], 'text');
 
     RETURN NEXT is((SELECT count(*) FROM given_names WHERE giver_id = _coach), 0::bigint, 'no names yet');
     RETURN NEXT is((SELECT count(*) FROM invitations WHERE inviter_id = _coach), 0::bigint, 'no invitations yet');
@@ -39,6 +41,7 @@ BEGIN
 
     INSERT INTO given_names (giver_id, person_id, name) VALUES (_coach, _student, 'Samantha');
     RETURN NEXT is(_given_name(_coach, _student), 'Samantha', 'a name set wins');
+    RETURN NEXT is(_invited_as(_coach, _student), 'Sam again', 'and the invitation''s stays beside it');
 
     DELETE FROM given_names WHERE giver_id = _coach;
     RETURN NEXT is(_given_name(_coach, _student), 'Sam again', 'cleared, back to the invitation');
