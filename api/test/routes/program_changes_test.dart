@@ -39,6 +39,10 @@ void main() {
 
   const program = '01900000-0000-7000-8000-000000000001';
   const session = '01900000-0000-7000-8000-000000000002';
+  const action = '01900000-0000-7000-8000-000000000003';
+  const base = '01900000-0000-7000-8000-000000000004';
+  const exercise = '01900000-0000-7000-8000-000000000005';
+  const slot = '01900000-0000-7000-8000-000000000006';
 
   void told() {
     final message =
@@ -463,13 +467,15 @@ void main() {
           coachId: anyNamed('coachId'),
           studentId: anyNamed('studentId'),
           programId: anyNamed('programId'),
+          withBases: anyNamed('withBases'),
         ),
       ).thenAnswer(
         (_) async => (
           program: Program(id: program, name: 'Plan', sessions: const [session]),
           sessions: [template()],
-          actions: const <ProgramAction>[],
-          marks: const <ProgramMark>[],
+          actions: [ProgramAction(id: action, kind: .repeat, at: DateTime.utc(2026, 11, 2))],
+          bases: [ProgramBase(id: base, exerciseId: exercise, slot: slot, value: 80, at: DateTime.utc(2026, 11, 1))],
+          marks: [ProgramMark(templateId: session, at: DateTime.utc(2026, 11, 3), isWorkout: true)],
         ),
       );
 
@@ -480,7 +486,13 @@ void main() {
       expect(view.program.id, program);
       expect(view.sessions.single.id, session);
       expect(view.position, isNotEmpty);
-      verify(app.db.readCopy(locale: anyNamed('locale'), coachId: 'u1', studentId: 's', programId: program)).called(1);
+      // what the student's device plans the next session from (heart-api#439)
+      expect(view.actions.single.id, action);
+      expect((view.bases.single.exerciseId, view.bases.single.slot, view.bases.single.value), (exercise, slot, 80));
+      expect((view.marks.single.templateId, view.marks.single.isWorkout), (session, true));
+      verify(
+        app.db.readCopy(locale: anyNamed('locale'), coachId: 'u1', studentId: 's', programId: program, withBases: true),
+      ).called(1);
       verifyNever(app.db.getProgramMarks(userId: anyNamed('userId'), programId: anyNamed('programId')));
     });
 
@@ -491,6 +503,7 @@ void main() {
           coachId: anyNamed('coachId'),
           studentId: anyNamed('studentId'),
           programId: anyNamed('programId'),
+          withBases: anyNamed('withBases'),
         ),
       ).thenThrow(const Forbidden(reason: 'no'));
 

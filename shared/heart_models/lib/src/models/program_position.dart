@@ -6,7 +6,7 @@ import 'workout.dart';
 
 /// One thing that happened in a program: a workout done, or a session skipped.
 /// What a [ProgramPosition] is folded from, beside the program's actions.
-final class ProgramMark {
+final class ProgramMark implements Model {
   /// The session it was for; null when it named none, or its template is gone.
   final String? templateId;
 
@@ -23,6 +23,19 @@ final class ProgramMark {
   }
 
   factory skip(TrainingSkip skip) => ProgramMark(templateId: skip.templateId, at: skip.at, isWorkout: false);
+
+  factory fromJson(Map json) {
+    return ProgramMark(
+      templateId: json['templateId'] as String?,
+      at: DateTime.parse(json['at'] as String),
+      isWorkout: json['isWorkout'] == true,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {'templateId': ?templateId, 'at': at.toUtc().toIso8601String(), 'isWorkout': isWorkout};
+  }
 }
 
 /// Where the user stands in a program, worked out from its history and never

@@ -278,6 +278,115 @@ FROM skips
 WHERE program_id = @programId::uuid
   AND user_id = @ownerId
   AND _readable_at((SELECT r FROM _rel), at, NULL)
+ORDER BY at, is_workout, template_id
+''';
+
+/// What a reader plans a program's next session from, in one statement under one
+/// read of the relation: its steps, its bases (with `@withBases`) and its marks, as
+/// JSON arrays in the models' own shape, each oldest first. A row a reader can't see
+/// stays out: one dated in a pause or before what they read from, and one a workout
+/// they can't read caused (an advance or a stage, a base it moved, a base that
+/// step moved), as that workout's own mark does. A later move still starts from
+/// what came before it: the values are the owner's.
+const _visiblePlanning = '''
+WITH
+_rel AS (
+  SELECT _relation(@readerId, @ownerId, @assistant::boolean) AS r
+),
+-- the workouts of the program, and those its steps and bases name
+_seen AS (
+  SELECT w.id, w.program_id, w.template_id, w.started_at
+  FROM workouts w, _rel
+  WHERE w.user_id = @ownerId
+    AND w.started_at IS NOT NULL
+    AND _readable_at(_rel.r, w.started_at, w.hidden_at)
+    AND (
+      w.program_id = @programId::uuid
+      OR w.id IN (SELECT workout_id FROM program_actions WHERE program_id = @programId::uuid)
+      OR w.id IN (SELECT workout_id FROM program_bases WHERE program_id = @programId::uuid)
+    )
+),
+_actions AS (
+  SELECT a.*
+  FROM program_actions a, _rel
+  WHERE a.program_id = @programId::uuid
+    AND a.user_id = @ownerId
+    AND _readable_at(_rel.r, a.at, NULL)
+    AND (a.workout_id IS NULL OR a.workout_id IN (SELECT id FROM _seen))
+),
+_bases AS (
+  SELECT b.*
+  FROM program_bases b, _rel
+  WHERE @withBases::boolean
+    AND b.program_id = @programId::uuid
+    AND b.user_id = @ownerId
+    AND _readable_at(_rel.r, b.at, NULL)
+    AND (b.workout_id IS NULL OR b.workout_id IN (SELECT id FROM _seen))
+    AND (b.action_id IS NULL OR b.action_id IN (SELECT id FROM _actions))
+),
+_marks AS (
+  SELECT template_id, started_at AS at, true AS is_workout
+  FROM _seen
+  WHERE program_id = @programId::uuid
+  UNION ALL
+  SELECT k.template_id, k.at, false
+  FROM skips k, _rel
+  WHERE k.program_id = @programId::uuid
+    AND k.user_id = @ownerId
+    AND _readable_at(_rel.r, k.at, NULL)
+)
+SELECT
+  (
+    SELECT coalesce(
+      jsonb_agg(
+        jsonb_build_object(
+          'id', id,
+          'programId', program_id,
+          'kind', kind,
+          'week', week,
+          'from', from_exercise,
+          'to', to_exercise,
+          'exercise', exercise_id,
+          'slot', slot,
+          'stage', stage,
+          'workoutId', workout_id,
+          'at', at
+        )
+        ORDER BY at, id
+      ),
+      '[]'
+    )
+    FROM _actions
+  ) AS actions,
+  (
+    SELECT coalesce(
+      jsonb_agg(
+        jsonb_build_object(
+          'id', id,
+          'programId', program_id,
+          'exerciseId', exercise_id,
+          'slot', slot,
+          'value', value,
+          'workoutId', workout_id,
+          'actionId', action_id,
+          'at', at
+        )
+        ORDER BY at, id
+      ),
+      '[]'
+    )
+    FROM _bases
+  ) AS bases,
+  (
+    SELECT coalesce(
+      jsonb_agg(
+        jsonb_build_object('templateId', template_id, 'at', at, 'isWorkout', is_workout)
+        ORDER BY at, is_workout, template_id
+      ),
+      '[]'
+    )
+    FROM _marks
+  ) AS marks
 ''';
 
 const _getCopyIds = '''

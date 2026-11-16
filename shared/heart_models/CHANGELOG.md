@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.59.0
+
+What a coach plans a client's session from (heart-api#439).
+
+- Added: `CoachProgramView.actions` (`List<ProgramAction>`), `bases` (`List<ProgramBase>`) and
+  `marks` (`List<ProgramMark>`), each empty when an answer predates them.
+- Added: `ProgramMark.fromJson` and `toMap` (`at` in UTC); `ProgramMark` is now a `Model`.
+
 ## 2.58.0
 
 A coach's own name for each client (heart-api#444).
