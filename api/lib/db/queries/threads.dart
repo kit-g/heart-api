@@ -11,7 +11,8 @@ SELECT
   t.cleared_at,
   t.cleared_by,
   other.id AS other_id,
-  other.username AS other_name,
+  named.name AS other_name,
+  coalesce(named.given, false) AS other_named_by_you,
   other.avatar_url AS other_avatar,
   (
     SELECT i.created_at
@@ -31,16 +32,18 @@ SELECT
   ) AS unread
 ''';
 
-const _threadOther = '''
+final _threadOther =
+    '''
 LEFT JOIN profiles other
   ON other.id = CASE WHEN t.person_a = @userId THEN t.person_b ELSE t.person_a END
+${_named('_given_name(@userId, other.id)', username: 'other.username')}
 ''';
 
 /// Only for a connection that was accepted, whichever person it was made by, and
 /// not for someone the other person blocked, who can't read one either. A thread
 /// that exists is read rather than written: the insert's conflict clause is only
 /// for two devices opening it at once.
-const _openThread =
+final _openThread =
     '''
 WITH
 _connection AS (
@@ -147,7 +150,7 @@ SELECT $_noThreadItem, NULL, EXISTS (SELECT 1 FROM _open), (SELECT sent FROM _re
 WHERE NOT EXISTS (SELECT 1 FROM _stored)
 ''';
 
-const _listThreads =
+final _listThreads =
     '''
 $_threadAsSeen
 FROM threads t

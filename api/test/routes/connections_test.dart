@@ -252,6 +252,65 @@ void main() {
     });
   });
 
+  group('a coach\'s name for a client', () {
+    void named({Connection? answer}) {
+      when(
+        app.db.nameClient(
+          actorId: anyNamed('actorId'),
+          connectionId: anyNamed('connectionId'),
+          name: anyNamed('name'),
+        ),
+      ).thenAnswer((_) async => answer);
+    }
+
+    final sam = Connection(
+      targetId: 't1',
+      role: .coach,
+      domain: .fitness,
+      status: .active,
+      createdAt: DateTime.utc(2026),
+      connectionId: id,
+      name: 'Sam',
+      namedByYou: true,
+    );
+
+    test('PUT gives one, trimmed, and answers with the connection the write read back', () async {
+      named(answer: sam);
+      final res = await app.send('PUT', '/connections/$id/name', body: {'name': '  Sam  '});
+      expect(res.status, 200);
+      expect(jsonDecode(res.body), containsPair('namedByYou', true));
+      verify(app.db.nameClient(actorId: 'u1', connectionId: id, name: 'Sam')).called(1);
+      verifyNever(app.db.getConnectionById(actorId: anyNamed('actorId'), connectionId: anyNamed('connectionId')));
+    });
+
+    test('DELETE takes it back', () async {
+      named(answer: sam);
+      final res = await app.send('DELETE', '/connections/$id/name');
+      expect(res.status, 200);
+      verify(app.db.nameClient(actorId: 'u1', connectionId: id, name: null)).called(1);
+    });
+
+    test('a name of nothing, or past 100 characters, is a 400 before anything is read', () async {
+      for (final name in ['   ', 'x' * 101, null, 7]) {
+        final res = await app.send('PUT', '/connections/$id/name', body: {'name': name});
+        expect(res.status, 400, reason: '$name');
+      }
+      verifyZeroInteractions(app.db);
+    });
+
+    test('characters count as people see them: 100 emoji are a name', () async {
+      named(answer: sam);
+      final res = await app.send('PUT', '/connections/$id/name', body: {'name': '💪' * 100});
+      expect(res.status, 200);
+    });
+
+    test('one that isn\'t the caller\'s is a 404', () async {
+      named();
+      expect((await app.send('PUT', '/connections/$id/name', body: {'name': 'Sam'})).status, 404);
+      expect((await app.send('DELETE', '/connections/$id/name')).status, 404);
+    });
+  });
+
   test('a share nobody has heard of is refused, naming it, before anything changes', () async {
     final res = await app.send(
       'PUT',

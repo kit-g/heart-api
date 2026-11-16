@@ -1,5 +1,6 @@
 part of 'db.dart';
 
+const _onlyTheCoachNames = 'Only the coach on a connection names its client.';
 const _onlyTheStudentShares = 'Only the student of a live coaching connection chooses what it shares.';
 
 mixin _Connections on _DatabaseBase implements ConnectionsService {
@@ -158,6 +159,22 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
       return 'Only the person you sent this request to can ${to == ConnectionStatus.active ? 'accept' : 'decline'} it.';
     }
     return 'This connection changed while you were acting on it. Fetch it again.';
+  }
+
+  @override
+  Future<Connection?> nameClient({required String actorId, required String connectionId, String? name}) async {
+    final result = await _pool.execute(
+      switch (name) {
+        null => _takeNameBack.toSql(),
+        _ => _giveName.toSql(),
+      },
+      parameters: {'userId': actorId, 'connectionId': connectionId, 'name': ?name},
+    );
+    return switch (result.firstOrNull?.toColumnMap()) {
+      null => null,
+      {'forbidden': true} => throw const Forbidden(reason: _onlyTheCoachNames),
+      final row => Connection.fromRow(row),
+    };
   }
 
   @override

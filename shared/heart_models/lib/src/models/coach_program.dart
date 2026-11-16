@@ -71,9 +71,14 @@ abstract interface class CoachProgramHolder implements Model {
 
   String get studentId;
 
+  /// What the coach calls them: a name the coach gave, or else what they go by
+  /// in Heart.
   String? get studentName;
 
   String? get studentAvatar;
+
+  /// Whether [studentName] is one the coach gave them.
+  bool get studentNamedByYou;
 
   String get programId;
 
@@ -84,6 +89,7 @@ abstract interface class CoachProgramHolder implements Model {
     required String studentId,
     String? studentName,
     String? studentAvatar,
+    bool studentNamedByYou,
     required String programId,
     required int version,
   }) = _CoachProgramHolder.new;
@@ -94,6 +100,7 @@ abstract interface class CoachProgramHolder implements Model {
       studentId: row['student_id'] as String,
       studentName: row['username'] as String?,
       studentAvatar: row['avatar_url'] as String?,
+      studentNamedByYou: row['named_by_you'] == true,
       programId: row['program_id'].toString(),
       version: row['library_version'] as int,
     );
@@ -105,6 +112,7 @@ abstract interface class CoachProgramHolder implements Model {
       studentId: json['studentId'] as String,
       studentName: json['studentName'] as String?,
       studentAvatar: json['studentAvatar'] as String?,
+      studentNamedByYou: json['studentNamedByYou'] == true,
       programId: json['programId'] as String,
       version: (json['version'] as num).toInt(),
     );
@@ -121,6 +129,8 @@ class _CoachProgramHolder implements CoachProgramHolder {
   @override
   final String? studentAvatar;
   @override
+  final bool studentNamedByYou;
+  @override
   final String programId;
   @override
   final int version;
@@ -130,6 +140,7 @@ class _CoachProgramHolder implements CoachProgramHolder {
     required this.studentId,
     this.studentName,
     this.studentAvatar,
+    this.studentNamedByYou = false,
     required this.programId,
     required this.version,
   });
@@ -141,6 +152,7 @@ class _CoachProgramHolder implements CoachProgramHolder {
       'studentId': studentId,
       'studentName': ?studentName,
       'studentAvatar': ?studentAvatar,
+      'studentNamedByYou': studentNamedByYou,
       'programId': programId,
       'version': version,
     };

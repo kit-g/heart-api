@@ -60,6 +60,27 @@ Future<Connection> changeConnectionShares(Request request) async {
   return changed.naming(connection);
 }
 
+/// A coach's own name for the client on this connection, current or former. Only
+/// the coach reads it.
+Future<Connection> nameClient(Request request) async {
+  final input = await ClientNameIn.fromRequest(request);
+  return _nameClient(request, input.name);
+}
+
+/// Back to the invitation's name, or the client's own when there was no
+/// invitation. Either side may: a name given as a coach stays if the roles turn.
+Future<Connection> unnameClient(Request request) => _nameClient(request, null);
+
+Future<Connection> _nameClient(Request request, String? name) async {
+  final connectionId = request.connectionIdInPath;
+  final named = await request.connectionsService.nameClient(
+    actorId: request.userId,
+    connectionId: connectionId,
+    name: name,
+  );
+  return named ?? (throw NotFound(type: 'Connection', id: connectionId));
+}
+
 Future<Connection?> reactToConnection(Request request) async {
   final input = await ConnectionStatusIn.fromRequest(request);
   final connection = await _connectionInPath(request);
@@ -93,6 +114,7 @@ extension on Connection {
       shares: shares,
       name: read.name,
       avatar: read.avatar,
+      namedByYou: read.namedByYou,
     );
   }
 }

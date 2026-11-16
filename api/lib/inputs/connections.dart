@@ -75,6 +75,19 @@ class ConnectionSharesIn {
   }
 }
 
+/// `PUT /connections/:connectionId/name`: what a coach calls this client, as
+/// an invitation's name is bounded.
+class ClientNameIn {
+  final String name;
+
+  const new _(this.name);
+
+  static Future<ClientNameIn> fromRequest(Request req) async {
+    final json = await req.json();
+    return ClientNameIn._(json.personName('name'));
+  }
+}
+
 /// `GET /connections?role=` — filters on the **caller's own** role, so
 /// `?role=COACH` lists the people they coach, not their coaches.
 class ConnectionListQuery {

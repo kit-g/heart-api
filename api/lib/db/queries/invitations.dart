@@ -374,10 +374,12 @@ _response AS (
 SELECT own FROM _invitation
 ''';
 
-const _listBlocks = '''
-SELECT b.blocked_id, b.created_at, p.username, p.avatar_url
+final _listBlocks =
+    '''
+SELECT b.blocked_id, b.created_at, named.name AS username, p.avatar_url
 FROM blocks b
 JOIN profiles p ON p.id = b.blocked_id
+${_named('_given_name(@userId, b.blocked_id)', username: 'p.username')}
 WHERE b.blocker_id = @userId
   AND b.lifted_at IS NULL
   AND (@cursor::text IS NULL OR b.blocked_id < @cursor)

@@ -65,12 +65,17 @@ String _statusSeen(String row, {required String other}) {
 
 /// Who the other side of connection `c` is, for `@userId`: their name and photo as
 /// their profile says now, to someone they asked or who they accepted, never to
-/// someone who only asked them, and never to someone they blocked. Its status is
-/// [_statusSeen] by `@userId`. `c` needs `target_id` (the other person),
-/// `initiator_id`, `status`, `status_by`, `accepted_at` and the rest of a
-/// connection's columns.
-final _connectionOther =
-    '''
+/// someone who only asked them, and never to someone they blocked. A name
+/// `@userId` gave them goes first, on the same terms, so a block still reads as an
+/// ending without a name. Its status is [_statusSeen] by `@userId`. `c` needs
+/// `target_id` (the other person), `initiator_id`, `status`, `status_by`,
+/// `accepted_at` and the rest of a connection's columns.
+final _connectionOther = _connectionOtherNamed('_given_name(@userId, c.target_id)');
+
+/// [_connectionOther], with [given] as the name `@userId` gave: a write that just
+/// changed it says what it is now, which the statement's own reads can't see.
+String _connectionOtherNamed(String given) {
+  return '''
 SELECT
   c.connection_id,
   c.target_id,
@@ -80,7 +85,8 @@ SELECT
   c.created_at,
   c.accepted_at,
   c.shares,
-  nullif(trim(p.username), '') AS username,
+  named.name AS username,
+  coalesce(named.given, false) AS named_by_you,
   p.avatar_url
 FROM _side c
 LEFT JOIN blocks b
@@ -95,7 +101,25 @@ LEFT JOIN profiles p
     OR c.initiator_id = c.target_id
     OR (c.status = 'pending' AND c.status_by = c.target_id)
   )
+${_named(given, username: 'p.username', on: 'p.id IS NOT NULL')}
 ''';
+}
+
+/// What a reader calls someone, as a lateral `named`: `named.name`, the name the
+/// reader gave them ([given], usually [_given_name]) or else [username] when it
+/// has a word in it, and `named.given`, whether it's the reader's. Every read of
+/// someone's name by someone who may have named them goes through this, so they
+/// all agree. Joined [on] a condition: a read that hides the person hides this too,
+/// and both columns are then NULL.
+String _named(String given, {required String username, String on = 'true'}) {
+  return '''
+LEFT JOIN LATERAL (
+  SELECT
+    coalesce(g.name, nullif(trim($username), '')) AS name,
+    g.name IS NOT NULL AS given
+  FROM (SELECT $given AS name) g
+) named ON $on''';
+}
 
 /// Every connection of the caller's, both directions, as [_connectionOther] says it.
 final _listConnections =
@@ -284,4 +308,67 @@ WHERE status = 'active'
     (initiator_id = @userB AND target_id = @userA)
   )
 LIMIT 1
+''';
+
+/// The connection `@connectionId` as `@userId` reads it, once it was accepted: a
+/// name is for someone who was a client, now or before.
+const _namedSide = '''
+_side AS (
+  SELECT
+    id AS connection_id,
+    CASE WHEN initiator_id = @userId THEN target_id ELSE initiator_id END AS target_id,
+    initiator_id,
+    CASE WHEN initiator_id = @userId THEN initiator_role ELSE target_role END AS role,
+    domain,
+    status,
+    status_by,
+    created_at,
+    accepted_at,
+    shares
+  FROM connections
+  WHERE id = @connectionId::uuid
+    AND @userId IN (initiator_id, target_id)
+    AND accepted_at IS NOT NULL
+)''';
+
+/// The coach's own name for the client, and the connection as they then read it.
+/// No row when it isn't theirs; `forbidden` when they aren't its coach. One a block
+/// stands on is written and reads as an ending, as everything else on it does.
+final _giveName =
+    '''
+WITH
+$_namedSide,
+_written AS (
+  INSERT INTO given_names (giver_id, person_id, name)
+  SELECT @userId, target_id, @name::text
+  FROM _side
+  WHERE role = 'COACH'
+  ON CONFLICT (giver_id, person_id) DO UPDATE
+  SET
+    name = EXCLUDED.name,
+    updated_at = now()
+  RETURNING name
+),
+_seen AS (
+  ${_connectionOtherNamed('(SELECT name FROM _written)')}
+)
+SELECT *, NOT EXISTS (SELECT 1 FROM _written) AS forbidden
+FROM _seen
+''';
+
+/// The name back to the invitation's, or the person's own, and the connection as
+/// `@userId` then reads it. Either side may: a name given as a coach stays on the
+/// pair if their roles turn around, and has to be possible to take back.
+final _takeNameBack =
+    '''
+WITH
+$_namedSide,
+_gone AS (
+  DELETE FROM given_names g
+  USING _side s
+  WHERE g.giver_id = @userId
+    AND g.person_id = s.target_id
+  RETURNING 1
+)
+${_connectionOtherNamed('_invited_as(@userId, c.target_id)')}
 ''';

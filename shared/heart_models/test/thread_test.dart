@@ -23,6 +23,13 @@ void main() {
 
     test('Thread round-trips', () => expectRoundTrip(Thread.fromRow(row), Thread.fromJson));
 
+    test('Thread says whether the reader gave the other their name, false when not said', () {
+      final named = Thread.fromRow({...row, 'other_named_by_you': true});
+      expect(named.otherNamedByYou, isTrue);
+      expectRoundTrip(named, Thread.fromJson);
+      expect(Thread.fromJson({...wire(named)}..remove('otherNamedByYou')).otherNamedByYou, isFalse);
+    });
+
     test('ThreadList round-trips, with the unread it adds up', () {
       final list = ThreadList([
         Thread.fromRow(row),

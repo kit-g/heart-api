@@ -53,4 +53,8 @@ abstract interface class RosterService {
 
   /// Whether [userId] coaches: has had a client, or has a library to send from.
   Future<bool> coaches(String userId);
+
+  /// What [coachId] calls [clientId]: a name the coach gave, or else the client's
+  /// own. Null when neither has a word in it.
+  Future<String?> clientName({required String coachId, required String clientId});
 }

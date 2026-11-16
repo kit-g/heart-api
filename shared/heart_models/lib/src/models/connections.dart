@@ -124,14 +124,20 @@ abstract interface class Connection implements Model {
 
   String get targetId;
 
-  /// What the other person goes by in Heart now, as their profile says, on
-  /// `GET /connections` and the answer to a status or shares change. Absent when
-  /// they have none, blocked the reader, or were only asked by the reader and
+  /// What the reader calls the other person: a name the reader gave them
+  /// ([namedByYou]), or else what they go by in Heart now, as their profile says,
+  /// on `GET /connections` and the answer to a change. The profile's is absent
+  /// when they have none, blocked the reader, or were only asked by the reader and
   /// never accepted.
   String? get name;
 
   /// The other person's photo, on the same terms as [name].
   String? get avatar;
+
+  /// Whether [name] is one the reader gave this person (their own, or the one on
+  /// the invitation the person accepted) rather than what the person goes by in
+  /// Heart. Only the one who gave a name ever reads it.
+  bool get namedByYou;
 
   ConnectionRole get role;
 
@@ -152,6 +158,7 @@ abstract interface class Connection implements Model {
     List<String> shares,
     String? name,
     String? avatar,
+    bool namedByYou,
   }) = _Connection.new;
 
   factory fromRow(Map<String, dynamic> row) {
@@ -173,6 +180,7 @@ abstract interface class Connection implements Model {
       },
       name: row['username'] as String?,
       avatar: row['avatar_url'] as String?,
+      namedByYou: row['named_by_you'] == true,
     );
   }
 
@@ -197,6 +205,7 @@ abstract interface class Connection implements Model {
       },
       name: json['name'] as String?,
       avatar: json['avatar'] as String?,
+      namedByYou: json['namedByYou'] == true,
     );
   }
 
@@ -236,6 +245,8 @@ class _Connection implements Connection {
   final String? name;
   @override
   final String? avatar;
+  @override
+  final bool namedByYou;
 
   const new({
     required this.targetId,
@@ -248,6 +259,7 @@ class _Connection implements Connection {
     this.shares = const [],
     this.name,
     this.avatar,
+    this.namedByYou = false,
   });
 
   @override
@@ -268,6 +280,7 @@ class _Connection implements Connection {
       'shares': shares,
       'name': ?name,
       'avatar': ?avatar,
+      if (namedByYou) 'namedByYou': true,
     };
   }
 
@@ -358,6 +371,15 @@ abstract interface class ConnectionsService {
     required ConnectionDomain domain,
     required Set<ConnectionShare> shares,
   });
+
+  /// Gives the client on [connectionId] a name only [actorId] reads, or with a null
+  /// [name] takes it back, so they read as the invitation or their profile names
+  /// them again, and answers with the connection as [actorId] then reads it. The
+  /// name is for the person, not the one connection, so it stays after the
+  /// connection ends. Null when the connection isn't [actorId]'s or was never
+  /// accepted. Giving one throws unless [actorId] is its coach; either side may take
+  /// one back.
+  Future<Connection?> nameClient({required String actorId, required String connectionId, String? name});
 
   /// True if there is any active connection between the two users in any
   /// direction or domain, and no block stands between them.

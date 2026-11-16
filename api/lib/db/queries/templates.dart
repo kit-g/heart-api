@@ -496,19 +496,21 @@ ORDER BY t.order_index, t.id
 LIMIT @limit
 ''';
 
-const _listTemplateShares = '''
+final _listTemplateShares =
+    '''
 SELECT
   ts.id AS id,
   ts.student_id,
   ts.master_template_id,
   ts.student_template_id,
   t.name AS template_name,
-  p.username AS student_username,
+  named.name AS student_username,
   p.avatar_url AS student_avatar,
   ts.created_at
 FROM template_shares ts
 JOIN templates t ON t.id = ts.master_template_id
 JOIN profiles p ON p.id = ts.student_id
+${_named('_given_name(@userId, ts.student_id)', username: 'p.username')}
 WHERE ts.coach_id = @userId
   AND (@cursor::uuid IS NULL OR ts.id < @cursor::uuid)
 ORDER BY ts.id DESC
@@ -530,7 +532,8 @@ LIMIT @limit
 ///
 /// Returns one row per master, plus a `forbidden` flag — the permission check is
 /// per (coach, student), so it is the same on every row.
-const _shareTemplates = '''
+final _shareTemplates =
+    '''
 WITH
 _student AS (
   SELECT id, username, avatar_url
@@ -658,11 +661,12 @@ SELECT
   m.id AS master_template_id,
   COALESCE(ns.student_template_id, ex.student_template_id) AS student_template_id,
   m.name AS template_name,
-  s.username AS student_username,
+  named.name AS student_username,
   s.avatar_url AS student_avatar,
   COALESCE(ns.created_at, ex.created_at) AS created_at,
   NOT EXISTS (SELECT 1 FROM _allowed) AS forbidden
 FROM _student s
+${_named('_given_name(@coachId, s.id)', username: 's.username')}
 CROSS JOIN _master m
 LEFT JOIN _new_share ns ON ns.master_template_id = m.id
 LEFT JOIN _existing ex ON ex.master_template_id = m.id

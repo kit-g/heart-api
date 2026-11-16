@@ -7,9 +7,16 @@ abstract interface class ClientSummary implements Model {
 
   String get studentId;
 
+  /// What the coach calls them: a name the coach gave, or else what they go by
+  /// in Heart.
   String? get name;
 
   String? get avatar;
+
+  /// Whether [name] is one the reader gave this person (their own, or the one on
+  /// the invitation the person accepted) rather than what the person goes by in
+  /// Heart. Only the one who gave a name ever reads it.
+  bool get namedByYou;
 
   /// `active`, `paused`, or `severed` for a former client.
   String get status;
@@ -39,6 +46,7 @@ abstract interface class ClientSummary implements Model {
     required String studentId,
     String? name,
     String? avatar,
+    bool namedByYou,
     required String status,
     DateTime? acceptedAt,
     String? programId,
@@ -57,6 +65,7 @@ abstract interface class ClientSummary implements Model {
       studentId: row['student_id'] as String,
       name: row['username'] as String?,
       avatar: row['avatar_url'] as String?,
+      namedByYou: row['named_by_you'] == true,
       status: row['status'] as String,
       acceptedAt: row['accepted_at'] as DateTime?,
       programId: row['program_id']?.toString(),
@@ -76,6 +85,7 @@ abstract interface class ClientSummary implements Model {
       studentId: json['studentId'] as String,
       name: json['name'] as String?,
       avatar: json['avatar'] as String?,
+      namedByYou: json['namedByYou'] == true,
       status: json['status'] as String,
       acceptedAt: switch (json['acceptedAt']) {
         final String at => DateTime.parse(at),
@@ -106,6 +116,8 @@ class _ClientSummary implements ClientSummary {
   @override
   final String? avatar;
   @override
+  final bool namedByYou;
+  @override
   final String status;
   @override
   final DateTime? acceptedAt;
@@ -131,6 +143,7 @@ class _ClientSummary implements ClientSummary {
     required this.studentId,
     this.name,
     this.avatar,
+    this.namedByYou = false,
     required this.status,
     this.acceptedAt,
     this.programId,
@@ -150,6 +163,7 @@ class _ClientSummary implements ClientSummary {
       'studentId': studentId,
       'name': ?name,
       'avatar': ?avatar,
+      'namedByYou': namedByYou,
       'status': status,
       'acceptedAt': ?acceptedAt?.toIso8601String(),
       'programId': ?programId,
@@ -173,9 +187,16 @@ abstract interface class CoachFeedItem implements Model {
 
   String get studentId;
 
+  /// What the coach calls them: a name the coach gave, or else what they go by
+  /// in Heart.
   String? get name;
 
   String? get avatar;
+
+  /// Whether [name] is one the reader gave this person (their own, or the one on
+  /// the invitation the person accepted) rather than what the person goes by in
+  /// Heart. Only the one who gave a name ever reads it.
+  bool get namedByYou;
 
   DateTime get at;
 
@@ -190,6 +211,7 @@ abstract interface class CoachFeedItem implements Model {
     required String studentId,
     String? name,
     String? avatar,
+    bool namedByYou,
     required DateTime at,
     String? title,
     String? cursor,
@@ -202,6 +224,7 @@ abstract interface class CoachFeedItem implements Model {
       studentId: row['student_id'] as String,
       name: row['username'] as String?,
       avatar: row['avatar_url'] as String?,
+      namedByYou: row['named_by_you'] == true,
       at: row['at'] as DateTime,
       title: row['title'] as String?,
       cursor: cursor,
@@ -217,6 +240,7 @@ abstract interface class CoachFeedItem implements Model {
       studentId: json['studentId'] as String,
       name: json['name'] as String?,
       avatar: json['avatar'] as String?,
+      namedByYou: json['namedByYou'] == true,
       at: DateTime.parse(json['at'] as String),
       title: json['title'] as String?,
     );
@@ -235,6 +259,8 @@ class _CoachFeedItem implements CoachFeedItem {
   @override
   final String? avatar;
   @override
+  final bool namedByYou;
+  @override
   final DateTime at;
   @override
   final String? title;
@@ -247,6 +273,7 @@ class _CoachFeedItem implements CoachFeedItem {
     required this.studentId,
     this.name,
     this.avatar,
+    this.namedByYou = false,
     required this.at,
     this.title,
     this.cursor,
@@ -260,6 +287,7 @@ class _CoachFeedItem implements CoachFeedItem {
       'studentId': studentId,
       'name': ?name,
       'avatar': ?avatar,
+      'namedByYou': namedByYou,
       'at': at.toIso8601String(),
       'title': ?title,
     };

@@ -1944,7 +1944,7 @@ void main() {
     setUp(() {
       connect(['read', 'read:coaching']);
       when(app.db.coaches('u1')).thenAnswer((_) async => true);
-      when(app.db.getProfile(client)).thenAnswer((_) async => User(id: client, displayName: 'Alex'));
+      when(app.db.clientName(coachId: 'u1', clientId: client)).thenAnswer((_) async => 'Alex');
       when(app.db.getExercises(client, owned: true)).thenAnswer(
         (_) async => {
           'exercises': [
@@ -2182,7 +2182,7 @@ void main() {
 
       expect(result['isError'], isTrue);
       expect(text(result), contains('list_clients'));
-      verifyNever(app.db.getProfile(client));
+      verifyNever(app.db.clientName(coachId: anyNamed('coachId'), clientId: anyNamed('clientId')));
     });
 
     test("a program's sessions are quoted as the client's, what the coach sent included", () async {

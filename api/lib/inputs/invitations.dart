@@ -13,10 +13,7 @@ class InvitationCreateIn {
 
   static Future<InvitationCreateIn> fromRequest(Request req) async {
     final json = await req.json();
-    final name = json.string('name').trim();
-    if (name.isEmpty || name.length > 100) {
-      throw const BadRequest(reason: 'name must be between 1 and 100 characters');
-    }
+    final name = json.personName('name');
     return InvitationCreateIn._(
       name: name,
       domain: switch (json['domain']) {
