@@ -87,6 +87,38 @@ void main() {
       expect(read.sessions.single.id, session);
       expect(read.position['week'], 1);
       expect(read.position['next'], session);
+      expect([...read.actions, ...read.bases, ...read.marks], isEmpty);
+    });
+
+    test('CoachProgramView carries what the student plans from, and an older answer reads as none', () {
+      final planned = CoachProgramView(
+        program: copy,
+        sessions: view.sessions,
+        position: view.position,
+        actions: [ProgramAction(id: 'a1', kind: .repeat, at: later)],
+        bases: [ProgramBase(id: 'b1', exerciseId: 'e1', slot: 's1', value: 82.5, at: later)],
+        marks: [
+          ProgramMark(templateId: session, at: later, isWorkout: true),
+          ProgramMark(templateId: null, at: later, isWorkout: false),
+        ],
+      );
+      expectRoundTrip(planned, CoachProgramView.fromJson);
+      final read = CoachProgramView.fromJson(wire(planned));
+      expect(read.actions.single.kind, ProgramActionKind.repeat);
+      expect((read.bases.single.slot, read.bases.single.value), ('s1', 82.5));
+      expect(
+        [for (final mark in read.marks) (mark.templateId, mark.at, mark.isWorkout)],
+        [
+          (session, later, true),
+          (null, later, false),
+        ],
+      );
+
+      final older = wire(view)
+        ..remove('actions')
+        ..remove('bases')
+        ..remove('marks');
+      expect(CoachProgramView.fromJson(older).marks, isEmpty);
     });
   });
 }
