@@ -152,15 +152,17 @@ Future<CoachProgramView> copyView(
   required String programId,
   bool assistant = false,
 }) async {
-  final (:program, :sessions, :position, :read) = await copyState(
+  final (:read, :position) = await copyState(
     req,
     student: student,
     programId: programId,
     assistant: assistant,
+    // an assistant plans no session
+    withBases: !assistant,
   );
   return CoachProgramView(
-    program: program,
-    sessions: sessions,
+    program: read.program,
+    sessions: read.sessions,
     position: position.toMap(),
     actions: read.actions.toList(),
     bases: read.bases.toList(),
@@ -170,17 +172,20 @@ Future<CoachProgramView> copyView(
 
 /// A copy the coach sent, read in one snapshot, and where the student stands in
 /// it as far as the coach can read.
-Future<({Program program, List<Template> sessions, ProgramPosition position, CopyRead read})> copyState(
+/// With [withBases], the bases too, which only planning a session needs.
+Future<({CopyRead read, ProgramPosition position})> copyState(
   Request req, {
   required String student,
   required String programId,
   bool assistant = false,
+  bool withBases = false,
 }) async {
   final read = await req.programChangeService.readCopy(
     coachId: req.userId,
     studentId: student,
     programId: programId,
     assistant: assistant,
+    withBases: withBases,
     // an assistant's host says nothing about the coach's language
     locale: switch (assistant) {
       true => null,
@@ -188,10 +193,8 @@ Future<({Program program, List<Template> sessions, ProgramPosition position, Cop
     },
   );
   return (
-    program: read.program,
-    sessions: read.sessions,
-    position: ProgramPosition.of(read.program, marks: read.marks, actions: read.actions, now: DateTime.timestamp()),
     read: read,
+    position: ProgramPosition.of(read.program, marks: read.marks, actions: read.actions, now: DateTime.timestamp()),
   );
 }
 

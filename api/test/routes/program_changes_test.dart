@@ -467,6 +467,7 @@ void main() {
           coachId: anyNamed('coachId'),
           studentId: anyNamed('studentId'),
           programId: anyNamed('programId'),
+          withBases: anyNamed('withBases'),
         ),
       ).thenAnswer(
         (_) async => (
@@ -489,7 +490,9 @@ void main() {
       expect(view.actions.single.id, action);
       expect((view.bases.single.exerciseId, view.bases.single.slot, view.bases.single.value), (exercise, slot, 80));
       expect((view.marks.single.templateId, view.marks.single.isWorkout), (session, true));
-      verify(app.db.readCopy(locale: anyNamed('locale'), coachId: 'u1', studentId: 's', programId: program)).called(1);
+      verify(
+        app.db.readCopy(locale: anyNamed('locale'), coachId: 'u1', studentId: 's', programId: program, withBases: true),
+      ).called(1);
       verifyNever(app.db.getProgramMarks(userId: anyNamed('userId'), programId: anyNamed('programId')));
     });
 
@@ -500,6 +503,7 @@ void main() {
           coachId: anyNamed('coachId'),
           studentId: anyNamed('studentId'),
           programId: anyNamed('programId'),
+          withBases: anyNamed('withBases'),
         ),
       ).thenThrow(const Forbidden(reason: 'no'));
 

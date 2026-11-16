@@ -941,7 +941,8 @@ void main() {
       await base(110, workout: hidden);
       await base(90, action: hiddenStage);
 
-      Future<CopyRead> read() => h.db.readCopy(coachId: c.coach, studentId: c.student, programId: c.program);
+      Future<CopyRead> read() =>
+          h.db.readCopy(coachId: c.coach, studentId: c.student, programId: c.program, withBases: true);
       var copy = await read();
       expect(copy.bases.map((b) => b.value), [100, 105, 110, 90]);
       expect(copy.bases.first.slot, c.sessions.first, reason: 'with their slots');
@@ -956,6 +957,59 @@ void main() {
 
       final own = await h.db.getProgramBases(userId: c.student, programId: c.program);
       expect(own.map((b) => b.value), [100, 105, 110, 90], reason: 'the student still plans from all of them');
+
+      expect(
+        (await h.db.readCopy(coachId: c.coach, studentId: c.student, programId: c.program)).bases,
+        isEmpty,
+        reason: 'bases only when asked for',
+      );
+    });
+
+    test('nothing dated in a pause, or before what the coach reads from', () async {
+      final c = await sent();
+      final exercise = await h.seedGlobalExercise();
+      final connection = c.connection;
+      Future<void> at(String when) async {
+        await h.exec(
+          '''
+          INSERT INTO program_actions (user_id, program_id, kind, at) VALUES (@u, @p::uuid, 'repeat', @at::timestamptz);
+          ''',
+          {'u': c.student, 'p': c.program, 'at': when},
+        );
+        await h.exec(
+          '''
+          INSERT INTO program_bases (user_id, program_id, exercise_id, value, at)
+          VALUES (@u, @p::uuid, @e::uuid, 100, @at::timestamptz)
+          ''',
+          {'u': c.student, 'p': c.program, 'e': exercise, 'at': when},
+        );
+        await h.exec(
+          'INSERT INTO skips (user_id, program_id, template_id, at) VALUES (@u, @p::uuid, @t::uuid, @at::timestamptz)',
+          {'u': c.student, 'p': c.program, 't': c.sessions.first, 'at': when},
+        );
+      }
+
+      await h.exec(
+        '''
+        INSERT INTO connection_events (connection_id, status, actor_id, at)
+        VALUES (@c::uuid, 'paused', @s, '2026-03-01Z'), (@c::uuid, 'active', @s, '2026-04-01Z')
+        ''',
+        {'c': connection, 's': c.student},
+      );
+      await at('2019-06-01Z'); // before accepting, and no history shared
+      await at('2026-03-15Z'); // paused
+      await at('2026-05-01Z'); // read
+
+      final copy = await h.db.readCopy(coachId: c.coach, studentId: c.student, programId: c.program, withBases: true);
+      expect(copy.actions.map((a) => a.at), [DateTime.utc(2026, 5)]);
+      expect(copy.bases.map((b) => b.at), [DateTime.utc(2026, 5)]);
+      expect(copy.marks.map((m) => m.at), [DateTime.utc(2026, 5)]);
+
+      await expectLater(
+        h.db.readCopy(coachId: c.coach, studentId: c.student, programId: c.program, assistant: true, withBases: true),
+        throwsA(isA<Forbidden>()),
+        reason: 'an assistant the student shares nothing with reads nothing',
+      );
     });
   });
 

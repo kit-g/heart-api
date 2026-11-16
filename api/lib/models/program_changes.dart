@@ -96,13 +96,15 @@ abstract interface class ProgramChangeService {
   /// [NotFound] unless they sent it, [Forbidden] without a coach's view of the
   /// student. With [assistant], what the coach's assistant reads: only while the
   /// student shares it with the assistant. [locale] names its sessions' library
-  /// exercises, as `ApiWorkoutService` does. Its steps, bases and marks are what
-  /// the reader may see: a workout they can't read moves none of them.
+  /// exercises, as `ApiWorkoutService` does. Its steps, marks and, [withBases],
+  /// bases are what the reader may see: nothing dated in a pause or before what
+  /// they read from, and nothing a workout they can't read moved.
   Future<CopyRead> readCopy({
     required String coachId,
     required String studentId,
     required String programId,
     bool assistant = false,
+    bool withBases = false,
     String? locale,
   });
 
