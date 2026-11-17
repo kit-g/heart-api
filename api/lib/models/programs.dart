@@ -58,9 +58,8 @@ abstract interface class ProgramService {
   /// Every base of the program, oldest first.
   Future<Iterable<ProgramBase>> getProgramBases({required String userId, required String programId});
 
-  /// Idempotent on the base's id, and on its exercise and workout together. Only the
-  /// owner writes a base: a workout someone logged for them moves theirs on their own
-  /// device.
+  /// Idempotent on the base's id, and on its exercise, slot and workout together. Only
+  /// [userId] writes their own bases.
   Future<(ProgramBase, bool created)> createProgramBase({
     required String userId,
     required String programId,

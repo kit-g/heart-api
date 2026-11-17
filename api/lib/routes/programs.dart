@@ -90,15 +90,11 @@ Future<ProgramBasesResponse> getProgramBases(Request req) async {
   return ProgramBasesResponse(bases: bases);
 }
 
-Future<Model> createProgramBase(Request req) {
-  return createProgramBaseFor(req, req.rawPathParameters[#programId]!);
-}
-
-Future<Model> createProgramBaseFor(Request req, String programId) async {
+Future<Model> createProgramBase(Request req) async {
   final input = await ProgramBaseIn.fromRequest(req);
   final (base, isNew) = await req.programService.createProgramBase(
     userId: req.userId,
-    programId: programId,
+    programId: req.rawPathParameters[#programId]!,
     base: input.base,
   );
   if (isNew) return Created(base);

@@ -436,8 +436,7 @@ Future<void> _assertCanLog(Request req, String student) async {
 
 /// A workout entered in person. It's the student's, and says who entered it. A
 /// coach's custom exercise reaches the student as sending a program does, so nothing
-/// is dropped. Moving a base is the device's job, as with any workout: it posts that
-/// to the route below.
+/// is dropped. No base moves here: the student's own device moves theirs.
 Future<Model> logWorkoutFor(Request req) => logWorkoutForStudent(req, req.rawPathParameters[#targetUserId]!);
 
 Future<Model> logWorkoutForStudent(Request req, String student) async {

@@ -286,7 +286,7 @@ WHERE program_id = @programId::uuid
 ORDER BY at, id
 ''';
 
-// Idempotent twice over: on the id, and on (exercise, workout), so a second
+// Idempotent twice over: on the id, and on (exercise, slot, workout), so a second
 // device replaying the same bump gets the first one back. The exercise must be
 // one the caller can see and the workout one they own; when either isn't, or
 // the program is full, nothing is written and the db layer tells which.

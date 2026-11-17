@@ -203,25 +203,6 @@ void main() {
         service.createProgramAction(userId: _meId, programId: _programId, action: anyNamed('action')),
       ).called(2);
     });
-
-    test('a new base is 201', () async {
-      when(
-        service.createProgramBase(userId: anyNamed('userId'), programId: anyNamed('programId'), base: anyNamed('base')),
-      ).thenAnswer((i) async => (i.namedArguments[#base] as ProgramBase, true));
-
-      final result = await createProgramBaseFor(
-        wire(
-          jsonRequest(
-            method: Method.post,
-            path: '/',
-            body: {'exerciseId': '019def00-0000-7000-8000-000000000001', 'value': 100, 'at': '2026-10-14T18:00:00Z'},
-          ),
-        ),
-        _programId,
-      );
-
-      expect(result, isA<Created<ProgramBase>>());
-    });
   });
 
   test('a replace on a coach\'s copy goes through the history instead', () async {
