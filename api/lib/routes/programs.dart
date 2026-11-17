@@ -90,19 +90,12 @@ Future<ProgramBasesResponse> getProgramBases(Request req) async {
   return ProgramBasesResponse(bases: bases);
 }
 
-Future<Model> createProgramBase(Request req) {
-  return createProgramBaseFor(req, req.rawPathParameters[#programId]!);
-}
-
-/// A base of [userId]'s program, the caller's own by default. A coach writing for a
-/// client passes [loggedBy].
-Future<Model> createProgramBaseFor(Request req, String programId, {String? userId, String? loggedBy}) async {
+Future<Model> createProgramBase(Request req) async {
   final input = await ProgramBaseIn.fromRequest(req);
   final (base, isNew) = await req.programService.createProgramBase(
-    userId: userId ?? req.userId,
-    programId: programId,
+    userId: req.userId,
+    programId: req.rawPathParameters[#programId]!,
     base: input.base,
-    loggedBy: loggedBy,
   );
   if (isNew) return Created(base);
   return base;

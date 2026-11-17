@@ -13,7 +13,6 @@ import 'package:heart/models/programs.dart';
 import 'package:heart/models/workouts.dart';
 import 'package:heart/notifications/topics.dart';
 import 'package:heart/routes/coach_library.dart';
-import 'package:heart/routes/programs.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:relic/relic.dart';
@@ -437,8 +436,7 @@ Future<void> _assertCanLog(Request req, String student) async {
 
 /// A workout entered in person. It's the student's, and says who entered it. A
 /// coach's custom exercise reaches the student as sending a program does, so nothing
-/// is dropped. Moving a base is the device's job, as with any workout: it posts that
-/// to the route below.
+/// is dropped. No base moves here: the student's own device moves theirs.
 Future<Model> logWorkoutFor(Request req) => logWorkoutForStudent(req, req.rawPathParameters[#targetUserId]!);
 
 Future<Model> logWorkoutForStudent(Request req, String student) async {
@@ -472,17 +470,6 @@ Future<Model> logWorkoutForStudent(Request req, String student) async {
     imageUrl: req.config.cdnAssetUrl,
     locale: req.contentLocale,
   );
-}
-
-/// The base a workout the coach logged moved, worked out on their device. The
-/// student's app is told, so it plans from the new base.
-Future<Model> moveBaseFor(Request req) async {
-  final student = req.rawPathParameters[#targetUserId]!;
-  final programId = req.rawPathParameters[#programId]!;
-  await _assertCanWrite(req, student, programId);
-  final base = await createProgramBaseFor(req, programId, userId: student, loggedBy: req.userId);
-  await _tellOtherSide(req, programId);
-  return base;
 }
 
 Future<Model> savePlanFor(Request req) async {

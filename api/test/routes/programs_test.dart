@@ -203,25 +203,6 @@ void main() {
         service.createProgramAction(userId: _meId, programId: _programId, action: anyNamed('action')),
       ).called(2);
     });
-
-    test('a new base is 201', () async {
-      when(
-        service.createProgramBase(userId: anyNamed('userId'), programId: anyNamed('programId'), base: anyNamed('base')),
-      ).thenAnswer((i) async => (i.namedArguments[#base] as ProgramBase, true));
-
-      final result = await createProgramBaseFor(
-        wire(
-          jsonRequest(
-            method: Method.post,
-            path: '/',
-            body: {'exerciseId': '019def00-0000-7000-8000-000000000001', 'value': 100, 'at': '2026-10-14T18:00:00Z'},
-          ),
-        ),
-        _programId,
-      );
-
-      expect(result, isA<Created<ProgramBase>>());
-    });
   });
 
   test('a replace on a coach\'s copy goes through the history instead', () async {
@@ -316,13 +297,12 @@ void main() {
       verify(app.db.getProgramBases(userId: _meId, programId: _programId)).called(1);
     });
 
-    test('a new base is the caller\'s own, logged by nobody else, 201', () async {
+    test('a new base is the caller\'s own, 201', () async {
       when(
         app.db.createProgramBase(
           userId: anyNamed('userId'),
           programId: anyNamed('programId'),
           base: anyNamed('base'),
-          loggedBy: anyNamed('loggedBy'),
         ),
       ).thenAnswer((i) async => (i.namedArguments[#base] as ProgramBase, true));
 
@@ -334,7 +314,7 @@ void main() {
 
       expect(res.status, 201);
       verify(
-        app.db.createProgramBase(userId: _meId, programId: _programId, base: anyNamed('base'), loggedBy: null),
+        app.db.createProgramBase(userId: _meId, programId: _programId, base: anyNamed('base')),
       ).called(1);
     });
 

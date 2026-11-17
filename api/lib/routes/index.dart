@@ -52,7 +52,6 @@ final routes = <(String, Method), ModelHandler>{
   ('/accounts/:targetUserId/programs/:programId/sessions/:sessionId', .put): changes.updateCopySession,
   ('/accounts/:targetUserId/programs/:programId/sessions/:sessionId', .delete): changes.deleteCopySession,
   ('/accounts/:targetUserId/workouts', .post): changes.logWorkoutFor,
-  ('/accounts/:targetUserId/programs/:programId/bases', .post): changes.moveBaseFor,
   ('/accounts/:targetUserId/workouts/:workoutId/plan', .get): changes.getTargetWorkoutPlan,
   ('/accounts/:targetUserId/workouts/:workoutId/plan', .put): changes.savePlanFor,
   ('/accounts/:targetUserId/goals', .get): goals.getTargetUserGoals,
