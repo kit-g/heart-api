@@ -316,13 +316,12 @@ void main() {
       verify(app.db.getProgramBases(userId: _meId, programId: _programId)).called(1);
     });
 
-    test('a new base is the caller\'s own, logged by nobody else, 201', () async {
+    test('a new base is the caller\'s own, 201', () async {
       when(
         app.db.createProgramBase(
           userId: anyNamed('userId'),
           programId: anyNamed('programId'),
           base: anyNamed('base'),
-          loggedBy: anyNamed('loggedBy'),
         ),
       ).thenAnswer((i) async => (i.namedArguments[#base] as ProgramBase, true));
 
@@ -334,7 +333,7 @@ void main() {
 
       expect(res.status, 201);
       verify(
-        app.db.createProgramBase(userId: _meId, programId: _programId, base: anyNamed('base'), loggedBy: null),
+        app.db.createProgramBase(userId: _meId, programId: _programId, base: anyNamed('base')),
       ).called(1);
     });
 
