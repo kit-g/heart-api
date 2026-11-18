@@ -142,18 +142,19 @@
                     <img src="assets/google_play_button.svg" alt="Get it on Google Play" class="h-10 w-auto"/>
                 </a>
             </div>
-            <!-- For a visitor at a computer: the phone scans this and lands in its own
-                 store (get.html). A heart-shaped code from a QR design tool, run through
-                 svgo; only the diamond in its middle is the code, so it reads reliably
-                 from 240px up. Re-export it there if the address ever changes. -->
-            <div class="desktop-only items-center gap-4 animate-fade-in animate-delay-200">
+            <!-- Scanned from a computer screen, or from a phone shown to a friend: either
+                 way the scanning phone lands in its own store (get.html). A heart-shaped
+                 code from a QR design tool, run through svgo; only the diamond in its
+                 middle is the code, so it reads reliably from 240px up. Re-export it there
+                 if the address ever changes. -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 animate-fade-in animate-delay-200">
                 <a href="get.html" class="shrink-0">
                     <img src="assets/get-app-qr.svg" width="256" height="256" loading="lazy" decoding="async"
                          alt="QR code for heart-of.me/get.html, which opens the app's store page"
                          class="block size-64"/>
                 </a>
                 <p class="text-sm text-muted max-w-[14rem]">
-                    On your computer? Scan with your phone's camera to get the app.
+                    Scan with a phone's camera to get the app.
                 </p>
             </div>
         </div>
