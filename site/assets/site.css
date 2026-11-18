@@ -140,6 +140,18 @@ body {
     }
 }
 
+/* For a visitor at a computer: wide enough, and a mouse rather than a finger,
+   so a tablet in landscape (where the reader holds the phone) stays out. */
+.desktop-only {
+    display: none;
+}
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+    .desktop-only {
+        display: flex;
+    }
+}
+
 /* Utility classes must not resurrect an element the hidden attribute removed. */
 [hidden] {
     display: none !important;
