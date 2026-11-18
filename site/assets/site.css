@@ -99,7 +99,10 @@ body {
     white-space: nowrap;
 }
 
-/* Entrance motion. The system is silent on motion; keep it short and honest. */
+/* Entrance motion. The system is silent on motion; keep it short and honest.
+   The fill mode holds the first frame through the delay, so the markup needs no
+   opacity-0 of its own, which (loaded later, in tailwind.css) would outrank the
+   reduced-motion rule below and leave the element invisible. */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -112,7 +115,7 @@ body {
 }
 
 .animate-fade-in {
-    animation: fadeIn 0.8s ease-out forwards;
+    animation: fadeIn 0.8s ease-out both;
 }
 
 .animate-delay-100 {
@@ -134,7 +137,6 @@ body {
 @media (prefers-reduced-motion: reduce) {
     .animate-fade-in {
         animation: none;
-        opacity: 1;
     }
 }
 
