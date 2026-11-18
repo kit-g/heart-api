@@ -120,7 +120,7 @@
     <div class="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         <!-- Text Content -->
         <div class="flex flex-col gap-8 text-left max-w-xl mx-auto lg:mx-0 order-2 lg:order-1">
-            <div class="flex flex-col gap-5 animate-fade-in opacity-0">
+            <div class="flex flex-col gap-5 animate-fade-in">
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-fill w-fit self-start">
                     <span class="material-symbols-outlined text-accent-ink text-[18px]">fitness_center</span>
                     <span class="text-xs font-semibold text-accent-ink uppercase tracking-wider">For a stronger you</span>
@@ -128,11 +128,11 @@
                 <h1 class="font-title text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] text-ink">
                     Fitness tracking that <span class="text-accent-ink">stays with you</span>.
                 </h1>
-                <p class="text-lg text-muted leading-relaxed max-w-md animate-fade-in opacity-0 animate-delay-100">
+                <p class="text-lg text-muted leading-relaxed max-w-md animate-fade-in animate-delay-100">
                     Your data is yours forever. Just keep going to the gym.
                 </p>
             </div>
-            <div class="flex flex-wrap gap-4 pt-2 animate-fade-in opacity-0 animate-delay-200" id="download">
+            <div class="flex flex-wrap justify-center sm:justify-start gap-4 pt-2 animate-fade-in animate-delay-200" id="download">
                 <a href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener"
                    class="inline-block hover:opacity-90 transition-opacity">
                     <img src="assets/appstore_button.svg" alt="Download on the App Store" class="h-10 w-auto"/>
@@ -142,9 +142,24 @@
                     <img src="assets/google_play_button.svg" alt="Get it on Google Play" class="h-10 w-auto"/>
                 </a>
             </div>
+            <!-- Scanned from a computer screen, or from a phone shown to a friend: either
+                 way the scanning phone lands in its own store (get.html). A heart-shaped
+                 code from a QR design tool, run through svgo; only the diamond in its
+                 middle is the code, so it reads reliably from 240px up. Re-export it there
+                 if the address ever changes. -->
+            <div class="flex flex-col sm:flex-row items-center gap-1 sm:gap-4 animate-fade-in animate-delay-200">
+                <a href="get.html" class="shrink-0">
+                    <img src="assets/get-app-qr.svg" width="256" height="256" loading="lazy" decoding="async"
+                         alt="QR code for heart-of.me/get.html, which opens the app's store page"
+                         class="block size-64"/>
+                </a>
+                <p class="text-sm text-muted text-center sm:text-left max-w-[14rem]">
+                    Scan with a phone's camera to get the app.
+                </p>
+            </div>
         </div>
         <!-- Visual Hero -->
-        <div class="relative flex justify-center lg:justify-end order-1 lg:order-2 animate-fade-in opacity-0 animate-delay-300">
+        <div class="relative flex justify-center lg:justify-end order-1 lg:order-2 animate-fade-in animate-delay-300">
             <!-- Phone mockup: a device, so it keeps its bezel radius; separated by a border, not a shadow. -->
             <div class="relative bg-[#1A1815] rounded-[2.5rem] p-3 border max-w-[320px] w-full aspect-[9/19] overflow-hidden">
                 <img src="assets/screens/hero-dashboard.webp" width="640" height="1391" fetchpriority="high"
