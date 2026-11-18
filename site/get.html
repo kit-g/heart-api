@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="robots" content="noindex"/>
+    <title>Get the app - Heart of Yours</title>
+    <!-- Where the QR code on the home page points: a phone goes straight to its
+         own store, the same way site.js tells the platforms apart. Anything
+         else (or no script) stays here and gets both badges. -->
+    <script>
+        (() => {
+            const ua = navigator.userAgent;
+            if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) {
+                location.replace("https://apps.apple.com/app/id6777837444");
+            } else if (/Android/.test(ua)) {
+                location.replace("https://play.google.com/store/apps/details?id=me.heart.android&referrer=utm_source%3Dsite%26utm_campaign%3Dqr");
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="assets/tokens.css">
+    <link rel="stylesheet" href="assets/site.css">
+    <link rel="stylesheet" href="assets/tailwind.css">
+</head>
+<body class="bg-ground text-ink font-text min-h-screen flex flex-col overflow-x-hidden">
+<main class="flex-grow w-full max-w-md mx-auto px-6 py-12 flex flex-col items-center justify-center gap-8 text-center">
+    <h1 class="font-title text-3xl font-semibold tracking-tight">Get Heart of Yours</h1>
+    <section class="flex flex-wrap justify-center gap-4" aria-label="Get the app">
+        <a href="https://apps.apple.com/app/id6777837444" class="inline-block hover:opacity-90 transition-opacity">
+            <img src="assets/appstore_button.svg" alt="Download on the App Store" class="h-12 w-auto"/>
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=me.heart.android&referrer=utm_source%3Dsite%26utm_campaign%3Dqr"
+           class="inline-block hover:opacity-90 transition-opacity">
+            <img src="assets/google_play_button.svg" alt="Get it on Google Play" class="h-12 w-auto"/>
+        </a>
+    </section>
+    <a href="index.html" class="text-sm font-medium text-muted hover:text-accent-ink transition-colors">heart-of.me</a>
+</main>
+</body>
+</html>

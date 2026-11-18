@@ -142,6 +142,18 @@
                     <img src="assets/google_play_button.svg" alt="Get it on Google Play" class="h-10 w-auto"/>
                 </a>
             </div>
+            <!-- For a visitor at a computer: the phone scans this and lands in its own
+                 store (get.html). Hidden where the page is itself on a phone or tablet.
+                 Always dark on white, which every scanner reads, so it sits on a white
+                 tile in either theme. -->
+            <div class="hidden lg:flex items-center gap-4 animate-fade-in opacity-0 animate-delay-200">
+                <img src="assets/get-app-qr.svg" width="96" height="96"
+                     alt="QR code linking to heart-of.me/get.html"
+                     class="size-24 rounded bg-white border"/>
+                <p class="text-sm text-muted max-w-[14rem]">
+                    On your computer? Scan with your phone's camera to get the app.
+                </p>
+            </div>
         </div>
         <!-- Visual Hero -->
         <div class="relative flex justify-center lg:justify-end order-1 lg:order-2 animate-fade-in opacity-0 animate-delay-300">
