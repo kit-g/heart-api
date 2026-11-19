@@ -1,24 +1,27 @@
 BEGIN;
 
-CREATE OR REPLACE FUNCTION test__stamp_program_history_signature() RETURNS SETOF TEXT AS
+CREATE OR REPLACE FUNCTION test__stamp_program_histories_signature() RETURNS SETOF TEXT AS
 $$
 BEGIN
-    RETURN NEXT has_function('public'::name, '_stamp_program_history'::name);
-    RETURN NEXT function_lang_is('public'::name, '_stamp_program_history'::name, 'plpgsql'::name);
-    RETURN NEXT function_returns('public'::name, '_stamp_program_history'::name, 'trigger');
+    RETURN NEXT has_function('public'::name, '_stamp_program_histories_by_program_id'::name);
+    RETURN NEXT function_lang_is('public'::name, '_stamp_program_histories_by_program_id'::name, 'plpgsql'::name);
+    RETURN NEXT function_returns('public'::name, '_stamp_program_histories_by_program_id'::name, 'trigger');
     RETURN NEXT has_function('public'::name, '_stamp_program_histories'::name, ARRAY ['uuid[]']);
     RETURN NEXT function_lang_is('public'::name, '_stamp_program_histories'::name, ARRAY ['uuid[]'], 'sql'::name);
     RETURN NEXT function_returns('public'::name, '_stamp_program_histories'::name, ARRAY ['uuid[]'], 'void');
-    RETURN NEXT trigger_is('public'::name, 'program_actions'::name, 'program_actions_stamp_insert'::name, 'public'::name, '_stamp_program_history'::name);
-    RETURN NEXT trigger_is('public'::name, 'program_actions'::name, 'program_actions_stamp_update'::name, 'public'::name, '_stamp_program_history'::name);
-    RETURN NEXT trigger_is('public'::name, 'program_actions'::name, 'program_actions_stamp_delete'::name, 'public'::name, '_stamp_program_history'::name);
-    RETURN NEXT trigger_is('public'::name, 'program_bases'::name, 'program_bases_stamp_insert'::name, 'public'::name, '_stamp_program_history'::name);
-    RETURN NEXT trigger_is('public'::name, 'program_bases'::name, 'program_bases_stamp_update'::name, 'public'::name, '_stamp_program_history'::name);
-    RETURN NEXT trigger_is('public'::name, 'program_bases'::name, 'program_bases_stamp_delete'::name, 'public'::name, '_stamp_program_history'::name);
+    RETURN NEXT has_function('public'::name, '_stamp_program_histories_by_id'::name);
+    RETURN NEXT function_returns('public'::name, '_stamp_program_histories_by_id'::name, 'trigger');
+    RETURN NEXT trigger_is('public'::name, 'programs'::name, 'programs_stamp_history'::name, 'public'::name, '_stamp_program_histories_by_id'::name);
+    RETURN NEXT trigger_is('public'::name, 'program_actions'::name, 'program_actions_stamp_insert'::name, 'public'::name, '_stamp_program_histories_by_program_id'::name);
+    RETURN NEXT trigger_is('public'::name, 'program_actions'::name, 'program_actions_stamp_update'::name, 'public'::name, '_stamp_program_histories_by_program_id'::name);
+    RETURN NEXT trigger_is('public'::name, 'program_actions'::name, 'program_actions_stamp_delete'::name, 'public'::name, '_stamp_program_histories_by_program_id'::name);
+    RETURN NEXT trigger_is('public'::name, 'program_bases'::name, 'program_bases_stamp_insert'::name, 'public'::name, '_stamp_program_histories_by_program_id'::name);
+    RETURN NEXT trigger_is('public'::name, 'program_bases'::name, 'program_bases_stamp_update'::name, 'public'::name, '_stamp_program_histories_by_program_id'::name);
+    RETURN NEXT trigger_is('public'::name, 'program_bases'::name, 'program_bases_stamp_delete'::name, 'public'::name, '_stamp_program_histories_by_program_id'::name);
 END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION test__stamp_program_history_follows_steps_and_bases() RETURNS SETOF TEXT AS
+CREATE OR REPLACE FUNCTION test__stamp_program_histories_follows_steps_and_bases() RETURNS SETOF TEXT AS
 $$
 DECLARE
     _user_id     TEXT;
@@ -36,10 +39,11 @@ BEGIN
     INSERT INTO programs (user_id, name) VALUES (_user_id, 'other') RETURNING id INTO _other_id;
     _exercise_id := create_test_exercise(_user_id => _user_id);
     RETURN NEXT is(
-            (SELECT count(*) FROM program_histories WHERE user_id = _user_id),
-            0::bigint,
-            'a program with no history has no row'
+            (SELECT changed_xid FROM program_histories WHERE program_id = _program_id),
+            pg_current_xact_id(),
+            'a program created stamps itself'
         );
+    UPDATE program_histories SET changed_xid = '1' WHERE user_id = _user_id;
 
     INSERT INTO program_actions (user_id, program_id, kind, at)
     VALUES (_user_id, _program_id, 'pause', now())
@@ -50,8 +54,8 @@ BEGIN
             'a step stamps its program'
         );
     RETURN NEXT is(
-            (SELECT count(*) FROM program_histories WHERE program_id = _other_id),
-            0::bigint,
+            (SELECT changed_xid FROM program_histories WHERE program_id = _other_id),
+            '1'::xid8,
             'and no other'
         );
 
@@ -81,6 +85,20 @@ BEGIN
             'and a base removed'
         );
 
+    UPDATE program_histories SET changed_xid = '1' WHERE user_id = _user_id;
+    UPDATE program_actions SET program_id = _other_id WHERE id = _action_id;
+    RETURN NEXT is(
+            (SELECT changed_xid FROM program_histories WHERE program_id = _program_id),
+            pg_current_xact_id(),
+            'a step moved away stamps the program it left'
+        );
+    RETURN NEXT is(
+            (SELECT changed_xid FROM program_histories WHERE program_id = _other_id),
+            pg_current_xact_id(),
+            'and the one it joined'
+        );
+    UPDATE program_actions SET program_id = _program_id WHERE id = _action_id;
+
     UPDATE program_histories SET changed_xid = '1' WHERE program_id = _program_id;
     DELETE FROM program_actions WHERE id = _action_id;
     RETURN NEXT is(
@@ -95,6 +113,13 @@ BEGIN
             (SELECT count(*) FROM program_histories WHERE program_id = _program_id),
             0::bigint,
             'a deleted program takes its row along'
+        );
+
+    INSERT INTO programs (id, user_id, name) VALUES (_program_id, _user_id, 'again');
+    RETURN NEXT is(
+            (SELECT changed_xid FROM program_histories WHERE program_id = _program_id),
+            pg_current_xact_id(),
+            'created again under its id, it reads as changed'
         );
 END
 $$ LANGUAGE plpgsql;
