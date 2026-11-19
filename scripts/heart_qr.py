@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
-# /// script
-# requires-python = ">=3.13"
-# dependencies = ["segno>=1.6"]
-# ///
 """Draws a QR code as a heart, in the site's blue and ink, as an SVG.
 
 Usage:
-    uv run scripts/heart_qr.py URL OUT.svg [--seed TEXT]
+    uv run python scripts/heart_qr.py URL OUT.svg [--seed TEXT]
 
 The heart is the classic construction: a square standing on one corner with a
 half-disc on each of its two upper sides. The square is the code itself, turned
@@ -15,21 +11,27 @@ corner without one points into the notch. The half-discs hold decorative tiles o
 the same grid, which a scanner reads as noise outside the code. No tile comes
 within two modules of a finder pattern, so the finders stay easy to find.
 
-The tiles are random but seeded from the URL (or --seed), so drawing the same
-address twice gives the same file.
+The tiles are random but seeded from the URL (or --seed), and segno is locked in
+uv.lock, so drawing the same address twice gives the same file. The file names its
+address in a comment, so a code can be checked against the link beside it. The
+colours are the default preset's accent and ink, from shared/heart_design/tokens.json.
 """
 
 import argparse
+import json
 import math
 import random
+from pathlib import Path
 
 import segno
 
-BLUE = '#1F4EC8'
-INK = '#1A1815'
+TOKENS = json.loads((Path(__file__).parent.parent / 'shared/heart_design/tokens.json').read_text())
+PALETTE = TOKENS['presets'][TOKENS['default']]['light']
+BLUE = PALETTE['accent']
+INK = PALETTE['ink']
 TILE = 0.96  # a module's tile, in modules: a hair of gap between neighbours
 ROUND = 0.2  # its corner radius
-PAD = 1.2  # white margin around the tiles, in modules
+PAD = 2  # white margin around the tiles, in modules: the quiet zone on a dark page
 DENSITY = 0.5  # share of decorative cells that get a tile
 CLEAR = 2  # decoration-free distance around a finder, in modules
 ANGLE = -135
@@ -123,6 +125,7 @@ def draw(url: str, seed: str) -> str:
 
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{num(x0)} {num(y0)} {num(side)} {num(side)}">'
+        f'<!-- {url}, drawn by scripts/heart_qr.py -->'
         '<defs><linearGradient id="g" gradientUnits="userSpaceOnUse"'
         f' x1="{num(x0)}" x2="{num(x0 + side)}" y1="0" y2="0">'
         f'<stop offset="0" stop-color="{BLUE}"/><stop offset="1" stop-color="{INK}"/></linearGradient>'
@@ -142,7 +145,7 @@ def main() -> None:
     parser.add_argument('--seed', help='seeds the decorative tiles; the URL by default')
     args = parser.parse_args()
     with open(args.out, 'w') as f:
-        f.write(draw(args.url, args.seed or args.url))
+        f.write(draw(args.url, args.url if args.seed is None else args.seed))
 
 
 if __name__ == '__main__':

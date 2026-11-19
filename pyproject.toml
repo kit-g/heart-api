@@ -38,6 +38,7 @@ dev = [
     "jsonschema>=4.25",
     "ruamel-yaml>=0.18",
     "ruff>=0.14",
+    "segno>=1.6", # scripts/heart_qr.py
     "pre-commit>=4.6.1",
 ]
 
