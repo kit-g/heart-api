@@ -91,6 +91,23 @@ class ProgramUpdateIn {
   }
 }
 
+/// `GET /programs/history?since=` — no `since` starts from the beginning; one that
+/// isn't a cursor from this feed is a 400, never a silent restart.
+class ProgramHistoryQuery {
+  final ChangeCursor? since;
+
+  const new _({required this.since});
+
+  static ProgramHistoryQuery fromRequest(Request req) {
+    return ProgramHistoryQuery._(
+      since: switch (req.url.queryParameters['since']) {
+        final String raw => ChangeCursor.parse(raw),
+        null => null,
+      },
+    );
+  }
+}
+
 /// `DELETE /programs/:programId?keepTemplates=` — by default the sessions go
 /// with the program; `keepTemplates=true` leaves them as plain templates.
 class ProgramDeleteQuery {

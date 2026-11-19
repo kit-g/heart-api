@@ -203,6 +203,50 @@ mixin _Programs on _DatabaseBase implements ProgramService {
   }
 
   @override
+  Future<ProgramHistoryChanges> getProgramHistoryChanges({required String userId, ChangeCursor? since}) async {
+    const limit = 50;
+    final rows = await _pool.execute(
+      _programHistoryChanges.toSql(),
+      parameters: {
+        'userId': userId,
+        'sinceXid': since?.xid,
+        'sinceId': since?.id,
+        'limit': limit + 1,
+        'budget': _programHistoryBudget,
+      },
+    );
+    final columns = rows.map((row) => row.toColumnMap()).toList();
+    final first = columns.first;
+    if (first['stale'] == true) {
+      throw const BadRequest(
+        code: 'stale_cursor',
+        reason: 'this cursor is from before the database moved; start again without since',
+      );
+    }
+    // the check's row stands alone when there's nothing to report
+    final changed = [
+      for (final row in columns)
+        if (row['program_id'] != null) row,
+    ].take(limit).toList();
+    List<Map> each(Map<String, dynamic> row, String column) => [for (final item in row[column] as List) item as Map];
+    return ProgramHistoryChanges(
+      programs: [
+        for (final row in changed)
+          (
+            programId: row['program_id'].toString(),
+            actions: [for (final json in each(row, 'actions')) ProgramAction.fromJson(json)],
+            bases: [for (final json in each(row, 'bases')) ProgramBase.fromJson(json)],
+          ),
+      ],
+      cursor: switch (changed.lastOrNull) {
+        final Map<String, dynamic> last => ChangeCursor(xid: last['xid'] as String, id: last['program_id'].toString()),
+        null => since,
+      },
+      hasMore: (first['candidates'] as int) > changed.length,
+    );
+  }
+
+  @override
   Future<(ProgramBase, bool created)> createProgramBase({
     required String userId,
     required String programId,

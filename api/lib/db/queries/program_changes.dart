@@ -288,7 +288,8 @@ ORDER BY at, is_workout, template_id
 /// they can't read caused (an advance or a stage, a base it moved, a base that
 /// step moved), as that workout's own mark does. A later move still starts from
 /// what came before it: the values are the owner's.
-const _visiblePlanning = '''
+const _visiblePlanning =
+    '''
 WITH
 _rel AS (
   SELECT _relation(@readerId, @ownerId, @assistant::boolean) AS r
@@ -338,41 +339,14 @@ _marks AS (
 SELECT
   (
     SELECT coalesce(
-      jsonb_agg(
-        jsonb_build_object(
-          'id', id,
-          'programId', program_id,
-          'kind', kind,
-          'week', week,
-          'from', from_exercise,
-          'to', to_exercise,
-          'exercise', exercise_id,
-          'slot', slot,
-          'stage', stage,
-          'workoutId', workout_id,
-          'at', at
-        )
-        ORDER BY at, id
-      ),
+      jsonb_agg($_actionJson ORDER BY at, id),
       '[]'
     )
     FROM _actions
   ) AS actions,
   (
     SELECT coalesce(
-      jsonb_agg(
-        jsonb_build_object(
-          'id', id,
-          'programId', program_id,
-          'exerciseId', exercise_id,
-          'slot', slot,
-          'value', value,
-          'workoutId', workout_id,
-          'actionId', action_id,
-          'at', at
-        )
-        ORDER BY at, id
-      ),
+      jsonb_agg($_baseJson ORDER BY at, id),
       '[]'
     )
     FROM _bases

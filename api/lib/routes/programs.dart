@@ -12,6 +12,13 @@ Future<ProgramsResponse> getMyPrograms(Request req) async {
   return ProgramsResponse(programs: await req.programService.getPrograms(req.userId));
 }
 
+/// The whole history of each program whose steps or bases changed since the
+/// caller's cursor.
+Future<ProgramHistoryChanges> getProgramHistoryChanges(Request req) {
+  final query = ProgramHistoryQuery.fromRequest(req);
+  return req.programService.getProgramHistoryChanges(userId: req.userId, since: query.since);
+}
+
 Future<Program> getMyProgram(Request req) {
   return req.programService.getProgram(userId: req.userId, programId: req.rawPathParameters[#programId]!);
 }
