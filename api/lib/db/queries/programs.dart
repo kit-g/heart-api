@@ -227,14 +227,15 @@ jsonb_build_object(
   'at', at
 )''';
 
-/// A base as the app reads it, from a row of `program_bases`.
+/// A base as the app reads it, from a row of `program_bases`. The value goes out
+/// widened, as the per-program read sends the column, so both say the same number.
 const _baseJson = '''
 jsonb_build_object(
   'id', id,
   'programId', program_id,
   'exerciseId', exercise_id,
   'slot', slot,
-  'value', value,
+  'value', value::double precision,
   'workoutId', workout_id,
   'actionId', action_id,
   'at', at
@@ -246,8 +247,9 @@ const _maxProgramActions = 1000;
 
 const _maxProgramBases = 5000;
 
-/// About how many steps and bases a page of program histories holds: the largest
-/// history allowed fits whole, and a page stays well under what a response can carry.
+/// Where a page of program histories stops: no program starts on a page already
+/// this many steps and bases long. The one that crosses it still comes whole, so a
+/// page holds at most about twice this.
 const _programHistoryBudget = _maxProgramActions + _maxProgramBases;
 
 // Idempotent on the id, as the other creates. A program that isn't the
@@ -323,8 +325,8 @@ ORDER BY at, id
 // the cursor, in the order those changes finished. Like the workout feed, it reads
 // only changes from transactions older than the oldest one still running, and a
 // cursor from another cluster is stale. A page holds up to `@limit` programs, and
-// stops at the program that takes it past `@budget` rows, so one long history
-// still comes whole.
+// none that would start past `@budget` rows, so one long history still comes
+// whole. One more candidate than a page says whether there is more.
 const _programHistoryChanges =
     '''
 WITH
@@ -344,7 +346,7 @@ _candidates AS (
     AND h.changed_xid < pg_snapshot_xmin(pg_current_snapshot())
     AND (@sinceXid::text IS NULL OR (h.changed_xid, h.program_id) > (@sinceXid::text::xid8, @sinceId::uuid))
   ORDER BY h.changed_xid, h.program_id
-  LIMIT @limit
+  LIMIT @limit + 1
 ),
 _page AS (
   SELECT program_id, changed_xid
@@ -352,10 +354,12 @@ _page AS (
     SELECT
       program_id,
       changed_xid,
-      sum(size) OVER (ORDER BY changed_xid, program_id ROWS UNBOUNDED PRECEDING) - size AS before
+      sum(size) OVER (ORDER BY changed_xid, program_id ROWS UNBOUNDED PRECEDING) - size AS before,
+      row_number() OVER (ORDER BY changed_xid, program_id) AS n
     FROM _candidates
   ) c
   WHERE before < @budget
+    AND n <= @limit
 )
 SELECT
   c.stale,
@@ -366,13 +370,11 @@ SELECT
     SELECT coalesce(jsonb_agg($_actionJson ORDER BY at, id), '[]')
     FROM program_actions
     WHERE program_id = p.program_id
-      AND user_id = @userId
   ) AS actions,
   (
     SELECT coalesce(jsonb_agg($_baseJson ORDER BY at, id), '[]')
     FROM program_bases
     WHERE program_id = p.program_id
-      AND user_id = @userId
   ) AS bases
 FROM _check c
 LEFT JOIN _page p ON true

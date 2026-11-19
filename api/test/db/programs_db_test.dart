@@ -821,7 +821,7 @@ FROM generate_series(1, 100) n
         program: program(name: 'Second'),
         sessions: const [],
       );
-      await h.db.createProgramOrExisting(
+      final (untouched, _) = await h.db.createProgramOrExisting(
         userId: userId,
         program: program(name: 'Untouched'),
         sessions: const [],
@@ -849,13 +849,19 @@ FROM generate_series(1, 100) n
         base: ProgramBase(exerciseId: exerciseId, value: 100, at: DateTime.utc(2026, 10, 3)),
       );
 
-      final all = await read(userId, until: (page) => page.programs.length == 2);
-      expect(all.programs.map((each) => each.programId), [first.id, second.id], reason: 'in the order they changed');
-      expect(all.programs.first.actions.map((action) => action.kind), [
+      final all = await read(userId, until: (page) => page.programs.length == 3);
+      expect(
+        all.programs.map((each) => each.programId),
+        [untouched.id, first.id, second.id],
+        reason: 'in the order they changed, one with no history among them',
+      );
+      expect(all.programs.first.actions, isEmpty);
+      expect(all.programs.first.bases, isEmpty);
+      expect(all.programs[1].actions.map((action) => action.kind), [
         ProgramActionKind.resume,
         ProgramActionKind.pause,
       ]);
-      expect(all.programs.first.bases, isEmpty);
+      expect(all.programs[1].bases, isEmpty);
       expect(all.programs.last.bases.single.value, 100);
       expect(all.hasMore, isFalse);
 

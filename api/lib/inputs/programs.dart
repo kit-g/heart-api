@@ -92,7 +92,7 @@ class ProgramUpdateIn {
 }
 
 /// `GET /programs/history?since=` — no `since` starts from the beginning; one that
-/// isn't a cursor from this feed is a 400, never a silent restart.
+/// isn't a cursor at all is a 400, never a silent restart.
 class ProgramHistoryQuery {
   final ChangeCursor? since;
 

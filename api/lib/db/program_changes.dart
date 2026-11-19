@@ -436,13 +436,12 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
             'withBases': withBases,
           },
         )).first.toColumnMap();
-        List<Map> each(String column) => [for (final item in planning[column] as List) item as Map];
         return (
           program: program,
           sessions: sessions,
-          actions: [for (final json in each('actions')) ProgramAction.fromJson(json)],
-          bases: [for (final json in each('bases')) ProgramBase.fromJson(json)],
-          marks: [for (final json in each('marks')) ProgramMark.fromJson(json)],
+          actions: [for (final json in _jsonList(planning, 'actions')) ProgramAction.fromJson(json)],
+          bases: [for (final json in _jsonList(planning, 'bases')) ProgramBase.fromJson(json)],
+          marks: [for (final json in _jsonList(planning, 'marks')) ProgramMark.fromJson(json)],
         );
       },
       settings: TransactionSettings(isolationLevel: IsolationLevel.repeatableRead, accessMode: AccessMode.readOnly),

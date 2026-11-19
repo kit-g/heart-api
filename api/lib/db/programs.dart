@@ -211,7 +211,7 @@ mixin _Programs on _DatabaseBase implements ProgramService {
         'userId': userId,
         'sinceXid': since?.xid,
         'sinceId': since?.id,
-        'limit': limit + 1,
+        'limit': limit,
         'budget': _programHistoryBudget,
       },
     );
@@ -227,15 +227,14 @@ mixin _Programs on _DatabaseBase implements ProgramService {
     final changed = [
       for (final row in columns)
         if (row['program_id'] != null) row,
-    ].take(limit).toList();
-    List<Map> each(Map<String, dynamic> row, String column) => [for (final item in row[column] as List) item as Map];
+    ];
     return ProgramHistoryChanges(
       programs: [
         for (final row in changed)
           (
             programId: row['program_id'].toString(),
-            actions: [for (final json in each(row, 'actions')) ProgramAction.fromJson(json)],
-            bases: [for (final json in each(row, 'bases')) ProgramBase.fromJson(json)],
+            actions: [for (final json in _jsonList(row, 'actions')) ProgramAction.fromJson(json)],
+            bases: [for (final json in _jsonList(row, 'bases')) ProgramBase.fromJson(json)],
           ),
       ],
       cursor: switch (changed.lastOrNull) {
@@ -375,3 +374,6 @@ mixin _Programs on _DatabaseBase implements ProgramService {
     };
   }
 }
+
+/// The objects of a jsonb array [column] of [row].
+List<Map> _jsonList(Map<String, dynamic> row, String column) => [for (final item in row[column] as List) item as Map];
