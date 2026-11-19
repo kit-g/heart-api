@@ -132,29 +132,35 @@
                     Your data is yours forever. Just keep going to the gym.
                 </p>
             </div>
-            <div class="flex flex-wrap justify-center sm:justify-start gap-4 pt-2 animate-fade-in animate-delay-200" id="download">
-                <a href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener"
-                   class="inline-block hover:opacity-90 transition-opacity">
-                    <img src="assets/appstore_button.svg" alt="Download on the App Store" class="h-10 w-auto"/>
-                </a>
-                <a href="https://play.google.com/store/apps/details?id=me.heart.android" target="_blank" rel="noopener"
-                   class="inline-block hover:opacity-90 transition-opacity">
-                    <img src="assets/google_play_button.svg" alt="Get it on Google Play" class="h-10 w-auto"/>
-                </a>
-            </div>
-            <!-- Scanned from a computer screen, or from a phone shown to a friend: either
-                 way the scanning phone lands in its own store (get.html). A heart-shaped
-                 code from a QR design tool, run through svgo; only the diamond in its
-                 middle is the code, so it reads reliably from 240px up. Re-export it there
-                 if the address ever changes. -->
-            <div class="flex flex-col sm:flex-row items-center gap-1 sm:gap-4 animate-fade-in animate-delay-200">
-                <a href="get.html" class="shrink-0">
-                    <img src="assets/get-app-qr.svg" width="256" height="256" loading="lazy" decoding="async"
-                         alt="QR code for heart-of.me/get.html, which opens the app's store page"
-                         class="block size-64"/>
-                </a>
-                <p class="text-sm text-muted text-center sm:text-left max-w-[14rem]">
-                    Scan with a phone's camera to get the app.
+            <!-- Each store gets its badge and, under it, a QR code of the same store link, so a
+                 scan from a computer screen, or from a phone shown to a friend, opens the store
+                 without passing through heart-of.me, which some networks can't reach. The hearts
+                 are drawn by scripts/heart_qr.py; redraw them there if a store link changes. -->
+            <div class="flex flex-col items-center sm:items-start gap-3 pt-2 animate-fade-in animate-delay-200" id="download">
+                <div class="flex justify-center sm:justify-start gap-6">
+                    <div class="flex flex-col items-center gap-3">
+                        <a href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener"
+                           class="inline-block hover:opacity-90 transition-opacity">
+                            <img src="assets/appstore_button.svg" alt="Download on the App Store" class="h-10 w-auto"/>
+                        </a>
+                        <a href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                            <img src="assets/qr-app-store.svg" width="176" height="176" loading="lazy" decoding="async"
+                                 alt="" class="block size-36 sm:size-44"/>
+                        </a>
+                    </div>
+                    <div class="flex flex-col items-center gap-3">
+                        <a href="https://play.google.com/store/apps/details?id=me.heart.android" target="_blank" rel="noopener"
+                           class="inline-block hover:opacity-90 transition-opacity">
+                            <img src="assets/google_play_button.svg" alt="Get it on Google Play" class="h-10 w-auto"/>
+                        </a>
+                        <a href="https://play.google.com/store/apps/details?id=me.heart.android" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                            <img src="assets/qr-google-play.svg" width="176" height="176" loading="lazy" decoding="async"
+                                 alt="" class="block size-36 sm:size-44"/>
+                        </a>
+                    </div>
+                </div>
+                <p class="text-sm text-muted text-center sm:text-left">
+                    Or scan your store's code with a phone's camera.
                 </p>
             </div>
         </div>
