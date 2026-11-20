@@ -4,7 +4,6 @@ library;
 import 'package:heart/db/db.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
-import 'package:heart/models/programs.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
@@ -796,13 +795,13 @@ FROM generate_series(1, 100) n
     /// database: what is due shows up once they finish, not instantly.
     Future<ProgramHistoryChanges> read(
       String userId, {
-      ChangeCursor? since,
+      String? since,
       bool Function(ProgramHistoryChanges page)? until,
     }) async {
       final done = until ?? (page) => page.programs.isNotEmpty;
       final deadline = DateTime.now().add(const Duration(seconds: 10));
       while (true) {
-        final page = await h.db.getProgramHistoryChanges(userId: userId, since: since);
+        final page = await h.db.getProgramHistoryChanges(userId: userId, since: since == null ? null : .parse(since));
         if (done(page) || DateTime.now().isAfter(deadline)) return page;
         await Future<void>.delayed(const Duration(milliseconds: 100));
       }
@@ -865,9 +864,9 @@ FROM generate_series(1, 100) n
       expect(all.programs.last.bases.single.value, 100);
       expect(all.hasMore, isFalse);
 
-      final quiet = await h.db.getProgramHistoryChanges(userId: userId, since: all.cursor);
+      final quiet = await h.db.getProgramHistoryChanges(userId: userId, since: .parse(all.cursor!));
       expect(quiet.programs, isEmpty);
-      expect(quiet.cursor.toString(), all.cursor.toString(), reason: 'nothing new keeps the cursor');
+      expect(quiet.cursor, all.cursor, reason: 'nothing new keeps the cursor');
 
       await h.db.deleteProgramAction(userId: userId, programId: first.id!, actionId: pause.id!);
       await h.db.deleteProgram(userId: userId, programId: second.id!);

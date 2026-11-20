@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.60.0
+
+Every program's history in one read (heart-api#458, heart-of-yours#707).
+
+- Added: `ProgramHistoryChanges` (`fromJson`, `toMap`), one page of
+  `GET /programs/history`: `programs`, each a `ProgramHistoryOf` record of `programId`,
+  `actions` and `bases`; an opaque `cursor`, null when there was nothing to report; and
+  `hasMore`. A step or base this build can't read is left out of its program.
+
 ## 2.59.0
 
 What a coach plans a client's session from (heart-api#439).

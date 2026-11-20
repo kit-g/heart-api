@@ -5,7 +5,6 @@ import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
-import 'package:heart/models/programs.dart';
 import 'package:heart/routes/programs.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -310,7 +309,7 @@ void main() {
               bases: const [],
             ),
           ],
-          cursor: const ChangeCursor(xid: '43', id: _programId),
+          cursor: const ChangeCursor(xid: '43', id: _programId).toString(),
           hasMore: false,
         ),
       );

@@ -240,7 +240,7 @@ mixin _Programs on _DatabaseBase implements ProgramService {
       cursor: switch (changed.lastOrNull) {
         final Map<String, dynamic> last => ChangeCursor(xid: last['xid'] as String, id: last['program_id'].toString()),
         null => since,
-      },
+      }?.toString(),
       hasMore: (first['candidates'] as int) > changed.length,
     );
   }
