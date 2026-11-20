@@ -67,25 +67,6 @@
         </a>
     </section>
 
-    <!-- One code per store, opening the store directly: heart-of.me doesn't load on
-         some networks (Russia without a VPN), while the stores do. Both show on every
-         device, so a phone can be shown to a friend on the other platform. -->
-    <section class="w-full flex flex-col gap-3">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Scan to get the app</h2>
-        <div class="flex flex-col items-center gap-6 py-2">
-            <figure class="flex flex-col items-center gap-2">
-                <img src="assets/qr-app-store.svg" width="256" height="256" loading="lazy" decoding="async"
-                     alt="QR code for Heart on the App Store" class="block size-64"/>
-                <figcaption class="text-sm text-muted">App Store</figcaption>
-            </figure>
-            <figure class="flex flex-col items-center gap-2">
-                <img src="assets/qr-google-play.svg" width="256" height="256" loading="lazy" decoding="async"
-                     alt="QR code for Heart on Google Play" class="block size-64"/>
-                <figcaption class="text-sm text-muted">Google Play</figcaption>
-            </figure>
-        </div>
-    </section>
-
     <section class="w-full flex flex-col gap-3">
         <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Read</h2>
         <a href="blog.html"
@@ -144,6 +125,32 @@
             <span class="material-symbols-outlined text-accent-ink">mail</span>
             <span class="flex-grow break-all">info@heart-of.me</span>
         </a>
+    </section>
+
+    <!-- One code per store, opening the store directly: heart-of.me doesn't load on
+         some networks (Russia without a VPN), while the stores do. Both show on every
+         device, so a phone can be shown to a friend on the other platform; last on the
+         page, since a phone's own viewer can't scan it. Square codes from a QR design
+         tool, run through svgo, encoding the two badge links above (the Play one
+         without its referrer). Re-export them there if either link changes. -->
+    <section class="w-full flex flex-col gap-3">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Scan to get the app</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <figure class="flex flex-col items-center gap-2">
+                <a href="https://apps.apple.com/app/id6777837444" target="_blank" rel="noopener" tabindex="-1" class="block w-full">
+                    <img src="assets/qr-app-store.svg" width="192" height="192" loading="lazy" decoding="async"
+                         alt="QR code for Heart of Yours on the App Store" class="block w-full h-auto"/>
+                </a>
+                <figcaption class="text-sm text-muted" aria-hidden="true">App Store</figcaption>
+            </figure>
+            <figure class="flex flex-col items-center gap-2">
+                <a href="https://play.google.com/store/apps/details?id=me.heart.android" target="_blank" rel="noopener" tabindex="-1" class="block w-full">
+                    <img src="assets/qr-google-play.svg" width="192" height="192" loading="lazy" decoding="async"
+                         alt="QR code for Heart of Yours on Google Play" class="block w-full h-auto"/>
+                </a>
+                <figcaption class="text-sm text-muted" aria-hidden="true">Google Play</figcaption>
+            </figure>
+        </div>
     </section>
 </main>
 
