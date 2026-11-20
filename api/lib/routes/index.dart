@@ -106,6 +106,7 @@ final routes = <(String, Method), ModelHandler>{
   ('/goals/:goalId/stages/:stageId', .put): goals.markStageAchieved,
   ('/programs', .get): programs.getMyPrograms,
   ('/programs', .post): programs.createProgram,
+  ('/programs/history', .get): programs.getProgramHistoryChanges,
   ('/programs/:programId', .get): programs.getMyProgram,
   ('/programs/:programId', .put): programs.updateProgram,
   ('/programs/:programId', .delete): programs.deleteProgram,

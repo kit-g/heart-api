@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:heart/core/handler.dart';
 import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
+import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/programs.dart';
 import 'package:heart/routes/programs.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -295,6 +297,46 @@ void main() {
       expect(res.status, 200);
       expect(((jsonDecode(res.body) as Map)['bases'] as List).single, containsPair('id', base));
       verify(app.db.getProgramBases(userId: _meId, programId: _programId)).called(1);
+    });
+
+    test('every program\'s history in one read, from the cursor the app passes (heart-api#458)', () async {
+      const since = ChangeCursor(xid: '42', id: _programId);
+      when(app.db.getProgramHistoryChanges(userId: anyNamed('userId'), since: anyNamed('since'))).thenAnswer(
+        (_) async => ProgramHistoryChanges(
+          programs: [
+            (
+              programId: _programId,
+              actions: [ProgramAction(id: _programId, kind: .pause, at: DateTime.utc(2026, 10))],
+              bases: const [],
+            ),
+          ],
+          cursor: const ChangeCursor(xid: '43', id: _programId),
+          hasMore: false,
+        ),
+      );
+
+      final res = await app.send('GET', '/programs/history?since=$since');
+
+      expect(res.status, 200);
+      final body = jsonDecode(res.body) as Map;
+      final program = (body['programs'] as List).single as Map;
+      expect(program['programId'], _programId);
+      expect((program['actions'] as List).single, containsPair('kind', 'pause'));
+      expect(program['bases'], isEmpty);
+      expect(body['cursor'], const ChangeCursor(xid: '43', id: _programId).toString());
+      expect(body['hasMore'], isFalse);
+      final read =
+          verify(
+                app.db.getProgramHistoryChanges(userId: _meId, since: captureAnyNamed('since')),
+              ).captured.single
+              as ChangeCursor;
+      expect((read.xid, read.id), ('42', _programId));
+    });
+
+    test('a since that is no cursor is a 400, never a fresh start', () async {
+      final res = await app.send('GET', '/programs/history?since=nope');
+      expect(res.status, 400);
+      verifyNever(app.db.getProgramHistoryChanges(userId: anyNamed('userId'), since: anyNamed('since')));
     });
 
     test('a new base is the caller\'s own, 201', () async {

@@ -1,3 +1,4 @@
+import 'package:heart/models/changes.dart';
 import 'package:heart_models/heart_models.dart';
 
 /// What makes a program a coach's copy for a student. [waits] when the student is
@@ -67,6 +68,12 @@ abstract interface class ProgramService {
   });
 
   Future<void> deleteProgramBase({required String userId, required String programId, required String baseId});
+
+  /// Each of [userId]'s programs whose steps or bases changed after [since], with
+  /// all of them as they stand, oldest first; from the beginning without [since].
+  /// A program whose history was emptied comes with none, and a deleted one
+  /// doesn't come at all.
+  Future<ProgramHistoryChanges> getProgramHistoryChanges({required String userId, ChangeCursor? since});
 
   /// The program's workouts and skips, as its position reads them.
   Future<Iterable<ProgramMark>> getProgramMarks({required String userId, required String programId});
@@ -220,6 +227,39 @@ class _ProgramHistory implements ProgramHistory {
       ],
       'actions': [for (final action in actions) action.toMap()..remove('programId')],
       'skips': [for (final skip in skips) skip.toMap()..remove('programId')],
+    };
+  }
+}
+
+/// One program's steps and bases, each oldest first.
+typedef ProgramHistoryOf = ({String programId, List<ProgramAction> actions, List<ProgramBase> bases});
+
+/// One page of the programs whose history changed since a cursor.
+class ProgramHistoryChanges implements Model {
+  final List<ProgramHistoryOf> programs;
+
+  /// Where the next read starts. Null only when there has never been anything
+  /// to report.
+  final ChangeCursor? cursor;
+
+  /// True when this page was cut short: ask again straight away.
+  final bool hasMore;
+
+  const new({required this.programs, required this.cursor, required this.hasMore});
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'programs': [
+        for (final (:programId, :actions, :bases) in programs)
+          {
+            'programId': programId,
+            'actions': [for (final action in actions) action.toMap()],
+            'bases': [for (final base in bases) base.toMap()],
+          },
+      ],
+      'cursor': ?cursor?.toString(),
+      'hasMore': hasMore,
     };
   }
 }

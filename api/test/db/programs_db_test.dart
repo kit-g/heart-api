@@ -2,7 +2,9 @@
 library;
 
 import 'package:heart/db/db.dart';
+import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
+import 'package:heart/models/programs.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
@@ -785,6 +787,167 @@ FROM generate_series(1, 100) n
         reason: 'only the owner',
       );
       expect(await h.db.getProgramWorkouts(userId: stranger, programId: programId), isEmpty);
+    });
+  });
+
+  group('every program\'s history in one read (heart-api#458)', () {
+    /// Polls until [done] holds. The read waits for every transaction still
+    /// writing, and the other suites run theirs in parallel against the same
+    /// database: what is due shows up once they finish, not instantly.
+    Future<ProgramHistoryChanges> read(
+      String userId, {
+      ChangeCursor? since,
+      bool Function(ProgramHistoryChanges page)? until,
+    }) async {
+      final done = until ?? (page) => page.programs.isNotEmpty;
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      while (true) {
+        final page = await h.db.getProgramHistoryChanges(userId: userId, since: since);
+        if (done(page) || DateTime.now().isAfter(deadline)) return page;
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
+    }
+
+    test('each program whose history changed comes whole, and only once until it changes again', () async {
+      final userId = await h.seedProfile();
+      final stranger = await h.seedProfile();
+      final none = await h.db.getProgramHistoryChanges(userId: userId);
+      expect(none.programs, isEmpty);
+      expect((none.cursor, none.hasMore), (null, false));
+
+      final (first, _) = await h.db.createProgramOrExisting(userId: userId, program: program(), sessions: const []);
+      final (second, _) = await h.db.createProgramOrExisting(
+        userId: userId,
+        program: program(name: 'Second'),
+        sessions: const [],
+      );
+      final (untouched, _) = await h.db.createProgramOrExisting(
+        userId: userId,
+        program: program(name: 'Untouched'),
+        sessions: const [],
+      );
+      final (theirs, _) = await h.db.createProgramOrExisting(userId: stranger, program: program(), sessions: const []);
+      await h.db.createProgramAction(
+        userId: stranger,
+        programId: theirs.id!,
+        action: ProgramAction(kind: .pause, at: DateTime.utc(2026, 10, 1)),
+      );
+
+      final (pause, _) = await h.db.createProgramAction(
+        userId: userId,
+        programId: first.id!,
+        action: ProgramAction(kind: .pause, at: DateTime.utc(2026, 10, 2)),
+      );
+      await h.db.createProgramAction(
+        userId: userId,
+        programId: first.id!,
+        action: ProgramAction(kind: .resume, at: DateTime.utc(2026, 10, 1)),
+      );
+      await h.db.createProgramBase(
+        userId: userId,
+        programId: second.id!,
+        base: ProgramBase(exerciseId: exerciseId, value: 100, at: DateTime.utc(2026, 10, 3)),
+      );
+
+      final all = await read(userId, until: (page) => page.programs.length == 3);
+      expect(
+        all.programs.map((each) => each.programId),
+        [untouched.id, first.id, second.id],
+        reason: 'in the order they changed, one with no history among them',
+      );
+      expect(all.programs.first.actions, isEmpty);
+      expect(all.programs.first.bases, isEmpty);
+      expect(all.programs[1].actions.map((action) => action.kind), [
+        ProgramActionKind.resume,
+        ProgramActionKind.pause,
+      ]);
+      expect(all.programs[1].bases, isEmpty);
+      expect(all.programs.last.bases.single.value, 100);
+      expect(all.hasMore, isFalse);
+
+      final quiet = await h.db.getProgramHistoryChanges(userId: userId, since: all.cursor);
+      expect(quiet.programs, isEmpty);
+      expect(quiet.cursor.toString(), all.cursor.toString(), reason: 'nothing new keeps the cursor');
+
+      await h.db.deleteProgramAction(userId: userId, programId: first.id!, actionId: pause.id!);
+      await h.db.deleteProgram(userId: userId, programId: second.id!);
+      final after = await read(userId, since: all.cursor);
+      expect(after.programs.single.programId, first.id, reason: 'a deleted program is not in it');
+      expect(after.programs.single.actions.map((action) => action.kind), [ProgramActionKind.resume]);
+
+      final workoutId = await h.seedWorkout(userId: userId);
+      await h.db.createProgramBase(
+        userId: userId,
+        programId: first.id!,
+        base: ProgramBase(exerciseId: exerciseId, value: 60, workoutId: workoutId, at: DateTime.utc(2026, 10, 4)),
+      );
+      final moved = await read(userId, since: after.cursor);
+      expect(moved.programs.single.bases.single.workoutId, workoutId);
+      await h.db.deleteWorkout(userId: userId, workoutId: workoutId);
+      final gone = await read(userId, since: moved.cursor);
+      expect(gone.programs.single.bases, isEmpty, reason: 'a base goes with its workout, and the read says so');
+    });
+
+    test('a page stops at the program that fills it, and the next one picks up after it', () async {
+      final userId = await h.seedProfile();
+      final (long, _) = await h.db.createProgramOrExisting(userId: userId, program: program(), sessions: const []);
+      final (short, _) = await h.db.createProgramOrExisting(
+        userId: userId,
+        program: program(name: 'Short'),
+        sessions: const [],
+      );
+      await h.exec(
+        '''
+        INSERT INTO program_bases (user_id, program_id, exercise_id, value, at)
+        SELECT @u, @p::uuid, @e::uuid, n, timestamptz '2026-10-01' + n * interval '1 minute'
+        FROM generate_series(1, 7000) n
+        ''',
+        {'u': userId, 'p': long.id, 'e': exerciseId},
+      );
+      await h.db.createProgramBase(
+        userId: userId,
+        programId: short.id!,
+        base: ProgramBase(exerciseId: exerciseId, value: 1, at: DateTime.utc(2026, 10, 1)),
+      );
+
+      final page = await read(userId, until: (page) => page.hasMore);
+      expect(page.programs.single.programId, long.id);
+      expect(page.programs.single.bases, hasLength(7000), reason: 'one history comes whole');
+      expect(page.hasMore, isTrue);
+      final next = await read(userId, since: page.cursor);
+      expect(next.programs.single.programId, short.id);
+      expect(next.hasMore, isFalse);
+    });
+
+    test('a page holds up to 50 programs', () async {
+      final userId = await h.seedProfile();
+      await h.exec(
+        '''
+        WITH p AS (
+          INSERT INTO programs (user_id, name)
+          SELECT @u, 'p' || n FROM generate_series(1, 51) n
+          RETURNING id
+        )
+        INSERT INTO program_actions (user_id, program_id, kind, at)
+        SELECT @u, id, 'pause', timestamptz '2026-10-01' FROM p
+        ''',
+        {'u': userId},
+      );
+      final page = await read(userId, until: (page) => page.programs.length == 50);
+      expect((page.programs.length, page.hasMore), (50, true));
+      final next = await read(userId, since: page.cursor);
+      expect((next.programs.length, next.hasMore), (1, false));
+    });
+
+    test('a cursor from another database is stale', () async {
+      final userId = await h.seedProfile();
+      await expectLater(
+        h.db.getProgramHistoryChanges(
+          userId: userId,
+          since: const ChangeCursor(xid: '18446744073709551000', id: '019a0000-0000-7000-8000-000000000000'),
+        ),
+        throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'stale_cursor')),
+      );
     });
   });
 }

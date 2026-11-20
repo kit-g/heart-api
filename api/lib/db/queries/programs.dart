@@ -211,11 +211,46 @@ WHERE program_id = @programId::uuid
 ORDER BY at, id
 ''';
 
+/// A step as the app reads it, from a row of `program_actions`.
+const _actionJson = '''
+jsonb_build_object(
+  'id', id,
+  'programId', program_id,
+  'kind', kind,
+  'week', week,
+  'from', from_exercise,
+  'to', to_exercise,
+  'exercise', exercise_id,
+  'slot', slot,
+  'stage', stage,
+  'workoutId', workout_id,
+  'at', at
+)''';
+
+/// A base as the app reads it, from a row of `program_bases`. The value goes out
+/// widened, as the per-program read sends the column, so both say the same number.
+const _baseJson = '''
+jsonb_build_object(
+  'id', id,
+  'programId', program_id,
+  'exerciseId', exercise_id,
+  'slot', slot,
+  'value', value::double precision,
+  'workoutId', workout_id,
+  'actionId', action_id,
+  'at', at
+)''';
+
 /// A program keeps at most this many steps, and this many bases: years of use,
 /// and a ceiling on what a fold reads.
 const _maxProgramActions = 1000;
 
 const _maxProgramBases = 5000;
+
+/// Where a page of program histories stops: no program starts on a page already
+/// this many steps and bases long. The one that crosses it still comes whole, so a
+/// page holds at most about twice this.
+const _programHistoryBudget = _maxProgramActions + _maxProgramBases;
 
 // Idempotent on the id, as the other creates. A program that isn't the
 // caller's trips program_actions_program_fk (404 unknown_program). An empty
@@ -284,6 +319,66 @@ FROM program_bases
 WHERE program_id = @programId::uuid
   AND user_id = @userId
 ORDER BY at, id
+''';
+
+// The whole history of each of an account's programs whose history changed after
+// the cursor, in the order those changes finished. Like the workout feed, it reads
+// only changes from transactions older than the oldest one still running, and a
+// cursor from another cluster is stale. A page holds up to `@limit` programs, and
+// none that would start past `@budget` rows, so one long history still comes
+// whole. One more candidate than a page says whether there is more.
+const _programHistoryChanges =
+    '''
+WITH
+_check AS (
+  SELECT @sinceXid::text IS NOT NULL
+         AND @sinceXid::text::xid8 >= pg_snapshot_xmax(pg_current_snapshot()) AS stale
+),
+_candidates AS (
+  SELECT
+    h.program_id,
+    h.changed_xid,
+    (SELECT count(*) FROM program_actions a WHERE a.program_id = h.program_id)
+      + (SELECT count(*) FROM program_bases b WHERE b.program_id = h.program_id) AS size
+  FROM program_histories h
+  WHERE h.user_id = @userId
+    AND NOT (SELECT stale FROM _check)
+    AND h.changed_xid < pg_snapshot_xmin(pg_current_snapshot())
+    AND (@sinceXid::text IS NULL OR (h.changed_xid, h.program_id) > (@sinceXid::text::xid8, @sinceId::uuid))
+  ORDER BY h.changed_xid, h.program_id
+  LIMIT @limit + 1
+),
+_page AS (
+  SELECT program_id, changed_xid
+  FROM (
+    SELECT
+      program_id,
+      changed_xid,
+      sum(size) OVER (ORDER BY changed_xid, program_id ROWS UNBOUNDED PRECEDING) - size AS before,
+      row_number() OVER (ORDER BY changed_xid, program_id) AS n
+    FROM _candidates
+  ) c
+  WHERE before < @budget
+    AND n <= @limit
+)
+SELECT
+  c.stale,
+  (SELECT count(*) FROM _candidates) AS candidates,
+  p.program_id,
+  p.changed_xid::text AS xid,
+  (
+    SELECT coalesce(jsonb_agg($_actionJson ORDER BY at, id), '[]')
+    FROM program_actions
+    WHERE program_id = p.program_id
+  ) AS actions,
+  (
+    SELECT coalesce(jsonb_agg($_baseJson ORDER BY at, id), '[]')
+    FROM program_bases
+    WHERE program_id = p.program_id
+  ) AS bases
+FROM _check c
+LEFT JOIN _page p ON true
+ORDER BY p.changed_xid, p.program_id
 ''';
 
 // Idempotent twice over: on the id, and on (exercise, slot, workout), so a second
