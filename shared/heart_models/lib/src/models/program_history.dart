@@ -2,8 +2,75 @@ import 'misc.dart';
 import 'program.dart';
 import 'tolerant.dart';
 
-/// One program's steps and bases, each oldest first.
-typedef ProgramHistoryOf = ({String programId, List<ProgramAction> actions, List<ProgramBase> bases});
+/// One program's history as the server holds it: its steps and bases, each
+/// oldest first.
+class ProgramHistoryOf implements Model {
+  final String programId;
+  final List<ProgramAction> actions;
+  final List<ProgramBase> bases;
+
+  final List<(int, Map)> _unreadActions;
+  final List<(int, Map)> _unreadBases;
+
+  const new({required this.programId, this.actions = const [], this.bases = const []})
+    : _unreadActions = const [],
+      _unreadBases = const [];
+
+  const new _read({
+    required this.programId,
+    required this.actions,
+    required this.bases,
+    required List<(int, Map)> unreadActions,
+    required List<(int, Map)> unreadBases,
+  }) : _unreadActions = unreadActions,
+       _unreadBases = unreadBases;
+
+  /// A step or base this build can't read is set aside in [unreadActions] or
+  /// [unreadBases], as it arrived, and written back in place by [toMap]. A
+  /// missing list is not an empty history: an emptied one arrives as `[]`.
+  factory fromJson(Map json) {
+    final programId = json['programId'] as String;
+    final actions = readIndexed(
+      _list(json, 'actions'),
+      (each) => ProgramAction.fromJson({...each, 'programId': programId}),
+    );
+    final bases = readIndexed(_list(json, 'bases'), (each) => ProgramBase.fromJson({...each, 'programId': programId}));
+    return ._read(
+      programId: programId,
+      actions: actions.items,
+      bases: bases.items,
+      unreadActions: actions.unread,
+      unreadBases: bases.unread,
+    );
+  }
+
+  /// The steps this build couldn't read, as they arrived.
+  List<Map> get unreadActions => [for (final (_, json) in _unreadActions) json];
+
+  /// The bases this build couldn't read, as they arrived.
+  List<Map> get unreadBases => [for (final (_, json) in _unreadBases) json];
+
+  /// False when something in this history was set aside: [actions] and [bases]
+  /// are then not the whole of it for this build.
+  bool get isWhole => _unreadActions.isEmpty && _unreadBases.isEmpty;
+
+  /// Each step and base without its `programId`, which the entry carries once.
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'programId': programId,
+      'actions': splice([for (final action in actions) action.toMap()..remove('programId')], _unreadActions),
+      'bases': splice([for (final base in bases) base.toMap()..remove('programId')], _unreadBases),
+    };
+  }
+}
+
+List<Object?> _list(Map json, String key) {
+  return switch (json[key]) {
+    final List<Object?> list => list,
+    _ => throw FormatException('a program history without $key'),
+  };
+}
 
 /// One page of an account's programs whose history changed since a cursor
 /// (heart-api#458): each program whole, as it stands now.
@@ -17,35 +84,39 @@ class ProgramHistoryChanges implements Model {
   /// True when this page was cut short: ask again from [cursor] straight away.
   final bool hasMore;
 
-  const new({required this.programs, required this.cursor, required this.hasMore});
+  final List<(int, Map)> _unread;
 
-  /// A step or base this build can't read is left out of its program.
+  const new({required this.programs, required this.cursor, required this.hasMore}) : _unread = const [];
+
+  const new _read({
+    required this.programs,
+    required this.cursor,
+    required this.hasMore,
+    required List<(int, Map)> unread,
+  }) : _unread = unread;
+
+  /// A program this build can't read is set aside in [unread], as it arrived,
+  /// and written back in place by [toMap].
   factory fromJson(Map json) {
-    return ProgramHistoryChanges(
-      programs: [
-        for (final program in json['programs'] as List)
-          (
-            programId: (program as Map)['programId'] as String,
-            actions: readIndexed(program['actions'], ProgramAction.fromJson).items,
-            bases: readIndexed(program['bases'], ProgramBase.fromJson).items,
-          ),
-      ],
+    final programs = readIndexed(json['programs'] as List, ProgramHistoryOf.fromJson);
+    return ._read(
+      programs: programs.items,
       cursor: json['cursor'] as String?,
       hasMore: json['hasMore'] as bool? ?? false,
+      unread: programs.unread,
     );
   }
+
+  /// The programs this build couldn't read, as they arrived.
+  List<Map> get unread => [for (final (_, json) in _unread) json];
+
+  /// False when a program, or a step or base of one, was set aside.
+  bool get isWhole => _unread.isEmpty && programs.every((program) => program.isWhole);
 
   @override
   Map<String, dynamic> toMap() {
     return {
-      'programs': [
-        for (final (:programId, :actions, :bases) in programs)
-          {
-            'programId': programId,
-            'actions': [for (final action in actions) action.toMap()],
-            'bases': [for (final base in bases) base.toMap()],
-          },
-      ],
+      'programs': splice([for (final program in programs) program.toMap()], _unread),
       'cursor': ?cursor,
       'hasMore': hasMore,
     };

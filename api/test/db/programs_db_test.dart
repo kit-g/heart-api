@@ -799,9 +799,13 @@ FROM generate_series(1, 100) n
       bool Function(ProgramHistoryChanges page)? until,
     }) async {
       final done = until ?? (page) => page.programs.isNotEmpty;
+      final cursor = switch (since) {
+        final String raw => ChangeCursor.parse(raw),
+        null => null,
+      };
       final deadline = DateTime.now().add(const Duration(seconds: 10));
       while (true) {
-        final page = await h.db.getProgramHistoryChanges(userId: userId, since: since == null ? null : .parse(since));
+        final page = await h.db.getProgramHistoryChanges(userId: userId, since: cursor);
         if (done(page) || DateTime.now().isAfter(deadline)) return page;
         await Future<void>.delayed(const Duration(milliseconds: 100));
       }

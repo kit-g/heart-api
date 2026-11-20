@@ -4,10 +4,13 @@
 
 Every program's history in one read (heart-api#458, heart-of-yours#707).
 
-- Added: `ProgramHistoryChanges` (`fromJson`, `toMap`), one page of
-  `GET /programs/history`: `programs`, each a `ProgramHistoryOf` record of `programId`,
-  `actions` and `bases`; an opaque `cursor`, null when there was nothing to report; and
-  `hasMore`. A step or base this build can't read is left out of its program.
+- Added: `ProgramHistoryChanges` (`fromJson`, `toMap`), one page of `GET /programs/history`:
+  `programs`, an opaque `cursor` (null when there was nothing to report) and `hasMore`.
+- Added: `ProgramHistoryOf`, one program in it: `programId`, `actions` and `bases`. Each step
+  and base arrives without `programId` and reads it from its program.
+- A program, step or base this build can't read is set aside as it arrived (`unread`,
+  `unreadActions`, `unreadBases`) and written back in place by `toMap`; `isWhole` is false
+  then. A program missing its `actions` or `bases` list is set aside, never read as empty.
 
 ## 2.59.0
 
