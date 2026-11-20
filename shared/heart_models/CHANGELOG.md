@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.60.0
+
+Every program's history in one read (heart-api#458, heart-of-yours#707).
+
+- Added: `ProgramHistoryChanges` (`fromJson`, `toMap`), one page of `GET /programs/history`:
+  `programs`, an opaque `cursor` (null when there was nothing to report) and `hasMore`.
+- Added: `ProgramHistoryOf`, one program in it: `programId`, `actions` and `bases`. Each step
+  and base arrives without `programId` and reads it from its program.
+- A program, step or base this build can't read is set aside as it arrived (`unread`,
+  `unreadActions`, `unreadBases`) and written back in place by `toMap`; `isWhole` is false
+  then. A program missing its `actions` or `bases` list is set aside, never read as empty.
+
 ## 2.59.0
 
 What a coach plans a client's session from (heart-api#439).

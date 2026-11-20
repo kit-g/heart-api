@@ -5,7 +5,6 @@ import 'package:heart/globals/globals.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/models/changes.dart';
 import 'package:heart/models/errors.dart';
-import 'package:heart/models/programs.dart';
 import 'package:heart/routes/programs.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:mockito/mockito.dart';
@@ -304,13 +303,12 @@ void main() {
       when(app.db.getProgramHistoryChanges(userId: anyNamed('userId'), since: anyNamed('since'))).thenAnswer(
         (_) async => ProgramHistoryChanges(
           programs: [
-            (
+            ProgramHistoryOf(
               programId: _programId,
-              actions: [ProgramAction(id: _programId, kind: .pause, at: DateTime.utc(2026, 10))],
-              bases: const [],
+              actions: [ProgramAction(id: _programId, programId: _programId, kind: .pause, at: DateTime.utc(2026, 10))],
             ),
           ],
-          cursor: const ChangeCursor(xid: '43', id: _programId),
+          cursor: const ChangeCursor(xid: '43', id: _programId).toString(),
           hasMore: false,
         ),
       );
@@ -318,13 +316,15 @@ void main() {
       final res = await app.send('GET', '/programs/history?since=$since');
 
       expect(res.status, 200);
-      final body = jsonDecode(res.body) as Map;
-      final program = (body['programs'] as List).single as Map;
-      expect(program['programId'], _programId);
-      expect((program['actions'] as List).single, containsPair('kind', 'pause'));
-      expect(program['bases'], isEmpty);
-      expect(body['cursor'], const ChangeCursor(xid: '43', id: _programId).toString());
-      expect(body['hasMore'], isFalse);
+      final page = ProgramHistoryChanges.fromJson(jsonDecode(res.body) as Map);
+      expect(page.isWhole, isTrue, reason: 'the app reads every row the route sends');
+      final program = page.programs.single;
+      expect(program.programId, _programId);
+      expect(program.actions.single.kind, ProgramActionKind.pause);
+      expect(program.actions.single.programId, _programId, reason: 'the entry names it once, and each row reads it');
+      expect(program.bases, isEmpty);
+      expect(page.cursor, const ChangeCursor(xid: '43', id: _programId).toString());
+      expect(page.hasMore, isFalse);
       final read =
           verify(
                 app.db.getProgramHistoryChanges(userId: _meId, since: captureAnyNamed('since')),

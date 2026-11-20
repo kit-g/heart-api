@@ -231,7 +231,7 @@ mixin _Programs on _DatabaseBase implements ProgramService {
     return ProgramHistoryChanges(
       programs: [
         for (final row in changed)
-          (
+          ProgramHistoryOf(
             programId: row['program_id'].toString(),
             actions: [for (final json in _jsonList(row, 'actions')) ProgramAction.fromJson(json)],
             bases: [for (final json in _jsonList(row, 'bases')) ProgramBase.fromJson(json)],
@@ -240,7 +240,7 @@ mixin _Programs on _DatabaseBase implements ProgramService {
       cursor: switch (changed.lastOrNull) {
         final Map<String, dynamic> last => ChangeCursor(xid: last['xid'] as String, id: last['program_id'].toString()),
         null => since,
-      },
+      }?.toString(),
       hasMore: (first['candidates'] as int) > changed.length,
     );
   }

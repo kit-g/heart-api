@@ -230,36 +230,3 @@ class _ProgramHistory implements ProgramHistory {
     };
   }
 }
-
-/// One program's steps and bases, each oldest first.
-typedef ProgramHistoryOf = ({String programId, List<ProgramAction> actions, List<ProgramBase> bases});
-
-/// One page of the programs whose history changed since a cursor.
-class ProgramHistoryChanges implements Model {
-  final List<ProgramHistoryOf> programs;
-
-  /// Where the next read starts. Null only when there has never been anything
-  /// to report.
-  final ChangeCursor? cursor;
-
-  /// True when this page was cut short: ask again straight away.
-  final bool hasMore;
-
-  const new({required this.programs, required this.cursor, required this.hasMore});
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'programs': [
-        for (final (:programId, :actions, :bases) in programs)
-          {
-            'programId': programId,
-            'actions': [for (final action in actions) action.toMap()],
-            'bases': [for (final base in bases) base.toMap()],
-          },
-      ],
-      'cursor': ?cursor?.toString(),
-      'hasMore': hasMore,
-    };
-  }
-}
