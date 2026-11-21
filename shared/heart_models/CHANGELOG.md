@@ -11,6 +11,8 @@ One error for a request the server refused (heart-api#465).
   refusal: a status outside 4xx, or a body that isn't a JSON object with a string `code`.
 - `toString()` is `ServerRefusal: <status> <code> at <method> <route>`, and never includes the
   body.
+- Two refusals are `==` when every field is, `details` compared by value all the way down, so a
+  test can `expect` the refusal it built.
 
 ## 2.60.0
 

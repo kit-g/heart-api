@@ -83,4 +83,71 @@ void main() {
     expect(refusal.toString(), 'ServerRefusal: 409 name_taken at PUT /v1/templates/{id}');
     expect(refusal.toString(), isNot(contains('secret')));
   });
+
+  group('equality', () {
+    ServerRefusal refusal({
+      int status = 403,
+      String code = 'goal_limit',
+      String method = 'POST',
+      String route = '/v1/goals',
+      Map<String, dynamic> details = const {},
+    }) => ServerRefusal(status: status, code: code, method: method, route: route, details: details);
+
+    test('a parsed refusal equals the one built by hand, nested details included', () {
+      final parsed = _parse(403, jsonDecode('{"code": "goal_limit", "limit": {"max": 10, "kinds": ["a", "b"]}}'));
+      final built = refusal(
+        details: {
+          'limit': {
+            'max': 10,
+            'kinds': ['a', 'b'],
+          },
+        },
+      );
+
+      expect(parsed, built);
+      expect(parsed.hashCode, built.hashCode);
+    });
+
+    test('any differing field makes refusals unequal', () {
+      const kinds = {
+        'kinds': ['a'],
+      };
+      final base = refusal(details: kinds);
+
+      expect(base, isNot(refusal(status: 409, details: kinds)));
+      expect(base, isNot(refusal(code: 'other', details: kinds)));
+      expect(base, isNot(refusal(method: 'GET', details: kinds)));
+      expect(base, isNot(refusal(route: '/v1/goals/{id}', details: kinds)));
+      expect(
+        base,
+        isNot(
+          refusal(
+            details: {
+              'kinds': ['b'],
+            },
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          refusal(
+            details: {
+              'kinds': ['a', 'b'],
+            },
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          refusal(
+            details: {
+              'other': ['a'],
+            },
+          ),
+        ),
+      );
+    });
+  });
 }

@@ -13,6 +13,9 @@ class UpgradeRequired implements Exception;
 /// [toString] names the status, the code, the method and the route, never the
 /// body, which can echo what the caller sent: whatever records the error's text
 /// records only those.
+///
+/// Two refusals are equal when every field is, [details] compared by value all
+/// the way down, so a test can expect the one it built.
 class ServerRefusal implements Exception {
   /// The HTTP status, a 4xx.
   final int status;
@@ -65,5 +68,30 @@ class ServerRefusal implements Exception {
   }
 
   @override
+  bool operator ==(Object other) =>
+      other is ServerRefusal &&
+      other.status == status &&
+      other.code == code &&
+      other.method == method &&
+      other.route == route &&
+      _jsonEquals(other.details, details);
+
+  /// [details] adds only its keys: equal refusals have the same ones.
+  @override
+  int get hashCode => Object.hash(status, code, method, route, Object.hashAllUnordered(details.keys));
+
+  @override
   String toString() => 'ServerRefusal: $status $code at $method $route';
+}
+
+/// Whether two decoded JSON values are equal, comparing lists and maps by
+/// their contents.
+bool _jsonEquals(Object? a, Object? b) {
+  return switch ((a, b)) {
+    (final List a, final List b) =>
+      a.length == b.length && Iterable.generate(a.length).every((i) => _jsonEquals(a[i], b[i])),
+    (final Map a, final Map b) =>
+      a.length == b.length && a.keys.every((key) => b.containsKey(key) && _jsonEquals(a[key], b[key])),
+    _ => a == b,
+  };
 }
