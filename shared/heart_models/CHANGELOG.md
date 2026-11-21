@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.61.0
+
+One error for a request the server refused (heart-api#465).
+
+- Added: `ServerRefusal` (`status`, `code`, `method`, `route`, `details`), an `Exception` for a
+  4xx whose body names the refusal in its `code`. `code` is a plain string, so a code this build
+  doesn't know arrives as sent; `details` is the rest of the body.
+- Added: `ServerRefusal.tryParse(status:, method:, route:, body:)`, null when the answer isn't a
+  refusal: a status outside 4xx, or a body that isn't a JSON object with a string `code`.
+- `toString()` is `ServerRefusal: <status> <code> at <method> <route>`, and never includes the
+  body.
+- Two refusals are `==` when every field is, `details` compared by value all the way down, so a
+  test can `expect` the refusal it built.
+
 ## 2.60.0
 
 Every program's history in one read (heart-api#458, heart-of-yours#707).
