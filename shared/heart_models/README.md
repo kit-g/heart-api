@@ -13,7 +13,7 @@ Shared domain models and service interfaces for the Heart project. This package 
   - User, Exercise, ExerciseSet, ExerciseAct, Workout, Template
   - Aggregations and summaries (WeekSummary, WorkoutSummary, WorkoutAggregation)
   - Small helpers and mixins: UsesTimestampForId, Searchable, Storable, Model
-  - Errors: AccountDeleted
+  - Errors: AccountDeleted, UpgradeRequired, and ServerRefusal for a 4xx the server answered with a `code`
 - Service interfaces (no implementations here)
   - Accounts, Exercises, PreviousExercise, Workouts, Templates, Stats, Feedback
   - Config (remote configuration), Timers
@@ -25,7 +25,7 @@ Shared domain models and service interfaces for the Heart project. This package 
 - JSON-friendly: models provide toMap and factory constructors like fromJson(Map) where applicable, using simple Map and primitive types.
 - Immutable by default: fields are final in concrete implementations; copyWith is provided where mutation semantics are needed.
 - ID strategy: UsesTimestampForId mixin offers consistent, comparable identifiers derived from timestamps for sets/workouts.
-- No transport/runtime coupling: there are no imports from http, Flutter, or platform APIs; suitable for pure Dart and Flutter.
+- No transport/runtime coupling: there are no imports from http, Flutter, or platform APIs; suitable for pure Dart and Flutter. ServerRefusal names an HTTP status and method as plain values, so `heart_api` can throw it and the state layer can catch it without either importing the other.
 
 ### Quick start
 - Add a dependency within the monorepo and import the umbrella library:
