@@ -44,7 +44,8 @@ jobs:
       contents: read
       id-token: write
     name: "Build & Deploy"
-    runs-on: ubuntu-latest
+    # arm64, as the function is: the package's handler is imported before it ships
+    runs-on: ubuntu-24.04-arm
     needs: [ python-test ]
     # Skip deploy on PRs; only ship on push/manual. (For workflow_call the
     # event name reflects the caller's trigger.)
@@ -67,26 +68,11 @@ jobs:
         with:
           enable-cache: true
 
-      - name: "Resolve firebase service deps"
+      - name: "Install deps and source into the Lambda package dir"
         run: |
-          uv export \
-            --package firebase \
-            --frozen \
-            --no-dev \
-            --no-hashes \
-            > requirements.txt
-
-      - name: "Install deps into Lambda package dir"
-        run: |
-          uv pip install \
-            --no-cache-dir \
-            --target pkg/ \
-            --python-platform aarch64-manylinux2014 \
-            --python-version 3.12 \
-            --requirements requirements.txt
-
-      - name: "Copy service source into package"
-        run: cp firebase/firebase/*.py pkg/
+          ./scripts/lambda_deps.sh \
+            ${{ inputs.FUNCTION_NAME }} ${{ inputs.AWS_REGION }} \
+            firebase firebase/firebase pkg
 
       - name: "Fetch runtime Firebase SA key and bake into the zip"
         run: |

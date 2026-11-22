@@ -16,7 +16,7 @@ variable "name_prefix" {
 }
 
 variable "python_runtime" {
-  description = "AWS Lambda runtime for every Python service in this env."
+  description = "AWS Lambda runtime for every Python service in this env. A change needs each service redeployed: its package is built for the runtime it finds."
   type        = string
   default     = "python3.14"
 }

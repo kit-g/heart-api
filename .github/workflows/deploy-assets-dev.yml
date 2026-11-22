@@ -10,6 +10,7 @@ on:
       - 'uv.lock'
       - '.github/workflows/deploy-assets.yml'
       - '.github/workflows/deploy-assets-dev.yml'
+      - 'scripts/lambda_deps.sh'
   pull_request:
     paths:
       - 'assets/**'
@@ -17,6 +18,7 @@ on:
       - 'uv.lock'
       - '.github/workflows/deploy-assets.yml'
       - '.github/workflows/deploy-assets-dev.yml'
+      - 'scripts/lambda_deps.sh'
 
 permissions:
   id-token: write
