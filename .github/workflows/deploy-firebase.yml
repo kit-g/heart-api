@@ -76,13 +76,27 @@ jobs:
             --no-hashes \
             > requirements.txt
 
+      # Native wheels (cffi, grpcio) only import on the Python version they were
+      # built for, so the package follows the function's own runtime instead of
+      # restating it here, where it can drift from the Terraform setting.
+      - name: "Read the function's Python version"
+        id: runtime
+        run: |
+          runtime=$(aws lambda get-function-configuration \
+            --function-name ${{ inputs.FUNCTION_NAME }} \
+            --region ${{ inputs.AWS_REGION }} \
+            --query Runtime \
+            --output text)
+          [[ "$runtime" =~ ^python3\.[0-9]+$ ]] || { echo "::error::unexpected runtime $runtime"; exit 1; }
+          echo "version=${runtime#python}" >> "$GITHUB_OUTPUT"
+
       - name: "Install deps into Lambda package dir"
         run: |
           uv pip install \
             --no-cache-dir \
             --target pkg/ \
             --python-platform aarch64-manylinux2014 \
-            --python-version 3.12 \
+            --python-version ${{ steps.runtime.outputs.version }} \
             --requirements requirements.txt
 
       - name: "Copy service source into package"
