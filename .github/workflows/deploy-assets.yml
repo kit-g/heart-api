@@ -41,7 +41,8 @@ jobs:
       contents: read
       id-token: write
     name: "Build & Deploy"
-    runs-on: ubuntu-latest
+    # arm64, as the function is: the package's handler is imported before it ships
+    runs-on: ubuntu-24.04-arm
     needs: [ python-test ]
     # Skip deploy on PRs; only ship on push/manual. (For workflow_call the
     # event name reflects the caller's trigger.)
@@ -64,37 +65,13 @@ jobs:
         with:
           enable-cache: true
 
-      - name: "Resolve assets service deps"
+      # The runtime stays python3.12 in Terraform: Pillow doesn't run on Lambda
+      # above 3.12. The script reads it from the function.
+      - name: "Install deps and source into the Lambda package dir"
         run: |
-          uv export \
-            --package assets \
-            --frozen \
-            --no-dev \
-            --no-hashes \
-            > requirements.txt
-
-      # Pillow is a C extension: install wheels for the Lambda's arch/runtime,
-      # not the runner's. Pinned to 3.12 — Pillow doesn't run on Lambda > 3.12.
-      #
-      # The glibc floor is manylinux_2_28, NOT manylinux2014 (2.17): Pillow
-      # 12.3.0 dropped its manylinux_2_17 wheels and now ships linux wheels
-      # only for manylinux_2_27/2_28. Against a 2.17 target uv finds no
-      # compatible wheel and silently falls back to building the sdist — which
-      # yields a runner-native binary that won't import on the Lambda. The
-      # python3.12 runtime is Amazon Linux 2023 (glibc 2.34), so 2_28 is safe.
-      # --no-build makes a future wheel-tag change fail loudly instead.
-      - name: "Install deps into Lambda package dir"
-        run: |
-          uv pip install \
-            --no-cache-dir \
-            --no-build \
-            --target pkg/ \
-            --python-platform aarch64-manylinux_2_28 \
-            --python-version 3.12 \
-            --requirements requirements.txt
-
-      - name: "Copy service source into package"
-        run: cp assets/assets/*.py pkg/
+          ./scripts/lambda_deps.sh \
+            ${{ inputs.FUNCTION_NAME }} ${{ inputs.AWS_REGION }} \
+            assets assets/assets pkg
 
       - name: "Zip the package"
         run: ( cd pkg && zip -qr ../assets.zip . )

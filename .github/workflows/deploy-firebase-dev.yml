@@ -10,6 +10,7 @@ on:
       - 'uv.lock'
       - '.github/workflows/deploy-firebase.yml'
       - '.github/workflows/deploy-firebase-dev.yml'
+      - 'scripts/lambda_deps.sh'
   pull_request:
     paths:
       - 'firebase/**'
@@ -17,6 +18,7 @@ on:
       - 'uv.lock'
       - '.github/workflows/deploy-firebase.yml'
       - '.github/workflows/deploy-firebase-dev.yml'
+      - 'scripts/lambda_deps.sh'
 
 permissions:
   id-token: write
