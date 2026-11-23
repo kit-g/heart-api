@@ -35,7 +35,7 @@ LIMIT @limit
 const _maxSkips = 10000;
 
 // Idempotent on the id, as the other creates. The template and program are the
-// caller's own or nothing, as on a workout: a skip always saves. An empty
+// caller's own or nothing: a skip always saves. An empty
 // result is the cap.
 const _createSkip =
     '''

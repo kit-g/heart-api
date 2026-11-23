@@ -22,18 +22,6 @@ END AS logged_by_name''';
 const _templateForReader = '''
 CASE WHEN @requesterId = user_id THEN coalesce(template_id, sent_template_id) ELSE template_id END AS template_id''';
 
-/// The id a workout was sent with, when no template answers to it and the caller
-/// didn't delete the one that did: a sample, or a template that hasn't arrived.
-const _unheldTemplate = '''
-  SELECT @templateId::uuid AS id
-  WHERE NOT EXISTS (SELECT 1 FROM templates WHERE id = @templateId::uuid)
-    AND NOT EXISTS (
-      SELECT 1
-      FROM archive.deleted_templates
-      WHERE user_id = @userId
-        AND id = @templateId::uuid
-    )''';
-
 const _listWorkouts =
     '''
 WITH
@@ -197,13 +185,6 @@ _template AS (
     AND user_id = @userId
     AND (@loggedBy::text IS NULL OR program_id IN (SELECT id FROM _program))
 ),
-_sent_template AS (
-  SELECT id
-  FROM (
-$_unheldTemplate
-  ) unheld
-  WHERE @loggedBy::text IS NULL
-),
 _order_to_id AS (
   SELECT
     -- ids round-trip, same as _replaceWorkout: the exercise id the client
@@ -241,7 +222,8 @@ _workout AS (
     @note,
     @pauses::jsonb,
     (SELECT id FROM _template),
-    (SELECT id FROM _sent_template),
+    -- the database links, keeps or drops an id that isn't a template of theirs
+    CASE WHEN NOT EXISTS (SELECT 1 FROM _template) THEN @templateId::uuid END,
     (SELECT id FROM _program),
     @loggedBy::text
   WHERE NOT EXISTS (SELECT 1 FROM _existing_workout)
@@ -774,9 +756,6 @@ _exercise_lookup AS (
 _template AS (
   SELECT id FROM templates WHERE id = @templateId::uuid AND user_id = @userId
 ),
-_sent_template AS (
-$_unheldTemplate
-),
 _program AS (
   SELECT id FROM programs WHERE id = @programId::uuid AND user_id = @userId
 ),
@@ -792,7 +771,10 @@ _workout AS (
     calories = @calories,
     note = CASE WHEN @setsNote::boolean THEN @note ELSE note END,
     template_id = CASE WHEN @setsTemplate::boolean THEN (SELECT id FROM _template) ELSE template_id END,
-    sent_template_id = CASE WHEN @setsTemplate::boolean THEN (SELECT id FROM _sent_template) ELSE sent_template_id END,
+    sent_template_id = CASE
+      WHEN NOT @setsTemplate::boolean THEN sent_template_id
+      WHEN NOT EXISTS (SELECT 1 FROM _template) THEN @templateId::uuid
+    END,
     program_id = CASE WHEN @setsProgram::boolean THEN (SELECT id FROM _program) ELSE program_id END,
     pauses = CASE
       WHEN @setsPauses::boolean THEN @pauses::jsonb

@@ -3,6 +3,7 @@ library;
 
 import 'package:heart/models/workouts.dart';
 import 'package:heart_models/heart_models.dart';
+import 'package:postgres/postgres.dart' show Sql;
 import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
@@ -153,6 +154,122 @@ void main() {
       final workout = await save({'templateId': sample});
       final seen = await h.db.getWorkouts(userId: coach, targetUserId: userId, imageUrl: imageUrl);
       expect(seen.items.singleWhere((each) => each.id == workout.id).templateId, isNull);
+    });
+
+    test(
+      'a save repeated, the owner\'s own read by id and the change feed name it, and a coach\'s read doesn\'t',
+      () async {
+        final coach = await h.seedProfile();
+        final owner = await h.seedProfile();
+        await h.exec(
+          '''
+        INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status, accepted_at)
+        VALUES (@c, @s, 'COACH', 'STUDENT', 'fitness', 'active', '2020-01-01Z')
+        ''',
+          {'c': coach, 's': owner},
+        );
+        final id = uuidV7();
+        final request = WorkoutRequest(
+          userId: owner,
+          body: {
+            'id': id,
+            'name': 'Session A',
+            'start': DateTime.utc(2026, 10, 14, 18).toIso8601String(),
+            'end': DateTime.utc(2026, 10, 14, 19).toIso8601String(),
+            'templateId': sample,
+          },
+        );
+        Future<(Workout, bool)> again() => h.db.createWorkout(userId: owner, body: request, imageUrl: imageUrl);
+        await again();
+        final (repeated, created) = await again();
+        expect((repeated.templateId, created), (sample, false));
+
+        Future<String?> seenBy(String reader) async {
+          final workout = await h.db.getTargetWorkout(
+            requesterId: reader,
+            targetUserId: owner,
+            workoutId: id,
+            imageUrl: imageUrl,
+          );
+          return workout.templateId;
+        }
+
+        expect(await seenBy(owner), sample);
+        expect(await seenBy(coach), isNull);
+
+        // the feed stops short of any transaction still running, which other suites keep
+        for (var i = 0; ; i++) {
+          final feed = await h.db.getWorkoutChanges(userId: owner, limit: 10, imageUrl: imageUrl);
+          if (feed.upserted.isEmpty && i < 50) {
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+            continue;
+          }
+          expect(feed.upserted.single.templateId, sample);
+          break;
+        }
+      },
+    );
+
+    test('deleted before it ever arrived, it is named no more, and not by a workout still to come', () async {
+      final id = uuidV7();
+      final workout = await save({'templateId': id});
+      await h.db.deleteTemplate(coachId: userId, templateId: id);
+      expect(await read(workout.id), isNull);
+      expect((await save({'templateId': id})).templateId, isNull);
+    });
+
+    test('a workout and its template written at once end up linked, whichever is first', () async {
+      Future<String?> link(String workout) async {
+        final rows = await h.exec('SELECT template_id::text FROM workouts WHERE id = @w::uuid', {'w': workout});
+        return rows.single[0] as String?;
+      }
+
+      const insertTemplate = "INSERT INTO templates (id, user_id, name, order_index) VALUES (@t::uuid, @u, 'A', 0)";
+      const insertWorkout = '''
+        INSERT INTO workouts (id, user_id, name, sent_template_id) VALUES (@w::uuid, @u, 'A', @t::uuid)
+      ''';
+      for (final workoutFirst in [true, false]) {
+        final (t, w) = (uuidV7(), uuidV7());
+        final [first, second] = workoutFirst ? [insertWorkout, insertTemplate] : [insertTemplate, insertWorkout];
+        Map<String, dynamic> params(String sql) => {'t': t, 'u': userId, if (sql == insertWorkout) 'w': w};
+
+        late Future<void> waiting;
+        await h.pool.runTx((tx) async {
+          await tx.execute(Sql.named(first), parameters: params(first));
+          // on its own connection: it waits for this transaction to end
+          waiting = h.exec(second, params(second));
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        });
+        await waiting;
+        expect(await link(w), t, reason: workoutFirst ? 'the workout first' : 'the template first');
+      }
+    });
+
+    test('a session put back takes the place of the one sent with', () async {
+      final coach = await h.seedProfile();
+      final (program, session) = await seedProgram(userId);
+      await h.exec('UPDATE programs SET coach_id = @c WHERE id = @p::uuid', {'c': coach, 'p': program});
+      final workout = await save({'templateId': session, 'programId': program});
+      await h.db.removeSession(ownerId: userId, actorId: userId, sessionId: session);
+      await h.db.updateWorkout(
+        userId: userId,
+        workoutId: workout.id,
+        body: body({'templateId': sample}),
+        imageUrl: imageUrl,
+      );
+      await h.db.restoreSession(
+        ownerId: userId,
+        actorId: userId,
+        programId: program,
+        body: TemplateRequest(userId: userId, id: session, name: 'A'),
+        links: {
+          'workouts': [workout.id],
+        },
+      );
+      final row = await h.exec('SELECT template_id::text, sent_template_id FROM workouts WHERE id = @w::uuid', {
+        'w': workout.id,
+      });
+      expect(row.single, [session, null]);
     });
 
     test('one that arrives later is linked, and let go once deleted', () async {
