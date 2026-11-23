@@ -2,6 +2,7 @@
 library;
 
 import 'package:heart/globals/globals.dart';
+import 'package:heart/inputs/inputs.dart';
 import 'package:heart/middleware/database.dart';
 import 'package:heart/routes/roster.dart';
 import 'package:heart_models/heart_models.dart';
@@ -275,10 +276,10 @@ void main() {
       );
       await h.exec(
         '''
-        INSERT INTO templates (user_id, name, program_id, joined_program_at)
-        VALUES (@s, 'Day', @p::uuid, '2020-01-01Z')
+        INSERT INTO templates (user_id, name, program_id, joined_program_at, assigned_by)
+        VALUES (@s, 'Day', @p::uuid, '2020-01-01Z', @c)
         ''',
-        {'s': student, 'p': id},
+        {'s': student, 'p': id, 'c': coach},
       );
       return id;
     }
@@ -357,6 +358,91 @@ void main() {
       await roster(coach);
       await h.db.markReviewed(coachId: coach, connectionId: connection);
       await changes(coach, student, id, 'Block, from the coach again');
+      expect((await roster(coach)).items.single.reasons, isNot(contains('changed')));
+    });
+
+    test('a session the client added is the program changed, though no history says so', () async {
+      final (coach, student, connection) = await client();
+      final id = await program(coach, student, connection);
+      await roster(coach);
+      await h.exec("INSERT INTO templates (user_id, name, program_id) VALUES (@s, 'Mine', @p::uuid)", {
+        's': student,
+        'p': id,
+      });
+      expect((await roster(coach)).items.single.reasons, contains('changed'));
+
+      await h.db.markReviewed(coachId: coach, connectionId: connection);
+      expect((await roster(coach)).items.single.reasons, isNot(contains('changed')));
+    });
+
+    test('archiving a program is not changing it', () async {
+      final (coach, student, connection) = await client();
+      final id = await program(coach, student, connection);
+      await h.db.writeProgramFields(
+        ownerId: student,
+        actorId: student,
+        programId: id,
+        program: Program(name: 'Block', weeks: 1, archived: true),
+      );
+      expect((await h.exec('SELECT 1 FROM program_changes WHERE program_id = @p::uuid', {'p': id})), hasLength(1));
+      expect((await roster(coach)).items.single.reasons, isNot(contains('changed')));
+    });
+
+    test('a ladder\'s step up is not the client changing it, and swapping another exercise is', () async {
+      final (coach, student, connection) = await client();
+      final id = await program(coach, student, connection);
+      final session = (await h.exec('SELECT id::text FROM templates WHERE program_id = @p::uuid', {'p': id})).single[0];
+      final (goblet, front, other) = (
+        await h.seedGlobalExercise(),
+        await h.seedGlobalExercise(),
+        await h.seedGlobalExercise(),
+      );
+      Future<void> holds(String actor, String exercise) async {
+        await h.db.writeSession(
+          ownerId: student,
+          actorId: actor,
+          sessionId: session! as String,
+          body: TemplateUpdateIn.fromJson({
+            'name': 'Day',
+            'exercises': [
+              {
+                'exercise': exercise,
+                'order': 0,
+                'sets': [
+                  {'reps': 5},
+                ],
+              },
+            ],
+          }, userId: student).request,
+        );
+      }
+
+      await holds(coach, goblet);
+      await h.exec(
+        '''
+        INSERT INTO program_actions (user_id, program_id, kind, at, from_exercise, to_exercise)
+        VALUES (@s, @p::uuid, 'advance', now(), @f::uuid, @t::uuid)
+        ''',
+        {'s': student, 'p': id, 'f': goblet, 't': front},
+      );
+      await holds(student, front);
+      expect(await h.exec('SELECT 1 FROM program_changes WHERE actor_id = @s', {'s': student}), hasLength(1));
+      expect((await roster(coach)).items.single.reasons, isNot(contains('changed')));
+
+      await holds(student, other);
+      expect((await roster(coach)).items.single.reasons, contains('changed'));
+    });
+
+    test('a change made during a pause is none the coach can read', () async {
+      final (coach, student, connection) = await client();
+      final id = await program(coach, student, connection);
+      Future<void> status(String status) => h.exec(
+        'UPDATE connections SET status = @status, status_by = @s WHERE id = @c::uuid',
+        {'status': status, 's': student, 'c': connection},
+      );
+      await status('paused');
+      await changes(student, student, id, 'Block, while paused');
+      await status('active');
       expect((await roster(coach)).items.single.reasons, isNot(contains('changed')));
     });
 
