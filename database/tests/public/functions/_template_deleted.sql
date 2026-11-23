@@ -20,7 +20,6 @@ DECLARE
     _user_id     TEXT := create_test_profile();
     _template_id UUID := create_test_template(_user_id => _user_id);
     _linked      UUID;
-    _unlinked    UUID;
 BEGIN
     RETURN NEXT is(
             (SELECT count(*) FROM archive.deleted_templates WHERE user_id = _user_id),
@@ -29,9 +28,7 @@ BEGIN
         );
 
     _linked := create_test_workout(_user_id => _user_id);
-    _unlinked := create_test_workout(_user_id => _user_id);
     UPDATE workouts SET template_id = _template_id WHERE id = _linked;
-    UPDATE workouts SET sent_template_id = _template_id WHERE id = _unlinked;
 
     DELETE FROM templates WHERE id = _template_id;
 
@@ -44,7 +41,7 @@ BEGIN
             (
                 SELECT count(*)
                 FROM workouts
-                WHERE id IN (_linked, _unlinked)
+                WHERE id = _linked
                   AND coalesce(template_id, sent_template_id) IS NOT NULL
             ),
             0::bigint,

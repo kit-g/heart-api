@@ -38,8 +38,8 @@ BEGIN
         );
     RETURN NEXT results_eq(
             format('SELECT template_id, sent_template_id FROM workouts WHERE id = %L', _theirs),
-            format('VALUES (NULL::uuid, %L::uuid)', _template_id),
-            'another account''s is not'
+            'VALUES (NULL::uuid, NULL::uuid)',
+            'another account''s names it no more, since it is somebody else''s'
         );
 END
 $$ LANGUAGE plpgsql;
@@ -63,6 +63,22 @@ BEGIN
             0::bigint,
             'and not once put back'
         );
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test__template_arrived_leaves_a_linked_workout() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _user_id  TEXT := create_test_profile();
+    _held     UUID := create_test_template(_user_id => _user_id);
+    _late     UUID := uuidv7();
+    _workout  UUID := create_test_workout(_user_id => _user_id);
+BEGIN
+    UPDATE workouts SET sent_template_id = _late WHERE id = _workout;
+    UPDATE workouts SET template_id = _held WHERE id = _workout;
+
+    INSERT INTO templates (id, user_id, name, order_index) VALUES (_late, _user_id, 'late', 0);
+    RETURN NEXT is((SELECT template_id FROM workouts WHERE id = _workout), _held, 'it keeps the one it has');
 END
 $$ LANGUAGE plpgsql;
 
