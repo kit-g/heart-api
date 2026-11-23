@@ -271,6 +271,18 @@ void main() {
       expect(programs[unlinked['id']], isNull, reason: 'the student\'s own program is no link for a coach');
     });
 
+    test('a template the server holds nothing for is not named by a coach\'s log (heart-api#474)', () async {
+      final (coach, student) = await coaching();
+      final log = body(await h.seedGlobalExercise());
+      await logWorkoutForStudent(logging(coach, student, {...log, 'templateId': uuidV7()}), student);
+
+      final rows = await h.exec(
+        'SELECT template_id, sent_template_id FROM workouts WHERE id = @w::uuid',
+        {'w': log['id']},
+      );
+      expect(rows.single, [null, null]);
+    });
+
     test('nothing from before coaching began, without the history', () async {
       final (coach, student) = await coaching();
       final exercise = await h.seedGlobalExercise();

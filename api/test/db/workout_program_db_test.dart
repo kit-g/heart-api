@@ -82,6 +82,110 @@ void main() {
     expect(garbage.templateId, isNull);
   });
 
+  group('a template the server holds nothing for (heart-api#474)', () {
+    // a sample's id is the content's own, and no v7
+    const sample = '3b790e9f-98da-44f6-bb5d-53044635da6c';
+
+    Future<String?> read(String workout) async {
+      return (await h.db.getWorkout(userId: userId, workoutId: workout, imageUrl: imageUrl)).templateId;
+    }
+
+    Future<Workout> save(Map<String, dynamic> links) async {
+      final (workout, _) = await h.db.createWorkout(userId: userId, body: body(links), imageUrl: imageUrl);
+      return workout;
+    }
+
+    Future<String> template({String? id}) async {
+      final (stored, _) = await h.db.createTemplateOrExisting(
+        userId: userId,
+        body: TemplateRequest(userId: userId, id: id, name: 'A'),
+      );
+      return stored.id;
+    }
+
+    test('a sample is named by every read of its owner\'s', () async {
+      final workout = await save({'templateId': sample});
+      expect(workout.templateId, sample);
+      expect(await read(workout.id), sample);
+
+      final listed = await h.db.getWorkouts(
+        userId: userId,
+        targetUserId: userId,
+        imageUrl: imageUrl,
+      );
+      expect(listed.items.singleWhere((each) => each.id == workout.id).templateId, sample);
+
+      final patched = await h.db.patchWorkout(
+        userId: userId,
+        workoutId: workout.id,
+        name: 'Renamed',
+        imageUrl: imageUrl,
+      );
+      expect(patched.templateId, sample);
+
+      final kept = await h.db.updateWorkout(userId: userId, workoutId: workout.id, body: body({}), imageUrl: imageUrl);
+      expect(kept.templateId, sample);
+      final cleared = await h.db.updateWorkout(
+        userId: userId,
+        workoutId: workout.id,
+        body: body({'templateId': null}),
+        imageUrl: imageUrl,
+      );
+      expect(cleared.templateId, isNull);
+      final again = await h.db.updateWorkout(
+        userId: userId,
+        workoutId: workout.id,
+        body: body({'templateId': sample}),
+        imageUrl: imageUrl,
+      );
+      expect(again.templateId, sample);
+    });
+
+    test('someone else reading the workout isn\'t given it', () async {
+      final coach = await h.seedProfile();
+      await h.exec(
+        '''
+        INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status, accepted_at)
+        VALUES (@c, @s, 'COACH', 'STUDENT', 'fitness', 'active', '2020-01-01Z')
+        ''',
+        {'c': coach, 's': userId},
+      );
+      final workout = await save({'templateId': sample});
+      final seen = await h.db.getWorkouts(userId: coach, targetUserId: userId, imageUrl: imageUrl);
+      expect(seen.items.singleWhere((each) => each.id == workout.id).templateId, isNull);
+    });
+
+    test('one that arrives later is linked, and let go once deleted', () async {
+      final id = uuidV7();
+      final workout = await save({'templateId': id});
+      expect(workout.templateId, id);
+
+      await template(id: id);
+      final linked = await h.exec('SELECT template_id::text FROM workouts WHERE id = @w::uuid', {'w': workout.id});
+      expect(linked.single[0], id);
+      expect(await read(workout.id), id);
+
+      await h.db.deleteTemplate(coachId: userId, templateId: id);
+      expect(await read(workout.id), isNull);
+    });
+
+    test('one deleted before the workout arrived is none, and so is a replace naming it', () async {
+      final id = await template();
+      await h.db.deleteTemplate(coachId: userId, templateId: id);
+
+      final workout = await save({'templateId': id});
+      expect(workout.templateId, isNull);
+      final replaced = await h.db.updateWorkout(
+        userId: userId,
+        workoutId: workout.id,
+        body: body({'templateId': id}),
+        imageUrl: imageUrl,
+      );
+      expect(replaced.templateId, isNull);
+      expect(await read(workout.id), isNull);
+    });
+  });
+
   test('a replace without the keys keeps them, as a 1.13 save does; null lets go', () async {
     final (program, template) = await seedProgram(userId);
     final (workout, _) = await h.db.createWorkout(

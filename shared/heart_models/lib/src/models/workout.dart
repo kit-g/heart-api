@@ -208,7 +208,8 @@ abstract interface class Workout with Iterable<WorkoutExercise>, HasUuid impleme
   static const maxPauses = 100;
 
   /// The template this workout was started from, if any: a program's session
-  /// or a plain template.
+  /// or a plain template. It can name one the server doesn't hold: a sample, or
+  /// one that hasn't reached it. Null once that template is deleted.
   String? get templateId;
 
   /// The program this workout counts toward, if any. Kept apart from

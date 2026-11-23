@@ -17,6 +17,23 @@ CASE
   WHEN @requesterId IN (logged_by, user_id) THEN (SELECT username FROM profiles coach WHERE coach.id = logged_by)
 END AS logged_by_name''';
 
+/// The template a workout names, to its owner: one of theirs, or the id it was sent
+/// with while no template answers to it. Anyone else reads only the first.
+const _templateForReader = '''
+CASE WHEN @requesterId = user_id THEN coalesce(template_id, sent_template_id) ELSE template_id END AS template_id''';
+
+/// The id a workout was sent with, when no template answers to it and the caller
+/// didn't delete the one that did: a sample, or a template that hasn't arrived.
+const _unheldTemplate = '''
+  SELECT @templateId::uuid AS id
+  WHERE NOT EXISTS (SELECT 1 FROM templates WHERE id = @templateId::uuid)
+    AND NOT EXISTS (
+      SELECT 1
+      FROM archive.deleted_templates
+      WHERE user_id = @userId
+        AND id = @templateId::uuid
+    )''';
+
 const _listWorkouts =
     '''
 WITH
@@ -25,7 +42,7 @@ _rel AS (
 ),
 _workouts AS (
   SELECT
-    id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at,
+    id, name, started_at, completed_at, calories, note, pauses, $_templateForReader, program_id, created_at,
     $_loggedByColumnsForReader,
     _workout_exercises(id, @locale::text) AS exercises,
     CASE
@@ -96,7 +113,7 @@ SELECT
   w.calories,
   w.note,
   w.pauses,
-  w.template_id,
+  coalesce(w.template_id, w.sent_template_id) AS template_id,
   w.program_id,
   w.created_at,
   $_loggedByColumns,
@@ -117,7 +134,7 @@ _rel AS (
   SELECT _relation(@requesterId, @targetUserId, @assistant::boolean) AS r
 )
 SELECT
-  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
+  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, $_templateForReader, w.program_id, w.created_at,
   $_loggedByColumnsForReader,
   _workout_exercises(w.id, @locale::text) AS exercises,
   CASE
@@ -150,7 +167,7 @@ SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, N
 /// `_rethrowForeignId`.
 ///
 /// A coach logging for the owner (`@loggedBy`) links only their own copy, live, and its
-/// sessions, so the log can't move a program they don't write. They log only what
+/// sessions, so the log can't move a program they don't write, and leaves no other id. They log only what
 /// they could read, and not a workout the owner deleted: either returns no row.
 const _saveWorkout =
     '''
@@ -158,8 +175,8 @@ WITH
 _existing_workout AS (
   SELECT id FROM workouts WHERE id = @id::uuid AND user_id = @userId
 ),
--- the template and program are the caller's own or nothing: a session saved
--- before its template synced, or after it was deleted, still saves, unlinked
+-- the template and program are the caller's own: a session saved before its
+-- template synced, or after it was deleted, still saves, unlinked
 _program AS (
   SELECT p.id
   FROM programs p
@@ -179,6 +196,13 @@ _template AS (
   WHERE id = @templateId::uuid
     AND user_id = @userId
     AND (@loggedBy::text IS NULL OR program_id IN (SELECT id FROM _program))
+),
+_sent_template AS (
+  SELECT id
+  FROM (
+$_unheldTemplate
+  ) unheld
+  WHERE @loggedBy::text IS NULL
 ),
 _order_to_id AS (
   SELECT
@@ -206,7 +230,7 @@ _exercise_lookup AS (
   WHERE e.user_id IS NULL OR e.user_id = @userId
 ),
 _workout AS (
-  INSERT INTO workouts (id, user_id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, logged_by)
+  INSERT INTO workouts (id, user_id, name, started_at, completed_at, calories, note, pauses, template_id, sent_template_id, program_id, logged_by)
   SELECT
     coalesce(@id::uuid, uuidv7()),
     @userId,
@@ -217,6 +241,7 @@ _workout AS (
     @note,
     @pauses::jsonb,
     (SELECT id FROM _template),
+    (SELECT id FROM _sent_template),
     (SELECT id FROM _program),
     @loggedBy::text
   WHERE NOT EXISTS (SELECT 1 FROM _existing_workout)
@@ -227,7 +252,7 @@ _workout AS (
         AND NOT EXISTS (SELECT 1 FROM archive.deleted_workouts d WHERE d.id = @id::uuid AND d.user_id = @userId)
       )
     )
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, logged_by
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, sent_template_id, program_id, created_at, logged_by
 ),
 _inserted_exercises AS (
   INSERT INTO workout_exercises (id, workout_id, exercise_id, exercise_order, met, note, superset)
@@ -325,7 +350,7 @@ SELECT
   w.calories,
   w.note,
   w.pauses,
-  w.template_id,
+  coalesce(w.template_id, w.sent_template_id) AS template_id,
   w.program_id,
   w.created_at,
   $_loggedByColumns,
@@ -344,7 +369,8 @@ SELECT
   w.calories,
   w.note,
   w.pauses,
-  w.template_id,
+  -- a workout that was here already is the owner's, whoever asks
+  CASE WHEN @loggedBy::text IS NULL THEN coalesce(w.template_id, w.sent_template_id) ELSE w.template_id END AS template_id,
   w.program_id,
   w.created_at,
   $_loggedByColumns,
@@ -744,9 +770,12 @@ _exercise_lookup AS (
   JOIN _order_to_id otn ON otn.exercise_id = e.id
   WHERE e.user_id IS NULL OR e.user_id = @userId
 ),
--- the caller's own template and program, or nothing, as on create
+-- the caller's own template and program, as on create
 _template AS (
   SELECT id FROM templates WHERE id = @templateId::uuid AND user_id = @userId
+),
+_sent_template AS (
+$_unheldTemplate
 ),
 _program AS (
   SELECT id FROM programs WHERE id = @programId::uuid AND user_id = @userId
@@ -763,13 +792,14 @@ _workout AS (
     calories = @calories,
     note = CASE WHEN @setsNote::boolean THEN @note ELSE note END,
     template_id = CASE WHEN @setsTemplate::boolean THEN (SELECT id FROM _template) ELSE template_id END,
+    sent_template_id = CASE WHEN @setsTemplate::boolean THEN (SELECT id FROM _sent_template) ELSE sent_template_id END,
     program_id = CASE WHEN @setsProgram::boolean THEN (SELECT id FROM _program) ELSE program_id END,
     pauses = CASE
       WHEN @setsPauses::boolean THEN @pauses::jsonb
       ELSE _clip_pauses(pauses, @startedAt::timestamptz, @completedAt::timestamptz)
     END
   WHERE id = @workoutId::uuid AND user_id = @userId
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, logged_by
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, sent_template_id, program_id, created_at, logged_by
 ),
 -- The body as stored, read from the statement's snapshot: every CTE sees the
 -- rows as they were before this replace, whatever the others write.
@@ -950,7 +980,8 @@ _exercises_json AS (
   LEFT JOIN _sets_json sj ON sj.workout_exercise_id = ie.id
 )
 SELECT
-  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
+  w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses,
+  coalesce(w.template_id, w.sent_template_id) AS template_id, w.program_id, w.created_at,
   $_loggedByColumns,
   -- the replacing branch reads its own RETURNING, because a CTE cannot see
   -- rows it just wrote; the preserving branch reads the table, which is
@@ -990,7 +1021,7 @@ WITH _updated AS (
       )
     END
   WHERE id = @workoutId::uuid AND user_id = @userId
-  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, program_id, created_at, logged_by
+  RETURNING id, name, started_at, completed_at, calories, note, pauses, template_id, sent_template_id, program_id, created_at, logged_by
 )
 SELECT
   u.id,
@@ -1000,7 +1031,7 @@ SELECT
   u.calories,
   u.note,
   u.pauses,
-  u.template_id,
+  coalesce(u.template_id, u.sent_template_id) AS template_id,
   u.program_id,
   u.created_at,
   $_loggedByColumns,
@@ -1066,7 +1097,8 @@ WITH _check AS (
 SELECT
   c.stale,
   p.id, p.xid::text AS xid, p.at, p.deleted,
-  w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses, w.template_id, w.program_id, w.created_at,
+  w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses,
+  coalesce(w.template_id, w.sent_template_id) AS template_id, w.program_id, w.created_at,
   $_loggedByColumns,
   CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id, @locale::text) END AS exercises,
   CASE WHEN p.deleted THEN NULL ELSE COALESCE(

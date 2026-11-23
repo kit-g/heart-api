@@ -217,6 +217,20 @@ class WorkoutRequest {
 
   bool get setsProgram => body.containsKey('programId');
 
+  /// The template it was started from. Any uuid, where every other id is a v7:
+  /// a sample template's is the content's own.
+  String? get _template {
+    return switch (body['templateId']) {
+      final String id when _uuid.hasMatch(id) => id,
+      _ => null,
+    };
+  }
+
+  static final _uuid = RegExp(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+    caseSensitive: false,
+  );
+
   /// A link, never a requirement: anything but a v7 id reads as none, and the
   /// query drops an id that isn't the caller's, so a workout always saves.
   String? _link(String field) {
@@ -420,7 +434,7 @@ class WorkoutRequest {
       'calories': (body['calories'] as num?)?.toDouble(),
       'note': workoutNote(body['note']),
       'pauses': jsonEncode(workoutPauses(body['pauses']).map((pause) => pause.toMap()).toList()),
-      'templateId': _link('templateId'),
+      'templateId': _template,
       'programId': _link('programId'),
       'exercises': jsonEncode(_exercises()),
     };
