@@ -1,6 +1,6 @@
 name: heart_models
 description: "Interfaces and data classes"
-version: 2.61.0
+version: 2.62.0
 publish_to: none
 
 environment:

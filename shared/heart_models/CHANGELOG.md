@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.62.0
+
+Account deletion calls return nothing (heart-api#471).
+
+- Changed: `AccountService.deleteAccount` and `undoAccountDeletion` are `Future<void>`, where they
+  were `Future<String?>`. The string always came back null: a failure is thrown. An implementer
+  that still returns `Future<String?>` compiles as it is, since that is a `Future<void>` too;
+  only a caller that reads the result doesn't.
+
 ## 2.61.0
 
 One error for a request the server refused (heart-api#465).
