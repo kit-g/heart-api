@@ -4,10 +4,11 @@ import '../models/misc.dart';
 abstract interface class AccountService implements HeaderAuthenticatedService, FileUploadService {
   Future<User> registerAccount(User user);
 
-  /// Cancels a scheduled deletion. Done when it completes; a failure throws.
+  /// Cancels a scheduled deletion. Throws on failure.
   Future<void> undoAccountDeletion();
 
-  /// Schedules the account for deletion. Done when it completes; a failure throws.
+  /// Schedules the account for deletion, which can still be undone once this
+  /// completes. Throws on failure.
   ///
   /// [appleGrant] is what lets the deletion revoke a Sign in with Apple grant
   /// when it eventually runs; omitted for every other kind of account, and
