@@ -73,6 +73,7 @@ void main() {
             as Map;
     expect(message['userId'], 'coach-1');
     expect(message['topic'], 'coaching.invitation_accepted');
+    expect(message['data'], {'connectionId': 'c1'});
   });
 
   test('accepting again answers the same connection and tells nobody', () async {

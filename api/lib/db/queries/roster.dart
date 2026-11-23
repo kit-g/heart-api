@@ -22,12 +22,19 @@ WHERE s.coach_id = @coachId
   AND c.status IN ('active', 'paused')
 ''';
 
+/// What a snapshot of a session or a program holds besides what it says.
+const _unsaid = "ARRAY['archived', 'folder', 'assignedBy', 'revision', 'sessionRevisions']";
+
 /// From what the coach can read, and nothing else: a hidden or paused-over workout
 /// moves none of these. A reason is dated when it reached the server, not when the
 /// workout started, so one that syncs after the coach looked still counts: a note by
 /// the workout's last change, falling short by that or its plan's arrival. A workout
-/// the coach logged themselves raises neither: they were there.
-const _refreshSummary = '''
+/// the coach logged themselves raises neither: they were there. A change to a program
+/// is dated by the same clock, and only the student's own is one: not what their device writes when a ladder steps up, not
+/// where they file it, and not archiving it, which is how they move to the next one. A
+/// session they added is in no history, so it counts from when it joined.
+const _refreshSummary =
+    '''
 WITH
 _rel AS (
   SELECT _relation(@coachId, @studentId) AS r
@@ -63,6 +70,36 @@ SET
     JOIN workout_plans p ON p.workout_id = s.id
     WHERE NOT s.by_coach
       AND _workout_fell_short(s.id)
+  ),
+  changed_at = greatest(
+    (
+      SELECT max(c.at)
+      FROM programs p
+      JOIN program_changes c ON c.program_id = p.id
+      WHERE p.user_id = @studentId
+        AND p.coach_id = @coachId
+        AND c.actor_id = @studentId
+        AND (SELECT (r).scope FROM _rel) = 'coach'
+        AND _readable_at((SELECT r FROM _rel), c.at, NULL)
+        AND (c.before - $_unsaid) IS DISTINCT FROM (c.after - $_unsaid)
+        AND NOT EXISTS (
+          SELECT 1
+          FROM program_actions a
+          WHERE a.program_id = p.id
+            AND a.kind = 'advance'
+            AND _change_is_advance(c.before, c.after, a.from_exercise, a.to_exercise)
+        )
+    ),
+    (
+      SELECT max(greatest(t.created_at, t.joined_program_at))
+      FROM programs p
+      JOIN templates t ON t.program_id = p.id
+      WHERE p.user_id = @studentId
+        AND p.coach_id = @coachId
+        AND t.assigned_by IS NULL
+        AND (SELECT (r).scope FROM _rel) = 'coach'
+        AND _readable_at((SELECT r FROM _rel), greatest(t.created_at, t.joined_program_at), NULL)
+    )
   ),
   updated_at = now()
 WHERE connection_id = @connectionId::uuid
@@ -131,7 +168,8 @@ _clients AS (
             ) < now() - INTERVAL '7 days'
           THEN 'gap'
         END,
-        CASE WHEN s.ending THEN 'ending' END
+        CASE WHEN s.ending THEN 'ending' END,
+        CASE WHEN s.changed_at > coalesce(s.reviewed_at, '-infinity') THEN 'changed' END
       ],
       NULL
     ) AS reasons_seen

@@ -29,7 +29,8 @@ final List<McpTool> _coachTools = [
         '(sharesWithAssistant). For those who share: the program they are on and its week, when they trained in the '
         'last 14 days, when they last trained, and why they need a word (reasons: lighter, a workout fell short of '
         'its plan; note, they left a note; gap, a week without training; ending, their program is in its last '
-        'week). former true lists former clients, by name and dates only.',
+        'week; changed, they changed a program the user sent, not always the one named here: list_client_programs has '
+        'them and get_client_program_changes says what). former true lists former clients, by name and dates only.',
     scope: .readCoaching,
     inputSchema: {
       'type': 'object',

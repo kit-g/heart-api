@@ -1,6 +1,6 @@
 import 'misc.dart';
 
-/// Why a client needs a word. `lighter`, `note`, `gap`, `ending`, and a later server
+/// Why a client needs a word. `lighter`, `note`, `gap`, `ending`, `changed`, and a later server
 /// may add one, so these travel as text.
 abstract interface class ClientSummary implements Model {
   String get connectionId;

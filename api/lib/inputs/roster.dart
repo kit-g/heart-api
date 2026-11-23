@@ -46,7 +46,7 @@ class RosterQuery {
     return RosterQuery._(
       reason: query.stringOrNull(
         'reason',
-        description: 'Only those who need a word for this reason: `lighter`, `note`, `gap` or `ending`.',
+        description: 'Only those who need a word for this reason: `lighter`, `note`, `gap`, `ending` or `changed`.',
       ),
       former: query.boolean('former', description: 'Former clients instead of current ones.'),
       cursor: switch (page.cursor) {

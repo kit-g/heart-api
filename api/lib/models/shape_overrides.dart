@@ -37,7 +37,7 @@ final Map<String, ShapeOverride> shapeOverrides = {
   ),
   'MeCoachingClient.recent': const .describe('When they trained in the last 14 days.'),
   'MeCoachingClient.reasons': const .describe(
-    'Why they need a word: `lighter`, `note`, `gap` or `ending`, and a word you don\'t know may be added.',
+    'Why they need a word: `lighter`, `note`, `gap`, `ending` or `changed`, and a word you don\'t know may be added.',
   ),
   'MeClientProgramChange.by': const .describe('`you` or `client`; absent for a change neither of you made.'),
   'MeClientProgramChanges.cursor': const .describe('Where to resume: pass it back as `since`.'),

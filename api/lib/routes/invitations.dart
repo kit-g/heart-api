@@ -92,6 +92,8 @@ Future<AcceptedInvitation> acceptInvitation(Request req) async {
         'name': ?req.user.displayName,
         'actorId': req.userId,
         'connectionId': connection.connectionId,
+        // what a tap on it opens
+        'data': {'connectionId': ?connection.connectionId},
       },
     );
   }
