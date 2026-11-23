@@ -310,6 +310,73 @@ void main() {
       expect(finished.reasons, isNot(contains('ending')));
       expect((await h.db.getCoachFeed(coachId: coach)).items.map((each) => each.kind), ['workout']);
     });
+
+    Future<void> changes(String actor, String student, String program, String name) async {
+      final written = await h.db.writeProgramFields(
+        ownerId: student,
+        actorId: actor,
+        programId: program,
+        program: Program(name: name, weeks: 1),
+      );
+      expect(written?.name, name);
+    }
+
+    test('the client changed it, until the coach has looked', () async {
+      final (coach, student, connection) = await client();
+      final id = await program(coach, student, connection);
+      expect((await roster(coach)).items.single.reasons, isNot(contains('changed')));
+
+      await changes(student, student, id, 'Block, my way');
+      expect((await roster(coach)).items.single.reasons, contains('changed'));
+      expect((await roster(coach, reason: 'changed')).items.single.studentId, student);
+
+      await h.db.markReviewed(coachId: coach, connectionId: connection);
+      expect((await roster(coach)).items.single.reasons, isNot(contains('changed')));
+
+      await changes(student, student, id, 'Block, my way again');
+      expect((await roster(coach)).items.single.reasons, contains('changed'));
+    });
+
+    test('a session the client changed is the program changed', () async {
+      final (coach, student, connection) = await client();
+      final id = await program(coach, student, connection);
+      await roster(coach);
+
+      final session = (await h.exec('SELECT id::text FROM templates WHERE program_id = @p::uuid', {'p': id})).single[0];
+      await h.db.removeSession(ownerId: student, actorId: student, sessionId: session! as String);
+      expect((await roster(coach)).items.single.reasons, contains('changed'));
+    });
+
+    test('the coach changing it is no reason, before or after the client\'s own', () async {
+      final (coach, student, connection) = await client();
+      final id = await program(coach, student, connection);
+      await changes(coach, student, id, 'Block, from the coach');
+      expect((await roster(coach)).items.single.reasons, isNot(contains('changed')));
+
+      await changes(student, student, id, 'Block, my way');
+      await roster(coach);
+      await h.db.markReviewed(coachId: coach, connectionId: connection);
+      await changes(coach, student, id, 'Block, from the coach again');
+      expect((await roster(coach)).items.single.reasons, isNot(contains('changed')));
+    });
+
+    test('a program another coach sent is none of this one\'s', () async {
+      final (coach, student, _) = await client();
+      final (other, _, _) = await client();
+      final theirs = await h.insertId(
+        '''
+        INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status, accepted_at)
+        VALUES (@c, @s, 'COACH', 'STUDENT', 'fitness', 'active', '2020-01-01Z')
+        RETURNING id
+        ''',
+        {'c': other, 's': student},
+      );
+      await changes(student, student, await program(other, student, theirs), 'Theirs, my way');
+
+      expect((await roster(coach)).items.single.reasons, isNot(contains('changed')));
+      final seen = (await roster(other)).items.singleWhere((each) => each.studentId == student);
+      expect(seen.reasons, contains('changed'));
+    });
   });
 
   group('what it can\'t see', () {

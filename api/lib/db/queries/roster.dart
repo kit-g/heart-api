@@ -26,7 +26,8 @@ WHERE s.coach_id = @coachId
 /// moves none of these. A reason is dated when it reached the server, not when the
 /// workout started, so one that syncs after the coach looked still counts: a note by
 /// the workout's last change, falling short by that or its plan's arrival. A workout
-/// the coach logged themselves raises neither: they were there.
+/// the coach logged themselves raises neither: they were there. A change to a program
+/// is dated by the same clock, and only the student's own is one.
 const _refreshSummary = '''
 WITH
 _rel AS (
@@ -63,6 +64,15 @@ SET
     JOIN workout_plans p ON p.workout_id = s.id
     WHERE NOT s.by_coach
       AND _workout_fell_short(s.id)
+  ),
+  changed_at = (
+    SELECT max(c.at)
+    FROM programs p
+    JOIN program_changes c ON c.program_id = p.id
+    WHERE p.user_id = @studentId
+      AND p.coach_id = @coachId
+      AND c.actor_id = @studentId
+      AND (SELECT (r).scope FROM _rel) = 'coach'
   ),
   updated_at = now()
 WHERE connection_id = @connectionId::uuid
@@ -131,7 +141,8 @@ _clients AS (
             ) < now() - INTERVAL '7 days'
           THEN 'gap'
         END,
-        CASE WHEN s.ending THEN 'ending' END
+        CASE WHEN s.ending THEN 'ending' END,
+        CASE WHEN s.changed_at > coalesce(s.reviewed_at, '-infinity') THEN 'changed' END
       ],
       NULL
     ) AS reasons_seen

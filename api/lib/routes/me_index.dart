@@ -214,7 +214,8 @@ final EndpointTable meRoutes = {
         '(`sharesWithAssistant`), which the client turns on in the app. Only those who share can be read here: '
         'for them, the program they are on and its week, the days they trained in the last 14 (`recent`), when '
         'they last trained, and why they need a word (`reasons`: `lighter`, a workout fell short of its plan; '
-        '`note`, they left a note; `gap`, a week without training; `ending`, their program is in its last week). '
+        '`note`, they left a note; `gap`, a week without training; `ending`, their program is in its last week; '
+        '`changed`, they changed a program you sent). '
         'One who doesn\'t share is named, with their status and since when, and nothing more. `?former=true` '
         'lists former clients.',
     input: RosterQuery.read,
