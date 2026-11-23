@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(13);
+SELECT plan(14);
 
 SELECT has_table('public'::name, 'client_summaries'::name);
 
@@ -17,6 +17,7 @@ SELECT has_index('public'::name, 'client_summaries'::name, 'client_summaries_coa
 SELECT has_index('public'::name, 'client_summaries'::name, 'client_summaries_student_idx'::name);
 
 SELECT col_type_is('public'::name, 'client_summaries'::name, 'ending_since'::name, 'timestamp with time zone'::name);
+SELECT col_type_is('public'::name, 'client_summaries'::name, 'changed_at'::name, 'timestamp with time zone'::name);
 
 SELECT has_trigger('public'::name, 'workouts'::name, 'workouts_mark_summaries_insert'::name);
 SELECT has_trigger('public'::name, 'workouts'::name, 'workouts_mark_summaries_update'::name);
