@@ -31,7 +31,11 @@ void main() {
     return ['heart-of.me/vouch/v1', user, deviceId, 'identity', signingKeys[deviceId]].join('\n');
   }
 
-  String removalMessage(String user, String deviceId) => ['heart-of.me/remove-device/v1', user, deviceId].join('\n');
+  int now() => DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+  String removalMessage(String user, String deviceId, int at) {
+    return ['heart-of.me/remove-device/v1', user, deviceId, '$at'].join('\n');
+  }
 
   /// A device with keys of its own, vouched for by [vouchedBy] when given.
   Future<String> device(String user, {String? vouchedBy}) async {
@@ -68,8 +72,9 @@ void main() {
       userId: user,
       deviceId: deviceId,
       removedBy: by,
+      signedAt: now(),
       signature: switch (by) {
-        final String by => await sign(by, removalMessage(user, deviceId)),
+        final String by => await sign(by, removalMessage(user, deviceId, now())),
         null => null,
       },
     );
@@ -250,9 +255,11 @@ void main() {
       );
       expect(padded.changed, isFalse, reason: 'the same vouch, spelled with padding and in upper case');
 
+      await vouch(me, another, by: trusted);
       await expectLater(
         vouch(me, fresh, by: another),
         throwsA(isA<Conflict>().having((e) => e.code, 'code', 'already_vouched')),
+        reason: 'a trusted vouch stays',
       );
       expect((await h.db.getDevices(readerId: me, ownerId: me)).firstWhere((d) => d.id == fresh).signature, signature);
     });
@@ -404,12 +411,30 @@ void main() {
       final me = await h.seedProfile();
       final first = await device(me);
       final vouched = await device(me, vouchedBy: first);
-      for (final signature in ['sig', await sign(first, removalMessage(me, first)), await sign(vouched, 'other')]) {
+      for (final signature in [
+        'sig',
+        await sign(first, removalMessage(me, first, now())),
+        await sign(first, removalMessage(me, vouched, now() - 1)),
+        await sign(vouched, 'other'),
+      ]) {
         await expectLater(
-          h.db.removeDevice(userId: me, deviceId: vouched, removedBy: first, signature: signature),
+          h.db.removeDevice(userId: me, deviceId: vouched, removedBy: first, signedAt: now(), signature: signature),
           refused('bad_signature'),
         );
       }
+
+      final stale = now() - 3600;
+      await expectLater(
+        h.db.removeDevice(
+          userId: me,
+          deviceId: vouched,
+          removedBy: first,
+          signedAt: stale,
+          signature: await sign(first, removalMessage(me, vouched, stale)),
+        ),
+        refused('signature_expired'),
+        reason: 'one left in a log is spent',
+      );
       expect(await inUse(me), {first, vouched});
     });
 
@@ -425,7 +450,8 @@ void main() {
             userId: me,
             deviceId: vouched,
             removedBy: by,
-            signature: await sign(by, removalMessage(me, vouched)),
+            signedAt: now(),
+            signature: await sign(by, removalMessage(me, vouched, now())),
           ),
           refused('vouch_required'),
         );
@@ -456,7 +482,8 @@ void main() {
         userId: me,
         deviceId: vouched.toUpperCase(),
         removedBy: first.toUpperCase(),
-        signature: await sign(first, removalMessage(me, vouched)),
+        signedAt: now(),
+        signature: await sign(first, removalMessage(me, vouched, now())),
       );
       expect(await inUse(me), {first, forged.device.id});
     });
@@ -485,17 +512,47 @@ void main() {
       expect((again.changed, again.device.vouchedBy), (true, grandchild));
     });
 
-    test('an account left with no trusted device in use trusts the earliest one left', () async {
+    test('removing the only trusted device trusts nobody else, so a password can\'t take its place', () async {
       final me = await h.seedProfile();
-      final (leftover, reinstalled) = (await device(me), await device(me));
-      expect(await trust(me), {leftover: 'first', reinstalled: null});
-
-      await remove(me, leftover);
-      expect(await trust(me), {reinstalled: 'first'});
-      final tablet = await device(me, vouchedBy: reinstalled);
+      final phone = await device(me);
       final password = await device(me);
-      await expectLater(remove(me, tablet, by: password), refused('vouch_required'));
-      await remove(me, tablet, by: reinstalled);
+      await remove(me, phone);
+      final second = await device(me, vouchedBy: password);
+      expect(await trust(me), {password: null, second: null});
+
+      final owner = await device(me);
+      await remove(me, second, by: owner);
+      await remove(me, password);
+      expect(await inUse(me), {owner});
+    });
+
+    test('a device that comes to be trusted passes it to what it vouched for before', () async {
+      final me = await h.seedProfile();
+      final first = await device(me);
+      final reinstalled = await device(me);
+      final tablet = await device(me, vouchedBy: reinstalled);
+      expect((await trust(me))[tablet], isNull);
+
+      await vouch(me, reinstalled, by: first);
+      expect(await trust(me), {first: 'first', reinstalled: 'vouched', tablet: 'vouched'});
+    });
+
+    test('a trusted device takes a vouch only from a trusted one, which takes the place of an untrusted one', () async {
+      final me = await h.seedProfile();
+      final first = await device(me);
+      final upgraded = await device(me, vouchedBy: first);
+      final kept = await device(me, vouchedBy: first);
+      await remove(me, first, by: upgraded);
+
+      final password = await device(me);
+      await expectLater(vouch(me, kept, by: password), refused('vouch_required'));
+      final again = await vouch(me, kept, by: upgraded);
+      expect((again.changed, again.device.vouchedBy), (true, upgraded));
+
+      final fresh = await device(me, vouchedBy: password);
+      final replaced = await vouch(me, fresh, by: upgraded);
+      expect((replaced.changed, replaced.device.vouchedBy), (true, upgraded));
+      expect((await trust(me))[fresh], 'vouched');
     });
   });
 

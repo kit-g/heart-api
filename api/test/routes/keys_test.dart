@@ -172,6 +172,7 @@ void main() {
           userId: anyNamed('userId'),
           deviceId: anyNamed('deviceId'),
           removedBy: anyNamed('removedBy'),
+          signedAt: anyNamed('signedAt'),
           signature: anyNamed('signature'),
         ),
       ).thenAnswer((_) async {});
@@ -179,23 +180,35 @@ void main() {
       when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
     }
 
-    test('names the device asking and its signature, a + left unescaped read as one', () async {
+    test('names the device asking, when it signed, and its signature, a + left unescaped read as one', () async {
       stub();
-      final res = await app.send('DELETE', '/keys/devices/$device?removedBy=$other&signature=a+b/c%2Bd');
+      final res = await app.send(
+        'DELETE',
+        '/keys/devices/$device?removedBy=$other&signedAt=1764000000&signature=a+b/c%2Bd',
+      );
 
       expect(res.status, 204);
       verify(
-        app.db.removeDevice(userId: 'u1', deviceId: device, removedBy: other, signature: 'a+b/c+d'),
+        app.db.removeDevice(
+          userId: 'u1',
+          deviceId: device,
+          removedBy: other,
+          signedAt: 1764000000,
+          signature: 'a+b/c+d',
+        ),
       ).called(1);
     });
 
-    test('is the device asking and its signature, or neither', () async {
+    test('is the device asking, when it signed, and its signature, or none', () async {
       stub();
       for (final query in [
         'removedBy=$other',
         'signature=sig',
-        'removedBy=nope&signature=sig',
-        'removedBy=$other&signature=',
+        'removedBy=$other&signature=sig',
+        'signedAt=1764000000',
+        'removedBy=$other&signedAt=soon&signature=sig',
+        'removedBy=nope&signedAt=1764000000&signature=sig',
+        'removedBy=$other&signedAt=1764000000&signature=',
       ]) {
         final res = await app.send('DELETE', '/keys/devices/$device?$query');
         expect(res.status, 400, reason: query);
@@ -205,6 +218,7 @@ void main() {
           userId: anyNamed('userId'),
           deviceId: anyNamed('deviceId'),
           removedBy: anyNamed('removedBy'),
+          signedAt: anyNamed('signedAt'),
           signature: anyNamed('signature'),
         ),
       );
@@ -216,6 +230,7 @@ void main() {
           userId: anyNamed('userId'),
           deviceId: anyNamed('deviceId'),
           removedBy: anyNamed('removedBy'),
+          signedAt: anyNamed('signedAt'),
           signature: anyNamed('signature'),
         ),
       ).thenThrow(const Forbidden(code: 'vouch_required', reason: 'no'));

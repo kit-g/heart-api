@@ -28,9 +28,13 @@ String _vouchMessage({
 
 /// What a device signs to remove one of the account's devices. A removed device
 /// can't come back, so the same signature sent again removes nothing.
-String _removalMessage({required String userId, required String deviceId}) {
-  return ['heart-of.me/remove-device/v1', userId, deviceId].join('\n');
+String _removalMessage({required String userId, required String deviceId, required int signedAt}) {
+  return ['heart-of.me/remove-device/v1', userId, deviceId, '$signedAt'].join('\n');
 }
+
+/// How far a removal's signing time may be from the server's clock, either way: long
+/// enough for a phone's clock, short enough that a signature left in a log is spent.
+const _removalWindow = Duration(minutes: 10);
 
 /// A device's public keys, as it signs with them.
 typedef _Signer = ({String identityKey, String signingKey});
@@ -82,15 +86,19 @@ mixin _Keys on _DatabaseBase implements KeyService {
   }) async {
     id = id.toLowerCase();
     // a vouch that doesn't check out, or by a device that isn't the caller's in
-    // use, is no vouch
-    if ((vouchedBy?.toLowerCase(), signature) case (final String by, final String said)) {
-      final voucher = (await _signersOf(userId: userId, ids: [by]))[by];
-      final message = _vouchMessage(userId: userId, deviceId: id, identityKey: identityKey, signingKey: signingKey);
-      (vouchedBy, signature) = switch (voucher) {
-        final voucher? when await voucher.signed(message, said) => (by, said),
+    // use, or half of one, is no vouch
+    (vouchedBy, signature) = switch ((vouchedBy?.toLowerCase(), signature)) {
+      (final String by, final String said) => switch ((await _signersOf(userId: userId, ids: [by]))[by]) {
+        final voucher?
+            when await voucher.signed(
+              _vouchMessage(userId: userId, deviceId: id, identityKey: identityKey, signingKey: signingKey),
+              said,
+            ) =>
+          (by, said),
         _ => (null, null),
-      };
-    }
+      },
+      _ => (null, null),
+    };
 
     Future<Map<String, dynamic>?> publish(TxSession tx) async {
       final rows = await tx.execute(
@@ -178,6 +186,10 @@ mixin _Keys on _DatabaseBase implements KeyService {
         changed: false,
       ),
       {'voucher_owned': false} => throw const BadRequest(reason: 'vouchedBy must be another device of yours'),
+      {'untrusted': true} => throw const Forbidden(
+        code: 'vouch_required',
+        reason: 'a device the account trusts takes a vouch only from another it trusts',
+      ),
       _ => throw const Conflict(code: 'already_vouched', reason: 'this device is already vouched for'),
     };
   }
@@ -200,18 +212,26 @@ mixin _Keys on _DatabaseBase implements KeyService {
     required String userId,
     required String deviceId,
     String? removedBy,
+    int? signedAt,
     String? signature,
   }) async {
     deviceId = deviceId.toLowerCase();
     // a device that isn't the caller's in use asks as nobody would; the write
     // checks again that the one that signed is in use, and trusted
-    final by = switch ((removedBy?.toLowerCase(), signature)) {
-      (final String by, final String said) => switch ((await _signersOf(userId: userId, ids: [by]))[by]) {
-        null => null,
-        final signer => switch (await signer.signed(_removalMessage(userId: userId, deviceId: deviceId), said)) {
-          true => by,
+    final by = switch ((removedBy?.toLowerCase(), signedAt, signature)) {
+      (final String by, final int at, final String said) => switch ((await _signersOf(userId: userId, ids: [by]))[by]) {
+        final signer? => switch (await signer.signed(
+          _removalMessage(userId: userId, deviceId: deviceId, signedAt: at),
+          said,
+        )) {
+          true when _fresh(at) => by,
+          true => throw const BadRequest(
+            code: 'signature_expired',
+            reason: 'a removal is signed within ten minutes of the server\'s clock',
+          ),
           false => throw _badSignature,
         },
+        null => null,
       },
       _ => null,
     };
@@ -232,6 +252,11 @@ mixin _Keys on _DatabaseBase implements KeyService {
           reason: 'a device the account trusts and that is in a vouch is removed only from a trusted device',
         );
     }
+  }
+
+  bool _fresh(int signedAt) {
+    final at = DateTime.fromMillisecondsSinceEpoch(signedAt * 1000, isUtc: true);
+    return DateTime.now().toUtc().difference(at).abs() <= _removalWindow;
   }
 
   Future<Map<String, _Signer>> _signersOf({required String userId, required List<String> ids}) async {

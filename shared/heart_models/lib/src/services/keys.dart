@@ -30,11 +30,12 @@ abstract interface class KeyService {
   /// Stops using a device of the caller's: nothing more is sent to it, and what it
   /// vouched for is vouched for by nobody. A trusted device in a vouch is removed
   /// only when [removedBy], a trusted device of the caller's, signed the removal
-  /// ([signature]).
+  /// ([signature]) at [signedAt], in seconds since the epoch, lately.
   Future<void> removeDevice({
     required String userId,
     required String deviceId,
     String? removedBy,
+    int? signedAt,
     String? signature,
   });
 

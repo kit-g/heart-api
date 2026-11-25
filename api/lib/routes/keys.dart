@@ -87,6 +87,7 @@ Future<Model> removeDevice(Request req) async {
     userId: req.userId,
     deviceId: _deviceId(req),
     removedBy: query.removedBy,
+    signedAt: query.signedAt,
     signature: query.signature,
   );
   await _tellPeers(req);

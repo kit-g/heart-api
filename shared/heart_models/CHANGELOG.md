@@ -4,8 +4,9 @@
 
 Removing a device names the device asking (heart-api#483).
 
-- Added: `KeyService.removeDevice` takes `removedBy` and `signature`, both optional: the device
-  asking, and its signature over the removal. Callers compile as they are.
+- Added: `KeyService.removeDevice` takes `removedBy`, `signedAt` and `signature`, all optional: the
+  device asking, when it signed, in seconds since the epoch, and its signature over the removal.
+  Callers compile as they are.
 
 ## 2.62.0
 

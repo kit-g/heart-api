@@ -61,12 +61,15 @@ WHERE is_full
 ''';
 
 /// A device is vouched for once, by another device of the same owner in use, and a
-/// trusted one's vouch makes it trusted. The update checks the row it locks, so of
-/// two vouches racing, one lands and the other finds it there.
+/// trusted one's vouch makes it trusted. A trusted device takes a vouch only from a
+/// trusted one, and a trusted voucher's vouch takes the place of one by a device
+/// nobody trusts, so a password can't take the place a trusted device would. The
+/// update checks the row it locks, so of two vouches racing, one lands and the
+/// other finds it there.
 const _vouchForDevice = '''
 WITH
 _device AS (
-  SELECT id, vouched_by, signature
+  SELECT id, vouched_by, signature, trust
   FROM crypto_devices
   WHERE id = @deviceId::uuid
     AND user_id = @userId
@@ -90,13 +93,32 @@ _vouched AS (
   WHERE d.id = @deviceId::uuid
     AND d.user_id = @userId
     AND d.removed_at IS NULL
-    AND d.vouched_by IS NULL
+    AND (d.trust IS NULL OR v.trust IS NOT NULL)
+    AND (
+      d.vouched_by IS NULL
+      OR (
+        v.trust IS NOT NULL
+        AND d.vouched_by <> v.id
+        AND NOT EXISTS (
+          SELECT 1
+          FROM crypto_devices held
+          WHERE held.id = d.vouched_by
+            AND held.trust IS NOT NULL
+        )
+      )
+    )
   RETURNING d.id, d.user_id, d.identity_key, d.signing_key, d.fallback_key, d.signature, d.vouched_by, d.created_at
 )
 SELECT
   EXISTS (SELECT 1 FROM _device) AS owned,
   EXISTS (SELECT 1 FROM _voucher) AS voucher_owned,
   EXISTS (SELECT 1 FROM _vouched) AS changed,
+  EXISTS (
+    SELECT 1
+    FROM _device d, _voucher v
+    WHERE d.trust IS NOT NULL
+      AND v.trust IS NULL
+  ) AS untrusted,
   coalesce(v.id, d.id) AS id,
   coalesce(v.user_id, d.user_id) AS user_id,
   coalesce(v.identity_key, d.identity_key) AS identity_key,

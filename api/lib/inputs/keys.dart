@@ -68,23 +68,26 @@ class DeviceVouchIn {
   }
 }
 
-/// `DELETE /keys/devices/:deviceId?removedBy=&signature=` — the device asking, and
-/// its signature over the removal, both or neither. A `+` a client left unescaped
+/// `DELETE /keys/devices/:deviceId?removedBy=&signedAt=&signature=` — the device
+/// asking, when it signed, in seconds since the epoch, and its signature over the
+/// removal: all three or none. A `+` a client left unescaped
 /// arrives as a space, which base64 never holds, so it reads as the `+` it was.
 class DeviceRemovalQuery {
   final String? removedBy;
+  final int? signedAt;
   final String? signature;
 
-  const new _({this.removedBy, this.signature});
+  const new _({this.removedBy, this.signedAt, this.signature});
 
   factory fromRequest(Request req) {
     final query = req.url.queryParameters;
-    return switch ((query['removedBy'], query['signature'])) {
-      (null, null) => const DeviceRemovalQuery._(),
-      (final String by, final String signature) when isUuidV7(by) && signature.isNotEmpty && signature.length <= 256 =>
-        DeviceRemovalQuery._(removedBy: by.toLowerCase(), signature: signature.replaceAll(' ', '+')),
+    return switch ((query['removedBy'], int.tryParse(query['signedAt'] ?? ''), query['signature'])) {
+      (null, null, null) when !query.containsKey('signedAt') => const DeviceRemovalQuery._(),
+      (final String by, final int at, final String signature)
+          when isUuidV7(by) && signature.isNotEmpty && signature.length <= 256 =>
+        DeviceRemovalQuery._(removedBy: by.toLowerCase(), signedAt: at, signature: signature.replaceAll(' ', '+')),
       _ => throw const BadRequest(
-        reason: 'a removal is signed by removedBy, a device id, and its signature, or neither',
+        reason: 'a removal is signed by removedBy, a device id, at signedAt, in seconds, with its signature, or none',
       ),
     };
   }
