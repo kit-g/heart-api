@@ -40,21 +40,36 @@ extension on _Signer {
   /// Ed25519 signature over [message]. A key or a signature that isn't one signs
   /// nothing.
   Future<bool> signed(String message, String signature) async {
+    final (key, bytes) = (signingKey.bytes, signature.bytes);
+    if (key?.length != 32 || bytes?.length != 64) return false;
+    return Ed25519().verify(
+      utf8.encode(message),
+      signature: Signature(bytes!, publicKey: SimplePublicKey(key!, type: .ed25519)),
+    );
+  }
+}
+
+extension on String {
+  /// The bytes of base64, padded or not, standard or URL-safe; null if it isn't.
+  List<int>? get bytes {
     try {
-      final key = base64.decode(base64.normalize(signingKey));
-      final bytes = base64.decode(base64.normalize(signature));
-      if (key.length != 32 || bytes.length != 64) return false;
-      return await Ed25519().verify(
-        utf8.encode(message),
-        signature: Signature(bytes, publicKey: SimplePublicKey(key, type: .ed25519)),
-      );
+      return base64.decode(base64.normalize(this));
     } on FormatException {
-      return false;
+      return null;
     }
+  }
+
+  /// Whether two spellings of base64 hold the same bytes.
+  bool sameBytes(String other) {
+    final (mine, theirs) = (bytes, other.bytes);
+    return mine != null && theirs != null && base64.encode(mine) == base64.encode(theirs);
   }
 }
 
 mixin _Keys on _DatabaseBase implements KeyService {
+  // Device ids are UUIDs, which Postgres reads in either case and answers in lower
+  // case: every id is lowered first, so one sent in upper case finds its signer.
+
   @override
   Future<({CryptoDevice device, bool added})> publishDevice({
     required String userId,
@@ -65,6 +80,18 @@ mixin _Keys on _DatabaseBase implements KeyService {
     String? signature,
     String? vouchedBy,
   }) async {
+    id = id.toLowerCase();
+    // a vouch that doesn't check out, or by a device that isn't the caller's in
+    // use, is no vouch
+    if ((vouchedBy?.toLowerCase(), signature) case (final String by, final String said)) {
+      final voucher = (await _signersOf(userId: userId, ids: [by]))[by];
+      final message = _vouchMessage(userId: userId, deviceId: id, identityKey: identityKey, signingKey: signingKey);
+      (vouchedBy, signature) = switch (voucher) {
+        final voucher? when await voucher.signed(message, said) => (by, said),
+        _ => (null, null),
+      };
+    }
+
     Future<Map<String, dynamic>?> publish(TxSession tx) async {
       final rows = await tx.execute(
         _publishDevice.toSql(),
@@ -85,18 +112,6 @@ mixin _Keys on _DatabaseBase implements KeyService {
     // snapshot taken before it committed and finds nothing. Asking again sees it.
     final row = await _pool.runTx((tx) async {
       await tx.execute(_lockDevices.toSql(), parameters: {'userId': userId});
-      // a vouch that doesn't check out is no vouch, as one by somebody else's
-      // device is none
-      if ((vouchedBy, signature) case (final String by, final String said)) {
-        final voucher = (await _signersOf(tx, userId: userId, ids: [by]))[by];
-        final message = _vouchMessage(
-          userId: userId,
-          deviceId: id,
-          identityKey: identityKey,
-          signingKey: signingKey,
-        );
-        if (voucher != null && !await voucher.signed(message, said)) (vouchedBy, signature) = (null, null);
-      }
       return await publish(tx) ?? await publish(tx);
     });
     return switch (row) {
@@ -117,26 +132,36 @@ mixin _Keys on _DatabaseBase implements KeyService {
     required String vouchedBy,
     required String signature,
   }) async {
+    (deviceId, vouchedBy) = (deviceId.toLowerCase(), vouchedBy.toLowerCase());
+    final signers = await _signersOf(userId: userId, ids: [deviceId, vouchedBy]);
+    // Only a vouch that checks out goes on. One naming a device that isn't the
+    // caller's in use goes on as no voucher at all, for the write to say which.
+    final voucher = switch ((signers[deviceId], signers[vouchedBy])) {
+      (final device?, final voucher?) when deviceId != vouchedBy => switch (await voucher.signed(
+        _vouchMessage(
+          userId: userId,
+          deviceId: deviceId,
+          identityKey: device.identityKey,
+          signingKey: device.signingKey,
+        ),
+        signature,
+      )) {
+        true => vouchedBy,
+        false => throw _badSignature,
+      },
+      _ => null,
+    };
+
     Future<Map<String, dynamic>> vouch(TxSession tx) async {
       final rows = await tx.execute(
         _vouchForDevice.toSql(),
-        parameters: {'userId': userId, 'deviceId': deviceId, 'vouchedBy': vouchedBy, 'signature': signature},
+        parameters: {'userId': userId, 'deviceId': deviceId, 'vouchedBy': voucher, 'signature': signature},
       );
       return rows.first.toColumnMap();
     }
 
     final row = await _pool.runTx((tx) async {
       await tx.execute(_lockDevices.toSql(), parameters: {'userId': userId});
-      final signers = await _signersOf(tx, userId: userId, ids: [deviceId, vouchedBy]);
-      if ((signers[deviceId], signers[vouchedBy]) case (final device?, final voucher?) when deviceId != vouchedBy) {
-        final message = _vouchMessage(
-          userId: userId,
-          deviceId: deviceId,
-          identityKey: device.identityKey,
-          signingKey: device.signingKey,
-        );
-        if (!await voucher.signed(message, signature)) throw _badSignature;
-      }
       // A vouch racing another sees the device unvouched in its snapshot, and the
       // other's vouch only when it asks again.
       final row = await vouch(tx);
@@ -148,7 +173,7 @@ mixin _Keys on _DatabaseBase implements KeyService {
     return switch (row) {
       {'owned': false} => throw NotFound(type: 'Device', id: deviceId),
       {'changed': true} => (device: CryptoDevice.fromRow(row), changed: true),
-      {'vouched_by': final by, 'signature': final said} when '$by' == vouchedBy && said == signature => (
+      {'vouched_by': final by, 'signature': final String said} when '$by' == vouchedBy && said.sameBytes(signature) => (
         device: CryptoDevice.fromRow(row),
         changed: false,
       ),
@@ -177,17 +202,21 @@ mixin _Keys on _DatabaseBase implements KeyService {
     String? removedBy,
     String? signature,
   }) async {
+    deviceId = deviceId.toLowerCase();
+    // a device that isn't the caller's in use asks as nobody would; the write
+    // checks again that the one that signed is in use, and trusted
+    final by = switch ((removedBy?.toLowerCase(), signature)) {
+      (final String by, final String said) => switch ((await _signersOf(userId: userId, ids: [by]))[by]) {
+        null => null,
+        final signer => switch (await signer.signed(_removalMessage(userId: userId, deviceId: deviceId), said)) {
+          true => by,
+          false => throw _badSignature,
+        },
+      },
+      _ => null,
+    };
     final row = await _pool.runTx((tx) async {
       await tx.execute(_lockDevices.toSql(), parameters: {'userId': userId});
-      // a device that isn't the caller's in use asks as nobody would
-      final by = switch ((removedBy, signature)) {
-        (final String by, final String said) => switch ((await _signersOf(tx, userId: userId, ids: [by]))[by]) {
-          final signer? when await signer.signed(_removalMessage(userId: userId, deviceId: deviceId), said) => by,
-          null => null,
-          _ => throw _badSignature,
-        },
-        _ => null,
-      };
       final rows = await tx.execute(
         _removeDevice.toSql(),
         parameters: {'userId': userId, 'deviceId': deviceId, 'removedBy': by},
@@ -200,13 +229,13 @@ mixin _Keys on _DatabaseBase implements KeyService {
       case {'removed': false}:
         throw const Forbidden(
           code: 'vouch_required',
-          reason: 'a device that was vouched for, or vouched for another, is removed from one the account trusts',
+          reason: 'a device the account trusts and that is in a vouch is removed only from a trusted device',
         );
     }
   }
 
-  Future<Map<String, _Signer>> _signersOf(TxSession tx, {required String userId, required List<String> ids}) async {
-    final rows = await tx.execute(_signers.toSql(), parameters: {'userId': userId, 'ids': ids});
+  Future<Map<String, _Signer>> _signersOf({required String userId, required List<String> ids}) async {
+    final rows = await _pool.execute(_signers.toSql(), parameters: {'userId': userId, 'ids': ids});
     return {
       for (final row in rows) row[0].toString(): (identityKey: row[1] as String, signingKey: row[2] as String),
     };

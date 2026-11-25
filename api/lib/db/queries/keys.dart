@@ -1,16 +1,17 @@
 part of '../db.dart';
 
 /// Taken before publishing, vouching or removing, in a statement of its own, so
-/// two at once see each other: two new devices count each other, and a vouch by a
-/// device being removed doesn't land after it. A statement reads from the snapshot
-/// it started with.
+/// two at once see each other: two new devices count each other, and which device
+/// is trusted is settled by one at a time. A statement reads from the snapshot it
+/// started with.
 const _lockDevices = '''
 SELECT pg_advisory_xact_lock(hashtextextended('crypto_devices:' || @userId, 0))
 ''';
 
 /// A device id is chosen by the device, so publishing twice answers what is
 /// there, and someone else's id answers nothing. A signature only counts if it
-/// names a device of the same owner. A device its owner removed stays removed,
+/// names a device of the same owner in use, and a trusted one's makes this one
+/// trusted too. A device its owner removed stays removed,
 /// and says so. A new one past the account's limit of devices in use is no
 /// device, and `is_full` says why. `added` says this statement added it.
 const _publishDevice =
@@ -23,7 +24,7 @@ _live AS (
     AND removed_at IS NULL
 ),
 _inserted AS (
-  INSERT INTO crypto_devices (id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by)
+  INSERT INTO crypto_devices (id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, trust)
   SELECT
     @id::uuid,
     @userId,
@@ -31,7 +32,8 @@ _inserted AS (
     @signingKey,
     @fallbackKey,
     CASE WHEN voucher.id IS NULL THEN NULL ELSE @signature::text END,
-    voucher.id
+    voucher.id,
+    CASE WHEN voucher.trust IS NOT NULL THEN 'vouched' END
   FROM (SELECT 1) one
   LEFT JOIN crypto_devices voucher
     ON voucher.id = @vouchedBy::uuid AND voucher.user_id = @userId AND voucher.removed_at IS NULL
@@ -58,9 +60,9 @@ WHERE is_full
   AND NOT EXISTS (SELECT 1 FROM crypto_devices WHERE id = @id::uuid)
 ''';
 
-/// A device is vouched for once, by another device of the same owner in use. The
-/// update checks the row it locks, so of two vouches racing, one lands and the
-/// other finds it there.
+/// A device is vouched for once, by another device of the same owner in use, and a
+/// trusted one's vouch makes it trusted. The update checks the row it locks, so of
+/// two vouches racing, one lands and the other finds it there.
 const _vouchForDevice = '''
 WITH
 _device AS (
@@ -71,7 +73,7 @@ _device AS (
     AND removed_at IS NULL
 ),
 _voucher AS (
-  SELECT id
+  SELECT id, trust
   FROM crypto_devices
   WHERE id = @vouchedBy::uuid
     AND id <> @deviceId::uuid
@@ -82,7 +84,8 @@ _vouched AS (
   UPDATE crypto_devices d
   SET
     vouched_by = v.id,
-    signature = @signature
+    signature = @signature,
+    trust = CASE WHEN v.trust IS NOT NULL THEN 'vouched' ELSE d.trust END
   FROM _voucher v
   WHERE d.id = @deviceId::uuid
     AND d.user_id = @userId
@@ -118,7 +121,9 @@ LEFT JOIN crypto_devices d
 ORDER BY d.id
 ''';
 
-/// The devices of the caller's in use that sign what a vouch or a removal says.
+/// The devices of the caller's in use that sign what a vouch or a removal says. Their
+/// keys never change, so they're read and checked before anything is locked, and the
+/// write checks again that they're in use.
 const _signers = '''
 SELECT id, identity_key, signing_key
 FROM crypto_devices
@@ -127,47 +132,43 @@ WHERE id = ANY (@ids::uuid[])
   AND removed_at IS NULL
 ''';
 
-/// A device that vouched for another, or that another vouched for, is removed
-/// only by one the account trusts: vouched for, or the account's first, published
-/// while it had none in use, which nobody could vouch for. Anyone else removes
-/// the rest. A removed device gets nothing more, so what waits for it and its keys
-/// go now.
+/// A trusted device that a trusted device vouched for, or that vouched for one in use,
+/// is removed only by a trusted device, which signed the removal. Anyone else removes
+/// the rest: a reinstall leaves its old device behind, which nobody can sign for. A
+/// removed device gets nothing more, so what waits for it and its keys go now.
 const _removeDevice = '''
 WITH
 _target AS (
-  SELECT id, vouched_by
+  SELECT id, trust
   FROM crypto_devices
   WHERE id = @deviceId::uuid
     AND user_id = @userId
     AND removed_at IS NULL
 ),
 _guarded AS (
-  SELECT
-    EXISTS (SELECT 1 FROM _target WHERE vouched_by IS NOT NULL)
-    OR EXISTS (
-      SELECT 1
-      FROM crypto_devices
-      WHERE vouched_by = @deviceId::uuid
-        AND removed_at IS NULL
-    ) AS guarded
+  SELECT EXISTS (
+    SELECT 1
+    FROM _target t
+    WHERE t.trust = 'vouched'
+      OR (
+        t.trust IS NOT NULL
+        AND EXISTS (
+          SELECT 1
+          FROM crypto_devices d
+          WHERE d.vouched_by = t.id
+            AND d.removed_at IS NULL
+        )
+      )
+  ) AS guarded
 ),
 _trusted AS (
   SELECT EXISTS (
     SELECT 1
-    FROM crypto_devices r
-    WHERE r.id = @removedBy::uuid
-      AND r.user_id = @userId
-      AND r.removed_at IS NULL
-      AND (
-        r.vouched_by IS NOT NULL
-        OR NOT EXISTS (
-          SELECT 1
-          FROM crypto_devices o
-          WHERE o.user_id = r.user_id
-            AND (o.created_at, o.id) < (r.created_at, r.id)
-            AND (o.removed_at IS NULL OR o.removed_at > r.created_at)
-        )
-      )
+    FROM crypto_devices
+    WHERE id = @removedBy::uuid
+      AND user_id = @userId
+      AND removed_at IS NULL
+      AND trust IS NOT NULL
   ) AS trusted
 ),
 _removed AS (

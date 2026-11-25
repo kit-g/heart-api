@@ -43,7 +43,7 @@ Future<void> _wake(Request req, {required String userId, required String deviceI
 /// that can't be such an id is no device.
 String _deviceId(Request req) {
   return switch (req.rawPathParameters[#deviceId]) {
-    final String id when isUuidV7(id) => id,
+    final String id when isUuidV7(id) => id.toLowerCase(),
     final id => throw NotFound(type: 'Device', id: '$id'),
   };
 }

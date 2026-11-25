@@ -242,6 +242,14 @@ void main() {
       expect(again.changed, isFalse, reason: 'the same vouch again is a retry');
       expect(again.device.vouchedBy, trusted);
 
+      final padded = await h.db.vouchForDevice(
+        userId: me,
+        deviceId: fresh.toUpperCase(),
+        vouchedBy: trusted.toUpperCase(),
+        signature: base64.encode(base64.decode(base64.normalize(signature!))),
+      );
+      expect(padded.changed, isFalse, reason: 'the same vouch, spelled with padding and in upper case');
+
       await expectLater(
         vouch(me, fresh, by: another),
         throwsA(isA<Conflict>().having((e) => e.code, 'code', 'already_vouched')),
@@ -340,30 +348,56 @@ void main() {
       for (final each in await h.db.getDevices(readerId: user, ownerId: user)) each.id,
     };
 
-    test('one nobody vouched for, and that vouched for nobody, any device of the account removes', () async {
+    Future<Map<String, String?>> trust(String user) async {
+      final rows = await h.exec(
+        'SELECT id, trust FROM crypto_devices WHERE user_id = @u AND removed_at IS NULL',
+        {'u': user},
+      );
+      return {for (final row in rows) row[0].toString(): row[1] as String?};
+    }
+
+    test('a reinstall\'s leftover, in no vouch, any device of the account removes', () async {
       final me = await h.seedProfile();
-      final (first, leftover, other) = (await device(me), await device(me), await device(me));
+      final (leftover, reinstalled, other) = (await device(me), await device(me), await device(me));
       await remove(me, leftover);
       await remove(me, other, by: leftover);
-      expect(await inUse(me), {first});
+      expect(await inUse(me), {reinstalled});
     });
 
-    test('one in a vouch is removed only from a device that was vouched for, or the account\'s first', () async {
+    test('a trusted device in a vouch is removed only from a trusted device, which signs', () async {
       final me = await h.seedProfile();
       final first = await device(me);
       final (vouched, also) = (await device(me, vouchedBy: first), await device(me, vouchedBy: first));
       final (password, later) = (await device(me), await device(me, vouchedBy: first));
+      expect(await trust(me), {first: 'first', vouched: 'vouched', also: 'vouched', password: null, later: 'vouched'});
 
       for (final target in [first, vouched]) {
         await expectLater(remove(me, target), refused('vouch_required'), reason: 'nobody asked');
-        await expectLater(remove(me, target, by: password), refused('vouch_required'), reason: 'nobody vouched for it');
+        await expectLater(remove(me, target, by: password), refused('vouch_required'), reason: 'nobody trusts it');
       }
       expect(await inUse(me), {first, vouched, also, password, later});
 
       await remove(me, also, by: vouched);
       await remove(me, later, by: first);
-      await remove(me, password, by: vouched);
+      await remove(me, password);
       expect(await inUse(me), {first, vouched});
+    });
+
+    test('a vouch by a device nobody trusts makes nobody trusted', () async {
+      final me = await h.seedProfile();
+      final first = await device(me);
+      final vouched = await device(me, vouchedBy: first);
+      final password = await device(me);
+      final second = await device(me, vouchedBy: password);
+      await vouch(me, password, by: second);
+      expect((await trust(me))[second], isNull);
+      expect((await trust(me))[password], isNull, reason: 'a ring of vouches holds no trust');
+
+      for (final by in [password, second]) {
+        await expectLater(remove(me, vouched, by: by), refused('vouch_required'));
+      }
+      await remove(me, second);
+      expect(await inUse(me), {first, vouched, password});
     });
 
     test('a signature that does not check out removes nothing, and says so', () async {
@@ -382,55 +416,86 @@ void main() {
     test('a device not in use, or somebody else\'s, asks as nobody', () async {
       final (me, other) = (await h.seedProfile(), await h.seedProfile());
       final first = await device(me);
-      final vouched = await device(me, vouchedBy: first);
+      final (vouched, gone) = (await device(me, vouchedBy: first), await device(me, vouchedBy: first));
+      await remove(me, gone, by: first);
       final theirs = await device(other);
-      await expectLater(
-        h.db.removeDevice(
-          userId: me,
-          deviceId: vouched,
-          removedBy: theirs,
-          signature: await sign(theirs, removalMessage(me, vouched)),
-        ),
-        refused('vouch_required'),
-      );
+      for (final by in [theirs, gone]) {
+        await expectLater(
+          h.db.removeDevice(
+            userId: me,
+            deviceId: vouched,
+            removedBy: by,
+            signature: await sign(by, removalMessage(me, vouched)),
+          ),
+          refused('vouch_required'),
+        );
+      }
     });
 
-    test('what a removed device vouched for reads as never vouched for, and can be vouched for again', () async {
+    test('an id in upper case is the same device, and checks the same signature', () async {
       final me = await h.seedProfile();
       final first = await device(me);
-      final (vouched, other) = (await device(me, vouchedBy: first), await device(me, vouchedBy: first));
-      final grandchild = await device(me, vouchedBy: vouched);
+      final vouched = await device(me, vouchedBy: first);
 
-      await remove(me, first, by: vouched);
+      final forged = await h.db.publishDevice(
+        userId: me,
+        id: uuidV7(),
+        identityKey: 'i',
+        signingKey: 's',
+        fallbackKey: 'f',
+        vouchedBy: first.toUpperCase(),
+        signature: 'AAAA',
+      );
+      expect((forged.device.vouchedBy, forged.device.signature), (null, null));
+      await expectLater(
+        h.db.vouchForDevice(userId: me, deviceId: forged.device.id, vouchedBy: first.toUpperCase(), signature: 'AAAA'),
+        refused('bad_signature'),
+      );
+
+      await h.db.removeDevice(
+        userId: me,
+        deviceId: vouched.toUpperCase(),
+        removedBy: first.toUpperCase(),
+        signature: await sign(first, removalMessage(me, vouched)),
+      );
+      expect(await inUse(me), {first, forged.device.id});
+    });
+
+    test('what a removed device vouched for reads as never vouched for, and stays trusted', () async {
+      final me = await h.seedProfile();
+      final first = await device(me);
+      final (upgraded, other) = (await device(me, vouchedBy: first), await device(me, vouchedBy: first));
+      final grandchild = await device(me, vouchedBy: upgraded);
+
+      await remove(me, first, by: upgraded);
 
       final listed = {for (final each in await h.db.getDevices(readerId: me, ownerId: me)) each.id: each};
-      expect((listed[vouched]!.vouchedBy, listed[vouched]!.signature), (null, null));
+      expect((listed[upgraded]!.vouchedBy, listed[upgraded]!.signature), (null, null));
       expect((listed[other]!.vouchedBy, listed[other]!.signature), (null, null));
-      expect(listed[grandchild]!.vouchedBy, vouched, reason: 'its voucher is still in use');
+      expect(listed[grandchild]!.vouchedBy, upgraded, reason: 'its voucher is still in use');
+
+      final password = await device(me);
+      await expectLater(
+        remove(me, upgraded, by: password),
+        refused('vouch_required'),
+        reason: 'the phone the person moved to is still theirs to keep',
+      );
 
       final again = await vouch(me, other, by: grandchild);
       expect((again.changed, again.device.vouchedBy), (true, grandchild));
     });
 
-    test('the account\'s first is the one published while it had none in use', () async {
+    test('an account left with no trusted device in use trusts the earliest one left', () async {
       final me = await h.seedProfile();
-      final gone = await device(me);
-      final next = await device(me);
-      await remove(me, gone);
-      final vouched = await device(me, vouchedBy: next);
-      await expectLater(
-        remove(me, vouched, by: next),
-        refused('vouch_required'),
-        reason: 'published while another was in use, so somebody could have vouched for it',
-      );
+      final (leftover, reinstalled) = (await device(me), await device(me));
+      expect(await trust(me), {leftover: 'first', reinstalled: null});
 
-      final alone = await h.seedProfile();
-      final old = await device(alone);
-      await remove(alone, old);
-      final fresh = await device(alone);
-      final child = await device(alone, vouchedBy: fresh);
-      await remove(alone, child, by: fresh);
-      expect(await inUse(alone), {fresh});
+      await remove(me, leftover);
+      expect(await trust(me), {reinstalled: 'first'});
+      final tablet = await device(me, vouchedBy: reinstalled);
+      final password = await device(me);
+      await expectLater(remove(me, tablet, by: password), refused('vouch_required'));
+      await remove(me, tablet, by: reinstalled);
     });
   });
 

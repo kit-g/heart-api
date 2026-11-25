@@ -4,9 +4,8 @@
 
 Removing a device names the device asking (heart-api#483).
 
-- Added: `KeyService.removeDevice` takes `removedBy` and `signature`, both optional. A device that
-  was vouched for, or that vouched for another, is removed only from a device the account trusts,
-  which signs the removal. Callers compile as they are.
+- Added: `KeyService.removeDevice` takes `removedBy` and `signature`, both optional: the device
+  asking, and its signature over the removal. Callers compile as they are.
 
 ## 2.62.0
 

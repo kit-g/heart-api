@@ -28,9 +28,9 @@ abstract interface class KeyService {
   Future<List<CryptoDevice>> getDevices({required String readerId, required String ownerId});
 
   /// Stops using a device of the caller's: nothing more is sent to it, and what it
-  /// vouched for is vouched for by nobody. A device that was vouched for, or that
-  /// vouched for another, is removed only when [removedBy], a device of the
-  /// caller's the account trusts, signed the removal ([signature]).
+  /// vouched for is vouched for by nobody. A trusted device in a vouch is removed
+  /// only when [removedBy], a trusted device of the caller's, signed the removal
+  /// ([signature]).
   Future<void> removeDevice({
     required String userId,
     required String deviceId,

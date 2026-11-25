@@ -82,7 +82,7 @@ class DeviceRemovalQuery {
     return switch ((query['removedBy'], query['signature'])) {
       (null, null) => const DeviceRemovalQuery._(),
       (final String by, final String signature) when isUuidV7(by) && signature.isNotEmpty && signature.length <= 256 =>
-        DeviceRemovalQuery._(removedBy: by, signature: signature.replaceAll(' ', '+')),
+        DeviceRemovalQuery._(removedBy: by.toLowerCase(), signature: signature.replaceAll(' ', '+')),
       _ => throw const BadRequest(
         reason: 'a removal is signed by removedBy, a device id, and its signature, or neither',
       ),
