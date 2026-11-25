@@ -139,6 +139,14 @@ abstract interface class Connection implements Model {
   /// Heart. Only the one who gave a name ever reads it.
   bool get namedByYou;
 
+  /// Whether [name] is one the reader set after the invitation, rather than the
+  /// invitation's or what the person goes by in Heart: what taking it back changes.
+  bool get nameSetByYou;
+
+  /// What [name] goes back to once the reader takes theirs back: the invitation's,
+  /// else what the person goes by in Heart. Only when [nameSetByYou].
+  String? get fallbackName;
+
   ConnectionRole get role;
 
   ConnectionDomain get domain;
@@ -159,6 +167,8 @@ abstract interface class Connection implements Model {
     String? name,
     String? avatar,
     bool namedByYou,
+    bool nameSetByYou,
+    String? fallbackName,
   }) = _Connection.new;
 
   factory fromRow(Map<String, dynamic> row) {
@@ -181,6 +191,8 @@ abstract interface class Connection implements Model {
       name: row['username'] as String?,
       avatar: row['avatar_url'] as String?,
       namedByYou: row['named_by_you'] == true,
+      nameSetByYou: row['name_set_by_you'] == true,
+      fallbackName: row['fallback_name'] as String?,
     );
   }
 
@@ -206,6 +218,8 @@ abstract interface class Connection implements Model {
       name: json['name'] as String?,
       avatar: json['avatar'] as String?,
       namedByYou: json['namedByYou'] == true,
+      nameSetByYou: json['nameSetByYou'] == true,
+      fallbackName: json['fallbackName'] as String?,
     );
   }
 
@@ -247,6 +261,10 @@ class _Connection implements Connection {
   final String? avatar;
   @override
   final bool namedByYou;
+  @override
+  final bool nameSetByYou;
+  @override
+  final String? fallbackName;
 
   const new({
     required this.targetId,
@@ -260,6 +278,8 @@ class _Connection implements Connection {
     this.name,
     this.avatar,
     this.namedByYou = false,
+    this.nameSetByYou = false,
+    this.fallbackName,
   });
 
   @override
@@ -281,6 +301,8 @@ class _Connection implements Connection {
       'name': ?name,
       'avatar': ?avatar,
       if (namedByYou) 'namedByYou': true,
+      if (nameSetByYou) 'nameSetByYou': true,
+      'fallbackName': ?fallbackName,
     };
   }
 
@@ -372,13 +394,13 @@ abstract interface class ConnectionsService {
     required Set<ConnectionShare> shares,
   });
 
-  /// Gives the client on [connectionId] a name only [actorId] reads, or with a null
+  /// Gives the other side of [connectionId] a name only [actorId] reads, or with a null
   /// [name] takes it back, so they read as the invitation or their profile names
   /// them again, and answers with the connection as [actorId] then reads it. The
   /// name is for the person, not the one connection, so it stays after the
   /// connection ends. Null when the connection isn't [actorId]'s or was never
-  /// accepted. Giving one throws unless [actorId] is its coach; either side may take
-  /// one back.
+  /// accepted. Giving one throws unless [actorId] is its coach or its student, the
+  /// one naming the other; either side may take one back.
   Future<Connection?> nameClient({required String actorId, required String connectionId, String? name});
 
   /// True if there is any active connection between the two users in any

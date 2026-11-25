@@ -18,6 +18,14 @@ abstract interface class ClientSummary implements Model {
   /// Heart. Only the one who gave a name ever reads it.
   bool get namedByYou;
 
+  /// Whether [name] is one the reader set after the invitation, rather than the
+  /// invitation's or what the person goes by in Heart: what taking it back changes.
+  bool get nameSetByYou;
+
+  /// What [name] goes back to once the reader takes theirs back: the invitation's,
+  /// else what the person goes by in Heart. Only when [nameSetByYou].
+  String? get fallbackName;
+
   /// `active`, `paused`, or `severed` for a former client.
   String get status;
 
@@ -47,6 +55,8 @@ abstract interface class ClientSummary implements Model {
     String? name,
     String? avatar,
     bool namedByYou,
+    bool nameSetByYou,
+    String? fallbackName,
     required String status,
     DateTime? acceptedAt,
     String? programId,
@@ -66,6 +76,8 @@ abstract interface class ClientSummary implements Model {
       name: row['username'] as String?,
       avatar: row['avatar_url'] as String?,
       namedByYou: row['named_by_you'] == true,
+      nameSetByYou: row['name_set_by_you'] == true,
+      fallbackName: row['fallback_name'] as String?,
       status: row['status'] as String,
       acceptedAt: row['accepted_at'] as DateTime?,
       programId: row['program_id']?.toString(),
@@ -86,6 +98,8 @@ abstract interface class ClientSummary implements Model {
       name: json['name'] as String?,
       avatar: json['avatar'] as String?,
       namedByYou: json['namedByYou'] == true,
+      nameSetByYou: json['nameSetByYou'] == true,
+      fallbackName: json['fallbackName'] as String?,
       status: json['status'] as String,
       acceptedAt: switch (json['acceptedAt']) {
         final String at => DateTime.parse(at),
@@ -118,6 +132,10 @@ class _ClientSummary implements ClientSummary {
   @override
   final bool namedByYou;
   @override
+  final bool nameSetByYou;
+  @override
+  final String? fallbackName;
+  @override
   final String status;
   @override
   final DateTime? acceptedAt;
@@ -144,6 +162,8 @@ class _ClientSummary implements ClientSummary {
     this.name,
     this.avatar,
     this.namedByYou = false,
+    this.nameSetByYou = false,
+    this.fallbackName,
     required this.status,
     this.acceptedAt,
     this.programId,
@@ -164,6 +184,8 @@ class _ClientSummary implements ClientSummary {
       'name': ?name,
       'avatar': ?avatar,
       'namedByYou': namedByYou,
+      'nameSetByYou': nameSetByYou,
+      'fallbackName': ?fallbackName,
       'status': status,
       'acceptedAt': ?acceptedAt?.toIso8601String(),
       'programId': ?programId,

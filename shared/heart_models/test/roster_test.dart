@@ -83,6 +83,19 @@ void main() {
       expect(ClientSummary.fromRow(row).namedByYou, isFalse);
       expect(ClientSummary.fromJson({...wire(summary)}..remove('namedByYou')).namedByYou, isFalse);
 
+      final set = ClientSummary.fromRow({
+        ...row,
+        'named_by_you': true,
+        'name_set_by_you': true,
+        'fallback_name': 'Sam from the gym',
+      });
+      expect((set.nameSetByYou, set.fallbackName), (true, 'Sam from the gym'));
+      expectRoundTrip(set, ClientSummary.fromJson);
+      final unsaid = {...wire(summary)}
+        ..remove('nameSetByYou')
+        ..remove('fallbackName');
+      expect((ClientSummary.fromJson(unsaid).nameSetByYou, ClientSummary.fromJson(unsaid).fallbackName), (false, null));
+
       final named = CoachFeedItem.fromRow({
         'kind': 'skip',
         'id': 'k1',
