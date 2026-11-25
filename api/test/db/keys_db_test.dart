@@ -1,6 +1,9 @@
 @Tags(['db'])
 library;
 
+import 'dart:convert';
+
+import 'package:cryptography/cryptography.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:postgres/postgres.dart' show Sql;
@@ -14,17 +17,62 @@ void main() {
   setUpAll(h.setupDatabase);
   tearDownAll(h.teardownDatabase);
 
-  Future<String> device(String user, {String? vouchedBy, String? signature}) async {
+  final ed25519 = Ed25519();
+  final pairs = <String, SimpleKeyPair>{};
+  final signingKeys = <String, String>{};
+
+  /// A device's signature, unpadded, as the app's library spells one.
+  Future<String> sign(String deviceId, String message) async {
+    final signature = await ed25519.sign(utf8.encode(message), keyPair: pairs[deviceId]!);
+    return base64.encode(signature.bytes).replaceAll('=', '');
+  }
+
+  String vouchMessage(String user, String deviceId) {
+    return ['heart-of.me/vouch/v1', user, deviceId, 'identity', signingKeys[deviceId]].join('\n');
+  }
+
+  String removalMessage(String user, String deviceId) => ['heart-of.me/remove-device/v1', user, deviceId].join('\n');
+
+  /// A device with keys of its own, vouched for by [vouchedBy] when given.
+  Future<String> device(String user, {String? vouchedBy}) async {
+    final id = uuidV7();
+    final pair = await ed25519.newKeyPair();
+    pairs[id] = pair;
+    signingKeys[id] = base64.encode((await pair.extractPublicKey()).bytes).replaceAll('=', '');
     final published = await h.db.publishDevice(
       userId: user,
-      id: uuidV7(),
+      id: id,
       identityKey: 'identity',
-      signingKey: 'signing',
+      signingKey: signingKeys[id]!,
       fallbackKey: 'fallback',
       vouchedBy: vouchedBy,
-      signature: signature,
+      signature: switch (vouchedBy) {
+        final String by => await sign(by, vouchMessage(user, id)),
+        null => null,
+      },
     );
     return published.device.id;
+  }
+
+  Future<({CryptoDevice device, bool changed})> vouch(String user, String deviceId, {required String by}) async {
+    return h.db.vouchForDevice(
+      userId: user,
+      deviceId: deviceId,
+      vouchedBy: by,
+      signature: await sign(by, vouchMessage(user, deviceId)),
+    );
+  }
+
+  Future<void> remove(String user, String deviceId, {String? by}) async {
+    return h.db.removeDevice(
+      userId: user,
+      deviceId: deviceId,
+      removedBy: by,
+      signature: switch (by) {
+        final String by => await sign(by, removalMessage(user, deviceId)),
+        null => null,
+      },
+    );
   }
 
   Future<(String, String)> connected() async {
@@ -129,34 +177,31 @@ void main() {
       );
     });
 
-    test('a signature only counts from a device of the same owner', () async {
+    test('a vouch only counts from a device of the same owner, and when its signature checks out', () async {
       final (me, other) = (await h.seedProfile(), await h.seedProfile());
       final mine = await device(me);
       final theirs = await device(other);
 
-      final vouched = await h.db.publishDevice(
-        userId: me,
-        id: uuidV7(),
-        identityKey: 'i',
-        signingKey: 's',
-        fallbackKey: 'f',
-        vouchedBy: mine,
-        signature: 'sig',
-      );
-      expect(vouched.device.vouchedBy, mine);
-      expect(vouched.device.signature, 'sig');
+      final vouched = await device(me, vouchedBy: mine);
+      final listed = (await h.db.getDevices(readerId: me, ownerId: me)).firstWhere((d) => d.id == vouched);
+      expect(listed.vouchedBy, mine);
+      expect(listed.signature, isNotNull);
 
-      final not = await h.db.publishDevice(
-        userId: me,
-        id: uuidV7(),
-        identityKey: 'i',
-        signingKey: 's',
-        fallbackKey: 'f',
-        vouchedBy: theirs,
-        signature: 'sig',
-      );
-      expect(not.device.vouchedBy, isNull);
-      expect(not.device.signature, isNull);
+      final not = await device(me, vouchedBy: theirs);
+      expect((await h.db.getDevices(readerId: me, ownerId: me)).firstWhere((d) => d.id == not).vouchedBy, isNull);
+
+      for (final signature in ['sig', await sign(mine, 'something else')]) {
+        final forged = await h.db.publishDevice(
+          userId: me,
+          id: uuidV7(),
+          identityKey: 'i',
+          signingKey: 's',
+          fallbackKey: 'f',
+          vouchedBy: mine,
+          signature: signature,
+        );
+        expect((forged.device.vouchedBy, forged.device.signature), (null, null), reason: signature);
+      }
     });
 
     test('a published device is vouched for once, by another device of the same owner in use', () async {
@@ -167,40 +212,49 @@ void main() {
         await device(me),
         await device(other),
       );
-      Future<({CryptoDevice device, bool changed})> vouch(String by, {String signature = 'sig', String? as}) {
-        return h.db.vouchForDevice(userId: as ?? me, deviceId: fresh, vouchedBy: by, signature: signature);
-      }
 
       for (final by in [theirs, fresh, uuidV7()]) {
-        await expectLater(vouch(by), throwsA(isA<BadRequest>()), reason: 'not another device of mine');
+        await expectLater(
+          h.db.vouchForDevice(userId: me, deviceId: fresh, vouchedBy: by, signature: 'sig'),
+          throwsA(isA<BadRequest>()),
+          reason: 'not another device of mine',
+        );
       }
-      await expectLater(vouch(trusted, as: other), throwsA(isA<NotFound>()), reason: 'not their device');
+      await expectLater(
+        h.db.vouchForDevice(userId: other, deviceId: fresh, vouchedBy: trusted, signature: 'sig'),
+        throwsA(isA<NotFound>()),
+        reason: 'not their device',
+      );
+      for (final signature in ['sig', await sign(another, vouchMessage(me, fresh)), await sign(trusted, 'other')]) {
+        await expectLater(
+          h.db.vouchForDevice(userId: me, deviceId: fresh, vouchedBy: trusted, signature: signature),
+          throwsA(isA<BadRequest>().having((e) => e.code, 'code', 'bad_signature')),
+          reason: 'not the voucher\'s signature over these keys',
+        );
+      }
 
-      final first = await vouch(trusted);
+      final first = await vouch(me, fresh, by: trusted);
       expect(first.changed, isTrue);
-      expect((first.device.vouchedBy, first.device.signature), (trusted, 'sig'));
+      expect(first.device.vouchedBy, trusted);
+      final signature = first.device.signature;
 
-      final again = await vouch(trusted);
+      final again = await vouch(me, fresh, by: trusted);
       expect(again.changed, isFalse, reason: 'the same vouch again is a retry');
       expect(again.device.vouchedBy, trusted);
 
       await expectLater(
-        vouch(another),
+        vouch(me, fresh, by: another),
         throwsA(isA<Conflict>().having((e) => e.code, 'code', 'already_vouched')),
       );
-      await expectLater(vouch(trusted, signature: 'other'), throwsA(isA<Conflict>()));
-      expect((await h.db.getDevices(readerId: me, ownerId: me)).firstWhere((d) => d.id == fresh).signature, 'sig');
+      expect((await h.db.getDevices(readerId: me, ownerId: me)).firstWhere((d) => d.id == fresh).signature, signature);
     });
 
     test('a removed device can neither be vouched for nor vouch', () async {
       final me = await h.seedProfile();
       final (kept, gone) = (await device(me), await device(me));
-      await h.db.removeDevice(userId: me, deviceId: gone);
+      await remove(me, gone);
 
-      await expectLater(
-        h.db.vouchForDevice(userId: me, deviceId: gone, vouchedBy: kept, signature: 's'),
-        throwsA(isA<NotFound>()),
-      );
+      await expectLater(vouch(me, gone, by: kept), throwsA(isA<NotFound>()));
       await expectLater(
         h.db.vouchForDevice(userId: me, deviceId: kept, vouchedBy: gone, signature: 's'),
         throwsA(isA<BadRequest>()),
@@ -210,21 +264,20 @@ void main() {
     test('of two vouches racing, one lands and the other is told', () async {
       final me = await h.seedProfile();
       final (one, two, fresh) = (await device(me), await device(me), await device(me));
+      final (first, second) = (await sign(one, vouchMessage(me, fresh)), await sign(two, vouchMessage(me, fresh)));
       final results = await h.runBlocked(
         hold: (tx) async {
           await tx.execute(
-            Sql.named(
-              'UPDATE crypto_devices SET vouched_by = @one::uuid, signature = \'first\' WHERE id = @fresh::uuid',
-            ),
-            parameters: {'one': one, 'fresh': fresh},
+            Sql.named('UPDATE crypto_devices SET vouched_by = @one::uuid, signature = @first WHERE id = @fresh::uuid'),
+            parameters: {'one': one, 'first': first, 'fresh': fresh},
           );
         },
         calls: [
           () => h.db
-              .vouchForDevice(userId: me, deviceId: fresh, vouchedBy: two, signature: 'second')
+              .vouchForDevice(userId: me, deviceId: fresh, vouchedBy: two, signature: second)
               .then<Object>((result) => result, onError: (Object e) => e),
           () => h.db
-              .vouchForDevice(userId: me, deviceId: fresh, vouchedBy: one, signature: 'first')
+              .vouchForDevice(userId: me, deviceId: fresh, vouchedBy: one, signature: first)
               .then<Object>((result) => result, onError: (Object e) => e),
         ],
       );
@@ -277,6 +330,107 @@ void main() {
       final held = await h.exec('SELECT 1 FROM one_time_keys WHERE device_id = @d::uuid', {'d': mine});
       expect(held, isEmpty);
       expect(await h.db.getQueue(userId: a, deviceId: mine), isEmpty);
+    });
+  });
+
+  group('removing a device', () {
+    Matcher refused(String code) => throwsA(isA<ApiException>().having((e) => e.code, 'code', code));
+
+    Future<Set<String>> inUse(String user) async => {
+      for (final each in await h.db.getDevices(readerId: user, ownerId: user)) each.id,
+    };
+
+    test('one nobody vouched for, and that vouched for nobody, any device of the account removes', () async {
+      final me = await h.seedProfile();
+      final (first, leftover, other) = (await device(me), await device(me), await device(me));
+      await remove(me, leftover);
+      await remove(me, other, by: leftover);
+      expect(await inUse(me), {first});
+    });
+
+    test('one in a vouch is removed only from a device that was vouched for, or the account\'s first', () async {
+      final me = await h.seedProfile();
+      final first = await device(me);
+      final (vouched, also) = (await device(me, vouchedBy: first), await device(me, vouchedBy: first));
+      final (password, later) = (await device(me), await device(me, vouchedBy: first));
+
+      for (final target in [first, vouched]) {
+        await expectLater(remove(me, target), refused('vouch_required'), reason: 'nobody asked');
+        await expectLater(remove(me, target, by: password), refused('vouch_required'), reason: 'nobody vouched for it');
+      }
+      expect(await inUse(me), {first, vouched, also, password, later});
+
+      await remove(me, also, by: vouched);
+      await remove(me, later, by: first);
+      await remove(me, password, by: vouched);
+      expect(await inUse(me), {first, vouched});
+    });
+
+    test('a signature that does not check out removes nothing, and says so', () async {
+      final me = await h.seedProfile();
+      final first = await device(me);
+      final vouched = await device(me, vouchedBy: first);
+      for (final signature in ['sig', await sign(first, removalMessage(me, first)), await sign(vouched, 'other')]) {
+        await expectLater(
+          h.db.removeDevice(userId: me, deviceId: vouched, removedBy: first, signature: signature),
+          refused('bad_signature'),
+        );
+      }
+      expect(await inUse(me), {first, vouched});
+    });
+
+    test('a device not in use, or somebody else\'s, asks as nobody', () async {
+      final (me, other) = (await h.seedProfile(), await h.seedProfile());
+      final first = await device(me);
+      final vouched = await device(me, vouchedBy: first);
+      final theirs = await device(other);
+      await expectLater(
+        h.db.removeDevice(
+          userId: me,
+          deviceId: vouched,
+          removedBy: theirs,
+          signature: await sign(theirs, removalMessage(me, vouched)),
+        ),
+        refused('vouch_required'),
+      );
+    });
+
+    test('what a removed device vouched for reads as never vouched for, and can be vouched for again', () async {
+      final me = await h.seedProfile();
+      final first = await device(me);
+      final (vouched, other) = (await device(me, vouchedBy: first), await device(me, vouchedBy: first));
+      final grandchild = await device(me, vouchedBy: vouched);
+
+      await remove(me, first, by: vouched);
+
+      final listed = {for (final each in await h.db.getDevices(readerId: me, ownerId: me)) each.id: each};
+      expect((listed[vouched]!.vouchedBy, listed[vouched]!.signature), (null, null));
+      expect((listed[other]!.vouchedBy, listed[other]!.signature), (null, null));
+      expect(listed[grandchild]!.vouchedBy, vouched, reason: 'its voucher is still in use');
+
+      final again = await vouch(me, other, by: grandchild);
+      expect((again.changed, again.device.vouchedBy), (true, grandchild));
+    });
+
+    test('the account\'s first is the one published while it had none in use', () async {
+      final me = await h.seedProfile();
+      final gone = await device(me);
+      final next = await device(me);
+      await remove(me, gone);
+      final vouched = await device(me, vouchedBy: next);
+      await expectLater(
+        remove(me, vouched, by: next),
+        refused('vouch_required'),
+        reason: 'published while another was in use, so somebody could have vouched for it',
+      );
+
+      final alone = await h.seedProfile();
+      final old = await device(alone);
+      await remove(alone, old);
+      final fresh = await device(alone);
+      final child = await device(alone, vouchedBy: fresh);
+      await remove(alone, child, by: fresh);
+      expect(await inUse(alone), {fresh});
     });
   });
 

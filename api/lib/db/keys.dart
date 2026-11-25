@@ -13,6 +13,47 @@ const _maxKeyClaims = 60;
 /// session anyway, so anything past it is a sign something is wrong.
 const _maxQueuedPerPair = 2000;
 
+const _badSignature = BadRequest(code: 'bad_signature', reason: 'the signature does not check out');
+
+/// What one device signs to vouch for another of the same owner's, spelled as the
+/// app spells it.
+String _vouchMessage({
+  required String userId,
+  required String deviceId,
+  required String identityKey,
+  required String signingKey,
+}) {
+  return ['heart-of.me/vouch/v1', userId, deviceId, identityKey, signingKey].join('\n');
+}
+
+/// What a device signs to remove one of the account's devices. A removed device
+/// can't come back, so the same signature sent again removes nothing.
+String _removalMessage({required String userId, required String deviceId}) {
+  return ['heart-of.me/remove-device/v1', userId, deviceId].join('\n');
+}
+
+/// A device's public keys, as it signs with them.
+typedef _Signer = ({String identityKey, String signingKey});
+
+extension on _Signer {
+  /// Whether [signature], base64 with or without padding, is this device's
+  /// Ed25519 signature over [message]. A key or a signature that isn't one signs
+  /// nothing.
+  Future<bool> signed(String message, String signature) async {
+    try {
+      final key = base64.decode(base64.normalize(signingKey));
+      final bytes = base64.decode(base64.normalize(signature));
+      if (key.length != 32 || bytes.length != 64) return false;
+      return await Ed25519().verify(
+        utf8.encode(message),
+        signature: Signature(bytes, publicKey: SimplePublicKey(key, type: .ed25519)),
+      );
+    } on FormatException {
+      return false;
+    }
+  }
+}
+
 mixin _Keys on _DatabaseBase implements KeyService {
   @override
   Future<({CryptoDevice device, bool added})> publishDevice({
@@ -43,7 +84,19 @@ mixin _Keys on _DatabaseBase implements KeyService {
     // A publish racing another of the same id waits for it, then reads from a
     // snapshot taken before it committed and finds nothing. Asking again sees it.
     final row = await _pool.runTx((tx) async {
-      await tx.execute(_lockPublishing.toSql(), parameters: {'userId': userId});
+      await tx.execute(_lockDevices.toSql(), parameters: {'userId': userId});
+      // a vouch that doesn't check out is no vouch, as one by somebody else's
+      // device is none
+      if ((vouchedBy, signature) case (final String by, final String said)) {
+        final voucher = (await _signersOf(tx, userId: userId, ids: [by]))[by];
+        final message = _vouchMessage(
+          userId: userId,
+          deviceId: id,
+          identityKey: identityKey,
+          signingKey: signingKey,
+        );
+        if (voucher != null && !await voucher.signed(message, said)) (vouchedBy, signature) = (null, null);
+      }
       return await publish(tx) ?? await publish(tx);
     });
     return switch (row) {
@@ -64,18 +117,34 @@ mixin _Keys on _DatabaseBase implements KeyService {
     required String vouchedBy,
     required String signature,
   }) async {
-    Future<Map<String, dynamic>> vouch() async {
-      final rows = await _pool.execute(
+    Future<Map<String, dynamic>> vouch(TxSession tx) async {
+      final rows = await tx.execute(
         _vouchForDevice.toSql(),
         parameters: {'userId': userId, 'deviceId': deviceId, 'vouchedBy': vouchedBy, 'signature': signature},
       );
       return rows.first.toColumnMap();
     }
 
-    // A vouch racing another sees the device unvouched in its snapshot, and the
-    // other's vouch only when it asks again.
-    var row = await vouch();
-    if (row case {'owned': true, 'changed': false, 'voucher_owned': true, 'vouched_by': null}) row = await vouch();
+    final row = await _pool.runTx((tx) async {
+      await tx.execute(_lockDevices.toSql(), parameters: {'userId': userId});
+      final signers = await _signersOf(tx, userId: userId, ids: [deviceId, vouchedBy]);
+      if ((signers[deviceId], signers[vouchedBy]) case (final device?, final voucher?) when deviceId != vouchedBy) {
+        final message = _vouchMessage(
+          userId: userId,
+          deviceId: deviceId,
+          identityKey: device.identityKey,
+          signingKey: device.signingKey,
+        );
+        if (!await voucher.signed(message, signature)) throw _badSignature;
+      }
+      // A vouch racing another sees the device unvouched in its snapshot, and the
+      // other's vouch only when it asks again.
+      final row = await vouch(tx);
+      return switch (row) {
+        {'owned': true, 'changed': false, 'voucher_owned': true, 'vouched_by': null} => await vouch(tx),
+        _ => row,
+      };
+    });
     return switch (row) {
       {'owned': false} => throw NotFound(type: 'Device', id: deviceId),
       {'changed': true} => (device: CryptoDevice.fromRow(row), changed: true),
@@ -102,9 +171,45 @@ mixin _Keys on _DatabaseBase implements KeyService {
   }
 
   @override
-  Future<void> removeDevice({required String userId, required String deviceId}) async {
-    final rows = await _pool.execute(_removeDevice.toSql(), parameters: {'userId': userId, 'deviceId': deviceId});
-    if (rows.isEmpty) throw NotFound(type: 'Device', id: deviceId);
+  Future<void> removeDevice({
+    required String userId,
+    required String deviceId,
+    String? removedBy,
+    String? signature,
+  }) async {
+    final row = await _pool.runTx((tx) async {
+      await tx.execute(_lockDevices.toSql(), parameters: {'userId': userId});
+      // a device that isn't the caller's in use asks as nobody would
+      final by = switch ((removedBy, signature)) {
+        (final String by, final String said) => switch ((await _signersOf(tx, userId: userId, ids: [by]))[by]) {
+          final signer? when await signer.signed(_removalMessage(userId: userId, deviceId: deviceId), said) => by,
+          null => null,
+          _ => throw _badSignature,
+        },
+        _ => null,
+      };
+      final rows = await tx.execute(
+        _removeDevice.toSql(),
+        parameters: {'userId': userId, 'deviceId': deviceId, 'removedBy': by},
+      );
+      return rows.first.toColumnMap();
+    });
+    switch (row) {
+      case {'found': false}:
+        throw NotFound(type: 'Device', id: deviceId);
+      case {'removed': false}:
+        throw const Forbidden(
+          code: 'vouch_required',
+          reason: 'a device that was vouched for, or vouched for another, is removed from one the account trusts',
+        );
+    }
+  }
+
+  Future<Map<String, _Signer>> _signersOf(TxSession tx, {required String userId, required List<String> ids}) async {
+    final rows = await tx.execute(_signers.toSql(), parameters: {'userId': userId, 'ids': ids});
+    return {
+      for (final row in rows) row[0].toString(): (identityKey: row[1] as String, signingKey: row[2] as String),
+    };
   }
 
   @override

@@ -1,9 +1,10 @@
 part of '../db.dart';
 
-/// Taken before [_publishDevice], in a statement of its own, so two new devices
-/// published at once count each other: a statement counts from the snapshot it
-/// started with.
-const _lockPublishing = '''
+/// Taken before publishing, vouching or removing, in a statement of its own, so
+/// two at once see each other: two new devices count each other, and a vouch by a
+/// device being removed doesn't land after it. A statement reads from the snapshot
+/// it started with.
+const _lockDevices = '''
 SELECT pg_advisory_xact_lock(hashtextextended('crypto_devices:' || @userId, 0))
 ''';
 
@@ -117,15 +118,63 @@ LEFT JOIN crypto_devices d
 ORDER BY d.id
 ''';
 
-/// A removed device gets nothing more, so what waits for it and its keys go now.
+/// The devices of the caller's in use that sign what a vouch or a removal says.
+const _signers = '''
+SELECT id, identity_key, signing_key
+FROM crypto_devices
+WHERE id = ANY (@ids::uuid[])
+  AND user_id = @userId
+  AND removed_at IS NULL
+''';
+
+/// A device that vouched for another, or that another vouched for, is removed
+/// only by one the account trusts: vouched for, or the account's first, published
+/// while it had none in use, which nobody could vouch for. Anyone else removes
+/// the rest. A removed device gets nothing more, so what waits for it and its keys
+/// go now.
 const _removeDevice = '''
 WITH
-_removed AS (
-  UPDATE crypto_devices
-  SET removed_at = now()
+_target AS (
+  SELECT id, vouched_by
+  FROM crypto_devices
   WHERE id = @deviceId::uuid
     AND user_id = @userId
     AND removed_at IS NULL
+),
+_guarded AS (
+  SELECT
+    EXISTS (SELECT 1 FROM _target WHERE vouched_by IS NOT NULL)
+    OR EXISTS (
+      SELECT 1
+      FROM crypto_devices
+      WHERE vouched_by = @deviceId::uuid
+        AND removed_at IS NULL
+    ) AS guarded
+),
+_trusted AS (
+  SELECT EXISTS (
+    SELECT 1
+    FROM crypto_devices r
+    WHERE r.id = @removedBy::uuid
+      AND r.user_id = @userId
+      AND r.removed_at IS NULL
+      AND (
+        r.vouched_by IS NOT NULL
+        OR NOT EXISTS (
+          SELECT 1
+          FROM crypto_devices o
+          WHERE o.user_id = r.user_id
+            AND (o.created_at, o.id) < (r.created_at, r.id)
+            AND (o.removed_at IS NULL OR o.removed_at > r.created_at)
+        )
+      )
+  ) AS trusted
+),
+_removed AS (
+  UPDATE crypto_devices
+  SET removed_at = now()
+  WHERE id = (SELECT id FROM _target)
+    AND ((SELECT trusted FROM _trusted) OR NOT (SELECT guarded FROM _guarded))
   RETURNING id
 ),
 _keys AS (
@@ -138,7 +187,9 @@ _queue AS (
   WHERE recipient_device_id IN (SELECT id FROM _removed)
   RETURNING 1
 )
-SELECT id FROM _removed
+SELECT
+  EXISTS (SELECT 1 FROM _target) AS found,
+  EXISTS (SELECT 1 FROM _removed) AS removed
 ''';
 
 const _replaceFallbackKey = '''
