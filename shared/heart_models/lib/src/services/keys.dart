@@ -27,8 +27,16 @@ abstract interface class KeyService {
   /// [ownerId]'s devices in use. Throws unless [readerId] shares keys with them.
   Future<List<CryptoDevice>> getDevices({required String readerId, required String ownerId});
 
-  /// Stops using a device of the caller's: nothing more is sent to it.
-  Future<void> removeDevice({required String userId, required String deviceId});
+  /// Stops using a device of the caller's: nothing more is sent to it, and what it
+  /// vouched for is vouched for by nobody. A device that was vouched for, or that
+  /// vouched for another, is removed only when [removedBy], a device of the
+  /// caller's the account trusts, signed the removal ([signature]).
+  Future<void> removeDevice({
+    required String userId,
+    required String deviceId,
+    String? removedBy,
+    String? signature,
+  });
 
   Future<void> replaceFallbackKey({required String userId, required String deviceId, required String key});
 

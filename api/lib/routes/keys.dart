@@ -82,7 +82,13 @@ Future<CryptoDevices> getDevices(Request req) async {
 }
 
 Future<Model> removeDevice(Request req) async {
-  await req.keyService.removeDevice(userId: req.userId, deviceId: _deviceId(req));
+  final query = DeviceRemovalQuery.fromRequest(req);
+  await req.keyService.removeDevice(
+    userId: req.userId,
+    deviceId: _deviceId(req),
+    removedBy: query.removedBy,
+    signature: query.signature,
+  );
   await _tellPeers(req);
   throw const NoContent();
 }

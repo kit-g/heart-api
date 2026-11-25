@@ -165,6 +165,67 @@ void main() {
     verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
   });
 
+  group('DELETE /keys/devices/:deviceId', () {
+    void stub() {
+      when(
+        app.db.removeDevice(
+          userId: anyNamed('userId'),
+          deviceId: anyNamed('deviceId'),
+          removedBy: anyNamed('removedBy'),
+          signature: anyNamed('signature'),
+        ),
+      ).thenAnswer((_) async {});
+      when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+      when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
+    }
+
+    test('names the device asking and its signature, a + left unescaped read as one', () async {
+      stub();
+      final res = await app.send('DELETE', '/keys/devices/$device?removedBy=$other&signature=a+b/c%2Bd');
+
+      expect(res.status, 204);
+      verify(
+        app.db.removeDevice(userId: 'u1', deviceId: device, removedBy: other, signature: 'a+b/c+d'),
+      ).called(1);
+    });
+
+    test('is the device asking and its signature, or neither', () async {
+      stub();
+      for (final query in [
+        'removedBy=$other',
+        'signature=sig',
+        'removedBy=nope&signature=sig',
+        'removedBy=$other&signature=',
+      ]) {
+        final res = await app.send('DELETE', '/keys/devices/$device?$query');
+        expect(res.status, 400, reason: query);
+      }
+      verifyNever(
+        app.db.removeDevice(
+          userId: anyNamed('userId'),
+          deviceId: anyNamed('deviceId'),
+          removedBy: anyNamed('removedBy'),
+          signature: anyNamed('signature'),
+        ),
+      );
+    });
+
+    test('a refusal says why, and tells nobody', () async {
+      when(
+        app.db.removeDevice(
+          userId: anyNamed('userId'),
+          deviceId: anyNamed('deviceId'),
+          removedBy: anyNamed('removedBy'),
+          signature: anyNamed('signature'),
+        ),
+      ).thenThrow(const Forbidden(code: 'vouch_required', reason: 'no'));
+
+      final res = await app.send('DELETE', '/keys/devices/$device');
+      expect((res.status, (jsonDecode(res.body) as Map)['code']), (403, 'vouch_required'));
+      verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
+    });
+  });
+
   test('a device in the path that cannot be one is not there, and a query one is refused', () async {
     for (final (method, path, body) in [
       ('DELETE', '/keys/devices/nope', null),
