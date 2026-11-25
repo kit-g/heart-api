@@ -30,9 +30,11 @@ const _unsaid = "ARRAY['archived', 'folder', 'assignedBy', 'revision', 'sessionR
 /// workout started, so one that syncs after the coach looked still counts: a note by
 /// the workout's last change, falling short by that or its plan's arrival. A workout
 /// the coach logged themselves raises neither: they were there. A change to a program
-/// is dated by the same clock, and only the student's own is one: not what their device writes when a ladder steps up, not
-/// where they file it, and not archiving it, which is how they move to the next one. A
-/// session they added is in no history, so it counts from when it joined.
+/// is dated by the same clock, and only the student's own is one: not what their
+/// device writes when a ladder steps up, not where they file it, and not archiving it,
+/// which is how they move to the next one. A session they added is in no history, so
+/// it counts from when it joined. Each copy keeps its latest, and the summary the
+/// latest of all.
 const _refreshSummary =
     '''
 WITH
@@ -46,6 +48,37 @@ _seen AS (
     AND w.completed_at IS NOT NULL
     AND (SELECT (r).scope FROM _rel) = 'coach'
     AND _readable_at((SELECT r FROM _rel), w.started_at, w.hidden_at)
+),
+_changes AS (
+  SELECT program_id, max(at) AS at
+  FROM (
+    SELECT p.id AS program_id, c.at
+    FROM programs p
+    JOIN program_changes c ON c.program_id = p.id
+    WHERE p.user_id = @studentId
+      AND p.coach_id = @coachId
+      AND c.actor_id = @studentId
+      AND (SELECT (r).scope FROM _rel) = 'coach'
+      AND _readable_at((SELECT r FROM _rel), c.at, NULL)
+      AND (c.before - $_unsaid) IS DISTINCT FROM (c.after - $_unsaid)
+      AND NOT EXISTS (
+        SELECT 1
+        FROM program_actions a
+        WHERE a.program_id = p.id
+          AND a.kind = 'advance'
+          AND _change_is_advance(c.before, c.after, a.from_exercise, a.to_exercise)
+      )
+    UNION ALL
+    SELECT p.id, greatest(t.created_at, t.joined_program_at)
+    FROM programs p
+    JOIN templates t ON t.program_id = p.id
+    WHERE p.user_id = @studentId
+      AND p.coach_id = @coachId
+      AND t.assigned_by IS NULL
+      AND (SELECT (r).scope FROM _rel) = 'coach'
+      AND _readable_at((SELECT r FROM _rel), greatest(t.created_at, t.joined_program_at), NULL)
+  ) each_change
+  GROUP BY program_id
 )
 UPDATE client_summaries
 SET
@@ -71,36 +104,8 @@ SET
     WHERE NOT s.by_coach
       AND _workout_fell_short(s.id)
   ),
-  changed_at = greatest(
-    (
-      SELECT max(c.at)
-      FROM programs p
-      JOIN program_changes c ON c.program_id = p.id
-      WHERE p.user_id = @studentId
-        AND p.coach_id = @coachId
-        AND c.actor_id = @studentId
-        AND (SELECT (r).scope FROM _rel) = 'coach'
-        AND _readable_at((SELECT r FROM _rel), c.at, NULL)
-        AND (c.before - $_unsaid) IS DISTINCT FROM (c.after - $_unsaid)
-        AND NOT EXISTS (
-          SELECT 1
-          FROM program_actions a
-          WHERE a.program_id = p.id
-            AND a.kind = 'advance'
-            AND _change_is_advance(c.before, c.after, a.from_exercise, a.to_exercise)
-        )
-    ),
-    (
-      SELECT max(greatest(t.created_at, t.joined_program_at))
-      FROM programs p
-      JOIN templates t ON t.program_id = p.id
-      WHERE p.user_id = @studentId
-        AND p.coach_id = @coachId
-        AND t.assigned_by IS NULL
-        AND (SELECT (r).scope FROM _rel) = 'coach'
-        AND _readable_at((SELECT r FROM _rel), greatest(t.created_at, t.joined_program_at), NULL)
-    )
-  ),
+  changed_at = (SELECT max(at) FROM _changes),
+  changed_programs = coalesce((SELECT jsonb_object_agg(program_id, at) FROM _changes), '{}'::jsonb),
   updated_at = now()
 WHERE connection_id = @connectionId::uuid
 RETURNING connection_id
@@ -174,7 +179,16 @@ _clients AS (
         CASE WHEN s.changed_at > coalesce(s.reviewed_at, '-infinity') THEN 'changed' END
       ],
       NULL
-    ) AS reasons_seen
+    ) AS reasons_seen,
+    -- the copies the changed reason stands for, each with its latest change
+    coalesce(
+      (
+        SELECT jsonb_agg(jsonb_build_object('program_id', e.key, 'at', e.value::timestamptz) ORDER BY e.value::timestamptz DESC, e.key)
+        FROM jsonb_each_text(s.changed_programs) e
+        WHERE e.value::timestamptz > coalesce(s.reviewed_at, '-infinity')
+      ),
+      '[]'::jsonb
+    ) AS changed_programs_seen
   FROM client_summaries s
   JOIN connections c ON c.id = s.connection_id
   JOIN profiles profile ON profile.id = s.student_id
@@ -218,6 +232,7 @@ SELECT
   CASE WHEN @former::boolean OR NOT readable THEN '{}'::timestamptz[] ELSE recent END AS recent,
   CASE WHEN @former::boolean OR NOT readable THEN NULL ELSE last_trained_at END AS last_trained_at,
   CASE WHEN @former::boolean THEN '{}'::text[] ELSE reasons END AS reasons,
+  CASE WHEN @former::boolean OR NOT readable THEN '[]'::jsonb ELSE changed_programs_seen END AS changed_programs,
   assistant
 FROM _ranked
 WHERE @afterRank::int IS NULL OR (rank, connection_id) > (@afterRank::int, @afterId::uuid)
