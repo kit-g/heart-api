@@ -222,7 +222,6 @@ class _ClientSummary implements ClientSummary {
   }
 }
 
-/// One thing in a coach's feed: a workout finished, a session skipped, a program ending.
 /// One copy of a coach's program a client changed, and when they last did.
 class ChangedProgram implements Model {
   final String programId;
@@ -244,14 +243,16 @@ class ChangedProgram implements Model {
   @override
   Map<String, dynamic> toMap() => {'programId': programId, 'changedAt': changedAt.toIso8601String()};
 
+  /// The same moment is the same change, whatever zone it's held in.
   @override
   bool operator ==(Object other) =>
-      other is ChangedProgram && other.programId == programId && other.changedAt == changedAt;
+      other is ChangedProgram && other.programId == programId && other.changedAt.isAtSameMomentAs(changedAt);
 
   @override
-  int get hashCode => Object.hash(programId, changedAt);
+  int get hashCode => Object.hash(programId, changedAt.microsecondsSinceEpoch);
 }
 
+/// One thing in a coach's feed: a workout finished, a session skipped, a program ending.
 abstract interface class CoachFeedItem implements Model {
   /// `workout`, `skip` or `ending`, and a later server may add a word.
   String get kind;
