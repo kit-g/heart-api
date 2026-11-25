@@ -33,8 +33,9 @@ const _unsaid = "ARRAY['archived', 'folder', 'assignedBy', 'revision', 'sessionR
 /// is dated by the same clock, and only the student's own is one: not what their
 /// device writes when a ladder steps up, not where they file it, and not archiving it,
 /// which is how they move to the next one. A session they added is in no history, so
-/// it counts from when it joined. Each copy keeps its latest, and the summary the
-/// latest of all.
+/// it counts from when it joined. Only copies sent through this connection count, so a
+/// client coached in two domains says each on its own row. Each copy keeps its
+/// latest, and the summary the latest of all.
 const _refreshSummary =
     '''
 WITH
@@ -57,6 +58,7 @@ _changes AS (
     JOIN program_changes c ON c.program_id = p.id
     WHERE p.user_id = @studentId
       AND p.coach_id = @coachId
+      AND p.connection_id = @connectionId::uuid
       AND c.actor_id = @studentId
       AND (SELECT (r).scope FROM _rel) = 'coach'
       AND _readable_at((SELECT r FROM _rel), c.at, NULL)
@@ -74,6 +76,7 @@ _changes AS (
     JOIN templates t ON t.program_id = p.id
     WHERE p.user_id = @studentId
       AND p.coach_id = @coachId
+      AND p.connection_id = @connectionId::uuid
       AND t.assigned_by IS NULL
       AND (SELECT (r).scope FROM _rel) = 'coach'
       AND _readable_at((SELECT r FROM _rel), greatest(t.created_at, t.joined_program_at), NULL)
@@ -176,7 +179,15 @@ _clients AS (
           THEN 'gap'
         END,
         CASE WHEN s.ending THEN 'ending' END,
-        CASE WHEN s.changed_at > coalesce(s.reviewed_at, '-infinity') THEN 'changed' END
+        -- from the copies themselves, so the reason and the list always agree
+        CASE
+          WHEN EXISTS (
+            SELECT 1
+            FROM jsonb_each_text(s.changed_programs) e
+            WHERE e.value::timestamptz > coalesce(s.reviewed_at, '-infinity')
+          )
+          THEN 'changed'
+        END
       ],
       NULL
     ) AS reasons_seen,

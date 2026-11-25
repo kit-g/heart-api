@@ -488,6 +488,40 @@ void main() {
       expect((await roster(coach)).items.single.reasons, isNot(contains('changed')));
     });
 
+    test('a client coached in two domains says each copy on the row it came through', () async {
+      final (coach, student, fitness) = await client();
+      final running = await h.insertId(
+        '''
+        INSERT INTO connections (initiator_id, target_id, initiator_role, target_role, domain, status, accepted_at)
+        VALUES (@c, @s, 'COACH', 'STUDENT', 'running', 'active', '2020-01-01Z')
+        RETURNING id
+        ''',
+        {'c': coach, 's': student},
+      );
+      final id = await program(coach, student, fitness);
+      await changes(student, student, id, 'Block, my way');
+
+      final rows = {for (final each in (await roster(coach)).items) each.connectionId: each};
+      expect(rows[fitness]!.changedPrograms.single.programId, id);
+      expect(rows[fitness]!.reasons, contains('changed'));
+      expect(rows[running]!.changedPrograms, isEmpty);
+      expect(rows[running]!.reasons, isNot(contains('changed')));
+    });
+
+    test('a former client, and one who doesn\'t share with the assistant, say no copy', () async {
+      final (coach, student, connection) = await client();
+      final id = await program(coach, student, connection);
+      await changes(student, student, id, 'Block, my way');
+      await roster(coach);
+
+      final assistant = await h.db.getRoster(coachId: coach, assistant: true);
+      expect(assistant.items.single.changedPrograms, isEmpty);
+      expect(assistant.items.single.reasons, isEmpty);
+
+      await h.exec("UPDATE connections SET status = 'severed' WHERE id = @c::uuid", {'c': connection});
+      expect((await roster(coach, former: true)).items.single.changedPrograms, isEmpty);
+    });
+
     test('a program another coach sent is none of this one\'s', () async {
       final (coach, student, _) = await client();
       final (other, _, _) = await client();
