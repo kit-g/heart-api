@@ -134,6 +134,8 @@ _clients AS (
     c.accepted_at,
     named.name AS username,
     named.given AS named_by_you,
+    named.set AS name_set_by_you,
+    named.fallback AS fallback_name,
     profile.avatar_url,
     s.program_id,
     s.program_name,
@@ -176,7 +178,7 @@ _clients AS (
   FROM client_summaries s
   JOIN connections c ON c.id = s.connection_id
   JOIN profiles profile ON profile.id = s.student_id
-  ${_named('_given_name(@coachId, s.student_id)', username: 'profile.username')}
+  ${_named(giver: '@coachId', person: 's.student_id', username: 'profile.username')}
   WHERE s.coach_id = @coachId
     AND (
       (@former::boolean AND c.status IN ('severed', 'blocked') AND NOT _blocked_between(@coachId, s.student_id))
@@ -206,6 +208,8 @@ SELECT
   accepted_at,
   username,
   named_by_you,
+  name_set_by_you,
+  fallback_name,
   avatar_url,
   CASE WHEN @former::boolean OR NOT readable THEN NULL ELSE program_id END AS program_id,
   CASE WHEN @former::boolean OR NOT readable THEN NULL ELSE program_name END AS program_name,
@@ -253,7 +257,7 @@ _clients AS (
     p.avatar_url
   FROM (SELECT DISTINCT student_id FROM _summaries) students
   JOIN profiles p ON p.id = students.student_id
-  ${_named('_given_name(@coachId, students.student_id)', username: 'p.username')}
+  ${_named(giver: '@coachId', person: 'students.student_id', username: 'p.username')}
 ),
 _items AS (
   (
@@ -314,6 +318,6 @@ final _clientName =
     '''
 SELECT named.name
 FROM profiles p
-${_named('_given_name(@coachId, p.id)', username: 'p.username')}
+${_named(giver: '@coachId', person: 'p.id', username: 'p.username')}
 WHERE p.id = @clientId
 ''';

@@ -8,8 +8,9 @@ import 'package:test/test.dart';
 
 import 'db_test_utility.dart';
 
-/// A coach's own name for a client (`given_names`, `_given_name`): who can give
-/// one, and that every read of the coach's shows it while the client's don't.
+/// A coach's own name for a client, and a student's for their coach (`given_names`,
+/// `_given_name`): who can give one, and that every read of the giver's shows it
+/// while the other's don't.
 void main() {
   final h = _Harness();
 
@@ -108,12 +109,8 @@ void main() {
       expect(former.items.single.namedByYou, isTrue);
     });
 
-    test('only the coach gives one, on a connection of theirs that was accepted', () async {
+    test('only the coach and the student give one, on a connection of theirs that was accepted', () async {
       final (coach, student, connection) = await coaching();
-      await expectLater(
-        h.db.nameClient(actorId: student, connectionId: connection, name: 'Coach'),
-        throwsA(isA<Forbidden>()),
-      );
 
       final stranger = await h.seedProfile();
       expect(await h.db.nameClient(actorId: stranger, connectionId: connection, name: 'Who'), isNull);
@@ -136,6 +133,66 @@ void main() {
         throwsA(isA<Forbidden>()),
       );
       expect(await h.db.nameClient(actorId: stranger, connectionId: connection), isNull);
+    });
+
+    test('whether the name is one the reader set, and what taking it back returns to', () async {
+      final (coach, student, connection) = await coaching();
+      Future<(bool?, bool?, String?)> state() async {
+        final read = await seen(coach, connection);
+        return (read?.namedByYou, read?.nameSetByYou, read?.fallbackName);
+      }
+
+      expect(await state(), (false, false, null), reason: 'the client\'s own name');
+
+      final named = await h.db.nameClient(actorId: coach, connectionId: connection, name: 'Sam');
+      expect((named?.nameSetByYou, named?.fallbackName), (true, 'u_$student'));
+      expect(await state(), (true, true, 'u_$student'));
+
+      await invited(coach, student, 'Sam from the gym');
+      expect(await state(), (true, true, 'Sam from the gym'), reason: 'taking it back returns to the invitation\'s');
+      final roster = (await h.db.getRoster(coachId: coach)).items.single;
+      expect((roster.namedByYou, roster.nameSetByYou, roster.fallbackName), (true, true, 'Sam from the gym'));
+
+      final cleared = await h.db.nameClient(actorId: coach, connectionId: connection);
+      expect(
+        (cleared?.name, cleared?.namedByYou, cleared?.nameSetByYou, cleared?.fallbackName),
+        (
+          'Sam from the gym',
+          true,
+          false,
+          null,
+        ),
+      );
+      expect(await state(), (true, false, null), reason: 'the invitation\'s, which taking back would not change');
+      final after = (await h.db.getRoster(coachId: coach)).items.single;
+      expect((after.namedByYou, after.nameSetByYou, after.fallbackName), (true, false, null));
+
+      final theirs = await seen(student, connection);
+      expect((theirs?.nameSetByYou, theirs?.fallbackName), (false, null), reason: 'the client reads none of it');
+    });
+
+    test('a student names their coach, and only the student reads it', () async {
+      final (coach, student, connection) = await coaching();
+      final named = await h.db.nameClient(actorId: student, connectionId: connection, name: 'Coach Dana');
+      expect(
+        (named?.name, named?.namedByYou, named?.nameSetByYou, named?.fallbackName, named?.role),
+        ('Coach Dana', true, true, 'u_$coach', ConnectionRole.student),
+      );
+      expect((await h.db.getConnections(student)).single.name, 'Coach Dana');
+
+      await h.db.openThread(userId: student, connectionId: connection);
+      final thread = (await h.db.getThreads(userId: student)).single;
+      expect((thread.otherName, thread.otherNamedByYou), ('Coach Dana', true));
+
+      final coachs = await seen(coach, connection);
+      expect((coachs?.name, coachs?.namedByYou), ('u_$student', false), reason: 'the coach never reads it');
+      expect((await h.db.getThreads(userId: coach)).single.otherName, 'u_$student');
+
+      final toStudent = await h.db.getPushAudience(userId: student, topic: 'coaching.message', actorId: coach);
+      expect(toStudent.actorName, 'u_$coach', reason: 'a push never carries it');
+
+      final cleared = await h.db.nameClient(actorId: student, connectionId: connection);
+      expect((cleared?.name, cleared?.namedByYou, cleared?.nameSetByYou), ('u_$coach', false, false));
     });
 
     test('a client who blocked the coach reads as an ending: the name is kept, and shown to nobody', () async {

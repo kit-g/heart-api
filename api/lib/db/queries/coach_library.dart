@@ -89,7 +89,7 @@ SELECT
 FROM programs p
 JOIN library_programs l ON l.id = p.library_program_id
 JOIN profiles profile ON profile.id = p.user_id
-${_named('_given_name(@coachId, p.user_id)', username: 'profile.username')}
+${_named(giver: '@coachId', person: 'p.user_id', username: 'profile.username')}
 WHERE l.id = @id::uuid
   AND l.coach_id = @coachId
   AND p.coach_id = @coachId

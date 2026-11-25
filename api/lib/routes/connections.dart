@@ -60,8 +60,9 @@ Future<Connection> changeConnectionShares(Request request) async {
   return changed.naming(connection);
 }
 
-/// A coach's own name for the client on this connection, current or former. Only
-/// the coach reads it.
+/// The caller's own name for the other side of a coaching connection, current or
+/// former: the coach's for the client, or the student's for the coach. Only the one
+/// who gave it reads it.
 Future<Connection> nameClient(Request request) async {
   final input = await ClientNameIn.fromRequest(request);
   return _nameClient(request, input.name);
@@ -115,6 +116,8 @@ extension on Connection {
       name: read.name,
       avatar: read.avatar,
       namedByYou: read.namedByYou,
+      nameSetByYou: read.nameSetByYou,
+      fallbackName: read.fallbackName,
     );
   }
 }
