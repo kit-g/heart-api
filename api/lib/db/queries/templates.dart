@@ -673,8 +673,23 @@ LEFT JOIN _existing ex ON ex.master_template_id = m.id
 ORDER BY m.id
 ''';
 
+/// One that never arrived is remembered as deleted all the same: the workouts sent with
+/// it, and any still on their way, name it no more.
 const _deleteTemplate = '''
 WITH
+_never_held AS (
+  INSERT INTO archive.deleted_templates (user_id, id)
+  SELECT @coachId, @templateId::uuid
+  WHERE NOT EXISTS (SELECT 1 FROM templates WHERE id = @templateId::uuid)
+    AND EXISTS (SELECT 1 FROM profiles WHERE id = @coachId)
+  ON CONFLICT (user_id, id) DO UPDATE SET deleted_at = now()
+),
+_unnamed AS (
+  UPDATE workouts
+  SET sent_template_id = NULL
+  WHERE sent_template_id = @templateId::uuid
+    AND user_id = @coachId
+),
 _student_templates AS (
   SELECT student_template_id FROM template_shares
   WHERE coach_id = @coachId AND master_template_id = @templateId::uuid

@@ -141,7 +141,9 @@ const _restoreSessionLinks = '''
 WITH
 _workouts AS (
   UPDATE workouts
-  SET template_id = @sessionId::uuid
+  SET
+    template_id = @sessionId::uuid,
+    sent_template_id = NULL
   WHERE id = ANY (@workouts::uuid[])
     AND user_id = @ownerId
   RETURNING 1

@@ -74,6 +74,23 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION test__archive_workout_keeps_a_template_never_held() RETURNS SETOF TEXT AS
+$$
+DECLARE
+    _template_id UUID := uuidv7();
+    _w_id        UUID := create_test_workout();
+BEGIN
+    RETURN NEXT is((SELECT count(*) FROM archive.deleted_workouts WHERE id = _w_id), 0::bigint, 'not archived yet');
+    UPDATE workouts SET sent_template_id = _template_id WHERE id = _w_id;
+    DELETE FROM workouts WHERE id = _w_id;
+    RETURN NEXT is(
+            (SELECT template_id FROM archive.deleted_workouts WHERE id = _w_id),
+            _template_id,
+            'the template it was sent with is the one archived'
+        );
+END
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION test__archive_workout_snapshots_exercises_jsonb() RETURNS SETOF TEXT AS
 $$
 DECLARE

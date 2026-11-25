@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(55);
+SELECT plan(57);
 
 SELECT has_table('public'::name, 'workouts'::name);
 
@@ -21,6 +21,7 @@ SELECT columns_are(
                    'updated_at',
                    'changed_xid',
                    'template_id',
+                   'sent_template_id',
                    'program_id',
                    'hidden_at',
                    'logged_by'
@@ -38,6 +39,8 @@ SELECT col_type_is('public'::name, 'workouts'::name, 'import_id'::name, 'text'::
 SELECT col_type_is('public'::name, 'workouts'::name, 'note'::name, 'text'::name);
 SELECT col_type_is('public'::name, 'workouts'::name, 'pauses'::name, 'jsonb'::name);
 SELECT col_type_is('public'::name, 'workouts'::name, 'template_id'::name, 'uuid'::name);
+SELECT col_type_is('public'::name, 'workouts'::name, 'sent_template_id'::name, 'uuid'::name);
+SELECT has_index('public'::name, 'workouts'::name, 'workouts_sent_template_id_idx'::name);
 SELECT col_type_is('public'::name, 'workouts'::name, 'program_id'::name, 'uuid'::name);
 SELECT col_type_is('public'::name, 'workouts'::name, 'hidden_at'::name, 'timestamp with time zone'::name);
 SELECT has_index('public'::name, 'workouts'::name, 'workouts_hidden_idx'::name);
