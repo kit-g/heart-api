@@ -16,7 +16,8 @@ SELECT columns_are(
                    'signature',
                    'vouched_by',
                    'created_at',
-                   'removed_at'
+                   'removed_at',
+                   'trust'
                    ]
        );
 
