@@ -5,11 +5,11 @@
 Whether a name is one the reader set, and what taking it back returns to (heart-api#481).
 
 - Added: `Connection.nameSetByYou` and `Connection.fallbackName`, the same on `ClientSummary`.
-  `nameSetByYou` is true when the reader set the name after the invitation, rather than it being the
-  invitation's or the person's own; `fallbackName` is what the name goes back to once the reader takes
-  theirs back, only when `nameSetByYou`. On a connection both are absent from the wire when not said.
-- A student can now name their coach (heart-api#480): `ConnectionsService.nameClient` answers for the
-  student's side too, as it does for the coach's.
+  `nameSetByYou` is true when the reader set a name of their own that taking it back would change;
+  `fallbackName` is what the name goes back to, only with `nameSetByYou`, and absent when that has no
+  name. On a connection both are absent from the wire when not said.
+- Changed: `ConnectionsService.nameClient` is `nameOther`, since a student names their coach too
+  (heart-api#480). Coaching's signatures change freely until the app ships coaching.
 
 ## 2.62.0
 

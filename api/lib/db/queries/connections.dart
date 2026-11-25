@@ -112,12 +112,14 @@ ${_named(giver: '@userId', person: 'c.target_id', username: 'p.username', set: s
 /// - `named.name`: the name the reader set, else the one on the reader's invitation
 ///   the person accepted, else [username] when it has a word in it;
 /// - `named.given`: whether it's the reader's, set or the invitation's;
-/// - `named.set`: whether the reader set it;
+/// - `named.set`: whether the reader set a name of their own that taking it back
+///   would change: one the same as what it goes back to changes nothing;
 /// - `named.fallback`: what it goes back to once the reader takes theirs back, the
-///   invitation's or else [username]; only when the reader set one.
+///   invitation's or else [username]; only with `named.set`, and NULL when that has
+///   no name.
 ///
-/// Every read of someone's name by someone who may have named them goes through
-/// this, so they all agree. [set] stands in for the name the reader set, for a
+/// The reads that show a name the reader gave go through this, so they agree.
+/// `_given_name` resolves the same name in SQL. [set] stands in for the name the reader set, for a
 /// write that just changed it. Joined [on] a condition: a read that hides the person
 /// hides this too, and every column is then NULL.
 String _named({
@@ -133,13 +135,27 @@ LEFT JOIN LATERAL (
   SELECT
     coalesce(_set.name, _invited.name, $own) AS name,
     coalesce(_set.name, _invited.name) IS NOT NULL AS given,
-    _set.name IS NOT NULL AS set,
-    CASE WHEN _set.name IS NOT NULL THEN coalesce(_invited.name, $own) END AS fallback
+    _set.name IS DISTINCT FROM coalesce(_invited.name, $own) AND _set.name IS NOT NULL AS set,
+    CASE
+      WHEN _set.name IS DISTINCT FROM coalesce(_invited.name, $own) AND _set.name IS NOT NULL
+        THEN coalesce(_invited.name, $own)
+    END AS fallback
   FROM (
-    SELECT ${set ?? '(SELECT _g.name FROM given_names _g WHERE _g.giver_id = $giver AND _g.person_id = $person)'} AS name
+    SELECT ${set ?? _setName(giver: giver, person: person)} AS name
   ) _set
   CROSS JOIN LATERAL (SELECT _invited_as($giver, $person) AS name) _invited
 ) named ON $on''';
+}
+
+/// The name [giver] set for [person], or NULL.
+String _setName({required String giver, required String person}) {
+  return '''
+(
+    SELECT _g.name
+    FROM given_names _g
+    WHERE _g.giver_id = $giver
+      AND _g.person_id = $person
+  )''';
 }
 
 /// Every connection of the caller's, both directions, as [_connectionOther] says it.

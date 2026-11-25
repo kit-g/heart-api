@@ -18,12 +18,15 @@ abstract interface class ClientSummary implements Model {
   /// Heart. Only the one who gave a name ever reads it.
   bool get namedByYou;
 
-  /// Whether [name] is one the reader set after the invitation, rather than the
-  /// invitation's or what the person goes by in Heart: what taking it back changes.
+  /// Whether [name] is one the reader set of their own, which wins over any
+  /// invitation's, and taking it back would change it: false when it reads the same
+  /// as what it would go back to.
   bool get nameSetByYou;
 
   /// What [name] goes back to once the reader takes theirs back: the invitation's,
-  /// else what the person goes by in Heart. Only when [nameSetByYou].
+  /// else what the person goes by in Heart. Only with [nameSetByYou], and absent
+  /// even then when that has no name: offering to take a name back keys on
+  /// [nameSetByYou] alone.
   String? get fallbackName;
 
   /// `active`, `paused`, or `severed` for a former client.

@@ -139,12 +139,15 @@ abstract interface class Connection implements Model {
   /// Heart. Only the one who gave a name ever reads it.
   bool get namedByYou;
 
-  /// Whether [name] is one the reader set after the invitation, rather than the
-  /// invitation's or what the person goes by in Heart: what taking it back changes.
+  /// Whether [name] is one the reader set of their own, which wins over any
+  /// invitation's, and taking it back would change it: false when it reads the same
+  /// as what it would go back to.
   bool get nameSetByYou;
 
   /// What [name] goes back to once the reader takes theirs back: the invitation's,
-  /// else what the person goes by in Heart. Only when [nameSetByYou].
+  /// else what the person goes by in Heart. Only with [nameSetByYou], and absent
+  /// even then when that has no name: offering to take a name back keys on
+  /// [nameSetByYou] alone.
   String? get fallbackName;
 
   ConnectionRole get role;
@@ -401,7 +404,7 @@ abstract interface class ConnectionsService {
   /// connection ends. Null when the connection isn't [actorId]'s or was never
   /// accepted. Giving one throws unless [actorId] is its coach or its student, the
   /// one naming the other; either side may take one back.
-  Future<Connection?> nameClient({required String actorId, required String connectionId, String? name});
+  Future<Connection?> nameOther({required String actorId, required String connectionId, String? name});
 
   /// True if there is any active connection between the two users in any
   /// direction or domain, and no block stands between them.

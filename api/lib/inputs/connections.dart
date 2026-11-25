@@ -75,16 +75,16 @@ class ConnectionSharesIn {
   }
 }
 
-/// `PUT /connections/:connectionId/name`: what a coach calls this client, as
+/// `PUT /connections/:connectionId/name`: what the caller calls the other side, as
 /// an invitation's name is bounded.
-class ClientNameIn {
+class ConnectionNameIn {
   final String name;
 
   const new _(this.name);
 
-  static Future<ClientNameIn> fromRequest(Request req) async {
+  static Future<ConnectionNameIn> fromRequest(Request req) async {
     final json = await req.json();
-    return ClientNameIn._(json.personName('name'));
+    return ConnectionNameIn._(json.personName('name'));
   }
 }
 
