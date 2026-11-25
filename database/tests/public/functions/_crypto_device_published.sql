@@ -41,8 +41,8 @@ BEGIN
     VALUES (_again, _user_id, 'i', 's', 'f');
     RETURN NEXT is(
             (SELECT trust FROM crypto_devices WHERE id = _again),
-            'first',
-            'one published once none is in use is the first again'
+            NULL,
+            'one published once none is in use is not: a password could do that'
         );
 END
 $$ LANGUAGE plpgsql;
