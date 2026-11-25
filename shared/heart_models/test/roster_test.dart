@@ -76,6 +76,32 @@ void main() {
 
     test('CoachFeedItem round-trips', () => expectRoundTrip(item, CoachFeedItem.fromJson));
 
+    test('which copies changed, read from a row and round-tripped, and one this build can\'t read left out', () {
+      final changed = ClientSummary.fromRow({
+        ...row,
+        'changed_programs': [
+          {'program_id': 'p2', 'at': '2026-01-03T00:00:00+00:00'},
+          {'program_id': 'p1', 'at': '2026-01-02T00:00:00+00:00'},
+        ],
+      });
+      expect(changed.changedPrograms, [
+        ChangedProgram('p2', DateTime.utc(2026, 1, 3)),
+        ChangedProgram('p1', DateTime.utc(2026, 1, 2)),
+      ]);
+      expectRoundTrip(changed, ClientSummary.fromJson);
+
+      final odd = {
+        ...wire(changed),
+        'changedPrograms': [
+          {'programId': 'p1', 'changedAt': 'not a time'},
+          {'programId': 7},
+          {'programId': 'p3', 'changedAt': '2026-01-04T00:00:00.000Z'},
+        ],
+      };
+      expect(ClientSummary.fromJson(odd).changedPrograms, [ChangedProgram('p3', DateTime.utc(2026, 1, 4))]);
+      expect(ClientSummary.fromJson({...wire(changed)}..remove('changedPrograms')).changedPrograms, isEmpty);
+    });
+
     test('a name the coach gave says so, in the roster and the feed, false when not said', () {
       final summary = ClientSummary.fromRow({...row, 'named_by_you': true});
       expect(summary.namedByYou, isTrue);

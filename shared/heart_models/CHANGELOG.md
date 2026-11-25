@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.65.0
+
+Which of a client's programs they changed (heart-api#482).
+
+- Added: `ChangedProgram` (`programId`, `changedAt`, `tryJson`, `toMap`), and
+  `ClientSummary.changedPrograms`, newest first: the copies the `changed` reason stands for, each with
+  its latest change. Empty when absent; an entry this build can't read is left out.
+
 ## 2.64.0
 
 Whether a name is one the reader set, and what taking it back returns to (heart-api#481).
