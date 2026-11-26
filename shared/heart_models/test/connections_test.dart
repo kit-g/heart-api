@@ -196,6 +196,25 @@ void main() {
       expect(Connection.fromJson(Connection.fromRow(row).toMap()..remove('namedByYou')).namedByYou, isFalse);
     });
 
+    test('says whether the reader set the name, and what taking it back returns to, absent when not said', () {
+      final row = {
+        'target_id': 'u',
+        'role': 'COACH',
+        'domain': 'fitness',
+        'status': 'active',
+        'created_at': DateTime.utc(2026),
+        'username': 'Sam',
+        'named_by_you': true,
+      };
+      final set = Connection.fromRow({...row, 'name_set_by_you': true, 'fallback_name': 'Sam from the gym'});
+      final read = Connection.fromJson(set.toMap());
+      expect((read.nameSetByYou, read.fallbackName), (true, 'Sam from the gym'));
+
+      final invited = Connection.fromRow(row).toMap();
+      expect(invited.containsKey('nameSetByYou') || invited.containsKey('fallbackName'), isFalse);
+      expect((Connection.fromJson(invited).nameSetByYou, Connection.fromJson(invited).fallbackName), (false, null));
+    });
+
     test('says who the other person is, and reads one that does not', () {
       final connection = Connection.fromRow({
         'target_id': 'u',

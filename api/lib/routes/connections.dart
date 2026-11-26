@@ -60,20 +60,21 @@ Future<Connection> changeConnectionShares(Request request) async {
   return changed.naming(connection);
 }
 
-/// A coach's own name for the client on this connection, current or former. Only
-/// the coach reads it.
-Future<Connection> nameClient(Request request) async {
-  final input = await ClientNameIn.fromRequest(request);
-  return _nameClient(request, input.name);
+/// The caller's own name for the other side of a coaching connection, current or
+/// former: the coach's for the client, or the student's for the coach. Only the one
+/// who gave it reads it.
+Future<Connection> nameOther(Request request) async {
+  final input = await ConnectionNameIn.fromRequest(request);
+  return _nameOther(request, input.name);
 }
 
-/// Back to the invitation's name, or the client's own when there was no
-/// invitation. Either side may: a name given as a coach stays if the roles turn.
-Future<Connection> unnameClient(Request request) => _nameClient(request, null);
+/// Back to the caller's invitation's name, or the other person's own when there was
+/// none. Either side may: a name given as a coach stays if the roles turn.
+Future<Connection> unnameOther(Request request) => _nameOther(request, null);
 
-Future<Connection> _nameClient(Request request, String? name) async {
+Future<Connection> _nameOther(Request request, String? name) async {
   final connectionId = request.connectionIdInPath;
-  final named = await request.connectionsService.nameClient(
+  final named = await request.connectionsService.nameOther(
     actorId: request.userId,
     connectionId: connectionId,
     name: name,
@@ -115,6 +116,8 @@ extension on Connection {
       name: read.name,
       avatar: read.avatar,
       namedByYou: read.namedByYou,
+      nameSetByYou: read.nameSetByYou,
+      fallbackName: read.fallbackName,
     );
   }
 }

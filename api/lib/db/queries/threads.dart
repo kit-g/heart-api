@@ -36,7 +36,7 @@ final _threadOther =
     '''
 LEFT JOIN profiles other
   ON other.id = CASE WHEN t.person_a = @userId THEN t.person_b ELSE t.person_a END
-${_named('_given_name(@userId, other.id)', username: 'other.username')}
+${_named(giver: '@userId', person: 'other.id', username: 'other.username')}
 ''';
 
 /// Only for a connection that was accepted, whichever person it was made by, and

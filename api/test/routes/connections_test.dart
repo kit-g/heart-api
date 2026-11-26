@@ -255,7 +255,7 @@ void main() {
   group('a coach\'s name for a client', () {
     void named({Connection? answer}) {
       when(
-        app.db.nameClient(
+        app.db.nameOther(
           actorId: anyNamed('actorId'),
           connectionId: anyNamed('connectionId'),
           name: anyNamed('name'),
@@ -279,7 +279,7 @@ void main() {
       final res = await app.send('PUT', '/connections/$id/name', body: {'name': '  Sam  '});
       expect(res.status, 200);
       expect(jsonDecode(res.body), containsPair('namedByYou', true));
-      verify(app.db.nameClient(actorId: 'u1', connectionId: id, name: 'Sam')).called(1);
+      verify(app.db.nameOther(actorId: 'u1', connectionId: id, name: 'Sam')).called(1);
       verifyNever(app.db.getConnectionById(actorId: anyNamed('actorId'), connectionId: anyNamed('connectionId')));
     });
 
@@ -287,7 +287,7 @@ void main() {
       named(answer: sam);
       final res = await app.send('DELETE', '/connections/$id/name');
       expect(res.status, 200);
-      verify(app.db.nameClient(actorId: 'u1', connectionId: id, name: null)).called(1);
+      verify(app.db.nameOther(actorId: 'u1', connectionId: id, name: null)).called(1);
     });
 
     test('a name of nothing, or past 100 characters, is a 400 before anything is read', () async {

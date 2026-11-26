@@ -18,7 +18,7 @@ r.${target.column} AS target_id,
 String _reactionAuthor(String reader) {
   return '''
 LEFT JOIN profiles author ON author.id = r.author_id
-${_named('_given_name($reader, r.author_id)', username: 'author.username')}''';
+${_named(giver: reader, person: 'r.author_id', username: 'author.username')}''';
 }
 
 const _reactionAccess =

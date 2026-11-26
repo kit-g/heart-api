@@ -510,7 +510,7 @@ SELECT
 FROM template_shares ts
 JOIN templates t ON t.id = ts.master_template_id
 JOIN profiles p ON p.id = ts.student_id
-${_named('_given_name(@userId, ts.student_id)', username: 'p.username')}
+${_named(giver: '@userId', person: 'ts.student_id', username: 'p.username')}
 WHERE ts.coach_id = @userId
   AND (@cursor::uuid IS NULL OR ts.id < @cursor::uuid)
 ORDER BY ts.id DESC
@@ -666,7 +666,7 @@ SELECT
   COALESCE(ns.created_at, ex.created_at) AS created_at,
   NOT EXISTS (SELECT 1 FROM _allowed) AS forbidden
 FROM _student s
-${_named('_given_name(@coachId, s.id)', username: 's.username')}
+${_named(giver: '@coachId', person: 's.id', username: 's.username')}
 CROSS JOIN _master m
 LEFT JOIN _new_share ns ON ns.master_template_id = m.id
 LEFT JOIN _existing ex ON ex.master_template_id = m.id

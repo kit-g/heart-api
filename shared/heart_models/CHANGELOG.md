@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.64.0
+
+Whether a name is one the reader set, and what taking it back returns to (heart-api#481).
+
+- Added: `Connection.nameSetByYou` and `Connection.fallbackName`, the same on `ClientSummary`.
+  `nameSetByYou` is true when the reader set a name of their own that taking it back would change;
+  `fallbackName` is what the name goes back to, only with `nameSetByYou`, and absent when that has no
+  name. On a connection both are absent from the wire when not said.
+- Changed: `ConnectionsService.nameClient` is `nameOther`, since a student names their coach too
+  (heart-api#480). Coaching's signatures change freely until the app ships coaching.
+
 ## 2.62.0
 
 Account deletion calls return nothing (heart-api#471).

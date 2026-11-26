@@ -1,6 +1,6 @@
 part of 'db.dart';
 
-const _onlyTheCoachNames = 'Only the coach on a connection names its client.';
+const _onlyCoachingNames = 'Only the coach and the student on a coaching connection name each other.';
 const _onlyTheStudentShares = 'Only the student of a live coaching connection chooses what it shares.';
 
 mixin _Connections on _DatabaseBase implements ConnectionsService {
@@ -162,7 +162,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
   }
 
   @override
-  Future<Connection?> nameClient({required String actorId, required String connectionId, String? name}) async {
+  Future<Connection?> nameOther({required String actorId, required String connectionId, String? name}) async {
     final result = await _pool.execute(
       switch (name) {
         null => _takeNameBack.toSql(),
@@ -172,7 +172,7 @@ mixin _Connections on _DatabaseBase implements ConnectionsService {
     );
     return switch (result.firstOrNull?.toColumnMap()) {
       null => null,
-      {'forbidden': true} => throw const Forbidden(reason: _onlyTheCoachNames),
+      {'forbidden': true} => throw const Forbidden(reason: _onlyCoachingNames),
       final row => Connection.fromRow(row),
     };
   }

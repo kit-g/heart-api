@@ -70,11 +70,11 @@ String _statusSeen(String row, {required String other}) {
 /// ending without a name. Its status is [_statusSeen] by `@userId`. `c` needs
 /// `target_id` (the other person), `initiator_id`, `status`, `status_by`,
 /// `accepted_at` and the rest of a connection's columns.
-final _connectionOther = _connectionOtherNamed('_given_name(@userId, c.target_id)');
+final _connectionOther = _connectionOtherNamed();
 
-/// [_connectionOther], with [given] as the name `@userId` gave: a write that just
+/// [_connectionOther], with [set] as the name `@userId` set: a write that just
 /// changed it says what it is now, which the statement's own reads can't see.
-String _connectionOtherNamed(String given) {
+String _connectionOtherNamed({String? set}) {
   return '''
 SELECT
   c.connection_id,
@@ -87,6 +87,8 @@ SELECT
   c.shares,
   named.name AS username,
   coalesce(named.given, false) AS named_by_you,
+  coalesce(named.set, false) AS name_set_by_you,
+  named.fallback AS fallback_name,
   p.avatar_url
 FROM _side c
 LEFT JOIN blocks b
@@ -101,24 +103,59 @@ LEFT JOIN profiles p
     OR c.initiator_id = c.target_id
     OR (c.status = 'pending' AND c.status_by = c.target_id)
   )
-${_named(given, username: 'p.username', on: 'p.id IS NOT NULL')}
+${_named(giver: '@userId', person: 'c.target_id', username: 'p.username', set: set, on: 'p.id IS NOT NULL')}
 ''';
 }
 
-/// What a reader calls someone, as a lateral `named`: `named.name`, the name the
-/// reader gave them ([given], usually [_given_name]) or else [username] when it
-/// has a word in it, and `named.given`, whether it's the reader's. Every read of
-/// someone's name by someone who may have named them goes through this, so they
-/// all agree. Joined [on] a condition: a read that hides the person hides this too,
-/// and both columns are then NULL.
-String _named(String given, {required String username, String on = 'true'}) {
+/// What [giver], the reader, calls [person], as a lateral `named`, as `_given_name`
+/// resolves it:
+/// - `named.name`: the name the reader set, else the one on the reader's invitation
+///   the person accepted, else [username] when it has a word in it;
+/// - `named.given`: whether it's the reader's, set or the invitation's;
+/// - `named.set`: whether the reader set a name of their own that taking it back
+///   would change: one the same as what it goes back to changes nothing;
+/// - `named.fallback`: what it goes back to once the reader takes theirs back, the
+///   invitation's or else [username]; only with `named.set`, and NULL when that has
+///   no name.
+///
+/// The reads that show a name the reader gave go through this, so they agree.
+/// `_given_name` resolves the same name in SQL. [set] stands in for the name the reader set, for a
+/// write that just changed it. Joined [on] a condition: a read that hides the person
+/// hides this too, and every column is then NULL.
+String _named({
+  required String giver,
+  required String person,
+  required String username,
+  String? set,
+  String on = 'true',
+}) {
+  final own = "nullif(trim($username), '')";
   return '''
 LEFT JOIN LATERAL (
   SELECT
-    coalesce(g.name, nullif(trim($username), '')) AS name,
-    g.name IS NOT NULL AS given
-  FROM (SELECT $given AS name) g
+    coalesce(_set.name, _invited.name, $own) AS name,
+    coalesce(_set.name, _invited.name) IS NOT NULL AS given,
+    _set.name IS DISTINCT FROM coalesce(_invited.name, $own) AND _set.name IS NOT NULL AS set,
+    CASE
+      WHEN _set.name IS DISTINCT FROM coalesce(_invited.name, $own) AND _set.name IS NOT NULL
+        THEN coalesce(_invited.name, $own)
+    END AS fallback
+  FROM (
+    SELECT ${set ?? _setName(giver: giver, person: person)} AS name
+  ) _set
+  CROSS JOIN LATERAL (SELECT _invited_as($giver, $person) AS name) _invited
 ) named ON $on''';
+}
+
+/// The name [giver] set for [person], or NULL.
+String _setName({required String giver, required String person}) {
+  return '''
+(
+    SELECT _g.name
+    FROM given_names _g
+    WHERE _g.giver_id = $giver
+      AND _g.person_id = $person
+  )''';
 }
 
 /// Every connection of the caller's, both directions, as [_connectionOther] says it.
@@ -331,9 +368,10 @@ _side AS (
     AND accepted_at IS NOT NULL
 )''';
 
-/// The coach's own name for the client, and the connection as they then read it.
-/// No row when it isn't theirs; `forbidden` when they aren't its coach. One a block
-/// stands on is written and reads as an ending, as everything else on it does.
+/// The caller's own name for the other side of a coaching connection, the coach's
+/// for the client or the student's for the coach, and the connection as they then
+/// read it. No row when it isn't theirs; `forbidden` on one between peers. One a
+/// block stands on is written and reads as an ending, as everything else on it does.
 final _giveName =
     '''
 WITH
@@ -342,7 +380,7 @@ _written AS (
   INSERT INTO given_names (giver_id, person_id, name)
   SELECT @userId, target_id, @name::text
   FROM _side
-  WHERE role = 'COACH'
+  WHERE role IN ('COACH', 'STUDENT')
   ON CONFLICT (giver_id, person_id) DO UPDATE
   SET
     name = EXCLUDED.name,
@@ -350,7 +388,7 @@ _written AS (
   RETURNING name
 ),
 _seen AS (
-  ${_connectionOtherNamed('(SELECT name FROM _written)')}
+  ${_connectionOtherNamed(set: '(SELECT name FROM _written)')}
 )
 SELECT *, NOT EXISTS (SELECT 1 FROM _written) AS forbidden
 FROM _seen
@@ -370,5 +408,5 @@ _gone AS (
     AND g.person_id = s.target_id
   RETURNING 1
 )
-${_connectionOtherNamed('_invited_as(@userId, c.target_id)')}
+${_connectionOtherNamed(set: 'NULL::text')}
 ''';
