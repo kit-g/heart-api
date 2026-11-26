@@ -1,6 +1,5 @@
--- A device that asked to publish while the account was full is still known: it holds no
--- place and nothing is sent to it, but it signs removals, and its day counts from when it
--- first asked. Without it, a new phone on a full account could never remove a stolen one.
+-- Whether a device of the account's holds one of its places, or asked to publish while
+-- there was none and waits for one.
 
 ALTER TABLE IF EXISTS crypto_devices
     DROP COLUMN IF EXISTS waiting,
