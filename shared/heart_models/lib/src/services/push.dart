@@ -10,8 +10,9 @@ typedef PushAudience = ({
   String? forTopic,
   List<({String token, String locale})> devices,
 
-  /// The name the person the push is about goes by in Heart, as everything else
-  /// names them. Null without one, or without an actor.
+  /// The name the person the push is about goes by to its recipient, as everything
+  /// else names them: the name the recipient set, else the one they invited them by,
+  /// else their own. Null without one, or without an actor.
   String? actorName,
 });
 
