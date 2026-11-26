@@ -33,6 +33,9 @@ abstract interface class CryptoDevice implements Model {
   /// recorded that.
   String? get removedBy;
 
+  /// The day, in UTC, it last reached the server; only on the owner's own list.
+  DateTime? get lastSeenOn;
+
   factory({
     required String id,
     required String userId,
@@ -46,6 +49,7 @@ abstract interface class CryptoDevice implements Model {
     String? oneTimeKey,
     DateTime? removedAt,
     String? removedBy,
+    DateTime? lastSeenOn,
   }) = _CryptoDevice.new;
 
   factory fromRow(Map row) {
@@ -62,6 +66,10 @@ abstract interface class CryptoDevice implements Model {
       oneTimeKey: row['key'] as String?,
       removedAt: row['removed_at'] as DateTime?,
       removedBy: row['removed_by']?.toString(),
+      lastSeenOn: switch (row['seen_on']) {
+        final DateTime on => DateTime.utc(on.year, on.month, on.day),
+        _ => null,
+      },
     );
   }
 
@@ -82,6 +90,12 @@ abstract interface class CryptoDevice implements Model {
         _ => null,
       },
       removedBy: json['removedBy'] as String?,
+      lastSeenOn: switch (json['lastSeenOn']) {
+        final String on => switch (DateTime.parse(on)) {
+          final day => DateTime.utc(day.year, day.month, day.day),
+        },
+        _ => null,
+      },
     );
   }
 }
@@ -111,6 +125,8 @@ class _CryptoDevice implements CryptoDevice {
   final DateTime? removedAt;
   @override
   final String? removedBy;
+  @override
+  final DateTime? lastSeenOn;
 
   const new({
     required this.id,
@@ -125,6 +141,7 @@ class _CryptoDevice implements CryptoDevice {
     this.oneTimeKey,
     this.removedAt,
     this.removedBy,
+    this.lastSeenOn,
   });
 
   @override
@@ -142,8 +159,18 @@ class _CryptoDevice implements CryptoDevice {
       'oneTimeKey': ?oneTimeKey,
       'removedAt': ?removedAt?.toIso8601String(),
       'removedBy': ?removedBy,
+      'lastSeenOn': ?lastSeenOn?.ymd,
     };
   }
+}
+
+extension on DateTime {
+  /// `2026-11-26`.
+  String get ymd => [
+    year.toString().padLeft(4, '0'),
+    month.toString().padLeft(2, '0'),
+    day.toString().padLeft(2, '0'),
+  ].join('-');
 }
 
 /// A sealed item waiting for one device.
@@ -264,18 +291,25 @@ class CryptoDevices implements Model {
   /// owner's own list; never anything to send to.
   final List<CryptoDevice> removed;
 
-  const new(this.devices, {this.removed = const []});
+  /// The owner's own devices that asked to publish while the account was full: each
+  /// holds no place and is nothing to send to, but may remove devices. Only on the
+  /// owner's own list.
+  final List<CryptoDevice> waiting;
+
+  const new(this.devices, {this.removed = const [], this.waiting = const []});
 
   /// A device this build can't read is left out.
   factory fromJson(Map json) => CryptoDevices(
     readIndexed(json['devices'], CryptoDevice.fromJson).items,
     removed: readIndexed(json['removed'], CryptoDevice.fromJson).items,
+    waiting: readIndexed(json['waiting'], CryptoDevice.fromJson).items,
   );
 
   @override
   Map<String, dynamic> toMap() => {
     'devices': [for (final device in devices) device.toMap()],
     if (removed.isNotEmpty) 'removed': [for (final device in removed) device.toMap()],
+    if (waiting.isNotEmpty) 'waiting': [for (final device in waiting) device.toMap()],
   };
 }
 

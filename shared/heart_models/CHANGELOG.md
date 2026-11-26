@@ -4,10 +4,11 @@
 
 Who removed a device, and which device may remove which (heart-api#483, heart-api#484).
 
-- Added: `CryptoDevice.removedAt` and `CryptoDevice.removedBy`, and `CryptoDevices.removed`, empty when
-  absent.
-- Changed: `KeyService.removeDevice` takes `removedBy`, `signedAt` and `signature`, all required.
-  Coaching's signatures change freely until the app ships coaching.
+- Added: `CryptoDevice.removedAt`, `CryptoDevice.removedBy` and `CryptoDevice.lastSeenOn` (a UTC day),
+  and `CryptoDevices.removed` and `CryptoDevices.waiting`, each empty when absent.
+- Changed: `KeyService.removeDevice` takes `removedBy`, `signedAt` and `signature`, all required, and
+  `KeyService.publishDevice` answers `waiting` too, and `KeyService.getDevices` answers `CryptoDevices`. Coaching's signatures change freely until the app
+  ships coaching.
 
 ## 2.65.0
 
