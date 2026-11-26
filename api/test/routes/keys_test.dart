@@ -98,7 +98,7 @@ void main() {
     });
   });
 
-  void stubPublish({required bool added}) {
+  void stubPublish({required bool added, bool waiting = false}) {
     when(
       app.db.publishDevice(
         userId: anyNamed('userId'),
@@ -120,6 +120,7 @@ void main() {
           createdAt: DateTime.utc(2026),
         ),
         added: added,
+        waiting: waiting,
       ),
     );
   }
@@ -149,6 +150,21 @@ void main() {
     expect(removed.status, 204);
 
     verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).called(2);
+  });
+
+  test('a device refused for the limit is told it waits, and the account is told it asked', () async {
+    stubPublish(added: true, waiting: true);
+    when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+    when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
+
+    final res = await app.send(
+      'POST',
+      '/keys/devices',
+      body: {'id': device, 'identityKey': 'i', 'signingKey': 's', 'fallbackKey': 'f'},
+    );
+    final body = jsonDecode(res.body) as Map;
+    expect((res.status, body['code'], body['waiting']), (409, 'device_limit', true));
+    verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).called(1);
   });
 
   test('a device publishing itself again tells nobody', () async {
@@ -432,7 +448,7 @@ void main() {
     setUp(() {
       when(
         app.db.getDevices(readerId: anyNamed('readerId'), ownerId: anyNamed('ownerId')),
-      ).thenAnswer((_) async => [published()]);
+      ).thenAnswer((_) async => CryptoDevices([published()]));
     });
 
     test('someone else\'s, as the caller reads them', () async {
@@ -448,26 +464,6 @@ void main() {
 
       expect(res.status, 200);
       verify(app.db.getDevices(readerId: 'u1', ownerId: 'u1')).called(1);
-    });
-    test('the removed ones apart from those in use', () async {
-      final removed = CryptoDevice(
-        id: other,
-        userId: 'u1',
-        identityKey: 'i',
-        signingKey: 's',
-        fallbackKey: 'f',
-        createdAt: DateTime.utc(2026),
-        removedAt: DateTime.utc(2026, 2),
-        removedBy: device,
-      );
-      when(
-        app.db.getDevices(readerId: anyNamed('readerId'), ownerId: anyNamed('ownerId')),
-      ).thenAnswer((_) async => [published(), removed]);
-
-      final res = await app.send('GET', '/keys/devices');
-      final read = CryptoDevices.fromJson(jsonDecode(res.body) as Map);
-      expect(read.devices.map((d) => d.id), [device]);
-      expect((read.removed.single.id, read.removed.single.removedBy), (other, device));
     });
   });
 

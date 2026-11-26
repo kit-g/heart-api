@@ -55,6 +55,8 @@ void main() {
         null => null,
       },
     );
+    // as the route answers one that waits for a place
+    if (published.waiting) throw const Conflict(code: 'device_limit', reason: 'it waits for a place');
     return published.device.id;
   }
 
@@ -81,10 +83,8 @@ void main() {
   }
 
   /// The devices [user] has in use, as their own list says.
-  Future<List<CryptoDevice>> listed(String user) async => [
-    for (final each in await h.db.getDevices(readerId: user, ownerId: user))
-      if (each.removedAt == null) each,
-  ];
+  Future<List<CryptoDevice>> listed(String user) async =>
+      (await h.db.getDevices(readerId: user, ownerId: user)).devices;
 
   Future<(String, String)> connected() async {
     final (a, b) = (await h.seedProfile(), await h.seedProfile());
@@ -96,7 +96,7 @@ void main() {
     test('publishing twice answers what is there', () async {
       final me = await h.seedProfile();
       final id = uuidV7();
-      Future<({CryptoDevice device, bool added})> publish(String key) {
+      Future<({CryptoDevice device, bool added, bool waiting})> publish(String key) {
         return h.db.publishDevice(userId: me, id: id, identityKey: key, signingKey: 's', fallbackKey: 'f');
       }
 
@@ -311,14 +311,14 @@ void main() {
       final stranger = await h.seedProfile();
       final id = await device(a);
 
-      expect((await h.db.getDevices(readerId: a, ownerId: a)).single.id, id);
-      expect((await h.db.getDevices(readerId: b, ownerId: a)).single.id, id);
+      expect((await h.db.getDevices(readerId: a, ownerId: a)).devices.single.id, id);
+      expect((await h.db.getDevices(readerId: b, ownerId: a)).devices.single.id, id);
       await expectLater(h.db.getDevices(readerId: stranger, ownerId: a), throwsA(isA<Forbidden>()));
     });
 
     test('a person with no devices is an empty list', () async {
       final (a, b) = await connected();
-      expect(await h.db.getDevices(readerId: a, ownerId: b), isEmpty);
+      expect((await h.db.getDevices(readerId: a, ownerId: b)).devices, isEmpty);
     });
 
     test('a removed device stops being listed, and loses its keys and what waited for it', () async {
@@ -350,7 +350,9 @@ void main() {
       final other = await device(a);
       await remove(a, mine);
       expect((await listed(a)).map((d) => d.id), [other]);
-      expect((await h.db.getDevices(readerId: b, ownerId: a)).map((d) => d.id), [other], reason: 'theirs to know');
+      expect((await h.db.getDevices(readerId: b, ownerId: a)).devices.map((d) => d.id), [
+        other,
+      ], reason: 'theirs to know');
       await expectLater(
         remove(a, mine, by: other),
         throwsA(isA<NotFound>()),
@@ -412,23 +414,24 @@ void main() {
       await remove(me, old);
 
       final removed = {
-        for (final each in await h.db.getDevices(readerId: me, ownerId: me))
-          if (each.removedAt != null) each.id: each,
+        for (final each in (await h.db.getDevices(readerId: me, ownerId: me)).removed) each.id: each,
       };
       expect(removed.keys, unorderedEquals([password, old]));
       expect(removed[password]!.removedBy, phone);
       expect(removed[old]!.removedBy, old);
       expect(removed[password]!.removedAt, isNotNull);
-      expect((await h.db.getDevices(readerId: peer, ownerId: me)).map((d) => d.id), [phone], reason: 'theirs alone');
+      final theirs = await h.db.getDevices(readerId: peer, ownerId: me);
+      expect(theirs.devices.map((d) => d.id), [phone]);
+      expect(theirs.removed, isEmpty, reason: 'theirs alone');
 
       await h.exec(
         "UPDATE crypto_devices SET removed_at = now() - INTERVAL '31 days' WHERE id = @d::uuid",
         {'d': old},
       );
       expect(
-        [for (final each in await h.db.getDevices(readerId: me, ownerId: me)) each.id],
-        [phone, password],
-        reason: 'in use first, then the removals still shown',
+        (await h.db.getDevices(readerId: me, ownerId: me)).removed.map((d) => d.id),
+        [password],
+        reason: 'a month on, a removal is no longer shown',
       );
     });
 
@@ -578,8 +581,8 @@ void main() {
         await remove(me, await device(me), by: phone);
       }
       final all = await h.db.getDevices(readerId: me, ownerId: me);
-      expect(all.where((d) => d.removedAt == null).map((d) => d.id), [phone]);
-      expect(all.where((d) => d.removedAt != null), hasLength(20));
+      expect(all.devices.map((d) => d.id), [phone]);
+      expect(all.removed, hasLength(20));
     });
 
     test('a device unheard of for a month holds no place, so an account whose every device is gone adds one', () async {
@@ -611,6 +614,97 @@ void main() {
         await remove(me, old, by: fresh);
       }
       expect(await inUse(me), {fresh}, reason: 'the new one removes the rest a day on');
+    });
+
+    test(
+      'a device refused for the limit waits: known, nothing sent to it, and it removes once its day is up',
+      () async {
+        final (me, peer) = await connected();
+        final ten = [for (var i = 0; i < 10; i++) await device(me)];
+        await h.exec(
+          "UPDATE crypto_devices SET created_at = now() - INTERVAL '40 days' WHERE id = ANY (@ids::uuid[])",
+          {'ids': ten},
+        );
+        final theirs = await device(peer);
+
+        final id = uuidV7();
+        final pair = await ed25519.newKeyPair();
+        pairs[id] = pair;
+        signingKeys[id] = base64.encode((await pair.extractPublicKey()).bytes).replaceAll('=', '');
+        Future<({CryptoDevice device, bool added, bool waiting})> publish() => h.db.publishDevice(
+          userId: me,
+          id: id,
+          identityKey: 'identity',
+          signingKey: signingKeys[id]!,
+          fallbackKey: 'fallback',
+        );
+        final asked = await publish();
+        expect((asked.added, asked.waiting), (true, true), reason: 'the account is told it asked');
+        final again = await publish();
+        expect((again.added, again.waiting), (false, true));
+
+        final mine = await h.db.getDevices(readerId: me, ownerId: me);
+        expect(mine.waiting.map((d) => d.id), [id]);
+        expect(mine.devices.map((d) => d.id), isNot(contains(id)));
+        final seen = await h.db.getDevices(readerId: peer, ownerId: me);
+        expect(seen.devices.map((d) => d.id), isNot(contains(id)));
+        expect(seen.waiting, isEmpty, reason: 'nothing to send to');
+        expect(
+          (await h.db.claimKeys(claimerId: peer, ownerId: me)).map((d) => d.id),
+          isNot(contains(id)),
+        );
+        await expectLater(
+          h.db.enqueue(
+            userId: peer,
+            id: uuidV7(),
+            recipientDeviceId: id,
+            senderDeviceId: theirs,
+            kind: 'key',
+            content: 'sealed',
+          ),
+          throwsA(isA<Forbidden>()),
+        );
+        await expectLater(vouch(me, id, by: ten.first), throwsA(isA<NotFound>()));
+
+        await expectLater(remove(me, ten.first, by: id), refused('device_too_new'), reason: 'its day counts');
+        await age(id, 25);
+        await remove(me, ten.first, by: id);
+        final placed = await publish();
+        expect((placed.added, placed.waiting), (true, false), reason: 'with room, it has a place');
+        expect((await listed(me)).map((d) => d.id), contains(id));
+      },
+    );
+
+    test('an older device removes a waiting one at once, and there are only so many waiting', () async {
+      final me = await h.seedProfile();
+      final ten = [for (var i = 0; i < 10; i++) await device(me)];
+      final waiting = [
+        for (var i = 0; i < 10; i++)
+          (await h.db.publishDevice(
+            userId: me,
+            id: uuidV7(),
+            identityKey: 'i',
+            signingKey: 's',
+            fallbackKey: 'f',
+          )).device.id,
+      ];
+      await expectLater(
+        device(me),
+        throwsA(isA<Conflict>().having((e) => e.toMap()['waiting'], 'waiting', false)),
+      );
+      await remove(me, waiting.first, by: ten.first);
+      expect((await h.db.getDevices(readerId: me, ownerId: me)).waiting, hasLength(9));
+    });
+
+    test('the owner\'s list says the day each device was last seen, and nobody else\'s does', () async {
+      final (me, peer) = await connected();
+      final phone = await device(me);
+      await h.exec(
+        "UPDATE crypto_devices SET seen_at = '2026-10-03 23:30:00+00' WHERE id = @d::uuid",
+        {'d': phone},
+      );
+      expect((await listed(me)).single.lastSeenOn, DateTime.utc(2026, 10, 3));
+      expect((await h.db.getDevices(readerId: peer, ownerId: me)).devices.single.lastSeenOn, isNull);
     });
   });
 
@@ -919,7 +1013,7 @@ void main() {
       final (mine, theirs) = (await device(a), await device(b));
       await h.exec("UPDATE connections SET accepted_at = now(), status = 'pending' WHERE initiator_id = @a", {'a': a});
       await send(a, mine, theirs, 'x', kind: 'key_request');
-      expect(await h.db.getDevices(readerId: a, ownerId: b), hasLength(1));
+      expect((await h.db.getDevices(readerId: a, ownerId: b)).devices, hasLength(1));
       expect(await h.db.getKeyPeers(userId: a), [b]);
 
       await h.exec("UPDATE connections SET status = 'declined' WHERE initiator_id = @a", {'a': a});

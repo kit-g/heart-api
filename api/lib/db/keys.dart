@@ -48,13 +48,18 @@ const _removedListedDays = 30;
 /// How many removed devices the owner's list shows at most, the latest first.
 const _maxRemovedListed = 20;
 
+/// How many devices an account can have waiting for a place: as many as there are
+/// places, so a new phone always can, and a script can't add rows without end.
+const _maxWaitingDevices = _maxDevices;
+
 /// How long a device goes without publishing itself or reading its queue before it
 /// stops holding one of the account's places, so an account whose every device was
 /// wiped or lost can add one, which then removes them.
 const _unseenDays = 30;
 
-/// A device's public keys, as it signs with them, and whether it was removed.
-typedef _Signer = ({String identityKey, String signingKey, bool removed});
+/// A device's public keys, as it signs with them, whether it was removed, and whether
+/// it waits for a place.
+typedef _Signer = ({String identityKey, String signingKey, bool removed, bool waiting});
 
 extension on _Signer {
   /// Whether [signature], base64 with or without padding, is this device's
@@ -92,7 +97,7 @@ mixin _Keys on _DatabaseBase implements KeyService {
   // case: every id is lowered first, so one sent in upper case finds its signer.
 
   @override
-  Future<({CryptoDevice device, bool added})> publishDevice({
+  Future<({CryptoDevice device, bool added, bool waiting})> publishDevice({
     required String userId,
     required String id,
     required String identityKey,
@@ -108,6 +113,7 @@ mixin _Keys on _DatabaseBase implements KeyService {
       (final String by, final String said) => switch ((await _signersOf(userId: userId, ids: [by]))[by]) {
         final voucher?
             when !voucher.removed &&
+                !voucher.waiting &&
                 await voucher.signed(
                   _vouchMessage(userId: userId, deviceId: id, identityKey: identityKey, signingKey: signingKey),
                   said,
@@ -147,10 +153,11 @@ mixin _Keys on _DatabaseBase implements KeyService {
       null => throw _idTaken,
       {'is_full': true} => throw const Conflict(
         code: 'device_limit',
-        reason: 'an account has at most $_maxDevices devices with keys; remove one first',
+        reason: 'an account has at most $_maxDevices devices with keys, and as many waiting; remove one first',
+        payload: {'waiting': false},
       ),
       {'removed': true} => throw const Forbidden(code: 'device_removed', reason: 'this device was removed'),
-      _ => (device: CryptoDevice.fromRow(row), added: row['added'] == true),
+      _ => (device: CryptoDevice.fromRow(row), added: row['added'] == true, waiting: row['waiting'] == true),
     };
   }
 
@@ -166,7 +173,8 @@ mixin _Keys on _DatabaseBase implements KeyService {
     // Only a vouch that checks out goes on. One naming a device that isn't the
     // caller's in use goes on as no voucher at all, for the write to say which.
     final voucher = switch ((signers[deviceId], signers[vouchedBy])) {
-      (final device?, final voucher?) when deviceId != vouchedBy && !device.removed && !voucher.removed =>
+      (final device?, final voucher?)
+          when deviceId != vouchedBy && !device.removed && !voucher.removed && !device.waiting && !voucher.waiting =>
         switch (await voucher.signed(
           _vouchMessage(
             userId: userId,
@@ -213,16 +221,32 @@ mixin _Keys on _DatabaseBase implements KeyService {
   }
 
   @override
-  Future<List<CryptoDevice>> getDevices({required String readerId, required String ownerId}) async {
+  Future<CryptoDevices> getDevices({required String readerId, required String ownerId}) async {
     final rows = await _pool.execute(_listDevices.toSql(), parameters: {'readerId': readerId, 'ownerId': ownerId});
-    final maps = rows.map((row) => row.toColumnMap()).toList();
+    final maps = [
+      for (final row in rows) row.toColumnMap(),
+    ];
     if (maps.first['forbidden'] == true) {
       throw const Forbidden(reason: 'You do not have permission to see these devices.');
     }
-    return [
+    final listed = [
       for (final map in maps)
-        if (map['id'] != null) CryptoDevice.fromRow(map),
+        if (map['id'] != null) (CryptoDevice.fromRow(map), map['waiting'] == true),
     ];
+    return CryptoDevices(
+      [
+        for (final (device, waits) in listed)
+          if (device.removedAt == null && !waits) device,
+      ],
+      removed: [
+        for (final (device, _) in listed)
+          if (device.removedAt != null) device,
+      ],
+      waiting: [
+        for (final (device, waits) in listed)
+          if (device.removedAt == null && waits) device,
+      ],
+    );
   }
 
   @override
@@ -286,7 +310,12 @@ mixin _Keys on _DatabaseBase implements KeyService {
     final rows = await _pool.execute(_signers.toSql(), parameters: {'userId': userId, 'ids': ids});
     return {
       for (final row in rows)
-        row[0].toString(): (identityKey: row[1] as String, signingKey: row[2] as String, removed: row[3] as bool),
+        row[0].toString(): (
+          identityKey: row[1] as String,
+          signingKey: row[2] as String,
+          removed: row[3] as bool,
+          waiting: row[4] as bool,
+        ),
     };
   }
 

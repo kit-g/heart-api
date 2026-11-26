@@ -50,7 +50,7 @@ String _deviceId(Request req) {
 
 Future<Model> publishDevice(Request req) async {
   final input = await DevicePublishIn.fromRequest(req);
-  final (:device, :added) = await req.keyService.publishDevice(
+  final (:device, :added, :waiting) = await req.keyService.publishDevice(
     userId: req.userId,
     id: input.id,
     identityKey: input.identityKey,
@@ -59,8 +59,16 @@ Future<Model> publishDevice(Request req) async {
     signature: input.signature,
     vouchedBy: input.vouchedBy,
   );
-  // a device publishing itself again, as it may on every start, changes nothing
+  // a device publishing itself again, as it may on every start, changes nothing; one
+  // waiting for a place is told so, and the account's devices are told it asked
   if (added) await _tellPeers(req);
+  if (waiting) {
+    throw const Conflict(
+      code: 'device_limit',
+      reason: 'the account is full: this device waits for a place, and may remove one of its devices',
+      payload: {'waiting': true},
+    );
+  }
   return Created(device);
 }
 
@@ -78,17 +86,7 @@ Future<CryptoDevice> vouchForDevice(Request req) async {
 
 Future<CryptoDevices> getDevices(Request req) async {
   final owner = req.url.queryParameters['userId'] ?? req.userId;
-  final devices = await req.keyService.getDevices(readerId: req.userId, ownerId: owner);
-  return CryptoDevices(
-    [
-      for (final device in devices)
-        if (device.removedAt == null) device,
-    ],
-    removed: [
-      for (final device in devices)
-        if (device.removedAt != null) device,
-    ],
-  );
+  return req.keyService.getDevices(readerId: req.userId, ownerId: owner);
 }
 
 Future<Model> removeDevice(Request req) async {
