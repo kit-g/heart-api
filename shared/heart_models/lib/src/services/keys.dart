@@ -24,11 +24,22 @@ abstract interface class KeyService {
     required String signature,
   });
 
-  /// [ownerId]'s devices in use. Throws unless [readerId] shares keys with them.
+  /// [ownerId]'s devices in use and, when [readerId] is [ownerId], the ones removed
+  /// lately, each with its `removedAt`. Throws unless [readerId] shares keys with them.
   Future<List<CryptoDevice>> getDevices({required String readerId, required String ownerId});
 
-  /// Stops using a device of the caller's: nothing more is sent to it.
-  Future<void> removeDevice({required String userId, required String deviceId});
+  /// Stops using a device of the caller's: nothing more is sent to it, and what it
+  /// vouched for is vouched for by nobody. [removedBy], a device of the caller's in
+  /// use, signed the removal ([signature]) at [signedAt], in seconds since the epoch.
+  /// It removes itself, or a device added after it, at once, and one added before it
+  /// once it has been in use for a day; until then this throws, saying when.
+  Future<void> removeDevice({
+    required String userId,
+    required String deviceId,
+    required String removedBy,
+    required int signedAt,
+    required String signature,
+  });
 
   Future<void> replaceFallbackKey({required String userId, required String deviceId, required String key});
 

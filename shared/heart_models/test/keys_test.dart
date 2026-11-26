@@ -44,6 +44,21 @@ void main() {
       expect(read.devices.first.oneTimeKey, 'one-time');
       expect(read.devices.last.oneTimeKey, isNull);
       expect(read.devices.first.createdAt, at);
+      expect(read.removed, isEmpty);
+      expect(wire(read), isNot(contains('removed')));
+    });
+
+    test('CryptoDevices carries the removed ones apart, saying when and by which device', () {
+      final gone = CryptoDevice.fromRow({...row, 'id': 'd3', 'removed_at': at, 'removed_by': 'd1'});
+      final listed = CryptoDevices([CryptoDevice.fromRow(row)], removed: [gone]);
+      expectRoundTrip(listed, CryptoDevices.fromJson);
+
+      final read = CryptoDevices.fromJson(wire(listed));
+      expect(read.devices.map((device) => device.id), ['d1']);
+      expect(read.devices.single.removedAt, isNull);
+      expect(read.removed.single.id, 'd3');
+      expect(read.removed.single.removedAt, at);
+      expect(read.removed.single.removedBy, 'd1');
     });
 
     final item = QueuedItem.fromRow({

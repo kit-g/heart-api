@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.66.0
+
+Who removed a device, and which device may remove which (heart-api#483, heart-api#484).
+
+- Added: `CryptoDevice.removedAt` and `CryptoDevice.removedBy`, and `CryptoDevices.removed`: the
+  owner's own devices removed lately, each saying when and by which of their devices. Only on the
+  owner's own list, empty elsewhere, and never a device to send to.
+- Changed: `KeyService.removeDevice` takes `removedBy`, `signedAt` and `signature`, all required: the
+  device making the removal signs it. Coaching's signatures change freely until the app ships coaching.
+
 ## 2.65.0
 
 Which of a client's programs they changed (heart-api#482).
