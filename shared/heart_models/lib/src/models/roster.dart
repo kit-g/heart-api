@@ -49,6 +49,11 @@ abstract interface class ClientSummary implements Model {
 
   List<String> get reasons;
 
+  /// With the `changed` reason, the copies of the coach's programs they changed
+  /// since the coach last looked, each with its latest change, newest first; by the
+  /// rule the reason keeps. Empty without the reason.
+  List<ChangedProgram> get changedPrograms;
+
   /// Whether they give the coach [ConnectionShare.assistant].
   bool get assistant;
 
@@ -69,6 +74,7 @@ abstract interface class ClientSummary implements Model {
     List<DateTime> recent,
     DateTime? lastTrainedAt,
     List<String> reasons,
+    List<ChangedProgram> changedPrograms,
     bool assistant,
   }) = _ClientSummary.new;
 
@@ -90,6 +96,11 @@ abstract interface class ClientSummary implements Model {
       recent: [for (final at in (row['recent'] as List?) ?? const []) at as DateTime],
       lastTrainedAt: row['last_trained_at'] as DateTime?,
       reasons: [for (final reason in (row['reasons'] as List?) ?? const []) '$reason'],
+      changedPrograms: [
+        for (final change in (row['changed_programs'] as List?) ?? const [])
+          if (change case {'program_id': final String id, 'at': final String at})
+            ChangedProgram(id, DateTime.parse(at)),
+      ],
       assistant: row['assistant'] == true,
     );
   }
@@ -118,6 +129,10 @@ abstract interface class ClientSummary implements Model {
         _ => null,
       },
       reasons: [for (final reason in (json['reasons'] as List?) ?? const []) '$reason'],
+      changedPrograms: [
+        for (final change in (json['changedPrograms'] as List?) ?? const [])
+          if (ChangedProgram.tryJson(change) case final ChangedProgram read) read,
+      ],
       assistant: json['assistant'] == true,
     );
   }
@@ -157,6 +172,8 @@ class _ClientSummary implements ClientSummary {
   @override
   final List<String> reasons;
   @override
+  final List<ChangedProgram> changedPrograms;
+  @override
   final bool assistant;
 
   const new({
@@ -176,6 +193,7 @@ class _ClientSummary implements ClientSummary {
     this.recent = const [],
     this.lastTrainedAt,
     this.reasons = const [],
+    this.changedPrograms = const [],
     this.assistant = false,
   });
 
@@ -198,9 +216,40 @@ class _ClientSummary implements ClientSummary {
       'recent': [for (final at in recent) at.toIso8601String()],
       'lastTrainedAt': ?lastTrainedAt?.toIso8601String(),
       'reasons': reasons,
+      'changedPrograms': [for (final change in changedPrograms) change.toMap()],
       'assistant': assistant,
     };
   }
+}
+
+/// One copy of a coach's program a client changed, and when they last did.
+class ChangedProgram implements Model {
+  final String programId;
+  final DateTime changedAt;
+
+  const new(this.programId, this.changedAt);
+
+  /// Null for one this build can't read, which a list leaves out.
+  static ChangedProgram? tryJson(Object? json) {
+    return switch (json) {
+      {'programId': final String id, 'changedAt': final String at} => switch (DateTime.tryParse(at)) {
+        final DateTime at => ChangedProgram(id, at),
+        null => null,
+      },
+      _ => null,
+    };
+  }
+
+  @override
+  Map<String, dynamic> toMap() => {'programId': programId, 'changedAt': changedAt.toIso8601String()};
+
+  /// The same moment is the same change, whatever zone it's held in.
+  @override
+  bool operator ==(Object other) =>
+      other is ChangedProgram && other.programId == programId && other.changedAt.isAtSameMomentAs(changedAt);
+
+  @override
+  int get hashCode => Object.hash(programId, changedAt.microsecondsSinceEpoch);
 }
 
 /// One thing in a coach's feed: a workout finished, a session skipped, a program ending.

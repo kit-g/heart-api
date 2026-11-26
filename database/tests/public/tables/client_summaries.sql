@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(14);
+SELECT plan(16);
 
 SELECT has_table('public'::name, 'client_summaries'::name);
 
@@ -18,6 +18,8 @@ SELECT has_index('public'::name, 'client_summaries'::name, 'client_summaries_stu
 
 SELECT col_type_is('public'::name, 'client_summaries'::name, 'ending_since'::name, 'timestamp with time zone'::name);
 SELECT col_type_is('public'::name, 'client_summaries'::name, 'changed_at'::name, 'timestamp with time zone'::name);
+SELECT col_type_is('public'::name, 'client_summaries'::name, 'changed_programs'::name, 'jsonb'::name);
+SELECT col_default_is('public', 'client_summaries', 'changed_programs', '{}'::jsonb, 'no copy changed');
 
 SELECT has_trigger('public'::name, 'workouts'::name, 'workouts_mark_summaries_insert'::name);
 SELECT has_trigger('public'::name, 'workouts'::name, 'workouts_mark_summaries_update'::name);
