@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(19);
+SELECT plan(21);
 
 SELECT has_table('public'::name, 'crypto_devices'::name);
 
@@ -16,7 +16,8 @@ SELECT columns_are(
                    'signature',
                    'vouched_by',
                    'created_at',
-                   'removed_at'
+                   'removed_at',
+                   'removed_by'
                    ]
        );
 
@@ -25,7 +26,10 @@ SELECT col_is_pk('public'::name, 'crypto_devices'::name, 'id'::name);
 SELECT fk_ok('public', 'crypto_devices', 'user_id', 'public', 'profiles', 'id');
 SELECT fk_ok('public', 'crypto_devices', 'vouched_by', 'public', 'crypto_devices', 'id');
 
+SELECT fk_ok('public', 'crypto_devices', 'removed_by', 'public', 'crypto_devices', 'id');
+
 SELECT has_index('public'::name, 'crypto_devices'::name, 'crypto_devices_user_idx'::name);
+SELECT has_index('public'::name, 'crypto_devices'::name, 'crypto_devices_removed_by_idx'::name);
 
 SELECT has_table('public'::name, 'one_time_keys'::name);
 
