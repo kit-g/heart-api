@@ -68,6 +68,30 @@ class DeviceVouchIn {
   }
 }
 
+/// `DELETE /keys/devices/:deviceId?removedBy=&signedAt=&signature=` — the device
+/// asking, when it signed, in seconds since the epoch, and its signature over the
+/// removal, all three required. A `+` a client left unescaped arrives as a space,
+/// which base64 never holds, so it reads as the `+` it was.
+class DeviceRemovalQuery {
+  final String removedBy;
+  final int signedAt;
+  final String signature;
+
+  const new _({required this.removedBy, required this.signedAt, required this.signature});
+
+  factory fromRequest(Request req) {
+    final query = req.url.queryParameters;
+    return switch ((query['removedBy'], int.tryParse(query['signedAt'] ?? ''), query['signature'])) {
+      (final String by, final int at, final String signature)
+          when isUuidV7(by) && signature.isNotEmpty && signature.length <= 256 =>
+        DeviceRemovalQuery._(removedBy: by.toLowerCase(), signedAt: at, signature: signature.replaceAll(' ', '+')),
+      _ => throw const BadRequest(
+        reason: 'a removal is signed by removedBy, a device id, at signedAt, in seconds, with its signature',
+      ),
+    };
+  }
+}
+
 /// `POST /keys/devices/:deviceId/one-time-keys` — `{keys: [{id, key}]}`, no more at
 /// once than a device can hold. A list, not a map of id to key: a random id would
 /// be a field name, which the health guard reads (`docs/2026-11-01.coaching.md`).

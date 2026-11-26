@@ -43,7 +43,7 @@ Future<void> _wake(Request req, {required String userId, required String deviceI
 /// that can't be such an id is no device.
 String _deviceId(Request req) {
   return switch (req.rawPathParameters[#deviceId]) {
-    final String id when isUuidV7(id) => id,
+    final String id when isUuidV7(id) => id.toLowerCase(),
     final id => throw NotFound(type: 'Device', id: '$id'),
   };
 }
@@ -78,11 +78,29 @@ Future<CryptoDevice> vouchForDevice(Request req) async {
 
 Future<CryptoDevices> getDevices(Request req) async {
   final owner = req.url.queryParameters['userId'] ?? req.userId;
-  return CryptoDevices(await req.keyService.getDevices(readerId: req.userId, ownerId: owner));
+  final devices = await req.keyService.getDevices(readerId: req.userId, ownerId: owner);
+  return CryptoDevices(
+    [
+      for (final device in devices)
+        if (device.removedAt == null) device,
+    ],
+    removed: [
+      for (final device in devices)
+        if (device.removedAt != null) device,
+    ],
+  );
 }
 
 Future<Model> removeDevice(Request req) async {
-  await req.keyService.removeDevice(userId: req.userId, deviceId: _deviceId(req));
+  final deviceId = _deviceId(req);
+  final query = DeviceRemovalQuery.fromRequest(req);
+  await req.keyService.removeDevice(
+    userId: req.userId,
+    deviceId: deviceId,
+    removedBy: query.removedBy,
+    signedAt: query.signedAt,
+    signature: query.signature,
+  );
   await _tellPeers(req);
   throw const NoContent();
 }

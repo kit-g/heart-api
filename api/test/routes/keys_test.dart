@@ -126,7 +126,15 @@ void main() {
 
   test('publishing and removing a device tell the people who share keys, through the real app', () async {
     stubPublish(added: true);
-    when(app.db.removeDevice(userId: anyNamed('userId'), deviceId: anyNamed('deviceId'))).thenAnswer((_) async {});
+    when(
+      app.db.removeDevice(
+        userId: anyNamed('userId'),
+        deviceId: anyNamed('deviceId'),
+        removedBy: anyNamed('removedBy'),
+        signedAt: anyNamed('signedAt'),
+        signature: anyNamed('signature'),
+      ),
+    ).thenAnswer((_) async {});
     when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
     when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
 
@@ -137,7 +145,7 @@ void main() {
     );
     expect(published.status, 201);
 
-    final removed = await app.send('DELETE', '/keys/devices/$device');
+    final removed = await app.send('DELETE', '/keys/devices/$device?removedBy=$other&signedAt=1764000000&signature=s');
     expect(removed.status, 204);
 
     verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).called(2);
@@ -157,12 +165,98 @@ void main() {
 
   test('removing a device nobody had tells nobody', () async {
     when(
-      app.db.removeDevice(userId: anyNamed('userId'), deviceId: anyNamed('deviceId')),
+      app.db.removeDevice(
+        userId: anyNamed('userId'),
+        deviceId: anyNamed('deviceId'),
+        removedBy: anyNamed('removedBy'),
+        signedAt: anyNamed('signedAt'),
+        signature: anyNamed('signature'),
+      ),
     ).thenThrow(const NotFound(type: 'Device', id: device));
 
-    final res = await app.send('DELETE', '/keys/devices/$device');
+    final res = await app.send('DELETE', '/keys/devices/$device?removedBy=$other&signedAt=1764000000&signature=s');
     expect(res.status, 404);
     verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
+  });
+
+  group('DELETE /keys/devices/:deviceId', () {
+    void stub() {
+      when(
+        app.db.removeDevice(
+          userId: anyNamed('userId'),
+          deviceId: anyNamed('deviceId'),
+          removedBy: anyNamed('removedBy'),
+          signedAt: anyNamed('signedAt'),
+          signature: anyNamed('signature'),
+        ),
+      ).thenAnswer((_) async {});
+      when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
+      when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
+    }
+
+    test('names the device asking, when it signed, and its signature, a + left unescaped read as one', () async {
+      stub();
+      final res = await app.send(
+        'DELETE',
+        '/keys/devices/$device?removedBy=$other&signedAt=1764000000&signature=a+b/c%2Bd',
+      );
+
+      expect(res.status, 204);
+      verify(
+        app.db.removeDevice(
+          userId: 'u1',
+          deviceId: device,
+          removedBy: other,
+          signedAt: 1764000000,
+          signature: 'a+b/c+d',
+        ),
+      ).called(1);
+    });
+
+    test('is the device asking, when it signed, and its signature, all three', () async {
+      stub();
+      for (final query in [
+        '',
+        'removedBy=$other',
+        'signature=sig',
+        'removedBy=$other&signature=sig',
+        'signedAt=1764000000',
+        'removedBy=$other&signedAt=soon&signature=sig',
+        'removedBy=nope&signedAt=1764000000&signature=sig',
+        'removedBy=$other&signedAt=1764000000&signature=',
+      ]) {
+        final res = await app.send('DELETE', '/keys/devices/$device?$query');
+        expect(res.status, 400, reason: query);
+      }
+      verifyNever(
+        app.db.removeDevice(
+          userId: anyNamed('userId'),
+          deviceId: anyNamed('deviceId'),
+          removedBy: anyNamed('removedBy'),
+          signedAt: anyNamed('signedAt'),
+          signature: anyNamed('signature'),
+        ),
+      );
+    });
+
+    test('a refusal says why, and tells nobody', () async {
+      when(
+        app.db.removeDevice(
+          userId: anyNamed('userId'),
+          deviceId: anyNamed('deviceId'),
+          removedBy: anyNamed('removedBy'),
+          signedAt: anyNamed('signedAt'),
+          signature: anyNamed('signature'),
+        ),
+      ).thenThrow(
+        const Forbidden(code: 'device_too_new', reason: 'no', payload: {'removableAt': '2026-11-27T03:00:00.000Z'}),
+      );
+
+      final res = await app.send('DELETE', '/keys/devices/$device?removedBy=$other&signedAt=1764000000&signature=s');
+      final body = jsonDecode(res.body) as Map;
+      expect((res.status, body['code'], body['removableAt']), (403, 'device_too_new', '2026-11-27T03:00:00.000Z'));
+      verifyNever(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message')));
+    });
   });
 
   test('a device in the path that cannot be one is not there, and a query one is refused', () async {
@@ -352,6 +446,26 @@ void main() {
 
       expect(res.status, 200);
       verify(app.db.getDevices(readerId: 'u1', ownerId: 'u1')).called(1);
+    });
+    test('the removed ones apart from those in use', () async {
+      final removed = CryptoDevice(
+        id: other,
+        userId: 'u1',
+        identityKey: 'i',
+        signingKey: 's',
+        fallbackKey: 'f',
+        createdAt: DateTime.utc(2026),
+        removedAt: DateTime.utc(2026, 2),
+        removedBy: device,
+      );
+      when(
+        app.db.getDevices(readerId: anyNamed('readerId'), ownerId: anyNamed('ownerId')),
+      ).thenAnswer((_) async => [published(), removed]);
+
+      final res = await app.send('GET', '/keys/devices');
+      final read = CryptoDevices.fromJson(jsonDecode(res.body) as Map);
+      expect(read.devices.map((d) => d.id), [device]);
+      expect((read.removed.single.id, read.removed.single.removedBy), (other, device));
     });
   });
 

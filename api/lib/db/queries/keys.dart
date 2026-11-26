@@ -1,15 +1,16 @@
 part of '../db.dart';
 
-/// Taken before [_publishDevice], in a statement of its own, so two new devices
-/// published at once count each other: a statement counts from the snapshot it
-/// started with.
-const _lockPublishing = '''
+/// Taken before publishing, vouching or removing, in a statement of its own, so
+/// two at once see each other: two new devices count each other, and a device
+/// removed can't remove another in the meantime. A statement reads from the
+/// snapshot it started with.
+const _lockDevices = '''
 SELECT pg_advisory_xact_lock(hashtextextended('crypto_devices:' || @userId, 0))
 ''';
 
 /// A device id is chosen by the device, so publishing twice answers what is
 /// there, and someone else's id answers nothing. A signature only counts if it
-/// names a device of the same owner. A device its owner removed stays removed,
+/// names a device of the same owner in use. A device its owner removed stays removed,
 /// and says so. A new one past the account's limit of devices in use is no
 /// device, and `is_full` says why. `added` says this statement added it.
 const _publishDevice =
@@ -106,26 +107,76 @@ LEFT JOIN _vouched v ON true
 LEFT JOIN crypto_devices d ON d.id = (SELECT id FROM _device)
 ''';
 
-const _listDevices = '''
+/// The devices in use, and for the owner alone, those removed lately, so a removal
+/// they didn't make shows on their other devices.
+const _listDevices =
+    '''
 WITH _status AS (
   SELECT NOT _shares_keys_with(@readerId, @ownerId) AS forbidden
 )
-SELECT s.forbidden, d.id, d.user_id, d.identity_key, d.signing_key, d.fallback_key, d.signature, d.vouched_by, d.created_at
+SELECT
+  s.forbidden,
+  d.id, d.user_id, d.identity_key, d.signing_key, d.fallback_key, d.signature, d.vouched_by, d.created_at,
+  d.removed_at, d.removed_by
 FROM _status s
 LEFT JOIN crypto_devices d
-  ON NOT s.forbidden AND d.user_id = @ownerId AND d.removed_at IS NULL
-ORDER BY d.id
+  ON NOT s.forbidden
+  AND d.user_id = @ownerId
+  AND (
+    d.removed_at IS NULL
+    OR (@readerId = @ownerId AND d.removed_at > now() - INTERVAL '$_removedListedDays days')
+  )
+ORDER BY d.removed_at DESC NULLS FIRST, d.id
 ''';
 
-/// A removed device gets nothing more, so what waits for it and its keys go now.
-const _removeDevice = '''
+/// The caller's devices that sign what a vouch or a removal says, and whether each
+/// is still in use. Their keys never change, so they're read and checked before
+/// anything is locked, and the write checks again that they're in use.
+const _signers = '''
+SELECT id, identity_key, signing_key, removed_at IS NOT NULL AS removed
+FROM crypto_devices
+WHERE id = ANY (@ids::uuid[])
+  AND user_id = @userId
+''';
+
+/// A device removes itself, or one added after it, at once, and one added before it
+/// once it has been in use for a day: someone holding only the password adds a
+/// device later than the owner's, whose devices remove it before the wait is over,
+/// and someone who lost a phone removes it from the new one a day on. `removable_at`
+/// says when the wait ends. A removed device gets nothing more, so what waits for it
+/// and its keys go now.
+const _removeDevice =
+    '''
 WITH
-_removed AS (
-  UPDATE crypto_devices
-  SET removed_at = now()
+_target AS (
+  SELECT id, created_at
+  FROM crypto_devices
   WHERE id = @deviceId::uuid
     AND user_id = @userId
     AND removed_at IS NULL
+),
+_remover AS (
+  SELECT id, created_at
+  FROM crypto_devices
+  WHERE id = @removedBy::uuid
+    AND user_id = @userId
+    AND removed_at IS NULL
+),
+_removable AS (
+  SELECT
+    CASE
+      WHEN t.id = r.id OR (t.created_at, t.id) > (r.created_at, r.id) THEN now()
+      ELSE greatest(now(), r.created_at + INTERVAL '$_removalWaitHours hours')
+    END AS at
+  FROM _target t, _remover r
+),
+_removed AS (
+  UPDATE crypto_devices
+  SET
+    removed_at = now(),
+    removed_by = (SELECT id FROM _remover)
+  WHERE id = (SELECT id FROM _target)
+    AND (SELECT at FROM _removable) <= now()
   RETURNING id
 ),
 _keys AS (
@@ -138,7 +189,11 @@ _queue AS (
   WHERE recipient_device_id IN (SELECT id FROM _removed)
   RETURNING 1
 )
-SELECT id FROM _removed
+SELECT
+  EXISTS (SELECT 1 FROM _target) AS found,
+  EXISTS (SELECT 1 FROM _remover) AS remover_in_use,
+  EXISTS (SELECT 1 FROM _removed) AS removed,
+  (SELECT at FROM _removable) AS removable_at
 ''';
 
 const _replaceFallbackKey = '''
