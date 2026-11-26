@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(24);
+SELECT plan(27);
 
 SELECT has_table('public'::name, 'crypto_devices'::name);
 
@@ -18,9 +18,14 @@ SELECT columns_are(
                    'created_at',
                    'removed_at',
                    'removed_by',
-                   'seen_at'
+                   'seen_at',
+                   'waiting'
                    ]
        );
+
+SELECT col_type_is('public'::name, 'crypto_devices'::name, 'waiting'::name, 'boolean'::name);
+SELECT col_not_null('public'::name, 'crypto_devices'::name, 'waiting'::name);
+SELECT col_default_is('public', 'crypto_devices', 'waiting', 'false', 'a device has a place unless it waits for one');
 
 SELECT col_type_is('public'::name, 'crypto_devices'::name, 'seen_at'::name, 'timestamp with time zone'::name);
 SELECT col_not_null('public'::name, 'crypto_devices'::name, 'seen_at'::name);
