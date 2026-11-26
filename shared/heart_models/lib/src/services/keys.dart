@@ -4,8 +4,7 @@ abstract interface class KeyService {
   /// Publishes a device, idempotent on its id: one already there is answered as it
   /// is, and `added` says whether this call added it or gave it a place. [signature]
   /// and [vouchedBy] say another device of the owner's vouched for it, and [vouchedBy]
-  /// has to be theirs. `waiting` says the account had no place for it: it is known,
-  /// and may remove devices, but nothing is sent to it until it publishes with room.
+  /// has to be theirs. `waiting` says the account had no place for it.
   Future<({CryptoDevice device, bool added, bool waiting})> publishDevice({
     required String userId,
     required String id,
@@ -35,8 +34,9 @@ abstract interface class KeyService {
   /// vouched for is vouched for by nobody. [removedBy], a device of the caller's in
   /// use, signed the removal ([signature]) at [signedAt], in seconds since the epoch.
   /// It removes itself, or a device added after it, at once, and one added before it
-  /// once it has been in use for a day; until then this throws, saying when.
-  Future<void> removeDevice({
+  /// once it has been in use for a day; until then this throws, saying when. `placed`
+  /// says the device removed held a place, rather than waiting for one.
+  Future<({bool placed})> removeDevice({
     required String userId,
     required String deviceId,
     required String removedBy,

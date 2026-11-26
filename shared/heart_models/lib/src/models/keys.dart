@@ -159,14 +159,14 @@ class _CryptoDevice implements CryptoDevice {
       'oneTimeKey': ?oneTimeKey,
       'removedAt': ?removedAt?.toIso8601String(),
       'removedBy': ?removedBy,
-      'lastSeenOn': ?lastSeenOn?.ymd,
+      'lastSeenOn': ?lastSeenOn?.toYmd(),
     };
   }
 }
 
 extension on DateTime {
   /// `2026-11-26`.
-  String get ymd => [
+  String toYmd() => [
     year.toString().padLeft(4, '0'),
     month.toString().padLeft(2, '0'),
     day.toString().padLeft(2, '0'),
@@ -291,9 +291,8 @@ class CryptoDevices implements Model {
   /// owner's own list; never anything to send to.
   final List<CryptoDevice> removed;
 
-  /// The owner's own devices that asked to publish while the account was full: each
-  /// holds no place and is nothing to send to, but may remove devices. Only on the
-  /// owner's own list.
+  /// The owner's own devices that asked to publish while the account was full, each
+  /// holding no place: never a device to send to.
   final List<CryptoDevice> waiting;
 
   const new(this.devices, {this.removed = const [], this.waiting = const []});
