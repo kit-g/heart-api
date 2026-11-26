@@ -511,7 +511,8 @@ extension on Request {
       },
       switch (lifts) {
         .none => Future.value(const <String, String?>{}),
-        _ => exerciseService.getCoachedExercises(clientId),
+        // each coach as this coach calls them, never as the client does
+        _ => exerciseService.getCoachedExercises(clientId, readerId: userId),
       },
     ).wait;
     final coached = _Coached({

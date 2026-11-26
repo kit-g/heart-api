@@ -9,7 +9,9 @@ import 'package:relic/relic.dart';
 ///
 /// It says who, never what. There is a [name] and nothing else to put in the
 /// words, because a push goes through Apple and Google, so no message text,
-/// weights or health values can reach one. [data] carries ids for the app.
+/// weights or health values can reach one. The name is the one the recipient
+/// calls them, which can be a label the recipient wrote themselves: their own
+/// words, reaching their own phone. [data] carries ids for the app.
 extension Notifier on Request {
   /// Sends [topic] to [userId], as they want it. [actorId] is who it's about, and
   /// nothing goes across a block. [variant] picks a topic's wording. The push names

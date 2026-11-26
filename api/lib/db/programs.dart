@@ -9,7 +9,7 @@ mixin _Programs on _DatabaseBase implements ProgramService {
 
   @override
   Future<Program> getProgram({required String userId, required String programId}) async {
-    return _readProgram(_pool, userId: userId, programId: programId);
+    return _readProgram(_pool, userId: userId, programId: programId, readerId: userId);
   }
 
   @override
@@ -94,7 +94,7 @@ mixin _Programs on _DatabaseBase implements ProgramService {
             }
           }
           // a copy's answer goes to the coach who sent it
-          final read = await _readProgram(tx, userId: userId, programId: id, readerId: copy?.coachId);
+          final read = await _readProgram(tx, userId: userId, programId: id, readerId: copy?.coachId ?? userId);
           return (read, created);
         }),
       );
@@ -353,11 +353,11 @@ mixin _Programs on _DatabaseBase implements ProgramService {
     Session session, {
     required String userId,
     required String programId,
-    String? readerId,
+    required String readerId,
   }) async {
     final rows = await session.execute(
       _getProgram.toSql(),
-      parameters: {'id': programId, 'userId': userId, 'readerId': readerId ?? userId},
+      parameters: {'id': programId, 'userId': userId, 'readerId': readerId},
     );
     if (rows.isEmpty) throw NotFound(type: 'Program', id: programId, code: 'program_not_found');
     return Program.fromRow(rows.first.toColumnMap());

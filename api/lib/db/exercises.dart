@@ -22,8 +22,11 @@ mixin _Exercises on _DatabaseBase implements ExerciseService {
   }
 
   @override
-  Future<Map<String, String?>> getCoachedExercises(String userId) async {
-    final rows = await _pool.execute(_coachedExercises.toSql(), parameters: {'userId': userId});
+  Future<Map<String, String?>> getCoachedExercises(String userId, {String? readerId}) async {
+    final rows = await _pool.execute(
+      _coachedExercises.toSql(),
+      parameters: {'userId': userId, 'readerId': readerId ?? userId},
+    );
     return {
       for (final row in rows.map((row) => row.toColumnMap()))
         row['id'].toString(): switch (row['coach_name']) {

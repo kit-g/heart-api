@@ -1,8 +1,11 @@
 @Tags(['db'])
 library;
 
+import 'package:heart/inputs/inputs.dart';
 import 'package:heart/models/errors.dart';
 import 'package:heart/models/program_copy.dart';
+import 'package:heart/models/workouts.dart';
+import 'package:heart/notifications/topics.dart';
 import 'package:heart_models/heart_models.dart';
 import 'package:test/test.dart';
 
@@ -309,7 +312,11 @@ void main() {
     test('a push names the client as the coach does, and the coach to the client by their own', () async {
       final (coach, student, connection) = await coaching();
       await invited(coach, student, 'Sam from the gym');
-      final toCoach = await h.db.getPushAudience(userId: coach, topic: 'invitation.accepted', actorId: student);
+      final toCoach = await h.db.getPushAudience(
+        userId: coach,
+        topic: PushTopic.invitationAccepted.key,
+        actorId: student,
+      );
       expect(toCoach.actorName, 'Sam from the gym', reason: 'the invitation\'s name, until the coach sets one');
 
       await h.db.nameOther(actorId: coach, connectionId: connection, name: 'Sam');
@@ -393,6 +400,41 @@ void main() {
         'u_$coach',
         reason: 'a copy\'s session, as the coach reads it',
       );
+      final session = {
+        'name': 'Push',
+        'exercises': <Object?>[],
+      };
+      final written = await h.db.writeSession(
+        ownerId: student,
+        actorId: coach,
+        sessionId: template,
+        body: TemplateUpdateIn.fromJson(session, userId: student).request,
+      );
+      expect(written?.assignedBy?.name, 'u_$coach', reason: 'the coach\'s write answers the coach');
+      final restored = await h.db.restoreSession(
+        ownerId: student,
+        actorId: coach,
+        programId: sent.id!,
+        body: TemplateCreateIn.fromJson({...session, 'id': uuidV7()}, userId: student).request,
+      );
+      expect(restored.assignedBy?.name, 'u_$coach');
+      final fields = await h.db.writeProgramFields(
+        ownerId: student,
+        actorId: coach,
+        programId: sent.id!,
+        program: Program(name: 'Two'),
+      );
+      expect(fields?.coachName, 'u_$coach');
+      final student_ = await h.db.writeProgramFields(
+        ownerId: student,
+        actorId: student,
+        programId: sent.id!,
+        program: Program(name: 'Three'),
+      );
+      expect(student_?.coachName, 'Coach Dana', reason: 'the student\'s own write answers the student');
+      await h.exec('UPDATE client_summaries SET dirty = true WHERE coach_id = @c', {'c': coach});
+      final dirty = await h.db.getDirtySummaries(coachId: coach);
+      expect(dirty.map((d) => d.program?.coachName), ['u_$coach'], reason: 'the roster\'s read is the coach\'s');
       final listed = await h.db.getTemplates(userId: student);
       expect(listed.items.singleWhere((t) => t.id == template).assignedBy?.name, 'Coach Dana');
 
@@ -405,6 +447,11 @@ void main() {
         {'s': student, 'n': h.uniqueName('Sled'), 'c': coach},
       );
       expect((await h.db.getCoachedExercises(student))[exercise], 'Coach Dana');
+      expect(
+        (await h.db.getCoachedExercises(student, readerId: coach))[exercise],
+        'u_$coach',
+        reason: 'the coach\'s assistant reads the coach\'s own name',
+      );
 
       final now = DateTime.now().toUtc();
       final workout = await h.seedWorkout(userId: student, start: now, end: now.add(const Duration(hours: 1)));
@@ -419,6 +466,30 @@ void main() {
         imageUrl: url,
       );
       expect(theirs.loggedByName, 'u_$coach', reason: 'the coach never reads the student\'s name for them');
+
+      final (logged, created) = await h.db.createWorkout(
+        userId: student,
+        body: WorkoutRequest(
+          userId: student,
+          body: {
+            'id': uuidV7(),
+            'name': 'Logged',
+            'start': now.toIso8601String(),
+            'end': now.add(const Duration(hours: 1)).toIso8601String(),
+            'exercises': <Object?>[],
+          },
+        ),
+        imageUrl: url,
+        loggedBy: coach,
+      );
+      expect((created, logged.loggedByName), (true, 'u_$coach'), reason: 'a coach\'s log answers the coach');
+      final again = await h.db.createWorkout(
+        userId: student,
+        body: WorkoutRequest(userId: student, body: {...logged.toMap(), 'start': now.toIso8601String()}),
+        imageUrl: url,
+        loggedBy: coach,
+      );
+      expect((again.$2, again.$1.loggedByName), (false, 'u_$coach'), reason: 'and so does a retry');
     });
   });
 

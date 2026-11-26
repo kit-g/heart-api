@@ -27,7 +27,7 @@ RETURNING id
 /// template list walks.
 /// `joined` says when each one joined the program. `coach_name` is the coach as
 /// [reader] calls them: the student, or the coach, who reads their own.
-String _programColumns({String reader = 'p.user_id'}) {
+String _programColumns({required String reader}) {
   return '''
   p.id,
   p.name,
@@ -77,7 +77,7 @@ String _programColumns({String reader = 'p.user_id'}) {
 /// the app needs both to sync.
 final _listPrograms =
     '''
-SELECT ${_programColumns()}
+SELECT ${_programColumns(reader: 'p.user_id')}
 FROM programs p
 WHERE p.user_id = @userId
 ORDER BY p.id
@@ -189,7 +189,7 @@ _updated AS (
     AND user_id = @userId
   RETURNING *
 )
-SELECT ${_programColumns()}
+SELECT ${_programColumns(reader: 'p.user_id')}
 FROM _updated p
 ''';
 

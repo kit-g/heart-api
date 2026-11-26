@@ -5,7 +5,7 @@ part of '../db.dart';
 /// for them, who reads their own name. It reads `logged_by` unqualified, from
 /// whichever row the query selects. A read of someone else's workouts uses
 /// [_loggedByColumnsForReader].
-String _loggedByColumns({String reader = '@userId'}) {
+String _loggedByColumns({required String reader}) {
   return '''
 logged_by,
 (
@@ -117,7 +117,7 @@ SELECT
   coalesce(w.template_id, w.sent_template_id) AS template_id,
   w.program_id,
   w.created_at,
-  ${_loggedByColumns()},
+  ${_loggedByColumns(reader: '@userId')},
   _workout_exercises(w.id, @locale::text) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -977,7 +977,7 @@ _exercises_json AS (
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses,
   coalesce(w.template_id, w.sent_template_id) AS template_id, w.program_id, w.created_at,
-  ${_loggedByColumns()},
+  ${_loggedByColumns(reader: '@userId')},
   -- the replacing branch reads its own RETURNING, because a CTE cannot see
   -- rows it just wrote; the preserving branch reads the table, which is
   -- untouched in that case and so already final
@@ -1029,7 +1029,7 @@ SELECT
   coalesce(u.template_id, u.sent_template_id) AS template_id,
   u.program_id,
   u.created_at,
-  ${_loggedByColumns()},
+  ${_loggedByColumns(reader: '@userId')},
   _workout_exercises(u.id, @locale::text) AS exercises,
   coalesce(
     (
@@ -1094,7 +1094,7 @@ SELECT
   p.id, p.xid::text AS xid, p.at, p.deleted,
   w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses,
   coalesce(w.template_id, w.sent_template_id) AS template_id, w.program_id, w.created_at,
-  ${_loggedByColumns()},
+  ${_loggedByColumns(reader: '@userId')},
   CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id, @locale::text) END AS exercises,
   CASE WHEN p.deleted THEN NULL ELSE COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)

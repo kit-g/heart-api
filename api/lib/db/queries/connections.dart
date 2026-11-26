@@ -149,9 +149,11 @@ LEFT JOIN LATERAL (
 
 /// `named.name` as one expression, for a read that needs only the name: what
 /// [reader] calls [person], whose own name is [username]. A reader who is the
-/// person reads their own.
-String _calledBy({required String reader, required String person, required String username}) {
-  return "coalesce(_given_name($reader, $person), nullif(trim($username), ''))";
+/// person reads their own. [asIs] falls back to [username] untrimmed, for a field
+/// installed builds read that way.
+String _calledBy({required String reader, required String person, required String username, bool asIs = false}) {
+  final own = asIs ? username : "nullif(trim($username), '')";
+  return 'coalesce(_given_name($reader, $person), $own)';
 }
 
 /// The name [giver] set for [person], or NULL.

@@ -43,7 +43,7 @@ void main() {
     // a result a card draws carries the user's units
     when(app.db.getProfile(any)).thenAnswer((_) async => User(id: 'u1'));
     // nothing came from a coach unless a test says so
-    when(app.db.getCoachedExercises(any)).thenAnswer((_) async => {});
+    when(app.db.getCoachedExercises(any, readerId: anyNamed('readerId'))).thenAnswer((_) async => {});
     // and nobody coaches
     when(app.db.coaches(any)).thenAnswer((_) async => false);
   });
@@ -2139,7 +2139,8 @@ void main() {
 
     test("another coach's exercise is theirs; a workout reads as the client's, who logged it being unsaid", () async {
       stubWorkouts(workout());
-      when(app.db.getCoachedExercises(client)).thenAnswer((_) async => {custom: 'Robin'});
+      // named as the coach, u1, calls them
+      when(app.db.getCoachedExercises(client, readerId: 'u1')).thenAnswer((_) async => {custom: 'Robin'});
 
       final listed = structured(await call('list_client_workouts', {'clientId': client}));
 
