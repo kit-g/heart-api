@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(21);
+SELECT plan(24);
 
 SELECT has_table('public'::name, 'crypto_devices'::name);
 
@@ -17,9 +17,14 @@ SELECT columns_are(
                    'vouched_by',
                    'created_at',
                    'removed_at',
-                   'removed_by'
+                   'removed_by',
+                   'seen_at'
                    ]
        );
+
+SELECT col_type_is('public'::name, 'crypto_devices'::name, 'seen_at'::name, 'timestamp with time zone'::name);
+SELECT col_not_null('public'::name, 'crypto_devices'::name, 'seen_at'::name);
+SELECT col_default_is('public', 'crypto_devices', 'seen_at', 'now()', 'seen when published');
 
 SELECT col_is_pk('public'::name, 'crypto_devices'::name, 'id'::name);
 
