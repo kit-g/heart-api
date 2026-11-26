@@ -70,12 +70,13 @@ void main() {
   /// [by] removes [deviceId], signing it; a device removes itself unless told otherwise.
   Future<void> remove(String user, String deviceId, {String? by}) async {
     by ??= deviceId;
+    final at = now();
     return h.db.removeDevice(
       userId: user,
       deviceId: deviceId,
       removedBy: by,
-      signedAt: now(),
-      signature: await sign(by, removalMessage(user, deviceId, now())),
+      signedAt: at,
+      signature: await sign(by, removalMessage(user, deviceId, at)),
     );
   }
 
@@ -333,13 +334,14 @@ void main() {
         content: 'sealed',
       );
 
+      final at = now();
       await expectLater(
         h.db.removeDevice(
           userId: b,
           deviceId: mine,
           removedBy: theirs,
-          signedAt: now(),
-          signature: await sign(theirs, removalMessage(b, mine, now())),
+          signedAt: at,
+          signature: await sign(theirs, removalMessage(b, mine, at)),
         ),
         throwsA(isA<NotFound>()),
       );
@@ -442,7 +444,7 @@ void main() {
       for (final by in [theirs, uuidV7()]) {
         await expectLater(
           h.db.removeDevice(userId: me, deviceId: phone, removedBy: by, signedAt: now(), signature: 'sig'),
-          throwsA(isA<BadRequest>()),
+          refused('unknown_device'),
         );
       }
       expect(await inUse(me), {phone});
@@ -471,14 +473,15 @@ void main() {
     test('a signature that does not check out removes nothing, and says so', () async {
       final me = await h.seedProfile();
       final (phone, password) = (await device(me), await device(me));
+      final at = now();
       for (final signature in [
         'sig',
-        await sign(phone, removalMessage(me, phone, now())),
-        await sign(phone, removalMessage(me, password, now() - 1)),
-        await sign(password, removalMessage(me, password, now())),
+        await sign(phone, removalMessage(me, phone, at)),
+        await sign(phone, removalMessage(me, password, at - 1)),
+        await sign(password, removalMessage(me, password, at)),
       ]) {
         await expectLater(
-          h.db.removeDevice(userId: me, deviceId: password, removedBy: phone, signedAt: now(), signature: signature),
+          h.db.removeDevice(userId: me, deviceId: password, removedBy: phone, signedAt: at, signature: signature),
           refused('bad_signature'),
         );
       }
@@ -517,12 +520,13 @@ void main() {
         refused('bad_signature'),
       );
 
+      final at = now();
       await h.db.removeDevice(
         userId: me,
         deviceId: later.toUpperCase(),
         removedBy: phone.toUpperCase(),
-        signedAt: now(),
-        signature: await sign(phone, removalMessage(me, later, now())),
+        signedAt: at,
+        signature: await sign(phone, removalMessage(me, later, at)),
       );
       expect(await inUse(me), {phone, forged.device.id});
     });
@@ -542,6 +546,71 @@ void main() {
 
       final again = await vouch(me, other, by: grandchild);
       expect((again.changed, again.device.vouchedBy), (true, grandchild));
+    });
+
+    test('a device removing itself again is told what any repeat is told', () async {
+      final me = await h.seedProfile();
+      final phone = await device(me);
+      await remove(me, phone);
+      await expectLater(remove(me, phone), throwsA(isA<NotFound>()));
+    });
+
+    test('a signing time no clock could hold is only far off', () async {
+      final me = await h.seedProfile();
+      final (phone, later) = (await device(me), await device(me));
+      const far = 99999999999;
+      await expectLater(
+        h.db.removeDevice(
+          userId: me,
+          deviceId: later,
+          removedBy: phone,
+          signedAt: far,
+          signature: await sign(phone, removalMessage(me, later, far)),
+        ),
+        refused('signature_expired'),
+      );
+    });
+
+    test('the owner\'s list shows the latest twenty removals', () async {
+      final me = await h.seedProfile();
+      final phone = await device(me);
+      for (var i = 0; i < 22; i++) {
+        await remove(me, await device(me), by: phone);
+      }
+      final all = await h.db.getDevices(readerId: me, ownerId: me);
+      expect(all.where((d) => d.removedAt == null).map((d) => d.id), [phone]);
+      expect(all.where((d) => d.removedAt != null), hasLength(20));
+    });
+
+    test('a device unheard of for a month holds no place, so an account whose every device is gone adds one', () async {
+      final me = await h.seedProfile();
+      final ten = [for (var i = 0; i < 10; i++) await device(me)];
+      await expectLater(device(me), refused('device_limit'));
+      Future<void> unheard(String id) => h.exec(
+        "UPDATE crypto_devices SET seen_at = now() - INTERVAL '31 days' WHERE id = @d::uuid",
+        {'d': id},
+      );
+
+      await unheard(ten[0]);
+      final fresh = await device(me);
+
+      await unheard(ten[1]);
+      await h.db.getQueue(userId: me, deviceId: ten[1]);
+      await expectLater(device(me), refused('device_limit'), reason: 'reading its queue, it is heard of again');
+
+      await unheard(ten[2]);
+      await h.db.publishDevice(userId: me, id: ten[2], identityKey: 'i', signingKey: 's', fallbackKey: 'f');
+      await expectLater(device(me), refused('device_limit'), reason: 'so is one publishing itself again');
+
+      await h.exec(
+        "UPDATE crypto_devices SET created_at = now() - INTERVAL '40 days' WHERE id = ANY (@ids::uuid[])",
+        {'ids': ten},
+      );
+      await age(fresh, 25);
+      for (final old in ten) {
+        await remove(me, old, by: fresh);
+      }
+      expect(await inUse(me), {fresh}, reason: 'the new one removes the rest a day on');
     });
   });
 

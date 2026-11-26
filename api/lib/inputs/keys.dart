@@ -73,6 +73,9 @@ class DeviceVouchIn {
 /// removal, all three required. A `+` a client left unescaped arrives as a space,
 /// which base64 never holds, so it reads as the `+` it was.
 class DeviceRemovalQuery {
+  /// The year 5138, in seconds: anything later is milliseconds sent as seconds.
+  static const _maxSignedAt = 100000000000;
+
   final String removedBy;
   final int signedAt;
   final String signature;
@@ -83,7 +86,7 @@ class DeviceRemovalQuery {
     final query = req.url.queryParameters;
     return switch ((query['removedBy'], int.tryParse(query['signedAt'] ?? ''), query['signature'])) {
       (final String by, final int at, final String signature)
-          when isUuidV7(by) && signature.isNotEmpty && signature.length <= 256 =>
+          when isUuidV7(by) && at >= 0 && at < _maxSignedAt && signature.isNotEmpty && signature.length <= 256 =>
         DeviceRemovalQuery._(removedBy: by.toLowerCase(), signedAt: at, signature: signature.replaceAll(' ', '+')),
       _ => throw const BadRequest(
         reason: 'a removal is signed by removedBy, a device id, at signedAt, in seconds, with its signature',

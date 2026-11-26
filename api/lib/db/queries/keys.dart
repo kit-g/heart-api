@@ -12,7 +12,8 @@ SELECT pg_advisory_xact_lock(hashtextextended('crypto_devices:' || @userId, 0))
 /// there, and someone else's id answers nothing. A signature only counts if it
 /// names a device of the same owner in use. A device its owner removed stays removed,
 /// and says so. A new one past the account's limit of devices in use is no
-/// device, and `is_full` says why. `added` says this statement added it.
+/// device, and `is_full` says why; a device unseen for a month holds no place.
+/// `added` says this statement added it.
 const _publishDevice =
     '''
 WITH
@@ -21,6 +22,7 @@ _live AS (
   FROM crypto_devices
   WHERE user_id = @userId
     AND removed_at IS NULL
+    AND seen_at > now() - INTERVAL '$_unseenDays days'
 ),
 _inserted AS (
   INSERT INTO crypto_devices (id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by)
@@ -107,8 +109,10 @@ LEFT JOIN _vouched v ON true
 LEFT JOIN crypto_devices d ON d.id = (SELECT id FROM _device)
 ''';
 
-/// The devices in use, and for the owner alone, those removed lately, so a removal
-/// they didn't make shows on their other devices.
+/// The devices in use, and for the owner alone, the latest of those removed lately,
+/// so a removal they didn't make shows on their other devices. Removing is open to any
+/// device of the account's, so the removed ones are capped, or a script adding and
+/// removing devices would make the list as long as it liked.
 const _listDevices =
     '''
 WITH _status AS (
@@ -119,13 +123,24 @@ SELECT
   d.id, d.user_id, d.identity_key, d.signing_key, d.fallback_key, d.signature, d.vouched_by, d.created_at,
   d.removed_at, d.removed_by
 FROM _status s
-LEFT JOIN crypto_devices d
-  ON NOT s.forbidden
-  AND d.user_id = @ownerId
-  AND (
-    d.removed_at IS NULL
-    OR (@readerId = @ownerId AND d.removed_at > now() - INTERVAL '$_removedListedDays days')
+LEFT JOIN LATERAL (
+  (
+    SELECT *
+    FROM crypto_devices
+    WHERE user_id = @ownerId
+      AND removed_at IS NULL
   )
+  UNION ALL
+  (
+    SELECT *
+    FROM crypto_devices
+    WHERE user_id = @ownerId
+      AND @readerId = @ownerId
+      AND removed_at > now() - INTERVAL '$_removedListedDays days'
+    ORDER BY removed_at DESC
+    LIMIT $_maxRemovedListed
+  )
+) d ON NOT s.forbidden
 ORDER BY d.removed_at DESC NULLS FIRST, d.id
 ''';
 
@@ -194,6 +209,16 @@ SELECT
   EXISTS (SELECT 1 FROM _remover) AS remover_in_use,
   EXISTS (SELECT 1 FROM _removed) AS removed,
   (SELECT at FROM _removable) AS removable_at
+''';
+
+/// A device showing it's in use, at most once an hour, so it keeps its place.
+const _seeDevice = '''
+UPDATE crypto_devices
+SET seen_at = now()
+WHERE id = @deviceId::uuid
+  AND user_id = @userId
+  AND removed_at IS NULL
+  AND seen_at < now() - INTERVAL '1 hour'
 ''';
 
 const _replaceFallbackKey = '''

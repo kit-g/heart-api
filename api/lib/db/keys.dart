@@ -45,6 +45,14 @@ const _removalWaitHours = 24;
 /// How long a removed device stays on its owner's list, saying who removed it.
 const _removedListedDays = 30;
 
+/// How many removed devices the owner's list shows at most, the latest first.
+const _maxRemovedListed = 20;
+
+/// How long a device goes without publishing itself or reading its queue before it
+/// stops holding one of the account's places, so an account whose every device was
+/// wiped or lost can add one, which then removes them.
+const _unseenDays = 30;
+
 /// A device's public keys, as it signs with them, and whether it was removed.
 typedef _Signer = ({String identityKey, String signingKey, bool removed});
 
@@ -132,6 +140,9 @@ mixin _Keys on _DatabaseBase implements KeyService {
       await tx.execute(_lockDevices.toSql(), parameters: {'userId': userId});
       return await publish(tx) ?? await publish(tx);
     });
+    if (row case {'added': false, 'removed': false}) {
+      await _pool.execute(_seeDevice.toSql(), parameters: {'userId': userId, 'deviceId': id});
+    }
     return switch (row) {
       null => throw _idTaken,
       {'is_full': true} => throw const Conflict(
@@ -225,7 +236,10 @@ mixin _Keys on _DatabaseBase implements KeyService {
     (deviceId, removedBy) = (deviceId.toLowerCase(), removedBy.toLowerCase());
     switch ((await _signersOf(userId: userId, ids: [removedBy]))[removedBy]) {
       case null:
-        throw const BadRequest(reason: 'removedBy must be a device of yours');
+        throw const BadRequest(code: 'unknown_device', reason: 'removedBy must be a published device of yours');
+      // a device that removed itself and asks again is told what any repeat is told
+      case final signer when signer.removed && removedBy == deviceId:
+        throw NotFound(type: 'Device', id: deviceId);
       case final signer when signer.removed:
         throw _removerRemoved;
       case final signer
@@ -262,9 +276,10 @@ mixin _Keys on _DatabaseBase implements KeyService {
     }
   }
 
+  /// In seconds throughout, so a time no clock could hold is only far off.
   bool _fresh(int signedAt) {
-    final at = DateTime.fromMillisecondsSinceEpoch(signedAt * 1000, isUtc: true);
-    return DateTime.now().toUtc().difference(at).abs() <= _removalWindow;
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    return (now - signedAt).abs() <= _removalWindow.inSeconds;
   }
 
   Future<Map<String, _Signer>> _signersOf({required String userId, required List<String> ids}) async {
@@ -383,6 +398,7 @@ mixin _Keys on _DatabaseBase implements KeyService {
       _listQueue.toSql(),
       parameters: {'userId': userId, 'deviceId': deviceId, 'limit': limit},
     );
+    await _pool.execute(_seeDevice.toSql(), parameters: {'userId': userId, 'deviceId': deviceId});
     return rows.map((row) => QueuedItem.fromRow(row.toColumnMap())).toList();
   }
 

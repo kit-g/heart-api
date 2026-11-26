@@ -224,6 +224,8 @@ void main() {
         'removedBy=$other&signedAt=soon&signature=sig',
         'removedBy=nope&signedAt=1764000000&signature=sig',
         'removedBy=$other&signedAt=1764000000&signature=',
+        'removedBy=$other&signedAt=1764000000000&signature=sig',
+        'removedBy=$other&signedAt=-1&signature=sig',
       ]) {
         final res = await app.send('DELETE', '/keys/devices/$device?$query');
         expect(res.status, 400, reason: query);
