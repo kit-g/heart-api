@@ -12,10 +12,12 @@ import 'package:relic/relic.dart';
 
 final _logger = logging.Logger('Keys');
 
-Future<void> _tellPeers(Request req) {
+/// [own] tells only the caller's own devices: a device waiting for a place is
+/// nothing the people they share keys with send to.
+Future<void> _tellPeers(Request req, {bool own = false}) {
   return req.events.publish(
     queueUrl: req.config.eventsQueueUrl,
-    message: {'type': 'devices.changed', 'userId': req.userId},
+    message: {'type': 'devices.changed', 'userId': req.userId, if (own) 'own': true},
   );
 }
 
@@ -61,12 +63,11 @@ Future<Model> publishDevice(Request req) async {
   );
   // a device publishing itself again, as it may on every start, changes nothing; one
   // waiting for a place is told so, and the account's devices are told it asked
-  if (added) await _tellPeers(req);
+  if (added) await _tellPeers(req, own: waiting);
   if (waiting) {
     throw const Conflict(
-      code: 'device_limit',
+      code: 'device_waiting',
       reason: 'the account is full: this device waits for a place, and may remove one of its devices',
-      payload: {'waiting': true},
     );
   }
   return Created(device);
@@ -92,14 +93,14 @@ Future<CryptoDevices> getDevices(Request req) async {
 Future<Model> removeDevice(Request req) async {
   final deviceId = _deviceId(req);
   final query = DeviceRemovalQuery.fromRequest(req);
-  await req.keyService.removeDevice(
+  final (:placed) = await req.keyService.removeDevice(
     userId: req.userId,
     deviceId: deviceId,
     removedBy: query.removedBy,
     signedAt: query.signedAt,
     signature: query.signature,
   );
-  await _tellPeers(req);
+  await _tellPeers(req, own: !placed);
   throw const NoContent();
 }
 

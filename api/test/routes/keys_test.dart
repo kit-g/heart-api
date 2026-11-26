@@ -135,7 +135,7 @@ void main() {
         signedAt: anyNamed('signedAt'),
         signature: anyNamed('signature'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async => (placed: true));
     when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
     when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
 
@@ -163,8 +163,11 @@ void main() {
       body: {'id': device, 'identityKey': 'i', 'signingKey': 's', 'fallbackKey': 'f'},
     );
     final body = jsonDecode(res.body) as Map;
-    expect((res.status, body['code'], body['waiting']), (409, 'device_limit', true));
-    verify(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).called(1);
+    expect((res.status, body['code']), (409, 'device_waiting'));
+    final told = verify(
+      app.events.publish(queueUrl: anyNamed('queueUrl'), message: captureAnyNamed('message')),
+    ).captured.single;
+    expect(told, {'type': 'devices.changed', 'userId': 'u1', 'own': true}, reason: 'its own devices alone');
   });
 
   test('a device publishing itself again tells nobody', () async {
@@ -205,7 +208,7 @@ void main() {
           signedAt: anyNamed('signedAt'),
           signature: anyNamed('signature'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async => (placed: true));
       when(app.config.eventsQueueUrl).thenReturn('https://sqs.test/events');
       when(app.events.publish(queueUrl: anyNamed('queueUrl'), message: anyNamed('message'))).thenAnswer((_) async {});
     }

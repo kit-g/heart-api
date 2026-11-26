@@ -56,7 +56,7 @@ void main() {
       },
     );
     // as the route answers one that waits for a place
-    if (published.waiting) throw const Conflict(code: 'device_limit', reason: 'it waits for a place');
+    if (published.waiting) throw const Conflict(code: 'device_waiting', reason: 'it waits for a place');
     return published.device.id;
   }
 
@@ -70,7 +70,7 @@ void main() {
   }
 
   /// [by] removes [deviceId], signing it; a device removes itself unless told otherwise.
-  Future<void> remove(String user, String deviceId, {String? by}) async {
+  Future<({bool placed})> remove(String user, String deviceId, {String? by}) async {
     by ??= deviceId;
     final at = now();
     return h.db.removeDevice(
@@ -140,7 +140,7 @@ void main() {
       final ten = [for (var i = 0; i < 10; i++) await device(me)];
       await expectLater(
         device(me),
-        throwsA(isA<Conflict>().having((e) => e.code, 'code', 'device_limit')),
+        throwsA(isA<Conflict>().having((e) => e.code, 'code', 'device_waiting')),
       );
       final again = await h.db.publishDevice(
         userId: me,
@@ -176,7 +176,7 @@ void main() {
         },
         calls: [() => device(me).then<Object>((id) => id, onError: (Object e) => e)],
       );
-      expect(results.single, isA<Conflict>().having((e) => e.code, 'code', 'device_limit'));
+      expect(results.single, isA<Conflict>().having((e) => e.code, 'code', 'device_waiting'));
     });
 
     test('someone else cannot take a device id', () async {
@@ -588,7 +588,7 @@ void main() {
     test('a device unheard of for a month holds no place, so an account whose every device is gone adds one', () async {
       final me = await h.seedProfile();
       final ten = [for (var i = 0; i < 10; i++) await device(me)];
-      await expectLater(device(me), refused('device_limit'));
+      await expectLater(device(me), refused('device_waiting'));
       Future<void> unheard(String id) => h.exec(
         "UPDATE crypto_devices SET seen_at = now() - INTERVAL '31 days' WHERE id = @d::uuid",
         {'d': id},
@@ -599,11 +599,11 @@ void main() {
 
       await unheard(ten[1]);
       await h.db.getQueue(userId: me, deviceId: ten[1]);
-      await expectLater(device(me), refused('device_limit'), reason: 'reading its queue, it is heard of again');
+      await expectLater(device(me), refused('device_waiting'), reason: 'reading its queue, it is heard of again');
 
       await unheard(ten[2]);
       await h.db.publishDevice(userId: me, id: ten[2], identityKey: 'i', signingKey: 's', fallbackKey: 'f');
-      await expectLater(device(me), refused('device_limit'), reason: 'so is one publishing itself again');
+      await expectLater(device(me), refused('device_waiting'), reason: 'so is one publishing itself again');
 
       await h.exec(
         "UPDATE crypto_devices SET created_at = now() - INTERVAL '40 days' WHERE id = ANY (@ids::uuid[])",
@@ -690,7 +690,7 @@ void main() {
       ];
       await expectLater(
         device(me),
-        throwsA(isA<Conflict>().having((e) => e.toMap()['waiting'], 'waiting', false)),
+        refused('device_limit'),
       );
       await remove(me, waiting.first, by: ten.first);
       expect((await h.db.getDevices(readerId: me, ownerId: me)).waiting, hasLength(9));
@@ -705,6 +705,82 @@ void main() {
       );
       expect((await listed(me)).single.lastSeenOn, DateTime.utc(2026, 10, 3));
       expect((await h.db.getDevices(readerId: peer, ownerId: me)).devices.single.lastSeenOn, isNull);
+    });
+
+    test('a waiting device gone quiet stops counting, and one vouched for at publish waits unvouched', () async {
+      final me = await h.seedProfile();
+      final ten = [for (var i = 0; i < 10; i++) await device(me)];
+      final waiting = [
+        for (var i = 0; i < 10; i++)
+          (await h.db.publishDevice(
+            userId: me,
+            id: uuidV7(),
+            identityKey: 'i',
+            signingKey: 's',
+            fallbackKey: 'f',
+          )).device.id,
+      ];
+      await expectLater(device(me), refused('device_limit'));
+      await h.exec(
+        "UPDATE crypto_devices SET seen_at = now() - INTERVAL '31 days' WHERE id = @d::uuid",
+        {'d': waiting.first},
+      );
+      await expectLater(device(me, vouchedBy: ten.first), refused('device_waiting'));
+      final vouched = (await h.db.getDevices(readerId: me, ownerId: me)).waiting.where((d) => d.vouchedBy != null);
+      expect(vouched, isEmpty, reason: 'it is vouched for once it has a place');
+    });
+
+    test('a device back after a month, whose place was taken, waits like a new one', () async {
+      final me = await h.seedProfile();
+      final ten = [for (var i = 0; i < 10; i++) await device(me)];
+      await h.exec(
+        "UPDATE crypto_devices SET seen_at = now() - INTERVAL '31 days' WHERE id = @d::uuid",
+        {'d': ten.first},
+      );
+      await device(me);
+      await h.db.getQueue(userId: me, deviceId: ten.first);
+      final mine = await h.db.getDevices(readerId: me, ownerId: me);
+      expect((mine.devices.length, mine.waiting.single.id), (10, ten.first));
+    });
+
+    test('a waiting device sends nothing, and says why', () async {
+      final (me, peer) = await connected();
+      for (var i = 0; i < 10; i++) {
+        await device(me);
+      }
+      final theirs = await device(peer);
+      final waits = (await h.db.publishDevice(
+        userId: me,
+        id: uuidV7(),
+        identityKey: 'i',
+        signingKey: 's',
+        fallbackKey: 'f',
+      )).device.id;
+      await expectLater(
+        h.db.enqueue(
+          userId: me,
+          id: uuidV7(),
+          recipientDeviceId: theirs,
+          senderDeviceId: waits,
+          kind: 'key',
+          content: 'sealed',
+        ),
+        refused('device_waiting'),
+      );
+    });
+
+    test('a removal says whether the device held a place', () async {
+      final me = await h.seedProfile();
+      final ten = [for (var i = 0; i < 10; i++) await device(me)];
+      final waits = (await h.db.publishDevice(
+        userId: me,
+        id: uuidV7(),
+        identityKey: 'i',
+        signingKey: 's',
+        fallbackKey: 'f',
+      )).device.id;
+      expect(await remove(me, waits, by: ten.first), (placed: false));
+      expect(await remove(me, ten.last, by: ten.first), (placed: true));
     });
   });
 

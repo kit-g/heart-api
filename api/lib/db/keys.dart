@@ -17,6 +17,12 @@ const _badSignature = BadRequest(code: 'bad_signature', reason: 'the signature d
 
 const _removerRemoved = Forbidden(code: 'device_removed', reason: 'the device asking was removed');
 
+/// A device waiting for a place: known, but nothing goes to or from it yet.
+const _waiting = Conflict(
+  code: 'device_waiting',
+  reason: 'the account is full: this device waits for a place, and may remove one of its devices',
+);
+
 /// What one device signs to vouch for another of the same owner's, spelled as the
 /// app spells it.
 String _vouchMessage({
@@ -48,8 +54,9 @@ const _removedListedDays = 30;
 /// How many removed devices the owner's list shows at most, the latest first.
 const _maxRemovedListed = 20;
 
-/// How many devices an account can have waiting for a place: as many as there are
-/// places, so a new phone always can, and a script can't add rows without end.
+/// How many devices seen within a month an account can have waiting for a place: as
+/// many as there are places, and a script can't add rows without end. One gone quiet
+/// stops counting, as a placed one does.
 const _maxWaitingDevices = _maxDevices;
 
 /// How long a device goes without publishing itself or reading its queue before it
@@ -142,19 +149,18 @@ mixin _Keys on _DatabaseBase implements KeyService {
 
     // A publish racing another of the same id waits for it, then reads from a
     // snapshot taken before it committed and finds nothing. Asking again sees it.
+    // A device publishing itself again is seen first, so one back after a month
+    // whose place was taken waits like a new one.
     final row = await _pool.runTx((tx) async {
       await tx.execute(_lockDevices.toSql(), parameters: {'userId': userId});
+      await tx.execute(_seeDevice.toSql(), parameters: {'userId': userId, 'deviceId': id});
       return await publish(tx) ?? await publish(tx);
     });
-    if (row case {'added': false, 'removed': false}) {
-      await _pool.execute(_seeDevice.toSql(), parameters: {'userId': userId, 'deviceId': id});
-    }
     return switch (row) {
       null => throw _idTaken,
       {'is_full': true} => throw const Conflict(
         code: 'device_limit',
         reason: 'an account has at most $_maxDevices devices with keys, and as many waiting; remove one first',
-        payload: {'waiting': false},
       ),
       {'removed': true} => throw const Forbidden(code: 'device_removed', reason: 'this device was removed'),
       _ => (device: CryptoDevice.fromRow(row), added: row['added'] == true, waiting: row['waiting'] == true),
@@ -250,7 +256,7 @@ mixin _Keys on _DatabaseBase implements KeyService {
   }
 
   @override
-  Future<void> removeDevice({
+  Future<({bool placed})> removeDevice({
     required String userId,
     required String deviceId,
     required String removedBy,
@@ -298,6 +304,7 @@ mixin _Keys on _DatabaseBase implements KeyService {
           payload: {'removableAt': at.toUtc().toIso8601String()},
         );
     }
+    return (placed: row['waited'] != true);
   }
 
   /// In seconds throughout, so a time no clock could hold is only far off.
@@ -413,6 +420,7 @@ mixin _Keys on _DatabaseBase implements KeyService {
     final row = rows.first.toColumnMap();
     return switch (row) {
       {'sender_owned': false} => throw NotFound(type: 'Device', id: senderDeviceId),
+      {'sender_waiting': true} => throw _waiting,
       {'forbidden': true} => throw const Forbidden(reason: 'You do not have permission to reach this device.'),
       {'taken': true} => throw _idTaken,
       {'seen': true} => (delivered: false, notify: null),
@@ -427,7 +435,10 @@ mixin _Keys on _DatabaseBase implements KeyService {
       _listQueue.toSql(),
       parameters: {'userId': userId, 'deviceId': deviceId, 'limit': limit},
     );
-    await _pool.execute(_seeDevice.toSql(), parameters: {'userId': userId, 'deviceId': deviceId});
+    await _pool.runTx((tx) async {
+      await tx.execute(_lockDevices.toSql(), parameters: {'userId': userId});
+      await tx.execute(_seeDevice.toSql(), parameters: {'userId': userId, 'deviceId': deviceId});
+    });
     return rows.map((row) => QueuedItem.fromRow(row.toColumnMap())).toList();
   }
 

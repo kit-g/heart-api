@@ -22,7 +22,8 @@ WITH
 _live AS (
   SELECT
     count(*) FILTER (WHERE NOT waiting AND seen_at > now() - INTERVAL '$_unseenDays days') >= $_maxDevices AS is_full,
-    count(*) FILTER (WHERE waiting) >= $_maxWaitingDevices AS no_room_to_wait
+    count(*) FILTER (WHERE waiting AND seen_at > now() - INTERVAL '$_unseenDays days') >= $_maxWaitingDevices
+      AS no_room_to_wait
   FROM crypto_devices
   WHERE user_id = @userId
     AND removed_at IS NULL
@@ -35,8 +36,8 @@ _inserted AS (
     @identityKey,
     @signingKey,
     @fallbackKey,
-    CASE WHEN voucher.id IS NULL THEN NULL ELSE @signature::text END,
-    voucher.id,
+    CASE WHEN voucher.id IS NULL OR l.is_full THEN NULL ELSE @signature::text END,
+    CASE WHEN l.is_full THEN NULL ELSE voucher.id END,
     l.is_full
   FROM _live l
   LEFT JOIN crypto_devices voucher
@@ -87,9 +88,8 @@ WHERE is_full
 ''';
 
 /// A device is vouched for once, by another device of the same owner in use, both
-/// with a place. The
-/// update checks the row it locks, so of two vouches racing, one lands and the
-/// other finds it there.
+/// with a place. The update checks the row it locks, so of two vouches racing, one
+/// lands and the other finds it there.
 const _vouchForDevice = '''
 WITH
 _device AS (
@@ -197,7 +197,7 @@ const _removeDevice =
     '''
 WITH
 _target AS (
-  SELECT id, created_at
+  SELECT id, created_at, waiting
   FROM crypto_devices
   WHERE id = @deviceId::uuid
     AND user_id = @userId
@@ -241,17 +241,37 @@ SELECT
   EXISTS (SELECT 1 FROM _target) AS found,
   EXISTS (SELECT 1 FROM _remover) AS remover_in_use,
   EXISTS (SELECT 1 FROM _removed) AS removed,
+  coalesce((SELECT waiting FROM _target), false) AS waited,
   (SELECT at FROM _removable) AS removable_at
 ''';
 
-/// A device showing it's in use, at most once an hour, so it keeps its place.
-const _seeDevice = '''
-UPDATE crypto_devices
-SET seen_at = now()
-WHERE id = @deviceId::uuid
-  AND user_id = @userId
-  AND removed_at IS NULL
-  AND seen_at < now() - INTERVAL '1 hour'
+/// A device showing it's in use, at most once an hour and once a UTC day, so it keeps
+/// its place. One back after a month unseen, whose place another took meanwhile, waits
+/// for one like a new device.
+const _seeDevice =
+    '''
+UPDATE crypto_devices d
+SET
+  seen_at = now(),
+  waiting = d.waiting OR (
+    d.seen_at <= now() - INTERVAL '$_unseenDays days'
+    AND (
+      SELECT count(*)
+      FROM crypto_devices o
+      WHERE o.user_id = @userId
+        AND o.id <> d.id
+        AND o.removed_at IS NULL
+        AND NOT o.waiting
+        AND o.seen_at > now() - INTERVAL '$_unseenDays days'
+    ) >= $_maxDevices
+  )
+WHERE d.id = @deviceId::uuid
+  AND d.user_id = @userId
+  AND d.removed_at IS NULL
+  AND (
+    d.seen_at < now() - INTERVAL '1 hour'
+    OR (d.seen_at AT TIME ZONE 'UTC')::date < (now() AT TIME ZONE 'UTC')::date
+  )
 ''';
 
 const _replaceFallbackKey = '''
@@ -398,12 +418,11 @@ _seen AS (
   SELECT recipient_device_id, sender_device_id FROM device_queue_receipts WHERE id = @id::uuid
 ),
 _sender AS (
-  SELECT id
+  SELECT id, waiting
   FROM crypto_devices
   WHERE id = @senderDeviceId::uuid
     AND user_id = @userId
     AND removed_at IS NULL
-    AND NOT waiting
 ),
 _recipient AS (
   SELECT id, user_id
@@ -432,12 +451,14 @@ _inserted AS (
   SELECT @id::uuid, r.id, s.id, @kind, @content
   FROM _recipient r, _sender s, _load l
   WHERE NOT l.is_full
+    AND NOT s.waiting
     AND NOT EXISTS (SELECT 1 FROM _seen)
   ON CONFLICT (id) DO NOTHING
   RETURNING 1
 )
 SELECT
   EXISTS (SELECT 1 FROM _sender) AS sender_owned,
+  coalesce((SELECT waiting FROM _sender), false) AS sender_waiting,
   NOT EXISTS (SELECT 1 FROM _recipient) AS forbidden,
   EXISTS (
     SELECT 1
