@@ -209,8 +209,10 @@ FROM _move_exercise_history(@userId, @sourceId::uuid, @targetId::uuid, @dryRun)
 ''';
 
 /// A custom stops being the coach's once they are gone, as a program's copy does.
-const _coachedExercises = '''
-SELECT e.id, p.username AS coach_name
+/// The coach is named as the owner calls them.
+final _coachedExercises =
+    '''
+SELECT e.id, ${_calledBy(reader: 'e.user_id', person: 'p.id', username: 'p.username')} AS coach_name
 FROM exercises e
 JOIN profiles p ON p.id = e.coach_id
 WHERE e.user_id = @userId

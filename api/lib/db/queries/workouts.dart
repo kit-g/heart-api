@@ -1,20 +1,33 @@
 part of '../db.dart';
 
-/// Who entered a workout for its owner, for a query that reads the caller's own
-/// workouts. It reads `logged_by` unqualified, from whichever row the query
-/// selects. A read of someone else's workouts uses [_loggedByColumnsForReader].
-const _loggedByColumns = '''
+/// Who entered a workout for its owner, as [reader] calls them, for a query that
+/// reads the caller's own workouts: the owner, `@userId`, or a coach logging one
+/// for them, who reads their own name. It reads `logged_by` unqualified, from
+/// whichever row the query selects. A read of someone else's workouts uses
+/// [_loggedByColumnsForReader].
+String _loggedByColumns({String reader = '@userId'}) {
+  return '''
 logged_by,
-(SELECT username FROM profiles coach WHERE coach.id = logged_by) AS logged_by_name''';
+(
+  SELECT ${_calledBy(reader: reader, person: 'coach.id', username: 'coach.username')}
+  FROM profiles coach
+  WHERE coach.id = logged_by
+) AS logged_by_name''';
+}
 
 /// [_loggedByColumns] for a query `@requesterId` reads someone's workouts through:
 /// that a coach logged one is the owner's to see and that coach's, and every other
-/// reader gets the workout without it. It reads `logged_by` and `user_id`
-/// unqualified, from the workouts row.
-const _loggedByColumnsForReader = '''
+/// reader gets the workout without it, named as the reader calls them. It reads
+/// `logged_by` and `user_id` unqualified, from the workouts row.
+final _loggedByColumnsForReader =
+    '''
 CASE WHEN @requesterId IN (logged_by, user_id) THEN logged_by END AS logged_by,
 CASE
-  WHEN @requesterId IN (logged_by, user_id) THEN (SELECT username FROM profiles coach WHERE coach.id = logged_by)
+  WHEN @requesterId IN (logged_by, user_id) THEN (
+    SELECT ${_calledBy(reader: '@requesterId', person: 'coach.id', username: 'coach.username')}
+    FROM profiles coach
+    WHERE coach.id = logged_by
+  )
 END AS logged_by_name''';
 
 /// The template a workout names, to its owner: one of theirs, or the id it was sent
@@ -22,7 +35,7 @@ END AS logged_by_name''';
 const _templateForReader = '''
 CASE WHEN @requesterId = user_id THEN coalesce(template_id, sent_template_id) ELSE template_id END AS template_id''';
 
-const _listWorkouts =
+final _listWorkouts =
     '''
 WITH
 _rel AS (
@@ -91,7 +104,7 @@ ORDER BY id DESC
 LIMIT @limit
 ''';
 
-const _getWorkout =
+final _getWorkout =
     '''
 SELECT
   w.id,
@@ -104,7 +117,7 @@ SELECT
   coalesce(w.template_id, w.sent_template_id) AS template_id,
   w.program_id,
   w.created_at,
-  $_loggedByColumns,
+  ${_loggedByColumns()},
   _workout_exercises(w.id, @locale::text) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -115,7 +128,7 @@ FROM workouts w
 WHERE w.id = @workoutId::uuid AND w.user_id = @userId
 ''';
 
-const _getTargetWorkout =
+final _getTargetWorkout =
     '''
 WITH
 _rel AS (
@@ -157,7 +170,7 @@ SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, N
 /// A coach logging for the owner (`@loggedBy`) links only their own copy, live, and its
 /// sessions, so the log can't move a program they don't write, and leaves no other id. They log only what
 /// they could read, and not a workout the owner deleted: either returns no row.
-const _saveWorkout =
+final _saveWorkout =
     '''
 WITH
 _existing_workout AS (
@@ -335,7 +348,7 @@ SELECT
   coalesce(w.template_id, w.sent_template_id) AS template_id,
   w.program_id,
   w.created_at,
-  $_loggedByColumns,
+  ${_loggedByColumns(reader: 'coalesce(@loggedBy::text, @userId)')},
   coalesce(ej.exercises_json, '[]'::jsonb) AS exercises,
   '[]'::jsonb AS images,
   true AS created
@@ -355,7 +368,7 @@ SELECT
   CASE WHEN @loggedBy::text IS NULL THEN coalesce(w.template_id, w.sent_template_id) ELSE w.template_id END AS template_id,
   w.program_id,
   w.created_at,
-  $_loggedByColumns,
+  ${_loggedByColumns(reader: 'coalesce(@loggedBy::text, @userId)')},
   _workout_exercises(w.id, @locale::text) AS exercises,
   COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)
@@ -723,7 +736,7 @@ SELECT
 /// untouched and answers with what the workout already has, so a shallow PUT
 /// can no longer strip a session's body; true replaces, and an empty array
 /// legitimately empties. See [WorkoutRequest.replacesExercises].
-const _replaceWorkout =
+final _replaceWorkout =
     '''
 WITH
 _order_to_id AS (
@@ -964,7 +977,7 @@ _exercises_json AS (
 SELECT
   w.id, w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses,
   coalesce(w.template_id, w.sent_template_id) AS template_id, w.program_id, w.created_at,
-  $_loggedByColumns,
+  ${_loggedByColumns()},
   -- the replacing branch reads its own RETURNING, because a CTE cannot see
   -- rows it just wrote; the preserving branch reads the table, which is
   -- untouched in that case and so already final
@@ -981,7 +994,7 @@ FROM _workout w
 LEFT JOIN _exercises_json ej ON true
 ''';
 
-const _patchWorkout =
+final _patchWorkout =
     '''
 WITH _updated AS (
   UPDATE workouts
@@ -1016,7 +1029,7 @@ SELECT
   coalesce(u.template_id, u.sent_template_id) AS template_id,
   u.program_id,
   u.created_at,
-  $_loggedByColumns,
+  ${_loggedByColumns()},
   _workout_exercises(u.id, @locale::text) AS exercises,
   coalesce(
     (
@@ -1055,7 +1068,7 @@ WHERE id = @workoutId::uuid
 // Transaction ids belong to one cluster. A cursor at or past the snapshot's
 // xmax can't have come from this one: the database was moved, and its new
 // counter started lower. That cursor is stale, never read from.
-const _workoutChanges =
+final _workoutChanges =
     '''
 WITH _check AS (
   SELECT @sinceXid::text IS NOT NULL
@@ -1081,7 +1094,7 @@ SELECT
   p.id, p.xid::text AS xid, p.at, p.deleted,
   w.name, w.started_at, w.completed_at, w.calories, w.note, w.pauses,
   coalesce(w.template_id, w.sent_template_id) AS template_id, w.program_id, w.created_at,
-  $_loggedByColumns,
+  ${_loggedByColumns()},
   CASE WHEN p.deleted THEN NULL ELSE _workout_exercises(w.id, @locale::text) END AS exercises,
   CASE WHEN p.deleted THEN NULL ELSE COALESCE(
     (SELECT jsonb_agg(jsonb_build_object('id', wi.id, 'key', wi.key, 'workout_id', wi.workout_id) ORDER BY wi.id DESC)

@@ -147,6 +147,13 @@ LEFT JOIN LATERAL (
 ) named ON $on''';
 }
 
+/// `named.name` as one expression, for a read that needs only the name: what
+/// [reader] calls [person], whose own name is [username]. A reader who is the
+/// person reads their own.
+String _calledBy({required String reader, required String person, required String username}) {
+  return "coalesce(_given_name($reader, $person), nullif(trim($username), ''))";
+}
+
 /// The name [giver] set for [person], or NULL.
 String _setName({required String giver, required String person}) {
   return '''

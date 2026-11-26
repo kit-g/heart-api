@@ -203,7 +203,9 @@ void main() {
       expect((await h.db.getThreads(userId: coach)).single.otherName, 'u_$student');
 
       final toStudent = await h.db.getPushAudience(userId: student, topic: 'coaching.message', actorId: coach);
-      expect(toStudent.actorName, 'u_$coach', reason: 'a push never carries it');
+      expect(toStudent.actorName, 'Coach Dana', reason: 'a push to the student names the coach as they do');
+      final toCoach = await h.db.getPushAudience(userId: coach, topic: 'coaching.message', actorId: student);
+      expect(toCoach.actorName, 'u_$student', reason: 'and one to the coach never carries it');
 
       final cleared = await h.db.nameOther(actorId: student, connectionId: connection);
       expect((cleared?.name, cleared?.namedByYou, cleared?.nameSetByYou), ('u_$coach', false, false));
@@ -304,12 +306,18 @@ void main() {
       expect(holder.studentNamedByYou, isTrue);
     });
 
-    test('a push never carries it: what reaches Apple or Google is the client\'s own name', () async {
+    test('a push names the client as the coach does, and the coach to the client by their own', () async {
       final (coach, student, connection) = await coaching();
-      await h.db.nameOther(actorId: coach, connectionId: connection, name: 'Sam, knee rehab');
+      await invited(coach, student, 'Sam from the gym');
+      final toCoach = await h.db.getPushAudience(userId: coach, topic: 'invitation.accepted', actorId: student);
+      expect(toCoach.actorName, 'Sam from the gym', reason: 'the invitation\'s name, until the coach sets one');
 
-      final toCoach = await h.db.getPushAudience(userId: coach, topic: 'coaching.message', actorId: student);
-      expect(toCoach.actorName, 'u_$student');
+      await h.db.nameOther(actorId: coach, connectionId: connection, name: 'Sam');
+      final named = await h.db.getPushAudience(userId: coach, topic: 'coaching.message', actorId: student);
+      expect(named.actorName, 'Sam');
+
+      final toStudent = await h.db.getPushAudience(userId: student, topic: 'coaching.message', actorId: coach);
+      expect(toStudent.actorName, 'u_$coach', reason: 'the coach\'s name for the client is theirs alone');
     });
 
     test('the assistant, the shares, blocks and reactions name the client as the coach does', () async {
@@ -335,6 +343,82 @@ void main() {
       await h.exec('INSERT INTO blocks (blocker_id, blocked_id) VALUES (@c, @s)', {'c': coach, 's': student});
       final blocked = await h.db.getBlocks(userId: coach);
       expect(blocked.items.single.name, 'Sam');
+    });
+  });
+
+  group('the student\'s reads of their coach', () {
+    test('a program, its sessions, a custom exercise and a workout the coach logged', () async {
+      final (coach, student, connection) = await coaching();
+      await h.db.nameOther(actorId: student, connectionId: connection, name: 'Coach Dana');
+      await h.db.nameOther(actorId: coach, connectionId: connection, name: 'Sam');
+
+      final library = uuidV7();
+      await h.db.saveCoachProgram(
+        coachId: coach,
+        id: library,
+        name: 'One',
+        body: withRowIds({
+          'name': 'One',
+          'sessions': [
+            {'name': 'Monday', 'exercises': <Object?>[]},
+          ],
+        }),
+      );
+      final (sent, _) = await h.db.createProgramOrExisting(
+        userId: student,
+        program: Program(name: 'One'),
+        sessions: const [],
+        copy: (
+          coachId: coach,
+          connectionId: connection,
+          libraryProgramId: library,
+          libraryVersion: 1,
+          libraryIds: const {},
+          waits: false,
+        ),
+      );
+      expect(sent.coachName, 'u_$coach', reason: 'the coach who sent it reads their own name');
+      expect((await h.db.getProgram(userId: student, programId: sent.id!)).coachName, 'Coach Dana');
+      expect((await h.db.getPrograms(student)).single.coachName, 'Coach Dana');
+      final template = await h.insertId(
+        'INSERT INTO templates (user_id, name, assigned_by, program_id) VALUES (@s, @n, @c, @p::uuid) RETURNING id',
+        {'s': student, 'n': 'Push', 'c': coach, 'p': sent.id},
+      );
+      final copy = await h.db.readCopy(coachId: coach, studentId: student, programId: sent.id!);
+      expect(copy.program.coachName, 'u_$coach', reason: 'the coach never reads the student\'s name for them');
+      expect((await h.db.getCopies(coachId: coach, studentId: student)).single.coachName, 'u_$coach');
+      expect((await h.db.getTemplate(userId: student, templateId: template)).assignedBy?.name, 'Coach Dana');
+      expect(
+        copy.sessions.single.assignedBy?.name,
+        'u_$coach',
+        reason: 'a copy\'s session, as the coach reads it',
+      );
+      final listed = await h.db.getTemplates(userId: student);
+      expect(listed.items.singleWhere((t) => t.id == template).assignedBy?.name, 'Coach Dana');
+
+      final exercise = await h.insertId(
+        '''
+        INSERT INTO exercises (user_id, name, category, target, coach_id)
+        VALUES (@s, @n, 'Barbell', 'Chest', @c)
+        RETURNING id
+        ''',
+        {'s': student, 'n': h.uniqueName('Sled'), 'c': coach},
+      );
+      expect((await h.db.getCoachedExercises(student))[exercise], 'Coach Dana');
+
+      final now = DateTime.now().toUtc();
+      final workout = await h.seedWorkout(userId: student, start: now, end: now.add(const Duration(hours: 1)));
+      await h.exec('UPDATE workouts SET logged_by = @c WHERE id = @w::uuid', {'c': coach, 'w': workout});
+      String url(String key) => key;
+      final own = await h.db.getWorkout(userId: student, workoutId: workout, imageUrl: url);
+      expect(own.loggedByName, 'Coach Dana');
+      final theirs = await h.db.getTargetWorkout(
+        requesterId: coach,
+        targetUserId: student,
+        workoutId: workout,
+        imageUrl: url,
+      );
+      expect(theirs.loggedByName, 'u_$coach', reason: 'the coach never reads the student\'s name for them');
     });
   });
 

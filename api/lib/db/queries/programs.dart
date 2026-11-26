@@ -25,8 +25,10 @@ RETURNING id
 /// The columns `Program.fromRow` reads, from a row aliased `p`. `sessions` is
 /// the program's templates in their order, the same `(order_index, id)` the
 /// template list walks.
-/// `joined` says when each one joined the program.
-const _programColumns = '''
+/// `joined` says when each one joined the program. `coach_name` is the coach as
+/// [reader] calls them: the student, or the coach, who reads their own.
+String _programColumns({String reader = 'p.user_id'}) {
+  return '''
   p.id,
   p.name,
   p.note,
@@ -55,7 +57,11 @@ const _programColumns = '''
     WHERE t.program_id = p.id
   ) AS joined,
   p.coach_id,
-  (SELECT username FROM profiles coach WHERE coach.id = p.coach_id) AS coach_name,
+  (
+    SELECT ${_calledBy(reader: reader, person: 'coach.id', username: 'coach.username')}
+    FROM profiles coach
+    WHERE coach.id = p.coach_id
+  ) AS coach_name,
   p.waiting_since,
   p.revision,
   (
@@ -65,20 +71,22 @@ const _programColumns = '''
       AND p.coach_id IS NOT NULL
   ) AS session_revisions
 ''';
+}
 
 /// Archived ones included: the cap counts them, so the list stays small, and
 /// the app needs both to sync.
-const _listPrograms =
+final _listPrograms =
     '''
-SELECT $_programColumns
+SELECT ${_programColumns()}
 FROM programs p
 WHERE p.user_id = @userId
 ORDER BY p.id
 ''';
 
-const _getProgram =
+/// Read by its owner, or by the coach writing to their copy (`@readerId`).
+final _getProgram =
     '''
-SELECT $_programColumns
+SELECT ${_programColumns(reader: '@readerId')}
 FROM programs p
 WHERE p.id = @id::uuid
   AND p.user_id = @userId
@@ -159,7 +167,7 @@ RETURNING t.id
 
 /// A full replace of the program's own fields. Its sessions are templates and
 /// change through the template routes, never here.
-const _replaceProgram =
+final _replaceProgram =
     '''
 WITH
 _updated AS (
@@ -181,7 +189,7 @@ _updated AS (
     AND user_id = @userId
   RETURNING *
 )
-SELECT $_programColumns
+SELECT ${_programColumns()}
 FROM _updated p
 ''';
 

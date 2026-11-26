@@ -69,7 +69,7 @@ mixin _Templates on _DatabaseBase implements IdempotentTemplateService {
   Future<Template> getTemplate({required String userId, required String templateId, String? locale}) async {
     final rows = await _pool.execute(
       _getTemplate.toSql(),
-      parameters: {'userId': userId, 'templateId': templateId, 'locale': locale},
+      parameters: {'userId': userId, 'readerId': userId, 'templateId': templateId, 'locale': locale},
     );
     if (rows.isEmpty) throw NotFound(type: 'Template', id: templateId);
     return Template.fromRow(rows.first.toColumnMap());

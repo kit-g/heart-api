@@ -2,13 +2,13 @@ part of '../db.dart';
 
 /// With each its program: the newest of this coach's copies the student has started.
 /// All of them, so no client is read from a summary never worked out.
-const _dirtySummaries =
+final _dirtySummaries =
     '''
 SELECT s.connection_id, s.student_id, s.generation, program.*
 FROM client_summaries s
 JOIN connections c ON c.id = s.connection_id
 LEFT JOIN LATERAL (
-  SELECT $_programColumns
+  SELECT ${_programColumns(reader: 's.coach_id')}
   FROM programs p
   WHERE p.user_id = s.student_id
     AND p.coach_id = s.coach_id

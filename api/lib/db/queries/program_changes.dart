@@ -254,9 +254,9 @@ SELECT
   ) AS writable
 ''';
 
-const _listCopies =
+final _listCopies =
     '''
-SELECT $_programColumns
+SELECT ${_programColumns(reader: '@coachId')}
 FROM programs p
 WHERE p.user_id = @studentId
   AND p.coach_id = @coachId

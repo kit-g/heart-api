@@ -53,10 +53,16 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
     );
   }
 
-  Future<Template> _readSession(Session tx, {required String userId, required String sessionId}) async {
+  /// [userId]'s session, as [readerId], who is writing to it, reads it.
+  Future<Template> _readSession(
+    Session tx, {
+    required String userId,
+    required String readerId,
+    required String sessionId,
+  }) async {
     final rows = await tx.execute(
       _getTemplate.toSql(),
-      parameters: {'userId': userId, 'templateId': sessionId, 'locale': null},
+      parameters: {'userId': userId, 'readerId': readerId, 'templateId': sessionId, 'locale': null},
     );
     return Template.fromRow(rows.first.toColumnMap());
   }
@@ -102,10 +108,10 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
             },
           )).first.toColumnMap(),
         };
-        if (row['replayed'] == true) return _readSession(tx, userId: ownerId, sessionId: sessionId);
+        if (row['replayed'] == true) return _readSession(tx, userId: ownerId, readerId: actorId, sessionId: sessionId);
         if (row['conflict'] == true) _changed(row['revision'] as int);
 
-        final before = await _readSession(tx, userId: ownerId, sessionId: sessionId);
+        final before = await _readSession(tx, userId: ownerId, readerId: actorId, sessionId: sessionId);
         final content = await _content(tx, sessionId: sessionId);
         final replaced = await tx.execute(
           _replaceTemplate.toSql(),
@@ -129,7 +135,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
           _bumpSessionRevision.toSql(),
           parameters: {'sessionId': sessionId, 'actorId': actorId},
         );
-        final after = await _readSession(tx, userId: ownerId, sessionId: sessionId);
+        final after = await _readSession(tx, userId: ownerId, readerId: actorId, sessionId: sessionId);
         await _record(
           tx,
           changeId: changeId,
@@ -201,7 +207,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
             'skips': [for (final id in (links?['skips'] as List?) ?? const []) '$id'],
           },
         );
-        final after = await _readSession(tx, userId: ownerId, sessionId: sessionId);
+        final after = await _readSession(tx, userId: ownerId, readerId: actorId, sessionId: sessionId);
         await _record(
           tx,
           changeId: changeId,
@@ -245,7 +251,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
         )).first.toColumnMap(),
       };
       if (row['conflict'] == true) _changed(row['revision'] as int);
-      final before = await _readSession(tx, userId: ownerId, sessionId: sessionId);
+      final before = await _readSession(tx, userId: ownerId, readerId: actorId, sessionId: sessionId);
       final linked = await tx.execute(_sessionLinks.toSql(), parameters: {'sessionId': sessionId, 'ownerId': ownerId});
       await tx.execute(_deleteSession.toSql(), parameters: {'sessionId': sessionId, 'ownerId': ownerId});
       final program = row['program_id'].toString();
@@ -286,10 +292,10 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
         parameters: {'programId': programId, 'actorId': actorId, 'baseRevision': baseRevision, 'changeId': changeId},
       );
       final row = standing.first.toColumnMap();
-      if (row['replayed'] == true) return _readProgram(tx, userId: ownerId, programId: programId);
+      if (row['replayed'] == true) return _readProgram(tx, userId: ownerId, programId: programId, readerId: actorId);
       if (row['conflict'] == true) _changed(row['revision'] as int);
 
-      final before = await _readProgram(tx, userId: ownerId, programId: programId);
+      final before = await _readProgram(tx, userId: ownerId, programId: programId, readerId: actorId);
       final content = await _content(tx, programId: programId);
       await tx.execute(
         _replaceProgram.toSql(),
@@ -303,7 +309,7 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
       // nothing changed, so there's nothing for the other person to be up against
       if (await _content(tx, programId: programId) == content) return before;
       final bumped = await tx.execute(_bumpProgramRevision.toSql(), parameters: {'programId': programId});
-      final after = await _readProgram(tx, userId: ownerId, programId: programId);
+      final after = await _readProgram(tx, userId: ownerId, programId: programId, readerId: actorId);
       await _record(
         tx,
         changeId: changeId,
@@ -416,12 +422,12 @@ mixin _ProgramChanges on _DatabaseBase, _Programs implements ProgramChangeServic
         if (access['readable'] != true) {
           throw const Forbidden(reason: 'You do not have permission to read this program.');
         }
-        final program = await _readProgram(tx, userId: studentId, programId: programId);
+        final program = await _readProgram(tx, userId: studentId, programId: programId, readerId: coachId);
         final sessions = <Template>[];
         for (final id in program.sessions) {
           final rows = await tx.execute(
             _getTemplate.toSql(),
-            parameters: {'userId': studentId, 'templateId': id, 'locale': locale},
+            parameters: {'userId': studentId, 'readerId': coachId, 'templateId': id, 'locale': locale},
           );
           if (rows.isEmpty) throw NotFound(type: 'Template', id: id);
           sessions.add(Template.fromRow(rows.first.toColumnMap()));
