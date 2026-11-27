@@ -37,7 +37,9 @@ RETURNING id
 
 /// A push that names no relationship is still about a person, so what was said
 /// about any relationship with the actor answers for them, the latest said first.
-const _pushAudience = '''
+/// The actor is named as the recipient calls them.
+final _pushAudience =
+    '''
 SELECT
   coalesce(_blocked_between(@userId, @actorId::text), false) AS blocked,
   (
@@ -68,7 +70,11 @@ SELECT
     ),
     '[]'::jsonb
   ) AS devices,
-  (SELECT nullif(trim(username), '') FROM profiles WHERE id = @actorId::text) AS actor_name
+  (
+    SELECT ${_calledBy(reader: '@userId', person: 'a.id', username: 'a.username')}
+    FROM profiles a
+    WHERE a.id = @actorId::text
+  ) AS actor_name
 ''';
 
 const _queueDigest = '''

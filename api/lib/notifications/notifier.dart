@@ -9,11 +9,13 @@ import 'package:relic/relic.dart';
 ///
 /// It says who, never what. There is a [name] and nothing else to put in the
 /// words, because a push goes through Apple and Google, so no message text,
-/// weights or health values can reach one. [data] carries ids for the app.
+/// weights or health values can reach one. The name is the one the recipient
+/// calls them, which can be a label the recipient wrote themselves: their own
+/// words, reaching their own phone. [data] carries ids for the app.
 extension Notifier on Request {
   /// Sends [topic] to [userId], as they want it. [actorId] is who it's about, and
   /// nothing goes across a block. [variant] picks a topic's wording. The push names
-  /// [actorId] as their profile does, and by [name] only when it holds none.
+  /// [actorId] as [userId] calls them, and by [name] only when that is no name.
   Future<void> notify({
     required String userId,
     required PushTopic topic,
@@ -43,8 +45,8 @@ extension Notifier on Request {
         return;
     }
 
-    // the name their profile holds, as the inbox and the roster show it; [name],
-    // from the sign-in token, only for someone whose profile has none
+    // what the recipient calls them, as the inbox and the roster show it; [name],
+    // from the sign-in token, only for someone with no name there
     final who = audience.actorName ?? name;
     await _sendPush(devices: audience.devices, topic: topic, name: who, variant: variant, data: data);
   }

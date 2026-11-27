@@ -4,8 +4,9 @@ abstract interface class ExerciseService {
   Future<Map<String, dynamic>> getExercises(String userId, {String? locale, bool owned = false});
 
   /// [userId]'s custom exercises that came with something a coach sent, by id,
-  /// each with that coach's name, or null when they have none.
-  Future<Map<String, String?>> getCoachedExercises(String userId);
+  /// each with that coach's name as [readerId] calls them (the owner unless
+  /// given), or null when they have none.
+  Future<Map<String, String?>> getCoachedExercises(String userId, {String? readerId});
 
   Future<Map<String, dynamic>> createExercise({
     required String userId,

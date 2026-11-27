@@ -9,7 +9,8 @@ part of '../db.dart';
 /// `_foreign_template`, which keeps a bad folder from masking the id
 /// conflict) and trips `templates_pkey` — `403 id_taken` via
 /// `_rethrowForeignId`.
-const _saveTemplate = '''
+final _saveTemplate =
+    '''
 WITH
 _existing_template AS (
   SELECT id FROM templates WHERE id = @id::uuid AND user_id = @userId
@@ -157,7 +158,7 @@ SELECT
   f.created_at AS folder_created_at,
   t.source_template_id,
   t.assigned_by AS assigned_by_id,
-  p.username AS assigned_by_username,
+  ${_calledBy(reader: '@userId', person: 'p.id', username: 'p.username', asIs: true)} AS assigned_by_username,
   p.avatar_url AS assigned_by_avatar,
   t.sync_enabled,
   t.created_at,
@@ -181,7 +182,7 @@ SELECT
   f.created_at AS folder_created_at,
   t.source_template_id,
   t.assigned_by AS assigned_by_id,
-  p.username AS assigned_by_username,
+  ${_calledBy(reader: '@userId', person: 'p.id', username: 'p.username', asIs: true)} AS assigned_by_username,
   p.avatar_url AS assigned_by_avatar,
   t.sync_enabled,
   t.created_at,
@@ -199,7 +200,8 @@ WHERE t.id IN (SELECT id FROM _existing_template)
 /// Full replace of a template body from `@exercises`, the way `_replaceWorkout`
 /// replaces a workout's: rows the body still names by their round-tripped ids
 /// are updated in place, new ones inserted, the rest deleted.
-const _replaceTemplate = '''
+final _replaceTemplate =
+    '''
 WITH
 _folder AS (
   SELECT id FROM template_folders
@@ -419,7 +421,7 @@ SELECT
   f.created_at AS folder_created_at,
   t.source_template_id,
   t.assigned_by AS assigned_by_id,
-  p.username AS assigned_by_username,
+  ${_calledBy(reader: '@userId', person: 'p.id', username: 'p.username', asIs: true)} AS assigned_by_username,
   p.avatar_url AS assigned_by_avatar,
   t.sync_enabled,
   t.created_at,
@@ -433,7 +435,9 @@ LEFT JOIN profiles p ON p.id = t.assigned_by
 LEFT JOIN _exercises_json ej ON true
 ''';
 
-const _getTemplate = '''
+/// Read by its owner, or by a coach reading or writing to their copy (`@readerId`).
+final _getTemplate =
+    '''
 SELECT
   t.id,
   t.name,
@@ -444,7 +448,7 @@ SELECT
   f.created_at AS folder_created_at,
   t.source_template_id,
   t.assigned_by AS assigned_by_id,
-  p.username AS assigned_by_username,
+  ${_calledBy(reader: '@readerId', person: 'p.id', username: 'p.username', asIs: true)} AS assigned_by_username,
   p.avatar_url AS assigned_by_avatar,
   t.sync_enabled,
   t.created_at,
@@ -466,7 +470,8 @@ WHERE t.id = @templateId::uuid AND t.user_id = @userId
 /// The two folder predicates are mutually exclusive in practice: @folderId
 /// narrows to one folder, @unfiledOnly to the templates in none; neither set
 /// means everything.
-const _listTemplates = '''
+final _listTemplates =
+    '''
 SELECT
   t.id,
   t.name,
@@ -477,7 +482,7 @@ SELECT
   f.created_at AS folder_created_at,
   t.source_template_id,
   t.assigned_by AS assigned_by_id,
-  p.username AS assigned_by_username,
+  ${_calledBy(reader: '@userId', person: 'p.id', username: 'p.username', asIs: true)} AS assigned_by_username,
   p.avatar_url AS assigned_by_avatar,
   t.sync_enabled,
   t.created_at,
