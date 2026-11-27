@@ -442,7 +442,7 @@ void main() {
           'rir': [2.25],
         }),
         effort({
-          'rir': [11],
+          'rir': [9.5],
         }),
         effort({'rir': 2}),
         effort({'rpe': 8}),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'misc.dart';
 
@@ -166,8 +167,9 @@ sealed class GrowthRule implements Model {
           final List weeks when weeks.isNotEmpty && weeks.length <= EffortThenWeight.maxWeeks => [
             for (final week in weeks)
               switch (week) {
-                final num rir when rir >= 0 && rir <= 10 && rir * 2 == (rir * 2).truncate() => rir,
-                _ => throw ArgumentError.value(week, 'rir', 'reps in reserve from 0 to 10, in halves'),
+                final num rir when rir >= 0 && rir <= EffortThenWeight.mostReserve && rir * 2 == (rir * 2).truncate() =>
+                  rir,
+                _ => throw ArgumentError.value(week, 'rir', 'reps in reserve from 0 to 9, in halves'),
               },
           ],
           final other => throw ArgumentError.value(other, 'rir', 'one to 52 weeks of reps in reserve'),
@@ -315,17 +317,21 @@ final class RangeThenWeight extends GrowthRule {
 ///
 /// [rir], when the rule has it, is the effort asked by program week, repeating
 /// the way a wave does: 3, 2, 1, 0, then an easy week. A planned session's
-/// working sets take the week's ([reserveOf]) in place of their own.
+/// plain working sets take the week's ([reserveOf]) in place of their own;
+/// a failure or drop set, which names its own effort, takes none.
 final class EffortThenWeight extends GrowthRule {
   static const key = 'effortThenWeight';
 
   /// The longest [rir] a rule may carry: a year of weeks.
   static const maxWeeks = 52;
 
+  /// The most reps in reserve a rating can say: the easiest is an RPE of 1.
+  static const mostReserve = 9;
+
   final num step;
 
-  /// Reps in reserve by program week, each 0 to 10 in halves; empty leaves
-  /// the sets' own targets as written.
+  /// Reps in reserve by program week, each 0 to [mostReserve] in halves;
+  /// empty leaves the sets' own targets as written.
   final List<num> rir;
   final MissRule? _miss;
   @override
@@ -337,8 +343,13 @@ final class EffortThenWeight extends GrowthRule {
   MissRule get miss => _miss ?? const MissRule();
 
   /// The reps in reserve program [week] asks for, counting from 1; null when
-  /// the rule names none.
-  num? reserveOf(int week) => rir.isEmpty ? null : rir[(week - 1) % rir.length];
+  /// the rule names none. A [lighter] week asks for the easiest the rule
+  /// names, whichever week it falls on: one taken on a hard week is still a
+  /// lighter one.
+  num? reserveOf(int week, {bool lighter = false}) {
+    if (rir.isEmpty) return null;
+    return lighter ? rir.reduce(max) : rir[(week - 1) % rir.length];
+  }
 
   @override
   String get kind => key;

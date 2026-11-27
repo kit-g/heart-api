@@ -54,8 +54,9 @@ abstract interface class PlannedSession implements Model {
   ///   `effortThenWeight` or `stages` weighs the base; under `longer`, the base
   ///   is its duration or distance, the measure its target names.
   /// - An `effortThenWeight` rule that names the effort by week sets each
-  ///   working set's `rir` to the week's, supplemental sets apart; without it
-  ///   the sets keep their own.
+  ///   plain working set's `rir` to the week's, or to the easiest it names in
+  ///   a lighter cycle. Supplemental, failure and drop sets take none, and
+  ///   without the list the sets keep their own.
   /// - Any other set keeps what its template stores, and a set's stored reps
   ///   stand only where its target names none.
   /// - A test session's working sets plan no weight.
@@ -105,7 +106,7 @@ abstract interface class PlannedSession implements Model {
       };
       // a test finds a max, so it asks for no effort short of one
       final reserve = switch (rule) {
-        EffortThenWeight() when test == null => rule.reserveOf(week),
+        EffortThenWeight() when test == null => rule.reserveOf(week, lighter: lighter),
         _ => null,
       };
 
@@ -124,7 +125,8 @@ abstract interface class PlannedSession implements Model {
         var target = planned;
         if (!warmup && index < wave.length) target = wave[index].onto(target);
         if (!warmup) index++;
-        if (reserve != null && !warmup && !(target?.supplemental ?? false)) {
+        // a failure or drop set names its own effort
+        if (reserve != null && set.setType == .normal && !(target?.supplemental ?? false)) {
           target = (target ?? SetTarget.none).withRir(reserve);
         }
 

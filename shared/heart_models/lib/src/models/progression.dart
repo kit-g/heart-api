@@ -169,7 +169,8 @@ abstract final class Progression {
         return top ? _step(rule, base, step, working) : const Hold();
       case EffortThenWeight(:final step):
         if (_missed(rule.miss, working)) return _miss(rule.miss, base, step, misses);
-        final made = working.every((set) => _atTop(set) && _withinEffort(set));
+        final byWeek = rule.reserveOf(week);
+        final made = working.every((set) => _atTop(set) && _withinEffort(set, byWeek));
         return made ? _step(rule, base, step, working) : const Hold();
       case Ladder():
         return const Hold();
@@ -244,14 +245,18 @@ bool _atTop(ExerciseSet set) {
   return aim == null || (set.reps ?? 0) >= aim;
 }
 
-/// Whether [set] was done at or under the effort its target asks for, with at
-/// least that many reps in reserve. One that asks for none is; one that asks
-/// and wasn't rated is not, since a rating is never guessed.
-bool _withinEffort(ExerciseSet set) {
-  final asked = set.target?.rir;
+/// Whether [set] was done at or under the effort asked of it, with at least
+/// that many reps in reserve. The effort asked is its target's; a plain set
+/// whose target names none is asked the rule's for the week, [byWeek], as the
+/// plan lays it, so a session logged without its plan is read the same way.
+/// One asked for none is within; one asked and not rated is not, since a
+/// rating is never guessed. No rating says more than
+/// [EffortThenWeight.mostReserve] in reserve, so more than that asks for it.
+bool _withinEffort(ExerciseSet set, num? byWeek) {
+  final asked = set.target?.rir ?? (set.setType == .normal ? byWeek : null);
   if (asked == null) return true;
   return switch (set.rpe) {
-    final double rpe => 10 - rpe >= asked,
+    final double rpe => 10 - rpe >= min(asked, EffortThenWeight.mostReserve),
     null => false,
   };
 }

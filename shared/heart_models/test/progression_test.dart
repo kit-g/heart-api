@@ -314,6 +314,48 @@ void main() {
         expect(Progression.next(rule: rule, base: 60, sets: [rated(5, null, all)]), const Hold());
       });
 
+      test('no rating says more than nine in reserve, so asking for more asks for nine', () {
+        final easy = _reps(5, 5).withRir(10);
+        expect(Progression.next(rule: rule, base: 60, sets: [rated(5, 1, easy)]), const Grow(62.5));
+        expect(Progression.next(rule: rule, base: 60, sets: [rated(5, 1.5, easy)]), const Hold());
+      });
+
+      test('a session logged without its plan is asked the rule\'s effort for the week', () {
+        const byWeek = EffortThenWeight(step: 2.5, rir: [3, 1]);
+        final plain = _reps(8, 12);
+        ExerciseSet bare(double? rpe, {SetType type = SetType.normal}) =>
+            _set(12, target: plain, type: type)..rpe = rpe;
+
+        expect(
+          Progression.next(rule: byWeek, base: 60, sets: [bare(null)]),
+          const Hold(),
+          reason: 'asked, not rated',
+        );
+        expect(
+          Progression.next(rule: byWeek, base: 60, sets: [bare(8)]),
+          const Hold(),
+          reason: 'week 1 asks three',
+        );
+        expect(Progression.next(rule: byWeek, base: 60, sets: [bare(8)], week: 2), const Grow(62.5));
+        expect(
+          Progression.next(rule: byWeek, base: 60, sets: [rated(12, 8), bare(null)], week: 2),
+          const Hold(),
+          reason: 'the set\'s own target, two, is met; the bare one is asked the week\'s and was not rated',
+        );
+        expect(
+          Progression.next(
+            rule: byWeek,
+            base: 60,
+            sets: [
+              bare(7),
+              bare(10, type: SetType.failure),
+            ],
+          ),
+          const Grow(62.5),
+          reason: 'a failure set names its own effort, and the plan lays none on it',
+        );
+      });
+
       test('inside the range: hold, however easy; below it: a miss, and the third cuts', () {
         expect(Progression.next(rule: rule, base: 60, sets: [rated(12, 7), rated(10, 7)]), const Hold());
         final short = [rated(12, 8), rated(6, 10)];
@@ -345,6 +387,8 @@ void main() {
         };
         final byWeek = GrowthRule.fromJson(json) as EffortThenWeight;
         expect([for (var week = 1; week <= 6; week++) byWeek.reserveOf(week)], [3, 2, 1, 0.5, 4, 3]);
+        expect(byWeek.reserveOf(4, lighter: true), 4, reason: 'a lighter week asks for the easiest it names');
+        expect(rule.reserveOf(4, lighter: true), isNull);
         expect(byWeek.extra, {'tempo': '3-1-1'});
         expect(byWeek.toMap(), json);
         expect(rule.reserveOf(3), isNull);
@@ -357,6 +401,7 @@ void main() {
           <num>[],
           [3, -1],
           [11],
+          [9.5],
           [2.25],
           ['two'],
           2,
