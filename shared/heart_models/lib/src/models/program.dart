@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'misc.dart';
 
@@ -97,8 +98,8 @@ final class AmrapStep implements Model {
 /// How one exercise's base grows over a program: what is raised, and when.
 ///
 /// The base is the one number a rule grows: the training max under
-/// [ShareOfMax], the working weight under [AddWeight] and [RangeThenWeight],
-/// the duration or distance under [Longer]. [NoGrowth] leaves the sets as
+/// [ShareOfMax], the working weight under [AddWeight], [RangeThenWeight] and
+/// [EffortThenWeight], the duration or distance under [Longer]. [NoGrowth] leaves the sets as
 /// written. What a session does to it is `Progression.next`.
 ///
 /// [fromJson] is strict about what it knows: an unknown kind, a missing
@@ -158,6 +159,24 @@ sealed class GrowthRule implements Model {
         miss: miss(),
         amrap: amrap(),
         extra: rest(weighted),
+      ),
+      EffortThenWeight.key => EffortThenWeight(
+        step: _positive(json, 'step'),
+        rir: switch (json['rir']) {
+          null => const [],
+          final List weeks when weeks.isNotEmpty && weeks.length <= EffortThenWeight.maxWeeks => [
+            for (final week in weeks)
+              switch (week) {
+                final num rir when rir >= 0 && rir <= EffortThenWeight.mostReserve && rir * 2 == (rir * 2).truncate() =>
+                  rir,
+                _ => throw ArgumentError.value(week, 'rir', 'reps in reserve from 0 to 9, in halves'),
+              },
+          ],
+          final other => throw ArgumentError.value(other, 'rir', 'one to 52 weeks of reps in reserve'),
+        },
+        miss: miss(),
+        amrap: amrap(),
+        extra: rest(const {'rir', ...weighted}),
       ),
       Longer.key => Longer(step: _positive(json, 'step'), extra: rest(const {'step'})),
       Ladder.key => Ladder.fromParameters(json, extra: rest(const {'rungs', 'top', 'bottom'})),
@@ -285,6 +304,61 @@ final class RangeThenWeight extends GrowthRule {
 
   @override
   Map<String, dynamic> get _parameters => _weighted(step, _miss, amrap);
+}
+
+/// The working weight goes up by [step] kilograms once every set reaches the
+/// top of its rep range at or under the effort it asks for (heart-api#495).
+///
+/// The effort asked is the set target's `rir`, reps in reserve; the effort
+/// given is the set's own rating (`10 - rpe`). A set rated harder than asked
+/// holds the weight. So does one that asks for an effort and wasn't rated:
+/// the rule reads the rating and never guesses it. A set that asks for none
+/// is judged on its reps alone, as under [RangeThenWeight].
+///
+/// [rir], when the rule has it, is the effort asked by program week, repeating
+/// the way a wave does: 3, 2, 1, 0, then an easy week. A planned session's
+/// plain working sets take the week's ([reserveOf]) in place of their own;
+/// a failure or drop set, which names its own effort, takes none.
+final class EffortThenWeight extends GrowthRule {
+  static const key = 'effortThenWeight';
+
+  /// The longest [rir] a rule may carry: a year of weeks.
+  static const maxWeeks = 52;
+
+  /// The most reps in reserve a rating can say: the easiest is an RPE of 1.
+  static const mostReserve = 9;
+
+  final num step;
+
+  /// Reps in reserve by program week, each 0 to [mostReserve] in halves;
+  /// empty leaves the sets' own targets as written.
+  final List<num> rir;
+  final MissRule? _miss;
+  @override
+  final List<AmrapStep> amrap;
+
+  const new({required this.step, this.rir = const [], this._miss, this.amrap = const [], super.extra});
+
+  @override
+  MissRule get miss => _miss ?? const MissRule();
+
+  /// The reps in reserve program [week] asks for, counting from 1; null when
+  /// the rule names none. A [lighter] week asks for the easiest the rule
+  /// names, whichever week it falls on: one taken on a hard week is still a
+  /// lighter one.
+  num? reserveOf(int week, {bool lighter = false}) {
+    if (rir.isEmpty) return null;
+    return lighter ? rir.reduce(max) : rir[(week - 1) % rir.length];
+  }
+
+  @override
+  String get kind => key;
+
+  @override
+  Map<String, dynamic> get _parameters => {
+    ..._weighted(step, _miss, amrap),
+    if (rir.isNotEmpty) 'rir': rir,
+  };
 }
 
 /// The duration (seconds) or distance (kilometres) goes up by [step] after

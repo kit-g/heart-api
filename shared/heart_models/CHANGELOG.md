@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.67.0
+
+A rule that grows the weight by effort (heart-api#495).
+
+- Added: `EffortThenWeight`, the `effortThenWeight` growth rule. It has `step`, `miss` and `amrap`
+  as the other weight rules do, and `rir`: the reps in reserve asked by program week, each 0 to 9
+  in halves, repeating. `reserveOf(week)` reads it, null when the rule names none; with
+  `lighter: true` it is the easiest the rule names.
+- `Progression.next` grows its base once every working set is at the top of its rep range and
+  rated at or under the effort asked of it (`10 - rpe` no less than the `rir`). The effort asked
+  is the set target's, else the rule's for the week on a plain set. A set rated harder holds the
+  weight. So does one that is asked for an effort and wasn't rated. A set short of its reps is a
+  miss, and a set asked for no effort is judged on its reps alone.
+- `PlannedSession.of` weighs its sets at the base and, when the rule names the effort by week,
+  sets the plain working sets' `rir` to the week's. Warm-ups, supplemental, failure and drop sets
+  and a test session take none.
+- `GrowthRule` is sealed, so a `switch` over it needs the new case.
+- A build before this one carries the rule as it arrived and runs the exercise as written.
+
 ## 2.66.0
 
 Who removed a device, which device may remove which, and devices waiting for a place (heart-api#483,

@@ -165,12 +165,13 @@ abstract final class Progression {
         return _step(rule, base, step, working);
       case RangeThenWeight(:final step):
         if (_missed(rule.miss, working)) return _miss(rule.miss, base, step, misses);
-        final top = working.every((set) {
-          final reps = set.target?[.reps];
-          final aim = reps?.max ?? reps?.min;
-          return aim == null || (set.reps ?? 0) >= aim;
-        });
+        final top = working.every(_atTop);
         return top ? _step(rule, base, step, working) : const Hold();
+      case EffortThenWeight(:final step):
+        if (_missed(rule.miss, working)) return _miss(rule.miss, base, step, misses);
+        final byWeek = rule.reserveOf(week);
+        final made = working.every((set) => _atTop(set) && _withinEffort(set, byWeek));
+        return made ? _step(rule, base, step, working) : const Hold();
       case Ladder():
         return const Hold();
       case Stages(:final step):
@@ -234,6 +235,30 @@ Iterable<ExerciseSet> _working(Iterable<ExerciseSet> sets) {
   return sets.where(
     (set) => set.isCompleted && set.setType != .warmup && !(set.target?.supplemental ?? false),
   );
+}
+
+/// Whether [set] reached the top of its rep range: a range's max, an exact
+/// target's number, and always when it names no reps.
+bool _atTop(ExerciseSet set) {
+  final reps = set.target?[.reps];
+  final aim = reps?.max ?? reps?.min;
+  return aim == null || (set.reps ?? 0) >= aim;
+}
+
+/// Whether [set] was done at or under the effort asked of it, with at least
+/// that many reps in reserve. The effort asked is its target's; a plain set
+/// whose target names none is asked the rule's for the week, [byWeek], as the
+/// plan lays it, so a session logged without its plan is read the same way.
+/// One asked for none is within; one asked and not rated is not, since a
+/// rating is never guessed. No rating says more than
+/// [EffortThenWeight.mostReserve] in reserve, so more than that asks for it.
+bool _withinEffort(ExerciseSet set, num? byWeek) {
+  final asked = set.target?.rir ?? (set.setType == .normal ? byWeek : null);
+  if (asked == null) return true;
+  return switch (set.rpe) {
+    final double rpe => 10 - rpe >= min(asked, EffortThenWeight.mostReserve),
+    null => false,
+  };
 }
 
 /// The set a session's AMRAP is: the last working set whose reps target is as

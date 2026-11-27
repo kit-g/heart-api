@@ -412,6 +412,57 @@ void main() {
       );
     });
 
+    test('an effort rule may name the reps in reserve by week (heart-api#495)', () async {
+      Map<String, dynamic> effort([Map<String, dynamic> more = const {}]) {
+        return {'kind': 'effortThenWeight', 'step': 2.5, ...more};
+      }
+
+      final input = await ProgramCreateIn.fromRequest(
+        req(
+          body: {
+            'name': 'p',
+            'rules': {
+              _bench: effort(),
+              _squat: effort({
+                'rir': [3, 2, 1, 0.5, 4],
+                'miss': {'after': 2},
+              }),
+            },
+          },
+        ),
+      );
+      expect(input.program.rules[_bench], isA<EffortThenWeight>().having((r) => r.rir, 'rir', isEmpty));
+      expect(
+        input.program.rules[_squat],
+        isA<EffortThenWeight>().having((r) => r.reserveOf(4), 'week 4', 0.5).having((r) => r.miss.after, 'after', 2),
+      );
+      for (final rule in [
+        effort({'rir': <num>[]}),
+        effort({
+          'rir': [2.25],
+        }),
+        effort({
+          'rir': [9.5],
+        }),
+        effort({'rir': 2}),
+        effort({'rpe': 8}),
+        {'kind': 'effortThenWeight'},
+      ]) {
+        await expectLater(
+          ProgramCreateIn.fromRequest(
+            req(
+              body: {
+                'name': 'p',
+                'rules': {_bench: rule},
+              },
+            ),
+          ),
+          badRequest('invalid_rule'),
+          reason: '$rule',
+        );
+      }
+    });
+
     test('a lighter week is an action', () async {
       final input = await ProgramActionIn.fromRequest(req(body: {'kind': 'lighter', 'at': '2026-10-15T08:00:00Z'}));
       expect(input.action.kind, ProgramActionKind.lighter);

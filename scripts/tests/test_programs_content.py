@@ -332,6 +332,48 @@ def test_a_shape_newer_than_the_first_library_build_needs_min_app(monkeypatch):
     assert check(tempo, LIBRARY_DOC) == []
 
 
+def test_an_effort_rule_reads_an_effort_from_the_rule_or_from_its_sets(monkeypatch):
+    import programs_content
+
+    monkeypatch.setitem(programs_content.FIRST_APP, 'rule effortThenWeight', '1.18.0')
+
+    def effort(target=None, **more):
+        rule = {'kind': 'effortThenWeight', 'step': 2.5, **more}
+        program = one(rules={'squat-barbell': rule}, min_app='1.18.0')
+        program['programs'][0]['sessions'][0]['exercises'][0]['target'] = target or {'reps': [5, 8]}
+        return program
+
+    assert check(effort(rir=[3, 2, 1, 0.5, 4]), LIBRARY_DOC) == []
+    assert check(effort({'reps': [5, 8], 'rir': 2}), LIBRARY_DOC) == []
+    rendered = render(effort(rir=[3, 2, 1]))['programs'][0]
+    assert next(iter(rendered['rules'].values())) == {'kind': 'effortThenWeight', 'step': 2.5, 'rir': [3, 2, 1]}
+    for rir in ([], [2.25], [9.5], [10], [True], 2, [2] * 53):
+        assert any('rir is one to 52 weeks' in p for p in check(effort(rir=rir), LIBRARY_DOC)), rir
+    assert any('needs an effort to read' in p for p in check(effort(), LIBRARY_DOC))
+    both = effort({'reps': [5, 8], 'rir': 2}, rir=[3, 2, 1])
+    assert any('replaces the rir its sets name' in p for p in check(both, LIBRARY_DOC))
+
+
+def test_a_newer_shape_can_t_say_an_app_build_older_than_the_first_that_runs_it(monkeypatch):
+    import programs_content
+
+    def effort(min_app):
+        rule = {'kind': 'effortThenWeight', 'step': 2.5, 'rir': [3, 2, 1]}
+        program = one(rules={'squat-barbell': rule})
+        if min_app is not None:
+            program['programs'][0]['min_app'] = min_app
+        return program
+
+    # no app build runs the effort rule yet, so no library program may use it
+    assert any('no app build runs yet' in p for p in check(effort('1.18.0'), LIBRARY_DOC))
+
+    monkeypatch.setitem(programs_content.FIRST_APP, 'rule effortThenWeight', '1.18.0')
+    assert check(effort('1.18.0'), LIBRARY_DOC) == []
+    assert check(effort('1.20.0'), LIBRARY_DOC) == []
+    assert any('min_app 1.9.0 is older' in p for p in check(effort('1.9.0'), LIBRARY_DOC)), 'by number, not by text'
+    assert any("['rule effortThenWeight']" in p and 'say min_app' in p for p in check(effort(None), LIBRARY_DOC))
+
+
 def test_every_program_today_runs_on_the_first_library_build():
     from programs_content import _newer_shapes
 

@@ -50,9 +50,13 @@ abstract interface class PlannedSession implements Model {
   ///   ([currentStages]): that many sets of its reps, the last as many as
   ///   possible when the stage says so, each like the session's first working
   ///   set.
-  /// - A set without a share under `addWeight`, `rangeThenWeight` or `stages`
-  ///   weighs the base; under `longer`, the base is its duration or distance, the
-  ///   measure its target names.
+  /// - A set without a share under `addWeight`, `rangeThenWeight`,
+  ///   `effortThenWeight` or `stages` weighs the base; under `longer`, the base
+  ///   is its duration or distance, the measure its target names.
+  /// - An `effortThenWeight` rule that names the effort by week sets each
+  ///   plain working set's `rir` to the week's, or to the easiest it names in
+  ///   a lighter cycle. Supplemental, failure and drop sets take none, and
+  ///   without the list the sets keep their own.
   /// - Any other set keeps what its template stores, and a set's stored reps
   ///   stand only where its target names none.
   /// - A test session's working sets plan no weight.
@@ -74,7 +78,11 @@ abstract interface class PlannedSession implements Model {
     final test = program.tests[session.id]?.share;
 
     num stepOf(String exerciseId, {String? slot}) => switch (program.ruleFor(exerciseId, slot: slot)) {
-      AddWeight(:final step) || RangeThenWeight(:final step) || ShareOfMax(:final step) || Stages(:final step) => step,
+      AddWeight(:final step) ||
+      RangeThenWeight(:final step) ||
+      EffortThenWeight(:final step) ||
+      ShareOfMax(:final step) ||
+      Stages(:final step) => step,
       _ => 2.5,
     };
 
@@ -96,6 +104,11 @@ abstract interface class PlannedSession implements Model {
         ShareOfMax() when test == null => rule.week(week),
         _ => const <WaveSet>[],
       };
+      // a test finds a max, so it asks for no effort short of one
+      final reserve = switch (rule) {
+        EffortThenWeight() when test == null => rule.reserveOf(week, lighter: lighter),
+        _ => null,
+      };
 
       final List<(ExerciseSet, SetTarget?)> all = switch ((rule, test)) {
         (final Stages rule, null) => exercise.laidOut(rule.stage(stage)),
@@ -112,6 +125,10 @@ abstract interface class PlannedSession implements Model {
         var target = planned;
         if (!warmup && index < wave.length) target = wave[index].onto(target);
         if (!warmup) index++;
+        // a failure or drop set names its own effort
+        if (reserve != null && set.setType == .normal && !(target?.supplemental ?? false)) {
+          target = (target ?? SetTarget.none).withRir(reserve);
+        }
 
         num? weight = set.weight;
         num? duration = set.duration;
@@ -128,7 +145,7 @@ abstract interface class PlannedSession implements Model {
           };
         } else if (base != null) {
           switch (rule) {
-            case AddWeight() || RangeThenWeight() || Stages():
+            case AddWeight() || RangeThenWeight() || EffortThenWeight() || Stages():
               weight = lighter ? roundDown(base.value * load, stepOf(exerciseId, slot: slot)) : base.value;
             case Longer():
               if (growsDistance(set, target)) {

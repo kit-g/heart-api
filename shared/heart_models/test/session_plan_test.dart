@@ -428,6 +428,56 @@ void main() {
       );
     });
 
+    test('effort, then weight: the week\'s reps in reserve on the working sets, at the base (heart-api#495)', () {
+      final session = _template([
+        (
+          '019a0000-0000-7000-8000-0000000000b3',
+          _exercise(_curl, 'Curl'),
+          [
+            _set(1, _reps(8, 12), type: 'warmup', weight: 10),
+            _set(2, {..._reps(8, 12), 'rir': 4}, weight: 20),
+            _set(3, _reps(8, 12), weight: 20),
+            _set(4, {..._reps(8, 12), 'supplemental': true}, weight: 20),
+            _set(5, _reps(8), type: 'failure', weight: 20),
+            _set(6, _reps(8), type: 'drop', weight: 15),
+          ],
+        ),
+      ]);
+      Program following(EffortThenWeight rule) {
+        return Program(name: 'Arms', sessions: const [_session], rules: {_curl: rule});
+      }
+
+      List<num?> reserve(PlannedSession plan) => [for (final set in plan.exercises.single.sets) set.target?.rir];
+
+      final byWeek = following(const EffortThenWeight(step: 2.5, rir: [3, 2, 1]));
+      final first = _plan(byWeek, session, [_base(_curl, 30)]);
+      expect(
+        reserve(first),
+        [null, 3, 3, null, null, null],
+        reason: 'warm-ups, supplemental, failure and drop sets ask for none',
+      );
+      expect([for (final set in first.exercises.single.sets) set.weight], [10, 30, 30, 30, 30, 30]);
+      expect(first.exercises.single.sets[1].target?[.reps], const TargetRange(min: 8, max: 12));
+      List<num?> asked(PlannedSession plan) => reserve(plan).sublist(0, 3);
+      expect(asked(_plan(byWeek, session, [_base(_curl, 30)], week: 3)), [null, 1, 1]);
+      expect(asked(_plan(byWeek, session, [_base(_curl, 30)], week: 4)), [null, 3, 3], reason: 'it repeats');
+      expect(
+        asked(_plan(byWeek, session, [_base(_curl, 30)], week: 3, lighter: true)),
+        [null, 3, 3],
+        reason: 'a lighter week taken on a hard one asks for the easiest effort the rule names',
+      );
+
+      final asWritten = following(const EffortThenWeight(step: 2.5));
+      expect(
+        reserve(_plan(asWritten, session, [_base(_curl, 30)], week: 2)),
+        [null, 4, null, null, null, null],
+        reason: 'a rule that names no effort leaves each set its own',
+      );
+
+      final tested = byWeek.copyWith(tests: {_session: const ProgramTest()});
+      expect(asked(_plan(tested, session, [_base(_curl, 30)])), [null, 4, null], reason: 'a test finds a max');
+    });
+
     test('on the wire', () {
       final program = Program(name: 'Waves', sessions: const [_session], rules: {_squat: waves});
       final map = _plan(program, squatDay, [_base(_squat, 140)]).toMap();
