@@ -60,6 +60,10 @@ RULES = {
 FIRST_LIBRARY_RULES = {'none', 'addWeight', 'rangeThenWeight', 'longer', 'shareOfMax', 'ladder', 'stages'}
 FIRST_LIBRARY_TARGETS = {'reps', 'duration', 'distance', 'share', 'rir', 'of', 'of_slot', 'supplemental'}
 FIRST_LIBRARY_EXERCISE = {'exercise', 'sets', 'target', 'rest', 'superset', 'pattern', 'total_reps', 'rule'}
+# The first app build that runs each shape past those, as `_newer_shapes` names
+# it: a program that uses one can't say an older `min_app`. None is a shape no
+# app build runs yet, so no library program may use it.
+FIRST_APP = {'rule effortThenWeight': None}
 APP_VERSION = re.compile(r'^\d+\.\d+\.\d+$')
 
 # The rules that keep a base a share can be of.
@@ -73,6 +77,10 @@ NAMESPACE = uuid.UUID('5f2b6a1e-9c1d-4f5e-8a57-3c1f0e2d7b90')
 def load(path: str) -> dict:
     with open(path, encoding='utf-8') as f:
         return yaml.safe_load(f)
+
+
+def _version(text: str) -> tuple[int, ...]:
+    return tuple(int(part) for part in text.split('.'))
 
 
 def _number(value, low, high) -> bool:
@@ -178,9 +186,16 @@ def check_rule(where, rule, exercise, category, targets, ladders) -> list[str]:
     if 'rir' in rule and not (
         isinstance(rule['rir'], list)
         and 1 <= len(rule['rir']) <= 52
-        and all(_number(week, 0, 10) and week * 2 == int(week * 2) for week in rule['rir'])
+        and all(_number(week, 0, 9) and week * 2 == int(week * 2) for week in rule['rir'])
     ):
-        problems.append(f'{where}: rir is one to 52 weeks of reps in reserve, each 0 to 10 in halves')
+        problems.append(f'{where}: rir is one to 52 weeks of reps in reserve, each 0 to 9 in halves')
+    if rule['kind'] == 'effortThenWeight':
+        for sets in targets:
+            asked = any('rir' in t for t in sets)
+            if 'rir' in rule and asked:
+                problems.append(f'{where}: the rule names rir by week, which replaces the rir its sets name: say one')
+            if 'rir' not in rule and not asked:
+                problems.append(f'{where}: effortThenWeight needs an effort to read: rir on the rule or on a set')
     if rule['kind'] == 'rangeThenWeight':
         for sets in targets:
             if not any('max' in t.get('reps', {}) and t['reps']['max'] > t['reps']['min'] for t in sets):
@@ -392,8 +407,15 @@ def check(document: dict, library: dict, sources=None, safety=None, ladders=None
         min_app = program.get('min_app')
         if min_app is not None and not (isinstance(min_app, str) and APP_VERSION.fullmatch(min_app)):
             problems.append(f'{where}: min_app is an app version, such as 1.15.0')
-        if min_app is None and (newer := _newer_shapes(program)):
+        newer = _newer_shapes(program)
+        if min_app is None and newer:
             problems.append(f'{where}: uses {sorted(newer)}, newer than the first library build reads: say min_app')
+        for shape in sorted(newer & set(FIRST_APP)):
+            first = FIRST_APP[shape]
+            if first is None:
+                problems.append(f'{where}: uses {shape}, which no app build runs yet')
+            elif isinstance(min_app, str) and APP_VERSION.fullmatch(min_app) and _version(min_app) < _version(first):
+                problems.append(f'{where}: uses {shape}, which runs from {first}: min_app {min_app} is older')
         if (deload := program.get('deload')) is not None and not (
             isinstance(deload, dict)
             and isinstance(deload.get('every'), int)
