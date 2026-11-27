@@ -3,6 +3,7 @@ library;
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:cryptography/cryptography.dart' show Ed25519, Signature, SimplePublicKey;
 import 'package:heart/models/anomalies.dart';
 import 'package:heart/models/apple.dart';
 import 'package:heart/models/changes.dart';

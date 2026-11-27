@@ -1,65 +1,95 @@
 part of '../db.dart';
 
-/// Taken before [_publishDevice], in a statement of its own, so two new devices
-/// published at once count each other: a statement counts from the snapshot it
-/// started with.
-const _lockPublishing = '''
+/// Taken before publishing, vouching or removing, in a statement of its own, so
+/// two at once see each other: two new devices count each other, and a device
+/// removed can't remove another in the meantime. A statement reads from the
+/// snapshot it started with.
+const _lockDevices = '''
 SELECT pg_advisory_xact_lock(hashtextextended('crypto_devices:' || @userId, 0))
 ''';
 
 /// A device id is chosen by the device, so publishing twice answers what is
 /// there, and someone else's id answers nothing. A signature only counts if it
-/// names a device of the same owner. A device its owner removed stays removed,
-/// and says so. A new one past the account's limit of devices in use is no
-/// device, and `is_full` says why. `added` says this statement added it.
+/// names a device of the same owner with a place. A device its owner removed stays
+/// removed, and says so. A device unseen for a month holds no place. A new one with
+/// no place left waits for one: known, so it can remove devices and its day counts,
+/// but nothing is sent to it, until it publishes again with room, which gives it a
+/// place. Past as many waiting as there are places, it is no device, and `is_full`
+/// says why. `added` says this statement added it or gave it a place.
 const _publishDevice =
     '''
 WITH
 _live AS (
-  SELECT count(*) >= $_maxDevices AS is_full
+  SELECT
+    count(*) FILTER (WHERE NOT waiting AND seen_at > now() - INTERVAL '$_unseenDays days') >= $_maxDevices AS is_full,
+    count(*) FILTER (WHERE waiting AND seen_at > now() - INTERVAL '$_unseenDays days') >= $_maxWaitingDevices
+      AS no_room_to_wait
   FROM crypto_devices
   WHERE user_id = @userId
     AND removed_at IS NULL
 ),
 _inserted AS (
-  INSERT INTO crypto_devices (id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by)
+  INSERT INTO crypto_devices (id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, waiting)
   SELECT
     @id::uuid,
     @userId,
     @identityKey,
     @signingKey,
     @fallbackKey,
-    CASE WHEN voucher.id IS NULL THEN NULL ELSE @signature::text END,
-    voucher.id
-  FROM (SELECT 1) one
+    CASE WHEN voucher.id IS NULL OR l.is_full THEN NULL ELSE @signature::text END,
+    CASE WHEN l.is_full THEN NULL ELSE voucher.id END,
+    l.is_full
+  FROM _live l
   LEFT JOIN crypto_devices voucher
-    ON voucher.id = @vouchedBy::uuid AND voucher.user_id = @userId AND voucher.removed_at IS NULL
-  WHERE NOT (SELECT is_full FROM _live)
+    ON voucher.id = @vouchedBy::uuid
+    AND voucher.user_id = @userId
+    AND voucher.removed_at IS NULL
+    AND NOT voucher.waiting
+  WHERE NOT (l.is_full AND l.no_room_to_wait)
   ON CONFLICT (id) DO NOTHING
+  RETURNING *
+),
+_placed AS (
+  UPDATE crypto_devices
+  SET
+    waiting = false,
+    seen_at = now()
+  WHERE id = @id::uuid
+    AND user_id = @userId
+    AND removed_at IS NULL
+    AND waiting
+    AND NOT (SELECT is_full FROM _live)
   RETURNING *
 )
 SELECT
   id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at,
-  false AS removed, false AS is_full, true AS added
+  false AS removed, false AS is_full, waiting, true AS added
 FROM _inserted
 UNION ALL
 SELECT
   id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at,
-  removed_at IS NOT NULL, false, false
+  false, false, false, true
+FROM _placed
+UNION ALL
+SELECT
+  id, user_id, identity_key, signing_key, fallback_key, signature, vouched_by, created_at,
+  removed_at IS NOT NULL, false, waiting, false
 FROM crypto_devices
 WHERE id = @id::uuid
   AND user_id = @userId
   AND NOT EXISTS (SELECT 1 FROM _inserted)
+  AND NOT EXISTS (SELECT 1 FROM _placed)
 UNION ALL
-SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, false
+SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, false, false
 FROM _live
 WHERE is_full
+  AND no_room_to_wait
   AND NOT EXISTS (SELECT 1 FROM crypto_devices WHERE id = @id::uuid)
 ''';
 
-/// A device is vouched for once, by another device of the same owner in use. The
-/// update checks the row it locks, so of two vouches racing, one lands and the
-/// other finds it there.
+/// A device is vouched for once, by another device of the same owner in use, both
+/// with a place. The update checks the row it locks, so of two vouches racing, one
+/// lands and the other finds it there.
 const _vouchForDevice = '''
 WITH
 _device AS (
@@ -68,6 +98,7 @@ _device AS (
   WHERE id = @deviceId::uuid
     AND user_id = @userId
     AND removed_at IS NULL
+    AND NOT waiting
 ),
 _voucher AS (
   SELECT id
@@ -76,6 +107,7 @@ _voucher AS (
     AND id <> @deviceId::uuid
     AND user_id = @userId
     AND removed_at IS NULL
+    AND NOT waiting
 ),
 _vouched AS (
   UPDATE crypto_devices d
@@ -86,6 +118,7 @@ _vouched AS (
   WHERE d.id = @deviceId::uuid
     AND d.user_id = @userId
     AND d.removed_at IS NULL
+    AND NOT d.waiting
     AND d.vouched_by IS NULL
   RETURNING d.id, d.user_id, d.identity_key, d.signing_key, d.fallback_key, d.signature, d.vouched_by, d.created_at
 )
@@ -106,26 +139,92 @@ LEFT JOIN _vouched v ON true
 LEFT JOIN crypto_devices d ON d.id = (SELECT id FROM _device)
 ''';
 
-const _listDevices = '''
+/// The devices in use, and for the owner alone, those waiting for a place, the latest
+/// of those removed lately, so a device or a removal they didn't make shows on their
+/// other devices, and the day each was last seen. Removing is open to any device of
+/// the account's, so the removed ones are capped, or a script adding and removing
+/// devices would make the list as long as it liked.
+const _listDevices =
+    '''
 WITH _status AS (
   SELECT NOT _shares_keys_with(@readerId, @ownerId) AS forbidden
 )
-SELECT s.forbidden, d.id, d.user_id, d.identity_key, d.signing_key, d.fallback_key, d.signature, d.vouched_by, d.created_at
+SELECT
+  s.forbidden,
+  d.id, d.user_id, d.identity_key, d.signing_key, d.fallback_key, d.signature, d.vouched_by, d.created_at,
+  d.removed_at, d.removed_by, d.waiting,
+  CASE WHEN @readerId = @ownerId THEN (d.seen_at AT TIME ZONE 'UTC')::date END AS seen_on
 FROM _status s
-LEFT JOIN crypto_devices d
-  ON NOT s.forbidden AND d.user_id = @ownerId AND d.removed_at IS NULL
-ORDER BY d.id
+LEFT JOIN LATERAL (
+  (
+    SELECT *
+    FROM crypto_devices
+    WHERE user_id = @ownerId
+      AND removed_at IS NULL
+      AND (NOT waiting OR @readerId = @ownerId)
+  )
+  UNION ALL
+  (
+    SELECT *
+    FROM crypto_devices
+    WHERE user_id = @ownerId
+      AND @readerId = @ownerId
+      AND removed_at > now() - INTERVAL '$_removedListedDays days'
+    ORDER BY removed_at DESC
+    LIMIT $_maxRemovedListed
+  )
+) d ON NOT s.forbidden
+ORDER BY d.removed_at DESC NULLS FIRST, d.id
 ''';
 
-/// A removed device gets nothing more, so what waits for it and its keys go now.
-const _removeDevice = '''
+/// The caller's devices that sign what a vouch or a removal says, and whether each
+/// is still in use. Their keys never change, so they're read and checked before
+/// anything is locked, and the write checks again that they're in use.
+const _signers = '''
+SELECT id, identity_key, signing_key, removed_at IS NOT NULL AS removed, waiting
+FROM crypto_devices
+WHERE id = ANY (@ids::uuid[])
+  AND user_id = @userId
+''';
+
+/// A device removes itself, or one added after it, at once, and one added before it
+/// once it has been in use for a day: someone holding only the password adds a
+/// device later than the owner's, whose devices remove it before the wait is over,
+/// and someone who lost a phone removes it from the new one a day on. `removable_at`
+/// says when the wait ends. A removed device gets nothing more, so what waits for it
+/// and its keys go now.
+const _removeDevice =
+    '''
 WITH
-_removed AS (
-  UPDATE crypto_devices
-  SET removed_at = now()
+_target AS (
+  SELECT id, created_at, waiting
+  FROM crypto_devices
   WHERE id = @deviceId::uuid
     AND user_id = @userId
     AND removed_at IS NULL
+),
+_remover AS (
+  SELECT id, created_at
+  FROM crypto_devices
+  WHERE id = @removedBy::uuid
+    AND user_id = @userId
+    AND removed_at IS NULL
+),
+_removable AS (
+  SELECT
+    CASE
+      WHEN t.id = r.id OR (t.created_at, t.id) > (r.created_at, r.id) THEN now()
+      ELSE greatest(now(), r.created_at + INTERVAL '$_removalWaitHours hours')
+    END AS at
+  FROM _target t, _remover r
+),
+_removed AS (
+  UPDATE crypto_devices
+  SET
+    removed_at = now(),
+    removed_by = (SELECT id FROM _remover)
+  WHERE id = (SELECT id FROM _target)
+    AND (SELECT at FROM _removable) <= now()
   RETURNING id
 ),
 _keys AS (
@@ -138,7 +237,41 @@ _queue AS (
   WHERE recipient_device_id IN (SELECT id FROM _removed)
   RETURNING 1
 )
-SELECT id FROM _removed
+SELECT
+  EXISTS (SELECT 1 FROM _target) AS found,
+  EXISTS (SELECT 1 FROM _remover) AS remover_in_use,
+  EXISTS (SELECT 1 FROM _removed) AS removed,
+  coalesce((SELECT waiting FROM _target), false) AS waited,
+  (SELECT at FROM _removable) AS removable_at
+''';
+
+/// A device showing it's in use, at most once an hour and once a UTC day, so it keeps
+/// its place. One back after a month unseen, whose place another took meanwhile, waits
+/// for one like a new device.
+const _seeDevice =
+    '''
+UPDATE crypto_devices d
+SET
+  seen_at = now(),
+  waiting = d.waiting OR (
+    d.seen_at <= now() - INTERVAL '$_unseenDays days'
+    AND (
+      SELECT count(*)
+      FROM crypto_devices o
+      WHERE o.user_id = @userId
+        AND o.id <> d.id
+        AND o.removed_at IS NULL
+        AND NOT o.waiting
+        AND o.seen_at > now() - INTERVAL '$_unseenDays days'
+    ) >= $_maxDevices
+  )
+WHERE d.id = @deviceId::uuid
+  AND d.user_id = @userId
+  AND d.removed_at IS NULL
+  AND (
+    d.seen_at < now() - INTERVAL '1 hour'
+    OR (d.seen_at AT TIME ZONE 'UTC')::date < (now() AT TIME ZONE 'UTC')::date
+  )
 ''';
 
 const _replaceFallbackKey = '''
@@ -237,6 +370,7 @@ _devices AS (
   FROM crypto_devices d, _count c
   WHERE d.user_id = @ownerId
     AND d.removed_at IS NULL
+    AND NOT d.waiting
     AND (@deviceIds::uuid[] IS NULL OR d.id = ANY (@deviceIds::uuid[]))
     AND c.claims <= $_maxKeyClaims
 ),
@@ -284,7 +418,7 @@ _seen AS (
   SELECT recipient_device_id, sender_device_id FROM device_queue_receipts WHERE id = @id::uuid
 ),
 _sender AS (
-  SELECT id
+  SELECT id, waiting
   FROM crypto_devices
   WHERE id = @senderDeviceId::uuid
     AND user_id = @userId
@@ -295,6 +429,7 @@ _recipient AS (
   FROM crypto_devices
   WHERE id = @recipientDeviceId::uuid
     AND removed_at IS NULL
+    AND NOT waiting
     AND _shares_keys_with(@userId, user_id)
 ),
 _recent AS (
@@ -316,12 +451,14 @@ _inserted AS (
   SELECT @id::uuid, r.id, s.id, @kind, @content
   FROM _recipient r, _sender s, _load l
   WHERE NOT l.is_full
+    AND NOT s.waiting
     AND NOT EXISTS (SELECT 1 FROM _seen)
   ON CONFLICT (id) DO NOTHING
   RETURNING 1
 )
 SELECT
   EXISTS (SELECT 1 FROM _sender) AS sender_owned,
+  coalesce((SELECT waiting FROM _sender), false) AS sender_waiting,
   NOT EXISTS (SELECT 1 FROM _recipient) AS forbidden,
   EXISTS (
     SELECT 1

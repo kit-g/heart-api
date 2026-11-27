@@ -5,10 +5,11 @@ import 'package:relic/relic.dart';
 /// Consumes a `devices.changed` event: everyone who shares keys with this person
 /// looks again at their devices, and their app says so in the thread. So do the
 /// person's own devices, so another phone of theirs can trust a new key or flag
-/// one they didn't add.
+/// one they didn't add. With `own`, only the person's own devices: a device waiting
+/// for a place is nothing anyone sends to.
 Future<void> devicesChanged(Request req, Map event) async {
   final userId = event['userId'] as String;
-  final peers = await req.keyService.getKeyPeers(userId: userId);
+  final peers = event['own'] == true ? const <String>[] : await req.keyService.getKeyPeers(userId: userId);
   for (final peer in {userId, ...peers}) {
     await req.notify(userId: peer, topic: .devicesChanged, actorId: userId, data: {'userId': userId});
   }

@@ -12,10 +12,12 @@ import 'package:relic/relic.dart';
 
 final _logger = logging.Logger('Keys');
 
-Future<void> _tellPeers(Request req) {
+/// [own] tells only the caller's own devices: a device waiting for a place is
+/// nothing the people they share keys with send to.
+Future<void> _tellPeers(Request req, {bool own = false}) {
   return req.events.publish(
     queueUrl: req.config.eventsQueueUrl,
-    message: {'type': 'devices.changed', 'userId': req.userId},
+    message: {'type': 'devices.changed', 'userId': req.userId, if (own) 'own': true},
   );
 }
 
@@ -43,14 +45,14 @@ Future<void> _wake(Request req, {required String userId, required String deviceI
 /// that can't be such an id is no device.
 String _deviceId(Request req) {
   return switch (req.rawPathParameters[#deviceId]) {
-    final String id when isUuidV7(id) => id,
+    final String id when isUuidV7(id) => id.toLowerCase(),
     final id => throw NotFound(type: 'Device', id: '$id'),
   };
 }
 
 Future<Model> publishDevice(Request req) async {
   final input = await DevicePublishIn.fromRequest(req);
-  final (:device, :added) = await req.keyService.publishDevice(
+  final (:device, :added, :waiting) = await req.keyService.publishDevice(
     userId: req.userId,
     id: input.id,
     identityKey: input.identityKey,
@@ -59,8 +61,15 @@ Future<Model> publishDevice(Request req) async {
     signature: input.signature,
     vouchedBy: input.vouchedBy,
   );
-  // a device publishing itself again, as it may on every start, changes nothing
-  if (added) await _tellPeers(req);
+  // a device publishing itself again, as it may on every start, changes nothing; one
+  // waiting for a place is told so, and the account's devices are told it asked
+  if (added) await _tellPeers(req, own: waiting);
+  if (waiting) {
+    throw const Conflict(
+      code: 'device_waiting',
+      reason: 'the account is full: this device waits for a place, and may remove one of its devices',
+    );
+  }
   return Created(device);
 }
 
@@ -78,12 +87,20 @@ Future<CryptoDevice> vouchForDevice(Request req) async {
 
 Future<CryptoDevices> getDevices(Request req) async {
   final owner = req.url.queryParameters['userId'] ?? req.userId;
-  return CryptoDevices(await req.keyService.getDevices(readerId: req.userId, ownerId: owner));
+  return req.keyService.getDevices(readerId: req.userId, ownerId: owner);
 }
 
 Future<Model> removeDevice(Request req) async {
-  await req.keyService.removeDevice(userId: req.userId, deviceId: _deviceId(req));
-  await _tellPeers(req);
+  final deviceId = _deviceId(req);
+  final query = DeviceRemovalQuery.fromRequest(req);
+  final (:placed) = await req.keyService.removeDevice(
+    userId: req.userId,
+    deviceId: deviceId,
+    removedBy: query.removedBy,
+    signedAt: query.signedAt,
+    signature: query.signature,
+  );
+  await _tellPeers(req, own: !placed);
   throw const NoContent();
 }
 

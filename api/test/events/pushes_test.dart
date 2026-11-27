@@ -230,4 +230,12 @@ void main() {
       ),
     );
   });
+  test('a change only to their own devices wakes only those', () async {
+    audience('student', [(token: 't-student', locale: 'en')]);
+
+    await devicesChanged(request, {'type': 'devices.changed', 'userId': 'student', 'own': true});
+
+    expect([for (final message in sent()) ...message['tokens'] as List], ['t-student']);
+    verifyNever(keys.getKeyPeers(userId: anyNamed('userId')));
+  });
 }

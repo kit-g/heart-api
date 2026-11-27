@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.66.0
+
+Who removed a device, which device may remove which, and devices waiting for a place (heart-api#483,
+heart-api#484).
+
+- Added: `CryptoDevice.removedAt`, `CryptoDevice.removedBy` and `CryptoDevice.lastSeenOn` (a UTC day).
+- Added: `CryptoDevices.removed` and `CryptoDevices.waiting`, each empty when absent.
+- Changed: `KeyService.removeDevice` takes `removedBy`, `signedAt` and `signature`, all required, and
+  answers `placed`.
+- Changed: `KeyService.publishDevice` answers `waiting` too.
+- Changed: `KeyService.getDevices` answers `CryptoDevices`.
+
+Coaching's signatures change freely until the app ships coaching.
+
 ## 2.65.0
 
 Which of a client's programs they changed (heart-api#482).

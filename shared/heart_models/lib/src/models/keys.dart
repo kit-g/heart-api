@@ -26,6 +26,16 @@ abstract interface class CryptoDevice implements Model {
 
   String? get oneTimeKey;
 
+  /// When its owner removed it, on a device of theirs listed as removed.
+  DateTime? get removedAt;
+
+  /// Which of the owner's devices removed it; null for one removed before the server
+  /// recorded that.
+  String? get removedBy;
+
+  /// The day, in UTC, it last reached the server; only on the owner's own list.
+  DateTime? get lastSeenOn;
+
   factory({
     required String id,
     required String userId,
@@ -37,6 +47,9 @@ abstract interface class CryptoDevice implements Model {
     required DateTime createdAt,
     String? oneTimeKeyId,
     String? oneTimeKey,
+    DateTime? removedAt,
+    String? removedBy,
+    DateTime? lastSeenOn,
   }) = _CryptoDevice.new;
 
   factory fromRow(Map row) {
@@ -51,6 +64,12 @@ abstract interface class CryptoDevice implements Model {
       createdAt: row['created_at'] as DateTime,
       oneTimeKeyId: row['key_id'] as String?,
       oneTimeKey: row['key'] as String?,
+      removedAt: row['removed_at'] as DateTime?,
+      removedBy: row['removed_by']?.toString(),
+      lastSeenOn: switch (row['seen_on']) {
+        final DateTime on => DateTime.utc(on.year, on.month, on.day),
+        _ => null,
+      },
     );
   }
 
@@ -66,6 +85,17 @@ abstract interface class CryptoDevice implements Model {
       createdAt: DateTime.parse(json['createdAt'] as String),
       oneTimeKeyId: json['oneTimeKeyId'] as String?,
       oneTimeKey: json['oneTimeKey'] as String?,
+      removedAt: switch (json['removedAt']) {
+        final String at => DateTime.parse(at),
+        _ => null,
+      },
+      removedBy: json['removedBy'] as String?,
+      lastSeenOn: switch (json['lastSeenOn']) {
+        final String on => switch (DateTime.parse(on)) {
+          final day => DateTime.utc(day.year, day.month, day.day),
+        },
+        _ => null,
+      },
     );
   }
 }
@@ -91,6 +121,12 @@ class _CryptoDevice implements CryptoDevice {
   final String? oneTimeKeyId;
   @override
   final String? oneTimeKey;
+  @override
+  final DateTime? removedAt;
+  @override
+  final String? removedBy;
+  @override
+  final DateTime? lastSeenOn;
 
   const new({
     required this.id,
@@ -103,6 +139,9 @@ class _CryptoDevice implements CryptoDevice {
     required this.createdAt,
     this.oneTimeKeyId,
     this.oneTimeKey,
+    this.removedAt,
+    this.removedBy,
+    this.lastSeenOn,
   });
 
   @override
@@ -118,8 +157,20 @@ class _CryptoDevice implements CryptoDevice {
       'createdAt': createdAt.toIso8601String(),
       'oneTimeKeyId': ?oneTimeKeyId,
       'oneTimeKey': ?oneTimeKey,
+      'removedAt': ?removedAt?.toIso8601String(),
+      'removedBy': ?removedBy,
+      'lastSeenOn': ?lastSeenOn?.toYmd(),
     };
   }
+}
+
+extension on DateTime {
+  /// `2026-11-26`.
+  String toYmd() => [
+    year.toString().padLeft(4, '0'),
+    month.toString().padLeft(2, '0'),
+    day.toString().padLeft(2, '0'),
+  ].join('-');
 }
 
 /// A sealed item waiting for one device.
@@ -232,16 +283,32 @@ class OneTimeKeyCount implements Model {
 
 /// A list of devices, answered by a device list and by a claim.
 class CryptoDevices implements Model {
+  /// The devices in use.
   final List<CryptoDevice> devices;
 
-  const new(this.devices);
+  /// The owner's own devices removed lately, newest removal first, each saying when
+  /// and by which device, so a removal the owner didn't make shows. Only on the
+  /// owner's own list; never anything to send to.
+  final List<CryptoDevice> removed;
+
+  /// The owner's own devices that asked to publish while the account was full, each
+  /// holding no place: never a device to send to.
+  final List<CryptoDevice> waiting;
+
+  const new(this.devices, {this.removed = const [], this.waiting = const []});
 
   /// A device this build can't read is left out.
-  factory fromJson(Map json) => CryptoDevices(readIndexed(json['devices'], CryptoDevice.fromJson).items);
+  factory fromJson(Map json) => CryptoDevices(
+    readIndexed(json['devices'], CryptoDevice.fromJson).items,
+    removed: readIndexed(json['removed'], CryptoDevice.fromJson).items,
+    waiting: readIndexed(json['waiting'], CryptoDevice.fromJson).items,
+  );
 
   @override
   Map<String, dynamic> toMap() => {
     'devices': [for (final device in devices) device.toMap()],
+    if (removed.isNotEmpty) 'removed': [for (final device in removed) device.toMap()],
+    if (waiting.isNotEmpty) 'waiting': [for (final device in waiting) device.toMap()],
   };
 }
 

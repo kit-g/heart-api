@@ -105,7 +105,10 @@ class Forbidden implements ApiException {
   @override
   final String code;
 
-  const new({required this.reason, this.code = 'forbidden'});
+  /// What else the refusal says, beside the code, such as when it ends.
+  final Map<String, dynamic> payload;
+
+  const new({required this.reason, this.code = 'forbidden', this.payload = const {}});
 
   @override
   int get statusCode => 403;
@@ -116,6 +119,7 @@ class Forbidden implements ApiException {
       'error': 'forbidden',
       'code': code,
       'reason': reason,
+      ...payload,
     };
   }
 }

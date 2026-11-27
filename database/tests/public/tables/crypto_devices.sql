@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(19);
+SELECT plan(27);
 
 SELECT has_table('public'::name, 'crypto_devices'::name);
 
@@ -16,16 +16,30 @@ SELECT columns_are(
                    'signature',
                    'vouched_by',
                    'created_at',
-                   'removed_at'
+                   'removed_at',
+                   'removed_by',
+                   'seen_at',
+                   'waiting'
                    ]
        );
+
+SELECT col_type_is('public'::name, 'crypto_devices'::name, 'waiting'::name, 'boolean'::name);
+SELECT col_not_null('public'::name, 'crypto_devices'::name, 'waiting'::name);
+SELECT col_default_is('public', 'crypto_devices', 'waiting', 'false', 'a device has a place unless it waits for one');
+
+SELECT col_type_is('public'::name, 'crypto_devices'::name, 'seen_at'::name, 'timestamp with time zone'::name);
+SELECT col_not_null('public'::name, 'crypto_devices'::name, 'seen_at'::name);
+SELECT col_default_is('public', 'crypto_devices', 'seen_at', 'now()', 'seen when published');
 
 SELECT col_is_pk('public'::name, 'crypto_devices'::name, 'id'::name);
 
 SELECT fk_ok('public', 'crypto_devices', 'user_id', 'public', 'profiles', 'id');
 SELECT fk_ok('public', 'crypto_devices', 'vouched_by', 'public', 'crypto_devices', 'id');
 
+SELECT fk_ok('public', 'crypto_devices', 'removed_by', 'public', 'crypto_devices', 'id');
+
 SELECT has_index('public'::name, 'crypto_devices'::name, 'crypto_devices_user_idx'::name);
+SELECT has_index('public'::name, 'crypto_devices'::name, 'crypto_devices_removed_by_idx'::name);
 
 SELECT has_table('public'::name, 'one_time_keys'::name);
 

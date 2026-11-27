@@ -2,9 +2,10 @@ import '../models/keys.dart';
 
 abstract interface class KeyService {
   /// Publishes a device, idempotent on its id: one already there is answered as it
-  /// is, and `added` says whether this call added it. [signature] and [vouchedBy]
-  /// say another device of the owner's vouched for it, and [vouchedBy] has to be theirs.
-  Future<({CryptoDevice device, bool added})> publishDevice({
+  /// is, and `added` says whether this call added it or gave it a place. [signature]
+  /// and [vouchedBy] say another device of the owner's vouched for it, and [vouchedBy]
+  /// has to be theirs. `waiting` says the account had no place for it.
+  Future<({CryptoDevice device, bool added, bool waiting})> publishDevice({
     required String userId,
     required String id,
     required String identityKey,
@@ -24,11 +25,24 @@ abstract interface class KeyService {
     required String signature,
   });
 
-  /// [ownerId]'s devices in use. Throws unless [readerId] shares keys with them.
-  Future<List<CryptoDevice>> getDevices({required String readerId, required String ownerId});
+  /// [ownerId]'s devices in use and, when [readerId] is [ownerId], those waiting for a
+  /// place, the ones removed lately, and the day each was last seen. Throws unless
+  /// [readerId] shares keys with them.
+  Future<CryptoDevices> getDevices({required String readerId, required String ownerId});
 
-  /// Stops using a device of the caller's: nothing more is sent to it.
-  Future<void> removeDevice({required String userId, required String deviceId});
+  /// Stops using a device of the caller's: nothing more is sent to it, and what it
+  /// vouched for is vouched for by nobody. [removedBy], a device of the caller's in
+  /// use, signed the removal ([signature]) at [signedAt], in seconds since the epoch.
+  /// It removes itself, or a device added after it, at once, and one added before it
+  /// once it has been in use for a day; until then this throws, saying when. `placed`
+  /// says the device removed held a place, rather than waiting for one.
+  Future<({bool placed})> removeDevice({
+    required String userId,
+    required String deviceId,
+    required String removedBy,
+    required int signedAt,
+    required String signature,
+  });
 
   Future<void> replaceFallbackKey({required String userId, required String deviceId, required String key});
 
