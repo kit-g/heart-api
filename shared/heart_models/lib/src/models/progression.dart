@@ -165,12 +165,12 @@ abstract final class Progression {
         return _step(rule, base, step, working);
       case RangeThenWeight(:final step):
         if (_missed(rule.miss, working)) return _miss(rule.miss, base, step, misses);
-        final top = working.every((set) {
-          final reps = set.target?[.reps];
-          final aim = reps?.max ?? reps?.min;
-          return aim == null || (set.reps ?? 0) >= aim;
-        });
+        final top = working.every(_atTop);
         return top ? _step(rule, base, step, working) : const Hold();
+      case EffortThenWeight(:final step):
+        if (_missed(rule.miss, working)) return _miss(rule.miss, base, step, misses);
+        final made = working.every((set) => _atTop(set) && _withinEffort(set));
+        return made ? _step(rule, base, step, working) : const Hold();
       case Ladder():
         return const Hold();
       case Stages(:final step):
@@ -234,6 +234,26 @@ Iterable<ExerciseSet> _working(Iterable<ExerciseSet> sets) {
   return sets.where(
     (set) => set.isCompleted && set.setType != .warmup && !(set.target?.supplemental ?? false),
   );
+}
+
+/// Whether [set] reached the top of its rep range: a range's max, an exact
+/// target's number, and always when it names no reps.
+bool _atTop(ExerciseSet set) {
+  final reps = set.target?[.reps];
+  final aim = reps?.max ?? reps?.min;
+  return aim == null || (set.reps ?? 0) >= aim;
+}
+
+/// Whether [set] was done at or under the effort its target asks for, with at
+/// least that many reps in reserve. One that asks for none is; one that asks
+/// and wasn't rated is not, since a rating is never guessed.
+bool _withinEffort(ExerciseSet set) {
+  final asked = set.target?.rir;
+  if (asked == null) return true;
+  return switch (set.rpe) {
+    final double rpe => 10 - rpe >= asked,
+    null => false,
+  };
 }
 
 /// The set a session's AMRAP is: the last working set whose reps target is as

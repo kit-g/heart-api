@@ -275,6 +275,103 @@ void main() {
       });
     });
 
+    group('effort, then weight (heart-api#495)', () {
+      const rule = EffortThenWeight(step: 2.5);
+      // 8 to 12 reps, stopping with two in the tank: an RPE of 8
+      final target = _reps(8, 12).withRir(2);
+
+      ExerciseSet rated(int reps, double? rpe, [SetTarget? aim]) => _set(reps, target: aim ?? target)..rpe = rpe;
+
+      test('every set at the top, at or under the effort asked: the weight goes up', () {
+        expect(Progression.next(rule: rule, base: 60, sets: [rated(12, 7), rated(12, 8)]), const Grow(62.5));
+      });
+
+      test('a set rated harder than asked holds the weight', () {
+        expect(Progression.next(rule: rule, base: 60, sets: [rated(12, 8), rated(12, 9)]), const Hold());
+        expect(
+          Progression.next(rule: rule, base: 60, sets: [rated(12, 8.5)]),
+          const Hold(),
+          reason: 'one and a half in reserve where two were asked',
+        );
+      });
+
+      test('a set that asks for an effort and was not rated holds: a rating is never guessed', () {
+        expect(Progression.next(rule: rule, base: 60, sets: [rated(12, 8), rated(12, null)]), const Hold());
+      });
+
+      test('a set that asks for no effort is judged on its reps alone', () {
+        final plain = _reps(8, 12);
+        expect(
+          Progression.next(rule: rule, base: 60, sets: [rated(12, 8), rated(12, null, plain)]),
+          const Grow(62.5),
+        );
+        expect(Progression.next(rule: rule, base: 60, sets: [rated(12, 10, plain)]), const Grow(62.5));
+      });
+
+      test('none in reserve is met by any rating, and by none short of one', () {
+        final all = _reps(5, 5).withRir(0);
+        expect(Progression.next(rule: rule, base: 60, sets: [rated(5, 10, all)]), const Grow(62.5));
+        expect(Progression.next(rule: rule, base: 60, sets: [rated(5, null, all)]), const Hold());
+      });
+
+      test('inside the range: hold, however easy; below it: a miss, and the third cuts', () {
+        expect(Progression.next(rule: rule, base: 60, sets: [rated(12, 7), rated(10, 7)]), const Hold());
+        final short = [rated(12, 8), rated(6, 10)];
+        expect(Progression.next(rule: rule, base: 60, sets: short), const Missed(1));
+        expect(Progression.next(rule: rule, base: 60, sets: short, misses: 2), const Cut(52.5));
+        expect(Progression.streak(rule, [short, short]), 2);
+      });
+
+      test('a session harder than asked that made its reps is no miss', () {
+        expect(
+          Progression.streak(rule, [
+            [rated(6, 10)],
+            [rated(12, 10)],
+          ]),
+          0,
+        );
+      });
+
+      test('a lighter week moves nothing', () {
+        expect(Progression.next(rule: rule, base: 60, sets: [rated(12, 6)], lighter: true), const Hold());
+      });
+
+      test('the effort by week repeats, and round-trips', () {
+        final json = {
+          'kind': 'effortThenWeight',
+          'step': 2.5,
+          'rir': [3, 2, 1, 0.5, 4],
+          'tempo': '3-1-1',
+        };
+        final byWeek = GrowthRule.fromJson(json) as EffortThenWeight;
+        expect([for (var week = 1; week <= 6; week++) byWeek.reserveOf(week)], [3, 2, 1, 0.5, 4, 3]);
+        expect(byWeek.extra, {'tempo': '3-1-1'});
+        expect(byWeek.toMap(), json);
+        expect(rule.reserveOf(3), isNull);
+        expect(rule.toMap(), {'kind': 'effortThenWeight', 'step': 2.5});
+        expect(rule.miss.after, 3);
+      });
+
+      test('a bad effort by week is refused', () {
+        for (final rir in [
+          <num>[],
+          [3, -1],
+          [11],
+          [2.25],
+          ['two'],
+          2,
+          List.filled(EffortThenWeight.maxWeeks + 1, 2),
+        ]) {
+          expect(
+            () => GrowthRule.fromJson({'kind': 'effortThenWeight', 'step': 2.5, 'rir': rir}),
+            throwsArgumentError,
+            reason: '$rir',
+          );
+        }
+        expect(() => GrowthRule.fromJson(const {'kind': 'effortThenWeight'}), throwsArgumentError);
+      });
+    });
+
     group('share of a max', () {
       final rule = GrowthRule.fromJson(const {
         'kind': 'shareOfMax',
@@ -438,6 +535,7 @@ void main() {
       for (final json in <Map<String, dynamic>>[
         {'kind': 'none', 'note': 'x'},
         {'kind': 'addWeight', 'step': 2.5, 'note': 'x'},
+        {'kind': 'effortThenWeight', 'step': 2.5, 'note': 'x'},
         {'kind': 'longer', 'step': 5, 'note': 'x'},
         {
           'kind': 'shareOfMax',
