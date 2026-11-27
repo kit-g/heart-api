@@ -332,6 +332,22 @@ def test_a_shape_newer_than_the_first_library_build_needs_min_app(monkeypatch):
     assert check(tempo, LIBRARY_DOC) == []
 
 
+def test_an_effort_rule_names_reps_in_reserve_by_week_and_needs_min_app():
+    def effort(**more):
+        rule = {'kind': 'effortThenWeight', 'step': 2.5, **more}
+        return one(rules={'squat-barbell': rule}, min_app='1.18.0')
+
+    assert check(effort(), LIBRARY_DOC) == []
+    assert check(effort(rir=[3, 2, 1, 0.5, 4]), LIBRARY_DOC) == []
+    rendered = render(effort(rir=[3, 2, 1]))['programs'][0]
+    assert next(iter(rendered['rules'].values())) == {'kind': 'effortThenWeight', 'step': 2.5, 'rir': [3, 2, 1]}
+    for rir in ([], [2.25], [11], [True], 2, [2] * 53):
+        assert any('rir is one to 52 weeks' in p for p in check(effort(rir=rir), LIBRARY_DOC)), rir
+    older = effort()
+    del older['programs'][0]['min_app']
+    assert any("['rule effortThenWeight']" in p and 'say min_app' in p for p in check(older, LIBRARY_DOC))
+
+
 def test_every_program_today_runs_on_the_first_library_build():
     from programs_content import _newer_shapes
 

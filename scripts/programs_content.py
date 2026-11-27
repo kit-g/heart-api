@@ -46,6 +46,7 @@ RULES = {
     'none': (set(), None),
     'addWeight': ({'step', 'miss', 'amrap'}, WEIGHTED),
     'rangeThenWeight': ({'step', 'miss', 'amrap'}, WEIGHTED),
+    'effortThenWeight': ({'step', 'rir', 'miss', 'amrap'}, WEIGHTED),
     'longer': ({'step'}, TIMED),
     'shareOfMax': ({'step', 'waves', 'missCut', 'misses', 'miss', 'amrap'}, WEIGHTED),
     'ladder': ({'ladder', 'top', 'bottom'}, BODYWEIGHT),
@@ -62,7 +63,7 @@ FIRST_LIBRARY_EXERCISE = {'exercise', 'sets', 'target', 'rest', 'superset', 'pat
 APP_VERSION = re.compile(r'^\d+\.\d+\.\d+$')
 
 # The rules that keep a base a share can be of.
-BASED = {'addWeight', 'rangeThenWeight', 'shareOfMax', 'stages'}
+BASED = {'addWeight', 'rangeThenWeight', 'effortThenWeight', 'shareOfMax', 'stages'}
 MISS_WHEN = {'anySet', 'amrap', 'totalReps'}
 
 # Ids are stable across renders, so a republish doesn't look like new content.
@@ -174,6 +175,12 @@ def check_rule(where, rule, exercise, category, targets, ladders) -> list[str]:
         )
     ):
         problems.append(f'{where}: amrap is a list of {{reps, step}}')
+    if 'rir' in rule and not (
+        isinstance(rule['rir'], list)
+        and 1 <= len(rule['rir']) <= 52
+        and all(_number(week, 0, 10) and week * 2 == int(week * 2) for week in rule['rir'])
+    ):
+        problems.append(f'{where}: rir is one to 52 weeks of reps in reserve, each 0 to 10 in halves')
     if rule['kind'] == 'rangeThenWeight':
         for sets in targets:
             if not any('max' in t.get('reps', {}) and t['reps']['max'] > t['reps']['min'] for t in sets):
